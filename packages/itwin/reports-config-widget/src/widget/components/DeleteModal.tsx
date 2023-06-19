@@ -16,32 +16,30 @@ import "./DeleteModal.scss";
 import { handleError, LoadingSpinner } from "./utils";
 
 export interface DeleteModalProps {
-  entityName: string;
-  show: boolean;
-  setShow: React.Dispatch<React.SetStateAction<boolean>>;
+  entityName?: string;
+  onClose: () => void;
   onDelete: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
 export const DeleteModal = ({
   entityName,
-  show,
-  setShow,
+  onClose,
   onDelete,
   refresh,
 }: DeleteModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const deleteCallback = async () => {
     try {
-      setIsLoading(true);
+      setIsDeleting(true);
       await onDelete();
-      setShow(false);
       await refresh();
+      onClose();
     } catch (error: any) {
       handleError(error.status);
     } finally {
-      setIsLoading(false);
+      setIsDeleting(false);
     }
   };
 
@@ -50,11 +48,9 @@ export const DeleteModal = ({
       title={ReportsConfigWidget.localization.getLocalizedString(
         "ReportsConfigWidget:Confirm"
       )}
-      isOpen={show}
-      isDismissible={!isLoading}
-      onClose={() => {
-        setShow(false);
-      }}
+      isOpen={!!entityName}
+      isDismissible={!isDeleting}
+      onClose={onClose}
     >
       <ModalContent>
         <div className="rcw-delete-modal-body-text">
@@ -67,7 +63,7 @@ export const DeleteModal = ({
         </div>
       </ModalContent>
       <ModalButtonBar>
-        {isLoading && (
+        {isDeleting && (
           <div className="rcw-loading-delete" data-testid="rcw-loading-delete">
             <LoadingSpinner />
           </div>
@@ -75,7 +71,7 @@ export const DeleteModal = ({
         <Button
           styleType="high-visibility"
           onClick={deleteCallback}
-          disabled={isLoading}
+          disabled={isDeleting}
         >
           {ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Delete"
@@ -83,10 +79,8 @@ export const DeleteModal = ({
         </Button>
         <Button
           styleType="default"
-          onClick={() => {
-            setShow(false);
-          }}
-          disabled={isLoading}
+          onClick={onClose}
+          disabled={isDeleting}
         >
           {ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Cancel"

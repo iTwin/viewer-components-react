@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-export * from "./types";
 export * from "./TreeWidget";
 export * from "./components/TreeWidgetComponent";
 export * from "./components/trees";

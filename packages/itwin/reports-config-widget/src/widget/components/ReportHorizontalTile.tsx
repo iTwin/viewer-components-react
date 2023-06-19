@@ -2,9 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useEffect, useRef, useState } from "react";
-import React from "react";
-import type BulkExtractor from "./BulkExtractor";
+import React, { useEffect, useRef, useState } from "react";
+import type { BulkExtractor } from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
 import type { BeEvent } from "@itwin/core-bentley";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
@@ -21,16 +20,16 @@ import {
   SvgMore,
 } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
-import type { HorizontalTileProps } from "./HorizontalTile";
 
-export interface ReportHorizontalTileProps extends Pick<HorizontalTileProps, "onClickTitle"> {
+export interface ReportHorizontalTileProps {
   selected: boolean;
   onSelectionChange: (reportId: string, controlPressed: boolean) => void;
   bulkExtractor: BulkExtractor;
   jobStartEvent: BeEvent<(reportId: string) => void>;
   report: Report;
   onClickDelete: () => void;
-  onClickModify: () => void;
+  onClickModify?: (report: Report) => void;
+  onClickTitle?: (report: Report) => void;
 }
 
 export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
@@ -81,7 +80,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
       subtextToolTip={props.report.description ?? ""}
       titleTooltip={props.report.displayName}
       onClick={onClickTile}
-      onClickTitle={props.onClickTitle}
+      onClickTitle={() => props.onClickTitle?.(props.report)}
       selected={props.selected}
       actionGroup={extractionState === ExtractionStates.None ? (
         <div
@@ -89,15 +88,15 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
           data-testid="tile-action-button">
           <DropdownMenu
             menuItems={(close: () => void) => [
-              <MenuItem
+              props.onClickModify ? <MenuItem
                 key={0}
-                onClick={props.onClickModify}
+                onClick={() => props.onClickModify?.(props.report)}
                 icon={<SvgEdit />}
               >
                 {ReportsConfigWidget.localization.getLocalizedString(
                   "ReportsConfigWidget:Modify"
                 )}
-              </MenuItem>,
+              </MenuItem> : [],
               <MenuItem
                 key={1}
                 onClick={() => {
@@ -110,7 +109,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
                   "ReportsConfigWidget:Remove"
                 )}
               </MenuItem>,
-            ]}
+            ].flat()}
           >
             <IconButton styleType="borderless">
               <SvgMore />

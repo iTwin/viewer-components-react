@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   Fieldset,
-  Small,
+  Text,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
@@ -88,9 +88,9 @@ export const CalculatedPropertyAction = ({
       <div className='gmw-calculated-properties-action-container'>
         <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
           <div className='gmw-field-legend-container'>
-            <Small className='gmw-field-legend'>
+            <Text variant='small' as='small' className='gmw-field-legend'>
               Asterisk * indicates mandatory fields.
-            </Small>
+            </Text>
           </div>
           <SharedCalculatedPropertyForms
             validator={validator}

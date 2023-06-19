@@ -7,25 +7,22 @@ import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import {
-  generateUrl,
   handleError,
   handleInputChange,
-  WidgetHeader,
 } from "./utils";
 import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
-import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
-interface ReportActionProps {
-  iTwinId: string;
+export interface ReportActionProps {
   report?: Report;
-  returnFn: () => Promise<void>;
+  onSaveSuccess: () => void;
+  onClickCancel?: () => void;
 }
 
-const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
-  const apiConfig = useReportsApiConfig();
+export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportActionProps) => {
+  const { iTwinId, getAccessToken, reportsClient } = useReportsConfigApi();
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",
@@ -40,21 +37,22 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportsClientApi = new ReportsClient(
-        generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
-      );
-      const accessToken = await apiConfig.getAccessToken();
+      const accessToken = await getAccessToken();
       report
-        ? await reportsClientApi.updateReport(accessToken, report.id ?? "", {
+        ? await reportsClient.updateReport(accessToken, report.id ?? "", {
           displayName: values.name,
           description: values.description,
         })
-        : await reportsClientApi.createReport(accessToken, {
+        : await reportsClient.createReport(accessToken, {
           displayName: values.name,
           description: values.description,
           projectId: iTwinId,
         });
-      await returnFn();
+      onSaveSuccess();
+      setValues({
+        name: report?.displayName ?? "",
+        description: report?.description ?? "",
+      });
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
@@ -65,18 +63,6 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
 
   return (
     <>
-      <WidgetHeader
-        title={
-          report
-            ? ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:ModifyReport"
-            )
-            : ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:AddReport"
-            )
-        }
-        returnFn={returnFn}
-      />
       <div className="rcw-details-form-container">
         <Fieldset
           legend={ReportsConfigWidget.localization.getLocalizedString(
@@ -133,7 +119,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
           "ReportsConfigWidget:Add"
         )}
         onAction={onSave}
-        onCancel={returnFn}
+        onCancel={onClickCancel}
         isSavingDisabled={!values.name}
         isLoading={isLoading}
       />
@@ -141,4 +127,3 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
   );
 };
 
-export default ReportAction;

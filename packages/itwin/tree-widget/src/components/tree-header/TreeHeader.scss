@@ -1,0 +1,69 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+// Buttons dropdown container
+.tree-header-button-dropdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: calc(var(--iui-size-2xs) + var(--iui-size-3xs));
+
+  .dropdown-item {
+    width: 100%;
+    height: var(--iui-size-xl);
+
+    > * {
+      width: 100%;
+      height: 100%;
+    }
+
+    &:hover {
+      background-color: transparent;
+      cursor: default;
+    }
+  }
+}
+
+.tree-widget-tree-header {
+  display: flex;
+  align-items: center;
+  height: var(--iui-size-xl);
+  justify-content: space-between;
+
+  .tree-widget-search-box {
+    height: calc(var(--iui-size-l) + var(--iui-size-3xs) * 3);
+    padding: 0;
+    width: calc(100% - var(--iui-size-xl));
+
+    &.contracted {
+      outline: none;
+      width: var(--iui-size-l);
+
+      &::before {
+        border: none;
+      }
+    }
+
+    .searchbox-stepping-count {
+      font-size: var(--iui-size-s);
+      color: var(--iui-color-text);
+      margin-right: var(--iui-size-2xs);
+    }
+
+    .search-input {
+      margin-right: var(--iui-size-xs);
+      padding: 0 var(--iui-size-xs);
+    }
+  }
+
+  .button-container {
+    height: 100%;
+    width: calc(100% - var(--iui-size-l));
+
+    &.contracted {
+      width: var(--iui-size-xl);
+    }
+  }
+}

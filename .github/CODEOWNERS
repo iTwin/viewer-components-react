@@ -17,6 +17,8 @@
 /common/api/summary/property-grid-react.exports.csv @itwin/itwinjs-core-presentation
 /common/api/property-grid-react.api.md @itwin/itwinjs-core-presentation
 
+/common/api/summary/tree-widget-react.exports.csv @itwin/itwinjs-core-presentation
+/common/api/tree-widget-react.api.md @itwin/itwinjs-core-presentation
 /packages/itwin/tree-widget  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /common/changes/@itwin/tree-widget-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 

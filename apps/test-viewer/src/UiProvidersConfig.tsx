@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { UiItemsProvider } from "@itwin/appui-react";
-import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
+import { CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 import { AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider, RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 
@@ -60,15 +60,31 @@ const configuredUiItems = new Map<string, UiItem>([
         await TreeWidget.initialize();
       },
       createUiItemsProviders: () => [new TreeWidgetUiItemsProvider({
-        additionalTrees: [{
+        trees: [{
+          id: ModelsTreeComponent.id,
+          getLabel: ModelsTreeComponent.getLabel,
+          render: () => <ModelsTreeComponent />
+        }, {
+          id: CategoriesTreeComponent.id,
+          getLabel: CategoriesTreeComponent.getLabel,
+          render: () => <CategoriesTreeComponent />
+        }, {
+          id: IModelContentTreeComponent.id,
+          getLabel: IModelContentTreeComponent.getLabel,
+          render: () => <IModelContentTreeComponent />
+        }, {
+          id: ExternalSourcesTreeComponent.id,
+          getLabel: ExternalSourcesTreeComponent.getLabel,
+          render: () => <ExternalSourcesTreeComponent />
+        },{
           id: "spatial-containment-tree",
-          label: "Spatial Containment",
+          getLabel: () => "Spatial Containment",
           render: () => (
             <SampleSpatialTree />
           ),
         }]
       })],
-    }
+    },
   ],
   [
     "property-grid",
@@ -105,7 +121,7 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => {
         await MapLayersFormats.initialize();
-        await MapLayersUI.initialize();
+        await MapLayersUI.initialize({ iTwinConfig: new MapLayersPrefBrowserStorage() });
       },
       createUiItemsProviders: () => [
         new MapLayersUiItemsProvider(),

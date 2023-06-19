@@ -16,7 +16,6 @@ import {
   DropdownMenu,
   IconButton,
   MenuItem,
-  Surface,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -133,7 +132,7 @@ export const Mappings = ({
   return (
     <>
       <BlockingOverlay isVisible={showBlockingOverlay} />
-      <Surface className="gmw-mappings-container">
+      <div className="gmw-mappings-container">
         <div className="gmw-table-toolbar">
           <div className="gmw-button-spacing">
             {onClickAddMapping &&
@@ -239,7 +238,7 @@ export const Mappings = ({
               ))}
           </div>
         )}
-      </Surface>
+      </div>
       <DeleteModal
         entityName={showDeleteModal?.mappingName}
         onClose={() => setShowDeleteModal(undefined)}

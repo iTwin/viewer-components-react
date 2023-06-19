@@ -103,5 +103,18 @@
         "${workspaceFolder}/packages/itwin/breakdown-trees/lib/**/*.js"
       ]
     },
+    {
+      "name": "Tests: map-layers",
+      "cwd": "${workspaceFolder}/packages/itwin/map-layers",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "test"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/itwin/map-layers/lib/**/*.js"
+      ]
+    }
   ]
 }

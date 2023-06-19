@@ -231,14 +231,10 @@ const useVisibilityHandler = (rulesetId: string, treeDataProvider: IPresentation
     if (previous.current)
       previous.current.dispose();
 
-    const handler = createVisibilityHandler(rulesetId, treeDataProvider, modelSource, activeView);
+    const handler = new VisibilityHandler({ rulesetId, viewport: activeView, treeDataProvider, modelSource });
     previous.current = handler;
     return handler;
   }, [rulesetId, treeDataProvider, modelSource, activeView]);
-};
-
-const createVisibilityHandler = (rulesetId: string, treeDataProvider: IPresentationTreeDataProvider, modelSource: TreeModelSource, activeView?: Viewport): VisibilityHandler | undefined => {
-  return activeView ? new VisibilityHandler({ rulesetId, viewport: activeView, treeDataProvider, modelSource }) : undefined;
 };
 
 export function populateMapWithCommonMenuItems(treeName: string, treeFunctionalityMapper: TreeNodeFunctionIconInfoMapper, dataProvider: IPresentationTreeDataProvider, rulesetId: string, eventHandlers?: TreeWithRulesetEventHandlers) {

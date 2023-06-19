@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Content in measurements widget needs some padding",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}
