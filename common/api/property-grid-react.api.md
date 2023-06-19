@@ -301,8 +301,8 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps): {
 export function useNullValueSetting(): {
     showNullValues: boolean;
     setShowNullValues: (value: boolean, options?: {
-        persist?: boolean | undefined;
-    } | undefined) => Promise<void>;
+        persist?: boolean;
+    }) => Promise<void>;
 };
 
 // @internal (undocumented)
