@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "Added settings dropdown menu inside Property Grid header.",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/property-grid-react"

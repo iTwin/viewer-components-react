@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "Improved keyboard navigation when navigating from Property Grid to Element List.",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/property-grid-react"

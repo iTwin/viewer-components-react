@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "**BREAKING** Removed `customOnDataChanged` property. `createDataProvider` and `IPresentationPropertyDataProvider.onDataChanged` should be used instead.",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/property-grid-react"
