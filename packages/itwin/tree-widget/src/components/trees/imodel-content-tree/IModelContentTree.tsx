@@ -3,13 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import classNames from "classnames";
 import { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
+import type { BaseTreeProps } from "../Common";
 
 /**
  * Presentation rules used by IModelContentTree
@@ -21,16 +20,7 @@ export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); 
  * Props for [[IModelContentTree]]
  * @public
  */
-export interface IModelContentTreeProps extends Omit<React.HTMLProps<HTMLDivElement>, "children"> {
-  /** An IModel to pull data from */
-  iModel: IModelConnection;
-  /** Width of the component */
-  width: number;
-  /** Height of the component */
-  height: number;
-  /** Selection mode in the tree */
-  selectionMode?: SelectionMode;
-}
+export type IModelContentTreeProps = BaseTreeProps;
 
 /**
  * A tree that shows all iModel content starting from the root Subject, then the hierarchy of child
@@ -38,7 +28,7 @@ export interface IModelContentTreeProps extends Omit<React.HTMLProps<HTMLDivElem
  * @public
  */
 export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, className, width, height, ...divProps } = props;
+  const { iModel, width, height, selectionMode } = props;
 
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: iModel,
@@ -51,12 +41,12 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
   const treeModel = useTreeModel(nodeLoader.modelSource);
 
   return (
-    <div {...divProps} className={classNames("imodel-content-tree", className)}>
+    <div className="imodel-content-tree">
       <ControlledTree
         width={width}
         height={height}
         nodeLoader={nodeLoader}
-        selectionMode={props.selectionMode ? /* istanbul ignore next */ props.selectionMode : SelectionMode.None}
+        selectionMode={selectionMode ?? SelectionMode.None}
         eventsHandler={eventHandler}
         model={treeModel}
         iconsEnabled={true}
