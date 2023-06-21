@@ -34,7 +34,7 @@ export interface VisibilityTreeFilterInfo {
  * @public
  */
 export interface BaseTreeProps {
-  /** * An iModel to pull data from. */
+  /** An iModel to pull data from. */
   iModel: IModelConnection;
   /** Width of the component. */
   width: number;
