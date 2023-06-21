@@ -115,11 +115,11 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
         openModal(true);
       }
     } else {
-      const token = await getEC3AccessToken();
-      setToken({ token, exp: 0, source: '' });
+      const newToken = await getEC3AccessToken();
+      setToken({ token: newToken, exp: 0, source: "" });
       openModal(true);
     }
-  }, [config.clientId, config.ec3Uri, config.redirectUri, config.scope, token?.exp, token?.token]);
+  }, [config.clientId, config.ec3Uri, config.redirectUri, config.scope, getEC3AccessToken, token?.exp, token?.token]);
 
   useEffect(() => {
     void load();

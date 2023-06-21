@@ -6,7 +6,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../api/APIContext";
 
-export type EC3ConfigCommonProps = {
+export interface EC3ConfigCommonProps {
   /**
    * The OAuth client ID used to authenticate with the EC3 API.
    */
@@ -86,11 +86,11 @@ export class EC3Config {
         : ""
     );
 
-    if ('redirectUri' in props) {
+    if ("redirectUri" in props) {
       this.redirectUri = props.redirectUri;
     }
 
-    if ('getEC3AccessToken' in props) {
+    if ("getEC3AccessToken" in props) {
       this.getEC3AccessToken = props.getEC3AccessToken;
     }
   }

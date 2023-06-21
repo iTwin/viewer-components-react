@@ -123,7 +123,6 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
     return newReportOptions;
   }, [availableReports]);
 
-
   return (
     <>
       <div className='ec3w-template-details-container' data-testid="ec3-template-details">

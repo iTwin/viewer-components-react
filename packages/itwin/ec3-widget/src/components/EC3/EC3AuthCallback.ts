@@ -16,10 +16,10 @@ import type { EC3Token } from "./EC3Token";
 * } else {
 */
 
-export type EC3AuthCallbackConfigProps = {
-  clientId: EC3ConfigPropsWithRedirectUri['clientId'];
-  redirectUri: EC3ConfigPropsWithRedirectUri['redirectUri'];
-  ec3Uri?: EC3ConfigPropsWithRedirectUri['ec3Uri'];
+export interface EC3AuthCallbackConfigProps {
+  clientId: EC3ConfigPropsWithRedirectUri["clientId"];
+  redirectUri: EC3ConfigPropsWithRedirectUri["redirectUri"];
+  ec3Uri?: EC3ConfigPropsWithRedirectUri["ec3Uri"];
 }
 
 export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source: string = "ec3-auth") {
@@ -44,7 +44,6 @@ export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, sou
       exp: Date.now() + (tokenResponse.expires_in - EXPIRATION_REDUCTION) * MILLI_SECONDS,
       source,
     };
-
 
     const parentWindow = window.opener as Window;
     parentWindow.postMessage(token, window.location.origin);
