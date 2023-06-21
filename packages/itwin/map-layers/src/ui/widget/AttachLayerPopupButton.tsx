@@ -91,7 +91,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         return {layerNameUpdate: layerNameIdx>1, uniqueLayerName};
       };
 
-      const doAttachLayer = (layerName: string) => {
+      const doAttachLayer = (layerName: string, subLayer?: MapSubLayerProps) => {
         const generatedName = generateUniqueMapLayerName(layerName);
         let sourceToAdd = source;
         if (generatedName.layerNameUpdate || sourceToAdd.name !== generatedName.uniqueLayerName) {
@@ -104,7 +104,8 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           }
 
         }
-        const settings = sourceToAdd.toLayerSettings(subLayers);
+
+        const settings = sourceToAdd.toLayerSettings(subLayer ? [subLayer] : subLayers);
         if (settings) {
           activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: {index: -1, isOverlay} });
           return generatedName.uniqueLayerName;
@@ -116,7 +117,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         const layerNamesAttached: string[] = [];
         for (const subLayer of subLayers) {
 
-          const attachedLayerName = doAttachLayer(`${source.name} - ${subLayer.name}`);
+          const attachedLayerName = doAttachLayer(`${source.name} - ${subLayer.name}`, subLayer);
           if (attachedLayerName !== undefined)  {
             layerNamesAttached.push(attachedLayerName);
           }
@@ -166,20 +167,21 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
   }, [attachLayer]);
 
   const openFeatureSelectionDialog = React.useCallback((subLayers: MapSubLayerProps[], source: MapLayerSource ) => {
-    // Force sub-Layers to non-visible in the dialog
-    const clonedSubLayers = subLayers.map((value: MapSubLayerProps) => {return {...value, visible: false};});
+    // Keep leafs sub-layers and force default visibility to false
+    const noGroupLayers = subLayers.filter((value: MapSubLayerProps) => value.children === undefined);
+    const visibleLayers = noGroupLayers.map((value: MapSubLayerProps) => {return {...value, visible: false};});
     UiFramework.dialogs.modal.open(
       <MapSelectFeaturesDialog
         handleOk={(selectedLayers) => {handleSelectFeaturesOk(source, subLayers, selectedLayers);}}
         handleCancel={handleSelectFeaturesCancel}
         source={source}
-        subLayers={clonedSubLayers}/>);
+        subLayers={visibleLayers}/>);
   }, [handleSelectFeaturesCancel, handleSelectFeaturesOk]);
 
   const  needsFeatureSelection = React.useCallback((source: MapLayerSource, validation: MapLayerSourceValidation ) => {
-    return source.formatId === "ArcGISFeature"     // TODO, replace this with a flag in MapLayerSourceStatus
+    return (source.formatId === "ArcGISFeature" ||  source.formatId === "WMTS")    // TODO, replace this with a flag in MapLayerSourceStatus
     && validation.subLayers
-    && validation.subLayers.length;
+    && validation.subLayers.length > 1;
   }, []);
 
   const handleModalUrlDialogOk = React.useCallback((action: LayerAction, sourceState?: SourceState) => {
@@ -187,9 +189,8 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     if (LayerAction.New === action
       && sourceState
       && (sourceState.validation.status === MapLayerSourceStatus.Valid)) {
-      if (sourceState.validation.subLayers
-        && needsFeatureSelection(sourceState.source, sourceState.validation) && sourceState.validation.subLayers) {
-        openFeatureSelectionDialog(sourceState.validation.subLayers, sourceState.source);
+      if (needsFeatureSelection(sourceState.source, sourceState.validation)) {
+        openFeatureSelectionDialog(sourceState.validation.subLayers!, sourceState.source);
       } else {
         attachLayer(sourceState.source, sourceState.validation.subLayers, false);
       }
