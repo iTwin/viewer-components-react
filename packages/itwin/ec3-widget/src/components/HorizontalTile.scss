@@ -9,7 +9,8 @@
   justify-content: space-between;
   border-radius: 5px;
   background-color: var(--iui-color-background-2);
-  min-height: $iui-baseline * 4;
+  height: $iui-baseline * 4;
+  flex-shrink: 0;
   padding: 5.5px $iui-s;
 
   .ec3w-body {
