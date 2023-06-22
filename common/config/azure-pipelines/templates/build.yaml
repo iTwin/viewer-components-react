@@ -2,9 +2,9 @@
 
 steps:
   - task: NodeTool@0
-    displayName: "Use Node $(NodeVersion).x"
+    displayName: "Use Node $(NodeVersion)"
     inputs:
-      versionSpec: "$(NodeVersion).x"
+      versionSpec: "$(NodeVersion)"
       checkLatest: true
   - script: |
       git config --local user.email imodeljs-admin@users.noreply.github.com
