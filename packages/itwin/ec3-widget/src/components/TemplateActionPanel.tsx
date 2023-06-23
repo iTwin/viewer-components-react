@@ -21,7 +21,7 @@ export const TemplateActionPanel = ({
   isCancelDisabled = false,
   isSavingDisabled = false,
   isLoading = false,
-}: TemplateActionPanelProps): JSX.Element => {
+}: TemplateActionPanelProps) => {
   return (
     <div id='action' className='ec3w-action-panel-container'>
       <div className='ec3w-template-action-panel'>
