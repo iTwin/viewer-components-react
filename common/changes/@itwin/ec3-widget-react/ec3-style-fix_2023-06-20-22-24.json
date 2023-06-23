@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/ec3-widget-react",
+      "comment": "Fixed horizontal tiles not having consistent sizing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/ec3-widget-react"
+}
