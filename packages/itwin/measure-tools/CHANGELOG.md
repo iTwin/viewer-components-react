@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 23 May 2023 13:16:11 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Jun 2023 15:11:15 GMT and should not be manually modified.
+
+## 0.12.1
+Fri, 23 Jun 2023 15:11:15 GMT
+
+### Patches
+
+- Content in measurements widget needs some padding
 
 ## 0.12.0
 Tue, 23 May 2023 13:16:11 GMT
