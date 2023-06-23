@@ -3,44 +3,77 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./PropertyGrid.scss";
-import React, { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
   FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
-import { FillCentered, useDisposable } from "@itwin/core-react";
-import { usePropertyDataProviderWithUnifiedSelection } from "@itwin/presentation-components";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { useDisposable } from "@itwin/core-react";
 
-import type { IDisposable } from "@itwin/core-bentley";
-import type {
-  IPresentationPropertyDataProvider,
-} from "@itwin/presentation-components";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type {
-  IPropertyDataProvider,
-  PropertyCategory,
-  PropertyData,
-  PropertyDataFiltererBase,
-  PropertyDataFilterResult,
-  VirtualizedPropertyGridWithDataProviderProps,
-} from "@itwin/components-react";
+import type { IPropertyDataFilterer, IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataFilterResult, VirtualizedPropertyGridWithDataProviderProps } from "@itwin/components-react";
+import type { IDisposable } from "@itwin/core-bentley";
 
 /**
- * Placeholder filter
+ * Properties for rendering a `FilteringPropertyGrid`.
+ * @public
  */
-export class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
+export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
+  filterer: IPropertyDataFilterer;
+  autoExpandChildCategories?: boolean;
+}
+
+/**
+ * Creates a filtered data provider before rendering a `VirtualizedPropertyGridWithDataProvider`.
+ * @internal
+ */
+export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps) {
+  const filteringDataProvider = useDisposable(useCallback(
+    () => {
+      const filteringProvider = new FilteringPropertyDataProvider(dataProvider, filterer);
+      return new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
+    },
+    [filterer, dataProvider, autoExpandChildCategories]
+  ));
+
+  // in order to allow resize values column fully we need to override default width reserved for action buttons.
+  // istanbul ignore next
+  const actionButtonWidth = props.actionButtonWidth !== undefined
+    ? props.actionButtonWidth
+    : props.actionButtonRenderers !== undefined
+      ? undefined
+      : 0;
+
+  return (
+    <>
+      <VirtualizedPropertyGridWithDataProvider
+        {...props}
+        minLabelWidth={10}
+        minValueWidth={10}
+        actionButtonWidth={actionButtonWidth}
+        dataProvider={filteringDataProvider}
+      />
+    </>
+  );
+}
+
+/**
+ * Filterer that does nothing.
+ * @internal
+ */
+export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
     return false;
   }
+  // istanbul ignore next
   public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
     return { matchesFilter: true };
   }
 }
 
 /**
- * Filter that hides empty property data
+ * Filter that hides empty property data.
+ * @internal
  */
 export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
@@ -49,44 +82,30 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
   public async recordMatchesFilter(
     node: PropertyRecord
   ): Promise<PropertyDataFilterResult> {
-    if (node.value.valueFormat === PropertyValueFormat.Primitive) {
+    if (node.value.valueFormat !== PropertyValueFormat.Primitive) {
       return {
-        filteredTypes: [FilteredType.Value],
-        matchesFilter: !!node.value.displayValue,
+        matchesFilter: false,
       };
     }
-    if (node.value.valueFormat === PropertyValueFormat.Array) {
-      return {
-        filteredTypes: [FilteredType.Value],
-        matchesFilter: node.value.items.length > 0,
-      };
-    }
-    if (node.value.valueFormat === PropertyValueFormat.Struct) {
-      return {
-        filteredTypes: [FilteredType.Value],
-        matchesFilter: Object.keys(node.value.members).length > 0,
-      };
-    }
-    return { matchesFilter: false };
+
+    return {
+      filteredTypes: [FilteredType.Value],
+      matchesFilter: !!node.value.displayValue,
+    };
   }
 }
 
-type CustomPropertyDataProvider<TPropertyData> = IDisposable &
-Omit<IPropertyDataProvider, "getData"> & {
-  getData: () => Promise<TPropertyData>;
-};
-
-class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData> implements IPropertyDataProvider, IDisposable {
+class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider, IDisposable {
   public onDataChanged = new PropertyDataChangeEvent();
   private _removeListener: () => void;
   private _autoExpandChildCategories = true;
-  public constructor(
-    private _wrapped: CustomPropertyDataProvider<TPropertyData>,
+
+  constructor(
+    private _wrapped: FilteringPropertyDataProvider,
     autoExpandChildCategories?: boolean,
   ) {
-    this._removeListener = this._wrapped.onDataChanged.addListener(() =>
-      this.onDataChanged.raiseEvent()
-    );
+    // istanbul ignore next
+    this._removeListener = this._wrapped.onDataChanged.addListener(() => this.onDataChanged.raiseEvent());
     if (undefined !== autoExpandChildCategories) {
       this._autoExpandChildCategories = autoExpandChildCategories;
     }
@@ -97,7 +116,7 @@ class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData
     this._wrapped.dispose();
   }
 
-  public async getData(): Promise<TPropertyData> {
+  public async getData(): Promise<PropertyData> {
     const autoExpandChildCategories = this._autoExpandChildCategories;
     function expandCategories(categories: PropertyCategory[]) {
       categories.forEach((category: PropertyCategory) => {
@@ -107,81 +126,9 @@ class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData
         }
       });
     }
+
     const result = await this._wrapped.getData();
     expandCategories(result.categories);
     return result;
   }
 }
-
-/**
- * Properties for rendering a `FilteringPropertyGrid`
- */
-interface FilteringPropertyGridProps
-  extends VirtualizedPropertyGridWithDataProviderProps {
-  filterer: PropertyDataFiltererBase;
-  autoExpandChildCategories?: boolean;
-}
-
-/**
- * Calls the `usePropertyDataProviderWithUnifiedSelection` hook before rendering a `FilteringPropertyGrid`
- */
-export const FilteringPropertyGridWithUnifiedSelection = (
-  props: FilteringPropertyGridProps
-) => {
-  const localizations = useMemo(() => ({
-    tooManySelected: PropertyGridManager.translate(
-      "context-menu.selection.too-many-elements-selected"
-    ),
-  }), []);
-
-  const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
-
-  return (
-    <>
-      {isOverLimit ? (
-        <FillCentered style={{ flexDirection: "column" }}>
-          <div className="property-grid-react-filtering-pg-label">
-            { localizations.tooManySelected }
-          </div>
-        </FillCentered>
-      ) : (
-        <FilteringPropertyGrid
-          {...props}
-        />
-      )}
-    </>
-  );
-};
-
-/**
- * Creates a filtered data provider before rendering a `VirtualizedPropertyGridWithDataProvider`
- */
-export const FilteringPropertyGrid = (
-  props: FilteringPropertyGridProps
-) => {
-
-  const filteringDataProvider = useDisposable(useCallback(
-    () => new FilteringPropertyDataProvider(
-      props.dataProvider,
-      props.filterer
-    ),
-    [props.dataProvider, props.filterer]
-  ));
-
-  const autoExpandingFilteringDataProvider = useDisposable(useCallback(
-    () => new AutoExpandingPropertyFilterDataProvider(filteringDataProvider, props.autoExpandChildCategories),
-    [props.autoExpandChildCategories, filteringDataProvider],
-  ));
-
-  return (
-    <>
-      <VirtualizedPropertyGridWithDataProvider
-        {...props}
-        minLabelWidth={10}
-        minValueWidth={10}
-        actionButtonWidth={props.actionButtonWidth ?? props.actionButtonRenderers ? undefined : 0}
-        dataProvider={autoExpandingFilteringDataProvider}
-      />
-    </>
-  );
-};

@@ -11,8 +11,9 @@
   },
   {
     "policyName": "itwin-property-grid",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "definitionName": "lockStepVersion",
+    "version": "1.0.0-dev",
+    "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-measure-tools",
@@ -41,11 +42,6 @@
   },
   {
     "policyName": "one-click-lca-widget",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
-  },
-  {
-    "policyName": "infrastructure-iot",
     "definitionName": "individualVersion",
     "lockedMajor": 0
   },

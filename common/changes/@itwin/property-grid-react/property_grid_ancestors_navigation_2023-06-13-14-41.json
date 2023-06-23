@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Replaced `enableAncestorNavigation` property with `ancestorsNavigationControls` to allow using custom components for ancestors navigation.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}

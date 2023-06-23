@@ -12,8 +12,10 @@
 
 /apps/test-viewer  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 
-/packages/itwin/property-grid  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation @JoeZman
-/common/changes/@itwin/property-grid-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation @JoeZman
+/packages/itwin/property-grid  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/common/changes/@itwin/property-grid-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/common/api/summary/property-grid-react.exports.csv @itwin/itwinjs-core-presentation
+/common/api/property-grid-react.api.md @itwin/itwinjs-core-presentation
 
 /common/api/summary/tree-widget-react.exports.csv @itwin/itwinjs-core-presentation
 /common/api/tree-widget-react.api.md @itwin/itwinjs-core-presentation
@@ -40,9 +42,6 @@
 
 /packages/itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
 /common/changes/@itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
-
-/packages/itwin/infrastructure-iot  @itwin/viewer-components-reviewers @AntonAI @jpferrara @adamjhickey
-/common/changes/@itwin/infrastructure-iot-react  @itwin/viewer-components-reviewers @AntonAI @jpferrara @adamjhickey
 
 /packages/itwin/ec3-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
 /common/changes/@itwin/ec3-widget-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
