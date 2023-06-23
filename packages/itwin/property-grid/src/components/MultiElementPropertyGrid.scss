@@ -5,39 +5,34 @@
 
 .property-grid-react-transition-container {
   height: 100%;
-  width: auto;
   display: flex;
   position: relative;
-  padding-left: var(--iui-size-xs);
-  padding-bottom: var(--iui-size-xs);
+  padding: var(--iui-size-xs);
   box-sizing: border-box;
-}
 
-.property-grid-react-transition-container-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
+  .property-grid-react-transition-container-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 
-.property-grid-react-animated-tab {
-  transition: transform 400ms ease-out;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-}
+    .property-grid-react-animated-tab {
+      transition: all 400ms ease-out;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+    }
 
-.property-grid-react-animated-tab-animate-right {
-  transform: translate(100%, 0);
-}
+    .property-grid-react-animated-tab-animate-right {
+      transform: translate(100%, 0);
+      visibility: hidden;
+    }
 
-.property-grid-react-animated-tab-animate-left {
-  transform: translate(-100%, 0);
-}
-
-.property-grid-react-multi-select-icon>svg {
-  width: 26px;
-  height: 26px;
+    .property-grid-react-animated-tab-animate-left {
+      transform: translate(-100%, 0);
+      visibility: hidden;
+    }
+  }
 }

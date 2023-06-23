@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Added unit tests",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
