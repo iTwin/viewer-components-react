@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Added base tree props interface for props shared between trees.",
+      "comment": "Refactored `IModelContentTreeProps` to not inherit `HTMLDivElement` props.",
       "type": "none"
     }
   ],

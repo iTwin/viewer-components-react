@@ -17,7 +17,7 @@ import type { BaseTreeProps } from "../Common";
 export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 /**
- * Props for [[IModelContentTree]]
+ * Props for [[IModelContentTree]].
  * @public
  */
 export type IModelContentTreeProps = BaseTreeProps;
