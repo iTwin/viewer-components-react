@@ -18,7 +18,7 @@ import { createRuleset, createSearchRuleset } from "./Utils";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { VisibilityTreeFilterInfo } from "../Common";
+import type { BaseFilterableTreeProps } from "../Common";
 import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
 
 const PAGING_SIZE = 20;
@@ -41,19 +41,7 @@ export interface ModelsTreeHierarchyConfiguration {
  * Props for [[ModelsTree]] component
  * @public
  */
-export interface ModelsTreeProps {
-  /**
-   * An IModel to pull data from
-   */
-  iModel: IModelConnection;
-  /** Width of the component */
-  width: number;
-  /** Height of the component */
-  height: number;
-  /**
-   * Selection mode in the tree
-   */
-  selectionMode?: SelectionMode;
+export interface ModelsTreeProps extends BaseFilterableTreeProps {
   /**
    * Predicate which indicates whether node can be selected or no
    */
@@ -66,14 +54,6 @@ export interface ModelsTreeProps {
    * Ref to the root HTML element used by this component
    */
   rootElementRef?: React.Ref<HTMLDivElement>;
-  /**
-   * Information for tree filtering.
-   */
-  filterInfo?: VisibilityTreeFilterInfo;
-  /**
-   * Callback invoked when tree is filtered.
-   */
-  onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
   /**
    * Configuration options for the hierarchy loaded in the component.
    */
