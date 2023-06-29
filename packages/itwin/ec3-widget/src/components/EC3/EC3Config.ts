@@ -53,9 +53,9 @@ export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
 
 export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken;
 
-export function getDefaultEC3Uri(ec3Uri?: string) {
+export const getDefaultEC3Uri = (ec3Uri?: string) => {
   return ec3Uri ?? EC3URI;
-}
+};
 
 export class EC3Config {
   public readonly clientId: string;
