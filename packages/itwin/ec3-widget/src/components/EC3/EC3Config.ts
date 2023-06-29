@@ -53,6 +53,10 @@ export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
 
 export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken;
 
+export function getDefaultEC3Uri(ec3Uri?: string) {
+  return ec3Uri ?? EC3URI;
+}
+
 export class EC3Config {
   public readonly clientId: string;
   public readonly scope = "read%20write";
@@ -66,7 +70,7 @@ export class EC3Config {
 
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
-    this.ec3Uri = props.ec3Uri ?? EC3URI;
+    this.ec3Uri = getDefaultEC3Uri(props.ec3Uri);
     this.iTwinId = props.iTwinId;
 
     this.reportingBasePath = (props.reportingBasePath)

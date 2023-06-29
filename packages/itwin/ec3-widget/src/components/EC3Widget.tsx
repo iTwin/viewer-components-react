@@ -25,12 +25,12 @@ export interface EC3RouteFields {
 export interface Route {
   step: RouteStep;
   title: string;
-  ec3RoutingFields: EC3RouteFields;
+  routingFields: EC3RouteFields;
 }
 
 export const EC3Widget = (props: EC3WidgetProps) => {
   const [routingHistory, setRoutingHistory] = useState<Route[]>([
-    { step: RouteStep.Templates, title: "EC3 Templates", ec3RoutingFields: {} },
+    { step: RouteStep.Templates, title: "EC3 Templates", routingFields: {} },
   ]);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";

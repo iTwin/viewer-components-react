@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { EC3ConfigPropsWithRedirectUri } from "./EC3Config";
-import { EC3URI } from "./EC3Config";
+import { getDefaultEC3Uri } from "./EC3Config";
 import type { EC3Token } from "./EC3Token";
 
 /* This function must be called in EC3 authentication redirect path.
@@ -21,7 +21,7 @@ export type EC3AuthCallbackConfigProps = Pick<EC3ConfigPropsWithRedirectUri, "cl
 
 export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source: string = "ec3-auth") {
   const MILLI_SECONDS = 1000;
-  const ec3Uri = ec3Config.ec3Uri ?? EC3URI;
+  const ec3Uri = getDefaultEC3Uri(ec3Config.ec3Uri);
 
   async function exchangeToken() {
     const code = new URL(window.location.href).searchParams.get("code");

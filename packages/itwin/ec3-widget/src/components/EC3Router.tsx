@@ -17,7 +17,7 @@ export const EC3Router = ({
   navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
 }) => {
-  const { template } = currentRoute.ec3RoutingFields;
+  const { template } = currentRoute.routingFields;
   switch (currentRoute.step) {
     case RouteStep.Templates:
       return (
@@ -26,13 +26,13 @@ export const EC3Router = ({
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
               title: "Create Template",
-              ec3RoutingFields: {},
+              routingFields: {},
             }))}
           onClickTemplateTitle={(t) =>
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
               title: t.displayName,
-              ec3RoutingFields: { template: t },
+              routingFields: { template: t },
             }))
           }
         />
