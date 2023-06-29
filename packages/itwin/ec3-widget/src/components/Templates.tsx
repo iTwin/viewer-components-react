@@ -92,8 +92,10 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
   }, [selectedTemplate]);
 
   const onExport = useCallback(async () => {
+    // This is 5 minutes in milliseconds
+    const EXPIRATION_REDUCTION_BY_MS = 300000;
     if (!getEC3AccessToken) {
-      if (!(token?.token && token?.exp > Date.now())) {
+      if (!(token?.token && token?.exp - EXPIRATION_REDUCTION_BY_MS > Date.now())) {
         let authWindow: Window | null = null;
 
         const receiveMessage = (event: MessageEvent<EC3Token>) => {

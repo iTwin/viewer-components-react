@@ -21,8 +21,6 @@ export type EC3AuthCallbackConfigProps = Pick<EC3ConfigPropsWithRedirectUri, "cl
 
 export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source: string = "ec3-auth") {
   const MILLI_SECONDS = 1000;
-  // 300 Seconds = 5 Minutes
-  const EXPIRATION_REDUCTION_BY_SECONDS = 300;
   const ec3Uri = ec3Config.ec3Uri ?? EC3URI;
 
   async function exchangeToken() {
@@ -39,7 +37,7 @@ export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, sou
     const tokenResponse = await response.json();
     const token: EC3Token = {
       token: tokenResponse.access_token,
-      exp: Date.now() + (tokenResponse.expires_in - EXPIRATION_REDUCTION_BY_SECONDS) * MILLI_SECONDS,
+      exp: Date.now() + (tokenResponse.expires_in * MILLI_SECONDS),
       source,
     };
 
