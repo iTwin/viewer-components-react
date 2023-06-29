@@ -17,7 +17,6 @@ export const EC3Router = ({
   navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
 }) => {
-  goBack;
   const { template } = currentRoute.ec3RoutingFields;
   switch (currentRoute.step) {
     case RouteStep.Templates:

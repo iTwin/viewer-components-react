@@ -11,11 +11,6 @@ export interface EC3ConfigCommonProps {
    * The OAuth client ID used to authenticate with the EC3 API.
    */
   clientId: string;
-
-  /**
-   * A callback function that returns an access token for authenticating API requests.
-   * If not specified, it defaults to the authorizationClient of the {@link IModelApp}.
-   */
   iTwinId: string;
 
   /**
