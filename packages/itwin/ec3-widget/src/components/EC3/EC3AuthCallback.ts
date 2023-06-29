@@ -11,7 +11,7 @@ import type { EC3Token } from "./EC3Token";
 * } else if (window.location.pathname === "/callback") {
 *   handleEC3AuthCallback({
 *     clientId: "...",
-*     redirectUri: "...",
+*     redirectUri: "http://localhost:8887/callback",
 *   });
 * } else {
 */
