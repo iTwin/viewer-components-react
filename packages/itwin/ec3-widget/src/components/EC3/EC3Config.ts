@@ -6,6 +6,8 @@ import { IModelApp } from "@itwin/core-frontend";
 import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../api/APIContext";
 
+export const EC3URI = "https://buildingtransparency.org/";
+
 export interface EC3ConfigCommonProps {
   /**
    * The OAuth client ID used to authenticate with the EC3 API.
@@ -64,7 +66,7 @@ export class EC3Config {
 
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
-    this.ec3Uri = props.ec3Uri ?? "https://buildingtransparency.org/";
+    this.ec3Uri = props.ec3Uri ?? EC3URI;
     this.iTwinId = props.iTwinId;
 
     this.reportingBasePath = (props.reportingBasePath)
