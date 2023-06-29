@@ -6,9 +6,9 @@ import React from "react";
 import type { Route } from "./EC3Widget";
 import { WidgetHeader } from "./utils";
 
+export interface EC3HeaderProps {
+  currentRoute: Route;
+}
 export const EC3Header = ({
   currentRoute,
-}: {
-  goBack: () => void;
-  currentRoute: Route;
-}) => <WidgetHeader title={currentRoute.title} />;
+}: EC3HeaderProps) => <WidgetHeader title={currentRoute.title} />;
