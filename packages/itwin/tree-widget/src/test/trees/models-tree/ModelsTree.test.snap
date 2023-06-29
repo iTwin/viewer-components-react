@@ -308,6 +308,9 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
 <body
   class="iui-root"
 >
+  <div
+    id="core-global-context-menu-root"
+  />
   <div>
     <div
       class="tree-widget-visibility-tree-base"

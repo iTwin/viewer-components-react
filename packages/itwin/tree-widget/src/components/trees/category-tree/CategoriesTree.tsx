@@ -19,6 +19,7 @@ import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseFilterableTreeProps } from "../Common";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
+import type { TreeContextMenuProps } from "../ContextMenu";
 
 const PAGING_SIZE = 20;
 
@@ -29,10 +30,16 @@ const PAGING_SIZE = 20;
 export const RULESET_CATEGORIES: Ruleset = require("./Categories.json"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 /**
+ * Base props for [[CategoryTree]] component.
+ * @public
+ */
+export type CategoryTreeBaseProps = BaseFilterableTreeProps & TreeContextMenuProps;
+
+/**
  * Properties for the [[CategoryTree]] component
  * @public
  */
-export interface CategoryTreeProps extends BaseFilterableTreeProps {
+export interface CategoryTreeProps extends CategoryTreeBaseProps {
   /** Flag for accommodating all viewports */
   allViewports?: boolean;
   /** Active viewport */
@@ -80,7 +87,14 @@ export function CategoryTree(props: CategoryTreeProps) {
   }), [filteredNodeLoader, visibilityHandler]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = createVisibilityTreeRenderer({ iconsEnabled: false, descriptionEnabled: true, levelOffset: 10 });
+  const treeRenderer = createVisibilityTreeRenderer({
+    contextMenuItems: props.contextMenuItems,
+    nodeRendererProps: {
+      iconsEnabled: false,
+      descriptionEnabled: true,
+      levelOffset: 10,
+    },
+  });
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
   const filterApplied = filteredNodeLoader !== nodeLoader;
 
