@@ -11,11 +11,4 @@ export const EC3Header = ({
 }: {
   goBack: () => void;
   currentRoute: Route;
-}) => {
-
-  return (
-    <WidgetHeader
-      title={currentRoute.title}
-    />
-  );
-};
+}) => <WidgetHeader title={currentRoute.title} />;

@@ -43,6 +43,7 @@ export const EC3Widget = (props: EC3WidgetProps) => {
     updatedRouting.pop();
     setRoutingHistory(updatedRouting);
   }, [routingHistory]);
+
   return (
     <EC3Context {...props} iTwinId={iTwinId}>
       <div className="ec3w-container">
