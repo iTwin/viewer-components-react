@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/ec3-widget-react",
-      "comment": "EC3ConfigProps was introduced, which can either be EC3ConfigPropsWithRedirectUri or EC3ConfigPropsWithGetEC3AccessToken, which gives the option of two authentication methods.",
+      "comment": "A new property iTwinId was introduced in EC3Config, enabling the configuration to be tied to a specific iTwin instance.",
       "type": "minor"
     }
   ],
