@@ -33,7 +33,7 @@ export class EC3Provider implements UiItemsProvider {
       section === StagePanelSection.Start &&
       stageUsage === StageUsage.General
     ) {
-      const EC3: AbstractWidgetProps = {
+      const newEC3Widget: AbstractWidgetProps = {
         id: "EC3Widget",
         label: "EC3",
         getWidgetContent: () => {
@@ -41,7 +41,7 @@ export class EC3Provider implements UiItemsProvider {
         },
       };
 
-      widgets.push(EC3);
+      widgets.push(newEC3Widget);
     }
 
     return widgets;
