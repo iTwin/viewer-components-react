@@ -70,38 +70,6 @@ export class EC3Config {
   private token?: EC3Token;
   private readonly redirectUri?: string;
 
-  private async getAuthWindowToken(): Promise<string> {
-    // This is 5 minutes in milliseconds
-    const EXPIRATION_REDUCTION_BY_MS = 300000;
-    return new Promise((resolve, reject) => {
-      if (!(this.token && this.token.exp - EXPIRATION_REDUCTION_BY_MS > Date.now())) {
-        let authWindow: Window | null = null;
-
-        const receiveMessage = (event: MessageEvent<EC3Token>) => {
-          if (event.data.source !== "ec3-auth")
-            return;
-          authWindow?.close();
-          window.removeEventListener("message", receiveMessage, false);
-
-          if (!event.data.token) {
-            reject("Invalid token received");
-            return;
-          }
-          this.token = event.data;
-          resolve(event.data.token);
-        };
-        window.addEventListener("message", receiveMessage, false);
-
-        const url = `${this.ec3Uri}oauth2/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&response_type=code&scope=${this.scope}`;
-        authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
-
-      } else {
-        resolve(this.token.token);
-      }
-
-    });
-  }
-
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
     this.ec3Uri = getDefaultEC3Uri(props.ec3Uri);
@@ -123,6 +91,45 @@ export class EC3Config {
 
     this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
     this.getEC3AccessToken = "getEC3AccessToken" in props ? props.getEC3AccessToken : this.getAuthWindowToken.bind(this);
+  }
+
+  private tokenExpired(): boolean {
+    const EXPIRATION_REDUCTION_BY_MS = 300000; // 5 minutes in milliseconds
+    return !(this.token && this.token.exp - EXPIRATION_REDUCTION_BY_MS > Date.now());
+  }
+
+  private async getAuthWindowToken(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (this.tokenExpired()) {
+        let authWindow: Window | null = null;
+
+        const receiveMessage = (event: MessageEvent<EC3Token>) => {
+          if (event.data.source !== "ec3-auth")
+            return;
+          authWindow?.close();
+          window.removeEventListener("message", receiveMessage, false);
+
+          if (!event.data.token) {
+            reject("Invalid token received");
+            return;
+          }
+          this.token = event.data;
+          resolve(event.data.token);
+        };
+        window.addEventListener("message", receiveMessage, false);
+
+        const url = this.getAuthorizationUrl();
+        authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
+
+      } else {
+        resolve(this.token!.token);
+      }
+
+    });
+  }
+
+  private getAuthorizationUrl(): string {
+    return `${this.ec3Uri}oauth2/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&response_type=code&scope=${this.scope}`;
   }
 
 }
