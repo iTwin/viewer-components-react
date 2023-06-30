@@ -10,7 +10,7 @@ import type { IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { getComboboxOptions, getInputOptions, renderWithContext, simulateClick, simulateCombobox, simulateInput } from "./test-utils";
 import { LabelAction } from "../components/LabelAction";
-import type { Configuration, Label, Material } from "../components/Template";
+import type { Configuration, Label, Material } from "../components/EC3/Template";
 
 const oDataClient = moq.Mock.ofType<IOdataClient>();
 
@@ -79,7 +79,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
@@ -93,7 +93,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
@@ -112,7 +112,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
@@ -140,7 +140,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={template}
         label={label}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
@@ -163,7 +163,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={template}
         label={label}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
@@ -191,7 +191,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
@@ -218,7 +218,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={template}
         label={label}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
@@ -248,7 +248,7 @@ describe("LabelAction", () => {
       component: <LabelAction
         template={template}
         label={label}
-        goBack={async () => { }}
+        onClose={async () => { }}
         setTemplate={setter}
       />,
       oDataClient: oDataClient.object,

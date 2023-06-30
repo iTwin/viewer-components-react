@@ -11,6 +11,7 @@ import React from "react";
 import type { GetAccessTokenFn } from "../components/api/APIContext";
 import { ApiContext } from "../components/api/APIContext";
 import * as moq from "typemoq";
+import { EC3Config } from "../components/EC3/EC3Config";
 
 export interface RenderParameters {
   component: React.ReactNode;
@@ -19,7 +20,10 @@ export interface RenderParameters {
   reportsClient?: IReportsClient;
   oDataClient?: IOdataClient;
   getAccessTokenFn?: GetAccessTokenFn;
+  iTwinId?: string;
 }
+
+export const mockITwinId = "mockedITwinId";
 
 export async function renderWithContext({
   component, ec3ConfigurationsClient, ec3JobsClient, reportsClient, oDataClient, getAccessTokenFn,
@@ -32,7 +36,12 @@ export async function renderWithContext({
         oDataClient: oDataClient ?? moq.Mock.ofType<IOdataClient>().object,
         ec3JobsClient: ec3JobsClient ?? moq.Mock.ofType<IEC3JobsClient>().object,
         ec3ConfigurationsClient: ec3ConfigurationsClient ?? moq.Mock.ofType<IEC3ConfigurationsClient>().object,
-        getAccessTokenFn: getAccessTokenFn ?? (async () => ""),
+        config: new EC3Config({
+          iTwinId: mockITwinId,
+          clientId: "",
+          redirectUri: "",
+          getAccessToken: getAccessTokenFn ?? (async () => ""),
+        }),
       }}>
         {component}
       </ApiContext.Provider>
