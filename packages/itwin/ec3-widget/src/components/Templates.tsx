@@ -16,7 +16,6 @@ import type { Configuration } from "./EC3/Template";
 import { SearchBar } from "./SearchBar";
 import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
-import type { EC3Token } from "./EC3/EC3Token";
 import { useApiContext } from "./api/APIContext";
 import { ExportModal } from "./ExportModal";
 import { DeleteModal } from "./DeleteModal";
@@ -27,14 +26,14 @@ export interface TemplateProps {
 }
 
 export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => {
-  const { config, config: { getAccessToken, iTwinId, getEC3AccessToken } } = useApiContext();
+  const { config: { getAccessToken, iTwinId, getEC3AccessToken } } = useApiContext();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Configuration[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration | undefined>();
   const [searchValue, setSearchValue] = useState<string>("");
   const configClient = useApiContext().ec3ConfigurationsClient;
-  const [token, setToken] = useState<EC3Token>();
+  const [token, setToken] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
 
   const load = useCallback(async () => {
@@ -92,36 +91,11 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
   }, [selectedTemplate]);
 
   const onExport = useCallback(async () => {
-    // This is 5 minutes in milliseconds
-    const EXPIRATION_REDUCTION_BY_MS = 300000;
-    if (!getEC3AccessToken) {
-      if (!(token?.token && token?.exp - EXPIRATION_REDUCTION_BY_MS > Date.now())) {
-        let authWindow: Window | null = null;
+    const newToken = await getEC3AccessToken();
+    setToken(newToken);
+    openModal(true);
 
-        const receiveMessage = (event: MessageEvent<EC3Token>) => {
-          if (event.data.source !== "ec3-auth")
-            return;
-          authWindow?.close();
-          if (!event.data.token) {
-            toaster.negative("Invalid token received");
-            return;
-          }
-          setToken(event.data);
-          openModal(true);
-        };
-        window.addEventListener("message", receiveMessage, false);
-
-        const url = `${config.ec3Uri}oauth2/authorize?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&response_type=code&scope=${config.scope}`;
-        authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
-      } else {
-        openModal(true);
-      }
-    } else {
-      const newToken = await getEC3AccessToken();
-      setToken({ token: newToken, exp: 0, source: "" });
-      openModal(true);
-    }
-  }, [config.clientId, config.ec3Uri, config.redirectUri, config.scope, getEC3AccessToken, token?.exp, token?.token]);
+  }, [getEC3AccessToken]);
 
   useEffect(() => {
     void load();
@@ -222,7 +196,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
         isOpen={modalIsOpen}
         close={() => openModal(false)}
         templateId={selectedTemplate?.id}
-        token={token?.token}
+        token={token}
       />
 
       <DeleteModal

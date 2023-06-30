@@ -5,6 +5,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../api/APIContext";
+import type { EC3Token } from "./EC3Token";
 
 export const EC3URI = "https://buildingtransparency.org/";
 
@@ -60,13 +61,46 @@ export const getDefaultEC3Uri = (ec3Uri?: string) => {
 export class EC3Config {
   public readonly clientId: string;
   public readonly scope = "read%20write";
-  public readonly redirectUri?: string;
   public readonly ec3Uri?: string;
   public readonly reportingBasePath: string;
   public readonly carbonCalculationBasePath: string;
   public readonly iTwinId: string;
   public readonly getAccessToken: GetAccessTokenFn;
-  public readonly getEC3AccessToken?: GetAccessTokenFn;
+  public readonly getEC3AccessToken: GetAccessTokenFn;
+  private token?: EC3Token;
+  private readonly redirectUri?: string;
+
+  private async getAuthWindowToken(): Promise<string> {
+    // This is 5 minutes in milliseconds
+    const EXPIRATION_REDUCTION_BY_MS = 300000;
+    return new Promise((resolve, reject) => {
+      if (!(this.token && this.token.exp - EXPIRATION_REDUCTION_BY_MS > Date.now())) {
+        let authWindow: Window | null = null;
+
+        const receiveMessage = (event: MessageEvent<EC3Token>) => {
+          if (event.data.source !== "ec3-auth")
+            return;
+          authWindow?.close();
+          window.removeEventListener("message", receiveMessage, false);
+
+          if (!event.data.token) {
+            reject("Invalid token received");
+            return;
+          }
+          this.token = event.data;
+          resolve(event.data.token);
+        };
+        window.addEventListener("message", receiveMessage, false);
+
+        const url = `${this.ec3Uri}oauth2/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&response_type=code&scope=${this.scope}`;
+        authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
+
+      } else {
+        resolve(this.token.token);
+      }
+
+    });
+  }
 
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
@@ -87,12 +121,8 @@ export class EC3Config {
         : ""
     );
 
-    if ("redirectUri" in props) {
-      this.redirectUri = props.redirectUri;
-    }
-
-    if ("getEC3AccessToken" in props) {
-      this.getEC3AccessToken = props.getEC3AccessToken;
-    }
+    this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
+    this.getEC3AccessToken = "getEC3AccessToken" in props ? props.getEC3AccessToken : this.getAuthWindowToken.bind(this);
   }
+
 }

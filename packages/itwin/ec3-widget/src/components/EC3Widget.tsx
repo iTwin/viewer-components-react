@@ -34,8 +34,8 @@ export const EC3Widget = (props: EC3WidgetProps) => {
   ]);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
-  const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
-    setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
+  const navigateTo = useCallback((getNextRoute: (prev: Route | undefined) => Route) => {
+    setRoutingHistory((r) => [...r, getNextRoute(r[r.length - 1])]);
   }, []);
 
   const goBack = useCallback(() => {

@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Select } from "@itwin/itwinui-react";
-import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput } from "@itwin/itwinui-react";
 import type { Report } from "@itwin/insights-client";
 import { handleSelectChange } from "./utils";
 import type { Configuration, Label as EC3Label } from "./EC3/Template";
@@ -31,6 +31,7 @@ import { TemplateActionPanel } from "./TemplateActionPanel";
 import { DeleteModal } from "./DeleteModal";
 import { ReportConfirmModal } from "./ReportConfirmModal";
 import { LabelActionModal } from "./LabelActionModal";
+import { RequiredFieldsNotice } from "./RequiredFieldsNotice";
 
 export interface TemplateMenuProps {
   template?: Configuration;
@@ -127,9 +128,7 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
     <>
       <div className='ec3w-template-details-container' data-testid="ec3-template-details">
         <Fieldset legend='Template Details' className='ec3w-template-details'>
-          <Small className='ec3w-template-field-legend'>
-            Asterisk * indicates mandatory fields.
-          </Small>
+          <RequiredFieldsNotice />
           <LabeledInput
             id='templateName'
             data-testid="ec3-template-name-input"
