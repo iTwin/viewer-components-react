@@ -53,7 +53,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "RootNodes",
         autoExpand: true,
         specifications: [
-          rootSubjectSpecification(),
+          createRootSubjectSpecification(),
         ],
         customizationRules: [
           {
@@ -68,8 +68,8 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          relatedHierarchySubjectSpecification(),
-          relatedNonHierarchySubjectSpecification(),
+          createRelatedHierarchySubjectSpecification(),
+          createRelatedNonHierarchySubjectSpecification(),
         ],
         customizationRules: [
           {
@@ -84,8 +84,8 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          nonContentModelsSpecification(context),
-          contentModelsSpecification(context),
+          createNoncreateContentModelsSpecification(context),
+          createContentModelsSpecification(context),
         ],
         customizationRules: [
           {
@@ -100,7 +100,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("ISubModeledElement", "BisCore")`,
         specifications: [
-          elementModelSpecification(context),
+          createElementModelSpecification(context),
         ],
         customizationRules: [
           {
@@ -115,7 +115,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("GeometricModel3d", "BisCore")`,
         specifications: [
-          modelCategoriesSpecification(context),
+          createModelCategoriesSpecification(context),
         ],
         customizationRules: [
           {
@@ -131,7 +131,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("SpatialCategory", "BisCore")`,
         specifications: [
-          categoryElementsSpecification(context),
+          createCategoryElementsSpecification(context),
         ],
         customizationRules: [
           {
@@ -147,7 +147,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("GeometricElement3d", "BisCore")`,
         specifications: [
-          elementElementsSpecification(context),
+          createEementElementsSpecification(context),
         ],
         customizationRules: [
           {
@@ -253,7 +253,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
       {
         ruleType: "RootNodes",
         specifications: [
-          rootSubjectSpecification(),
+          createRootSubjectSpecification(),
         ],
         customizationRules: [
           {
@@ -268,9 +268,9 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          relatedHierarchySubjectSpecification(),
+          createRelatedHierarchySubjectSpecification(),
           {
-            ...relatedNonHierarchySubjectSpecification(),
+            ...createRelatedNonHierarchySubjectSpecification(),
             hideExpression: `NOT ThisNode.HasChildren ANDALSO NOT ThisNode.ChildrenArtifacts.AnyMatches(x => x.isContentModel)`,
           },
         ],
@@ -300,7 +300,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          nonContentModelsSpecification(context),
+          createNoncreateContentModelsSpecification(context),
         ],
         customizationRules: [
           {
@@ -315,7 +315,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          contentModelsSpecification(context),
+          createContentModelsSpecification(context),
         ],
         customizationRules: [
           {
@@ -336,7 +336,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("GeometricModel3d", "BisCore")`,
         specifications: [
-          modelSubModelsSpecification(context),
+          createModelSubModelsSpecification(context),
         ],
         customizationRules: [
           {
@@ -367,7 +367,7 @@ interface SpecificationsContext {
   showEmptyModels: boolean;
 }
 
-function rootSubjectSpecification(): ChildNodeSpecification {
+function createRootSubjectSpecification(): ChildNodeSpecification {
   return {
     specType: "InstanceNodesOfSpecificClasses",
     classes: [
@@ -384,7 +384,7 @@ function rootSubjectSpecification(): ChildNodeSpecification {
   };
 }
 
-function relatedHierarchySubjectSpecification(): ChildNodeSpecification {
+function createRelatedHierarchySubjectSpecification(): ChildNodeSpecification {
   return {
     specType: "RelatedInstanceNodes",
     relationshipPaths: [
@@ -407,7 +407,7 @@ function relatedHierarchySubjectSpecification(): ChildNodeSpecification {
   };
 }
 
-function relatedNonHierarchySubjectSpecification(): ChildNodeSpecification {
+function createRelatedNonHierarchySubjectSpecification(): ChildNodeSpecification {
   return {
     specType: "RelatedInstanceNodes",
     relationshipPaths: [
@@ -430,7 +430,7 @@ function relatedNonHierarchySubjectSpecification(): ChildNodeSpecification {
   };
 }
 
-function nonContentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
+function createNoncreateContentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
   const partitionFilter = `parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)`;
   const modelHasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
 
@@ -470,7 +470,7 @@ function nonContentModelsSpecification({ elementClassSpecification, showEmptyMod
   };
 }
 
-function contentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
+function createContentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
   const partitionFilter = `parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)`;
   const modelHasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
 
@@ -509,7 +509,7 @@ function contentModelsSpecification({ elementClassSpecification, showEmptyModels
   };
 }
 
-function elementModelSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
+function createElementModelSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
   const hasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
   const instanceFilter = `NOT this.IsPrivate${showEmptyModels ? "" : ` AND ${hasElements}`}`;
 
@@ -531,7 +531,7 @@ function elementModelSpecification({ elementClassSpecification, showEmptyModels 
   };
 }
 
-function modelCategoriesSpecification({ elementClassSpecification }: SpecificationsContext): ChildNodeSpecification {
+function createModelCategoriesSpecification({ elementClassSpecification }: SpecificationsContext): ChildNodeSpecification {
   return {
     specType: "RelatedInstanceNodes",
     relationshipPaths: [
@@ -561,7 +561,7 @@ function modelCategoriesSpecification({ elementClassSpecification }: Specificati
   };
 }
 
-function categoryElementsSpecification({ elementClassSpecification, groupElements }: SpecificationsContext): ChildNodeSpecification {
+function createCategoryElementsSpecification({ elementClassSpecification, groupElements }: SpecificationsContext): ChildNodeSpecification {
   return {
     specType: "RelatedInstanceNodes",
     relationshipPaths: [
@@ -580,7 +580,7 @@ function categoryElementsSpecification({ elementClassSpecification, groupElement
   };
 }
 
-function elementElementsSpecification({ elementClassSpecification, groupElements }: SpecificationsContext): ChildNodeSpecification {
+function createEementElementsSpecification({ elementClassSpecification, groupElements }: SpecificationsContext): ChildNodeSpecification {
   return {
     specType: "RelatedInstanceNodes",
     relationshipPaths: [
@@ -598,7 +598,7 @@ function elementElementsSpecification({ elementClassSpecification, groupElements
   };
 }
 
-function modelSubModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
+function createModelSubModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
   const hasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
   const instanceFilter = `NOT this.IsPrivate${showEmptyModels ? "" : ` AND ${hasElements}`}`;
 
