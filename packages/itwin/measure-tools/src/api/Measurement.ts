@@ -6,7 +6,7 @@
 import { UiFramework } from "@itwin/appui-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
-import type { DecorateContext, HitDetail} from "@itwin/core-frontend";
+import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
 import type { Point3d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
@@ -129,7 +129,7 @@ export abstract class MeasurementSerializer {
   public abstract isValidType(measurement: Measurement): boolean;
 
   /**
-   * Subclases can implement this to do JSON data validation. Some measurements may have optional properties, other measurements may need data that HAS to be present in order to
+   * Subclasses can implement this to do JSON data validation. Some measurements may have optional properties, other measurements may need data that HAS to be present in order to
    * create a new instance.
    * @param json JSON data to validate.
    */
@@ -238,7 +238,7 @@ export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData:
 export interface MeasurementDataWidgetHandler { priority: number, handlerFunction: MeasurementDataWidgetHandlerFunction }
 /**
  * Abstract class representing a Measurement. Measurements are semi-persistent annotation objects that can be drawn to a viewport. They are not stored
- * in the imodel database, but can be serialized to a JSON string for storage.
+ * in the iModel database, but can be serialized to a JSON string for storage.
  */
 export abstract class Measurement {
   private static _serializers = new Map<string, MeasurementSerializer>();

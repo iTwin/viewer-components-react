@@ -1,15 +1,10 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import type { GuidString } from "@itwin/core-bentley";
-import { BeUiEvent, Logger } from "@itwin/core-bentley";
-import type { IModelConnection } from "@itwin/core-frontend";
-import { IModelApp } from "@itwin/core-frontend";
-import { UiFramework } from "@itwin/appui-react";
-import { MeasureToolsLoggerCategory } from "./MeasureToolsLoggerCategory";
-import type { RpcActivity } from "@itwin/core-common";
+import { BeUiEvent } from "@itwin/core-bentley";
 
 /** Each feature has a human-readable name that should be unique, but also a GUID. */
 export interface Feature {

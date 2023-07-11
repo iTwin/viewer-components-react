@@ -19,7 +19,7 @@ import { ShimFunctions } from "./ShimFunctions";
 /** Handler for overriding what is returned for the tooltip of a measurement. */
 export type MeasurementToolTipHandler = (measurement: Measurement, pickContext: MeasurementPickContext) => Promise<HTMLElement | string>;
 
-/** Handler for overriding what is returned for pickable geometry of a measurement. */
+/** Handler for overriding what is returned for pick-able geometry of a measurement. */
 export type MeasurementGeometryHandler = (measurement: Measurement, pickContext: MeasurementPickContext) => GeometryStreamProps | undefined;
 
 /** Handler ofr overriding to determine if a measurement has been picked or not. */
@@ -33,7 +33,7 @@ export interface MeasurementButtonEvent {
 
 /**
  * Singleton manager which maintains a list of all active measurements once they are created by a measurement tool. The manager facilitates drawing and picking of measurements
- * to the appropiate viewport.
+ * to the appropriate viewport.
  */
 export class MeasurementManager implements Decorator {
   private static _instance?: MeasurementManager;
