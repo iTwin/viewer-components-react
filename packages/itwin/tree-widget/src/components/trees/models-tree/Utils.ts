@@ -84,7 +84,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          createNoncreateContentModelsSpecification(context),
+          createNonContentModelsSpecification(context),
           createContentModelsSpecification(context),
         ],
         customizationRules: [
@@ -300,7 +300,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          createNoncreateContentModelsSpecification(context),
+          createNonContentModelsSpecification(context),
         ],
         customizationRules: [
           {
@@ -430,7 +430,7 @@ function createRelatedNonHierarchySubjectSpecification(): ChildNodeSpecification
   };
 }
 
-function createNoncreateContentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
+function createNonContentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
   const partitionFilter = `parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)`;
   const modelHasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
 
