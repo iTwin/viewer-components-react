@@ -6,6 +6,8 @@
 import { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import { TreeContextMenuProps } from "../ContextMenu";
+import { TreeRenderer } from "../TreeRenderer";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseTreeProps } from "../Common";
@@ -20,7 +22,7 @@ export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); 
  * Props for [[IModelContentTree]].
  * @public
  */
-export type IModelContentTreeProps = BaseTreeProps;
+export type IModelContentTreeProps = BaseTreeProps & TreeContextMenuProps;
 
 /**
  * A tree that shows all iModel content starting from the root Subject, then the hierarchy of child
@@ -28,7 +30,7 @@ export type IModelContentTreeProps = BaseTreeProps;
  * @public
  */
 export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, width, height, selectionMode } = props;
+  const { iModel, width, height, selectionMode, contextMenuItems } = props;
 
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: iModel,
@@ -50,6 +52,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         eventsHandler={eventHandler}
         model={treeModel}
         iconsEnabled={true}
+        treeRenderer={(treeProps) => <TreeRenderer {...treeProps} contextMenuItems={contextMenuItems} />}
       />
     </div>
   );
