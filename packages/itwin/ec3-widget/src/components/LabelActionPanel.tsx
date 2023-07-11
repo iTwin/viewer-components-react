@@ -34,7 +34,7 @@ export const LabelActionPanel = ({
         id='save-app'
         onClick={onSave}
       >
-        Save
+        Add
       </Button>
       <Button
         styleType='default'

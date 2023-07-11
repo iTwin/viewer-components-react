@@ -51,7 +51,7 @@ interface ExportProps {
 export const ExportModal = (props: ExportProps) => {
   const PIN_INTERVAL = 5000;
   const ec3JobsClient = useApiContext().ec3JobsClient;
-  const getAccessToken = useApiContext().getAccessTokenFn;
+  const getAccessToken = useApiContext().config.getAccessToken;
 
   const [jobStatus, setJobStatus] = useState<JobStatus>({ status: CarbonUploadState.Queued });
 

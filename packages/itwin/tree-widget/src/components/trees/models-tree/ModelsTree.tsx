@@ -98,7 +98,14 @@ export function ModelsTree(props: ModelsTreeProps) {
   }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = createVisibilityTreeRenderer({ iconsEnabled: true, descriptionEnabled: false, levelOffset: 10, disableRootNodeCollapse: true });
+  const treeRenderer = createVisibilityTreeRenderer({
+    nodeRendererProps: {
+      iconsEnabled: true,
+      descriptionEnabled: false,
+      levelOffset: 10,
+      disableRootNodeCollapse: true,
+    },
+  });
 
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
 

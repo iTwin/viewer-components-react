@@ -9,19 +9,13 @@ import { Templates } from "../components/Templates";
 import * as moq from "typemoq";
 import type { EC3ConfigurationsClient, EC3Job, EC3JobsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
-import { EC3Config } from "../components/EC3/EC3Config";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { renderWithContext, simulateClick } from "./test-utils";
+import { mockITwinId, renderWithContext, simulateClick } from "./test-utils";
 import type { EC3Token } from "../components/EC3/EC3Token";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
 const ec3JobsClient = moq.Mock.ofType<EC3JobsClient>();
-
-jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual("@itwin/appui-react"),
-  useActiveIModelConnection: () => activeIModelConnection.object,
-}));
 
 describe("Templates", () => {
   const mockedConfigurations = Array.from(
@@ -52,9 +46,8 @@ describe("Templates", () => {
     },
   };
 
-  const iTwinId = faker.datatype.uuid();
+  const iTwinId = mockITwinId;
   const accessToken = faker.datatype.uuid();
-  const config = new EC3Config({ clientId: "", redirectUri: "" });
   const getAccessTokenFn = async () => accessToken;
 
   beforeAll(async () => {
@@ -70,7 +63,7 @@ describe("Templates", () => {
 
   it("Templates view should render successfully", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -79,7 +72,7 @@ describe("Templates", () => {
 
   it("Templates view should have mocked templates", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -91,7 +84,7 @@ describe("Templates", () => {
 
   it("Templates view should have mocked templates", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -101,33 +94,42 @@ describe("Templates", () => {
     );
   });
 
-  it("Clicking on template should open template menu", async () => {
+  it("Clicking on template should use callback", async () => {
+    const onClickTemplateTitle = jest.fn();
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates onClickTemplateTitle={onClickTemplateTitle} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const configuration = screen.getByText(mockedConfigurations[0].displayName);
     await simulateClick(configuration);
-    expect(screen.getByTestId("ec3-template-details")).toBeInTheDocument();
+    const expectedTemplate = {
+      displayName: mockedConfigurations[0].displayName,
+      description: mockedConfigurations[0].description ?? "",
+      id: mockedConfigurations[0].id,
+      labels: mockedConfigurations[0].labels,
+      reportId: mockedConfigurations[0]._links.report.href.split("/reports/")[1],
+    };
+    expect(onClickTemplateTitle).toBeCalledWith(expectedTemplate);
   });
 
-  it("Clicking create button should open create template menu", async () => {
+  it("Clicking create button should use callback", async () => {
+    const onClickCreate = jest.fn();
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates onClickCreate={onClickCreate} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
     await simulateClick(button);
-    expect(screen.getByTestId("ec3-template-details")).toBeInTheDocument();
+    expect(onClickCreate).toBeCalled();
   });
 
   it("Clicking on tile should select it and enable export button", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -144,7 +146,7 @@ describe("Templates", () => {
 
   it("Clicking again or on other tile should deselect", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -163,7 +165,7 @@ describe("Templates", () => {
 
   it("Search option filters out configurations", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -185,7 +187,7 @@ describe("Templates", () => {
 
   it("Search bar opens and closes on click", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -204,7 +206,7 @@ describe("Templates", () => {
 
   it("Deleting report brings up delete modal", async () => {
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -228,7 +230,7 @@ describe("Templates", () => {
     global.window.open = mockOpen;
 
     await renderWithContext({
-      component: <Templates config={config} />,
+      component: <Templates />,
       ec3JobsClient: ec3JobsClient.object,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,

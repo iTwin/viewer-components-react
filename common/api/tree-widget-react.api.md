@@ -166,10 +166,10 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset;
 export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping">;
 
 // @public
-export const createVisibilityTreeNodeRenderer: ({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
+export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
 
 // @public
-export const createVisibilityTreeRenderer: (visibilityTreeRendererProps: VisibilityTreeRendererProps) => (props: TreeRendererProps) => JSX.Element;
+export function createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps): (props: TreeRendererProps) => JSX.Element;
 
 // @alpha
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
@@ -425,7 +425,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
 export function useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[];
 
 // @public
-export const useVisibilityTreeFiltering: (nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: ((filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void) | undefined) => {
+export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void): {
     filteredNodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
     isFiltering: boolean;
     nodeHighlightingProps: HighlightableTreeProps | undefined;
@@ -474,7 +474,15 @@ export interface VisibilityTreeFilterInfo {
 }
 
 // @public
-export const VisibilityTreeNodeCheckbox: (props: NodeCheckboxRenderProps) => JSX.Element;
+export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps): JSX.Element;
+
+// @public
+export interface VisibilityTreeNodeRendererProps {
+    descriptionEnabled: boolean;
+    disableRootNodeCollapse?: boolean;
+    iconsEnabled: boolean;
+    levelOffset?: number;
+}
 
 // @public
 export function VisibilityTreeNoFilteredData(props: VisibilityTreeNoFilteredDataProps): JSX.Element;
@@ -489,10 +497,7 @@ export interface VisibilityTreeNoFilteredDataProps {
 
 // @public
 export interface VisibilityTreeRendererProps {
-    descriptionEnabled: boolean;
-    disableRootNodeCollapse?: boolean;
-    iconsEnabled: boolean;
-    levelOffset?: number;
+    nodeRendererProps: VisibilityTreeNodeRendererProps;
 }
 
 // @public
