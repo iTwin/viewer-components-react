@@ -39,16 +39,10 @@ export interface ModelsTreeHierarchyConfiguration {
 }
 
 /**
- * Base props for [[ModelsTree]] component.
- * @public
- */
-export type ModelsTreeBaseProps = BaseFilterableTreeProps & TreeContextMenuProps;
-
-/**
  * Props for [[ModelsTree]] component.
  * @public
  */
-export interface ModelsTreeProps extends ModelsTreeBaseProps {
+export interface ModelsTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
   /**
    * Predicate which indicates whether node can be selected or no
    */

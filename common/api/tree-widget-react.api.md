@@ -99,10 +99,7 @@ export interface CategoryInfo {
 export function CategoryTree(props: CategoryTreeProps): JSX.Element;
 
 // @public
-export type CategoryTreeBaseProps = BaseFilterableTreeProps & TreeContextMenuProps;
-
-// @public
-export interface CategoryTreeProps extends CategoryTreeBaseProps {
+export interface CategoryTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
     activeView: Viewport;
     allViewports?: boolean;
     categories: CategoryInfo[];
@@ -195,7 +192,7 @@ export const ExternalSourcesTreeComponent: {
 };
 
 // @alpha
-export type ExternalSourcesTreeProps = BaseTreeProps;
+export type ExternalSourcesTreeProps = BaseTreeProps & TreeContextMenuProps;
 
 // @public
 export function hideAllCategories(categories: string[], viewport: Viewport): Promise<void>;
@@ -217,7 +214,7 @@ export const IModelContentTreeComponent: {
 export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
 
 // @public
-export type IModelContentTreeProps = BaseTreeProps;
+export type IModelContentTreeProps = BaseTreeProps & TreeContextMenuProps;
 
 // @public
 export function invertAllCategories(categories: CategoryInfo[], viewport: Viewport): Promise<void>;
@@ -245,9 +242,6 @@ export interface ModelInfo {
 
 // @public
 export function ModelsTree(props: ModelsTreeProps): JSX.Element;
-
-// @public
-export type ModelsTreeBaseProps = BaseFilterableTreeProps & TreeContextMenuProps;
 
 // @public
 export const ModelsTreeComponent: {
@@ -289,7 +283,7 @@ export enum ModelsTreeNodeType {
 }
 
 // @public
-export interface ModelsTreeProps extends ModelsTreeBaseProps {
+export interface ModelsTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
     activeView: Viewport;
     // @alpha
     enableHierarchyAutoUpdate?: boolean;

@@ -30,16 +30,10 @@ const PAGING_SIZE = 20;
 export const RULESET_CATEGORIES: Ruleset = require("./Categories.json"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 /**
- * Base props for [[CategoryTree]] component.
- * @public
- */
-export type CategoryTreeBaseProps = BaseFilterableTreeProps & TreeContextMenuProps;
-
-/**
  * Properties for the [[CategoryTree]] component
  * @public
  */
-export interface CategoryTreeProps extends CategoryTreeBaseProps {
+export interface CategoryTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
   /** Flag for accommodating all viewports */
   allViewports?: boolean;
   /** Active viewport */
