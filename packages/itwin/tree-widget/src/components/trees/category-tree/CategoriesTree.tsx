@@ -80,7 +80,13 @@ export function CategoryTree(props: CategoryTreeProps) {
   }), [filteredNodeLoader, visibilityHandler]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = createVisibilityTreeRenderer({ iconsEnabled: false, descriptionEnabled: true, levelOffset: 10 });
+  const treeRenderer = createVisibilityTreeRenderer({
+    nodeRendererProps: {
+      iconsEnabled: false,
+      descriptionEnabled: true,
+      levelOffset: 10,
+    },
+  });
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
   const filterApplied = filteredNodeLoader !== nodeLoader;
 
