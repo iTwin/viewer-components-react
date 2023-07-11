@@ -434,6 +434,7 @@ describe("ModelsTree", () => {
           schemaName: "testSchemaName",
           className: "testClassName",
         },
+        showEmptyModels: false,
       };
       render(
         <ModelsTree
@@ -444,7 +445,7 @@ describe("ModelsTree", () => {
           hierarchyConfig={hierarchyConfig}
         />
       );
-      await waitFor(() => expect(createRulesetSpy).to.be.calledWith({ enableElementsClassGrouping: true, elementClassSpecification: { schemaName: "testSchemaName", className: "testClassName" } }));
+      await waitFor(() => expect(createRulesetSpy).to.be.calledWith({ enableElementsClassGrouping: true, elementClassSpecification: { schemaName: "testSchemaName", className: "testClassName" }, showEmptyModels: false }));
     });
   });
 });

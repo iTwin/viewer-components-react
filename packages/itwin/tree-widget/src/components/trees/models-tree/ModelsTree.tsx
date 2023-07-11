@@ -35,6 +35,8 @@ export interface ModelsTreeHierarchyConfiguration {
    * Defaults to `bis.GeometricElement3d`. It's expected for the given class to derive from it.
    */
   elementClassSpecification?: SingleSchemaClassSpecification;
+  /** Should the tree show models without elements. */
+  showEmptyModels?: boolean;
 }
 
 /**
@@ -139,10 +141,12 @@ function useModelsTreeNodeLoader(props: ModelsTreeProps) {
     general: useMemo(() => createRuleset({
       enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
       elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-    }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification]),
+      showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+    }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels]),
     search: useMemo(() => createSearchRuleset({
       elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-    }), [props.hierarchyConfig?.elementClassSpecification]),
+      showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+    }), [props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels]),
   };
 
   const { nodeLoader, onItemsRendered } = usePresentationTreeNodeLoader({
