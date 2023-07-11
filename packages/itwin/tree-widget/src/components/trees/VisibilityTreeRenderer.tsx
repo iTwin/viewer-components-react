@@ -25,15 +25,16 @@ import type { TreeRendererBaseProps } from "./TreeRenderer";
 const EXPANSION_TOGGLE_WIDTH = 24;
 
 /**
- * Props for tree renderer used by visibility trees.
+ * Props for visibility tree renderer.
  * @public
  */
 export interface VisibilityTreeRendererProps extends TreeRendererBaseProps {
+  /** Props for single node renderer. */
   nodeRendererProps: VisibilityTreeNodeRendererProps;
 }
 
 /**
- * Props for base tree node renderer used by visibility trees.
+ * Props for visibility tree node renderer.
  * @public
  */
 export interface VisibilityTreeNodeRendererProps {
@@ -98,16 +99,14 @@ export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRoot
  * @public
  */
 export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
-  return (
-    <Checkbox
-      className="visibility-tree-checkbox"
-      variant="eyeball"
-      checked={props.checked}
-      onChange={(e) => props.onChange(e.currentTarget.checked)}
-      disabled={props.disabled}
-      title={props.title}
-    />
-  );
+  return <Checkbox
+    className="visibility-tree-checkbox"
+    variant="eyeball"
+    checked={props.checked}
+    onChange={(e) => props.onChange(e.currentTarget.checked)}
+    disabled={props.disabled}
+    title={props.title}
+  />;
 }
 
 /**

@@ -543,7 +543,6 @@ export interface VisibilityTreeNoFilteredDataProps {
 
 // @public
 export interface VisibilityTreeRendererProps extends TreeRendererBaseProps {
-    // (undocumented)
     nodeRendererProps: VisibilityTreeNodeRendererProps;
 }
 

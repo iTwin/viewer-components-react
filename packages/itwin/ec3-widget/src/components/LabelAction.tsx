@@ -9,9 +9,8 @@ import {
 } from "@itwin/itwinui-icons-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "@itwin/itwinui-react";
-import { WidgetHeader } from "./utils";
 import "./LabelAction.scss";
-import type { Configuration, Label as EC3Label, Material } from "./Template";
+import type { Configuration, Label as EC3Label, Material } from "./EC3/Template";
 import { DropdownTile } from "./DropdrownTile";
 import React from "react";
 import { ReportTableSelector } from "./ReportTableSelector";
@@ -19,14 +18,14 @@ import SimpleReactValidator from "simple-react-validator";
 import { DeleteModal } from "./DeleteModal";
 import { LabelActionPanel } from "./LabelActionPanel";
 
-interface LabelActionProps {
+export interface LabelActionProps {
   template: Configuration;
   label: EC3Label | undefined;
-  goBack: () => Promise<void>;
+  onClose: () => Promise<void>;
   setTemplate: (sel: Configuration) => void;
 }
 
-export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
+export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActionProps) => {
   const [reportTable, setReportTable] = useState<string>(label?.reportTable ?? "");
   const [name, setName] = useState<string>(label?.name ?? "");
   const [itemName, setItemName] = useState<string>(label?.elementNameColumn ?? "UserLabel");
@@ -125,11 +124,6 @@ export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActio
 
   return (
     <>
-      <WidgetHeader
-        title={label?.name ?? "Assembly"}
-        returnFn={goBack}
-        disabled={isLoading}
-      />
       <div className='ec3w-label-details-container' data-testid="ec3-label-action">
         <Fieldset legend='Assembly' className='ec3w-label-details'>
           <Small className='ec3w-label-field-legend'>
@@ -249,10 +243,10 @@ export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActio
         }
         onSave={async () => {
           void onSave();
-          await goBack();
+          await onClose();
         }
         }
-        onCancel={goBack}
+        onCancel={onClose}
         isLoading={isLoading}
       />
     </>

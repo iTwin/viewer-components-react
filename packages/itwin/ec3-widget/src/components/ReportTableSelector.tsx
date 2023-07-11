@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { ComboBox, Label, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { Configuration } from "./Template";
+import type { Configuration } from "./EC3/Template";
 import "./ReportTableSelector.scss";
 import SimpleReactValidator from "simple-react-validator";
 import { useApiContext } from "./api/APIContext";
@@ -24,7 +24,7 @@ export const ReportTableSelector = ({
   onChange,
   setLoading,
 }: ReportTableSelectorProps) => {
-  const getAccessToken = useApiContext().getAccessTokenFn;
+  const getAccessToken = useApiContext().config.getAccessToken;
   const [reportTable, setReportTable] = useState(selectedReportTable);
   const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
   const oDataClient = useApiContext().oDataClient;

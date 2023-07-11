@@ -32,17 +32,7 @@
   &-button-center {
     align-self: center;
   }
-
-  &-container {
-    display: flex;
-    flex-direction: column;
-    padding: $iui-baseline $iui-m;
-    box-sizing: border-box;
-    height: 100%;
-    overflow: auto;
-  }
 }
-
 
 .ec3w-templates-list-container {
   display: flex;
@@ -58,6 +48,11 @@
     border-bottom: 1px solid var(--iui-color-background-4);
     padding-bottom: $iui-baseline;
     flex-wrap: wrap;
+    .ec3w-toolbar-left {
+      display: flex;
+      gap: $iui-s;
+      flex-wrap: wrap;
+    }
   }
 
   .ec3w-search-bar-container {
