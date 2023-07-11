@@ -64,6 +64,24 @@ describe("TreeRenderer", () => {
     expect(queryByRole("menu")).to.be.null;
   });
 
+  it("renders context menu without size if item is `null`", async () => {
+    const { user, getByText, queryByRole, getByRole } = renderWithUser(
+      <TreeRenderer
+        {...initialProps}
+        contextMenuItems={[
+          () => null,
+        ]}
+      />
+    );
+
+    const nodeElement = await waitFor(() => getByText("Test Node"));
+    await user.pointer({ keys: "[MouseRight>]", target: nodeElement });
+
+    const item = await waitFor(() => getByRole("menu"));
+    expect(item.clientWidth).to.be.eq(0);
+    expect(item.clientHeight).to.be.eq(0);
+  });
+
   it("closes context menu when item is clicked", async () => {
     const selectStub = sinon.stub();
     const { user, getByText, queryByText } = renderWithUser(
