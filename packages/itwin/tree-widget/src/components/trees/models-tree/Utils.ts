@@ -435,7 +435,7 @@ function createNonContentModelsSpecification({ elementClassSpecification, showEm
   const modelHasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
 
   const hasNoContent = `json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") = NULL AND json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") = NULL`;
-  const instanceFilter = `(${partitionFilter}) AND NOT this.IsPrivate AND ${hasNoContent} ${showEmptyModels ? "" : `AND ${modelHasElements}`}`;
+  const instanceFilter = `(${partitionFilter}) AND NOT this.IsPrivate AND ${hasNoContent}${showEmptyModels ? "" : ` AND ${modelHasElements}`}`;
 
   return {
     specType: "InstanceNodesOfSpecificClasses",
@@ -475,7 +475,7 @@ function createContentModelsSpecification({ elementClassSpecification, showEmpty
   const modelHasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
 
   const hasContent = `json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") <> NULL OR json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") <> NULL`;
-  const instanceFilter = `(${partitionFilter}) AND NOT this.IsPrivate AND (${hasContent}) ${showEmptyModels ? "" : `AND ${modelHasElements}`}`;
+  const instanceFilter = `(${partitionFilter}) AND NOT this.IsPrivate AND (${hasContent})${showEmptyModels ? "" : ` AND ${modelHasElements}`}`;
 
   return {
     specType: "InstanceNodesOfSpecificClasses",
