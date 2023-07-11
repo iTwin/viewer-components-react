@@ -888,7 +888,7 @@ Object {
           "groupByClass": false,
           "groupByLabel": false,
           "hasChildren": "Unknown",
-          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") = NULL AND json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") = NULL ",
+          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") = NULL AND json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") = NULL",
           "relatedInstances": Array [
             Object {
               "alias": "partition",
@@ -920,7 +920,7 @@ Object {
           "groupByLabel": false,
           "hasChildren": "Unknown",
           "hideNodesInHierarchy": true,
-          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") <> NULL OR json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") <> NULL) ",
+          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") <> NULL OR json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") <> NULL)",
           "relatedInstances": Array [
             Object {
               "alias": "partition",
@@ -1913,7 +1913,7 @@ Object {
           "groupByClass": false,
           "groupByLabel": false,
           "hasChildren": "Unknown",
-          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") = NULL AND json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") = NULL ",
+          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") = NULL AND json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") = NULL",
           "relatedInstances": Array [
             Object {
               "alias": "partition",
@@ -1965,7 +1965,7 @@ Object {
           "groupByLabel": false,
           "hasChildren": "Unknown",
           "hideNodesInHierarchy": true,
-          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") <> NULL OR json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") <> NULL) ",
+          "instanceFilter": "(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, \\"$.Subject.Model.TargetPartition\\") = printf(\\"0x%x\\", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, \\"$.PhysicalPartition.Model.Content\\") <> NULL OR json_extract(partition.JsonProperties, \\"$.GraphicalPartition3d.Model.Content\\") <> NULL)",
           "relatedInstances": Array [
             Object {
               "alias": "partition",
