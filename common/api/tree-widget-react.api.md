@@ -264,6 +264,7 @@ export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
 export interface ModelsTreeHierarchyConfiguration {
     elementClassSpecification?: SingleSchemaClassSpecification;
     enableElementsClassGrouping?: ClassGroupingOption;
+    showEmptyModels?: boolean;
 }
 
 // @public
