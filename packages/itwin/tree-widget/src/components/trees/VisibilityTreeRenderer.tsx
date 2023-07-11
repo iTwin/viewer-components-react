@@ -23,10 +23,19 @@ import type { VisibilityTreeFilterInfo } from "./Common";
 const EXPANSION_TOGGLE_WIDTH = 24;
 
 /**
- * Props for visibility tree node renderer.
+ * Props for visibility tree renderer.
  * @public
  */
 export interface VisibilityTreeRendererProps {
+  /** Props for single node renderer. */
+  nodeRendererProps: VisibilityTreeNodeRendererProps;
+}
+
+/**
+ * Props for visibility tree node renderer.
+ * @public
+ */
+export interface VisibilityTreeNodeRendererProps {
   /**
    * Specifies whether the icon at the left of the node label should be rendered.
    */
@@ -51,17 +60,16 @@ export interface VisibilityTreeRendererProps {
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
  * @public
  */
-export const createVisibilityTreeRenderer = (visibilityTreeRendererProps: VisibilityTreeRendererProps) => {
-  const nodeRenderer = createVisibilityTreeNodeRenderer(visibilityTreeRendererProps);
+export function createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps) {
   return function VisibilityTreeRenderer(props: TreeRendererProps) {
     return (
       <TreeRenderer
         {...props}
-        nodeRenderer={nodeRenderer}
+        nodeRenderer={createVisibilityTreeNodeRenderer(nodeRendererProps)}
       />
     );
   };
-};
+}
 
 const imageLoader = new TreeImageLoader();
 
@@ -69,7 +77,7 @@ const imageLoader = new TreeImageLoader();
  * Creates node renderer which renders node with eye checkbox.
  * @public
  */
-export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => {
+export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps) {
   return function VisibilityTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
     const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? EXPANSION_TOGGLE_WIDTH : 0);
     return (
@@ -87,32 +95,32 @@ export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, disableRoot
       />
     );
   };
-};
+}
 
 /**
  * Checkbox renderer that renders an eye.
  * @public
  */
-export const VisibilityTreeNodeCheckbox = (props: NodeCheckboxRenderProps) => (
-  <Checkbox
+export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
+  return <Checkbox
     className="visibility-tree-checkbox"
     variant="eyeball"
     checked={props.checked}
     onChange={(e) => props.onChange(e.currentTarget.checked)}
     disabled={props.disabled}
     title={props.title}
-  />
-);
+  />;
+}
 
 /**
  * Filters data provider used in supplied node loader and invokes onFilterApplied when filtering is completed.
  * @public
  */
-export const useVisibilityTreeFiltering = (
+export function useVisibilityTreeFiltering(
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>,
   filterInfo?: VisibilityTreeFilterInfo,
   onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void,
-) => {
+) {
   const { filter, activeMatchIndex } = filterInfo ?? { filter: undefined, activeMatchIndex: undefined };
   const {
     filteredNodeLoader,
@@ -130,7 +138,7 @@ export const useVisibilityTreeFiltering = (
   );
 
   return { filteredNodeLoader, isFiltering, nodeHighlightingProps };
-};
+}
 
 /**
  * Properties for [[VisibilityTreeNoFilteredData]] component.
