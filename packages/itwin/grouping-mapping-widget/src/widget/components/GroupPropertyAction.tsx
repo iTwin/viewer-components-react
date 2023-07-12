@@ -96,6 +96,7 @@ export const GroupPropertyAction = ({
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
+  const [oldPropertyName, setOldPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
   const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
@@ -114,6 +115,7 @@ export const GroupPropertyAction = ({
     })
   );
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -187,6 +189,7 @@ export const GroupPropertyAction = ({
           );
 
           setPropertyName(response.propertyName);
+          setOldPropertyName(response.propertyName);
           setDataType(response.dataType);
           setQuantityType(response.quantityType);
           const properties = findProperties(response.ecProperties, propertiesMetaData);
@@ -205,11 +208,21 @@ export const GroupPropertyAction = ({
     void generateProperties();
   }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
 
-  const onSave = async () => {
+  const onSaveClick = () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
       return;
     }
+    if (oldPropertyName != propertyName && oldPropertyName != "") {
+      setShowSaveModal(true);
+    }
+    else {
+      console.log("test");
+      onSave();
+    }
+  }
+
+  const onSave = async () => {
     try {
       setIsLoading(true);
       const accessToken = await getAccessToken();
@@ -366,7 +379,7 @@ export const GroupPropertyAction = ({
         </Fieldset>
       </div>
       <ActionPanel
-        onSave={onSave}
+        onSave={onSaveClick}
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
@@ -509,6 +522,33 @@ export const GroupPropertyAction = ({
             styleType="high-visibility"
           >
             Close
+          </Button>
+        </ModalButtonBar>
+      </Modal>
+      <Modal
+        title='Confirm'
+        modalRootId='grouping-mapping-widget'
+        isOpen={showSaveModal}
+        onClose={() => {
+          setShowSaveModal(false);
+        }}
+      >
+        <div className="gmw-save-modal-body-text">
+          <Text variant="leading" as="h3">
+            Are you sure you want to save this property with a new name? You may need to update this name in Custom Calculation formulas.
+          </Text>
+        </div>
+        <ModalButtonBar>
+          <Button styleType='high-visibility' onClick={onSave}>
+            Save
+          </Button>
+          <Button
+            onClick={() => {
+              setShowSaveModal(false);
+            }}
+            styleType='default'
+          >
+            Cancel
           </Button>
         </ModalButtonBar>
       </Modal>
