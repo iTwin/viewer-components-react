@@ -15,13 +15,13 @@ export const Validators = {
   OnlyBeginsWithLetterOrUnderscore: {
     message: "Name can only start with a letter or underscore.",
     rule: (val: string) => {
-      return !val.match(/^[\W\d]+/i);
+      return !val.match(/^[\p{Nd}\p{S}\p{Z}\p{Po}]+/iu);
     },
   },
   FollowedByLettersUnderscoresAndDigits: {
     message: "Name can only contain letters, underscores, or digits",
     rule: (val: string) => {
-      return !val.match(/\W+/i);
+      return !val.match(/[\p{S}\p{Z}\p{Po}]+/iu);
     },
   },
   CharLimit: {
