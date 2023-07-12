@@ -24,7 +24,7 @@ import { ModelsTreeNodeType } from "../../../components/trees/models-tree/Models
 import { createRuleset } from "../../../components/trees/models-tree/Utils";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement } from "../../IModelUtils";
-import { deepEquals, mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
+import { deepEquals, mockPresentationManager, mockViewport, renderWithUser, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
 import { ClassGroupingOption } from "../../../components/trees/Common";
 
@@ -127,6 +127,26 @@ describe("ModelsTree", () => {
         const { getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock.object} activeView={mockViewport().object} />);
         const node = await waitFor(() => getByTestId("tree-node"));
         expect(node.className.includes("disable-expander")).to.be.true;
+      });
+
+      it("renders context menu", async () => {
+        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
+        visibilityHandlerMock.setup(async (x) => x.getVisibilityStatus(moq.It.isAny())).returns(async () => ({ state: "hidden" }));
+
+        const { user, getByText, queryByText } = renderWithUser(<ModelsTree
+          {...sizeProps}
+          iModel={imodelMock.object}
+          modelsVisibilityHandler={visibilityHandlerMock.object}
+          activeView={mockViewport().object}
+          contextMenuItems={[
+            () => <div>Test Menu Item</div>,
+          ]}
+        />);
+
+        const node = await waitFor(() => getByText("test-node"));
+        await user.pointer({ keys: "[MouseRight>]", target: node });
+
+        await waitFor(() => expect(queryByText("Test Menu Item")).to.not.be.null);
       });
 
       it("renders nodes as unchecked when they're not displayed", async () => {

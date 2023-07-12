@@ -13,21 +13,22 @@ public;CategoryTreeProps
 public;CategoryVisibilityHandler 
 public;CategoryVisibilityHandlerParams
 public;ClassGroupingOption
+public;ContextMenuItemProps
 internal;createRuleset(props: CreateRulesetProps): Ruleset
 internal;CreateRulesetProps = Omit
 internal;createSearchRuleset(props: CreateSearchRulesetProps): Ruleset
 internal;CreateSearchRulesetProps = Omit
 public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps) => JSX.Element
-public;createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps): (props: TreeRendererProps) => JSX.Element
+public;createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps_2) => JSX.Element
 alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element
 alpha;ExternalSourcesTreeComponent:
-alpha;ExternalSourcesTreeProps = BaseTreeProps
+alpha;ExternalSourcesTreeProps = BaseTreeProps & TreeContextMenuProps
 public;hideAllCategories(categories: string[], viewport: Viewport): Promise
 public;hideAllModels(models: string[], viewport: Viewport): Promise
 public;IModelContentTree: (props: IModelContentTreeProps) => JSX.Element
 public;IModelContentTreeComponent:
 public;IModelContentTreeComponentProps = Omit
-public;IModelContentTreeProps = BaseTreeProps
+public;IModelContentTreeProps = BaseTreeProps & TreeContextMenuProps
 public;invertAllCategories(categories: CategoryInfo[], viewport: Viewport): Promise
 public;invertAllModels(models: string[], viewport: Viewport): Promise
 public;IVisibilityHandler 
@@ -49,7 +50,13 @@ public;showAllCategories(categories: string[], viewport: Viewport): Promise
 public;showAllModels(models: string[], viewport: Viewport): Promise
 internal;SubjectModelIdsCache
 public;toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise
+public;TreeContextMenuItem({ id, children, title, onSelect }: PropsWithChildren
+public;TreeContextMenuItemProps
+public;TreeContextMenuProps
 public;TreeDefinition
+public;TreeRenderer({ contextMenuItems, nodeRenderer, ...restProps }: TreeRendererProps): JSX.Element
+public;TreeRendererBaseProps = TreeContextMenuProps
+public;TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps
 public;TreeWidget
 public;TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element | null
 public;TreeWidgetComponentProps
@@ -57,6 +64,7 @@ public;TreeWidgetId = "tree-widget-react:trees"
 public;TreeWidgetOptions
 public;TreeWidgetUiItemsProvider 
 internal;useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[]
+internal;useContextMenu({ contextMenuItems }: TreeContextMenuProps):
 public;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
 public;VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map
 public;VisibilityStatus
@@ -67,5 +75,5 @@ public;VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps): JSX.Element
 public;VisibilityTreeNodeRendererProps
 public;VisibilityTreeNoFilteredData(props: VisibilityTreeNoFilteredDataProps): JSX.Element
 public;VisibilityTreeNoFilteredDataProps
-public;VisibilityTreeRendererProps
+public;VisibilityTreeRendererProps 
 public;VisibilityTreeSelectionPredicate = (node: TreeNodeItem) => boolean

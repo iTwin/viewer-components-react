@@ -17,8 +17,11 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
+import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
+import type { PropsWithChildren } from 'react';
+import type { ReactNode } from 'react';
 import type { Ruleset } from '@itwin/presentation-common';
 import type { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
 import type { SingleSchemaClassSpecification } from '@itwin/presentation-common';
@@ -26,9 +29,10 @@ import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import { Subscription } from '@itwin/components-react';
 import type { TreeCheckboxStateChangeEventArgs } from '@itwin/components-react';
+import type { TreeModelNode } from '@itwin/components-react';
 import type { TreeNodeItem } from '@itwin/components-react';
 import type { TreeNodeRendererProps } from '@itwin/components-react';
-import type { TreeRendererProps } from '@itwin/components-react';
+import type { TreeRendererProps as TreeRendererProps_2 } from '@itwin/components-react';
 import type { TreeSelectionModificationEventArgs } from '@itwin/components-react';
 import type { TreeSelectionReplacementEventArgs } from '@itwin/components-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
@@ -95,7 +99,7 @@ export interface CategoryInfo {
 export function CategoryTree(props: CategoryTreeProps): JSX.Element;
 
 // @public
-export interface CategoryTreeProps extends BaseFilterableTreeProps {
+export interface CategoryTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
     activeView: Viewport;
     allViewports?: boolean;
     categories: CategoryInfo[];
@@ -117,13 +121,13 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     // (undocumented)
     enableSubCategory(key: string, enabled: boolean): void;
     // (undocumented)
-    getCategoryVisibility(id: string): "visible" | "hidden";
+    getCategoryVisibility(id: string): "hidden" | "visible";
     // (undocumented)
     static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey): string;
     // (undocumented)
     getParent(key: string): CategoryInfo | undefined;
     // (undocumented)
-    getSubCategoryVisibility(id: string): "visible" | "hidden";
+    getSubCategoryVisibility(id: string): "hidden" | "visible";
     // (undocumented)
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus;
     // (undocumented)
@@ -151,6 +155,12 @@ export enum ClassGroupingOption {
     YesWithCounts = 2
 }
 
+// @public
+export interface ContextMenuItemProps {
+    // (undocumented)
+    node: TreeModelNode;
+}
+
 // @internal (undocumented)
 export function createRuleset(props: CreateRulesetProps): Ruleset;
 
@@ -169,7 +179,7 @@ export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "e
 export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
 
 // @public
-export function createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps): (props: TreeRendererProps) => JSX.Element;
+export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps_2) => JSX.Element;
 
 // @alpha
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
@@ -182,7 +192,7 @@ export const ExternalSourcesTreeComponent: {
 };
 
 // @alpha
-export type ExternalSourcesTreeProps = BaseTreeProps;
+export type ExternalSourcesTreeProps = BaseTreeProps & TreeContextMenuProps;
 
 // @public
 export function hideAllCategories(categories: string[], viewport: Viewport): Promise<void>;
@@ -204,7 +214,7 @@ export const IModelContentTreeComponent: {
 export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
 
 // @public
-export type IModelContentTreeProps = BaseTreeProps;
+export type IModelContentTreeProps = BaseTreeProps & TreeContextMenuProps;
 
 // @public
 export function invertAllCategories(categories: CategoryInfo[], viewport: Viewport): Promise<void>;
@@ -274,7 +284,7 @@ export enum ModelsTreeNodeType {
 }
 
 // @public
-export interface ModelsTreeProps extends BaseFilterableTreeProps {
+export interface ModelsTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
     activeView: Viewport;
     // @alpha
     enableHierarchyAutoUpdate?: boolean;
@@ -374,12 +384,37 @@ export class SubjectModelIdsCache {
 export function toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise<void>;
 
 // @public
+export function TreeContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<TreeContextMenuItemProps>): JSX.Element;
+
+// @public
+export interface TreeContextMenuItemProps {
+    id: string;
+    onSelect: () => void;
+    title?: string;
+}
+
+// @public
+export interface TreeContextMenuProps {
+    // (undocumented)
+    contextMenuItems?: Array<(props: ContextMenuItemProps) => ReactNode>;
+}
+
+// @public
 export interface TreeDefinition {
     getLabel: () => string;
     id: string;
     render: () => React.ReactNode;
     shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
 }
+
+// @public
+export function TreeRenderer({ contextMenuItems, nodeRenderer, ...restProps }: TreeRendererProps): JSX.Element;
+
+// @public
+export type TreeRendererBaseProps = TreeContextMenuProps;
+
+// @public
+export type TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps;
 
 // @public
 export class TreeWidget {
@@ -423,6 +458,12 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
 
 // @internal
 export function useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[];
+
+// @internal (undocumented)
+export function useContextMenu({ contextMenuItems }: TreeContextMenuProps): {
+    onContextMenu: (e: MouseEvent_2, node: TreeModelNode) => void;
+    renderContextMenu: () => JSX.Element | null;
+};
 
 // @public
 export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void): {
@@ -496,7 +537,7 @@ export interface VisibilityTreeNoFilteredDataProps {
 }
 
 // @public
-export interface VisibilityTreeRendererProps {
+export interface VisibilityTreeRendererProps extends TreeRendererBaseProps {
     nodeRendererProps: VisibilityTreeNodeRendererProps;
 }
 

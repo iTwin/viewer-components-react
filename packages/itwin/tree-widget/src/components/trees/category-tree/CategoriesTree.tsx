@@ -19,6 +19,7 @@ import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseFilterableTreeProps } from "../Common";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
+import type { TreeContextMenuProps } from "../ContextMenu";
 
 const PAGING_SIZE = 20;
 
@@ -32,7 +33,7 @@ export const RULESET_CATEGORIES: Ruleset = require("./Categories.json"); // esli
  * Properties for the [[CategoryTree]] component
  * @public
  */
-export interface CategoryTreeProps extends BaseFilterableTreeProps {
+export interface CategoryTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
   /** Flag for accommodating all viewports */
   allViewports?: boolean;
   /** Active viewport */
@@ -81,6 +82,7 @@ export function CategoryTree(props: CategoryTreeProps) {
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const treeRenderer = createVisibilityTreeRenderer({
+    contextMenuItems: props.contextMenuItems,
     nodeRendererProps: {
       iconsEnabled: false,
       descriptionEnabled: true,

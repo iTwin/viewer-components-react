@@ -4,6 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 export * from "./Common";
+export * from "./ContextMenu";
+export * from "./TreeRenderer";
 export * from "./VisibilityTreeEventHandler";
 export * from "./VisibilityTreeRenderer";
 

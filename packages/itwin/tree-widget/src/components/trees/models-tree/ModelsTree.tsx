@@ -20,6 +20,7 @@ import type { SingleSchemaClassSpecification } from "@itwin/presentation-common"
 import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../Common";
 import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
+import type { TreeContextMenuProps } from "../ContextMenu";
 
 const PAGING_SIZE = 20;
 
@@ -40,10 +41,10 @@ export interface ModelsTreeHierarchyConfiguration {
 }
 
 /**
- * Props for [[ModelsTree]] component
+ * Props for [[ModelsTree]] component.
  * @public
  */
-export interface ModelsTreeProps extends BaseFilterableTreeProps {
+export interface ModelsTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
   /**
    * Predicate which indicates whether node can be selected or no
    */
@@ -99,6 +100,7 @@ export function ModelsTree(props: ModelsTreeProps) {
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const treeRenderer = createVisibilityTreeRenderer({
+    contextMenuItems: props.contextMenuItems,
     nodeRendererProps: {
       iconsEnabled: true,
       descriptionEnabled: false,
