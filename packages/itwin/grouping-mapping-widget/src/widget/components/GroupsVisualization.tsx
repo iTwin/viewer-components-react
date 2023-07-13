@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Group } from "@itwin/insights-client";
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import {
   getHiliteIdsFromGroups,
@@ -202,21 +202,21 @@ export const GroupsVisualization = ({
 
   return (
     <>
-    <BlockingOverlay isVisible={isLoadingQuery} />
-    <div className="gmw-groups-vis-container">
-      <GroupVisualizationActions
-        isLoadingQuery={isLoadingQuery}
-        showAll={showAll}
-        hideAll={hideAll}
-      />
-      <Groupings
-        onClickGroupModify={onModify}
-        onClickAddGroup={onAddGroup}
-        actionButtonRenderers={groupActionButtonRenderers}
-        {...rest}
-        disableActions={isLoadingQuery}
-      />
-    </div>
+      <BlockingOverlay isVisible={isLoadingQuery} />
+      <div className="gmw-groups-vis-container">
+        <GroupVisualizationActions
+          isLoadingQuery={isLoadingQuery}
+          showAll={showAll}
+          hideAll={hideAll}
+        />
+        <Groupings
+          onClickGroupModify={onModify}
+          onClickAddGroup={onAddGroup}
+          actionButtonRenderers={groupActionButtonRenderers}
+          {...rest}
+          disableActions={isLoadingQuery}
+        />
+      </div>
     </>
   );
 };
