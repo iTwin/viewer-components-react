@@ -79,7 +79,7 @@ const toggleExtraction = async (
   mapping: Mapping
 ) => {
   try {
-    const newState = mapping.extractionEnabled;
+    const newState = !mapping.extractionEnabled;
     const accessToken = await getAccessToken();
     await mappingsClient.updateMapping(accessToken, iModelId, mapping.id, {
       extractionEnabled: newState,
