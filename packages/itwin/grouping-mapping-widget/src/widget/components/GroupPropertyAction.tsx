@@ -66,6 +66,7 @@ import {
   findProperties,
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "./viewerUtils";
+import SaveModal from "./SaveModal";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -208,19 +209,21 @@ export const GroupPropertyAction = ({
     void generateProperties();
   }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
 
-  const onSaveClick = () => {
+  const handleSaveClick = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
       return;
     }
-    if (oldPropertyName != propertyName && oldPropertyName != "") {
+    if (oldPropertyName !== propertyName && oldPropertyName !== "") {
       setShowSaveModal(true);
+    } else {
+      await onSave();
     }
-    else {
-      console.log("test");
-      onSave();
-    }
-  }
+  };
+
+  const handleCloseSaveModal = () => {
+    setShowSaveModal(false);
+  };
 
   const onSave = async () => {
     try {
@@ -379,7 +382,7 @@ export const GroupPropertyAction = ({
         </Fieldset>
       </div>
       <ActionPanel
-        onSave={onSaveClick}
+        onSave={handleSaveClick}
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
@@ -525,33 +528,11 @@ export const GroupPropertyAction = ({
           </Button>
         </ModalButtonBar>
       </Modal>
-      <Modal
-        title='Confirm'
-        modalRootId='grouping-mapping-widget'
-        isOpen={showSaveModal}
-        onClose={() => {
-          setShowSaveModal(false);
-        }}
-      >
-        <div className="gmw-save-modal-body-text">
-          <Text variant="leading" as="h3">
-            Are you sure you want to save this property with a new name? You may need to update this name in Custom Calculation formulas.
-          </Text>
-        </div>
-        <ModalButtonBar>
-          <Button styleType='high-visibility' onClick={onSave}>
-            Save
-          </Button>
-          <Button
-            onClick={() => {
-              setShowSaveModal(false);
-            }}
-            styleType='default'
-          >
-            Cancel
-          </Button>
-        </ModalButtonBar>
-      </Modal>
+      <SaveModal
+        onSave={onSave}
+        onClose={handleCloseSaveModal}
+        showSaveModal={showSaveModal}
+      />
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
           <HorizontalTile
