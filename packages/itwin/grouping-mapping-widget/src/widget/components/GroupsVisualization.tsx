@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Group } from "@itwin/insights-client";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import {
   getHiliteIdsFromGroups,
@@ -25,6 +25,7 @@ import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { BlockingOverlay } from "./BlockingOverlay";
 
 export interface GroupsVisualizationProps extends GroupingProps {
   isNonEmphasizedSelectable?: boolean;
@@ -42,6 +43,7 @@ export const GroupsVisualization = ({
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
+  const firstUpdate = useRef(true);
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
   const {
     hilitedElementsQueryCache,
@@ -89,6 +91,10 @@ export const GroupsVisualization = ({
 
   useEffect(() => {
     const visualize = async () => {
+      if (firstUpdate.current) {
+        firstUpdate.current = false;
+        return;
+      }
       if (groups.length > 0 && showGroupColor) {
         await visualizeGroupColorsWrapper();
       } else {
@@ -195,6 +201,8 @@ export const GroupsVisualization = ({
   ].flat(), [groups, hideSingleGroupWrapper, isLoadingQuery, showGroup, showGroupColor]);
 
   return (
+    <>
+    <BlockingOverlay isVisible={isLoadingQuery} />
     <div className="gmw-groups-vis-container">
       <GroupVisualizationActions
         isLoadingQuery={isLoadingQuery}
@@ -209,5 +217,6 @@ export const GroupsVisualization = ({
         disableActions={isLoadingQuery}
       />
     </div>
+    </>
   );
 };
