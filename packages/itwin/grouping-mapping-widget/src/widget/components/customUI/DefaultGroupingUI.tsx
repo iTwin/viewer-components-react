@@ -27,7 +27,7 @@ export const defaultGroupingUI: GroupingMappingCustomUI[] = [
   },
   {
     name: "Manual",
-    displayLabel: "Manual",
+    displayLabel: "Manual Query",
     type: GroupingMappingCustomUIType.Grouping,
     icon: <SvgDraw />,
     uiComponent: ManualGroupingCustomUI,
