@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Refixed unicode bug to meet OData simple identifier requirement",
+      "comment": "Fixed unicode bug to meet OData simple identifier requirement",
       "type": "patch"
     }
   ],
