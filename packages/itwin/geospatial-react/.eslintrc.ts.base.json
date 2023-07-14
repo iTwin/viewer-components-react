@@ -1,0 +1,47 @@
+{
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "react-app",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
+  "plugins": ["simple-import-sort", "@typescript-eslint", "deprecation"],
+  "rules": {
+    "no-console": "off",
+    "import/prefer-default-export": "off",
+    "radix": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/explicit-member-accessibility": "off",
+    "react/no-unescaped-entities": "off",
+    "react/display-name": "off",
+    "react/prop-types": "off",
+    "@typescript-eslint/interface-name-prefix": "off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [1, { "ignoreRestSiblings": true }],
+    "deprecation/deprecation": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        "printWidth": 120,
+        "endOfLine": "auto"
+      }
+    ]
+  }
+}

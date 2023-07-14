@@ -1,0 +1,93 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+.feedback {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 2px solid var(--iui-color-border);
+  border-top: 0;
+}
+
+.geospatial-widget {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  width: 100%;
+
+  > .toggle-switch {
+    padding: 4px;
+  }
+
+  > .grid-holding-tab {
+    height: 100%;
+
+    > .geospatial-widget-property-grid {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+
+      > .iui-tabs-content {
+        padding: 0;
+        border: 2px solid var(--iui-color-border);
+        overflow: auto;
+
+        .components-property-grid-wrapper {
+          height: 100% !important;
+        }
+
+        .reality-datum {
+          padding-left: 20px;
+        }
+      }
+
+      .components-property-record--horizontal {
+        border-bottom: 1px solid var(--iui-color-border-subtle);
+      }
+
+      .nested-border-bottom .components-property-record--horizontal {
+        border-bottom: 0;
+      }
+    }
+  }
+
+  mark {
+    color: var(--iui-color-icon-warning);
+    background: 0;
+  }
+
+  .visibility-grid-container {
+    display: flex;
+    flex-direction: row;
+    padding: 0 25px 10px 15px;
+
+    > .icon {
+      padding-top: 15px;
+    }
+
+    > .itwin-gcrs-property-grid {
+      flex: 1 1 auto;
+      height: 100%;
+      padding: 0 2px;
+    }
+  }
+
+  .icon-visibility,
+  .icon-visibility-hide-2 {
+    padding-right: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .icon-visibility {
+    color: var(--iui-color-text-accent);
+  }
+
+  .icon-visibility-hide-2 {
+    color: var(--iui-color-text);
+  }
+}

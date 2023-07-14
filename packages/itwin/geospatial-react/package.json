@@ -1,0 +1,76 @@
+{
+  "name": "geospatial-react",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
+  "module": "lib/esm/index.js",
+  "types": "lib/esm/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "start": "npm run copy:esm && tsc -w",
+    "build": "npm run copy:esm && npm run build:esm",
+    "build:esm": "tsc 1>&2 --module ES2020 --outDir lib/esm",
+    "copy:esm": "cpx \"./src/**/*.*css\" ./lib/esm",
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "@itwin/itwinui-icons-react": "^2.2.0",
+    "@itwin/itwinui-react": "^2.11.7",
+    "wkt-parser": "^1.3.3"
+  },
+  "devDependencies": {
+    "@itwin/appui-abstract": "^4.0.4",
+    "@itwin/appui-layout-react": "^4.2.1",
+    "@itwin/appui-react": "^4.2.1",
+    "@itwin/build-tools": "^4.0.4",
+    "@itwin/components-react": "^4.2.1",
+    "@itwin/core-bentley": "^4.0.4",
+    "@itwin/core-common": "^4.0.4",
+    "@itwin/core-frontend": "^4.0.4",
+    "@itwin/core-geometry": "^4.0.4",
+    "@itwin/core-orbitgt": "^4.0.4",
+    "@itwin/core-quantity": "^4.0.4",
+    "@itwin/core-react": "^4.2.1",
+    "@itwin/core-telemetry": "^4.0.4",
+    "@itwin/frontend-devtools": "^4.0.4",
+    "@itwin/imodel-components-react": "^4.2.1",
+    "@itwin/reality-data-client": "^1.1.0",
+    "@types/react": "^18.2.14",
+    "cpx2": "^4.2.3",
+    "prettier": "^3.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^7.2.9",
+    "redux": "^4.2.1",
+    "typescript": "^5.1.6"
+  },
+  "peerDependencies": {
+    "@itwin/appui-abstract": "^4.0.4",
+    "@itwin/appui-react": "^4.2.1",
+    "@itwin/components-react": "^4.2.1",
+    "@itwin/core-common": "^4.0.4",
+    "@itwin/core-frontend": "^4.0.4",
+    "@itwin/core-react": "^4.2.1",
+    "@itwin/frontend-devtools": "^4.0.4",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      ".eslintrc.ts.json"
+    ],
+    "rules": {
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
+    }
+  },
+  "prettier": {
+    "printWidth": 120
+  }
+}
