@@ -51,10 +51,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    */
   activeView: Viewport;
   /**
-   * Ref to the root HTML element used by this component
-   */
-  rootElementRef?: React.Ref<HTMLDivElement>;
-  /**
    * Configuration options for the hierarchy loaded in the component.
    */
   hierarchyConfig?: ModelsTreeHierarchyConfiguration;
@@ -116,7 +112,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }, []);
 
   return (
-    <div className="tree-widget-visibility-tree-base" ref={props.rootElementRef}>
+    <div className="tree-widget-visibility-tree-base">
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}
