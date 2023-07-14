@@ -20,6 +20,7 @@ import type { PropertyRecord } from '@itwin/appui-abstract';
 import { PropertyRecordDataFiltererBase } from '@itwin/components-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
+import { Ref } from 'react';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
@@ -307,6 +308,9 @@ export function useNullValueSetting(): {
 
 // @internal (undocumented)
 export function useNullValueSettingContext(): NullValueSettingContextValue;
+
+// @public
+export function usePropertyGridTransientState<T extends Element>(): Ref<T>;
 
 // (No @packageDocumentation comment for this package)
 

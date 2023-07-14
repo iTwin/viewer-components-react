@@ -4,9 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { createRef } from "react";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { render } from "@testing-library/react";
+import * as usePropertyGridTransientStateModule from "../hooks/UsePropertyGridTransientState";
 import * as propertyGridComponent from "../PropertyGridComponent";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridUiItemsProvider } from "../PropertyGridUiItemsProvider";
@@ -40,6 +42,8 @@ describe("PropertyGridUiItemsProvider", () => {
   });
 
   it("renders property grid component", () => {
+    const ref = createRef<HTMLDivElement>();
+    sinon.stub(usePropertyGridTransientStateModule, "usePropertyGridTransientState").callsFake(() => ref);
     const propertyGridComponentStub = sinon.stub(propertyGridComponent, "PropertyGridComponent").returns(<></>);
     const provider = new PropertyGridUiItemsProvider();
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);

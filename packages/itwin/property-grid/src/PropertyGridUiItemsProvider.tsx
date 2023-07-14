@@ -3,8 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import "./PropertyGridUiItemsProvider.scss";
 import { StagePanelLocation, StagePanelSection, StageUsage, WidgetState } from "@itwin/appui-react";
 import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
+import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState";
 import { PropertyGridComponent, PropertyGridComponentId } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
 
@@ -47,7 +49,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     return [{
       id: PropertyGridComponentId,
       label: PropertyGridManager.translate("widget-label"),
-      content: <PropertyGridComponent {...propertyGridProps} />,
+      content: <PropertyGridWidget {...propertyGridProps} />,
       defaultState: WidgetState.Hidden,
       icon: <SvgInfoCircular />,
       priority: defaultPanelWidgetPriority,
@@ -55,3 +57,10 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
   }
 }
 
+function PropertyGridWidget(props: PropertyGridComponentProps) {
+  const ref = usePropertyGridTransientState<HTMLDivElement>();
+
+  return <div ref={ref} className="property-grid-widget">
+    <PropertyGridComponent {...props} />
+  </div>;
+}
