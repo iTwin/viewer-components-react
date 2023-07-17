@@ -17,8 +17,7 @@ import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { VisibilityTreeFilterInfo } from "../Common";
+import type { BaseFilterableTreeProps } from "../Common";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
 
 const PAGING_SIZE = 20;
@@ -33,28 +32,11 @@ export const RULESET_CATEGORIES: Ruleset = require("./Categories.json"); // esli
  * Properties for the [[CategoryTree]] component
  * @public
  */
-export interface CategoryTreeProps {
+export interface CategoryTreeProps extends BaseFilterableTreeProps {
   /** Flag for accommodating all viewports */
   allViewports?: boolean;
   /** Active viewport */
   activeView: Viewport;
-  /**
-   * An IModel to pull data from
-   */
-  iModel: IModelConnection;
-  /** Width of the component */
-  width: number;
-  /** Height of the component */
-  height: number;
-  /**
-   * Information for tree filtering.
-   * @alpha
-   */
-  filterInfo?: VisibilityTreeFilterInfo;
-  /**
-   * Callback invoked when tree is filtered.
-   */
-  onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
   /**
    * Available iModel categories
    */
@@ -98,7 +80,13 @@ export function CategoryTree(props: CategoryTreeProps) {
   }), [filteredNodeLoader, visibilityHandler]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = createVisibilityTreeRenderer({ iconsEnabled: false, descriptionEnabled: true, levelOffset: 10 });
+  const treeRenderer = createVisibilityTreeRenderer({
+    nodeRendererProps: {
+      iconsEnabled: false,
+      descriptionEnabled: true,
+      levelOffset: 10,
+    },
+  });
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
   const filterApplied = filteredNodeLoader !== nodeLoader;
 
@@ -114,7 +102,7 @@ export function CategoryTree(props: CategoryTreeProps) {
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}
-        selectionMode={SelectionMode.None}
+        selectionMode={props.selectionMode ?? SelectionMode.None}
         eventsHandler={eventHandler}
         treeRenderer={treeRenderer}
         descriptionsEnabled={true}

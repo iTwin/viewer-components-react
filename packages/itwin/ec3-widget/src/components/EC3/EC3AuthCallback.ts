@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { EC3ConfigProps } from "./EC3Config";
-import { EC3Config } from "./EC3Config";
+import type { EC3ConfigPropsWithRedirectUri } from "./EC3Config";
+import { getDefaultEC3Uri } from "./EC3Config";
 import type { EC3Token } from "./EC3Token";
 
 /* This function must be called in EC3 authentication redirect path.
@@ -16,27 +16,29 @@ import type { EC3Token } from "./EC3Token";
 *   });
 * } else {
 */
-export function handleEC3AuthCallback(props: EC3ConfigProps) {
-  const MILI_SECONDS = 1000;
-  const EXPIRATRION_REDUCTION = 15 * 60;
+
+export type EC3AuthCallbackConfigProps = Pick<EC3ConfigPropsWithRedirectUri, "clientId" | "redirectUri" | "ec3Uri">;
+
+export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source: string = "ec3-auth") {
+  const MILLI_SECONDS = 1000;
+  const ec3Uri = getDefaultEC3Uri(ec3Config.ec3Uri);
 
   async function exchangeToken() {
-    const config = new EC3Config(props);
     const code = new URL(window.location.href).searchParams.get("code");
     const prop = {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: `client_id=${config.clientId}&grant_type=authorization_code&code=${code}`,
+      body: `client_id=${ec3Config.clientId}&grant_type=authorization_code&code=${code}&redirect_uri=${ec3Config.redirectUri}`,
     };
 
-    const response = await fetch(`${config.ec3Uri}api/oauth2/token`, prop);
+    const response = await fetch(`${ec3Uri}api/oauth2/token`, prop);
     const tokenResponse = await response.json();
     const token: EC3Token = {
       token: tokenResponse.access_token,
-      exp: Date.now() + (tokenResponse.expires_in - EXPIRATRION_REDUCTION) * MILI_SECONDS,
-      source: "ec3-auth",
+      exp: Date.now() + (tokenResponse.expires_in * MILLI_SECONDS),
+      source,
     };
 
     const parentWindow = window.opener as Window;

@@ -3,10 +3,14 @@
   "element-list": {
     "title": "Selected Elements"
   },
-  "tools": {
-    "navigateUpTooltip": "Navigate Up",
-    "navigateDownTooltip": "Navigate Down",
-    "backTooltip": "Back"
+  "header": {
+    "navigateUp": "Navigate Up",
+    "navigateDown": "Navigate Down",
+    "back": "Back"
+  },
+  "selection": {
+    "too-many-elements-selected": "Too many elements selected",
+    "no-elements-selected": "Select element(s) to view properties"
   },
   "context-menu": {
     "favorite": "Favorite",
@@ -18,18 +22,13 @@
       "label": "Remove from Favorite",
       "description": "Remove this property from Favorite category"
     },
-    "share-favorite": {
-      "label": "Share this Favorite",
-      "description": "Share this property in Favorite category"
-    },
-    "unshare-favorite": {
-      "label": "Unshare this Favorite",
-      "description": "Unshare this property in Favorite category"
-    },
     "copy-text": {
       "label": "Copy Text",
       "description": "Copy text of this property"
-    },
+    }
+  },
+  "settings": {
+    "label": "Settings",
     "hide-null": {
       "label": "Hide Empty Values",
       "description": "Hide properties with empty values"
@@ -37,10 +36,6 @@
     "show-null": {
       "label": "Show Empty Values",
       "description": "Show properties with empty values"
-    },
-    "selection": {
-      "too-many-elements-selected": "Too many elements selected",
-      "no-elements-selected": "Select element(s) to view properties"
     }
   }
 }
