@@ -159,7 +159,7 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
     // (undocumented)
     dataProvider: IPresentationPropertyDataProvider;
     // (undocumented)
-    headerControls?: JSX.Element;
+    headerControls?: ReactNode;
     // (undocumented)
     imodel: IModelConnection;
     // (undocumented)
