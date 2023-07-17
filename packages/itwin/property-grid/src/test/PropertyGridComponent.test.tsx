@@ -5,17 +5,13 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { UiFramework, WidgetState } from "@itwin/appui-react";
+import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { KeySet } from "@itwin/presentation-common";
 import { render, waitFor } from "@testing-library/react";
 import * as multiElementPropertyGrid from "../components/MultiElementPropertyGrid";
-import { PropertyGridComponent, PropertyGridComponentId } from "../PropertyGridComponent";
-import { stubSelectionManager } from "./TestUtils";
+import { PropertyGridComponent } from "../PropertyGridComponent";
 
-import type { WidgetDef } from "@itwin/appui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 
 describe("PropertyGridComponent", () => {
   const imodel = {
@@ -45,52 +41,5 @@ describe("PropertyGridComponent", () => {
     UiFramework.setIModelConnection(imodel);
     const { getByText } = render(<PropertyGridComponent />);
     await waitFor(() => getByText("MultiElementPropertyGrid"));
-  });
-
-  describe("widget state", () => {
-    const widgetDef = {
-      id: PropertyGridComponentId,
-      setWidgetState: sinon.stub<Parameters<WidgetDef["setWidgetState"]>, ReturnType<WidgetDef["setWidgetState"]>>(),
-    };
-    const frontstageDef = {
-      findWidgetDef: (id: string) => id === widgetDef.id ? widgetDef : undefined,
-    };
-
-    let selectionManager: ReturnType<typeof stubSelectionManager>;
-
-    before(() => {
-      selectionManager = stubSelectionManager();
-      sinon.stub(UiFramework.frontstages, "activeFrontstageDef").get(() => frontstageDef);
-      UiFramework.setIModelConnection(imodel);
-    });
-
-    beforeEach(() => {
-      selectionManager.getSelection.reset();
-      widgetDef.setWidgetState.reset();
-    });
-
-    it("hides widget if `UnifiedSelection` changes to empty", async () => {
-      render(<PropertyGridComponent />);
-
-      selectionManager.getSelection.returns(new KeySet());
-      selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
-
-      await waitFor(() => {
-        expect(widgetDef.setWidgetState).to.be.called;
-        expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Hidden);
-      });
-    });
-
-    it("opens widget if `UnifiedSelection` changes to non-empty", async () => {
-      render(<PropertyGridComponent />);
-
-      selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
-      selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
-
-      await waitFor(() => {
-        expect(widgetDef.setWidgetState).to.be.called;
-        expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Open);
-      });
-    });
   });
 });
