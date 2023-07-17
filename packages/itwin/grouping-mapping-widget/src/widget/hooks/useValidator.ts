@@ -15,14 +15,14 @@ export const Validators = {
   OnlyBeginsWithLetterOrUnderscore: {
     message: "Name can only start with a letter or underscore.",
     rule: (val: string) => {
-      var regexPattern = new RegExp(/^[\p{L}\p{Nl}_]+/u)
+      const regexPattern = new RegExp(/^[\p{L}\p{Nl}_]+/u);
       return regexPattern.test(val);
     },
   },
   FollowedByLettersUnderscoresAndDigits: {
     message: "Name can only contain letters, underscores, or digits",
     rule: (val: string) => {
-      var regexPattern = new RegExp(/[\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]+$/u)
+      const regexPattern = new RegExp(/[\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]+$/u);
       return regexPattern.test(val);
     },
   },
