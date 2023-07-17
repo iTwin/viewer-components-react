@@ -66,7 +66,7 @@ import {
   findProperties,
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "./viewerUtils";
-import SaveModal from "./SaveModal";
+import { SaveModal } from "./SaveModal";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
