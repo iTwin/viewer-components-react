@@ -38,11 +38,12 @@
     "@itwin/core-quantity": "^4.0.4",
     "@itwin/core-react": "^4.2.1",
     "@itwin/core-telemetry": "^4.0.4",
+    "@itwin/eslint-plugin": "^3.2.0",
     "@itwin/frontend-devtools": "^4.0.4",
     "@itwin/imodel-components-react": "^4.2.1",
     "@itwin/reality-data-client": "^1.1.0",
     "@types/react": "^18.2.14",
-    "cpx2": "^4.2.3",
+    "eslint": "^7.32.0",
     "prettier": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -61,13 +62,26 @@
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0"
   },
+  "overrides": {
+    "typescript": "^5.1.6"
+  },
   "eslintConfig": {
-    "extends": [
-      ".eslintrc.ts.json"
+    "plugins": [
+      "@itwin"
     ],
+    "extends": "plugin:@itwin/ui",
     "rules": {
       "no-duplicate-imports": "off",
-      "@typescript-eslint/consistent-type-imports": "error"
+      "@typescript-eslint/consistent-type-imports": "error",
+      "jsx-a11y/no-static-element-interactions": "off",
+      "jsx-a11y/click-events-have-key-events": "off",
+      "quote-props": "off",
+      "no-console": "off",
+      "spaced-comment": "off",
+      "@typescript-eslint/member-delimiter-style": "off",
+      "@typescript-eslint/consistent-type-definitions": "off",
+      "@typescript-eslint/explicit-member-accessibility": "off",
+      "@typescript-eslint/indent": "off"
     }
   },
   "prettier": {
