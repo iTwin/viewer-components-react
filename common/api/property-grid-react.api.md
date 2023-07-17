@@ -144,9 +144,6 @@ export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps
 export function PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps): JSX.Element | null;
 
 // @public
-export const PropertyGridComponentId = "vcr:PropertyGridComponent";
-
-// @public
 export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
     preferencesStorage?: PreferencesStorage;
 }
@@ -219,6 +216,9 @@ export interface PropertyGridUiItemsProviderProps {
     defaultPanelWidgetPriority?: number;
     propertyGridProps?: PropertyGridComponentProps;
 }
+
+// @public
+export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
 // @public
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
