@@ -125,7 +125,7 @@ const configuredUiItems = new Map<string, UiItem>([
       },
       createUiItemsProviders: () => [
         new MapLayersUiItemsProvider(),
-        new FeatureInfoUiItemsProvider({ onMapHit: DefaultMapFeatureInfoTool.onMapHit })
+        new FeatureInfoUiItemsProvider({})
       ]
     }
   ],
