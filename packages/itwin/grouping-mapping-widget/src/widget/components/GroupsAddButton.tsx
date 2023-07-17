@@ -6,6 +6,7 @@ import { Button, DropdownMenu, MenuItem, Text } from "@itwin/itwinui-react";
 import React from "react";
 import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import "./GroupsAddButton.scss";
+import { SvgCaretDownSmall } from "@itwin/itwinui-icons-react";
 
 export interface GroupsDropdownMenuProps {
   disabled?: boolean;
@@ -38,6 +39,7 @@ export const GroupsAddButton = ({
       data-testid="gmw-add-group-button"
       styleType="high-visibility"
       disabled={disabled}
+      endIcon={<SvgCaretDownSmall />}
     >
       <Text>Add Group</Text>
     </Button>
