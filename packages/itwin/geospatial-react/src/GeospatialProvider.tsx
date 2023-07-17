@@ -83,7 +83,7 @@ const GeospatialWidget = ({
 
 export class GeospatialProvider implements UiItemsProvider {
   public readonly id = "GeospatialProvider";
-  static widgetId = "GeospatialProvider:Widget";
+  private static widgetId = "GeospatialProvider:Widget";
 
   constructor(private getAccessToken: () => AccessToken, private rdClient: RealityDataAccessClient) {}
 

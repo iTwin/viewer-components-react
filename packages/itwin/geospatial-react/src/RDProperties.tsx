@@ -49,15 +49,15 @@ class GCSCache {
     if (!realityData.id || (realityData.type !== "RealityMesh3DTiles" && realityData.type !== "Terrain3DTiles")) {
       return;
     }
-    const msg = `${realityData.id.substring(0, 8)} - ${realityData.displayName}`;
+    // const msg = `${realityData.id.substring(0, 8)} - ${realityData.displayName}`;
     if (this.m_cache.has(realityData.id)) {
-      console.log(`Returning cached GCSInfo for ${msg}`);
+      // console.log(`Returning cached GCSInfo for ${msg}`);
 
       // the stored value may be undefined which would indicate we tried before and stored undefined
       return this.m_cache.get(realityData.id);
     }
 
-    console.log(`Querying GCSInfo for ${msg}`);
+    // console.log(`Querying GCSInfo for ${msg}`);
     const gcsInfo = await GCSCache.queryGCSInfo(accessToken, realityData);
     this.m_cache.set(realityData.id, gcsInfo);
     return gcsInfo;
@@ -69,7 +69,7 @@ class GCSCache {
       const rootDoc = realityData.rootDocument ?? `${rdName}.json`;
       const url = (await realityData.getBlobUrl(accessToken, rootDoc)).toString();
       if (!rootDoc.toLocaleLowerCase().includes(".json")) {
-        console.log(`Skipping non-json rootDoc: ${rootDoc}, blobUrl: ${url}`);
+        // console.log(`Skipping non-json rootDoc: ${rootDoc}, blobUrl: ${url}`);
         return;
       }
       const response = await fetch(url);
@@ -86,7 +86,7 @@ class GCSCache {
         }
       }
     } catch (e) {
-      console.log(`${realityData.displayName} ${e}`);
+      // console.log(`${realityData.displayName} ${e}`);
       // @todo: handle errors differently than missing data (404)?
     }
   }

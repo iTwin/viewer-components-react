@@ -7,12 +7,12 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { SimplePropertyDataProvider } from "@itwin/components-react";
 
 type SimpleValuePrimitive = string | number | undefined | SimpleStructValue;
-type SimpleStructValue = { [s: string]: SimpleValuePrimitive };
+interface SimpleStructValue { [s: string]: SimpleValuePrimitive }
 
 export class SimpleReadonlyPropertyDataProvider extends SimplePropertyDataProvider {
-  undefinedValue = "N/A";
+  private undefinedValue = "N/A";
 
-  addPropertyRecords(valueMap: SimpleStructValue, category: string) {
+  public addPropertyRecords(valueMap: SimpleStructValue, category: string) {
     const index = this.getOrAddCategory(category);
     for (const [key, value] of Object.entries(valueMap)) {
       let record: PropertyRecord | undefined;
@@ -28,7 +28,7 @@ export class SimpleReadonlyPropertyDataProvider extends SimplePropertyDataProvid
     }
   }
 
-  getOrAddCategory(label: string) {
+  public getOrAddCategory(label: string) {
     const index = this.categories.findIndex((currCategory) => currCategory.label === label);
     if (index >= 0) {
       return index;
@@ -36,7 +36,7 @@ export class SimpleReadonlyPropertyDataProvider extends SimplePropertyDataProvid
     return this.addCategory({ expand: true, label, name: label });
   }
 
-  createPropertyRecord(displayLabel: string, value: string): PropertyRecord {
+  public createPropertyRecord(displayLabel: string, value: string): PropertyRecord {
     const record = new PropertyRecord(
       {
         valueFormat: PropertyValueFormat.Primitive,
@@ -54,7 +54,7 @@ export class SimpleReadonlyPropertyDataProvider extends SimplePropertyDataProvid
     return record;
   }
 
-  createStructPropertyRecord(displayLabel: string, objectValue: SimpleStructValue) {
+  public createStructPropertyRecord(displayLabel: string, objectValue: SimpleStructValue) {
     const record = new PropertyRecord(this.getStructValue(objectValue), {
       displayLabel,
       name: displayLabel,
@@ -65,7 +65,7 @@ export class SimpleReadonlyPropertyDataProvider extends SimplePropertyDataProvid
     return record;
   }
 
-  getStructValue(objectValue: SimpleStructValue): StructValue {
+  public getStructValue(objectValue: SimpleStructValue): StructValue {
     const members: {
       [name: string]: PropertyRecord;
     } = {};

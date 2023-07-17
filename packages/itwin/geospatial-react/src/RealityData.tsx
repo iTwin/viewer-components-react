@@ -37,12 +37,12 @@ export const RealityDataWidget = ({ accessToken, rdClient }: RDWidgetProps) => {
   // Initialize the widget
   useEffect(() => {
     const queryRealityDatas = async (attachedModels: ContextRealityModelProps[]) => {
-      //@todo: We could filter the whole list by extent into the other two arrays (within and outside)?
+      // @todo: We could filter the whole list by extent into the other two arrays (within and outside)?
       if (accessToken && iModelConnection) {
         const availModels = await getRealityDatas(rdClient, iModelConnection, accessToken, false, attachedModels);
         const within = await getRealityDatas(rdClient, iModelConnection, accessToken, true, attachedModels);
         const outside: ITwinRealityData[] = [];
-        const limit = 100; //practical limit for this UI as too many causes major delays
+        const limit = 100; // practical limit for this UI as too many causes major delays
         for (const rdEntry of availModels) {
           if (outside.length === limit) {
             break;
@@ -59,7 +59,7 @@ export const RealityDataWidget = ({ accessToken, rdClient }: RDWidgetProps) => {
 
     if (iModelConnection) {
       const attachedModels = getAttachedRealityDataModels(iModelConnection);
-      queryRealityDatas(attachedModels).catch(console.error);
+      void queryRealityDatas(attachedModels).catch(/* console.error */);
       setAttachedRealityModels(attachedModels);
     }
   }, [iModelConnection, viewport, accessToken, rdClient]);
@@ -116,11 +116,11 @@ export const RealityDataWidget = ({ accessToken, rdClient }: RDWidgetProps) => {
   );
 };
 
-function Visibility({ displayed, onClick }: { displayed: boolean; onClick: () => void }) {
-  return <span className={displayed ? "icon icon-visibility" : "icon icon-visibility-hide-2"} onClick={onClick} />;
+function Visibility({ displayed, onClick }: { displayed: boolean, onClick: () => void }) {
+  return <span className={displayed ? "icon icon-visibility" : "icon icon-visibility-hide-2"} onClick={onClick} role="button" tabIndex={0} onKeyDown={onClick} />;
 }
 
-function ModelVisibility({ viewport, modelId }: { viewport: Viewport | undefined; modelId: string }) {
+function ModelVisibility({ viewport, modelId }: { viewport: Viewport | undefined, modelId: string }) {
   const [displayed, setDisplayed] = useState(false);
 
   const syncDisplayed = useCallback(() => {
@@ -201,7 +201,7 @@ function getContextRealityModelProps(
   iTwinRealityData: ITwinRealityData
 ): ContextRealityModelProps {
   return {
-    //Note: we should call RealityDataAccessClient.getRealityDataUrl except its unnecessarily async
+    // Note: we should call RealityDataAccessClient.getRealityDataUrl except its unnecessarily async
     tilesetUrl: `${rdClient.baseUrl}/${iTwinRealityData.id}?projectId=${iTwinId}`,
     rdSourceKey: {
       provider: RealityDataProvider.ContextShare,

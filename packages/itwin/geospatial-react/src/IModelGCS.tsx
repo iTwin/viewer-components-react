@@ -43,18 +43,18 @@ export const IModelGCS = () => {
       // const toDoFiller = "Missing Data";
       const helmert = gcrs?.additionalTransform?.helmert2DWithZOffset;
       const coordinateSystem = {
-        Name: `${gcrs?.horizontalCRS?.id}${helmert ? " Helmert Transformation" : ""}`,
-        Description: gcrs?.horizontalCRS?.description,
-        Projection: gcrs?.horizontalCRS?.projection?.method,
+        "Name": `${gcrs?.horizontalCRS?.id}${helmert ? " Helmert Transformation" : ""}`,
+        "Description": gcrs?.horizontalCRS?.description,
+        "Projection": gcrs?.horizontalCRS?.projection?.method,
         "EPSG Code": gcrs?.horizontalCRS?.epsg?.toString(),
-        Source: gcrs?.horizontalCRS?.source,
-        Units: gcrs?.horizontalCRS?.unit,
+        "Source": gcrs?.horizontalCRS?.source,
+        "Units": gcrs?.horizontalCRS?.unit,
         "Central Meridian": gcrs?.horizontalCRS?.projection?.centralMeridian?.toString(),
         "Origin Latitude": formatLatLong(gcrs?.horizontalCRS?.projection?.latitudeOfOrigin, true),
         "Scale Reduction": gcrs?.horizontalCRS?.projection?.scaleFactor?.toString(),
         "False Easting": gcrs?.horizontalCRS?.projection?.falseEasting?.toString(),
         "False Northing": gcrs?.horizontalCRS?.projection?.falseNorthing?.toString(),
-        // Quadrant: toDoFiller,
+        // "Quadrant": toDoFiller,
         "Minimum Longitude": formatLatLong(gcrs?.horizontalCRS?.extent?.southWest.longitude, false),
         "Maximum Longitude": formatLatLong(gcrs?.horizontalCRS?.extent?.northEast.longitude, false),
         "Minimum Latitude": formatLatLong(gcrs?.horizontalCRS?.extent?.southWest.latitude, true),
@@ -63,22 +63,22 @@ export const IModelGCS = () => {
 
       // const directionKey = gcrs?.horizontalCRS?.datumId ? `Direction to ${gcrs?.horizontalCRS?.datumId}` : "Direction";
       const datum = {
-        Name: gcrs?.horizontalCRS?.datumId,
-        Description: gcrs?.horizontalCRS?.datum?.description,
-        Source: gcrs?.horizontalCRS?.datum?.source,
+        "Name": gcrs?.horizontalCRS?.datumId,
+        "Description": gcrs?.horizontalCRS?.datum?.description,
+        "Source": gcrs?.horizontalCRS?.datum?.source,
         "Conversion Method": gcrs?.horizontalCRS?.datum?.ellipsoidId,
-        // Format: toDoFiller,
+        // "Format": toDoFiller,
         // [directionKey]: toDoFiller,
         // "Grid File Name": toDoFiller,
       };
 
       const ellipsoid = {
-        Name: gcrs?.horizontalCRS?.datum?.ellipsoidId,
-        Description: gcrs?.horizontalCRS?.datum?.ellipsoid?.description?.toString(),
+        "Name": gcrs?.horizontalCRS?.datum?.ellipsoidId,
+        "Description": gcrs?.horizontalCRS?.datum?.ellipsoid?.description?.toString(),
         "Equatorial Radius": gcrs?.horizontalCRS?.datum?.ellipsoid?.equatorialRadius?.toString(),
         "Polar Radius": gcrs?.horizontalCRS?.datum?.ellipsoid?.polarRadius?.toString(),
-        // Eccentricity: toDoFiller,
-        Source: gcrs?.horizontalCRS?.datum?.ellipsoid?.source,
+        // "Eccentricity": toDoFiller,
+        "Source": gcrs?.horizontalCRS?.datum?.ellipsoid?.source,
       };
 
       const coordinateSystemMods: Record<string, string | undefined> = {
