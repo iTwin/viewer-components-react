@@ -47,5 +47,3 @@ export const SaveModal = ({
     </>
   );
 };
-
-export default SaveModal;
