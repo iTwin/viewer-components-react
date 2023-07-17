@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import "./PropertyGridUiItemsProvider.scss";
 import { useEffect } from "react";
 import { StagePanelLocation, StagePanelSection, StageUsage, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
 import { Id64 } from "@itwin/core-bentley";
