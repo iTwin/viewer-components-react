@@ -48,7 +48,7 @@ const GeospatialWidget = ({
       case 1:
         return <RealityDataWidget accessToken={getAccessToken()} rdClient={rdClient} />;
       default:
-        return "UH OH";
+        return null;
     }
   };
   return (
