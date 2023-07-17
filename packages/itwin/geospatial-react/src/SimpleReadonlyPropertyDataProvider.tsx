@@ -7,7 +7,9 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { SimplePropertyDataProvider } from "@itwin/components-react";
 
 type SimpleValuePrimitive = string | number | undefined | SimpleStructValue;
-interface SimpleStructValue { [s: string]: SimpleValuePrimitive }
+interface SimpleStructValue {
+  [s: string]: SimpleValuePrimitive;
+}
 
 export class SimpleReadonlyPropertyDataProvider extends SimplePropertyDataProvider {
   private undefinedValue = "N/A";

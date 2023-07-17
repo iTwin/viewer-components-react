@@ -59,7 +59,7 @@ export const RealityDataWidget = ({ accessToken, rdClient }: RDWidgetProps) => {
 
     if (iModelConnection) {
       const attachedModels = getAttachedRealityDataModels(iModelConnection);
-      void queryRealityDatas(attachedModels).catch(/* console.error */);
+      void (queryRealityDatas(attachedModels).catch(/* console.error */));
       setAttachedRealityModels(attachedModels);
     }
   }, [iModelConnection, viewport, accessToken, rdClient]);
@@ -116,11 +116,19 @@ export const RealityDataWidget = ({ accessToken, rdClient }: RDWidgetProps) => {
   );
 };
 
-function Visibility({ displayed, onClick }: { displayed: boolean, onClick: () => void }) {
-  return <span className={displayed ? "icon icon-visibility" : "icon icon-visibility-hide-2"} onClick={onClick} role="button" tabIndex={0} onKeyDown={onClick} />;
+function Visibility({ displayed, onClick }: { displayed: boolean; onClick: () => void }) {
+  return (
+    <span
+      className={displayed ? "icon icon-visibility" : "icon icon-visibility-hide-2"}
+      onClick={onClick}
+      onKeyDown={onClick}
+      role="button"
+      tabIndex={0}
+    />
+  );
 }
 
-function ModelVisibility({ viewport, modelId }: { viewport: Viewport | undefined, modelId: string }) {
+function ModelVisibility({ viewport, modelId }: { viewport: Viewport | undefined; modelId: string }) {
   const [displayed, setDisplayed] = useState(false);
 
   const syncDisplayed = useCallback(() => {

@@ -31,7 +31,7 @@ export function convertDDToDMS(degrees: number, isLatitude: boolean) {
  * @returns An array of objects (ContextRealityModelProps & modelId) containing the reality data models in the IModelConnection.
  */
 export function getAttachedRealityDataModels(iModelConnection: IModelConnection) {
-  const realityModels = new Array<ContextRealityModelProps & {modelId: Id64String}>();
+  const realityModels = new Array<ContextRealityModelProps & { modelId: Id64String }>();
   // The original code from RealityDataManager used iModel.models.queryProps() but that's aync and we can
   // quickly loop through all the models looking for SpatialModelState instead.
   for (const modelState of iModelConnection.models) {

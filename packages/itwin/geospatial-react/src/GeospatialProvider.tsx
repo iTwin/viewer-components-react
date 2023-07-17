@@ -85,7 +85,10 @@ export class GeospatialProvider implements UiItemsProvider {
   public readonly id = "GeospatialProvider";
   private static widgetId = "GeospatialProvider:Widget";
 
-  constructor(private getAccessToken: () => AccessToken, private rdClient: RealityDataAccessClient) {}
+  constructor(
+    private getAccessToken: () => AccessToken,
+    private rdClient: RealityDataAccessClient
+  ) {}
 
   public provideWidgets(
     _stageId: string,

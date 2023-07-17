@@ -74,10 +74,25 @@
     "extends": "plugin:@itwin/ui",
     "rules": {
       "no-duplicate-imports": "off",
-      "@typescript-eslint/consistent-type-imports": "error"
+      "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/member-delimiter-style": [
+        "error",
+        {
+          "multiline": {
+            "delimiter": "semi",
+            "requireLast": true
+          },
+          "singleline": {
+            "delimiter": "semi",
+            "requireLast": false
+          }
+        }
+      ]
     }
   },
   "prettier": {
-    "printWidth": 120
+    "printWidth": 120,
+    "quoteProps": "consistent",
+    "trailingComma": "es5"
   }
 }
