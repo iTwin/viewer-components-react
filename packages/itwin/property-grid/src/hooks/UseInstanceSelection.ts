@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { UiFramework } from "@itwin/appui-react";
+import { Id64 } from "@itwin/core-bentley";
 import { Presentation } from "@itwin/presentation-frontend";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -179,10 +180,12 @@ function getInstanceKeys(keys: Readonly<KeySet>) {
   keys.instanceKeys.forEach(
     (ids: Set<string>, className: string) => {
       ids.forEach((id: string) => {
-        selectedInstanceKeys.push({
-          id,
-          className,
-        });
+        if (!Id64.isTransient(id)) {
+          selectedInstanceKeys.push({
+            id,
+            className,
+          });
+        }
       });
     }
   );
