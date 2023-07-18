@@ -51,3 +51,4 @@ internal;useDataProvider({ imodel, createDataProvider }: DataProviderProps &
 internal;useInstanceSelection({ imodel }: InstanceSelectionProps):
 internal;useNullValueSetting():
 internal;useNullValueSettingContext(): NullValueSettingContextValue
+public;usePropertyGridTransientState

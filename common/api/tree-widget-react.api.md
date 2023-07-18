@@ -19,6 +19,7 @@ import type { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
+import { Ref } from 'react';
 import type { Ruleset } from '@itwin/presentation-common';
 import type { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
 import type { SingleSchemaClassSpecification } from '@itwin/presentation-common';
@@ -279,7 +280,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     enableHierarchyAutoUpdate?: boolean;
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     modelsVisibilityHandler?: ModelsVisibilityHandler;
-    rootElementRef?: React.Ref<HTMLDivElement>;
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
 
@@ -357,6 +357,15 @@ export const RULESET_EXTERNAL_SOURCES: Ruleset;
 export const RULESET_IMODEL_CONTENT: Ruleset;
 
 // @public
+export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
+
+// @public
+export interface SelectableTreeProps {
+    // (undocumented)
+    trees: TreeDefinition[];
+}
+
+// @public
 export function showAllCategories(categories: string[], viewport: Viewport): Promise<void>;
 
 // @public
@@ -392,15 +401,6 @@ export class TreeWidget {
 }
 
 // @public
-export function TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element | null;
-
-// @public
-export interface TreeWidgetComponentProps {
-    // (undocumented)
-    trees: TreeDefinition[];
-}
-
-// @public
 export const TreeWidgetId = "tree-widget-react:trees";
 
 // @public
@@ -422,6 +422,9 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
 
 // @internal
 export function useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[];
+
+// @public
+export function useTreeTransientState<T extends Element>(): Ref<T>;
 
 // @public
 export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void): {

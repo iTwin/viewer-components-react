@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "Updated AppUI dependencies",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}

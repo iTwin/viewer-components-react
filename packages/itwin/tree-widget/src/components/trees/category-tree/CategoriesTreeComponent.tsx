@@ -100,13 +100,13 @@ CategoriesTreeComponent.HideAllButton = HideAllButton;
 CategoriesTreeComponent.InvertAllButton = InvertAllButton;
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
 CategoriesTreeComponent.id = "categories-tree";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
 CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categories");

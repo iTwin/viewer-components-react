@@ -4,13 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { createRef } from "react";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { render } from "@testing-library/react";
+import * as selectableTreeModule from "../components/SelectableTree";
 import * as categoriesTreeComponents from "../components/trees/category-tree/CategoriesTreeComponent";
 import * as modelsTreeComponents from "../components/trees/models-tree/ModelsTreeComponent";
-import * as widgetComponent from "../components/TreeWidgetComponent";
 import { TreeWidgetUiItemsProvider } from "../components/TreeWidgetUiItemsProvider";
+import * as useTreeTransientStateModule from "../components/utils/UseTreeTransientState";
 import { TestUtils } from "./TestUtils";
 
 describe("TreeWidgetUiItemsProvider", () => {
@@ -46,7 +48,9 @@ describe("TreeWidgetUiItemsProvider", () => {
   });
 
   it("renders default trees", () => {
-    const widgetComponentStub = sinon.stub(widgetComponent, "TreeWidgetComponent").returns(null);
+    const ref = createRef<HTMLDivElement>();
+    sinon.stub(useTreeTransientStateModule, "useTreeTransientState").callsFake(() => ref);
+    const widgetComponentStub = sinon.stub(selectableTreeModule, "SelectableTree").returns(null);
     const modelsTreeComponentStub = sinon.stub(modelsTreeComponents, "ModelsTreeComponent").returns(null);
     const categoriesTreeComponentStub = sinon.stub(categoriesTreeComponents, "CategoriesTreeComponent").returns(null);
     const provider = new TreeWidgetUiItemsProvider();
@@ -65,8 +69,10 @@ describe("TreeWidgetUiItemsProvider", () => {
   });
 
   it("renders supplied trees", () => {
-    const widgetComponentStub = sinon.stub(widgetComponent, "TreeWidgetComponent").returns(null);
-    const trees: widgetComponent.TreeDefinition[] = [{
+    const ref = createRef<HTMLDivElement>();
+    sinon.stub(useTreeTransientStateModule, "useTreeTransientState").callsFake(() => ref);
+    const widgetComponentStub = sinon.stub(selectableTreeModule, "SelectableTree").returns(null);
+    const trees: selectableTreeModule.TreeDefinition[] = [{
       id: "tree",
       getLabel: () => "Tree Label",
       render: () => <div>Tree Content</div>,

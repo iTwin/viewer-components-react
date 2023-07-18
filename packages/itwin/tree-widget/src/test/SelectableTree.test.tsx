@@ -7,14 +7,14 @@ import { expect } from "chai";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { render, waitFor } from "@testing-library/react";
-import { TreeWidgetComponent } from "../tree-widget-react";
+import { SelectableTree } from "../components/SelectableTree";
 import { TreeWidget } from "../TreeWidget";
 import { createResolvablePromise, stubCancelAnimationFrame, TestUtils } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeDefinition } from "../tree-widget-react";
+import type { TreeDefinition } from "../components/SelectableTree";
 
-describe("<TreeWidgetComponent />", () => {
+describe("<SelectableTree />", () => {
   stubCancelAnimationFrame();
 
   before(async () => {
@@ -41,13 +41,13 @@ describe("<TreeWidgetComponent />", () => {
       getLabel: () => "Tree Label 1",
       render: () => <div>Tree Content 1</div>,
     }];
-    const { container } = render(<TreeWidgetComponent trees={trees} />);
+    const { container } = render(<SelectableTree trees={trees} />);
     expect(container.children).to.be.empty;
   });
 
   it("renders without trees", async () => {
     const trees: TreeDefinition[] = [];
-    const { queryByText } = render(<TreeWidgetComponent trees={trees} />);
+    const { queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => expect(queryByText(TreeWidget.translate("noTrees"))).to.not.be.null);
   });
 
@@ -62,7 +62,7 @@ describe("<TreeWidgetComponent />", () => {
       getLabel: () => "Tree Label 2",
       render: () => <div>Tree Content 2</div>,
     }];
-    const { queryByText } = render(<TreeWidgetComponent trees={trees} />);
+    const { queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => expect(queryByText("Tree Content 1")).to.not.be.null);
   });
 
@@ -78,7 +78,7 @@ describe("<TreeWidgetComponent />", () => {
       getLabel: () => "Tree Label 2",
       render: () => <div>Tree Content 2</div>,
     }];
-    const { queryByText } = render(<TreeWidgetComponent trees={trees} />);
+    const { queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => {
       expect(queryByText("Tree Content 1")).to.be.null;
       expect(queryByText("Tree Content 2")).to.not.be.null;
@@ -94,7 +94,7 @@ describe("<TreeWidgetComponent />", () => {
       shouldShow: async () => promise,
     }];
 
-    const { container, queryByText } = render(<TreeWidgetComponent trees={trees} />);
+    const { container, queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => {
       const content = container.querySelector(".components-selectable-content-wrapper");
       expect(content?.children).to.not.be.empty;
