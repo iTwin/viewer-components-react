@@ -8,6 +8,7 @@
 
 import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
 import { BeEvent } from '@itwin/core-bentley';
+import type { DelayLoadedTreeNodeItem } from '@itwin/components-react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64String } from '@itwin/core-bentley';
@@ -17,8 +18,10 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
+import type { Node as Node_2 } from '@itwin/presentation-common';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
+import { Ref } from 'react';
 import type { Ruleset } from '@itwin/presentation-common';
 import type { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
 import type { SingleSchemaClassSpecification } from '@itwin/presentation-common';
@@ -171,6 +174,9 @@ export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeC
 // @public
 export function createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps): (props: TreeRendererProps) => JSX.Element;
 
+// @internal (undocumented)
+export function customizeModelsTreeNodeItem(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node_2>): void;
+
 // @alpha
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
 
@@ -279,7 +285,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     enableHierarchyAutoUpdate?: boolean;
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     modelsVisibilityHandler?: ModelsVisibilityHandler;
-    rootElementRef?: React.Ref<HTMLDivElement>;
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
 
@@ -357,6 +362,15 @@ export const RULESET_EXTERNAL_SOURCES: Ruleset;
 export const RULESET_IMODEL_CONTENT: Ruleset;
 
 // @public
+export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
+
+// @public
+export interface SelectableTreeProps {
+    // (undocumented)
+    trees: TreeDefinition[];
+}
+
+// @public
 export function showAllCategories(categories: string[], viewport: Viewport): Promise<void>;
 
 // @public
@@ -392,15 +406,6 @@ export class TreeWidget {
 }
 
 // @public
-export function TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element | null;
-
-// @public
-export interface TreeWidgetComponentProps {
-    // (undocumented)
-    trees: TreeDefinition[];
-}
-
-// @public
 export const TreeWidgetId = "tree-widget-react:trees";
 
 // @public
@@ -422,6 +427,9 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
 
 // @internal
 export function useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[];
+
+// @public
+export function useTreeTransientState<T extends Element>(): Ref<T>;
 
 // @public
 export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void): {

@@ -114,13 +114,13 @@ ModelsTreeComponent.View2DButton = View2DButton;
 ModelsTreeComponent.View3DButton = View3DButton;
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
 ModelsTreeComponent.id = "models-tree";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
 ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
