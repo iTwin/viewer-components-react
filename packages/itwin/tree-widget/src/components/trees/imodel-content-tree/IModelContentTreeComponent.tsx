@@ -42,13 +42,13 @@ export const IModelContentTreeComponent = (props: IModelContentTreeComponentProp
 };
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
 IModelContentTreeComponent.id = "imodel-content-tree";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
 IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContent");

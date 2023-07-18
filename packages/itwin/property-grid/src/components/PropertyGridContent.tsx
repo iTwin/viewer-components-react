@@ -33,7 +33,7 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
   dataProvider: IPresentationPropertyDataProvider;
   className?: string;
   onBackButton?: () => void;
-  headerControls?: JSX.Element;
+  headerControls?: ReactNode;
 }
 
 /**
