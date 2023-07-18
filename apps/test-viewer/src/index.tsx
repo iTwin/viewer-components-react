@@ -9,7 +9,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./components/App";
 
-// Set custom global variables
+// Set custom global variables 
 if (process.env.IMJS_GLOBAL_PROPS) {
   try {
     const json = JSON.parse(process.env.IMJS_GLOBAL_PROPS);
