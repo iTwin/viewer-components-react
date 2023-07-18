@@ -16,6 +16,8 @@
     "build": "npm run copy:esm && npm run build:esm",
     "build:esm": "tsc 1>&2 --module ES2020 --outDir lib/esm",
     "copy:esm": "cpx \"./src/**/*.*css\" ./lib/esm",
+    "rebuild": "npm run clean && npm run build",
+    "clean": "rimraf lib .rush/temp/package-deps*.json",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "test": ""
@@ -52,6 +54,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^7.2.9",
     "redux": "^4.2.1",
+    "rimraf": "^3.0.2",
     "typescript": "^5.1.6"
   },
   "peerDependencies": {
