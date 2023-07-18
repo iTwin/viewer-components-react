@@ -16,4 +16,5 @@ export * from "./hooks/UseContextMenu";
 export * from "./hooks/UseDataProvider";
 export * from "./hooks/UseInstanceSelection";
 export * from "./hooks/UseNullValuesSetting";
+export * from "./hooks/UsePropertyGridTransientState";
 export * from "./api/PreferencesStorage";
