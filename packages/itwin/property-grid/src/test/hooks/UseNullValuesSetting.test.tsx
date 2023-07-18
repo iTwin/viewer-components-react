@@ -10,10 +10,11 @@ import { useNullValueSetting } from "../../hooks/UseNullValuesSetting";
 import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext";
 import { createFunctionStub } from "../TestUtils";
 
+import type { ReactNode } from "react";
 import type { PreferencesContextProviderProps } from "../../PropertyGridPreferencesContext";
 import type { PreferencesStorage } from "../../property-grid-react";
 
-function renderWithContext(element: JSX.Element, contextProps: Partial<PreferencesContextProviderProps>) {
+function renderWithContext(element: ReactNode, contextProps: Partial<PreferencesContextProviderProps>) {
   return render(<PreferencesContextProvider {...contextProps}>
     {element}
   </PreferencesContextProvider>);
