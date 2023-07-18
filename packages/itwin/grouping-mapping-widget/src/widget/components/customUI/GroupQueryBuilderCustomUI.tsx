@@ -37,8 +37,8 @@ const createPropertyDataProvider = async (
   dataProvider.keys = keys;
   dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
   const data = await dataProvider.getData();
-  const selectedCategory = data.categories.find(category => category.label === 'Selected Item(s)');
-  if (selectedCategory) { 
+  const selectedCategory = data.categories.find((category) => category.label === "Selected Item(s)");
+  if (selectedCategory) {
     selectedCategory.expand = true;
   }
   return dataProvider;
