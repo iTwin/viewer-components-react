@@ -5,7 +5,7 @@
 
 import "./TreeHeader.scss";
 import classnames from "classnames";
-import { Children, useState } from "react";
+import { Children, useEffect, useRef, useState } from "react";
 import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, Divider, DropdownMenu, IconButton, SearchBox } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../TreeWidget";
@@ -43,39 +43,87 @@ export function TreeHeader(props: TreeHeaderProps) {
       <HeaderButtons contracted={isSearchOpen}>
         {children}
       </HeaderButtons>
-      <SearchBox
-        expandable
-        onExpand={() => setIsSearchOpen(true)}
-        onCollapse={() => setIsSearchOpen(false)}
-        className={classnames("tree-widget-search-box", !isSearchOpen && "contracted")}
-      >
-        <SearchBox.CollapsedState>
-          <SearchBox.ExpandButton
-            title={TreeWidget.translate("searchBox.searchForSomething")}
-            aria-label={TreeWidget.translate("searchBox.open")}
-            size="small"
-          />
-        </SearchBox.CollapsedState>
-        <SearchBox.ExpandedState >
-          <SearchBox.Input
-            placeholder={TreeWidget.translate("searchBox.search")}
-            onChange={(e) => e.currentTarget.value ? onFilterStart(e.currentTarget.value) : onFilterClear()}
-            className="search-input"
-          />
-          <SearchResultStepper
-            selectedIndex={selectedIndex}
-            total={resultCount}
-            onStep={onSelectedChanged}
-          />
-          <SearchBox.CollapseButton
-            onClick={onFilterClear}
-            size="small"
-            aria-label={TreeWidget.translate("searchBox.close")}
-          />
-        </SearchBox.ExpandedState>
-      </SearchBox>
+      <DebouncedSearchBox
+        isOpened={isSearchOpen}
+        onOpen={() => setIsSearchOpen(true)}
+        onClose={() => setIsSearchOpen(false)}
+        onChange={(value) => value ? onFilterStart(value) : onFilterClear()}
+        delay={500}
+        selectedResultIndex={selectedIndex}
+        resultCount={resultCount}
+        onSelectedResultChanged={onSelectedChanged}
+      />
     </div>
   );
+}
+
+interface DebouncedSearchBoxProps {
+  isOpened: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onChange: (value: string) => void;
+  delay: number;
+  selectedResultIndex?: number;
+  resultCount?: number;
+  onSelectedResultChanged: (index: number) => void;
+}
+
+function DebouncedSearchBox({ isOpened, selectedResultIndex, resultCount, onSelectedResultChanged, onChange, onOpen, onClose, delay }: DebouncedSearchBoxProps) {
+  const [inputValue, setInputValue] = useState<string>("");
+  const onChangeRef = useRef(onChange);
+  // don't want to restart timeout if `onChange` references changes.
+  // save latest `onChange` references into `useRef`
+  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    if (!inputValue) {
+      onChangeRef.current("");
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      onChangeRef.current(inputValue);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [inputValue, delay]);
+
+  return <SearchBox
+    expandable
+    onExpand={onOpen}
+    onCollapse={onClose}
+    className={classnames("tree-widget-search-box", !isOpened && "contracted")}
+  >
+    <SearchBox.CollapsedState>
+      <SearchBox.ExpandButton
+        title={TreeWidget.translate("searchBox.searchForSomething")}
+        aria-label={TreeWidget.translate("searchBox.open")}
+        size="small"
+      />
+    </SearchBox.CollapsedState>
+    <SearchBox.ExpandedState >
+      <SearchBox.Input
+        placeholder={TreeWidget.translate("searchBox.search")}
+        onChange={(e) => setInputValue(e.currentTarget.value)}
+        className="search-input"
+      />
+      <SearchResultStepper
+        selectedIndex={selectedResultIndex}
+        total={resultCount}
+        onStep={onSelectedResultChanged}
+      />
+      <SearchBox.CollapseButton
+        onClick={() => {
+          setInputValue("");
+          onClose();
+        }}
+        size="small"
+        aria-label={TreeWidget.translate("searchBox.close")}
+      />
+    </SearchBox.ExpandedState>
+  </SearchBox>;
 }
 
 interface HeaderButtonsProps {
