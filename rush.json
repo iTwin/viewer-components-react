@@ -77,6 +77,11 @@
       "packageName": "test-viewer",
       "projectFolder": "apps/test-viewer",
       "shouldPublish": false
+    },
+    {
+      "packageName": "@itwin/geospatial-react",
+      "projectFolder": "packages/itwin/geospatial-react",
+      "versionPolicyName": "itwin-geospatial-react"
     }
   ]
 }
