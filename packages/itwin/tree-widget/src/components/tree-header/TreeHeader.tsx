@@ -71,8 +71,7 @@ interface DebouncedSearchBoxProps {
 function DebouncedSearchBox({ isOpened, selectedResultIndex, resultCount, onSelectedResultChanged, onChange, onOpen, onClose, delay }: DebouncedSearchBoxProps) {
   const [inputValue, setInputValue] = useState<string>("");
   const onChangeRef = useRef(onChange);
-  // don't want to restart timeout if `onChange` references changes.
-  // save latest `onChange` references into `useRef`
+  // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
   onChangeRef.current = onChange;
 
   useEffect(() => {
