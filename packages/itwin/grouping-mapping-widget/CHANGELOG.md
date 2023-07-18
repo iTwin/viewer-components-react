@@ -1,6 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 09 Jun 2023 17:54:42 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Jul 2023 14:40:24 GMT and should not be manually modified.
+
+## 0.17.1
+Tue, 18 Jul 2023 14:40:24 GMT
+
+### Patches
+
+- Added a dropdown arrow for the Add Group button.
+- Fixed Color Legend not appearing bug.
+- Fixed Enable/Disable Extraction bug
+- Added a modal to confirm a property name change.
 
 ## 0.17.0
 Fri, 09 Jun 2023 17:54:42 GMT
