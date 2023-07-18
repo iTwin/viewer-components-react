@@ -13,7 +13,7 @@ import { ClassGroupingOption } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
-import { createRuleset, createSearchRuleset } from "./Utils";
+import { createRuleset, createSearchRuleset, customizeModelsTreeNodeItem } from "./Utils";
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
@@ -151,12 +151,14 @@ function useModelsTreeNodeLoader(props: ModelsTreeProps) {
     appendChildrenCountForGroupingNodes: (props.hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
+    customizeTreeNodeItem: customizeModelsTreeNodeItem,
   });
   const { nodeLoader: searchNodeLoader, onItemsRendered: onSearchItemsRendered } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: rulesets.search,
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
+    customizeTreeNodeItem: customizeModelsTreeNodeItem,
   });
 
   const activeNodeLoader = props.filterInfo?.filter ? searchNodeLoader : nodeLoader;

@@ -8,6 +8,7 @@
 
 import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
 import { BeEvent } from '@itwin/core-bentley';
+import type { DelayLoadedTreeNodeItem } from '@itwin/components-react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64String } from '@itwin/core-bentley';
@@ -17,6 +18,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
+import type { Node as Node_2 } from '@itwin/presentation-common';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
 import type { Ruleset } from '@itwin/presentation-common';
@@ -170,6 +172,9 @@ export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeC
 
 // @public
 export function createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps): (props: TreeRendererProps) => JSX.Element;
+
+// @internal (undocumented)
+export function customizeModelsTreeNodeItem(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node_2>): void;
 
 // @alpha
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
