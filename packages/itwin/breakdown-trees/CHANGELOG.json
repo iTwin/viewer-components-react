@@ -2,6 +2,18 @@
   "name": "@itwin/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@itwin/breakdown-trees-react_v0.6.0",
+      "date": "Tue, 18 Jul 2023 14:40:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updated AppUI dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.2",
       "tag": "@itwin/breakdown-trees-react_v0.5.2",
       "date": "Fri, 23 Jun 2023 15:11:15 GMT",

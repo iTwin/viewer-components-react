@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Persist property grid scroll position when switching between widgets.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}

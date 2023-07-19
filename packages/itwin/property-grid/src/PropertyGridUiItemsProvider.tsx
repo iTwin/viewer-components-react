@@ -3,13 +3,25 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { StagePanelLocation, StagePanelSection, StageUsage, WidgetState } from "@itwin/appui-react";
+import "./PropertyGridUiItemsProvider.scss";
+import { useEffect } from "react";
+import { StagePanelLocation, StagePanelSection, StageUsage, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
+import { Id64 } from "@itwin/core-bentley";
 import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
-import { PropertyGridComponent, PropertyGridComponentId } from "./PropertyGridComponent";
+import { Key } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
+import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState";
+import { PropertyGridComponent } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
 
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent";
+
+/**
+ * Id of the property grid widget created by `PropertyGridUiItemsProvider`.
+ * @public
+ */
+export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
 /**
  * Props for creating `PropertyGridUiItemsProvider`.
@@ -45,9 +57,9 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     }
 
     return [{
-      id: PropertyGridComponentId,
+      id: PropertyGridWidgetId,
       label: PropertyGridManager.translate("widget-label"),
-      content: <PropertyGridComponent {...propertyGridProps} />,
+      content: <PropertyGridWidget {...propertyGridProps} />,
       defaultState: WidgetState.Hidden,
       icon: <SvgInfoCircular />,
       priority: defaultPanelWidgetPriority,
@@ -55,3 +67,25 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
   }
 }
 
+/** Component that renders `PropertyGridComponent` an hides/shows widget based on `UnifiedSelection`. */
+function PropertyGridWidget(props: PropertyGridComponentProps) {
+  const ref = usePropertyGridTransientState<HTMLDivElement>();
+  const widgetDef = useSpecificWidgetDef(PropertyGridWidgetId);
+
+  useEffect(() => {
+    if (!widgetDef) {
+      return;
+    }
+
+    return Presentation.selection.selectionChange.addListener((args) => {
+      const selection = Presentation.selection.getSelection(args.imodel);
+      // show property grid widget if there are at least one node or valid instance selected.
+      const show = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
+      widgetDef.setWidgetState(show ? WidgetState.Open : WidgetState.Hidden);
+    });
+  }, [widgetDef]);
+
+  return <div ref={ref} className="property-grid-widget">
+    <PropertyGridComponent {...props} />
+  </div>;
+}
