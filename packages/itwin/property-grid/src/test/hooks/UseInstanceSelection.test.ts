@@ -59,6 +59,16 @@ describe("useInstanceSelection", () => {
     });
   });
 
+  it("ignores transient instance keys", async () => {
+    const transientKey: InstanceKey = { id: "0xffffff0000000001", className: "Transient" };
+    selectionManager.getSelection.returns(new KeySet([noParentKey, transientKey]));
+    const { result } = renderHook(useInstanceSelection, { initialProps: { imodel } });
+
+    await waitFor(() => {
+      expect(result.current.selectedKeys).to.have.lengthOf(1);
+    });
+  });
+
   it("reacts to selection changes", async () => {
     const otherKey: InstanceKey = { id: "0x5", className: "OtherClass" };
     selectionManager.getSelection.returns(new KeySet([noParentKey]));

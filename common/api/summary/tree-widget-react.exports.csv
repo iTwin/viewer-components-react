@@ -17,8 +17,9 @@ internal;createRuleset(props: CreateRulesetProps): Ruleset
 internal;CreateRulesetProps = Omit
 internal;createSearchRuleset(props: CreateSearchRulesetProps): Ruleset
 internal;CreateSearchRulesetProps = Omit
-public;createVisibilityTreeNodeRenderer: ({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => (treeNodeProps: TreeNodeRendererProps) => JSX.Element
-public;createVisibilityTreeRenderer: (visibilityTreeRendererProps: VisibilityTreeRendererProps) => (props: TreeRendererProps) => JSX.Element
+public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps) => JSX.Element
+public;createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps): (props: TreeRendererProps) => JSX.Element
+internal;customizeModelsTreeNodeItem(item: Partial
 alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element
 alpha;ExternalSourcesTreeComponent:
 alpha;ExternalSourcesTreeProps = BaseTreeProps
@@ -45,25 +46,27 @@ public;ModelTreeComponentProps
 internal;RULESET_CATEGORIES: Ruleset
 internal;RULESET_EXTERNAL_SOURCES: Ruleset
 internal;RULESET_IMODEL_CONTENT: Ruleset
+public;SelectableTree(props: SelectableTreeProps): JSX.Element | null
+public;SelectableTreeProps
 public;showAllCategories(categories: string[], viewport: Viewport): Promise
 public;showAllModels(models: string[], viewport: Viewport): Promise
 internal;SubjectModelIdsCache
 public;toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise
 public;TreeDefinition
 public;TreeWidget
-public;TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element | null
-public;TreeWidgetComponentProps
 public;TreeWidgetId = "tree-widget-react:trees"
 public;TreeWidgetOptions
 public;TreeWidgetUiItemsProvider 
 internal;useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[]
-public;useVisibilityTreeFiltering: (nodeLoader: AbstractTreeNodeLoaderWithProvider
+public;useTreeTransientState
+public;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
 public;VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map
 public;VisibilityStatus
 public;VisibilityTreeEventHandler 
 public;VisibilityTreeEventHandlerParams 
 public;VisibilityTreeFilterInfo
-public;VisibilityTreeNodeCheckbox: (props: NodeCheckboxRenderProps) => JSX.Element
+public;VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps): JSX.Element
+public;VisibilityTreeNodeRendererProps
 public;VisibilityTreeNoFilteredData(props: VisibilityTreeNoFilteredDataProps): JSX.Element
 public;VisibilityTreeNoFilteredDataProps
 public;VisibilityTreeRendererProps

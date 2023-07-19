@@ -3,20 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useEffect } from "react";
-import { useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
-import { Presentation } from "@itwin/presentation-frontend";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
 import { PreferencesContextProvider } from "./PropertyGridPreferencesContext";
 
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid";
 import type { PreferencesStorage } from "./api/PreferencesStorage";
-
-/**
- * Id of the property grid widget created by `PropertyGridUiItemsProvider`.
- * @public
- */
-export const PropertyGridComponentId = "vcr:PropertyGridComponent";
 
 /**
  * Props for `PropertyGridComponent`.
@@ -41,24 +33,6 @@ export function PropertyGridComponent({ preferencesStorage, ...props }: Property
   }
 
   return <PreferencesContextProvider storage={preferencesStorage}>
-    <PropertyGridComponentContent {...props} imodel={imodel} />
+    <MultiElementPropertyGrid {...props} imodel={imodel} />
   </PreferencesContextProvider>;
-}
-
-/** Component that renders `MultiElementPropertyGrid` an hides/shows widget based on `UnifiedSelection`. */
-function PropertyGridComponentContent(props: MultiElementPropertyGridProps) {
-  const widgetDef = useSpecificWidgetDef(PropertyGridComponentId);
-
-  useEffect(() => {
-    if (!widgetDef) {
-      return;
-    }
-
-    return Presentation.selection.selectionChange.addListener((args) => {
-      const keys = Presentation.selection.getSelection(args.imodel);
-      widgetDef.setWidgetState(keys.isEmpty ? WidgetState.Hidden : WidgetState.Open);
-    });
-  }, [widgetDef]);
-
-  return <MultiElementPropertyGrid {...props} />;
 }

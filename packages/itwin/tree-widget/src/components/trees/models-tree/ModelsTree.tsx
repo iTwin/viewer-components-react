@@ -13,7 +13,7 @@ import { ClassGroupingOption } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
-import { createRuleset, createSearchRuleset } from "./Utils";
+import { createRuleset, createSearchRuleset, customizeModelsTreeNodeItem } from "./Utils";
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
@@ -50,10 +50,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * Active view used to determine and control visibility
    */
   activeView: Viewport;
-  /**
-   * Ref to the root HTML element used by this component
-   */
-  rootElementRef?: React.Ref<HTMLDivElement>;
   /**
    * Configuration options for the hierarchy loaded in the component.
    */
@@ -96,7 +92,14 @@ export function ModelsTree(props: ModelsTreeProps) {
   }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = createVisibilityTreeRenderer({ iconsEnabled: true, descriptionEnabled: false, levelOffset: 10, disableRootNodeCollapse: true });
+  const treeRenderer = createVisibilityTreeRenderer({
+    nodeRendererProps: {
+      iconsEnabled: true,
+      descriptionEnabled: false,
+      levelOffset: 10,
+      disableRootNodeCollapse: true,
+    },
+  });
 
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
 
@@ -109,7 +112,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }, []);
 
   return (
-    <div className="tree-widget-visibility-tree-base" ref={props.rootElementRef}>
+    <div className="tree-widget-visibility-tree-base">
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}
@@ -144,12 +147,14 @@ function useModelsTreeNodeLoader(props: ModelsTreeProps) {
     appendChildrenCountForGroupingNodes: (props.hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
+    customizeTreeNodeItem: customizeModelsTreeNodeItem,
   });
   const { nodeLoader: searchNodeLoader, onItemsRendered: onSearchItemsRendered } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: rulesets.search,
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
+    customizeTreeNodeItem: customizeModelsTreeNodeItem,
   });
 
   const activeNodeLoader = props.filterInfo?.filter ? searchNodeLoader : nodeLoader;

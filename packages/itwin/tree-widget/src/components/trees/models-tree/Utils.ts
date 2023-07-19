@@ -3,8 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { NodeKey } from "@itwin/presentation-common";
+
 import type { Id64String } from "@itwin/core-bentley";
-import type { Ruleset } from "@itwin/presentation-common";
+import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
+import type { Node, Ruleset } from "@itwin/presentation-common";
 import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
 
 /** @internal */
@@ -68,6 +71,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
+              icon: "\"icon-imodel-hollow-2\"",
             },
           },
         ],
@@ -122,6 +126,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
+              icon: "\"icon-folder\"",
             },
           },
         ],
@@ -200,6 +205,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
+              icon: "\"icon-model\"",
             },
           },
         ],
@@ -230,6 +236,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
+              icon: "\"icon-model\"",
             },
           },
         ],
@@ -272,6 +279,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             items: {
               isCategory: "true",
               modelId: "ParentNode.InstanceId",
+              icon: "\"icon-layers\"",
             },
           },
         ],
@@ -303,6 +311,8 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             items: {
               modelId: "this.Model.Id",
               categoryId: "this.Category.Id",
+              icon: "\"icon-item\"",
+              groupIcon: "\"icon-ec-class\"",
             },
           },
         ],
@@ -333,6 +343,8 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             items: {
               modelId: "this.Model.Id",
               categoryId: "this.Category.Id",
+              icon: "\"icon-item\"",
+              groupIcon: "\"icon-ec-class\"",
             },
           },
         ],
@@ -362,31 +374,6 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
             applicationStage: "PostProcess",
           },
         ],
-      },
-      {
-        ruleType: "ImageIdOverride",
-        condition: `ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass("Subject", "BisCore")`,
-        imageIdExpression: `IIF(this.Parent.Id = NULL, "icon-imodel-hollow-2", "icon-folder")`,
-      },
-      {
-        ruleType: "ImageIdOverride",
-        condition: `ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass("Model", "BisCore")`,
-        imageIdExpression: `"icon-model"`,
-      },
-      {
-        ruleType: "ImageIdOverride",
-        condition: `ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass("Category", "BisCore")`,
-        imageIdExpression: `"icon-layers"`,
-      },
-      {
-        ruleType: "ImageIdOverride",
-        condition: `ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass("Element", "BisCore")`,
-        imageIdExpression: `"icon-item"`,
-      },
-      {
-        ruleType: "ImageIdOverride",
-        condition: `ThisNode.IsClassGroupingNode`,
-        imageIdExpression: `"icon-ec-class"`,
       },
       {
         ruleType: "Content",
@@ -447,6 +434,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
+              icon: "\"icon-imodel-hollow-2\"",
             },
           },
         ],
@@ -501,6 +489,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
+              icon: "\"icon-folder\"",
             },
           },
           {
@@ -558,6 +547,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
+              icon: "\"icon-model\"",
             },
           },
         ],
@@ -609,6 +599,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
+              icon: "\"icon-model\"",
             },
           },
         ],
@@ -642,20 +633,24 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
+              icon: "\"icon-model\"",
             },
           },
         ],
       },
-      {
-        ruleType: "ImageIdOverride",
-        condition: `ThisNode.IsOfClass("Subject", "BisCore")`,
-        imageIdExpression: `IIF(this.Parent.Id = NULL, "icon-imodel-hollow-2", "icon-folder")`,
-      },
-      {
-        ruleType: "ImageIdOverride",
-        condition: `ThisNode.IsOfClass("Model", "BisCore")`,
-        imageIdExpression: `"icon-model"`,
-      },
     ],
   };
+}
+
+/** @internal */
+export function customizeModelsTreeNodeItem(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) {
+  item.isCheckboxVisible = true;
+  item.isCheckboxDisabled = true;
+  item.icon = getIcon(node);
+}
+
+function getIcon(node: Partial<Node>) {
+  return node.key && NodeKey.isClassGroupingNodeKey(node.key)
+    ? node.extendedData?.groupIcon
+    : node.extendedData?.icon;
 }
