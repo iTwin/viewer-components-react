@@ -12,12 +12,13 @@ Array [
               Object {
                 "extendedData": Object {
                   "categoryId": "0x13",
+                  "groupIcon": "icon-ec-class",
+                  "icon": "icon-item",
                   "modelId": "0x11",
                 },
                 "filtering": Object {
                   "descriptor": [Function],
                 },
-                "icon": "icon-item",
                 "label": PropertyRecord {
                   "property": Object {
                     "displayLabel": "Label",
@@ -33,11 +34,11 @@ Array [
               },
             ],
             "extendedData": Object {
+              "icon": "icon-layers",
               "isCategory": true,
               "modelId": "0x11",
             },
             "hasChildren": true,
-            "icon": "icon-layers",
             "label": PropertyRecord {
               "property": Object {
                 "displayLabel": "Label",
@@ -53,13 +54,13 @@ Array [
           },
         ],
         "extendedData": Object {
+          "icon": "icon-model",
           "isModel": true,
         },
         "filtering": Object {
           "descriptor": [Function],
         },
         "hasChildren": true,
-        "icon": "icon-model",
         "label": PropertyRecord {
           "property": Object {
             "displayLabel": "Label",
@@ -75,10 +76,10 @@ Array [
       },
     ],
     "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
       "isSubject": true,
     },
     "hasChildren": true,
-    "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
       "property": Object {
         "displayLabel": "Label",
@@ -109,12 +110,13 @@ Array [
                   Object {
                     "extendedData": Object {
                       "categoryId": "0x12",
+                      "groupIcon": "icon-ec-class",
+                      "icon": "icon-item",
                       "modelId": "0x11",
                     },
                     "filtering": Object {
                       "descriptor": [Function],
                     },
-                    "icon": "icon-item",
                     "label": PropertyRecord {
                       "property": Object {
                         "displayLabel": "Label",
@@ -130,8 +132,11 @@ Array [
                   },
                 ],
                 "description": "The generic:PhysicalObject class is used for bis:PhysicalElements which cannot be further classified. More-specific bis:PhysicalElement subclasses should be used wherever possible.",
+                "extendedData": Object {
+                  "groupIcon": "icon-ec-class",
+                  "icon": "icon-item",
+                },
                 "hasChildren": true,
-                "icon": "icon-ec-class",
                 "label": PropertyRecord {
                   "property": Object {
                     "displayLabel": "Label",
@@ -147,11 +152,11 @@ Array [
               },
             ],
             "extendedData": Object {
+              "icon": "icon-layers",
               "isCategory": true,
               "modelId": "0x11",
             },
             "hasChildren": true,
-            "icon": "icon-layers",
             "label": PropertyRecord {
               "property": Object {
                 "displayLabel": "Label",
@@ -167,13 +172,13 @@ Array [
           },
         ],
         "extendedData": Object {
+          "icon": "icon-model",
           "isModel": true,
         },
         "filtering": Object {
           "descriptor": [Function],
         },
         "hasChildren": true,
-        "icon": "icon-model",
         "label": PropertyRecord {
           "property": Object {
             "displayLabel": "Label",
@@ -189,10 +194,10 @@ Array [
       },
     ],
     "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
       "isSubject": true,
     },
     "hasChildren": true,
-    "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
       "property": Object {
         "displayLabel": "Label",
@@ -221,12 +226,13 @@ Array [
               Object {
                 "extendedData": Object {
                   "categoryId": "0x12",
+                  "groupIcon": "icon-ec-class",
+                  "icon": "icon-item",
                   "modelId": "0x11",
                 },
                 "filtering": Object {
                   "descriptor": [Function],
                 },
-                "icon": "icon-item",
                 "label": PropertyRecord {
                   "property": Object {
                     "displayLabel": "Label",
@@ -242,11 +248,11 @@ Array [
               },
             ],
             "extendedData": Object {
+              "icon": "icon-layers",
               "isCategory": true,
               "modelId": "0x11",
             },
             "hasChildren": true,
-            "icon": "icon-layers",
             "label": PropertyRecord {
               "property": Object {
                 "displayLabel": "Label",
@@ -262,13 +268,13 @@ Array [
           },
         ],
         "extendedData": Object {
+          "icon": "icon-model",
           "isModel": true,
         },
         "filtering": Object {
           "descriptor": [Function],
         },
         "hasChildren": true,
-        "icon": "icon-model",
         "label": PropertyRecord {
           "property": Object {
             "displayLabel": "Label",
@@ -284,10 +290,10 @@ Array [
       },
     ],
     "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
       "isSubject": true,
     },
     "hasChildren": true,
-    "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
       "property": Object {
         "displayLabel": "Label",

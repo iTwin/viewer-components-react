@@ -64,7 +64,7 @@ As seen in the above code snippet, `TreeWidgetUiItemsProvider` takes a list of t
 
 While we expect this package to be mostly used with [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) and widget created through `TreeWidgetUiItemsProvider`, the package delivers components used within the widget to meet other use cases:
 
-- `TreeWidgetComponent` renders a tree selector and selected tree (based on the `trees` prop).
+- `SelectableTree` renders a tree selector and selected tree (based on the `trees` prop).
 
 - Visibility tree components help you build trees that look and feel like [Models](#models-tree) and [Categories](#categories-tree) trees, letting you control display of elements in the hierarchy.
 
@@ -74,6 +74,7 @@ While we expect this package to be mostly used with [AppUI](https://github.com/i
   - `useVisibilityTreeFiltering` is used to filter the hierarchy.
   - `VisibilityTreeNoFilteredData` is used to render a "no results" when filtering.
   - `VisibilityTreeEventHandler` is an extension of [UnifiedSelectionTreeEventHandler](https://www.itwinjs.org/reference/presentation-components/tree/unifiedselectiontreeeventhandler/), that additionally handles checkbox events and calls provided `IVisibilityHandler` to get/set display of the elements in the hierarchy.
+  - `useTreeTransientState` is used to persist tree scroll position when tree is used in [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) widget.
 
 ### Models tree
 
