@@ -20,7 +20,7 @@ function validate(formulaName: string, formula: string, properties: PropertyMap,
   return !error;
 }
 
-const debouncedValidationFunc = debounce(validate, 1000);
+const debouncedValidationFunc = debounce(validate, 5000);
 
 export function useFormulaValidation(formulaName: string, formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void) {
   const [isValid, setIsValid] = useState(false);
