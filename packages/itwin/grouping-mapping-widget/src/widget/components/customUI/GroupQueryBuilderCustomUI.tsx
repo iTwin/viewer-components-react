@@ -25,6 +25,7 @@ import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContex
 import { PropertyAction } from "../PropertyAction";
 import { Alert, Button } from "@itwin/itwinui-react";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
+import { IModelApp } from "@itwin/core-frontend";
 
 const createPropertyDataProvider = async (
   keys: KeySet,
@@ -37,7 +38,7 @@ const createPropertyDataProvider = async (
   dataProvider.keys = keys;
   dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
   const data = await dataProvider.getData();
-  const selectedCategory = data.categories.find((category) => category.label === "Selected Item(s)");
+  const selectedCategory = data.categories.find((category) => category.label === IModelApp.localization.getLocalizedString("Presentation:selectedItems.categoryLabel"));
   if (selectedCategory) {
     selectedCategory.expand = true;
   }
