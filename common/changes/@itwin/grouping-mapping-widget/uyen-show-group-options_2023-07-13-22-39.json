@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added a modal to confirm a property name change.",
+      "comment": "Made group creation options fully shown when there is space",
       "type": "patch"
     }
   ],
