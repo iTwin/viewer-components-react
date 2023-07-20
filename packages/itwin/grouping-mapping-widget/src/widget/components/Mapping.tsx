@@ -140,6 +140,7 @@ export const Mappings = ({
                 startIcon={<SvgAdd />}
                 onClick={onClickAddMapping}
                 styleType="high-visibility"
+                title='New Mapping'
               >
                 New
               </Button>
@@ -224,7 +225,7 @@ export const Mappings = ({
                         </MenuItem>,
                       ].flatMap((m) => m)}
                     >
-                      <IconButton styleType="borderless">
+                      <IconButton styleType="borderless" title='Mapping Options'>
                         <SvgMore
                           style={{
                             width: "16px",
