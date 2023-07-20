@@ -25,17 +25,23 @@ import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContex
 import { PropertyAction } from "../PropertyAction";
 import { Alert, Button } from "@itwin/itwinui-react";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
+import { IModelApp } from "@itwin/core-frontend";
 
-const createPropertyDataProvider = (
+const createPropertyDataProvider = async (
   keys: KeySet,
   iModelConnection: IModelConnection
-): PresentationPropertyDataProvider => {
+): Promise<PresentationPropertyDataProvider> => {
   const dataProvider = new PresentationPropertyDataProvider({
     imodel: iModelConnection,
     ruleset: DEFAULT_PROPERTY_GRID_RULESET,
   });
   dataProvider.keys = keys;
   dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
+  const data = await dataProvider.getData();
+  const selectedCategory = data.categories.find((category) => category.label === IModelApp.localization.getLocalizedString("Presentation:selectedItems.categoryLabel"));
+  if (selectedCategory) {
+    selectedCategory.expand = true;
+  }
   return dataProvider;
 };
 
@@ -68,7 +74,7 @@ export const GroupQueryBuilderCustomUI = ({
       const selection = selectionProvider.getSelection(evt.imodel, evt.level);
       const keys = new KeySet(selection);
       setSelectionKeyset(keys);
-      const dataProvider = createPropertyDataProvider(keys, iModelConnection);
+      const dataProvider = await createPropertyDataProvider(keys, iModelConnection);
       setDataProvider(dataProvider);
       setQueryBuilder(new QueryBuilder(dataProvider));
     };
