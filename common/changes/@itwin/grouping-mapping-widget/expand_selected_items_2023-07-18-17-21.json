@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed Enable/Disable Extraction bug",
+      "comment": "Made Selected Items section expand by default",
       "type": "patch"
     }
   ],

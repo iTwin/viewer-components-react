@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed Color Legend not appearing bug.",
+      "comment": "Made group creation options fully shown when there is space",
       "type": "patch"
     }
   ],

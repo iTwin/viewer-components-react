@@ -2,6 +2,27 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@itwin/ec3-widget-react_v0.2.0",
+      "date": "Tue, 18 Jul 2023 14:40:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improved modularity to Templates and TemplateMenu components."
+          },
+          {
+            "comment": "Added a EC3Context component to manage the configuration of the components."
+          },
+          {
+            "comment": "EC3ConfigProps was introduced, which can either be EC3ConfigPropsWithRedirectUri or EC3ConfigPropsWithGetEC3AccessToken, which gives the option of two authentication methods."
+          },
+          {
+            "comment": "A new property iTwinId was introduced in EC3Config, enabling the configuration to be tied to a specific iTwin instance."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@itwin/ec3-widget-react_v0.1.1",
       "date": "Fri, 23 Jun 2023 15:11:15 GMT",
