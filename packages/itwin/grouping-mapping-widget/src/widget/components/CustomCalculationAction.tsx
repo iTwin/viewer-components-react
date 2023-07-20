@@ -3,14 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
+  Alert,
   Fieldset,
-  Icon,
-  Label,
   LabeledInput,
   LabeledSelect,
   LabeledTextarea,
   Text,
-  Tooltip,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
@@ -26,7 +24,6 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 import type { CalculatedProperty, CustomCalculation, GroupProperty } from "@itwin/insights-client";
 import { QuantityType } from "@itwin/insights-client";
 import { usePropertiesContext } from "./context/PropertiesContext";
-import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
 
 export interface CustomCalculationActionProps {
   mappingId: string;
@@ -229,27 +226,18 @@ export const CustomCalculationAction = ({
               validator.showMessageFor("name");
             }}
           />
+          <Alert
+            type='informational'
+            clickableText='Click here.'
+            clickableTextProps={{ href: 'https://developer.bentley.com/apis/insights/operations/create-customcalculation/', target: '_blank', rel: 'noreferrer' }}
+          >
+            To learn more about creating custom calculation formulas, view the documentation.
+          </Alert>
           <LabeledTextarea
             value={formula}
+            required
             name='formula'
-            label={
-              <div className='gmw-formula-information-icon'>
-                <Label required>
-                  Formula
-                </Label>
-                <Tooltip
-                  content=' Formulas can be used to create calculated properties based on already
-                  existing properties. Data types supported are numbers, booleans, and strings.
-                  Formulas can be created using many common logical operators, mathematical operators,
-                  constants, and functions.'
-                  placement='top'
-                >
-                  <Icon fill='informational'>
-                    <SvgInfoCircular />
-                  </Icon>
-                </Tooltip>
-              </div>
-            }
+            label='Formula'
             disabled={isLoading}
             onChange={(event) => {
               setFormula(event.target.value);
