@@ -229,7 +229,7 @@ export const CustomCalculationAction = ({
           <Alert
             type='informational'
             clickableText='Click here.'
-            clickableTextProps={{ href: 'https://developer.bentley.com/apis/insights/operations/create-customcalculation/', target: '_blank', rel: 'noreferrer' }}
+            clickableTextProps={{ href: "https://developer.bentley.com/apis/insights/operations/create-customcalculation/", target: "_blank", rel: "noreferrer" }}
           >
             To learn more about creating custom calculation formulas, view the documentation.
           </Alert>
