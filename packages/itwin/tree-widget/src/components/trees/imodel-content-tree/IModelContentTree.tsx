@@ -6,11 +6,12 @@
 import { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
-import { TreeContextMenuProps } from "../ContextMenu";
-import { TreeRenderer } from "../TreeRenderer";
+import { addCustomTreeNodeItemLabelRenderer } from "../common/TreeNodeRenderer";
+import { TreeRenderer } from "../common/TreeRenderer";
+import { combineTreeNodeItemCustomizations } from "../common/Utils";
 
 import type { Ruleset } from "@itwin/presentation-common";
-import type { BaseTreeProps } from "../Common";
+import type { BaseTreeProps } from "../common/Types";
 
 /**
  * Presentation rules used by IModelContentTree
@@ -22,7 +23,7 @@ export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); 
  * Props for [[IModelContentTree]].
  * @public
  */
-export type IModelContentTreeProps = BaseTreeProps & TreeContextMenuProps;
+export type IModelContentTreeProps = BaseTreeProps;
 
 /**
  * A tree that shows all iModel content starting from the root Subject, then the hierarchy of child
@@ -37,6 +38,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
     ruleset: RULESET_IMODEL_CONTENT,
     pagingSize: 20,
     appendChildrenCountForGroupingNodes: true,
+    customizeTreeNodeItem,
   });
   const eventHandler = useTreeEventsHandler(useMemo(() => ({ nodeLoader, modelSource: nodeLoader.modelSource }), [nodeLoader]));
 
@@ -52,8 +54,12 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         eventsHandler={eventHandler}
         model={treeModel}
         iconsEnabled={true}
-        treeRenderer={(treeProps) => <TreeRenderer {...treeProps} contextMenuItems={contextMenuItems} />}
+        treeRenderer={(treeProps) => <TreeRenderer {...treeProps} contextMenuItems={contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} />}
       />
     </div>
   );
 };
+
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
+  addCustomTreeNodeItemLabelRenderer,
+]);

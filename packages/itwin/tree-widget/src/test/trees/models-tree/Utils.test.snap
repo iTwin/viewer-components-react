@@ -14,6 +14,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-imodel-hollow-2\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -42,6 +43,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-folder\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -96,6 +98,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -173,6 +176,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -203,6 +207,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-layers\\"",
             "isCategory": "true",
             "modelId": "ParentNode.InstanceId",
           },
@@ -249,6 +254,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -283,6 +290,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -335,31 +344,6 @@ Object {
         },
       ],
       "ruleType": "Grouping",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Subject\\", \\"BisCore\\")",
-      "imageIdExpression": "IIF(this.Parent.Id = NULL, \\"icon-imodel-hollow-2\\", \\"icon-folder\\")",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-model\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Category\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-layers\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Element\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-item\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsClassGroupingNode",
-      "imageIdExpression": "\\"icon-ec-class\\"",
-      "ruleType": "ImageIdOverride",
     },
     Object {
       "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
@@ -401,6 +385,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-imodel-hollow-2\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -429,6 +414,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-folder\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -483,6 +469,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -560,6 +547,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -590,6 +578,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-layers\\"",
             "isCategory": "true",
             "modelId": "ParentNode.InstanceId",
           },
@@ -636,6 +625,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -670,6 +661,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -724,31 +717,6 @@ Object {
       "ruleType": "Grouping",
     },
     Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Subject\\", \\"BisCore\\")",
-      "imageIdExpression": "IIF(this.Parent.Id = NULL, \\"icon-imodel-hollow-2\\", \\"icon-folder\\")",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-model\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Category\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-layers\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Element\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-item\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsClassGroupingNode",
-      "imageIdExpression": "\\"icon-ec-class\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
       "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
       "ruleType": "Content",
       "specifications": Array [
@@ -788,6 +756,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-imodel-hollow-2\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -816,6 +785,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-folder\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -870,6 +840,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -947,6 +918,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -977,6 +949,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-layers\\"",
             "isCategory": "true",
             "modelId": "ParentNode.InstanceId",
           },
@@ -1023,6 +996,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -1057,6 +1032,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -1111,31 +1088,6 @@ Object {
       "ruleType": "Grouping",
     },
     Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Subject\\", \\"BisCore\\")",
-      "imageIdExpression": "IIF(this.Parent.Id = NULL, \\"icon-imodel-hollow-2\\", \\"icon-folder\\")",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-model\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Category\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-layers\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Element\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-item\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsClassGroupingNode",
-      "imageIdExpression": "\\"icon-ec-class\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
       "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
       "ruleType": "Content",
       "specifications": Array [
@@ -1175,6 +1127,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-imodel-hollow-2\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -1203,6 +1156,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-folder\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -1257,6 +1211,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -1334,6 +1289,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -1364,6 +1320,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-layers\\"",
             "isCategory": "true",
             "modelId": "ParentNode.InstanceId",
           },
@@ -1410,6 +1367,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -1444,6 +1403,8 @@ Object {
         Object {
           "items": Object {
             "categoryId": "this.Category.Id",
+            "groupIcon": "\\"icon-ec-class\\"",
+            "icon": "\\"icon-item\\"",
             "modelId": "this.Model.Id",
           },
           "ruleType": "ExtendedData",
@@ -1498,31 +1459,6 @@ Object {
       "ruleType": "Grouping",
     },
     Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Subject\\", \\"BisCore\\")",
-      "imageIdExpression": "IIF(this.Parent.Id = NULL, \\"icon-imodel-hollow-2\\", \\"icon-folder\\")",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-model\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Category\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-layers\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsInstanceNode ANDALSO ThisNode.IsOfClass(\\"Element\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-item\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsClassGroupingNode",
-      "imageIdExpression": "\\"icon-ec-class\\"",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
       "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
       "ruleType": "Content",
       "specifications": Array [
@@ -1556,6 +1492,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-imodel-hollow-2\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -1584,6 +1521,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-folder\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -1652,6 +1590,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -1703,6 +1642,7 @@ Object {
         },
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -1749,6 +1689,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -1777,16 +1718,6 @@ Object {
         },
       ],
     },
-    Object {
-      "condition": "ThisNode.IsOfClass(\\"Subject\\", \\"BisCore\\")",
-      "imageIdExpression": "IIF(this.Parent.Id = NULL, \\"icon-imodel-hollow-2\\", \\"icon-folder\\")",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-model\\"",
-      "ruleType": "ImageIdOverride",
-    },
   ],
 }
 `;
@@ -1799,6 +1730,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-imodel-hollow-2\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -1827,6 +1759,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-folder\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -1895,6 +1828,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -1946,6 +1880,7 @@ Object {
         },
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -1992,6 +1927,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -2020,16 +1956,6 @@ Object {
         },
       ],
     },
-    Object {
-      "condition": "ThisNode.IsOfClass(\\"Subject\\", \\"BisCore\\")",
-      "imageIdExpression": "IIF(this.Parent.Id = NULL, \\"icon-imodel-hollow-2\\", \\"icon-folder\\")",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-model\\"",
-      "ruleType": "ImageIdOverride",
-    },
   ],
 }
 `;
@@ -2042,6 +1968,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-imodel-hollow-2\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -2070,6 +1997,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-folder\\"",
             "isSubject": "true",
           },
           "ruleType": "ExtendedData",
@@ -2138,6 +2066,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -2189,6 +2118,7 @@ Object {
         },
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -2235,6 +2165,7 @@ Object {
       "customizationRules": Array [
         Object {
           "items": Object {
+            "icon": "\\"icon-model\\"",
             "isModel": "true",
           },
           "ruleType": "ExtendedData",
@@ -2262,16 +2193,6 @@ Object {
           "specType": "RelatedInstanceNodes",
         },
       ],
-    },
-    Object {
-      "condition": "ThisNode.IsOfClass(\\"Subject\\", \\"BisCore\\")",
-      "imageIdExpression": "IIF(this.Parent.Id = NULL, \\"icon-imodel-hollow-2\\", \\"icon-folder\\")",
-      "ruleType": "ImageIdOverride",
-    },
-    Object {
-      "condition": "ThisNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
-      "imageIdExpression": "\\"icon-model\\"",
-      "ruleType": "ImageIdOverride",
     },
   ],
 }

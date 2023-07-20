@@ -8,13 +8,13 @@ import { useEffect } from "react";
 import { TreeImageLoader, TreeNodeRenderer } from "@itwin/components-react";
 import { Checkbox } from "@itwin/itwinui-react";
 import { useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
-import { TreeRenderer } from "./TreeRenderer";
+import { TreeRenderer } from "./common/TreeRenderer";
 
+import type { TreeRendererBaseProps } from "./common/TreeRenderer";
 import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
 import type { NodeCheckboxRenderProps } from "@itwin/core-react";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { VisibilityTreeFilterInfo } from "./Common";
-import type { TreeRendererBaseProps } from "./TreeRenderer";
+import type { VisibilityTreeFilterInfo } from "./common/Types";
 
 /**
  * This constant is taken from `@itwin/core-react`.
@@ -83,7 +83,7 @@ export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRoot
         node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }} // if we want to disable TreeNodeRenderer style calculations for tree nodes, we need to override these values.
         checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
           <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
-            <VisibilityTreeNodeCheckbox { ...checkboxProps }/>
+            <VisibilityTreeNodeCheckbox {...checkboxProps} />
           </div>
         )}
         descriptionEnabled={descriptionEnabled}

@@ -9,18 +9,19 @@ import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-r
 import { useDisposable } from "@itwin/core-react";
 import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { ClassGroupingOption } from "../Common";
+import { addCustomTreeNodeItemLabelRenderer } from "../common/TreeNodeRenderer";
+import { ClassGroupingOption } from "../common/Types";
+import { combineTreeNodeItemCustomizations, showTreeNodeItemCheckbox } from "../common/Utils";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
-import { createRuleset, createSearchRuleset, customizeModelsTreeNodeItem } from "./Utils";
+import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps } from "../Common";
+import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
-import type { TreeContextMenuProps } from "../ContextMenu";
 
 const PAGING_SIZE = 20;
 
@@ -44,7 +45,7 @@ export interface ModelsTreeHierarchyConfiguration {
  * Props for [[ModelsTree]] component.
  * @public
  */
-export interface ModelsTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
+export interface ModelsTreeProps extends BaseFilterableTreeProps {
   /**
    * Predicate which indicates whether node can be selected or no
    */
@@ -97,6 +98,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const treeRenderer = createVisibilityTreeRenderer({
     contextMenuItems: props.contextMenuItems,
+    nodeLabelRenderer: props.nodeLabelRenderer,
     nodeRendererProps: {
       iconsEnabled: true,
       descriptionEnabled: false,
@@ -134,6 +136,12 @@ export function ModelsTree(props: ModelsTreeProps) {
   );
 }
 
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
+  addCustomTreeNodeItemLabelRenderer,
+  showTreeNodeItemCheckbox,
+  addModelsTreeNodeItemIcons,
+]);
+
 function useModelsTreeNodeLoader(props: ModelsTreeProps) {
   const rulesets = {
     general: useMemo(() => createRuleset({
@@ -153,14 +161,14 @@ function useModelsTreeNodeLoader(props: ModelsTreeProps) {
     appendChildrenCountForGroupingNodes: (props.hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
-    customizeTreeNodeItem: customizeModelsTreeNodeItem,
+    customizeTreeNodeItem,
   });
   const { nodeLoader: searchNodeLoader, onItemsRendered: onSearchItemsRendered } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: rulesets.search,
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
-    customizeTreeNodeItem: customizeModelsTreeNodeItem,
+    customizeTreeNodeItem,
   });
 
   const activeNodeLoader = props.filterInfo?.filter ? searchNodeLoader : nodeLoader;

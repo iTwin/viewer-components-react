@@ -6,13 +6,14 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { waitFor } from "@testing-library/react";
-import { TreeContextMenuItem } from "../../components/trees/ContextMenu";
-import { TreeRenderer } from "../../components/trees/TreeRenderer";
-import { createSimpleTreeModelNode } from "./Common";
+import { TreeContextMenuItem } from "../../../components/trees/common/ContextMenu";
+import { TreeRenderer } from "../../../components/trees/common/TreeRenderer";
+import { registerRenderers } from "../../../components/trees/common/Utils";
+import { renderWithUser } from "../../TestUtils";
+import { createSimpleTreeModelNode } from "../Common";
 
 import type { ITreeNodeLoader, TreeActions, TreeModel, VisibleTreeNodes } from "@itwin/components-react";
-import type { TreeRendererProps } from "../../components/trees/TreeRenderer";
-import { renderWithUser } from "../TestUtils";
+import type { TreeRendererProps } from "../../../components/trees/common/TreeRenderer";
 
 describe("TreeRenderer", () => {
   const nodeLoader = {} as ITreeNodeLoader;
@@ -65,7 +66,7 @@ describe("TreeRenderer", () => {
   });
 
   it("renders context menu without size if item is `null`", async () => {
-    const { user, getByText, queryByRole, getByRole } = renderWithUser(
+    const { user, getByText, getByRole } = renderWithUser(
       <TreeRenderer
         {...initialProps}
         contextMenuItems={[
@@ -104,5 +105,38 @@ describe("TreeRenderer", () => {
     // wait for item to disappear
     await waitFor(() => expect(queryByText("Test Item")).to.be.null);
     expect(selectStub).to.be.calledOnce;
+  });
+
+  describe("custom labels", () => {
+    let cleanup: () => void;
+
+    before(() => {
+      cleanup = registerRenderers();
+    });
+
+    after(() => {
+      cleanup();
+    });
+
+    it("renders using default renderer", async () => {
+      const { queryByText } = renderWithUser(
+        <TreeRenderer
+          {...initialProps}
+        />
+      );
+
+      await waitFor(() => expect(queryByText("Test Node")).to.not.be.null);
+    });
+
+    it("renders using custom renderer", async () => {
+      const { queryByText } = renderWithUser(
+        <TreeRenderer
+          {...initialProps}
+          nodeLabelRenderer={() => "Custom label"}
+        />
+      );
+
+      await waitFor(() => expect(queryByText("Custom label")).to.not.be.null);
+    });
   });
 });

@@ -26,7 +26,7 @@ import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, renderWithUser, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
-import { ClassGroupingOption } from "../../../components/trees/Common";
+import { ClassGroupingOption } from "../../../components/trees/common/Types";
 
 import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTree";
 import type { TreeNodeItem } from "@itwin/components-react";

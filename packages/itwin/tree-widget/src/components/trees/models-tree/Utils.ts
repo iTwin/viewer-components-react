@@ -606,14 +606,8 @@ function createModelSubModelsSpecification({ elementClassSpecification, showEmpt
 }
 
 /** @internal */
-export function customizeModelsTreeNodeItem(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) {
-  item.isCheckboxVisible = true;
-  item.isCheckboxDisabled = true;
-  item.icon = getIcon(node);
-}
-
-function getIcon(node: Partial<Node>) {
-  return node.key && NodeKey.isClassGroupingNodeKey(node.key)
+export function addModelsTreeNodeItemIcons(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) {
+  item.icon = node.key && NodeKey.isClassGroupingNodeKey(node.key)
     ? node.extendedData?.groupIcon
     : node.extendedData?.icon;
 }

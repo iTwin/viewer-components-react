@@ -5,6 +5,7 @@
 
 import { UiError } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
+import { registerRenderers } from "./components/trees/common/Utils";
 
 import type { Localization } from "@itwin/core-common";
 import type { LocalizationOptions } from "@itwin/core-i18n";
@@ -16,6 +17,7 @@ import type { LocalizationOptions } from "@itwin/core-i18n";
 export class TreeWidget {
   private static _i18n?: Localization;
   private static _initialized?: boolean;
+  private static _dispose?: () => void;
 
   /**
    * Called by IModelApp to initialize the Tree Widget
@@ -26,15 +28,22 @@ export class TreeWidget {
 
     TreeWidget._initialized = true;
     TreeWidget._i18n = i18n ?? IModelApp.localization;
-
+    TreeWidget._dispose = registerRenderers();
     return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace);
   }
 
   /** Unregisters the TreeWidget internationalization service namespace */
   public static terminate() {
-    if (TreeWidget._i18n)
-      TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace); // eslint-disable-line @itwin/no-internal
+    if (TreeWidget._i18n) {
+      TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace);
+    }
+
+    if (TreeWidget._dispose) {
+      TreeWidget._dispose();
+    }
+
     TreeWidget._i18n = undefined;
+    TreeWidget._dispose = undefined;
     TreeWidget._initialized = false;
   }
 
