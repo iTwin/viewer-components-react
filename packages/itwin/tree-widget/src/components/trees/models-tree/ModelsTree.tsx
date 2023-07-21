@@ -10,7 +10,7 @@ import { useDisposable } from "@itwin/core-react";
 import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { ClassGroupingOption } from "../common/Types";
-import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations, showTreeNodeItemCheckbox } from "../common/Utils";
+import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
@@ -137,7 +137,7 @@ export function ModelsTree(props: ModelsTreeProps) {
 
 const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
   addCustomTreeNodeItemLabelRenderer,
-  showTreeNodeItemCheckbox,
+  addTreeNodeItemCheckbox,
   addModelsTreeNodeItemIcons,
 ]);
 

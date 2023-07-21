@@ -27,7 +27,7 @@ export function addCustomTreeNodeItemLabelRenderer(item: Partial<DelayLoadedTree
 }
 
 /** @internal */
-export function showTreeNodeItemCheckbox(item: Partial<DelayLoadedTreeNodeItem>) {
+export function addTreeNodeItemCheckbox(item: Partial<DelayLoadedTreeNodeItem>) {
   item.isCheckboxVisible = true;
   item.isCheckboxDisabled = true;
   item.checkBoxState = CheckBoxState.Off;

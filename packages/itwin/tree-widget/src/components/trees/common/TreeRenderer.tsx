@@ -9,13 +9,13 @@ import { TreeNodeRendererContextProvider } from "./TreeNodeRenderer";
 
 import type { TreeRendererProps as ComponentsTreeRendererProps } from "@itwin/components-react";
 import type { TreeContextMenuProps } from "./ContextMenu";
-import type { TreeNodeRendererContext } from "./TreeNodeRenderer";
+import type { TreeNodeRendererProps } from "./TreeNodeRenderer";
 
 /**
  * Base props for [[TreeRenderer]] component.
  * @public
  */
-export type TreeRendererBaseProps = TreeContextMenuProps & TreeNodeRendererContext;
+export type TreeRendererBaseProps = TreeContextMenuProps & TreeNodeRendererProps;
 
 /**
  * Props for [[TreeRenderer]] component.

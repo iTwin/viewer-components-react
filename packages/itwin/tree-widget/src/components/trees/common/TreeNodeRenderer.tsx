@@ -13,19 +13,33 @@ import type {
 } from "@itwin/components-react";
 
 /**
+ * Context for rendering label value.
+ * @public
+ */
+export interface LabelRendererContext {
+  /** Style that should be applied to the rendered element. */
+  style?: React.CSSProperties;
+  /** Callback to highlight text. */
+  textHighlighter?: (text: string) => React.ReactNode;
+}
+
+/**
  * Props for custom node renderer.
  * @public
  */
 export interface TreeNodeLabelRendererProps {
+  /** Tree node to rendered label for. */
   node: TreeModelNode;
-  context?: PropertyValueRendererContext;
+  /** Context for rendering node's label value. */
+  context?: LabelRendererContext;
 }
 
 /**
  * Props for customizing node rendering.
  * @public
  */
-export interface TreeNodeRendererContext {
+export interface TreeNodeRendererProps {
+  /** Custom renderer for node's label. */
   nodeLabelRenderer?: (props: TreeNodeLabelRendererProps) => ReactNode;
 }
 
@@ -34,8 +48,10 @@ export interface TreeNodeRendererContext {
  * @public
  */
 export interface DefaultLabelRendererProps {
+  /** Label that should be rendered. */
   label: PropertyRecord;
-  context?: PropertyValueRendererContext;
+  /** Context for rendering label value. */
+  context?: LabelRendererContext;
 }
 
 /**
@@ -48,7 +64,7 @@ export function DefaultLabelRenderer({ label, context }: DefaultLabelRendererPro
 }
 
 /** @internal */
-export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererContext {
+export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererProps {
   node: TreeModelNode;
   children: ReactNode;
 }
@@ -71,8 +87,12 @@ export class TreeNodeLabelRenderer implements IPropertyValueRenderer {
     return record.property.renderer?.name === TREE_NODE_LABEL_RENDERER;
   }
 
-  public render(record: PropertyRecord, _context?: PropertyValueRendererContext | undefined): ReactNode {
-    return <LabelRenderer record={record} />;
+  public render(record: PropertyRecord, context?: PropertyValueRendererContext | undefined): ReactNode {
+    const labelContext: LabelRendererContext = {
+      style: context?.style,
+      textHighlighter: context?.textHighlighter,
+    };
+    return <LabelRenderer record={record} context={labelContext} />;
   }
 }
 
@@ -85,7 +105,7 @@ const treeNodeLabelRendererContext = createContext<TreeNodeLabelRendererContext 
 
 interface LabelRendererProps {
   record: PropertyRecord;
-  context?: PropertyValueRendererContext;
+  context?: LabelRendererContext;
 }
 
 function LabelRenderer({ record, context }: LabelRendererProps) {

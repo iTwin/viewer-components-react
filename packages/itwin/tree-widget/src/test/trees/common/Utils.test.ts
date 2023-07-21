@@ -9,7 +9,7 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { CheckBoxState } from "@itwin/core-react";
 import { TREE_NODE_LABEL_RENDERER } from "../../../components/trees/common/TreeNodeRenderer";
 import {
-  addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations, showTreeNodeItemCheckbox,
+  addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations,
 } from "../../../components/trees/common/Utils";
 
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
@@ -31,11 +31,11 @@ describe("combineTreeNodeItemCustomizations", () => {
   });
 });
 
-describe("showTreeNodeItemCheckbox", () => {
+describe("addTreeNodeItemCheckbox", () => {
   it("enables checkbox", () => {
     const item: Partial<DelayLoadedTreeNodeItem> = {};
 
-    showTreeNodeItemCheckbox(item);
+    addTreeNodeItemCheckbox(item);
     expect(item.isCheckboxVisible).to.be.true;
     expect(item.isCheckboxDisabled).to.be.true;
     expect(item.checkBoxState).to.be.eq(CheckBoxState.Off);
