@@ -7,7 +7,6 @@
 
 import type { AbstractTreeNodeLoaderWithProvider } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
-import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import { HighlightableTreeProps } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
@@ -15,16 +14,16 @@ import type { IDisposable } from "@itwin/core-bentley";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPropertyValueRenderer } from "@itwin/components-react";
 import type { Localization } from "@itwin/core-common";
 import type { LocalizationOptions } from "@itwin/core-i18n";
 import type { MouseEvent as MouseEvent_2 } from "react";
 import type { NodeCheckboxRenderProps } from "@itwin/core-react";
 import { NodeKey } from "@itwin/presentation-common";
+import type { PropertyRecord } from "@itwin/appui-abstract";
+import type { PropertyValueRendererContext } from "@itwin/components-react";
 import type { PropsWithChildren } from "react";
 import type { ReactNode } from "react";
-import type { Node as Node_2 } from "@itwin/presentation-common";
-import type { NodeCheckboxRenderProps } from "@itwin/core-react";
-import { NodeKey } from "@itwin/presentation-common";
 import { Ref } from "react";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { SelectionMode as SelectionMode_2 } from "@itwin/components-react";
@@ -56,18 +55,11 @@ export interface BaseFilterableTreeProps extends BaseTreeProps {
 }
 
 // @public
-export interface BaseTreeProps {
+export interface BaseTreeProps extends TreeRendererBaseProps {
   height: number;
   iModel: IModelConnection;
   selectionMode?: SelectionMode_2;
   width: number;
-}
-
-// @internal (undocumented)
-export class CachingElementIdsContainer {
-  constructor(_generator: AsyncGenerator<Id64String>);
-  // (undocumented)
-  getElementIds(): AsyncGenerator<any, void, unknown>;
 }
 
 // @public
@@ -103,7 +95,7 @@ export interface CategoryInfo {
 export function CategoryTree(props: CategoryTreeProps): JSX.Element;
 
 // @public
-export interface CategoryTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
+export interface CategoryTreeProps extends BaseFilterableTreeProps {
   activeView: Viewport;
   allViewports?: boolean;
   categories: CategoryInfo[];
@@ -165,28 +157,22 @@ export interface ContextMenuItemProps {
   node: TreeModelNode;
 }
 
-// @internal (undocumented)
-export function createRuleset(props: CreateRulesetProps): Ruleset;
-
-// @internal (undocumented)
-export type CreateRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping"> & {
-  enableElementsClassGrouping?: boolean;
-};
-
-// @internal (undocumented)
-export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset;
-
-// @internal (undocumented)
-export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping">;
-
 // @public
 export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
 
 // @public
 export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps_2) => JSX.Element;
 
-// @internal (undocumented)
-export function customizeModelsTreeNodeItem(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node_2>): void;
+// @public
+export function DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): JSX.Element;
+
+// @public
+export interface DefaultLabelRendererProps {
+  // (undocumented)
+  context?: PropertyValueRendererContext;
+  // (undocumented)
+  label: PropertyRecord;
+}
 
 // @alpha
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
@@ -199,7 +185,7 @@ export const ExternalSourcesTreeComponent: {
 };
 
 // @alpha
-export type ExternalSourcesTreeProps = BaseTreeProps & TreeContextMenuProps;
+export type ExternalSourcesTreeProps = BaseTreeProps;
 
 // @public
 export function hideAllCategories(categories: string[], viewport: Viewport): Promise<void>;
@@ -221,7 +207,7 @@ export const IModelContentTreeComponent: {
 export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
 
 // @public
-export type IModelContentTreeProps = BaseTreeProps & TreeContextMenuProps;
+export type IModelContentTreeProps = BaseTreeProps;
 
 // @public
 export function invertAllCategories(categories: CategoryInfo[], viewport: Viewport): Promise<void>;
@@ -291,7 +277,7 @@ export enum ModelsTreeNodeType {
 }
 
 // @public
-export interface ModelsTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
+export interface ModelsTreeProps extends BaseFilterableTreeProps {
   activeView: Viewport;
   // @alpha
   enableHierarchyAutoUpdate?: boolean;
@@ -398,6 +384,9 @@ export class SubjectModelIdsCache {
 // @public
 export function toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise<void>;
 
+// @internal (undocumented)
+export const TREE_NODE_LABEL_RENDERER = "visibility-tree-node-label";
+
 // @public
 export function TreeContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<TreeContextMenuItemProps>): JSX.Element;
 
@@ -422,11 +411,44 @@ export interface TreeDefinition {
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
 }
 
-// @public
-export function TreeRenderer({ contextMenuItems, nodeRenderer, ...restProps }: TreeRendererProps): JSX.Element;
+// @internal (undocumented)
+export class TreeNodeLabelRenderer implements IPropertyValueRenderer {
+  // (undocumented)
+  canRender(record: PropertyRecord, _context?: PropertyValueRendererContext | undefined): boolean;
+  // (undocumented)
+  render(record: PropertyRecord, _context?: PropertyValueRendererContext | undefined): ReactNode;
+}
 
 // @public
-export type TreeRendererBaseProps = TreeContextMenuProps;
+export interface TreeNodeLabelRendererProps {
+  // (undocumented)
+  context?: PropertyValueRendererContext;
+  // (undocumented)
+  node: TreeModelNode;
+}
+
+// @public
+export interface TreeNodeRendererContext {
+  // (undocumented)
+  nodeLabelRenderer?: (props: TreeNodeLabelRendererProps) => ReactNode;
+}
+
+// @internal (undocumented)
+export function TreeNodeRendererContextProvider({ nodeLabelRenderer, node, children }: TreeNodeRendererContextProviderProps): JSX.Element;
+
+// @internal (undocumented)
+export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererContext {
+  // (undocumented)
+  children: ReactNode;
+  // (undocumented)
+  node: TreeModelNode;
+}
+
+// @public
+export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, ...restProps }: TreeRendererProps): JSX.Element;
+
+// @public
+export type TreeRendererBaseProps = TreeContextMenuProps & TreeNodeRendererContext;
 
 // @public
 export type TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps;

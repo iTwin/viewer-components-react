@@ -9,9 +9,8 @@ import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-r
 import { useDisposable } from "@itwin/core-react";
 import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { addCustomTreeNodeItemLabelRenderer } from "../common/TreeNodeRenderer";
 import { ClassGroupingOption } from "../common/Types";
-import { combineTreeNodeItemCustomizations, showTreeNodeItemCheckbox } from "../common/Utils";
+import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations, showTreeNodeItemCheckbox } from "../common/Utils";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";

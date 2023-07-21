@@ -6,9 +6,8 @@
 import { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
-import { addCustomTreeNodeItemLabelRenderer } from "../common/TreeNodeRenderer";
 import { TreeRenderer } from "../common/TreeRenderer";
-import { combineTreeNodeItemCustomizations } from "../common/Utils";
+import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseTreeProps } from "../common/Types";

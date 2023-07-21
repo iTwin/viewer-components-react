@@ -9,7 +9,7 @@ import { PrimitivePropertyValueRenderer } from "@itwin/components-react";
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
-  DelayLoadedTreeNodeItem, IPropertyValueRenderer, PropertyValueRendererContext, TreeModelNode,
+  IPropertyValueRenderer, PropertyValueRendererContext, TreeModelNode,
 } from "@itwin/components-react";
 
 /**
@@ -64,15 +64,6 @@ export function TreeNodeRendererContextProvider({ nodeLabelRenderer, node, child
 
 /** @internal */
 export const TREE_NODE_LABEL_RENDERER = "visibility-tree-node-label";
-
-/** @internal */
-export function addCustomTreeNodeItemLabelRenderer(item: Partial<DelayLoadedTreeNodeItem>) {
-  if (!item.label) {
-    return;
-  }
-
-  item.label.property.renderer = { name: TREE_NODE_LABEL_RENDERER };
-}
 
 /** @internal */
 export class TreeNodeLabelRenderer implements IPropertyValueRenderer {

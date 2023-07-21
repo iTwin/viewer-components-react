@@ -6,9 +6,8 @@
 import "../VisibilityTreeBase.scss";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader, useUnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
-import { addCustomTreeNodeItemLabelRenderer } from "../common/TreeNodeRenderer";
 import { TreeRenderer } from "../common/TreeRenderer";
-import { combineTreeNodeItemCustomizations } from "../common/Utils";
+import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
 import type { Ruleset } from "@itwin/presentation-common";

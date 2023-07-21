@@ -5,8 +5,12 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
+import { PropertyRecord } from "@itwin/appui-abstract";
 import { CheckBoxState } from "@itwin/core-react";
-import { combineTreeNodeItemCustomizations, showTreeNodeItemCheckbox } from "../../../components/trees/common/Utils";
+import { TREE_NODE_LABEL_RENDERER } from "../../../components/trees/common/TreeNodeRenderer";
+import {
+  addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations, showTreeNodeItemCheckbox,
+} from "../../../components/trees/common/Utils";
 
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { Node } from "@itwin/presentation-common";
@@ -35,5 +39,21 @@ describe("showTreeNodeItemCheckbox", () => {
     expect(item.isCheckboxVisible).to.be.true;
     expect(item.isCheckboxDisabled).to.be.true;
     expect(item.checkBoxState).to.be.eq(CheckBoxState.Off);
+  });
+});
+
+describe("addCustomTreeNodeItemLabelRenderer", () => {
+  it("sets property renderer name", () => {
+    const item: Partial<DelayLoadedTreeNodeItem> = {
+      label: PropertyRecord.fromString("Label"),
+    };
+    addCustomTreeNodeItemLabelRenderer(item);
+    expect(item.label?.property.renderer?.name).to.be.eq(TREE_NODE_LABEL_RENDERER);
+  });
+
+  it("does nothing if item does not have label", () => {
+    const item: Partial<DelayLoadedTreeNodeItem> = {};
+    addCustomTreeNodeItemLabelRenderer(item);
+    expect(item.label).to.be.undefined;
   });
 });

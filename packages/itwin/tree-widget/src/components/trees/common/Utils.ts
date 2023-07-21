@@ -18,6 +18,15 @@ export function combineTreeNodeItemCustomizations(customizations: Array<(item: P
 }
 
 /** @internal */
+export function addCustomTreeNodeItemLabelRenderer(item: Partial<DelayLoadedTreeNodeItem>) {
+  if (!item.label) {
+    return;
+  }
+
+  item.label.property.renderer = { name: TREE_NODE_LABEL_RENDERER };
+}
+
+/** @internal */
 export function showTreeNodeItemCheckbox(item: Partial<DelayLoadedTreeNodeItem>) {
   item.isCheckboxVisible = true;
   item.isCheckboxDisabled = true;
