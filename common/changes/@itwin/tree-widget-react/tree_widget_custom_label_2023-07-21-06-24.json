@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Added ability to customize tree node label",
+      "comment": "Trees: Added ability to customize tree node label",
       "type": "none"
     }
   ],

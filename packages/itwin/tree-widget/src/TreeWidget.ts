@@ -36,14 +36,14 @@ export class TreeWidget {
   public static terminate() {
     if (TreeWidget._i18n) {
       TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace);
+      TreeWidget._i18n = undefined;
     }
 
     if (TreeWidget._dispose) {
       TreeWidget._dispose();
+      TreeWidget._dispose = undefined;
     }
 
-    TreeWidget._i18n = undefined;
-    TreeWidget._dispose = undefined;
     TreeWidget._initialized = false;
   }
 
