@@ -91,7 +91,7 @@ export const GroupPropertyTable = ({
                     </MenuItem>,
                   ].flatMap((p) => p)}
                 >
-                  <IconButton styleType='borderless'>
+                  <IconButton styleType='borderless' title='Property Options'>
                     <SvgMore
                       style={{
                         width: "16px",
