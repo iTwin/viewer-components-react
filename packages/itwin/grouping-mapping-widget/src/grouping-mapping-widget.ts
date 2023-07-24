@@ -11,8 +11,9 @@ export { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig, GroupingMappi
 export * from "@itwin/insights-client";
 
 /** Internal components for custom UIs */
-export { Mappings, MappingsProps } from "./widget/components/Mapping";
+export { Mappings, MappingsProps, useMappingsOperations, MappingsOperationsProps } from "./widget/components/Mappings";
 export { MappingAction, MappingActionProps } from "./widget/components/MappingAction";
+export { MappingsUI, MappingsUIProps } from "./widget/components/MappingsUI";
 export { GroupingMappingContext, GroupingMappingContextProps } from "./widget/components/GroupingMappingContext";
 export { Groupings, GroupingProps } from "./widget/components/Grouping";
 export { GroupsVisualization, GroupsVisualizationProps } from "./widget/components/GroupsVisualization";
