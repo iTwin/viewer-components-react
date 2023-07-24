@@ -66,11 +66,13 @@ const processGroupVisualization = async (
   hiddenGroupsIds: Set<string>,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   doEmphasizeElements: boolean,
-  groupColor: string
+  groupColor: string,
+  setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void,
 ) => {
   const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
   const hilitedIds = result.ids;
   overrideElements(hilitedIds, groupColor, FeatureOverrideType.ColorAndAlpha);
+  setNumberOfVisualizedGroups((numberOfVisualizedGroups) => numberOfVisualizedGroups + 1);
 
   doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
 
@@ -82,7 +84,8 @@ export const visualizeGroupColors = async (
   groups: Group[],
   hiddenGroupsIds: Set<string>,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
-  doEmphasizeElements: boolean = true
+  setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void,
+  doEmphasizeElements: boolean = true,
 ) => {
   clearEmphasizedOverriddenElements();
 
@@ -93,7 +96,8 @@ export const visualizeGroupColors = async (
       hiddenGroupsIds,
       hilitedElementsQueryCache,
       doEmphasizeElements,
-      getGroupColor(index)
+      getGroupColor(index),
+      setNumberOfVisualizedGroups,
     )
   );
 

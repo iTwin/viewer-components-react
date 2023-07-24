@@ -25,7 +25,6 @@ import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { BlockingOverlay } from "./BlockingOverlay";
 
 export interface GroupsVisualizationProps extends GroupingProps {
   isNonEmphasizedSelectable?: boolean;
@@ -45,12 +44,14 @@ export const GroupsVisualization = ({
   }
   const firstUpdate = useRef(true);
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
+  const [isVisualizing, setIsVisualizing] =useState<boolean>(false);
   const {
     hilitedElementsQueryCache,
     groups,
     hiddenGroupsIds,
     showGroupColor,
     setHiddenGroupsIds,
+    setNumberOfVisualizedGroups,
   } = useGroupHilitedElementsContext();
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
@@ -67,6 +68,7 @@ export const GroupsVisualization = ({
 
   const visualizeGroupColorsWrapper = useCallback(
     async () => {
+      setIsVisualizing(true)
       setLoadingQuery(true);
       const groupsCopy = [...groups];
       await visualizeGroupColors(
@@ -74,10 +76,13 @@ export const GroupsVisualization = ({
         groupsCopy,
         hiddenGroupsIds,
         hilitedElementsQueryCache,
-        emphasizeElements
+        setNumberOfVisualizedGroups,
+        emphasizeElements,  
       );
       isNonEmphasizedSelectable && clearEmphasizedElements();
       setLoadingQuery(false);
+      setIsVisualizing(false)
+      setNumberOfVisualizedGroups(0);
     },
     [
       iModelConnection,
@@ -201,22 +206,20 @@ export const GroupsVisualization = ({
   ].flat(), [groups, hideSingleGroupWrapper, isLoadingQuery, showGroup, showGroupColor]);
 
   return (
-    <>
-      <BlockingOverlay isVisible={isLoadingQuery} />
-      <div className="gmw-groups-vis-container">
-        <GroupVisualizationActions
-          isLoadingQuery={isLoadingQuery}
-          showAll={showAll}
-          hideAll={hideAll}
-        />
-        <Groupings
-          onClickGroupModify={onModify}
-          onClickAddGroup={onAddGroup}
-          actionButtonRenderers={groupActionButtonRenderers}
-          {...rest}
-          disableActions={isLoadingQuery}
-        />
-      </div>
-    </>
+    <div className="gmw-groups-vis-container">
+      <GroupVisualizationActions
+        isLoadingQuery={isLoadingQuery}
+        showAll={showAll}
+        hideAll={hideAll}
+      />
+      <Groupings
+        onClickGroupModify={onModify}
+        onClickAddGroup={onAddGroup}
+        actionButtonRenderers={groupActionButtonRenderers}
+        {...rest}
+        disableActions={isLoadingQuery}
+        isVisualizing = {isVisualizing}
+      />
+    </div>
   );
 };

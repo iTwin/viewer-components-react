@@ -7,6 +7,7 @@ import type { CreateTypeFromInterface } from "../utils";
 import {
   ButtonGroup,
   IconButton,
+  ProgressLinear,
 } from "@itwin/itwinui-react";
 import {
   SvgRefresh,
@@ -50,6 +51,7 @@ export interface GroupingProps {
     displayLabel: string,
   ) => void;
   disableActions?: boolean;
+  isVisualizing ?: boolean;
 }
 
 const fetchGroups = async (
@@ -84,9 +86,10 @@ export const Groupings = ({
   onClickGroupModify,
   onClickRenderContextCustomUI,
   disableActions,
+  isVisualizing,
 }: GroupingProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const { groups, setGroups } = useGroupHilitedElementsContext();
+  const { groups, setGroups, numberOfVisualizedGroups } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] =
     useGroupingMappingCustomUI().customUIs.filter(
@@ -134,7 +137,7 @@ export const Groupings = ({
   return (
     <>
       <div className="gmw-groups-container">
-        <div className="gmw-toolbar">
+        <div className={ `gmw-toolbar ${ isVisualizing ? "gmw-visualizing-toolbar" : "" }` }>
           {onClickAddGroup && groupUIs.length > 0 && (
             <GroupsAddButton
               disabled={disableActions}
@@ -153,6 +156,14 @@ export const Groupings = ({
             </IconButton>
           </ButtonGroup>
         </div>
+
+        {isVisualizing && (numberOfVisualizedGroups !== undefined) &&
+        <div className = "gmw-group-progress-bar">
+          <ProgressLinear
+            value={ 25 + ( numberOfVisualizedGroups / groups.length * 65 ) }
+          />
+        </div>}
+
         {isLoading ? (
           <LoadingOverlay />
         ) : groups.length === 0 ? (
