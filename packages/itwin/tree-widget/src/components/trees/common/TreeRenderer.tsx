@@ -5,15 +5,17 @@
 
 import { TreeRenderer as ComponentsTreeRenderer, TreeNodeRenderer } from "@itwin/components-react";
 import { useContextMenu } from "./ContextMenu";
+import { TreeNodeRendererContextProvider } from "./TreeNodeRenderer";
 
 import type { TreeRendererProps as ComponentsTreeRendererProps } from "@itwin/components-react";
 import type { TreeContextMenuProps } from "./ContextMenu";
+import type { TreeNodeRendererProps } from "./TreeNodeRenderer";
 
 /**
  * Base props for [[TreeRenderer]] component.
  * @public
  */
-export type TreeRendererBaseProps = TreeContextMenuProps;
+export type TreeRendererBaseProps = TreeContextMenuProps & TreeNodeRendererProps;
 
 /**
  * Props for [[TreeRenderer]] component.
@@ -25,16 +27,19 @@ export type TreeRendererProps = ComponentsTreeRendererProps & TreeRendererBasePr
  * Base tree renderer for visibility trees.
  * @public
  */
-export function TreeRenderer({ contextMenuItems, nodeRenderer, ...restProps }: TreeRendererProps) {
+export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, ...restProps }: TreeRendererProps) {
   const { onContextMenu, renderContextMenu } = useContextMenu({ contextMenuItems });
 
   return (
     <>
       <ComponentsTreeRenderer
         {...restProps}
-        nodeRenderer={(nodeProps) => nodeRenderer
-          ? nodeRenderer({ ...nodeProps, onContextMenu })
-          : <TreeNodeRenderer {...nodeProps} onContextMenu={onContextMenu} />
+        nodeRenderer={(nodeProps) =>
+          <TreeNodeRendererContextProvider node={nodeProps.node} nodeLabelRenderer={nodeLabelRenderer}>
+            {nodeRenderer
+              ? nodeRenderer({ ...nodeProps, onContextMenu })
+              : <TreeNodeRenderer {...nodeProps} onContextMenu={onContextMenu} />}
+          </TreeNodeRendererContextProvider>
         }
       />
       {renderContextMenu()}

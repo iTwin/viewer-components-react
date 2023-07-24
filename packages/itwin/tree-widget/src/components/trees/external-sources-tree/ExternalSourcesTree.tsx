@@ -6,14 +6,12 @@
 import "../VisibilityTreeBase.scss";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader, useUnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
-import { TreeContextMenuProps } from "../ContextMenu";
-import { TreeRenderer } from "../TreeRenderer";
+import { TreeRenderer } from "../common/TreeRenderer";
+import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
-import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
-import type { Node, Ruleset } from "@itwin/presentation-common";
-import type { BaseTreeProps } from "../Common";
-
+import type { Ruleset } from "@itwin/presentation-common";
+import type { BaseTreeProps } from "../common/Types";
 /**
  * Presentation rules used by ControlledCategoriesTree
  * @internal
@@ -26,7 +24,7 @@ const PAGING_SIZE = 20;
  * Props for the [[ExternalSourcesTree]] component
  * @alpha
  */
-export type ExternalSourcesTreeProps = BaseTreeProps & TreeContextMenuProps;
+export type ExternalSourcesTreeProps = BaseTreeProps;
 
 /**
  * Tree which displays a hierarchy of ExternalSources and their elements.
@@ -51,12 +49,15 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         width={props.width}
         height={props.height}
         iconsEnabled={true}
-        treeRenderer={(treeProps) => <TreeRenderer {...treeProps} contextMenuItems={props.contextMenuItems} />}
+        treeRenderer={(treeProps) => <TreeRenderer {...treeProps} contextMenuItems={props.contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} />}
       />
     </div>
   );
 }
 
-function customizeTreeNodeItem(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) {
-  item.icon = node.extendedData?.imageId;
-}
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
+  addCustomTreeNodeItemLabelRenderer,
+  (item, node) => {
+    item.icon = node.extendedData?.imageId;
+  },
+]);

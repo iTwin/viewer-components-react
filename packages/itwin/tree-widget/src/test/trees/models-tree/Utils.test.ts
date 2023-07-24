@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { StandardNodeTypes } from "@itwin/presentation-common";
-import { createRuleset, createSearchRuleset, customizeModelsTreeNodeItem } from "../../../components/trees/models-tree/Utils";
+import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "../../../components/trees/models-tree/Utils";
 
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { Node } from "@itwin/presentation-common";
@@ -42,7 +42,7 @@ describe("createSearchRuleset", () => {
   });
 });
 
-describe("customizeModelsTreeNodeItem", () => {
+describe("addModelsTreeNodeItemIcons", () => {
   it("sets icon from extended data", () => {
     const item: Partial<DelayLoadedTreeNodeItem> = {};
     const node: Partial<Node> = {
@@ -50,7 +50,7 @@ describe("customizeModelsTreeNodeItem", () => {
         icon: "test-icon",
       },
     };
-    customizeModelsTreeNodeItem(item, node);
+    addModelsTreeNodeItemIcons(item, node);
     expect(item.icon).to.be.eq("test-icon");
   });
 
@@ -69,15 +69,7 @@ describe("customizeModelsTreeNodeItem", () => {
         groupIcon: "test-group-icon",
       },
     };
-    customizeModelsTreeNodeItem(item, node);
+    addModelsTreeNodeItemIcons(item, node);
     expect(item.icon).to.be.eq("test-group-icon");
-  });
-
-  it("sets checkbox to be visible and disabled", () => {
-    const item: Partial<DelayLoadedTreeNodeItem> = {};
-    const node: Partial<Node> = {};
-    customizeModelsTreeNodeItem(item, node);
-    expect(item.isCheckboxVisible).to.be.true;
-    expect(item.isCheckboxDisabled).to.be.true;
   });
 });

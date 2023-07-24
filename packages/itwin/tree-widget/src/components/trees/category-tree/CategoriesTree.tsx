@@ -11,15 +11,15 @@ import { useDisposable } from "@itwin/core-react";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
+import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
-import type { BaseFilterableTreeProps } from "../Common";
+import type { BaseFilterableTreeProps } from "../common/Types";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
-import type { TreeContextMenuProps } from "../ContextMenu";
 
 const PAGING_SIZE = 20;
 
@@ -33,7 +33,7 @@ export const RULESET_CATEGORIES: Ruleset = require("./Categories.json"); // esli
  * Properties for the [[CategoryTree]] component
  * @public
  */
-export interface CategoryTreeProps extends BaseFilterableTreeProps, TreeContextMenuProps {
+export interface CategoryTreeProps extends BaseFilterableTreeProps {
   /** Flag for accommodating all viewports */
   allViewports?: boolean;
   /** Active viewport */
@@ -63,6 +63,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     imodel: props.iModel,
     ruleset: RULESET_CATEGORIES,
     pagingSize: PAGING_SIZE,
+    customizeTreeNodeItem,
   });
 
   const { filteredNodeLoader, isFiltering, nodeHighlightingProps } = useVisibilityTreeFiltering(nodeLoader, props.filterInfo, props.onFilterApplied);
@@ -83,6 +84,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const treeRenderer = createVisibilityTreeRenderer({
     contextMenuItems: props.contextMenuItems,
+    nodeLabelRenderer: props.nodeLabelRenderer,
     nodeRendererProps: {
       iconsEnabled: false,
       descriptionEnabled: true,
@@ -134,3 +136,7 @@ async function setViewType(activeView: Viewport) {
   const viewType = view.is3d() ? "3d" : "2d"; // eslint-disable-line @itwin/no-internal
   await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", viewType);
 }
+
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
+  addCustomTreeNodeItemLabelRenderer,
+]);
