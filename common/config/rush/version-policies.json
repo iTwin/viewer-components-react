@@ -6,13 +6,13 @@
   {
     "policyName": "itwin-tree-widget",
     "definitionName": "lockStepVersion",
-    "version": "1.0.0-dev.3",
+    "version": "1.0.0-dev.5",
     "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-property-grid",
     "definitionName": "lockStepVersion",
-    "version": "1.0.0-dev.0",
+    "version": "1.0.0-dev.2",
     "nextBump": "prerelease"
   },
   {

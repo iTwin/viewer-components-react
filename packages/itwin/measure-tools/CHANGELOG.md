@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Fri, 23 Jun 2023 15:11:15 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Jul 2023 20:15:05 GMT and should not be manually modified.
+
+## 0.12.2
+Thu, 20 Jul 2023 20:15:05 GMT
+
+### Patches
+
+- Add listeners for unit system changes when starting decorator
 
 ## 0.12.1
 Fri, 23 Jun 2023 15:11:15 GMT

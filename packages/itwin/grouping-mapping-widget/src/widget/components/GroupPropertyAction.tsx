@@ -66,6 +66,7 @@ import {
   findProperties,
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "./viewerUtils";
+import { SaveModal } from "./SaveModal";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -96,6 +97,7 @@ export const GroupPropertyAction = ({
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
+  const [oldPropertyName, setOldPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
   const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
@@ -114,6 +116,7 @@ export const GroupPropertyAction = ({
     })
   );
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -187,6 +190,7 @@ export const GroupPropertyAction = ({
           );
 
           setPropertyName(response.propertyName);
+          setOldPropertyName(response.propertyName);
           setDataType(response.dataType);
           setQuantityType(response.quantityType);
           const properties = findProperties(response.ecProperties, propertiesMetaData);
@@ -205,11 +209,23 @@ export const GroupPropertyAction = ({
     void generateProperties();
   }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
 
-  const onSave = async () => {
+  const handleSaveClick = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
       return;
     }
+    if (oldPropertyName !== propertyName && oldPropertyName !== "") {
+      setShowSaveModal(true);
+    } else {
+      await onSave();
+    }
+  };
+
+  const handleCloseSaveModal = () => {
+    setShowSaveModal(false);
+  };
+
+  const onSave = async () => {
     try {
       setIsLoading(true);
       const accessToken = await getAccessToken();
@@ -366,7 +382,7 @@ export const GroupPropertyAction = ({
         </Fieldset>
       </div>
       <ActionPanel
-        onSave={onSave}
+        onSave={handleSaveClick}
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
@@ -423,11 +439,11 @@ export const GroupPropertyAction = ({
                 }}
                 svgIcon={
                   searched ? (
-                    <IconButton onClick={clearSearch} styleType="borderless">
+                    <IconButton onClick={clearSearch} styleType="borderless" title='Clear Search'>
                       <SvgClose />
                     </IconButton>
                   ) : (
-                    <IconButton onClick={startSearch} styleType="borderless">
+                    <IconButton onClick={startSearch} styleType="borderless" title='Search'>
                       <SvgSearch />
                     </IconButton>
                   )
@@ -512,6 +528,11 @@ export const GroupPropertyAction = ({
           </Button>
         </ModalButtonBar>
       </Modal>
+      <SaveModal
+        onSave={onSave}
+        onClose={handleCloseSaveModal}
+        showSaveModal={showSaveModal}
+      />
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
           <HorizontalTile
