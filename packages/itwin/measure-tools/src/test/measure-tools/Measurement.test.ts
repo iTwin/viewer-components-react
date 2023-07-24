@@ -11,6 +11,8 @@ import { MeasurementPreferences } from "../../api/MeasurementPreferences";
 import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurementSubClass } from "./MeasurementSerialization.test";
+import { MeasurementActionToolbar } from "../../widgets/MeasurementActionToolbar";
+import { Point2d } from "@itwin/core-geometry";
 
 describe("Measurement tests", () => {
   it("Test equality, type mismatch", () => {
@@ -212,6 +214,18 @@ describe("Measurement tests", () => {
 
     assert.isTrue(test.cleanupCalled);
   });
+
+  it("Test measurement allowActions", () => {
+    MeasurementActionToolbar.setDefaultActionProvider();
+    const didOpen = MeasurementActionToolbar.openToolbar([new NoParticipateMeasurement()], Point2d.create(0, 0));
+    assert.isFalse(didOpen);
+
+    const reallyDidOpen = MeasurementActionToolbar.openToolbar([new DistanceMeasurement()], Point2d.create(0, 0));
+    assert.isTrue(reallyDidOpen);
+
+    MeasurementActionToolbar.closeToolbar();
+    MeasurementActionToolbar.clearActionProviders();
+  });
 });
 
 class CleanupDistanceMeasurement extends DistanceMeasurement {
@@ -220,4 +234,8 @@ class CleanupDistanceMeasurement extends DistanceMeasurement {
   public override onCleanup() {
     this.cleanupCalled = true;
   }
+}
+
+class NoParticipateMeasurement extends DistanceMeasurement {
+  public override get allowActions() { return false; }
 }
