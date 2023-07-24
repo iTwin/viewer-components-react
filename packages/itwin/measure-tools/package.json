@@ -127,6 +127,16 @@
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
+      "@itwin/no-internal": [
+        "warn",
+        {
+          "tag": [
+            "internal",
+            "alpha",
+            "beta"
+          ]
+        }
+      ],
       "@typescript-eslint/unbound-method": "off",
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error"
