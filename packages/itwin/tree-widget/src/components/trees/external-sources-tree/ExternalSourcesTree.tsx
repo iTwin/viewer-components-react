@@ -9,8 +9,8 @@ import { usePresentationTreeNodeLoader, useUnifiedSelectionTreeEventHandler } fr
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { Node, Ruleset } from "@itwin/presentation-common";
+import type { BaseTreeProps } from "../Common";
 
 /**
  * Presentation rules used by ControlledCategoriesTree
@@ -24,14 +24,7 @@ const PAGING_SIZE = 20;
  * Props for the [[ExternalSourcesTree]] component
  * @alpha
  */
-export interface ExternalSourcesTreeProps {
-  /** An IModel to pull data from */
-  iModel: IModelConnection;
-  /** Width of the component */
-  width: number;
-  /** Height of the component */
-  height: number;
-}
+export type ExternalSourcesTreeProps = BaseTreeProps;
 
 /**
  * Tree which displays a hierarchy of ExternalSources and their elements.
@@ -51,7 +44,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
       <ControlledTree
         nodeLoader={nodeLoader}
         model={treeModel}
-        selectionMode={SelectionMode.Extended}
+        selectionMode={props.selectionMode ?? SelectionMode.Extended}
         eventsHandler={eventsHandler}
         width={props.width}
         height={props.height}

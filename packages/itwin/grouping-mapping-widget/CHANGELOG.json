@@ -2,6 +2,69 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.17.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.3",
+      "date": "Mon, 24 Jul 2023 17:26:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added tooltips to buttons."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.2",
+      "date": "Thu, 20 Jul 2023 20:15:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Made Selected Items section expand by default"
+          },
+          {
+            "comment": "Made group creation options fully shown when there is space"
+          },
+          {
+            "comment": "Fixed unicode bug to meet OData simple identifier requirement"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.1",
+      "date": "Tue, 18 Jul 2023 14:40:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added a dropdown arrow for the Add Group button."
+          },
+          {
+            "comment": "Fixed Color Legend not appearing bug."
+          },
+          {
+            "comment": "Fixed Enable/Disable Extraction bug"
+          },
+          {
+            "comment": "Added a modal to confirm a property name change."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.0",
+      "date": "Fri, 09 Jun 2023 17:54:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "New version of the package targeting iTwin.js 4.x and iTwinUI 2.x!"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.1",
       "tag": "@itwin/grouping-mapping-widget_v0.16.1",
       "date": "Tue, 06 Jun 2023 10:57:06 GMT",

@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-group-mapping-blocking-overlay {
   background-color: black;
@@ -10,10 +9,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  top: $iui-baseline;
-  bottom: $iui-baseline;
-  right: $iui-s;
-  left: $iui-s;
+  top: var(--iui-size-s);
+  bottom: var(--iui-size-s);
+  right: var(--iui-size-xs);
+  left: var(--iui-size-xs);
   opacity: 60%;
   z-index: 9999;
   visibility: hidden;

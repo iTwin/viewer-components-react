@@ -116,6 +116,7 @@ export const GroupMenuActions = ({
           disabled={disableActions}
           styleType="borderless"
           data-testid="gmw-more-button"
+          title='Group Options'
         >
           <SvgMore />
         </IconButton>

@@ -8,6 +8,7 @@ import type { HorizontalTileProps } from "./HorizontalTile";
 import { HorizontalTile } from "./HorizontalTile";
 import { CSS } from "@dnd-kit/utilities";
 import { SvgDragHandleVertical } from "@itwin/itwinui-icons-react";
+import { Icon } from "@itwin/itwinui-react";
 
 interface SortableHorizontalTileProps extends HorizontalTileProps {
   id: string;
@@ -46,9 +47,9 @@ const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileProps) =
     >
       <HorizontalTile
         dragHandle={
-          <div className="gmw-drag-icon" style={{ cursor: "grab" }} title="Drag & Drop" {...listeners}>
+          <Icon className="gmw-drag-icon" size="large" style={{ cursor: "grab" }} title="Drag & Drop" {...listeners}>
             <SvgDragHandleVertical />
-          </div>
+          </Icon>
         }
         {...props}
       />

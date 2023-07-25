@@ -9,7 +9,7 @@ import { LoadingSpinner } from "./utils";
 
 export interface TemplateActionPanelProps {
   onSave: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   isCancelDisabled?: boolean;
   isSavingDisabled?: boolean;
   isLoading?: boolean;
@@ -21,7 +21,7 @@ export const TemplateActionPanel = ({
   isCancelDisabled = false,
   isSavingDisabled = false,
   isLoading = false,
-}: TemplateActionPanelProps): JSX.Element => {
+}: TemplateActionPanelProps) => {
   return (
     <div id='action' className='ec3w-action-panel-container'>
       <div className='ec3w-template-action-panel'>
@@ -37,7 +37,7 @@ export const TemplateActionPanel = ({
         >
           Save
         </Button>
-        <Button
+        {onCancel && <Button
           styleType='default'
           type='button'
           id='cancel'
@@ -45,7 +45,7 @@ export const TemplateActionPanel = ({
           disabled={isCancelDisabled || isLoading}
         >
           Cancel
-        </Button>
+        </Button>}
       </div>
     </div>
   );

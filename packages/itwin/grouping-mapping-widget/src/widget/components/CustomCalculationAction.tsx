@@ -3,11 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
+  Alert,
   Fieldset,
   LabeledInput,
   LabeledSelect,
   LabeledTextarea,
-  Small,
+  Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
@@ -198,9 +199,9 @@ export const CustomCalculationAction = ({
     <>
       <div className='gmw-custom-calculation-action-container'>
         <Fieldset legend='Custom Calculation Details' className='gmw-details-form'>
-          <Small className='gmw-field-legend'>
+          <Text variant='small' as='small' className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
           <LabeledInput
             value={propertyName}
             required
@@ -225,6 +226,13 @@ export const CustomCalculationAction = ({
               validator.showMessageFor("name");
             }}
           />
+          <Alert
+            type='informational'
+            clickableText='Click here.'
+            clickableTextProps={{ href: "https://developer.bentley.com/apis/insights/operations/create-customcalculation/", target: "_blank", rel: "noreferrer" }}
+          >
+            To learn more about creating custom calculation formulas, view the documentation.
+          </Alert>
           <LabeledTextarea
             value={formula}
             required

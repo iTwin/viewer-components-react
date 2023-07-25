@@ -9,13 +9,13 @@ import {
   Alert,
   Button,
   Fieldset,
+  Icon,
   IconButton,
   Label,
   LabeledInput,
   LabeledSelect,
   Modal,
   ModalButtonBar,
-  Small,
   Surface,
   Text,
 } from "@itwin/itwinui-react";
@@ -66,6 +66,7 @@ import {
   findProperties,
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "./viewerUtils";
+import { SaveModal } from "./SaveModal";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -96,6 +97,7 @@ export const GroupPropertyAction = ({
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
+  const [oldPropertyName, setOldPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
   const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
@@ -114,6 +116,7 @@ export const GroupPropertyAction = ({
     })
   );
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -187,6 +190,7 @@ export const GroupPropertyAction = ({
           );
 
           setPropertyName(response.propertyName);
+          setOldPropertyName(response.propertyName);
           setDataType(response.dataType);
           setQuantityType(response.quantityType);
           const properties = findProperties(response.ecProperties, propertiesMetaData);
@@ -205,11 +209,23 @@ export const GroupPropertyAction = ({
     void generateProperties();
   }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
 
-  const onSave = async () => {
+  const handleSaveClick = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
       return;
     }
+    if (oldPropertyName !== propertyName && oldPropertyName !== "") {
+      setShowSaveModal(true);
+    } else {
+      await onSave();
+    }
+  };
+
+  const handleCloseSaveModal = () => {
+    setShowSaveModal(false);
+  };
+
+  const onSave = async () => {
     try {
       setIsLoading(true);
       const accessToken = await getAccessToken();
@@ -272,9 +288,9 @@ export const GroupPropertyAction = ({
     >
       <div className='gmw-group-property-action-container'>
         <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
-          <Small className='gmw-field-legend'>
+          <Text variant='small' as='small' className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
           <LabeledInput
             id='propertyName'
             label='Property Name'
@@ -366,7 +382,7 @@ export const GroupPropertyAction = ({
         </Fieldset>
       </div>
       <ActionPanel
-        onSave={onSave}
+        onSave={handleSaveClick}
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
@@ -389,7 +405,11 @@ export const GroupPropertyAction = ({
           gutterSize={2}
           gutter={() => {
             // Expects HTMLElement
-            const dragHangle = renderToStaticMarkup(<div className="gmw-gutter-drag-icon"><SvgMoreVerticalSmall /></div>);
+            const dragHangle = renderToStaticMarkup(
+              <Icon className="gmw-gutter-drag-icon" size="large">
+                <SvgMoreVerticalSmall />
+              </Icon>
+            );
             const gutter = document.createElement("div");
             gutter.className = `gmw-gutter`;
             gutter.innerHTML = dragHangle;
@@ -419,11 +439,11 @@ export const GroupPropertyAction = ({
                 }}
                 svgIcon={
                   searched ? (
-                    <IconButton onClick={clearSearch} styleType="borderless">
+                    <IconButton onClick={clearSearch} styleType="borderless" title='Clear Search'>
                       <SvgClose />
                     </IconButton>
                   ) : (
-                    <IconButton onClick={startSearch} styleType="borderless">
+                    <IconButton onClick={startSearch} styleType="borderless" title='Search'>
                       <SvgSearch />
                     </IconButton>
                   )
@@ -508,6 +528,11 @@ export const GroupPropertyAction = ({
           </Button>
         </ModalButtonBar>
       </Modal>
+      <SaveModal
+        onSave={onSave}
+        onClose={handleCloseSaveModal}
+        showSaveModal={showSaveModal}
+      />
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
           <HorizontalTile
@@ -519,7 +544,11 @@ export const GroupPropertyAction = ({
                 styleType="borderless">
                 <SvgRemove />
               </IconButton>}
-            dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical /></div>}
+            dragHandle={
+              <Icon className="gmw-drag-icon" size="large">
+                <SvgDragHandleVertical />
+              </Icon>
+            }
           /> : null}
       </DragOverlay>
     </DndContext>

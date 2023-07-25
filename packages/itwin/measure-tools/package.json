@@ -1,6 +1,6 @@
 {
   "name": "@itwin/measure-tools-react",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
@@ -127,6 +127,16 @@
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
+      "@itwin/no-internal": [
+        "warn",
+        {
+          "tag": [
+            "internal",
+            "alpha",
+            "beta"
+          ]
+        }
+      ],
       "@typescript-eslint/unbound-method": "off",
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error"

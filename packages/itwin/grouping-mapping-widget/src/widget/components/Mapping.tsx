@@ -16,7 +16,6 @@ import {
   DropdownMenu,
   IconButton,
   MenuItem,
-  Surface,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -80,7 +79,7 @@ const toggleExtraction = async (
   mapping: Mapping
 ) => {
   try {
-    const newState = mapping.extractionEnabled;
+    const newState = !mapping.extractionEnabled;
     const accessToken = await getAccessToken();
     await mappingsClient.updateMapping(accessToken, iModelId, mapping.id, {
       extractionEnabled: newState,
@@ -133,7 +132,7 @@ export const Mappings = ({
   return (
     <>
       <BlockingOverlay isVisible={showBlockingOverlay} />
-      <Surface className="gmw-mappings-container">
+      <div className="gmw-mappings-container">
         <div className="gmw-table-toolbar">
           <div className="gmw-button-spacing">
             {onClickAddMapping &&
@@ -141,6 +140,7 @@ export const Mappings = ({
                 startIcon={<SvgAdd />}
                 onClick={onClickAddMapping}
                 styleType="high-visibility"
+                title='New Mapping'
               >
                 New
               </Button>
@@ -225,7 +225,7 @@ export const Mappings = ({
                         </MenuItem>,
                       ].flatMap((m) => m)}
                     >
-                      <IconButton styleType="borderless">
+                      <IconButton styleType="borderless" title='Mapping Options'>
                         <SvgMore
                           style={{
                             width: "16px",
@@ -239,7 +239,7 @@ export const Mappings = ({
               ))}
           </div>
         )}
-      </Surface>
+      </div>
       <DeleteModal
         entityName={showDeleteModal?.mappingName}
         onClose={() => setShowDeleteModal(undefined)}

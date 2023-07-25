@@ -2,19 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .gmw-border-div {
-  border-bottom: 1px solid var(--iui-color-background-4);
+  border-bottom: 1px solid var(--iui-color-background);
 }
 
 .gmw-mapping-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-column-gap: $iui-xl;
+  grid-column-gap: var(--iui-size-xl);
   justify-items: stretch;
   align-items: center;
-  padding: $iui-baseline $iui-m $iui-baseline $iui-m;
+  padding: var(--iui-size-s) var(--iui-size-m) var(--iui-size-s) var(--iui-size-m);
 }
 
 .gmw-import-progress-container {
@@ -30,7 +29,7 @@
     flex-grow: 1;
     justify-content: center;
     align-items: center;
-    gap: $iui-baseline * 2;
+    gap: calc(var(--iui-size-s) * 2);
 
     .gmw-import-progress-bar-description {
       display: flex;
@@ -44,7 +43,7 @@
       span:first-of-type {
         display: flex;
         width: 80%;
-        gap: $iui-xs;
+        gap: var(--iui-size-2xs);
       }
     }
   }
@@ -65,14 +64,14 @@
     .gmw-mapping-row-header-container {
       position: sticky;
       top: 0;
-      background-color: var(--iui-color-background-3);
+      background-color: var(--iui-color-background);
     }
 
     .gmw-mapping-row-body {
       overflow-y: auto;
 
       .gmw-mapping-row-container {
-        background-color: var(--iui-color-background-2);
+        background-color: var(--iui-color-background-backdrop);
       }
     }
   }

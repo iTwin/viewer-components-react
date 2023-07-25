@@ -7,7 +7,6 @@ import type { CreateTypeFromInterface } from "../utils";
 import {
   ButtonGroup,
   IconButton,
-  Surface,
 } from "@itwin/itwinui-react";
 import {
   SvgRefresh,
@@ -134,7 +133,7 @@ export const Groupings = ({
 
   return (
     <>
-      <Surface className="gmw-groups-container">
+      <div className="gmw-groups-container">
         <div className="gmw-toolbar">
           {onClickAddGroup && groupUIs.length > 0 && (
             <GroupsAddButton
@@ -177,7 +176,7 @@ export const Groupings = ({
             ))}
           </div>
         )}
-      </Surface>
+      </div>
       <DeleteModal
         entityName={showDeleteModal?.groupName}
         onClose={() => setShowDeleteModal(undefined)}

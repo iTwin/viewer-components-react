@@ -2,20 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
 
 .gmw-group-property-action-container {
   display: flex;
   flex-direction: column;
   overflow-x: auto;
   height: 100%;
-  gap: $iui-baseline;
+  gap: var(--iui-size-s);
 
   .gmw-property-options {
     display: inherit;
     flex-direction: inherit;
-    gap: $iui-baseline;
+    gap: var(--iui-size-s);
   }
 }
 
@@ -33,16 +31,16 @@
   gap: 7.5px;
   flex: 1;
   overflow-y: overlay;
-  padding: $iui-baseline $iui-m;
+  padding: var(--iui-size-s) var(--iui-size-m);
 }
 
 .gmw-property-view-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  gap: $iui-baseline;
+  gap: var(--iui-size-s);
   min-height: 0;
-  padding: $iui-baseline $iui-m;
+  padding: var(--iui-size-s) var(--iui-size-m);
   min-width: 0;
   .gmw-property-view-button {
     display: flex;
@@ -51,7 +49,7 @@
 
 .gmw-property-selection-container {
   display: flex;
-  gap: $iui-s;
+  gap: var(--iui-size-xs);
   width: 45vw;
   min-width: 100%;
   height: 75vh;
@@ -66,20 +64,20 @@
   .gmw-selected-properties {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
-    padding: $iui-baseline $iui-m;
+    gap: var(--iui-size-s);
+    padding: var(--iui-size-s) var(--iui-size-m);
   }
 
   .gmw-available-properties {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
-    padding: $iui-baseline $iui-m;
+    gap: var(--iui-size-s);
+    padding: var(--iui-size-s) var(--iui-size-m);
     .gmw-available-properties-header {
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: $iui-s;
+      gap: var(--iui-size-xs);
       .gmw-available-prop-search {
         flex: 1 1 80px;
         min-width: 80px;
@@ -90,7 +88,6 @@
 }
 
 .gmw-gutter-drag-icon {
-  @include iui-icons-large();
   justify-content: center;
   cursor: col-resize;
 }
@@ -100,7 +97,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: $iui-baseline;
-  padding: $iui-baseline $iui-m;
+  gap: var(--iui-size-s);
+  padding: var(--iui-size-s) var(--iui-size-m);
   height: 100%;
 }

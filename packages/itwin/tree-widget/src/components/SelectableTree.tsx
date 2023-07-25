@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./TreeWidgetComponent.scss";
+import "./SelectableTree.scss";
 import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SelectableContent } from "@itwin/components-react";
@@ -16,7 +16,7 @@ import type { SelectableContentDefinition, SelectableContentProps } from "@itwin
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /**
- * Definition of a tree component displayed in [[TreeWidgetComponent]]
+ * Definition of a tree component displayed in [[SelectableTree]]
  * @public
  */
 export interface TreeDefinition {
@@ -34,10 +34,10 @@ export interface TreeDefinition {
 }
 
 /**
- * Props for [[TreeWidgetComponent]]
+ * Props for [[SelectableTree]]
  * @public
  */
-export interface TreeWidgetComponentProps {
+export interface SelectableTreeProps {
   trees: TreeDefinition[];
 }
 
@@ -45,21 +45,21 @@ export interface TreeWidgetComponentProps {
  * A component that renders a tree (combo box) selector and the selected tree component.
  * @public
  */
-export function TreeWidgetComponent(props: TreeWidgetComponentProps) {
+export function SelectableTree(props: SelectableTreeProps) {
   const imodel = useActiveIModelConnection();
 
   if (!imodel)
     return null;
 
-  return <TreeWidgetComponentContent {...props} imodel={imodel} />;
+  return <SelectableTreeContent {...props} imodel={imodel} />;
 }
 
-function TreeWidgetComponentContent(props: TreeWidgetComponentProps & { imodel: IModelConnection}) {
+function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConnection }) {
   const { trees: treeDefinitions, imodel } = props;
   const trees = useActiveTrees(treeDefinitions, imodel);
 
   return (
-    <div className="tree-widget-visibility-widget">
+    <div className="tree-widget-selectable-tree">
       <SelectableContent {...getSelectableContentProps(trees)} />
     </div>
   );

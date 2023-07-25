@@ -21,7 +21,7 @@ export const LabelActionPanel = ({
   isCancelDisabled = false,
   isSavingDisabled,
   isLoading = false,
-}: ActionPanelProps): JSX.Element => {
+}: ActionPanelProps) => {
   return (
     <div className='ec3w-label-action-panel'>
       {isLoading &&
@@ -34,7 +34,7 @@ export const LabelActionPanel = ({
         id='save-app'
         onClick={onSave}
       >
-        Save
+        Add
       </Button>
       <Button
         styleType='default'

@@ -108,7 +108,7 @@ describe("<TreeHeader />", () => {
 
       const input = getByRole("searchbox");
       await userEvents.type(input, "SearchString");
-      await waitFor(() => expect(spy).to.be.calledWithExactly("SearchString"));
+      await waitFor(() => expect(spy).to.be.calledOnceWithExactly("SearchString"));
     });
 
     it("invokes 'onFilterClear' when search box is cleared", async () => {

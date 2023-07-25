@@ -1,6 +1,39 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 06 Jun 2023 10:57:06 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Jul 2023 17:26:29 GMT and should not be manually modified.
+
+## 0.17.3
+Mon, 24 Jul 2023 17:26:29 GMT
+
+### Patches
+
+- Added tooltips to buttons.
+
+## 0.17.2
+Thu, 20 Jul 2023 20:15:04 GMT
+
+### Patches
+
+- Made Selected Items section expand by default
+- Made group creation options fully shown when there is space
+- Fixed unicode bug to meet OData simple identifier requirement
+
+## 0.17.1
+Tue, 18 Jul 2023 14:40:24 GMT
+
+### Patches
+
+- Added a dropdown arrow for the Add Group button.
+- Fixed Color Legend not appearing bug.
+- Fixed Enable/Disable Extraction bug
+- Added a modal to confirm a property name change.
+
+## 0.17.0
+Fri, 09 Jun 2023 17:54:42 GMT
+
+### Minor changes
+
+- New version of the package targeting iTwin.js 4.x and iTwinUI 2.x!
 
 ## 0.16.1
 Tue, 06 Jun 2023 10:57:06 GMT

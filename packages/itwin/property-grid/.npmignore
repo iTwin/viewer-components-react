@@ -5,3 +5,7 @@
 !lib/**/*.js.map
 !lib/**/*.*css
 !lib/public/**/*
+!CHANGELOG.md
+
+# ignore some stuff again
+lib/**/test/**

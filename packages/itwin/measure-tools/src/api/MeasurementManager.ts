@@ -452,11 +452,12 @@ export class MeasurementManager implements Decorator {
     this._dropDecoratorCallback = IModelApp.viewManager.addDecorator(this);
 
     if (undefined === this._dropQuantityFormatterListeners) {
-      this._dropQuantityFormatterListeners = () =>{
-        IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged, this);
-        IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(this.onActiveUnitSystemChanged, this);
-        IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(this.onActiveUnitSystemChanged, this);
-      };
+      const unsubscribers = [IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged, this),
+        IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(this.onActiveUnitSystemChanged, this),
+        IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(this.onActiveUnitSystemChanged, this)];
+      this._dropQuantityFormatterListeners = () => unsubscribers.forEach((unsubscriber) => {
+        unsubscriber();
+      });
 
     } else {
       this.onActiveUnitSystemChanged();

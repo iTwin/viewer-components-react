@@ -17,7 +17,7 @@ export interface PropertyTableItem {
 
 export interface PropertyTableProps<T extends PropertyTableItem> {
   propertyType: string;
-  columnsFactory: (handleShowDeleteModal: (value: T) => void) => ReadonlyArray<Column<T>>;
+  columnsFactory: (handleShowDeleteModal: (value: T) => void) => Array<Column<T>>;
   data: T[];
   isLoading: boolean;
   onClickAdd?: () => void;
