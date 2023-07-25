@@ -54,8 +54,10 @@
   },
   "dependencies": {
     "@itwin/itwinui-icons-react": "^2.1.0",
+    "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/itwinui-react": "^2.11.0",
-    "classnames": "^2.3.1"
+    "classnames": "^2.3.1",
+    "react-error-boundary": "^4.0.10"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0",

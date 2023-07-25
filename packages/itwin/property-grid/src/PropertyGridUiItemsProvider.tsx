@@ -5,15 +5,19 @@
 
 import "./PropertyGridUiItemsProvider.scss";
 import { useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, StageUsage, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
 import { Id64 } from "@itwin/core-bentley";
 import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
+import { SvgError } from "@itwin/itwinui-illustrations-react";
+import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { Key } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState";
 import { PropertyGridComponent } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
 
+import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent";
 
@@ -86,6 +90,21 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
   }, [widgetDef]);
 
   return <div ref={ref} className="property-grid-widget">
-    <PropertyGridComponent {...props} />
+    <ErrorBoundary FallbackComponent={ErrorState}>
+      <PropertyGridComponent {...props} />
+    </ErrorBoundary>
   </div>;
+}
+
+function ErrorState({ resetErrorBoundary }: FallbackProps) {
+  return (
+    <NonIdealState
+      svg={<SvgError />}
+      heading={PropertyGridManager.translate("error")}
+      description={PropertyGridManager.translate("generic-error-description")}
+      actions={
+        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>{PropertyGridManager.translate("retry")}</Button>
+      }
+    />
+  );
 }
