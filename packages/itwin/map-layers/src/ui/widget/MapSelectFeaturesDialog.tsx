@@ -11,7 +11,7 @@ import "./MapSelectFeaturesDialog.scss";
 import { DialogButtonType } from "@itwin/appui-abstract";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerSource } from "@itwin/core-frontend";
-import { MapSubLayerProps } from "@itwin/core-common";
+import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
 import { SubLayersTree } from "./SubLayersTree";
 
 export interface MapSelectFeaturesProps {
@@ -85,7 +85,15 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
         trapFocus={false}
       >
-        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])}/>
+        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={
+          (subLayerId: SubLayerId, isSelected: boolean) => {
+            const tmpSubLayers = [...subLayers];
+            const sl = tmpSubLayers.find((value: MapSubLayerProps) => value.id === subLayerId);
+            if (sl) {
+              sl.visible = isSelected;
+              setSubLayers(tmpSubLayers)
+            } }
+          }/>
 
         {/* Warning message */}
         {renderWarningMessage()}
