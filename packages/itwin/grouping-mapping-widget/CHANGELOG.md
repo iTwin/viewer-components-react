@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 20 Jul 2023 20:15:05 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Jul 2023 17:26:29 GMT and should not be manually modified.
+
+## 0.17.3
+Mon, 24 Jul 2023 17:26:29 GMT
+
+### Patches
+
+- Added tooltips to buttons.
 
 ## 0.17.2
 Thu, 20 Jul 2023 20:15:04 GMT
