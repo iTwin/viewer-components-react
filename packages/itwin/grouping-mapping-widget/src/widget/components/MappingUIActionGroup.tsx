@@ -68,7 +68,7 @@ export const MappingUIActionGroup = ({
         >
           Remove
         </MenuItem>,
-      ].flatMap((m) => m)}
+      ].flat()}
     >
       <IconButton styleType="borderless" title='Mapping Options'>
         <SvgMore
