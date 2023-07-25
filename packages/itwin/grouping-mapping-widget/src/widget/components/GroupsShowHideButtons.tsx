@@ -41,6 +41,7 @@ export const GroupsShowHideButtons = ({
       disabled={isLoadingQuery}
       styleType="borderless"
       onClick={toggleGroupVisibility}
+      title='Toggle Group Visibility'
     >
       {isGroupHidden ? <SvgVisibilityHide /> : <SvgVisibilityShow />}
     </IconButton>

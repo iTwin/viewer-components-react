@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Thu, 20 Jul 2023 20:15:05 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Jul 2023 17:26:29 GMT and should not be manually modified.
+
+## 0.13.0
+Mon, 24 Jul 2023 17:26:29 GMT
+
+### Minor changes
+
+- Added allowActions property to Measurement base class to let measurements to opt out of the popup action toolbar. Fixed up internal usage of currentInputState with (soon to be) public APIs
 
 ## 0.12.2
 Thu, 20 Jul 2023 20:15:05 GMT
