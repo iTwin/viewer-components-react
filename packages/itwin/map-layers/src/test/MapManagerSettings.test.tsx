@@ -195,7 +195,7 @@ describe("MapManagerSettings", () => {
     const sliders = container.querySelectorAll(".iui-slider-thumb");
     expect(sliders.length).to.eq(2);
     act(() => {
-      fireEvent.keyUp(sliders[0], { key: 'ArrowLeft' });
+      fireEvent.keyUp(sliders[0], { key: "ArrowLeft" });
     });
     viewportMock.verify((x) => x.changeBackgroundMapProps({ transparency: 0 }), moq.Times.once());
 
@@ -217,7 +217,7 @@ describe("MapManagerSettings", () => {
     const sliders = container.querySelectorAll(".iui-slider-thumb");
     expect(sliders.length).to.eq(2);
 
-    const sliderThumb = sliders[1]
+    const sliderThumb = sliders[1];
 
     // Make sure the slider is disabled by default
     expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("true");
@@ -241,7 +241,7 @@ describe("MapManagerSettings", () => {
 
     // Make sure the slider event are handled
     act(() => {
-      fireEvent.keyUp(sliderThumb, { key: 'ArrowLeft' });
+      fireEvent.keyUp(sliderThumb, { key: "ArrowLeft" });
     });
     viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }), moq.Times.exactly(2));
   });
