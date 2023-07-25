@@ -319,11 +319,15 @@ export class MeasurementActionToolbar {
     // Ensure a previous toolbar was closed out
     this.closeToolbar(false);
 
-    if (this._filterHandler && !this._filterHandler(measurements))
+    const measurementsForActions = measurements.filter((m) => m.allowActions);
+    if (measurementsForActions.length === 0)
+      return false;
+
+    if (this._filterHandler && !this._filterHandler(measurementsForActions))
       return false;
 
     // Query all action items...if have none, do not show the toolbar
-    const itemList = this.buildActionList(measurements);
+    const itemList = this.buildActionList(measurementsForActions);
     if (itemList.length === 0)
       return false;
 
@@ -334,7 +338,7 @@ export class MeasurementActionToolbar {
     // Show toolbar
     const realOffset = (offset !== undefined) ? offset : Point2d.createZero();
     const realRelPosition = (relativePosition !== undefined) ? relativePosition : RelativePosition.Top;
-    CursorPopupManager.open(this._lastPopupId, this.buildToolbar(measurements, itemList), screenPoint, realOffset, realRelPosition);
+    CursorPopupManager.open(this._lastPopupId, this.buildToolbar(measurementsForActions, itemList), screenPoint, realOffset, realRelPosition);
 
     FeatureTracking.notifyFeature(MeasureToolsFeatures.MeasurementActionsToolbar_Open);
 
