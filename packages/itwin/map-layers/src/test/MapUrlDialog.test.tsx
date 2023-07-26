@@ -161,7 +161,6 @@ describe("MapUrlDialog", () => {
 
   it("renders", () => {
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
-    // console.log(component.html())
     const allInputs = component.find("input");
 
     expect(allInputs.length).to.equals(defaultNumberOfInput);
