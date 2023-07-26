@@ -2,6 +2,23 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "version": "5.1.0",
+      "tag": "@itwin/map-layers_v5.1.0",
+      "date": "Wed, 26 Jul 2023 21:49:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "New UI that allow creating multiple layers from sources supporting single layer per request."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fixvarious display issues with MapLayer widget"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.0",
       "tag": "@itwin/map-layers_v5.0.0",
       "date": "Tue, 06 Jun 2023 10:57:06 GMT",
