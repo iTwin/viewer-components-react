@@ -6,23 +6,22 @@
 // cSpell:ignore droppable Sublayer Basemap
 
 import { UiFramework } from "@itwin/appui-react";
-import { BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings, MapLayerProps } from "@itwin/core-common";
-import { DisplayStyleState } from "@itwin/core-frontend";
+import { BaseLayerProps, BaseLayerSettings, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings, MapImagerySettings, MapLayerProps } from "@itwin/core-common";
 import { WebFontIcon } from "@itwin/core-react";
 import { ColorPickerDialog, ColorSwatch } from "@itwin/imodel-components-react";
 import { Button, Select, SelectOption } from "@itwin/itwinui-react";
 import * as React from "react";
 import { MapLayersUI } from "../../mapLayers";
-import "./BasemapPanel.scss";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
+import "./BasemapPanel.scss";
 
-function getBaseMapFromStyle(displayStyle: DisplayStyleState | undefined) {
-  if (!displayStyle)
+function getBaseMapFromStyle(backgroundBase: BaseLayerSettings | undefined) {
+  if (!backgroundBase)
     return undefined;
 
-  if (displayStyle.settings.mapImagery.backgroundBase instanceof ImageMapLayerSettings || displayStyle.settings.mapImagery.backgroundBase instanceof ColorDef)
-    return displayStyle.settings.mapImagery.backgroundBase.toJSON();
+  if (backgroundBase instanceof ImageMapLayerSettings || backgroundBase instanceof ColorDef)
+    return backgroundBase.toJSON();
 
   return undefined;
 }
@@ -36,12 +35,22 @@ interface BasemapPanelProps {
 export function BasemapPanel(props: BasemapPanelProps) {
   const [useColorLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.ColorFill"));
   const { activeViewport, bases } = useSourceMapContext();
-  const [selectedBaseMap, setSelectedBaseMap] = React.useState<MapLayerProps | number | undefined>(getBaseMapFromStyle(activeViewport?.displayStyle));
+  const [selectedBaseMap, setSelectedBaseMap] = React.useState<BaseLayerProps | undefined>(getBaseMapFromStyle(activeViewport?.displayStyle.settings.mapImagery.backgroundBase));
   const [baseMapTransparencyValue, setBaseMapTransparencyValue] = React.useState(() => {
-    if (activeViewport)
-      return activeViewport.displayStyle.baseMapTransparency;
-    return 0;
+    if (activeViewport) {
+      const mapImagery = activeViewport.displayStyle.settings.mapImagery;
+      if (mapImagery.backgroundBase instanceof ImageMapLayerSettings) {
+        return mapImagery.backgroundBase.transparency;
+      } else if (mapImagery.backgroundBase instanceof ColorDef ) {
+        return mapImagery.backgroundBase.getAlpha()/255;
+      } else {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
   });
+
   const [baseMapVisible, setBaseMapVisible] = React.useState(() => {
     if (activeViewport && activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings) {
       return activeViewport.displayStyle.backgroundMapBase.visible;
@@ -49,17 +58,37 @@ export function BasemapPanel(props: BasemapPanelProps) {
     return false;
   });
 
+  const handleMapImageryChanged = React.useCallback((args: Readonly<MapImagerySettings>) => {
+    // selectedBaseMap
+    const baseMap = getBaseMapFromStyle(args.backgroundBase);
+    if (JSON.stringify(baseMap) !== JSON.stringify(selectedBaseMap))
+      setSelectedBaseMap(baseMap);
+
+    // baseMapTransparencyValue
+    if (args.backgroundBase instanceof ImageMapLayerSettings &&  args.backgroundBase.transparency !== baseMapTransparencyValue) {
+      setBaseMapTransparencyValue(args.backgroundBase.transparency);
+    } else if (args.backgroundBase instanceof ColorDef && args.backgroundBase.getAlpha() !== baseMapTransparencyValue ) {
+      setBaseMapTransparencyValue(args.backgroundBase.getAlpha()/255);
+    }
+
+    // baseMapVisible
+    if (args.backgroundBase instanceof ImageMapLayerSettings &&  args.backgroundBase.visible !== baseMapVisible) {
+      setBaseMapVisible(args.backgroundBase.visible);
+    }
+  }, [baseMapTransparencyValue, baseMapVisible, selectedBaseMap, setBaseMapTransparencyValue, setBaseMapVisible, setSelectedBaseMap]);
+
+  // Monitor display style's onMapImageryChanged event
+  React.useEffect(() => {
+    return activeViewport?.displayStyle.settings.onMapImageryChanged.addListener(handleMapImageryChanged);
+  }, [activeViewport, handleMapImageryChanged]);
+
   // Monitor viewport updates, and refresh the widget accordingly.
   // Note: This is needed for multiple viewport applications.
   React.useEffect(() => {
     if (activeViewport) {
-      setBaseMapTransparencyValue(activeViewport.displayStyle.baseMapTransparency);
-      setSelectedBaseMap(getBaseMapFromStyle(activeViewport.displayStyle));
-      if (activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings) {
-        setBaseMapVisible(activeViewport.displayStyle.backgroundMapBase.visible);
-      }
+      handleMapImageryChanged(activeViewport.displayStyle.settings.mapImagery);
     }
-  }, [activeViewport]);
+  }, [activeViewport, handleMapImageryChanged]);
 
   const handleBasemapTransparencyChange = React.useCallback((transparency: number) => {
     if (activeViewport) {

@@ -58,7 +58,7 @@ importers:
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
       '@itwin/appui-layout-react': 4.3.0_d27e8f12d5a4b769b0a7224f2bdc539d
       '@itwin/appui-react': 4.3.0_eeb38eb7c3352f9d799ed6764039c897
-      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_b10c05ec054ece66f4afdb0e6dea72b5
+      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_c5146dc269245f4dbf335867a9edc37f
       '@itwin/browser-authorization': 0.8.0_@itwin+core-bentley@4.0.0
       '@itwin/components-react': 4.3.0_d27e8f12d5a4b769b0a7224f2bdc539d
       '@itwin/core-bentley': 4.0.0
@@ -699,10 +699,12 @@ importers:
       '@itwin/itwinui-react': ^2.11.2
       '@itwin/itwinui-variables': ^2.0.0
       '@itwin/webgl-compatibility': ^4.0.0
+      '@testing-library/dom': ^8.12.0
       '@testing-library/react': ^12.0.0
       '@testing-library/react-hooks': ^7.0.2
-      '@types/chai': 4.3.1
+      '@types/chai': 4.3.5
       '@types/enzyme': 3.9.3
+      '@types/jsdom-global': ^3.0.4
       '@types/mocha': ^8.2.2
       '@types/node': ^18.11.5
       '@types/react': ^17.0.37
@@ -710,16 +712,15 @@ importers:
       '@types/sinon': ^9.0.0
       '@types/sinon-chai': ^3.2.0
       '@wojtekmaj/enzyme-adapter-react-17': ^0.6.3
-      chai: ^4.1.2
+      chai: ^4.3.7
       chai-as-promised: ^7
-      chai-jest-snapshot: ^2.0.0
       chai-spies: 1.0.0
       classnames: ^2.3.1
       cpx2: ^3.0.0
       enzyme: 3.10.0
       enzyme-to-json: ^3.3.4
       eslint: ^7.11.0
-      jsdom: ^19.0.0
+      jsdom: ^22.1.0
       jsdom-global: 3.0.2
       mocha: ^10.0.0
       nyc: ^15.1.0
@@ -756,10 +757,12 @@ importers:
       '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@itwin/webgl-compatibility': 4.0.0
+      '@testing-library/dom': 8.13.0
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
       '@testing-library/react-hooks': 7.0.2_react-dom@17.0.2+react@17.0.2
-      '@types/chai': 4.3.1
+      '@types/chai': 4.3.5
       '@types/enzyme': 3.9.3
+      '@types/jsdom-global': 3.0.4
       '@types/mocha': 8.2.3
       '@types/node': 18.15.3
       '@types/react': 17.0.44
@@ -767,16 +770,15 @@ importers:
       '@types/sinon': 9.0.11
       '@types/sinon-chai': 3.2.8
       '@wojtekmaj/enzyme-adapter-react-17': 0.6.7_139404e387ad12a3919093d103c0dae6
-      chai: 4.3.6
-      chai-as-promised: 7.1.1_chai@4.3.6
-      chai-jest-snapshot: 2.0.0_chai@4.3.6
-      chai-spies: 1.0.0_chai@4.3.6
+      chai: 4.3.7
+      chai-as-promised: 7.1.1_chai@4.3.7
+      chai-spies: 1.0.0_chai@4.3.7
       cpx2: 3.0.2
       enzyme: 3.10.0
       enzyme-to-json: 3.6.2_enzyme@3.10.0
       eslint: 7.32.0
-      jsdom: 19.0.0
-      jsdom-global: 3.0.2_jsdom@19.0.0
+      jsdom: 22.1.0
+      jsdom-global: 3.0.2_jsdom@22.1.0
       mocha: 10.1.0
       nyc: 15.1.0
       react: 17.0.2
@@ -785,7 +787,7 @@ importers:
       redux: 4.2.1
       rimraf: 3.0.2
       sinon: 9.2.4
-      sinon-chai: 3.7.0_chai@4.3.6+sinon@9.2.4
+      sinon-chai: 3.7.0_chai@4.3.7+sinon@9.2.4
       typemoq: 2.1.0
       typescript: 4.4.4
 
@@ -8659,10 +8661,6 @@ packages:
     resolution: {integrity: sha512-/ceqdqeRraGolFTcfoXNiqjyQhZzbINDngeoAq9GoHa8PPK1yNzTaxWjA6BFWp5Ua9JpXEMSS4s5i9tS0hOJtw==}
     dev: true
 
-  /@types/chai/4.3.1:
-    resolution: {integrity: sha512-/zPMqDkzSZ8t3VtxOa4KPq7uzzW978M9Tvh+j7GHKuo6k6GTLxPJ4J5gE5cjfJ26pnXst0N5Hax8Sr0T2Mi9zQ==}
-    dev: true
-
   /@types/chai/4.3.5:
     resolution: {integrity: sha512-mEo1sAde+UCE6b2hxn332f1g1E8WfYRu6p5SvTKr2ZKC1f7gFJXk4h5PyGP9Dt6gCaG8y8XhwnXWC6Iy2cmBng==}
     dev: true
@@ -10949,12 +10947,6 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  /acorn/8.7.0:
-    resolution: {integrity: sha512-V/LGr1APy+PXIwKebEWrkZPwoeoF+w1jiOBUmuxuiUIaOHtob8Qc9BTrYo7VuI5fR8tqsy+buA2WFooR5olqvQ==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
-    dev: true
-
   /acorn/8.8.2:
     resolution: {integrity: sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==}
     engines: {node: '>=0.4.0'}
@@ -12067,6 +12059,15 @@ packages:
       check-error: 1.0.2
     dev: true
 
+  /chai-as-promised/7.1.1_chai@4.3.7:
+    resolution: {integrity: sha512-azL6xMoi+uxu6z4rhWQ1jbdUhOMhis2PvscD/xjLqNMkv3BPPp2JyyuTHOrf9BOosGpNQ11v6BKv/g57RXbiaA==}
+    peerDependencies:
+      chai: '>= 2.1.2 < 5'
+    dependencies:
+      chai: 4.3.7
+      check-error: 1.0.2
+    dev: true
+
   /chai-jest-snapshot/2.0.0_chai@4.3.6:
     resolution: {integrity: sha512-u8jZZjw/0G1t5A8wDfH6K7DAVfMg3g0dsw9wKQURNUyrZX96VojHNrFMmLirq1m0kOvC5icgL/Qh/fu1MZyvUw==}
     peerDependencies:
@@ -12094,6 +12095,15 @@ packages:
       chai: '*'
     dependencies:
       chai: 4.3.6
+    dev: true
+
+  /chai-spies/1.0.0_chai@4.3.7:
+    resolution: {integrity: sha512-elF2ZUczBsFoP07qCfMO/zeggs8pqCf3fZGyK5+2X4AndS8jycZYID91ztD9oQ7d/0tnS963dPkd0frQEThDsg==}
+    engines: {node: '>= 4.0.0'}
+    peerDependencies:
+      chai: '*'
+    dependencies:
+      chai: 4.3.7
     dev: true
 
   /chai-subset/1.6.0:
@@ -12915,10 +12925,6 @@ packages:
   /cssom/0.4.4:
     resolution: {integrity: sha512-p3pvU7r1MyyqbTk+WbNJIgJjG2VmTIaB10rI93LzVPrmDJKkzKYMtxxyAvQXR/NS6otuzveI7+7BBq3SjBS2mw==}
 
-  /cssom/0.5.0:
-    resolution: {integrity: sha512-iKuQcq+NdHqlAcwUY0o/HL69XQrUaQdMjmStJ8JFmUaiiQErlhrmuigkg/CU4E2J0IyUKUrMAgl36TvN67MqTw==}
-    dev: true
-
   /cssstyle/1.4.0:
     resolution: {integrity: sha512-GBrLZYZ4X4x6/QEoBnIrqb8B/f5l4+8me2dkom/j1Gtbxy0kBv6OGzKuAsGM75bkGwGAFkt56Iwg28S3XTZgSA==}
     dependencies:
@@ -12970,15 +12976,6 @@ packages:
       abab: 2.0.6
       whatwg-mimetype: 2.3.0
       whatwg-url: 8.7.0
-
-  /data-urls/3.0.2:
-    resolution: {integrity: sha512-Jy/tj3ldjZJo63sVAvg6LHt2mHvl4V6AgRAmNDtLdm7faqtsx+aJG42rsyCo9JCoRVKwPFzKlIPx3DIibwSIaQ==}
-    engines: {node: '>=12'}
-    dependencies:
-      abab: 2.0.6
-      whatwg-mimetype: 3.0.0
-      whatwg-url: 11.0.0
-    dev: true
 
   /data-urls/4.0.0:
     resolution: {integrity: sha512-/mMTei/JXPqvFqQtfyTowxmJVwr2PVAeCcDxyFf6LhoOu/09TX2OX3kb2wzi4DMXcfj4OItwDOnhl5oziPnT6g==}
@@ -16234,16 +16231,6 @@ packages:
       sshpk: 1.17.0
     dev: true
 
-  /https-proxy-agent/5.0.0:
-    resolution: {integrity: sha512-EkYm5BcKUGiduxzSt3Eppko+PiNWNEpa4ySk9vTC6wDsQJW9rHSa+UhGNJoRYp7bz6Ht1eaRIa6QaJqO5rCFbA==}
-    engines: {node: '>= 6'}
-    dependencies:
-      agent-base: 6.0.2
-      debug: 4.3.4
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /https-proxy-agent/5.0.1:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
     engines: {node: '>= 6'}
@@ -18079,14 +18066,6 @@ packages:
       jsdom: 16.7.0
     dev: true
 
-  /jsdom-global/3.0.2_jsdom@19.0.0:
-    resolution: {integrity: sha1-a9KZwTsMRiay2iwDk81DhdYGrLk=}
-    peerDependencies:
-      jsdom: '>=10.0.0'
-    dependencies:
-      jsdom: 19.0.0
-    dev: true
-
   /jsdom-global/3.0.2_jsdom@22.1.0:
     resolution: {integrity: sha1-a9KZwTsMRiay2iwDk81DhdYGrLk=}
     peerDependencies:
@@ -18166,48 +18145,6 @@ packages:
       - bufferutil
       - supports-color
       - utf-8-validate
-
-  /jsdom/19.0.0:
-    resolution: {integrity: sha512-RYAyjCbxy/vri/CfnjUWJQQtZ3LKlLnDqj+9XLNnJPgEGeirZs3hllKR20re8LUZ6o1b1X4Jat+Qd26zmP41+A==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      canvas: ^2.5.0
-    peerDependenciesMeta:
-      canvas:
-        optional: true
-    dependencies:
-      abab: 2.0.5
-      acorn: 8.7.0
-      acorn-globals: 6.0.0
-      cssom: 0.5.0
-      cssstyle: 2.3.0
-      data-urls: 3.0.2
-      decimal.js: 10.3.1
-      domexception: 4.0.0
-      escodegen: 2.0.0
-      form-data: 4.0.0
-      html-encoding-sniffer: 3.0.0
-      http-proxy-agent: 5.0.0
-      https-proxy-agent: 5.0.0
-      is-potential-custom-element-name: 1.0.1
-      nwsapi: 2.2.0
-      parse5: 6.0.1
-      saxes: 5.0.1
-      symbol-tree: 3.2.4
-      tough-cookie: 4.0.0
-      w3c-hr-time: 1.0.2
-      w3c-xmlserializer: 3.0.0
-      webidl-conversions: 7.0.0
-      whatwg-encoding: 2.0.0
-      whatwg-mimetype: 3.0.0
-      whatwg-url: 10.0.0
-      ws: 8.11.0
-      xml-name-validator: 4.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    dev: true
 
   /jsdom/22.1.0:
     resolution: {integrity: sha512-/9AVW7xNbsBv6GfWho4TTNjEo9fe6Zhf9O7s0Fhhr3u+awPwAJMKwAMXnkk5vBxflqLW9hTHX/0cs+P3gW+cQw==}
@@ -22473,6 +22410,16 @@ packages:
       sinon: 15.1.0
     dev: true
 
+  /sinon-chai/3.7.0_chai@4.3.7+sinon@9.2.4:
+    resolution: {integrity: sha512-mf5NURdUaSdnatJx3uhoBOrY9dtL19fiOtAdT1Azxg3+lNJFiuN0uzaU3xX1LeAfL17kHQhTAJgpsfhbMJMY2g==}
+    peerDependencies:
+      chai: ^4.0.0
+      sinon: '>=4.0.0'
+    dependencies:
+      chai: 4.3.7
+      sinon: 9.2.4
+    dev: true
+
   /sinon/15.1.0:
     resolution: {integrity: sha512-cS5FgpDdE9/zx7no8bxROHymSlPLZzq0ChbbLk1DrxBfc+eTeBK3y8nIL+nu/0QeYydhhbLIr7ecHJpywjQaoQ==}
     dependencies:
@@ -23489,7 +23436,7 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       psl: 1.8.0
-      punycode: 2.1.1
+      punycode: 2.3.0
       universalify: 0.2.0
       url-parse: 1.5.10
     dev: true
@@ -23507,13 +23454,6 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       punycode: 2.1.1
-
-  /tr46/3.0.0:
-    resolution: {integrity: sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA==}
-    engines: {node: '>=12'}
-    dependencies:
-      punycode: 2.1.1
-    dev: true
 
   /tr46/4.1.1:
     resolution: {integrity: sha512-2lv/66T7e5yNyhAAC4NaKe5nVavzuGJQVVtRYLyQ2OI8tsJ61PMLlelehb0wi2Hx6+hT/OJUWZcw8MjlSRnxvw==}
@@ -24250,13 +24190,6 @@ packages:
     dependencies:
       xml-name-validator: 3.0.0
 
-  /w3c-xmlserializer/3.0.0:
-    resolution: {integrity: sha512-3WFqGEgSXIyGhOmAFtlicJNMjEps8b1MG31NCA0/vOF9+nKMUW1ckhi9cnNHmf88Rzw5V+dwIwsm2C7X8k9aQg==}
-    engines: {node: '>=12'}
-    dependencies:
-      xml-name-validator: 4.0.0
-    dev: true
-
   /w3c-xmlserializer/4.0.0:
     resolution: {integrity: sha512-d+BFHzbiCx6zGfz0HyQ6Rg69w9k19nviJspaj4yNscGjrHu94sVP+aRm75yEbCh+r2/yR+7q6hux9LVtbuTGBw==}
     engines: {node: '>=14'}
@@ -24570,22 +24503,6 @@ packages:
   /whatwg-mimetype/3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
     engines: {node: '>=12'}
-    dev: true
-
-  /whatwg-url/10.0.0:
-    resolution: {integrity: sha512-CLxxCmdUby142H5FZzn4D8ikO1cmypvXVQktsgosNy4a4BHrDHeciBBGZhb0bNoR5/MltoCatso+vFjjGx8t0w==}
-    engines: {node: '>=12'}
-    dependencies:
-      tr46: 3.0.0
-      webidl-conversions: 7.0.0
-    dev: true
-
-  /whatwg-url/11.0.0:
-    resolution: {integrity: sha512-RKT8HExMpoYx4igMiVMY83lN6UeITKJlBQ+vR/8ZJ8OCdSiN3RwCq+9gH0+Xzj0+5IrM6i4j/6LuvzbZIQgEcQ==}
-    engines: {node: '>=12'}
-    dependencies:
-      tr46: 3.0.0
-      webidl-conversions: 7.0.0
     dev: true
 
   /whatwg-url/12.0.1:
@@ -24914,19 +24831,6 @@ packages:
       utf-8-validate:
         optional: true
 
-  /ws/8.11.0:
-    resolution: {integrity: sha512-HPG3wQd9sNQoT9xHyNCXoDUa+Xw/VevmY9FoHyQ+g+rrMn4j6FB4np7Z0OhdTgjx6MgQLK7jwSy1YecU1+4Asg==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-    dev: true
-
   /ws/8.13.0:
     resolution: {integrity: sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==}
     engines: {node: '>=10.0.0'}
@@ -25141,11 +25045,11 @@ packages:
       react: 17.0.2
       use-sync-external-store: 1.2.0_react@17.0.2
 
-  file:../../packages/itwin/breakdown-trees_b10c05ec054ece66f4afdb0e6dea72b5:
+  file:../../packages/itwin/breakdown-trees_c5146dc269245f4dbf335867a9edc37f:
     resolution: {directory: ../../packages/itwin/breakdown-trees, type: directory}
     id: file:../../packages/itwin/breakdown-trees
     name: '@itwin/breakdown-trees-react'
-    version: 0.6.1
+    version: 0.6.2
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.3.0
@@ -25156,11 +25060,11 @@ packages:
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-geometry': ^4.0.0
       '@itwin/core-react': ^4.3.0
-      '@itwin/measure-tools-react': workspace:^0.12.2
+      '@itwin/measure-tools-react': workspace:^0.13.0
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
-      '@itwin/tree-widget-react': workspace:^1.0.0-dev.5
+      '@itwin/tree-widget-react': workspace:^1.0.0-dev.6
       react: ^17.0.0
       react-dom: ^17.0.0
       react-redux: 7.2.6
@@ -25262,7 +25166,7 @@ packages:
     resolution: {directory: ../../packages/itwin/measure-tools, type: directory}
     id: file:../../packages/itwin/measure-tools
     name: '@itwin/measure-tools-react'
-    version: 0.12.2
+    version: 0.13.0
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.0.0
@@ -25299,7 +25203,7 @@ packages:
     resolution: {directory: ../../packages/itwin/property-grid, type: directory}
     id: file:../../packages/itwin/property-grid
     name: '@itwin/property-grid-react'
-    version: 1.0.0-dev.2
+    version: 1.0.0-dev.3
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
@@ -25335,7 +25239,7 @@ packages:
     resolution: {directory: ../../packages/itwin/tree-widget, type: directory}
     id: file:../../packages/itwin/tree-widget
     name: '@itwin/tree-widget-react'
-    version: 1.0.0-dev.5
+    version: 1.0.0-dev.6
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
