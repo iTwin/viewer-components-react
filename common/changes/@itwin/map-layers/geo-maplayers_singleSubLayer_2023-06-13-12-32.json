@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/map-layers",
       "comment": "New UI that allow creating multiple layers from sources supporting single layer per request.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/map-layers"
