@@ -299,7 +299,7 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
 
           // Update sublayer object, otherwise state would get out of sync with DisplayStyle each time the TreeView is re-rendered
           this._subLayers?.forEach((curSubLayer) => {
-            if (curSubLayer.id) {
+            if (curSubLayer.id !== undefined) {
               if (curSubLayer.id === subLayerId)
                 curSubLayer.visible = isSelected;
               else if  (prevVisibleSubLayers.includes(curSubLayer.id))

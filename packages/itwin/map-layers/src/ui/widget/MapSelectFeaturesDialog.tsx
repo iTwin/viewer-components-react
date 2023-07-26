@@ -85,15 +85,8 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
         trapFocus={false}
       >
-        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={
-          (subLayerId: SubLayerId, isSelected: boolean) => {
-            const tmpSubLayers = [...subLayers];
-            const sl = tmpSubLayers.find((value: MapSubLayerProps) => value.id === subLayerId);
-            if (sl) {
-              sl.visible = isSelected;
-              setSubLayers(tmpSubLayers)
-            } }
-          }/>
+        {/* 'onSubLayerStateChange' is used to trigger hook state change only, no need to update subLayer objects */}
+        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])}/>
 
         {/* Warning message */}
         {renderWarningMessage()}
