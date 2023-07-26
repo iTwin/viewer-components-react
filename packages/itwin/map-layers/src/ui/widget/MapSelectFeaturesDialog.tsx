@@ -11,7 +11,7 @@ import "./MapSelectFeaturesDialog.scss";
 import { DialogButtonType } from "@itwin/appui-abstract";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerSource } from "@itwin/core-frontend";
-import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
+import { MapSubLayerProps } from "@itwin/core-common";
 import { SubLayersTree } from "./SubLayersTree";
 
 export interface MapSelectFeaturesProps {
@@ -91,8 +91,6 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         {/* Warning message */}
         {renderWarningMessage()}
       </Dialog>
-
-
     </div >
   );
 }
