@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Fixvarious display issues with MapLayer widget",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
