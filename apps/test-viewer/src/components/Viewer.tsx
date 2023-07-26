@@ -11,12 +11,25 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
+import { ArcGisAccessClient } from "@itwin/map-layers-auth";
 
 const uiConfig = getUiProvidersConfig();
 
 async function onIModelAppInit() {
   await uiConfig.initialize();
   await FrontendDevTools.initialize();
+    // ArcGIS Oauth setup
+    const accessClient = new ArcGisAccessClient();
+    accessClient.initialize({
+      redirectUri: "http://localhost:3000/esri-oauth2-callback",
+      clientIds: {
+        arcgisOnlineClientId: process.env.IMJS_AUTH_ARCGIS_CLIENT_ID,
+        enterpriseClientIds: [{ serviceBaseUrl: "", clientId: "Bentley_TestApp" }],
+      },
+    });
+
+    IModelApp.mapLayerFormatRegistry.setAccessClient("ArcGIS", accessClient);
+    IModelApp.mapLayerFormatRegistry.setAccessClient("ArcGISFeature", accessClient);
 }
 
 export function Viewer() {

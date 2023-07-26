@@ -10,54 +10,12 @@ import {
   TreeNodeRenderer, TreeNodeRendererProps, TreeRenderer, TreeRendererProps, useTreeModel,
 } from "@itwin/components-react";
 import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
-import { CheckBoxState, ImageCheckBox, NodeCheckboxRenderProps, useDisposable, WebFontIcon } from "@itwin/core-react";
+import { CheckBoxState, ImageCheckBox, NodeCheckboxRenderProps, ResizableContainerObserver, useDisposable, WebFontIcon } from "@itwin/core-react";
 import { Button, Input } from "@itwin/itwinui-react";
 import * as React from "react";
-import { SubLayersDataProvider } from "./SubLayersDataProvider";
+import { SubLayersDataProvider, SubLayersTreeExpandMode } from "./SubLayersDataProvider";
 import "./SubLayersTree.scss";
 import { MapLayersUI } from "../../mapLayers";
-
-const getWindow = () => {
-  return typeof window === "undefined" ? undefined : window;
-};
-
-const useResizeObserver = <T extends HTMLElement>(
-  onResize: (size: DOMRectReadOnly) => void,
-) => {
-  const resizeObserver = React.useRef<ResizeObserver>();
-
-  const elementRef = React.useCallback(
-    (element: T | null) => {
-      if (!getWindow()?.ResizeObserver) {
-        return;
-      }
-
-      resizeObserver.current?.disconnect();
-      if (element) {
-        resizeObserver.current = new ResizeObserver(([{ contentRect }]) =>
-          onResize(contentRect),
-        );
-        resizeObserver.current?.observe(element);
-      }
-    },
-    [onResize],
-  );
-
-  return [elementRef, resizeObserver.current] as const;
-};
-
-/** Mimic processing of `react-resize-detector` to return width and height.
- * @internal
- */
-function useResizeDetector(): { width: number | undefined, height: number | undefined, ref: React.Ref<HTMLDivElement> } {
-  const [width, setWidth] = React.useState<number>();
-  const [height, setHeight] = React.useState<number>();
-  const [ref] = useResizeObserver(React.useCallback((size: DOMRectReadOnly) => {
-    setWidth(size.width);
-    setHeight(size.height);
-  }, []));
-  return { width, height, ref };
-}
 
 interface ToolbarProps {
   searchField?: React.ReactNode;
@@ -98,18 +56,26 @@ export function SubLayersPanel(props: SubLayersPanelProps) {
 }
 
 export interface SubLayersTreeProps {
+  checkboxStyle: "standard" | "eye";
+  expandMode: SubLayersTreeExpandMode;
   subLayers: MapSubLayerProps[];
   singleVisibleSubLayer?: boolean;
   onSubLayerStateChange?: OnSubLayerStateChangeType;
+  height?: number;
+  width?: number;
 }
+
 /**
  * Tree Control that displays sub-layer hierarchy
  * @internal
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function SubLayersTree(props: SubLayersTreeProps) {
+  const [width, setWidth] = React.useState<number|undefined>(props.width);
+  const [height, setHeight] = React.useState<number|undefined>(props.height);
 
   const [placeholderLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.SearchPlaceholder"));
+  const [noResults] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.NoResults"));
   const [allOnLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.AllOn"));
   const [allOffLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.AllOff"));
   const [subLayers, setSubLayers] = React.useState(props.subLayers);
@@ -117,7 +83,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
 
   // create data provider to get some nodes to show in tree
   // `React.useMemo' is used avoid creating new object on each render cycle
-  const dataProvider = React.useMemo(() => new SubLayersDataProvider(subLayers), [subLayers]);
+  const dataProvider = React.useMemo(() => new SubLayersDataProvider(subLayers, props.expandMode), [subLayers, props.expandMode]);
 
   const {
     modelSource,
@@ -152,13 +118,11 @@ export function SubLayersTree(props: SubLayersTreeProps) {
     setLayerFilterString(event.target.value);
   }, []);
 
-  const { width, height, ref: containerRef } = useResizeDetector();
-
   return <>
     <div className="map-manager-sublayer-tree">
       <Toolbar
         searchField={
-          <Input type="text" className="map-manager-source-list-filter"
+          <Input type="text" className="map-manager-sublayer-tree-searchbox"
             placeholder={placeholderLabel}
             value={layerFilterString}
             onChange={handleFilterTextChanged}
@@ -167,23 +131,26 @@ export function SubLayersTree(props: SubLayersTreeProps) {
       >
         {props.singleVisibleSubLayer ? undefined : [
           <Button size="small" styleType="borderless" key="show-all-btn" title={allOnLabel} onClick={async () => changeAll(true)}>
-            <WebFontIcon iconName="icon-visibility" />
+            <WebFontIcon iconName={props.checkboxStyle === "eye" ? "icon-visibility" : "icon-checkbox-select" } />
           </Button>,
           <Button size="small" styleType="borderless" key="hide-all-btn" title={allOffLabel} onClick={async () => changeAll(false)}>
-            <WebFontIcon iconName="icon-visibility-hide-2" />
+            <WebFontIcon iconName={props.checkboxStyle === "eye" ? "icon-visibility-hide-2" : "icon-checkbox-deselect" } />
           </Button>,
         ]}
       </Toolbar>
-      <div ref={containerRef} className="map-manager-sublayer-tree-content">
-        {width !== undefined && height !== undefined && <ControlledTree
+      <div className="map-manager-sublayer-tree-content" >
+        {(props.width === undefined && props.height === undefined) && <ResizableContainerObserver onResize={(w, h) => {setWidth(w); setHeight(h);} }/> }
+        {(width !== undefined && height !== undefined)
+        && <ControlledTree
           nodeLoader={nodeLoader}
           selectionMode={SelectionMode.None}
           eventsHandler={eventHandler}
           model={treeModel}
-          treeRenderer={nodeWithEyeCheckboxTreeRenderer}
+          treeRenderer={props.checkboxStyle === "eye" ? nodeWithEyeCheckboxTreeRenderer : undefined}
           nodeHighlightingProps={nodeHighlightingProps}
           width={width}
           height={height}
+          noDataRenderer={()=>(<p className="components-controlledTree-errorMessage">{noResults}</p>)}
         />}
       </div>
     </div >
@@ -332,7 +299,7 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
 
           // Update sublayer object, otherwise state would get out of sync with DisplayStyle each time the TreeView is re-rendered
           this._subLayers?.forEach((curSubLayer) => {
-            if (curSubLayer.id) {
+            if (curSubLayer.id !== undefined) {
               if (curSubLayer.id === subLayerId)
                 curSubLayer.visible = isSelected;
               else if  (prevVisibleSubLayers.includes(curSubLayer.id))

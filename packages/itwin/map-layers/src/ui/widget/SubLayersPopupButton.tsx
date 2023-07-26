@@ -54,7 +54,7 @@ export function SubLayersPopupButton(props: SubLayersPopupButtonProps) {
       >
         <div className="map-transparency-popup-panel">
           <div ref={panelRef} className="map-manager-sublayer-panel">
-            <SubLayersPanel {...props} />
+            <SubLayersPanel {...props} width={390} height={350}/>
           </div>
         </div>
       </Popup >

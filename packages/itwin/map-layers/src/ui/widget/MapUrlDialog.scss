@@ -24,6 +24,15 @@ $default-font-size: --iui-font-size-1;
   padding: 0;
 }
 
+.map-layer-source-url-subLayers {
+
+  height: 200px;
+  width: 500px;
+  // height: calc(100% - 40px);
+  // width: calc(100% - 40px);
+  // border: 1px solid #ccc;
+  // border-radius: 16px
+}
 .map-layer-source-url {
 
   height: 100%;
@@ -84,17 +93,8 @@ $default-font-size: --iui-font-size-1;
   .map-layer-source-warnMessage-icon {
     background-color: transparent;
     border: none;
-    color: $buic-foreground-warning;
+    color: var(--iui-color-icon-warning);
     background-color: transparent;
-
-    &:hover {
-      color: $hovered-icon-color;
-    }
-
-    &:focus {
-      outline: none;
-      box-shadow: rgba(var(--iui-color-border-accent), var(--iui-opacity-4)) 0px 0px 0px 2px;
-    }
   }
 
 }
