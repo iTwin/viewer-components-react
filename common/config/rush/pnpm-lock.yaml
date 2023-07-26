@@ -58,7 +58,7 @@ importers:
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
       '@itwin/appui-layout-react': 4.3.0_d27e8f12d5a4b769b0a7224f2bdc539d
       '@itwin/appui-react': 4.3.0_eeb38eb7c3352f9d799ed6764039c897
-      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_9533c7e454a2e3c1212223ffa91a2bc7
+      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_b10c05ec054ece66f4afdb0e6dea72b5
       '@itwin/browser-authorization': 0.8.0_@itwin+core-bentley@4.0.0
       '@itwin/components-react': 4.3.0_d27e8f12d5a4b769b0a7224f2bdc539d
       '@itwin/core-bentley': 4.0.0
@@ -1016,6 +1016,7 @@ importers:
       '@itwin/eslint-plugin': ^4.0.0-dev.38
       '@itwin/imodel-components-react': ^4.3.0
       '@itwin/itwinui-icons-react': ^2.1.0
+      '@itwin/itwinui-illustrations-react': ^2.1.0
       '@itwin/itwinui-react': ^2.11.0
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
@@ -1047,6 +1048,7 @@ importers:
       nyc: 15.1.0
       react: ^17.0.0
       react-dom: ^17.0.0
+      react-error-boundary: ^4.0.10
       react-redux: ^7.2.2
       redux: ^4.1.0
       rimraf: ^3.0.2
@@ -1055,8 +1057,10 @@ importers:
       typescript: ~5.0.0
     dependencies:
       '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
+      react-error-boundary: 4.0.10_react@17.0.2
     devDependencies:
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
       '@itwin/appui-layout-react': 4.3.0_d27e8f12d5a4b769b0a7224f2bdc539d
@@ -1260,6 +1264,7 @@ importers:
       '@itwin/eslint-plugin': ^4.0.0-dev.38
       '@itwin/imodel-components-react': ^4.3.0
       '@itwin/itwinui-icons-react': ^2.1.0
+      '@itwin/itwinui-illustrations-react': ^2.1.0
       '@itwin/itwinui-react': ^2.11.0
       '@itwin/itwinui-variables': ^2.0.0
       '@itwin/presentation-backend': ^4.0.0
@@ -1302,6 +1307,7 @@ importers:
       nyc: 15.1.0
       react: ^17.0.0
       react-dom: ^17.0.0
+      react-error-boundary: ^4.0.10
       react-redux: ^7.2.2
       redux: ^4.1.0
       rimraf: ^3.0.2
@@ -1314,10 +1320,12 @@ importers:
     dependencies:
       '@bentley/icons-generic': 1.0.34
       '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       i18next: 10.6.0
+      react-error-boundary: 4.0.10_react@17.0.2
       rxjs: 6.6.7
     devDependencies:
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
@@ -4412,7 +4420,7 @@ packages:
       '@itwin/imodel-components-react': 4.1.0_78603e3e11bdd64decb4bbc2e9634747
       '@itwin/itwinui-icons': 1.16.0
       '@itwin/itwinui-icons-react': 2.2.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-illustrations-react': 2.0.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
@@ -4458,7 +4466,7 @@ packages:
       '@itwin/imodel-components-react': 4.3.0_8cc85a425e80ff17b6bccfcaef60459d
       '@itwin/itwinui-icons': 1.16.0
       '@itwin/itwinui-icons-react': 2.2.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-illustrations-react': 2.0.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.8_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
@@ -4505,7 +4513,7 @@ packages:
       '@itwin/imodel-components-react': 4.3.0_8cc85a425e80ff17b6bccfcaef60459d
       '@itwin/itwinui-icons': 1.16.0
       '@itwin/itwinui-icons-react': 2.2.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-illustrations-react': 2.0.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.8_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
@@ -6372,8 +6380,8 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
 
-  /@itwin/itwinui-illustrations-react/2.0.1_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-uUrr/O3hpL8r0ZSSRExZ68RTxLbR7mlZFytpCLa9qwJqxvdWgTJaZhR3rSOad6HBfqk6KOGlOGz569BuWrD9Lw==}
+  /@itwin/itwinui-illustrations-react/2.1.0_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-5JR2A3mZy0d0qwwHpveSG3fsXLheJkO6a0GoWb8NQWw5edNZMRynJg0l3hVw3CHMgaaCGbUoKC77MuG0jWDzuA==}
     peerDependencies:
       react: '>=16.8.6'
       react-dom: '>=16.8.6'
@@ -6440,7 +6448,7 @@ packages:
       react-dom: '>=16.8.6 < 19.0.0'
     dependencies:
       '@itwin/itwinui-css': 1.11.1
-      '@itwin/itwinui-illustrations-react': 2.0.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@tippyjs/react': 4.2.6_react-dom@17.0.2+react@17.0.2
       '@types/react-table': 7.7.10
@@ -6458,7 +6466,7 @@ packages:
       react-dom: '>=16.8.6 < 19.0.0'
     dependencies:
       '@itwin/itwinui-css': 1.11.3
-      '@itwin/itwinui-illustrations-react': 2.0.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@tippyjs/react': 4.2.6_react-dom@17.0.2+react@17.0.2
       '@types/react-table': 7.7.10
@@ -6476,7 +6484,7 @@ packages:
       react-dom: '>=16.8.6 < 19.0.0'
     dependencies:
       '@itwin/itwinui-css': 1.8.0
-      '@itwin/itwinui-illustrations-react': 2.0.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@tippyjs/react': 4.2.6_react-dom@17.0.2+react@17.0.2
       '@types/react-table': 7.7.10
@@ -6989,7 +6997,7 @@ packages:
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
       '@itwin/imodels-access-frontend': 3.0.0_dc27d18731cfe2225c184224282702a2
       '@itwin/imodels-client-management': 4.1.0
-      '@itwin/itwinui-illustrations-react': 2.0.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.8_react-dom@17.0.2+react@17.0.2
       '@itwin/presentation-common': 4.0.0_b65abb2eba6f77a1811421d5706635e7
       '@itwin/presentation-components': 4.0.0_2d55c4275137e2e758b51375fcfe4e1c
@@ -21235,6 +21243,15 @@ packages:
       react: 17.0.2
     dev: true
 
+  /react-error-boundary/4.0.10_react@17.0.2:
+    resolution: {integrity: sha512-pvVKdi77j2OoPHo+p3rorgE43OjDWiqFkaqkJz8sJKK6uf/u8xtzuaVfj5qJ2JnDLIgF1De3zY5AJDijp+LVPA==}
+    peerDependencies:
+      react: '>=16.13.1'
+    dependencies:
+      '@babel/runtime': 7.21.0
+      react: 17.0.2
+    dev: false
+
   /react-error-boundary/4.0.3_react@17.0.2:
     resolution: {integrity: sha512-IzNKP/ViHWp2QRDgsDMirEcf0XLsLueN6Wgzm1TVwgbAH+paX8Z42VyKvZcFFRHgd+rPK2P4TLrOrHC/dommew==}
     peerDependencies:
@@ -25124,11 +25141,11 @@ packages:
       react: 17.0.2
       use-sync-external-store: 1.2.0_react@17.0.2
 
-  file:../../packages/itwin/breakdown-trees_9533c7e454a2e3c1212223ffa91a2bc7:
+  file:../../packages/itwin/breakdown-trees_b10c05ec054ece66f4afdb0e6dea72b5:
     resolution: {directory: ../../packages/itwin/breakdown-trees, type: directory}
     id: file:../../packages/itwin/breakdown-trees
     name: '@itwin/breakdown-trees-react'
-    version: 0.5.2
+    version: 0.6.1
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.3.0
@@ -25139,11 +25156,11 @@ packages:
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-geometry': ^4.0.0
       '@itwin/core-react': ^4.3.0
-      '@itwin/measure-tools-react': workspace:^0.12.1
+      '@itwin/measure-tools-react': workspace:^0.12.2
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
-      '@itwin/tree-widget-react': workspace:^1.0.0-dev.3
+      '@itwin/tree-widget-react': workspace:^1.0.0-dev.5
       react: ^17.0.0
       react-dom: ^17.0.0
       react-redux: 7.2.6
@@ -25158,7 +25175,7 @@ packages:
       '@itwin/core-geometry': 4.0.0
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
       '@itwin/itwinui-icons-react': 2.2.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.8_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@itwin/measure-tools-react': file:../../packages/itwin/measure-tools_2c73b38257a1abcf4cb8fe3542cb519e
       '@itwin/presentation-common': 4.0.0_b65abb2eba6f77a1811421d5706635e7
@@ -25245,7 +25262,7 @@ packages:
     resolution: {directory: ../../packages/itwin/measure-tools, type: directory}
     id: file:../../packages/itwin/measure-tools
     name: '@itwin/measure-tools-react'
-    version: 0.12.1
+    version: 0.12.2
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.0.0
@@ -25282,7 +25299,7 @@ packages:
     resolution: {directory: ../../packages/itwin/property-grid, type: directory}
     id: file:../../packages/itwin/property-grid
     name: '@itwin/property-grid-react'
-    version: 1.0.0-dev.0
+    version: 1.0.0-dev.2
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
@@ -25303,12 +25320,14 @@ packages:
       '@itwin/core-frontend': 4.0.0_be273c0b849e02c9a5835927dc181349
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
       '@itwin/itwinui-icons-react': 2.2.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.8_react-dom@17.0.2+react@17.0.2
       '@itwin/presentation-components': 4.0.0_2d55c4275137e2e758b51375fcfe4e1c
       '@itwin/presentation-frontend': 4.0.0_f4ca9731f71cbf5cc67e81c3c0c2cd08
       classnames: 2.3.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
+      react-error-boundary: 4.0.10_react@17.0.2
       react-redux: 7.2.9_react-dom@17.0.2+react@17.0.2
     dev: false
 
@@ -25316,7 +25335,7 @@ packages:
     resolution: {directory: ../../packages/itwin/tree-widget, type: directory}
     id: file:../../packages/itwin/tree-widget
     name: '@itwin/tree-widget-react'
-    version: 1.0.0-dev.3
+    version: 1.0.0-dev.5
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
@@ -25334,12 +25353,14 @@ packages:
       '@itwin/core-frontend': 4.0.0_be273c0b849e02c9a5835927dc181349
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
       '@itwin/itwinui-icons-react': 2.2.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.8_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@itwin/presentation-components': 4.0.0_2d55c4275137e2e758b51375fcfe4e1c
       classnames: 2.3.1
       i18next: 10.6.0
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
+      react-error-boundary: 4.0.10_react@17.0.2
       rxjs: 6.6.7
     dev: false
