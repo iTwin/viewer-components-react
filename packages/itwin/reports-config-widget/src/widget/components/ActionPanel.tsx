@@ -24,7 +24,7 @@ const ActionPanel = ({
   isCancelDisabled = false,
   isSavingDisabled = false,
   isLoading = false,
-}: ActionPanelProps): JSX.Element => {
+}: ActionPanelProps): React.ReactElement => {
   return (
     <div className="rcw-action-panel">
       {isLoading && <LoadingSpinner />}

@@ -15,6 +15,7 @@ import type { CreateTypeFromInterface } from "./utils";
 import { handleError } from "./utils";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import type { AccessToken } from "@itwin/core-bentley";
+import type { Column } from "react-table";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
@@ -74,29 +75,23 @@ export const AddMappingsModal = ({
   }, [getAccessToken, mappingsClient, selectedIModelId, setIsLoading]);
 
   const mappingsColumns = useMemo(
-    () => [
+    (): Column<CreateTypeFromInterface<Mapping>>[] => [
       {
-        Header: "Table",
-        columns: [
-          {
-            id: "mappingName",
-            Header: ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:MappingName"
-            ),
-            accessor: "mappingName",
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "description",
-            Header: ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:Description"
-            ),
-            accessor: "description",
-            Filter: tableFilters.TextFilter(),
-          },
-        ],
+        id: "mappingName",
+        Header: ReportsConfigWidget.localization.getLocalizedString(
+          "ReportsConfigWidget:MappingName"
+        ),
+        accessor: "mappingName",
+        Filter: tableFilters.TextFilter(),
       },
-    ],
+      {
+        id: "description",
+        Header: ReportsConfigWidget.localization.getLocalizedString(
+          "ReportsConfigWidget:Description"
+        ),
+        accessor: "description",
+        Filter: tableFilters.TextFilter(),
+      }],
     []
   );
 

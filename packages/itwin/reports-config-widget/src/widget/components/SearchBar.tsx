@@ -44,6 +44,7 @@ export const SearchBar = ({
           <IconButton
             onClick={() => setSearchBarClosing(true)}
             styleType="borderless"
+            title="Clear Search"
           >
             <SvgCloseSmall />
           </IconButton>
@@ -55,7 +56,7 @@ export const SearchBar = ({
       />
     </div>
   ) : (
-    <IconButton styleType="borderless" data-testid="rcw-search-button" onClick={() => setSearchBarOpened(true)}>
+    <IconButton styleType="borderless" data-testid="rcw-search-button" title="Search" onClick={() => setSearchBarOpened(true)}>
       <SvgSearch />
     </IconButton>
   );

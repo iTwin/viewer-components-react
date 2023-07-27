@@ -111,7 +111,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
               </MenuItem>,
             ].flat()}
           >
-            <IconButton styleType="borderless">
+            <IconButton styleType="borderless" title="Report Options">
               <SvgMore />
             </IconButton>
           </DropdownMenu>
