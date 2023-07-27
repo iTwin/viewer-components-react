@@ -80,8 +80,8 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
 
   return (
     <>
-      <DropdownMenu menuItems={dropdownMenuItems} disabled={disabled} data-testid="map-layer-settings"  >
-        <IconButton aria-label='More options' size="small" styleType="borderless">
+      <DropdownMenu placement="auto-start" menuItems={dropdownMenuItems} disabled={disabled} data-testid="map-layer-settings"  >
+        <IconButton size="small" styleType="borderless">
           <SvgMoreVertical />
         </IconButton>
       </DropdownMenu>

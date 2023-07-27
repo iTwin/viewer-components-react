@@ -241,7 +241,7 @@ $default-font-size: --iui-font-size-1;
 
   .map-manager-item-label-disabled {
     @extend .map-manager-item-label;
-    color: $buic-foreground-muted;
+    color: var(--iui-color-text-disabled);
   }
 
   .map-manager-item-transparency {
