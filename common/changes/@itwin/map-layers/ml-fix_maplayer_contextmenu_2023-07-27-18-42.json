@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Fixed maplayer context menu not opening at the right position.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
