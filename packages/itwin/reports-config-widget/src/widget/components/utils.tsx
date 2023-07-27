@@ -31,7 +31,7 @@ export const WidgetHeader = ({
           className={`${disabled ? "rcw-chevron-disabled" : "rcw-chevron"}`}
           onClick={disabled ? undefined : returnFn}
           size="large"
-          title='Back'
+          title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Back")}
         >
           <SvgChevronLeft />
         </Icon>
