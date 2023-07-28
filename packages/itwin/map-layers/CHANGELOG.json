@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "version": "5.1.1",
+      "tag": "@itwin/map-layers_v5.1.1",
+      "date": "Fri, 28 Jul 2023 18:31:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix baseMap visibility not retained when switching to another style. Also fixed typos localized strings."
+          },
+          {
+            "comment": "Fixed maplayer context menu not opening at the right position."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.1.0",
       "tag": "@itwin/map-layers_v5.1.0",
       "date": "Wed, 26 Jul 2023 21:49:07 GMT",
