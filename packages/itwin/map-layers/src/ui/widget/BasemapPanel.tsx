@@ -158,9 +158,9 @@ export function BasemapPanel(props: BasemapPanelProps) {
       if (baseMap) {
         const baseProps: MapLayerProps = baseMap.toJSON();
         if (activeViewport.displayStyle.backgroundMapBase instanceof BaseMapLayerSettings) {
-          activeViewport.displayStyle.backgroundMapBase = activeViewport.displayStyle.backgroundMapBase.clone(baseProps);
+          activeViewport.displayStyle.backgroundMapBase = activeViewport.displayStyle.backgroundMapBase.clone({...baseProps, visible: baseMapVisible});
         } else {
-          activeViewport.displayStyle.backgroundMapBase = BaseMapLayerSettings.fromJSON(baseProps);
+          activeViewport.displayStyle.backgroundMapBase = BaseMapLayerSettings.fromJSON({...baseProps, visible: baseMapVisible});
         }
         setSelectedBaseMap(baseProps);
       } else {
@@ -170,7 +170,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
         setSelectedBaseMap(bgColorDef.toJSON());
       }
     }
-  }, [bases, activeViewport, bgColor]);
+  }, [baseMapVisible, bases, activeViewport, bgColor]);
 
   const handleVisibilityChange = React.useCallback(() => {
     if (activeViewport) {
