@@ -241,7 +241,7 @@ $default-font-size: --iui-font-size-1;
 
   .map-manager-item-label-disabled {
     @extend .map-manager-item-label;
-    color: $buic-foreground-muted;
+    color: var(--iui-color-text-disabled);
   }
 
   .map-manager-item-transparency {
@@ -268,6 +268,10 @@ $default-font-size: --iui-font-size-1;
   }
 }
 
+.map-manager-item-dropdown-slider {
+  /* Make the slider a little bit wider, otherwise its quite small in the dropdown menu*/
+  width: 100px;
+}
 
 .map-manager-item-sub-layer-container {
   @include uicore-z-index(dialog-popup);
