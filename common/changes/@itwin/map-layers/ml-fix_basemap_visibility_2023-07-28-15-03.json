@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/map-layers",
-      "comment": "Fix baseMap visibility not retained when switching to another style",
+      "comment": "Fix baseMap visibility not retained when switching to another style. Also fixed typos localized strings.",
       "type": "patch"
     }
   ],
