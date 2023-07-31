@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Removed `Show/Hide Empty Values` setting from context menu and moved it to the setting dropdown in header. ",
-      "type": "none"
+      "comment": "Removed `Show/Hide Empty Values` setting from context menu and moved it to the setting dropdown in header.",
+      "type": "major"
     }
   ],
   "packageName": "@itwin/property-grid-react"

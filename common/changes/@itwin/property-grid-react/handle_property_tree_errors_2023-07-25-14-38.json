@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "Handle errors thrown from property grid component.",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/property-grid-react"

@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "`ModelsTree`: Refactor ruleset to not use deprecated `ImageIdOverride` rule. ",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

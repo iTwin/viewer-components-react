@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "Refactored preferences storing to allow persisting new settings in the future.",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/property-grid-react"

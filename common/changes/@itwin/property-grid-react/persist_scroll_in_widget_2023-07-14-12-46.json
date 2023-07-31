@@ -3,7 +3,12 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "Persist property grid scroll position when switching between widgets.",
-      "type": "none"
+      "type": "patch"
+    },
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Bumped AppUI peer dependencies to `^4.3.0`.",
+      "type": "major"
     }
   ],
   "packageName": "@itwin/property-grid-react"

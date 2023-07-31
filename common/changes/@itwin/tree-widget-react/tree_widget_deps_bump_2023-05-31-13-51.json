@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "`Tree Header`: Fixed dropdown buttons menu not theming correctly.",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

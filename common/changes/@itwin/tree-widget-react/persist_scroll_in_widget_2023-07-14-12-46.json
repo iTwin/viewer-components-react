@@ -3,7 +3,12 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Persist tree scroll position when switching between widgets.",
-      "type": "none"
+      "type": "patch"
+    },
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Bumped AppUI peer dependencies to `^4.3.0`.",
+      "type": "major"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

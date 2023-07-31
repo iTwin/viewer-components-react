@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Added type for `createVisibilityTreeRenderer` props.",
+      "comment": "",
       "type": "none"
     }
   ],

@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Trees: Keep child nodes state the same after parent node re-expands.",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"
