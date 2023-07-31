@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 24 Jul 2023 17:26:29 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Jul 2023 21:49:07 GMT and should not be manually modified.
+
+## 0.17.4
+Wed, 26 Jul 2023 21:49:07 GMT
+
+### Patches
+
+- Adds an informational icon that the user can hover over to learn about custom calculation formulas. Also adds a placeholder to the formula Textarea with an example formula.
 
 ## 0.17.3
 Mon, 24 Jul 2023 17:26:29 GMT

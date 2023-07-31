@@ -9,7 +9,7 @@
 
 import * as React from "react";
 import { Draggable, DraggableChildrenFn, Droppable, DroppableProvided, DroppableStateSnapshot } from "react-beautiful-dnd";
-import { MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp, MapLayerImageryProviderStatus, MapLayerIndex, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority, ScreenViewport } from "@itwin/core-frontend";
 import { Icon } from "@itwin/core-react";
 import { assert } from "@itwin/core-bentley";
 import { UiFramework } from "@itwin/appui-react";
@@ -18,7 +18,7 @@ import { SubLayersPopupButton } from "./SubLayersPopupButton";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { MapTypesOptions, StyleMapLayerSettings } from "../Interfaces";
 import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
-import { MapUrlDialog } from "./MapUrlDialog";
+import { MapUrlDialog, SourceState } from "./MapUrlDialog";
 import "./MapLayerManager.scss";
 import { MapLayersUI } from "../../mapLayers";
 import { ImageMapLayerSettings, SubLayerId } from "@itwin/core-common";
@@ -54,6 +54,34 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
       props.activeViewport.displayStyle.changeMapSubLayerProps({ visible: isSelected }, subLayerId, { index: mapLayerStyleIdx, isOverlay: activeLayer.isOverlay });
   };
 
+  const handleOk = React.useCallback((index: MapLayerIndex, sourceState?: SourceState) => {
+    UiFramework.dialogs.modal.close();
+
+    const source = sourceState?.source;
+    const vp = props?.activeViewport;
+    if (vp === undefined || sourceState === undefined || source === undefined) {
+      const error = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachMissingViewOrSource");
+      const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceName: source?.name ?? "" });
+      IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
+      return;
+    }
+
+    const validation = sourceState.validation;
+
+    // Layer is already attached,
+    // This calls invalidateRenderPlan()
+    vp.displayStyle.changeMapLayerProps({subLayers: validation.subLayers}, index);
+    vp.displayStyle.changeMapLayerCredentials(index, source.userName, source.password);
+
+    // Either initial attach/initialize failed or the layer failed to load at least one tile
+    // because of an invalid token; in both cases tile tree needs to be fully reset
+    const provider = vp.getMapLayerImageryProvider(index);
+    provider?.resetStatus();
+    vp.resetMapLayer(index);
+
+    props.onItemEdited();
+  }, [props]);
+
   const renderItem: DraggableChildrenFn = (dragProvided, _, rubric) => {
     assert(props.layersList !== undefined);
     const activeLayer = props.layersList[rubric.source.index];
@@ -78,6 +106,8 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         <div className="map-manager-item-sub-layer-container">
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 &&
             <SubLayersPopupButton
+              checkboxStyle="eye"
+              expandMode="rootGroupOnly"
               subLayers={props.activeViewport ? activeLayer.subLayers : undefined}
               singleVisibleSubLayer={activeLayer.provider?.mutualExclusiveSubLayer}
               onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }} />
@@ -91,12 +121,14 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             onClick={() => {
               const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
               if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-                const layerSettings = props.activeViewport.displayStyle.mapLayerAtIndex({ index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay });
+                const index = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
+                const layerSettings = props.activeViewport.displayStyle.mapLayerAtIndex(index);
                 if (layerSettings instanceof ImageMapLayerSettings) {
                   UiFramework.dialogs.modal.open(<MapUrlDialog activeViewport={props.activeViewport}
                     isOverlay={props.isOverlay}
                     layerRequiringCredentials={layerSettings?.toJSON()}
-                    onOkResult={props.onItemEdited}
+                    onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
+                    onCancelResult={() => {UiFramework.dialogs.modal.close();}}
                     mapTypesOptions={props.mapTypesOptions}></MapUrlDialog>);
                 }
               }

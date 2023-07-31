@@ -1,6 +1,30 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 23 May 2023 13:16:11 GMT and should not be manually modified.
+This log was last generated on Mon, 31 Jul 2023 14:10:09 GMT and should not be manually modified.
+
+## 1.0.0
+Mon, 31 Jul 2023 14:10:09 GMT
+
+### Breaking changes
+
+- Bumped AppUI peer dependencies to `^4.3.0`.
+- Replaced `enableAncestorNavigation` property with `ancestorsNavigationControls` to allow using custom components for ancestors navigation.
+- Removed properties used to configure data provider in favor of `createDataProvider` prop for supplying custom data provider.
+- Removed properties used for enabling/disabling context menu items in favor of `contextMenuItems` list that is now used to populate context menu.
+- Removed `customOnDataChanged` property. `createDataProvider` and `IPresentationPropertyDataProvider.onDataChanged` should be used instead.
+- Removed `Show/Hide Empty Values` setting from context menu and moved it to the setting dropdown in header.
+
+### Minor changes
+
+- Refactored preferences storing to allow persisting new settings in the future.
+- Added settings dropdown menu inside Property Grid header.
+
+### Patches
+
+- Handle errors thrown from property grid component.
+- Persist property grid scroll position when switching between widgets.
+- Fixed property grid not hiding empty struct and array properties.
+- Improved keyboard navigation when navigating from Property Grid to Element List.
 
 ## 0.11.0
 Tue, 23 May 2023 13:16:11 GMT

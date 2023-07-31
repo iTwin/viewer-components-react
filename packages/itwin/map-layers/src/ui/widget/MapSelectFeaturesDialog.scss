@@ -3,13 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.gmw-custom-calculation-action-container {
-  overflow-x: auto;
-  height: 100%;
+.map-layer-select-features-dialog {
+  z-Index: 21000;
 
-  .gmw-details-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--iui-size-s);
-  }
 }
+
+.map-layer-select-features-dialog.core-dialog .core-dialog-container .core-dialog-area > .core-dialog-content {
+  overflow: hidden;
+}
+.map-layer-select-features-dialog .map-manager-sublayer-tree-content {
+  min-height: 200px;
+}
+

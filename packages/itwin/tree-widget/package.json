@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "1.0.0-dev.6",
+  "version": "1.0.0",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -41,10 +41,12 @@
   "dependencies": {
     "@bentley/icons-generic": "^1.0.34",
     "@itwin/itwinui-icons-react": "^2.1.0",
+    "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/itwinui-react": "^2.11.0",
     "@itwin/itwinui-variables": "^2.0.0",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
+    "react-error-boundary": "^4.0.10",
     "rxjs": "^6.6.2"
   },
   "devDependencies": {

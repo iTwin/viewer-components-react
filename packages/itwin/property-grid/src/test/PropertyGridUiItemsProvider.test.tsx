@@ -25,6 +25,9 @@ describe("PropertyGridUiItemsProvider", () => {
   before(() => {
     sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
     propertyGridComponentStub = sinon.stub(propertyGridComponent, "PropertyGridComponent").returns(<></>);
+
+    const ref = createRef<HTMLDivElement>();
+    sinon.stub(usePropertyGridTransientStateModule, "usePropertyGridTransientState").callsFake(() => ref);
   });
 
   after(() => {
@@ -51,13 +54,23 @@ describe("PropertyGridUiItemsProvider", () => {
   });
 
   it("renders property grid component", () => {
-    const ref = createRef<HTMLDivElement>();
-    sinon.stub(usePropertyGridTransientStateModule, "usePropertyGridTransientState").callsFake(() => ref);
     const provider = new PropertyGridUiItemsProvider();
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
     render(<>{widget.content}</>);
 
     expect(propertyGridComponentStub).to.be.called;
+  });
+
+  it("renders error message if property grid component throws", () => {
+    propertyGridComponentStub.reset();
+    propertyGridComponentStub.callsFake(() => { throw new Error("Error"); });
+
+    const provider = new PropertyGridUiItemsProvider();
+    const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
+    const { queryByText } = render(<>{widget.content}</>);
+
+    expect(propertyGridComponentStub).to.be.called;
+    expect(queryByText(PropertyGridManager.translate("error"))).to.not.be.null;
   });
 
   describe("widget state", () => {
