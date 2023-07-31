@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "**BREAKING** Removed `customOnDataChanged` property. `createDataProvider` and `IPresentationPropertyDataProvider.onDataChanged` should be used instead.",
-      "type": "none"
+      "comment": "Removed `customOnDataChanged` property. `createDataProvider` and `IPresentationPropertyDataProvider.onDataChanged` should be used instead.",
+      "type": "major"
     }
   ],
   "packageName": "@itwin/property-grid-react"

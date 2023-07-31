@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "Fixed property grid not hiding empty struct and array properties.",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/property-grid-react"
