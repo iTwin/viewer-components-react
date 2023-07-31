@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Trees: Use search box from the itwinui-react library.",
+      "comment": "Trees: Use search box from the `@itwin/itwinui-react` library.",
       "type": "minor"
     }
   ],
