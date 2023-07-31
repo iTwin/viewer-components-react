@@ -12,7 +12,7 @@
     },
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "`createVisibilityTreeNodeRenderer` now can take a `props` object of type `VisibilityTreeNodeRendererProps`. It contains two new configuration options: `levelOffset`, and `disableRootNodeCollapse`.",
+      "comment": "`createVisibilityTreeNodeRenderer` now takes a `props` object of type `VisibilityTreeNodeRendererProps`. It contains two new configuration options: `levelOffset`, and `disableRootNodeCollapse`.",
       "type": "major"
     },
     {
