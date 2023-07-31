@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Persist tree scroll position when switching between widgets.",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

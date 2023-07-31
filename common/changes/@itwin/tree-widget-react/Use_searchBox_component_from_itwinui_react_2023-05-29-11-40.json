@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Trees: Use search box from the itwinui-react library.",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

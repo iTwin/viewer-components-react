@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Models tree: Removed expansion toggle for root node",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

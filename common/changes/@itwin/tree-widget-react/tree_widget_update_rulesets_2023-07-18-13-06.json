@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "`ModelsTree`: Always render checkbox to avoid UI shifting when checkbox appear.",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

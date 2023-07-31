@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Refactored `IModelContentTreeProps` to not inherit `HTMLDivElement` props.",
-      "type": "none"
+      "type": "major"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Handle errors thrown from tree components.",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"
