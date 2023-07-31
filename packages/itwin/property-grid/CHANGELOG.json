@@ -2,6 +2,63 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@itwin/property-grid-react_v1.0.0",
+      "date": "Mon, 31 Jul 2023 14:10:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle errors thrown from property grid component."
+          },
+          {
+            "comment": "Persist property grid scroll position when switching between widgets."
+          },
+          {
+            "comment": "Fixed property grid not hiding empty struct and array properties."
+          },
+          {
+            "comment": "Improved keyboard navigation when navigating from Property Grid to Element List."
+          }
+        ],
+        "major": [
+          {
+            "comment": "Bumped AppUI peer dependencies to `^4.3.0`."
+          },
+          {
+            "comment": "Replaced `enableAncestorNavigation` property with `ancestorsNavigationControls` to allow using custom components for ancestors navigation."
+          },
+          {
+            "comment": "Removed properties used to configure data provider in favor of `createDataProvider` prop for supplying custom data provider."
+          },
+          {
+            "comment": "Removed properties used for enabling/disabling context menu items in favor of `contextMenuItems` list that is now used to populate context menu."
+          },
+          {
+            "comment": "Removed `customOnDataChanged` property. `createDataProvider` and `IPresentationPropertyDataProvider.onDataChanged` should be used instead."
+          },
+          {
+            "comment": "Removed `Show/Hide Empty Values` setting from context menu and moved it to the setting dropdown in header."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Do not open property grid widget when transient instance is selected."
+          },
+          {
+            "comment": "Added unit tests."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Refactored preferences storing to allow persisting new settings in the future."
+          },
+          {
+            "comment": "Added settings dropdown menu inside Property Grid header."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.0",
       "tag": "@itwin/property-grid-react_v0.11.0",
       "date": "Tue, 23 May 2023 13:16:11 GMT",
