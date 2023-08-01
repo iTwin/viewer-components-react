@@ -244,6 +244,9 @@ export const CustomCalculationAction = ({
             }}
             message={formulaErrorMessage}
             status={formulaErrorMessage ? "negative" : undefined}
+            onBlurCapture={() => {
+              forceValidation();
+            }}
           />
           <LabeledSelect<QuantityType>
             label='Quantity Type'
