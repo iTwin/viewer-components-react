@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
+  Alert,
   Fieldset,
   LabeledInput,
   LabeledSelect,
@@ -225,6 +226,13 @@ export const CustomCalculationAction = ({
               validator.showMessageFor("name");
             }}
           />
+          <Alert
+            type='informational'
+            clickableText='Click here.'
+            clickableTextProps={{ href: "https://developer.bentley.com/apis/insights/operations/create-customcalculation/", target: "_blank", rel: "noreferrer" }}
+          >
+            To learn more about creating custom calculation formulas, view the documentation.
+          </Alert>
           <LabeledTextarea
             value={formula}
             required

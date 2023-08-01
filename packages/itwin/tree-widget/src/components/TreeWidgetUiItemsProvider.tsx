@@ -4,14 +4,18 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetUiItemsProvider.scss";
+import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
+import { SvgError } from "@itwin/itwinui-illustrations-react";
+import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
+import { SelectableTree } from "./SelectableTree";
 import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
 import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
-import { SelectableTree } from "./SelectableTree";
 import { useTreeTransientState } from "./utils/UseTreeTransientState";
 
+import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { SelectableTreeProps, TreeDefinition } from "./SelectableTree";
 
@@ -85,6 +89,21 @@ function SelectableTreeWidget(props: SelectableTreeProps) {
   const ref = useTreeTransientState<HTMLDivElement>();
 
   return (<div ref={ref} className="tree-widget">
-    <SelectableTree {...props} />
+    <ErrorBoundary FallbackComponent={ErrorState}>
+      <SelectableTree {...props} />
+    </ErrorBoundary>
   </div>);
+}
+
+function ErrorState({ resetErrorBoundary }: FallbackProps) {
+  return (
+    <NonIdealState
+      svg={<SvgError />}
+      heading={TreeWidget.translate("error")}
+      description={TreeWidget.translate("generic-error-description")}
+      actions={
+        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>{TreeWidget.translate("retry")}</Button>
+      }
+    />
+  );
 }

@@ -2,6 +2,99 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@itwin/tree-widget-react_v1.0.0",
+      "date": "Mon, 31 Jul 2023 14:10:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Models tree: Removed expansion toggle for root node."
+          },
+          {
+            "comment": "Widget: Added ability to conditionally show trees."
+          },
+          {
+            "comment": "Trees: Decrease whitespace size between the node label and eye checkbox."
+          },
+          {
+            "comment": "Added base tree props interface for props shared between trees."
+          },
+          {
+            "comment": "External sources tree: Add `ExternalSourcesTreeComponent` (currently `@alpha`)."
+          },
+          {
+            "comment": "Models tree: Added an option to specialize the class of geometric elements loaded into the hierarchy (see `ModelsTreeHierarchyConfiguration.elementClassSpecification`)."
+          },
+          {
+            "comment": "Trees: Use search box from the `@itwin/itwinui-react` library."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Trees: Keep child nodes state the same after parent node re-expands."
+          },
+          {
+            "comment": "Categories tree: Fixed behavior of the Invert button. Previously, only categories were affected, now sub-categories are affected as well."
+          },
+          {
+            "comment": "Handle errors thrown from tree components."
+          },
+          {
+            "comment": "Persist tree scroll position when switching between widgets."
+          },
+          {
+            "comment": "`Tree Header`: Fixed dropdown buttons menu not theming correctly."
+          },
+          {
+            "comment": "`ModelsTree`: Refactor ruleset to not use deprecated `ImageIdOverride` rule. "
+          },
+          {
+            "comment": "`ModelsTree`: Always render checkbox to avoid UI shifting when checkbox appear."
+          }
+        ],
+        "major": [
+          {
+            "comment": "Trees: Make eye checkboxes static on horizontal scroll."
+          },
+          {
+            "comment": "`createVisibilityTreeNodeRenderer` now takes a `props` object of type `VisibilityTreeNodeRendererProps`. It contains two new configuration options: `levelOffset`, and `disableRootNodeCollapse`."
+          },
+          {
+            "comment": "Rename `useVisibilityTreeRenderer` to `createVisibilityTreeRenderer`. It now takes a `props` object of type `VisibilityTreeRendererProps`"
+          },
+          {
+            "comment": "Bumped AppUI peer dependencies to `^4.3.0`."
+          },
+          {
+            "comment": "Renamed `TreeWidgetComponent` to `SelectableTree`."
+          },
+          {
+            "comment": "Widget: Reworked the way trees are provided to the widget. Instead of having separate configuration properties for hiding default trees and adding additional trees now there is only one property for supplying a list of trees to show."
+          },
+          {
+            "comment": "Refactored `IModelContentTreeProps` to not inherit `HTMLDivElement` props."
+          },
+          {
+            "comment": "`IVisibilityHandler`: Methods `getVisibilityStatus` and `changeVisibility` don't take `NodeKey` argument anymore."
+          },
+          {
+            "comment": "Models tree: `ModelsTreeProps.enableElementsClassGrouping` has been moved to `ModelsTreeProps.hierarchyConfig.enableElementsClassGrouping`."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Enforce consistent usage of type imports."
+          },
+          {
+            "comment": "`TreeHeader`: Debounce searchbox input to avoid making multiple requests."
+          },
+          {
+            "comment": "Bump dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@itwin/tree-widget-react_v0.10.0",
       "date": "Tue, 23 May 2023 13:16:11 GMT",

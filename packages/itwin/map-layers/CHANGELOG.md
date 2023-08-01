@@ -1,6 +1,25 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Tue, 06 Jun 2023 10:57:06 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Jul 2023 18:31:57 GMT and should not be manually modified.
+
+## 5.1.1
+Fri, 28 Jul 2023 18:31:57 GMT
+
+### Patches
+
+- Fix baseMap visibility not retained when switching to another style. Also fixed typos localized strings.
+- Fixed maplayer context menu not opening at the right position.
+
+## 5.1.0
+Wed, 26 Jul 2023 21:49:07 GMT
+
+### Minor changes
+
+- New UI that allow creating multiple layers from sources supporting single layer per request.
+
+### Patches
+
+- Fixvarious display issues with MapLayer widget
 
 ## 5.0.0
 Tue, 06 Jun 2023 10:57:06 GMT
