@@ -34,6 +34,7 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
   className?: string;
   onBackButton?: () => void;
   headerControls?: ReactNode;
+  dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
 }
 
 /**
@@ -54,6 +55,7 @@ export function PropertyGridContent({
   onBackButton,
   headerControls,
   settingsMenuItems,
+  dataRenderer,
   ...props
 }: PropertyGridContentProps) {
   const { item } = useLoadedInstanceInfo({ dataProvider });
@@ -75,20 +77,26 @@ export function PropertyGridContent({
     dataProvider,
   };
 
+  const dataRendererProps: FilteringPropertyGridProps = {
+    ...props,
+    dataProvider,
+    filterer,
+    isPropertyHoverEnabled: true,
+    isPropertySelectionEnabled: true,
+    onPropertyContextMenu,
+    width,
+    height,
+  };
+
   return (
     <div className={classnames("property-grid-widget-container", className)}>
       <PropertyGridHeader controls={headerControls} item={item} onBackButtonClick={onBackButton} settingsProps={settingsProps} />
       <ResizableContainerObserver onResize={handleResize}>
-        <FilteringPropertyGrid
-          {...props}
-          dataProvider={dataProvider}
-          filterer={filterer}
-          isPropertyHoverEnabled={true}
-          isPropertySelectionEnabled={true}
-          onPropertyContextMenu={onPropertyContextMenu}
-          width={width}
-          height={height}
-        />
+        {
+          dataRenderer
+            ? dataRenderer(dataRendererProps)
+            : <FilteringPropertyGrid {...dataRendererProps} />
+        }
       </ResizableContainerObserver>
       {renderContextMenu()}
     </div>
@@ -116,7 +124,7 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick }
         <Text>{item.className}</Text>
       </div>
       {controls}
-      <SettingsDropdownMenu {...settingsProps}/>
+      <SettingsDropdownMenu {...settingsProps} />
     </Header>
   );
 }
