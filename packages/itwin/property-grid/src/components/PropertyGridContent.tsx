@@ -30,10 +30,12 @@ import type { ContextMenuProps } from "../hooks/UseContextMenu";
  */
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
   imodel: IModelConnection;
-  dataProvider: IPresentationPropertyDataProvider;
   className?: string;
   onBackButton?: () => void;
   headerControls?: ReactNode;
+  /** @internal */
+  dataProvider: IPresentationPropertyDataProvider;
+  /** @internal */
   dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
 }
 

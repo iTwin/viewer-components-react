@@ -72,9 +72,8 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
 
 // @public
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
-    // (undocumented)
     autoExpandChildCategories?: boolean;
-    // (undocumented)
+    // @internal (undocumented)
     filterer: IPropertyDataFilterer;
 }
 
@@ -156,9 +155,9 @@ export function PropertyGridContent({ dataProvider, imodel, contextMenuItems, cl
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
     // (undocumented)
     className?: string;
-    // (undocumented)
+    // @internal (undocumented)
     dataProvider: IPresentationPropertyDataProvider;
-    // (undocumented)
+    // @internal (undocumented)
     dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
     // (undocumented)
     headerControls?: ReactNode;
