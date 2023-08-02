@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.17.5",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.5",
+      "date": "Wed, 02 Aug 2023 12:11:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Modified operator validation delay time and behavior"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.4",
       "tag": "@itwin/grouping-mapping-widget_v0.17.4",
       "date": "Wed, 26 Jul 2023 21:49:07 GMT",
