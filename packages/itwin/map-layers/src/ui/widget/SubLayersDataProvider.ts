@@ -8,13 +8,17 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeNodeItem } from "@itwin/components-react";
 import { CheckBoxState } from "@itwin/core-react";
 
+export type SubLayersTreeExpandMode = "full" | "rootGroupOnly";
+
 /**
  * Data provider that returns some fake nodes to show in tree.
  */
 export class SubLayersDataProvider implements ITreeDataProvider {
   private readonly _nodeMap = new Map<string, TreeNodeItem[]>();
+  private readonly _expandMode;
 
-  constructor(subLayers: MapSubLayerProps[]) {
+  constructor(subLayers: MapSubLayerProps[], expandMode: SubLayersTreeExpandMode = "rootGroupOnly") {
+    this._expandMode = expandMode;
     this.loadNodes(subLayers);
   }
 
@@ -51,7 +55,7 @@ export class SubLayersDataProvider implements ITreeDataProvider {
 
       filteredProps.forEach((props) => {
         treeNodes.push(this.createNode(props,
-          (!parentId && props?.children !== undefined) ? true : undefined, // expand root group only (i.e. not the entire tree),
+          (this._expandMode === "full" ? true : (!parentId && props?.children !== undefined) ? true : undefined),
           undefined,
           SubLayersDataProvider.isUnnamedGroup(props) ? "icon-folder" : "icon-layers"
 

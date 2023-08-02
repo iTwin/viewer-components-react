@@ -5,15 +5,13 @@
   },
   {
     "policyName": "itwin-tree-widget",
-    "definitionName": "lockStepVersion",
-    "version": "1.0.0-dev.6",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 1
   },
   {
     "policyName": "itwin-property-grid",
-    "definitionName": "lockStepVersion",
-    "version": "1.0.0-dev.3",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 1
   },
   {
     "policyName": "itwin-measure-tools",
