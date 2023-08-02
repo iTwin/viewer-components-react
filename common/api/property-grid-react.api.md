@@ -150,7 +150,7 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
 }
 
 // @internal
-export function PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, ...props }: PropertyGridContentProps): JSX.Element;
+export function PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, ...props }: PropertyGridContentProps): JSX.Element;
 
 // @public
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
@@ -158,6 +158,8 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
     className?: string;
     // (undocumented)
     dataProvider: IPresentationPropertyDataProvider;
+    // (undocumented)
+    dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
     // (undocumented)
     headerControls?: ReactNode;
     // (undocumented)
@@ -189,7 +191,7 @@ export class PropertyGridManager {
 }
 
 // @public
-export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & DataProviderProps;
+export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps;
 
 // @public
 export function PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren<PropertyGridSettingsMenuItemProps>): JSX.Element;
@@ -264,7 +266,7 @@ export interface SingleElementDataProviderProps extends DataProviderProps {
 export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element;
 
 // @public
-export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & SingleElementDataProviderProps;
+export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
 
 // @internal
 export interface UseContentMenuProps extends ContextMenuProps {
