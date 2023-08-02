@@ -301,7 +301,7 @@ importers:
     dependencies:
       '@itwin/insights-client': 0.4.0
       '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.12.1_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       simple-react-validator: 1.6.1
     devDependencies:
@@ -3995,7 +3995,7 @@ packages:
       '@itwin/appui-abstract': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/core-bentley': 4.0.6
       '@itwin/core-react': 4.3.0_ee36221829551e48b04f84197abaa039
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -4017,7 +4017,7 @@ packages:
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
       '@itwin/core-bentley': 4.0.0
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -4347,9 +4347,9 @@ packages:
       '@itwin/core-react': 4.3.0_ee36221829551e48b04f84197abaa039
       '@itwin/imodel-components-react': 4.3.0_74a15eae6395feb7815d2443954bbd28
       '@itwin/itwinui-icons': 1.16.0
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -4394,9 +4394,9 @@ packages:
       '@itwin/core-telemetry': 4.0.6_@itwin+core-geometry@4.0.6
       '@itwin/imodel-components-react': 4.3.0_74a15eae6395feb7815d2443954bbd28
       '@itwin/itwinui-icons': 1.16.0
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -4440,9 +4440,9 @@ packages:
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
       '@itwin/imodel-components-react': 4.3.0_8cc85a425e80ff17b6bccfcaef60459d
       '@itwin/itwinui-icons': 1.16.0
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -4487,9 +4487,9 @@ packages:
       '@itwin/core-telemetry': 4.0.0_@itwin+core-geometry@4.0.0
       '@itwin/imodel-components-react': 4.3.0_8cc85a425e80ff17b6bccfcaef60459d
       '@itwin/itwinui-icons': 1.16.0
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       immer: 9.0.6
@@ -4947,8 +4947,8 @@ packages:
       '@itwin/appui-abstract': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/core-bentley': 4.0.6
       '@itwin/core-react': 4.3.0_ee36221829551e48b04f84197abaa039
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@types/shortid': 0.0.29
       classnames: 2.3.1
@@ -4975,8 +4975,8 @@ packages:
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
       '@itwin/core-bentley': 4.0.0
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@types/shortid': 0.0.29
       classnames: 2.3.1
@@ -5640,8 +5640,8 @@ packages:
       '@bentley/icons-generic': 1.0.34
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
       '@itwin/core-bentley': 4.0.0
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       dompurify: 2.3.6
@@ -5663,8 +5663,8 @@ packages:
       '@bentley/icons-generic': 1.0.34
       '@itwin/appui-abstract': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/core-bentley': 4.0.6
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       dompurify: 2.3.6
@@ -6171,8 +6171,8 @@ packages:
       '@itwin/core-geometry': 4.0.6
       '@itwin/core-quantity': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/core-react': 4.3.0_ee36221829551e48b04f84197abaa039
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       react: 17.0.2
@@ -6201,8 +6201,8 @@ packages:
       '@itwin/core-geometry': 4.0.0
       '@itwin/core-quantity': 4.0.0_@itwin+core-bentley@4.0.0
       '@itwin/core-react': 4.3.0_4ad6e8154b3716bdf782b5d5451595ad
-      '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       react: 17.0.2
@@ -6477,8 +6477,8 @@ packages:
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
       tippy.js: 6.3.7
 
-  /@itwin/itwinui-react/2.12.0_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-owXvQ4qX6fkPFRS46BSMmhM1eHjJ/jfhdAkQTKYK7He+14gcyaBHrSBIiRNKILFHSyBQXE2FjD6wwoAjS/lnDA==}
+  /@itwin/itwinui-react/2.12.1_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-0U19Gg53BVh3nXGgt+rDhTQlYKAkUSxgpvH1WQHoF+3zRW1J0UgCNhP2hRjnVTtMMNXmV7H4sNmwiQq4LB+8PA==}
     peerDependencies:
       react: '>=16.8.6 < 19.0.0'
       react-dom: '>=16.8.6 < 19.0.0'
@@ -6492,6 +6492,7 @@ packages:
       react-table: 7.7.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
       tippy.js: 6.3.7
+    dev: false
 
   /@itwin/itwinui-react/2.7.0_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-SlBdxO00/l0J8K07TMQRd+jTE+nJqk6EY5l92SHbUhG5e+DiJqLG0Y92VDzmIT7bgw7YGQ7edm3gj/XRFvDvDw==}
@@ -24869,7 +24870,7 @@ packages:
       '@itwin/core-geometry': 4.0.6
       '@itwin/core-react': 4.3.0_ee36221829551e48b04f84197abaa039
       '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@itwin/measure-tools-react': file:../../packages/itwin/measure-tools_388968045ed1740de638f0e9bd268c9c
       '@itwin/presentation-common': 4.0.0_06de44eec71810a373bcecebaf159d09
@@ -25013,7 +25014,7 @@ packages:
       '@itwin/core-react': 4.3.0_ee36221829551e48b04f84197abaa039
       '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/presentation-components': 4.0.0_8f7cd248fbcf0f5d91199f5a474b1b39
       '@itwin/presentation-frontend': 4.0.0_7a455481de461478ee0dcad483614010
       classnames: 2.3.1
@@ -25046,7 +25047,7 @@ packages:
       '@itwin/core-react': 4.3.0_ee36221829551e48b04f84197abaa039
       '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 2.12.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.10_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       '@itwin/presentation-components': 4.0.0_8f7cd248fbcf0f5d91199f5a474b1b39
       classnames: 2.3.1
