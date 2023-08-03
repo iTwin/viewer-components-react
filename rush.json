@@ -77,6 +77,11 @@
       "packageName": "test-viewer",
       "projectFolder": "apps/test-viewer",
       "shouldPublish": false
+    },
+    {
+      "packageName": "e2e-tests",
+      "projectFolder": "apps/e2e-tests",
+      "shouldPublish": false
     }
   ]
 }

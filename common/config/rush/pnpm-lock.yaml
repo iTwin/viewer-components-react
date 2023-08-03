@@ -5,6 +5,14 @@ importers:
   .:
     specifiers: {}
 
+  ../../apps/e2e-tests:
+    specifiers:
+      '@playwright/test': ^1.36.2
+      cross-env: ^7.0.3
+    dependencies:
+      '@playwright/test': 1.36.2
+      cross-env: 7.0.3
+
   ../../apps/test-viewer:
     specifiers:
       '@bentley/react-scripts': ^5.0.4
@@ -59,7 +67,7 @@ importers:
       '@itwin/appui-abstract': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/appui-layout-react': 4.3.0_a15530b1b218cc32d3ec6ade15225a27
       '@itwin/appui-react': 4.3.0_95010a99ad239167390c73a26ef3edcc
-      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_065db99a892ecdf2d2aa4e3c2a0a5654
+      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_1584fb1a90fa4816af4b90fecb841064
       '@itwin/browser-authorization': 0.8.0_@itwin+core-bentley@4.0.6
       '@itwin/components-react': 4.3.0_a15530b1b218cc32d3ec6ade15225a27
       '@itwin/core-bentley': 4.0.6
@@ -8410,6 +8418,17 @@ packages:
     engines: {node: '>=8.0.0'}
     dev: true
 
+  /@playwright/test/1.36.2:
+    resolution: {integrity: sha512-2rVZeyPRjxfPH6J0oGJqE8YxiM1IBRyM8hyrXYK7eSiAqmbNhxwcLa7dZ7fy9Kj26V7FYia5fh9XJRq4Dqme+g==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      '@types/node': 18.15.3
+      playwright-core: 1.36.2
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: false
+
   /@pmmmwh/react-refresh-webpack-plugin/0.5.10_53c33370502146697226d4c22ea13b29:
     resolution: {integrity: sha512-j0Ya0hCFZPd4x40qLzbhGsh9TMtdb+CJQiso+WxLOPNasohq9cc5SNUcwsZaRH6++Xh91Xkm/xHCkuIiIu0LUA==}
     engines: {node: '>= 10.13'}
@@ -13110,6 +13129,14 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /cross-env/7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.3
+    dev: false
 
   /cross-fetch/3.1.5:
     resolution: {integrity: sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==}
@@ -20284,6 +20311,12 @@ packages:
       find-up: 3.0.0
     dev: false
 
+  /playwright-core/1.36.2:
+    resolution: {integrity: sha512-sQYZt31dwkqxOrP7xy2ggDfEzUxM1lodjhsQ3NMMv5uGTRDsLxU0e4xf4wwMkF2gplIxf17QMBCodSFgm6bFVQ==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dev: false
+
   /pluralize/8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
@@ -25465,7 +25498,7 @@ packages:
       react: 17.0.2
       use-sync-external-store: 1.2.0_react@17.0.2
 
-  file:../../packages/itwin/breakdown-trees_065db99a892ecdf2d2aa4e3c2a0a5654:
+  file:../../packages/itwin/breakdown-trees_1584fb1a90fa4816af4b90fecb841064:
     resolution: {directory: ../../packages/itwin/breakdown-trees, type: directory}
     id: file:../../packages/itwin/breakdown-trees
     name: '@itwin/breakdown-trees-react'
@@ -25484,7 +25517,7 @@ packages:
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
-      '@itwin/tree-widget-react': workspace:^1.0.0-dev.6
+      '@itwin/tree-widget-react': workspace:^1.0.0-dev.8
       react: ^17.0.0
       react-dom: ^17.0.0
       react-redux: 7.2.6
@@ -25550,15 +25583,15 @@ packages:
     resolution: {directory: ../../packages/itwin/map-layers, type: directory}
     id: file:../../packages/itwin/map-layers
     name: '@itwin/map-layers'
-    version: 5.0.0
+    version: 5.1.1
     peerDependencies:
-      '@itwin/appui-abstract': ^4.0.6
+      '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.0.0
       '@itwin/appui-react': ^4.0.0
       '@itwin/components-react': ^4.0.0
-      '@itwin/core-bentley': ^4.0.6
-      '@itwin/core-common': ^4.0.6
-      '@itwin/core-frontend': ^4.0.6
+      '@itwin/core-bentley': ^4.0.0
+      '@itwin/core-common': ^4.0.0
+      '@itwin/core-frontend': ^4.0.0
       '@itwin/core-react': ^4.0.0
       '@itwin/imodel-components-react': ^4.0.0
       react: ^17.0.0
@@ -25621,7 +25654,7 @@ packages:
     resolution: {directory: ../../packages/itwin/property-grid, type: directory}
     id: file:../../packages/itwin/property-grid
     name: '@itwin/property-grid-react'
-    version: 1.0.0-dev.3
+    version: 1.0.0-dev.5
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
@@ -25657,7 +25690,7 @@ packages:
     resolution: {directory: ../../packages/itwin/tree-widget, type: directory}
     id: file:../../packages/itwin/tree-widget
     name: '@itwin/tree-widget-react'
-    version: 1.0.0-dev.6
+    version: 1.0.0-dev.8
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
