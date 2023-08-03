@@ -72,10 +72,6 @@ export const MappingUIActionGroup = ({
     >
       <IconButton styleType="borderless" title='Mapping Options'>
         <SvgMore
-          style={{
-            width: "16px",
-            height: "16px",
-          }}
         />
       </IconButton>
     </DropdownMenu>
