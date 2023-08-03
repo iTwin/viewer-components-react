@@ -12,7 +12,7 @@ import { registerRenderers } from "../../../components/trees/common/Utils";
 import { renderWithUser } from "../../TestUtils";
 import { createSimpleTreeModelNode } from "../Common";
 
-import type { ITreeNodeLoader, TreeActions, TreeModel, VisibleTreeNodes } from "@itwin/components-react";
+import type { ITreeNodeLoader , TreeActions, TreeModel, VisibleTreeNodes } from "@itwin/components-react";
 import type { TreeRendererProps } from "../../../components/trees/common/TreeRenderer";
 
 describe("TreeRenderer", () => {
@@ -22,12 +22,12 @@ describe("TreeRenderer", () => {
   const node = createSimpleTreeModelNode("test-node", "Test Node");
   const visibleNodes = {
     getNumNodes: () => 1,
-    getAtIndex: () => node,
+    getAtIndex: sinon.stub<Parameters<VisibleTreeNodes["getAtIndex"]>, ReturnType<VisibleTreeNodes["getAtIndex"]>>(),
     getIndexOfNode: () => 0,
     getNumRootNodes: () => 1,
     getModel: () => ({} as TreeModel),
     *[Symbol.iterator]() { return; },
-  } as VisibleTreeNodes;
+  };
 
   const initialProps: TreeRendererProps = {
     height: 200,
@@ -37,6 +37,14 @@ describe("TreeRenderer", () => {
     treeActions,
     visibleNodes,
   };
+
+  beforeEach(() => {
+    visibleNodes.getAtIndex.returns(node);
+  });
+
+  afterEach(() => {
+    visibleNodes.getAtIndex.reset();
+  });
 
   it("opens context menu", async () => {
     const { user, getByText } = renderWithUser(
@@ -105,6 +113,31 @@ describe("TreeRenderer", () => {
     // wait for item to disappear
     await waitFor(() => expect(queryByText("Test Item")).to.be.null);
     expect(selectStub).to.be.calledOnce;
+  });
+
+  it("renders exploded nodes list", async () => {
+    const { container } = renderWithUser(
+      <TreeRenderer
+        {...initialProps}
+        explodeNodes={true}
+      />
+    );
+
+    await waitFor(() => expect(container.querySelector(".explode")).to.not.be.null);
+  });
+
+  it("marks node without expander", async () => {
+    const nodeWithoutExpander = createSimpleTreeModelNode("test-node", "Test Node", { numChildren: 0 });
+    visibleNodes.getAtIndex.reset();
+    visibleNodes.getAtIndex.returns(nodeWithoutExpander);
+    const { container } = renderWithUser(
+      <TreeRenderer
+        {...initialProps}
+        explodeNodes={true}
+      />
+    );
+
+    await waitFor(() => expect(container.querySelector(".without-expander")).to.not.be.null);
   });
 
   describe("custom labels", () => {

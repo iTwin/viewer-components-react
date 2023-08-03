@@ -1,0 +1,101 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+$exploded-node-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
+$exploded-node-icon-size: var(--iui-size-m);
+$exploded-node-icon-padding: calc($exploded-node-height - $exploded-node-icon-size);
+
+.tree-widget-tree-with-header {
+  width: 100%;
+  height: 100%;
+
+  .tree-widget-tree-header {
+    height: var(--iui-size-xl);
+  }
+
+  .tree-widget-tree-content {
+    height: calc(100% - var(--iui-size-xl));
+  }
+}
+
+.tree-widget-tree-nodes-list {
+  height: 100%;
+  width: 100%;
+
+  .ReactWindow__VariableSizeList {
+    >div {
+      min-width: max-content !important; // to override inline class
+    }
+  }
+
+  &.explode {
+    .core-tree-node {
+      &.without-expander {
+        >.contents {
+          padding-left: 18px;
+        }
+      }
+
+      >.contents {
+        height: $exploded-node-height;
+        font-size: var(--iui-font-size-2);
+
+        .core-tree-expansionToggle {
+          >.icon {
+            height: $exploded-node-height;
+            width: $exploded-node-height;
+            padding: calc($exploded-node-icon-padding / 2);
+
+            svg {
+              height: $exploded-node-icon-size;
+              width: $exploded-node-icon-size;
+            }
+          }
+        }
+
+        .iui-progress-indicator-radial {
+          height: $exploded-node-height;
+          width: $exploded-node-height;
+          padding: calc($exploded-node-icon-padding / 2 - 1px); // need to reduce padding by `1px` to make sure icon is centered
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+.tree-widget-tree-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .filteredTreeOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background-color: hsl(var(--iui-color-background) / var(--iui-opacity-2));
+  }
+
+  .components-tree-errormessage {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: 75%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    font-style: italic;
+    color: var(--iui-color-text-muted);
+
+    .errormessage-header {
+      display: block;
+      font-weight: bold;
+    }
+  }
+}

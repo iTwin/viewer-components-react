@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
+import classNames from "classnames";
 import { useCallback, useEffect, useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
@@ -18,9 +19,10 @@ import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "
 
 import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, PresentationTreeDataProviderDataSourceEntryPoints } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
+import { Presentation } from "@itwin/presentation-frontend";
 
 const PAGING_SIZE = 20;
 
@@ -98,6 +100,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   const treeRenderer = createVisibilityTreeRenderer({
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
+    explodeNodes: props.explodeNodes,
     nodeRendererProps: {
       iconsEnabled: true,
       descriptionEnabled: false,
@@ -117,7 +120,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }, []);
 
   return (
-    <div className="tree-widget-visibility-tree-base">
+    <div className={classNames("tree-widget-visibility-tree-base", "tree-widget-tree-container")}>
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}

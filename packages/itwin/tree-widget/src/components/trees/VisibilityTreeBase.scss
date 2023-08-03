@@ -3,109 +3,77 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.tree-widget-tree-with-header {
-  width: 100%;
-  height: 100%;
-
-  .tree-widget-tree-header {
-    height: var(--iui-size-xl);
-  }
-
-  .tree-widget-tree-content {
-    height: calc(100% - var(--iui-size-xl));
-  }
-}
+@import "./common/TreeRenderer.scss";
 
 .tree-widget-visibility-tree-base {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-
-  .ReactWindow__VariableSizeList {
-    >div {
-      min-width: max-content !important; // to override inline class
-    }
-  }
-  .core-tree-node {
-    &.with-checkbox {
-      >.contents {
-        padding-left: calc(var(--iui-size-3xs) / 2);
-      }
-    }
-
-    &.disable-expander {
-      >.contents {
-        >.core-tree-expansionToggle {
-          display: none;
+  .tree-widget-tree-nodes-list {
+    .core-tree-node {
+      &.with-checkbox {
+        >.contents {
+          padding-left: calc(var(--iui-size-3xs) / 2);
         }
       }
-    }
 
-    &.is-selected {
-      >.contents {
-        >.visibility-tree-checkbox-container {
-          background-color: var(--iui-color-background-accent-muted)
+      &.disable-expander {
+        >.contents {
+          >.core-tree-expansionToggle {
+            display: none;
+          }
         }
       }
-    }
-  }
 
-  .contents {
-    &:hover {
-      > .visibility-tree-checkbox-container {
-        background-color: var(--iui-color-background-hover);
-      }
-    }
-
-    > .visibility-tree-checkbox-container {
-      height: var(--iui-size-l);
-      width: var(--iui-size-l);
-      position: sticky;
-      order: -1;
-      left: 0;
-      background-color: var(--iui-color-background);
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      .visibility-tree-checkbox {
-        &:disabled {
-          background-color: transparent;
+      &.is-selected {
+        >.contents {
+          >.visibility-tree-checkbox-container {
+            background-color: var(--iui-color-background-accent-muted)
+          }
         }
+      }
 
+      .contents {
         &:hover {
-          background-color: transparent;
+          .visibility-tree-checkbox-container {
+            background-color: var(--iui-color-background-hover);
+          }
+        }
+      }
+
+      .visibility-tree-checkbox-container {
+        height: var(--iui-size-l);
+        width: var(--iui-size-l);
+        position: sticky;
+        order: -1;
+        left: 0;
+        background-color: var(--iui-color-background);
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .visibility-tree-checkbox {
+          &:disabled {
+            background-color: transparent;
+          }
+
+          &:hover {
+            background-color: transparent;
+          }
         }
       }
     }
-  }
 
-  .filteredTreeOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    background-color: hsl(var(--iui-color-background) / var(--iui-opacity-2));
-  }
+    &.explode {
+      .core-tree-node {
+        .visibility-tree-checkbox-container {
+          height: $exploded-node-height;
+          width: calc($exploded-node-height * 0.75);
 
-  .components-tree-errormessage {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    width: 75%;
-    text-align: center;
-    transform: translate(-50%, -50%);
-    font-style: italic;
-    color: var(--iui-color-text-muted);
-
-    .errormessage-header {
-      display: block;
-      font-weight: bold;
+          .visibility-tree-checkbox {
+            height: 100%;
+            width: calc(var(--iui-size-m) + var(--iui-size-3xs));
+          }
+        }
+      }
     }
   }
 }
