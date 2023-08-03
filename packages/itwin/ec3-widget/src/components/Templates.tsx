@@ -125,12 +125,12 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
           </div>
           <div className="ec3w-search-bar-container">
             <IconButton
-                title="Refresh"
-                onClick={refresh}
-                disabled={isLoading}
-                styleType="borderless"
+              title="Refresh"
+              onClick={refresh}
+              disabled={isLoading}
+              styleType="borderless"
               >
-                <SvgRefresh />
+              <SvgRefresh />
             </IconButton>
             <div className="ec3w-search-button" data-testid="ec3-search-bar">
               <SearchBar
