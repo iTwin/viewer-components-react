@@ -59,6 +59,9 @@
     flex-basis: $iui-3xl;
     flex-shrink: 1;
     flex-grow: 1;
+    .ec3w-search-button {
+      display: flex;
+    }
   }
 
   .ec3w-templates-list {
