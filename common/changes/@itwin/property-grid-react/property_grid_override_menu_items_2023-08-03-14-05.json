@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Added ability to override behavior of default context menu items.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
