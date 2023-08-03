@@ -129,7 +129,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
               onClick={refresh}
               disabled={isLoading}
               styleType="borderless"
-              >
+            >
               <SvgRefresh />
             </IconButton>
             <div className="ec3w-search-button" data-testid="ec3-search-bar">
