@@ -34,7 +34,7 @@ import { Subscription } from "@itwin/components-react";
 import type { TreeCheckboxStateChangeEventArgs } from "@itwin/components-react";
 import type { TreeModelNode } from "@itwin/components-react";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { TreeNodeRendererProps } from "@itwin/components-react";
+import type { TreeNodeRendererProps as TreeNodeRendererProps_2 } from "@itwin/components-react";
 import type { TreeRendererProps as TreeRendererProps_2 } from "@itwin/components-react";
 import type { TreeSelectionModificationEventArgs } from "@itwin/components-react";
 import type { TreeSelectionReplacementEventArgs } from "@itwin/components-react";
@@ -158,7 +158,7 @@ export interface ContextMenuItemProps {
 }
 
 // @public
-export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
+export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
 
 // @public
 export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps_2) => JSX.Element;
@@ -168,9 +168,7 @@ export function DefaultLabelRenderer({ label, context }: DefaultLabelRendererPro
 
 // @public
 export interface DefaultLabelRendererProps {
-  // (undocumented)
-  context?: PropertyValueRendererContext;
-  // (undocumented)
+  context?: LabelRendererContext;
   label: PropertyRecord;
 }
 
@@ -223,6 +221,12 @@ export interface IVisibilityHandler extends IDisposable {
   getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
   // (undocumented)
   onVisibilityChange: BeEvent<VisibilityChangeListener>;
+}
+
+// @public
+export interface LabelRendererContext {
+  style?: React.CSSProperties;
+  textHighlighter?: (text: string) => React.ReactNode;
 }
 
 // @public
@@ -416,28 +420,20 @@ export class TreeNodeLabelRenderer implements IPropertyValueRenderer {
   // (undocumented)
   canRender(record: PropertyRecord, _context?: PropertyValueRendererContext | undefined): boolean;
   // (undocumented)
-  render(record: PropertyRecord, _context?: PropertyValueRendererContext | undefined): ReactNode;
+  render(record: PropertyRecord, context?: PropertyValueRendererContext | undefined): ReactNode;
 }
 
 // @public
 export interface TreeNodeLabelRendererProps {
-  // (undocumented)
-  context?: PropertyValueRendererContext;
-  // (undocumented)
+  context?: LabelRendererContext;
   node: TreeModelNode;
-}
-
-// @public
-export interface TreeNodeRendererContext {
-  // (undocumented)
-  nodeLabelRenderer?: (props: TreeNodeLabelRendererProps) => ReactNode;
 }
 
 // @internal (undocumented)
 export function TreeNodeRendererContextProvider({ nodeLabelRenderer, node, children }: TreeNodeRendererContextProviderProps): JSX.Element;
 
 // @internal (undocumented)
-export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererContext {
+export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererProps {
   // (undocumented)
   children: ReactNode;
   // (undocumented)
@@ -445,10 +441,17 @@ export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererCo
 }
 
 // @public
-export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, ...restProps }: TreeRendererProps): JSX.Element;
+export interface TreeNodeRendererProps {
+  nodeLabelRenderer?: (props: TreeNodeLabelRendererProps) => ReactNode;
+}
 
 // @public
-export type TreeRendererBaseProps = TreeContextMenuProps & TreeNodeRendererContext;
+export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, explodeNodes, ...restProps }: TreeRendererProps): JSX.Element;
+
+// @public
+export interface TreeRendererBaseProps extends TreeContextMenuProps, TreeNodeRendererProps {
+  explodeNodes?: boolean;
+}
 
 // @public
 export type TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps;
