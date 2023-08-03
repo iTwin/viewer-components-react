@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/ec3-widget-react",
       "comment": "Migrated UI items for iTwin UI 2.x and iTwinJS 4.x upgrade.",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/ec3-widget-react"
