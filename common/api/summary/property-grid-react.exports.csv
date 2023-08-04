@@ -1,12 +1,13 @@
 sep=;
 Release Tag;API Item
-public;AddFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
+public;AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
 public;AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps): JSX.Element | null
 public;AncestorsNavigationControlsProps
 public;ContextMenuItemProps
 public;ContextMenuProps
-public;CopyPropertyTextContextMenuItem({ record }: ContextMenuItemProps): JSX.Element
+public;CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element
 public;DataProviderProps
+public;DefaultContextMenuItemProps 
 public;FavoritePropertiesContextMenuItemProps 
 internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element
 public;FilteringPropertyGridProps 
@@ -34,7 +35,7 @@ public;PropertyGridSettingsMenuItemProps
 public;PropertyGridUiItemsProvider 
 public;PropertyGridUiItemsProviderProps
 public;PropertyGridWidgetId = "vcr:PropertyGridComponent"
-public;RemoveFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
+public;RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
 internal;SettingsDropdownMenu({ settingsMenuItems, dataProvider }: SettingsDropdownMenuProps): JSX.Element | null
 internal;SettingsDropdownMenuProps 
 public;SettingsMenuItemProps
