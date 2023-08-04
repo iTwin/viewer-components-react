@@ -3,8 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "./common/TreeRenderer.scss";
-
 .tree-widget-visibility-tree-base {
   .tree-widget-tree-nodes-list {
     .core-tree-node {
@@ -65,19 +63,18 @@
     &.enlarge {
       .core-tree-node {
         .visibility-tree-checkbox-container {
-          height: $enlarged-node-height;
-          width: calc($enlarged-node-height * 0.75);
+          height: var(--enlarged-node-height);
+          width: var(--enlarged-node-height);
 
           .visibility-tree-checkbox {
-            height: 100%;
-            width: calc(var(--iui-size-m) + var(--iui-size-3xs));
+            --iui-checkbox-target-size: var(--enlarged-node-height);
           }
         }
       }
 
       .without-expander {
-        .visibility-tree-checkbox-container + * {
-          margin-left: $enlarged-node-expander-additional-padding;
+        .visibility-tree-checkbox-container+* {
+          margin-left: var(--enlarged-node-expander-additional-padding);
         }
       }
     }
