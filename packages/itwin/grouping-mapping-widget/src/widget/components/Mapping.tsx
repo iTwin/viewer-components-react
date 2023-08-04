@@ -27,12 +27,15 @@ import "./Mapping.scss";
 import DeleteModal from "./DeleteModal";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { IMappingsClient, Mapping } from "@itwin/insights-client";
+import type { IExtractionClient, IMappingsClient, Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import type { CreateTypeFromInterface } from "../utils";
+import { useExtractionClient } from "./context/ExtractionClientContext";
+import { ExtractionStatusIcon } from "./ExtractionStatusIcon";
+import { ExtractionMessageModal } from "./ExtractionMessageModal";
 
 export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
@@ -52,6 +55,50 @@ export interface MappingsProps {
   onClickMappingModify?: (mapping: Mapping) => void;
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
+
+export interface ExtractionMessageData {
+  date: string;
+  catagory: string;
+  level: string;
+  message: string;
+}
+
+const fetchExtractionStatus = async (
+  iModelId: string,
+  getAccessToken: GetAccessTokenFn,
+  extractionClient: IExtractionClient,
+  setIconStatus: React.Dispatch<React.SetStateAction<"negative" | "positive" | "warning">>,
+  setIconMessage: React.Dispatch<React.SetStateAction<string>>,
+  setExtractionMessageData: React.Dispatch<React.SetStateAction<ExtractionMessageData[]>>
+) => {
+  setIconStatus("warning");
+  setIconMessage("Extraction status pending.");
+  try {
+    const accessToken = await getAccessToken();
+    const extractions = await extractionClient.getExtractionHistory(accessToken, iModelId);
+    const jobId = extractions[0].jobId;
+    const status = await extractionClient.getExtractionStatus(accessToken, jobId);
+    if (status.containsIssues) {
+      setIconStatus("negative");
+      setIconMessage("Extraction contains issues. Click to view extraction logs.");
+      let logs = await extractionClient.getExtractionLogs(accessToken, jobId);
+      logs = logs.filter((log) => log.message != null);
+      const extractionMessageData = logs.map((log) =>
+        (
+          {
+            date: log.dateTime,
+            catagory: log.category,
+            level: log.level,
+            message: String(log.message),
+          }
+        ));
+      setExtractionMessageData(extractionMessageData);
+    } else {
+      setIconStatus("positive");
+      setIconMessage("Extraction Successful.");
+    }
+  } catch (error: any) { }
+};
 
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
@@ -97,16 +144,32 @@ export const Mappings = ({
 }: MappingsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
+  const extractionClient = useExtractionClient();
   const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [showBlockingOverlay, setShowBlockingOverlay] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
+  const [iconStatus, setIconStatus] = useState<"negative" | "positive" | "warning">("warning");
+  const [iconMessage, setIconMessage] = useState<string>("");
+  const [showExtractionMessageModal, setShowExtractionMessageModal] = useState<boolean>(false);
+  const [extractionMessageData, setExtractionMessageData] = useState<ExtractionMessageData[]>([]);
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
+
+  useEffect(() => {
+    void fetchExtractionStatus(
+      iModelId,
+      getAccessToken,
+      extractionClient,
+      setIconStatus,
+      setIconMessage,
+      setExtractionMessageData
+    );
+  }, [iModelId, getAccessToken, extractionClient]);
 
   useEffect(() => {
     void fetchMappings(
@@ -152,14 +215,25 @@ export const Mappings = ({
               <SvgImport />
             </IconButton>
           </div>
-          <IconButton
-            title="Refresh"
-            onClick={refresh}
-            disabled={isLoading}
-            styleType='borderless'
-          >
-            <SvgRefresh />
-          </IconButton>
+          <div className="gmw-button-spacing">
+            <ExtractionStatusIcon
+              iconStatus={iconStatus}
+              onClick={() => {
+                if (iconStatus === "negative") {
+                  setShowExtractionMessageModal(true);
+                }
+              }}
+              iconMessage={iconMessage}
+            />
+            <IconButton
+              title="Refresh"
+              onClick={refresh}
+              disabled={isLoading}
+              styleType='borderless'
+            >
+              <SvgRefresh />
+            </IconButton>
+          </div>
         </div>
         {isLoading ? (
           <LoadingOverlay />
@@ -239,7 +313,12 @@ export const Mappings = ({
               ))}
           </div>
         )}
-      </div>
+      </div >
+      <ExtractionMessageModal
+        isOpen={showExtractionMessageModal}
+        onClose={() => setShowExtractionMessageModal(false)}
+        extractionMessageData={extractionMessageData}
+      />
       <DeleteModal
         entityName={showDeleteModal?.mappingName}
         onClose={() => setShowDeleteModal(undefined)}
