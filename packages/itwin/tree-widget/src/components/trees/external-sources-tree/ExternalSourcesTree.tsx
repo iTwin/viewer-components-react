@@ -40,7 +40,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   const eventsHandler = useUnifiedSelectionTreeEventHandler({ nodeLoader });
   const treeModel = useTreeModel(nodeLoader.modelSource);
   return (
-    <div className="tree-widget-visibility-tree-base">
+    <div className="tree-widget-tree-container">
       <ControlledTree
         nodeLoader={nodeLoader}
         model={treeModel}
@@ -49,7 +49,14 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         width={props.width}
         height={props.height}
         iconsEnabled={true}
-        treeRenderer={(treeProps) => <TreeRenderer {...treeProps} contextMenuItems={props.contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} />}
+        treeRenderer={(treeProps) =>
+          <TreeRenderer
+            {...treeProps}
+            contextMenuItems={props.contextMenuItems}
+            nodeLabelRenderer={props.nodeLabelRenderer}
+            density={props.density}
+          />
+        }
       />
     </div>
   );

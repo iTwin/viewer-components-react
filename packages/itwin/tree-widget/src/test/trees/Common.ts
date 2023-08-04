@@ -15,7 +15,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassGroupingNodeKey, ECInstancesNodeKey, InstanceKey } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
 
-export const createSimpleTreeModelNode = (id?: string, labelValue?: string): TreeModelNode => {
+export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: labelValue ?? "Node Label" });
   label.property.renderer = { name: TREE_NODE_LABEL_RENDERER };
 
@@ -42,6 +42,7 @@ export const createSimpleTreeModelNode = (id?: string, labelValue?: string): Tre
       id: "node-id",
       label,
     },
+    ...node,
   };
 };
 

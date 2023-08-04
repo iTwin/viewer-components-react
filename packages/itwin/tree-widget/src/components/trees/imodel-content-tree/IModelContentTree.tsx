@@ -44,7 +44,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
   const treeModel = useTreeModel(nodeLoader.modelSource);
 
   return (
-    <div className="imodel-content-tree">
+    <div className="tree-widget-tree-container">
       <ControlledTree
         width={width}
         height={height}
@@ -53,7 +53,14 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         eventsHandler={eventHandler}
         model={treeModel}
         iconsEnabled={true}
-        treeRenderer={(treeProps) => <TreeRenderer {...treeProps} contextMenuItems={contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} />}
+        treeRenderer={(treeProps) =>
+          <TreeRenderer
+            {...treeProps}
+            contextMenuItems={contextMenuItems}
+            nodeLabelRenderer={props.nodeLabelRenderer}
+            density={props.density}
+          />
+        }
       />
     </div>
   );

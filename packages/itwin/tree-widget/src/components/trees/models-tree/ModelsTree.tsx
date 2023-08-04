@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
+import classNames from "classnames";
 import { useCallback, useEffect, useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
@@ -98,6 +99,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   const treeRenderer = createVisibilityTreeRenderer({
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
+    density: props.density,
     nodeRendererProps: {
       iconsEnabled: true,
       descriptionEnabled: false,
@@ -117,7 +119,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }, []);
 
   return (
-    <div className="tree-widget-visibility-tree-base">
+    <div className={classNames("tree-widget-visibility-tree-base", "tree-widget-tree-container")}>
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}
