@@ -86,7 +86,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   const treeRenderer = createVisibilityTreeRenderer({
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
-    explodeNodes: props.explodeNodes,
+    density: props.density,
     nodeRendererProps: {
       iconsEnabled: false,
       descriptionEnabled: true,

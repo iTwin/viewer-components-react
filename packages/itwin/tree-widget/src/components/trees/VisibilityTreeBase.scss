@@ -62,11 +62,11 @@
       }
     }
 
-    &.explode {
+    &.enlarge {
       .core-tree-node {
         .visibility-tree-checkbox-container {
-          height: $exploded-node-height;
-          width: calc($exploded-node-height * 0.75);
+          height: $enlarged-node-height;
+          width: calc($enlarged-node-height * 0.75);
 
           .visibility-tree-checkbox {
             height: 100%;
@@ -77,7 +77,7 @@
 
       .without-expander {
         .visibility-tree-checkbox-container + * {
-          margin-left: $exploded-node-expander-additional-padding;
+          margin-left: $enlarged-node-expander-additional-padding;
         }
       }
     }

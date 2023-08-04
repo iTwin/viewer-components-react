@@ -58,7 +58,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
             {...treeProps}
             contextMenuItems={contextMenuItems}
             nodeLabelRenderer={props.nodeLabelRenderer}
-            explodeNodes={props.explodeNodes}
+            density={props.density}
           />
         }
       />

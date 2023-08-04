@@ -18,9 +18,9 @@ import type { TreeContextMenuProps } from "./ContextMenu";
  */
 export interface TreeRendererBaseProps extends TreeContextMenuProps, TreeNodeRendererProps {
   /**
-   * Specifies whether nodes should be exploded. Exploded nodes have bigger height and button hit boxes.
+   * Modifies the density of tree nodes. `enlarged` tree nodes have bigger height and bigger button hit boxes.
    */
-  explodeNodes?: boolean;
+  density?: "default" | "enlarged";
 }
 
 /**
@@ -33,11 +33,11 @@ export type TreeRendererProps = ComponentsTreeRendererProps & TreeRendererBasePr
  * Base tree renderer for visibility trees.
  * @public
  */
-export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, explodeNodes, ...restProps }: TreeRendererProps) {
+export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, density, ...restProps }: TreeRendererProps) {
   const { onContextMenu, renderContextMenu } = useContextMenu({ contextMenuItems });
 
-  const nodeHeight = explodeNodes ? () => 43 : restProps.nodeHeight;
-  const className = classNames("tree-widget-tree-nodes-list", { ["explode"]: explodeNodes });
+  const nodeHeight = getNodeHeight(density ?? "default", restProps.nodeHeight);
+  const className = classNames("tree-widget-tree-nodes-list", { ["enlarge"]: density === "enlarged" });
 
   return (
     <div className={className}>
@@ -59,4 +59,13 @@ export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer
       {renderContextMenu()}
     </div>
   );
+}
+
+function getNodeHeight(density: "default" | "enlarged", defaultHeight: ComponentsTreeRendererProps["nodeHeight"]) {
+  switch (density) {
+    case "default":
+      return defaultHeight;
+    case "enlarged":
+      return () => 43;
+  }
 }

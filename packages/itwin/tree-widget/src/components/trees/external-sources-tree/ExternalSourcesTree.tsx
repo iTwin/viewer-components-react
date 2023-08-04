@@ -54,7 +54,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
             {...treeProps}
             contextMenuItems={props.contextMenuItems}
             nodeLabelRenderer={props.nodeLabelRenderer}
-            explodeNodes={props.explodeNodes}
+            density={props.density}
           />
         }
       />

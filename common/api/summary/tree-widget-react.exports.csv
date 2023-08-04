@@ -19,6 +19,7 @@ public;DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): JSX.
 public;DefaultLabelRendererProps
 alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element
 alpha;ExternalSourcesTreeComponent:
+alpha;ExternalSourcesTreeComponentProps = Omit
 alpha;ExternalSourcesTreeProps = BaseTreeProps
 public;hideAllCategories(categories: string[], viewport: Viewport): Promise
 public;hideAllModels(models: string[], viewport: Viewport): Promise
@@ -60,7 +61,7 @@ public;TreeNodeLabelRendererProps
 internal;TreeNodeRendererContextProvider({ nodeLabelRenderer, node, children }: TreeNodeRendererContextProviderProps): JSX.Element
 internal;TreeNodeRendererContextProviderProps 
 public;TreeNodeRendererProps
-public;TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, explodeNodes, ...restProps }: TreeRendererProps): JSX.Element
+public;TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, density, ...restProps }: TreeRendererProps): JSX.Element
 public;TreeRendererBaseProps 
 public;TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps
 public;TreeWidget

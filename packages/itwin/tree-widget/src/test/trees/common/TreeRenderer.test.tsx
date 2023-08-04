@@ -115,15 +115,15 @@ describe("TreeRenderer", () => {
     expect(selectStub).to.be.calledOnce;
   });
 
-  it("renders exploded nodes list", async () => {
+  it("renders `enlarged` nodes list", async () => {
     const { container } = renderWithUser(
       <TreeRenderer
         {...initialProps}
-        explodeNodes={true}
+        density={"enlarged"}
       />
     );
 
-    await waitFor(() => expect(container.querySelector(".explode")).to.not.be.null);
+    await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null);
   });
 
   it("marks node without expander", async () => {
@@ -133,7 +133,6 @@ describe("TreeRenderer", () => {
     const { container } = renderWithUser(
       <TreeRenderer
         {...initialProps}
-        explodeNodes={true}
       />
     );
 
