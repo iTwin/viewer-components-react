@@ -49,9 +49,9 @@
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error",
       "deprecation/deprecation": "error",
-      "jsx-a11y/anchor-is-valid": "off",
+      "jsx-a11y/no-static-element-interactions": "off",
       "jsx-a11y/click-events-have-key-events": "off",
-      "jsx-a11y/no-static-element-interactions": "off"
+      "jsx-a11y/anchor-is-valid": "off"
     }
   },
   "dependencies": {
@@ -90,7 +90,7 @@
     "@testing-library/user-event": "^14.1.1",
     "@types/chai": "4.2.11",
     "@types/i18next": "^8.4.2",
-    "@types/jest": "^28.1.3",
+    "@types/jest": "^27.4.1",
     "@types/node": "^14.14.20",
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
@@ -104,17 +104,16 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-react": "^7.25.1",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "jest": "^28.1.3",
-    "jest-cli": "^28.1.3",
-    "jest-environment-jsdom": "^28.1.3",
+    "jest": "^27.5.1",
+    "jest-cli": "^27.5.1",
     "jest-transform-stub": "^2.0.0",
-    "msw": "^0.49.3",
+    "msw": "^0.39.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.0",
     "redux": "^4.0.4",
     "rimraf": "^3.0.2",
-    "ts-jest": "^28.0.8",
+    "ts-jest": "^27.1.3",
     "typemoq": "^2.1.0",
     "typescript": "~4.3.0",
     "xmlhttprequest": "^1.8.0"
