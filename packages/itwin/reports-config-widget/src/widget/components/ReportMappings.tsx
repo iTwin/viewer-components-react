@@ -194,7 +194,6 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
               title={ReportsConfigWidget.localization.getLocalizedString(
                 "ReportsConfigWidget:Copy"
               )}
-              styleType="borderless"
               onClick={async (_) => {
                 await navigator.clipboard.writeText(odataFeedUrl);
                 toaster.positive(
