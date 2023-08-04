@@ -7,8 +7,15 @@ import "@testing-library/jest-dom";
 import { render, screen } from "../test/test-utils";
 import { WidgetHeader } from "../widget/components/utils";
 import { faker } from "@faker-js/faker";
+import { EmptyLocalization } from "@itwin/core-common";
+import { ReportsConfigWidget } from "../ReportsConfigWidget";
 
 describe("Widget Header Component", () => {
+  beforeAll(async () => {
+    const localization = new EmptyLocalization();
+    await ReportsConfigWidget.initialize(localization);
+  });
+
   it("title renders", async () => {
     const fakeTitle = faker.word.interjection();
     render(<WidgetHeader title={fakeTitle} />);
