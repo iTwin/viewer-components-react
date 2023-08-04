@@ -74,6 +74,12 @@
           }
         }
       }
+
+      .without-expander {
+        .visibility-tree-checkbox-container + * {
+          margin-left: $exploded-node-expander-additional-padding;
+        }
+      }
     }
   }
 }

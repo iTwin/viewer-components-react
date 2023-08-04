@@ -6,6 +6,7 @@
 $exploded-node-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
 $exploded-node-icon-size: var(--iui-size-m);
 $exploded-node-icon-padding: calc($exploded-node-height - $exploded-node-icon-size);
+$exploded-node-expander-additional-padding: calc(var(--iui-size-m) + var(--iui-size-3xs));
 
 .tree-widget-tree-with-header {
   width: 100%;
@@ -34,7 +35,7 @@ $exploded-node-icon-padding: calc($exploded-node-height - $exploded-node-icon-si
     .core-tree-node {
       &.without-expander {
         >.contents {
-          padding-left: 18px;
+          padding-left: $exploded-node-expander-additional-padding;
         }
       }
 
