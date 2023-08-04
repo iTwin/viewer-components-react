@@ -76,7 +76,7 @@ export interface DefaultContextMenuItemProps extends ContextMenuItemProps {
    * Callback that is invoked when context menu item is clicked. `defaultAction` argument passed to
    * this callback can be invoked to persist default behavior or omitted to completely override it.
    */
-  onSelect?: (defaultAction: () => void) => void;
+  onSelect?: (defaultAction: () => Promise<void>) => Promise<void>;
 }
 
 /**
@@ -105,7 +105,7 @@ export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSel
       id="add-favorite"
       onSelect={async () => {
         if (onSelect) {
-          onSelect(defaultAction);
+          await onSelect(defaultAction);
           return;
         }
 
@@ -135,7 +135,7 @@ export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, on
       id="remove-favorite"
       onSelect={async () => {
         if (onSelect) {
-          onSelect(defaultAction);
+          await onSelect(defaultAction);
           return;
         }
 
@@ -153,20 +153,20 @@ export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, on
  * @public
  */
 export function CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps) {
-  const defaultAction = () => {
+  const defaultAction = async () => {
     record.description && copyToClipboard(record.description);
   };
 
   return (
     <PropertyGridContextMenuItem
       id="copy-text"
-      onSelect={() => {
+      onSelect={async () => {
         if (onSelect) {
-          onSelect(defaultAction);
+          await onSelect(defaultAction);
           return;
         }
 
-        defaultAction();
+        await defaultAction();
       }}
       title={PropertyGridManager.translate("context-menu.copy-text.description")}
     >

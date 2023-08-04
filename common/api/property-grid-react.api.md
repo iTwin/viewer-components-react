@@ -64,7 +64,7 @@ export interface DataProviderProps {
 
 // @public
 export interface DefaultContextMenuItemProps extends ContextMenuItemProps {
-    onSelect?: (defaultAction: () => void) => void;
+    onSelect?: (defaultAction: () => Promise<void>) => Promise<void>;
 }
 
 // @public
