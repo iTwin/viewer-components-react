@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 const fs = require("fs");
 
-const path = "../test-viewer/.env";
+const path = "../../../apps/test-viewer/.env";
 const defaultVariables = `\
 IMJS_DEMO_CLIENT=true
 IMJS_AUTH_CLIENT_REDIRECT_URI = "http://localhost:3000/signin-callback"
@@ -21,13 +21,11 @@ USE_FAST_SASS=true
 USE_FULL_SOURCEMAP=true
 TRANSPILE_DEPS=false
 
-IMJS_ENABLED_WIDGETS = "tree-widget property-grid"
+IMJS_ENABLED_WIDGETS = "tree-widget"
 `;
 
-if (!fs.existsSync(path)) {
-  try {
-    fs.writeFileSync(path, defaultVariables);
-  } catch (err) {
-    console.log('Error creating file:', err);
-  }
+try {
+  fs.writeFileSync(path, defaultVariables);
+} catch (err) {
+  console.log("Error creating file:", err);
 }

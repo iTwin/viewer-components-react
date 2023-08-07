@@ -2,7 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { Locator, Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import assert from "assert";
 
 export const locateNode = (tree: Page | Locator, name: string) => tree.getByRole("treeitem", { name });
@@ -38,4 +38,4 @@ export const expandStagePanel = async (page: Page, side: PanelSide, px: number) 
       break;
   }
   await page.mouse.up();
-}
+};
