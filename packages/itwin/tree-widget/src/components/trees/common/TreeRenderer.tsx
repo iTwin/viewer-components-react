@@ -5,7 +5,7 @@
 
 import "./TreeRenderer.scss";
 import classNames from "classnames";
-import { TreeNodeRenderer, TreeRenderer as ComponentsTreeRenderer } from "@itwin/components-react";
+import { TreeRenderer as ComponentsTreeRenderer, TreeNodeRenderer } from "@itwin/components-react";
 import { useContextMenu } from "./ContextMenu";
 import { TreeNodeRendererContextProvider } from "./TreeNodeRenderer";
 

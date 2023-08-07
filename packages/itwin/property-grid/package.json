@@ -1,6 +1,6 @@
 {
   "name": "@itwin/property-grid-react",
-  "version": "1.0.0-dev.1",
+  "version": "1.0.1",
   "description": "This package offers a React widget which provides access to the property grid within an iModel. Designed for use in an iTwin AppUI application",
   "keywords": [
     "Bentley",
@@ -54,8 +54,10 @@
   },
   "dependencies": {
     "@itwin/itwinui-icons-react": "^2.1.0",
+    "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/itwinui-react": "^2.11.0",
-    "classnames": "^2.3.1"
+    "classnames": "^2.3.1",
+    "react-error-boundary": "^4.0.10"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0",

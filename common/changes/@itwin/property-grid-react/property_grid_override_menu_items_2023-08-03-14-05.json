@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Do not open property grid widget when transient instance is selected.",
-      "type": "none"
+      "comment": "Added ability to override behavior of default context menu items.",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/property-grid-react"

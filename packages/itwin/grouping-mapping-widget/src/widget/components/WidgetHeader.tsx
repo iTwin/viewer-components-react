@@ -25,6 +25,7 @@ export const WidgetHeader = ({
           className={`${disabled ? "gmw-chevron-disabled" : "gmw-chevron"}`}
           size="large"
           onClick={disabled ? undefined : returnFn}
+          title='Back'
         >
           <SvgChevronLeft />
         </Icon>

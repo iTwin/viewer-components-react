@@ -1,5 +1,8 @@
 {
   "widget-label": "Properties",
+  "error": "Error",
+  "retry": "Retry",
+  "generic-error-description": "An error occurred while loading properties.",
   "element-list": {
     "title": "Selected Elements"
   },

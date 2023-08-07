@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Fixed property grid not hiding empty struct and array properties.",
-      "type": "none"
+      "comment": "Render property grid header even when too many elements are selected.",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/property-grid-react"
