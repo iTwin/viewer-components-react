@@ -91,15 +91,17 @@ export function PropertyGridContent({
   };
 
   return (
-    <div className={classnames("property-grid-widget-container", className)}>
+    <div className={classnames("property-grid-react-container", className)}>
       <PropertyGridHeader controls={headerControls} item={item} onBackButtonClick={onBackButton} settingsProps={settingsProps} />
-      <ResizableContainerObserver onResize={handleResize}>
-        {
-          dataRenderer
-            ? dataRenderer(dataRendererProps)
-            : <FilteringPropertyGrid {...dataRendererProps} />
-        }
-      </ResizableContainerObserver>
+      <div className="property-grid-react-data">
+        <ResizableContainerObserver onResize={handleResize}>
+          {
+            dataRenderer
+              ? dataRenderer(dataRendererProps)
+              : <FilteringPropertyGrid {...dataRendererProps} />
+          }
+        </ResizableContainerObserver>
+      </div>
       {renderContextMenu()}
     </div>
   );
