@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "`ModelsTree`: Added ability to show models without elements.",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"
