@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
-import { BrowserAuthorizationClient } from "@itwin/browser-authorization";
+import { BrowserAuthorizationClient, isBrowserAuthorizationClient } from "@itwin/browser-authorization";
 import { AuthorizationClient } from "@itwin/core-common";
 import { AccessToken, BeEvent } from "@itwin/core-bentley";
+import { ViewerAuthorizationClient as WebViewerAuthorizationClient } from "@itwin/web-viewer-react";
 
 export enum AuthorizationState {
   Pending,
-  Authorized,
-  Offline
+  Authorized
 }
 
 class DemoAuthClient implements AuthorizationClient {
@@ -34,14 +34,56 @@ class DemoAuthClient implements AuthorizationClient {
   }
 }
 
+class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
+  private _client: WebViewerAuthorizationClient;
+
+  constructor(useDemoClient: boolean) {
+    this._client = useDemoClient ? new DemoAuthClient() :
+      new BrowserAuthorizationClient({
+        scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
+        clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
+        redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
+        postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
+        responseType: "code",
+        authority: process.env.IMJS_AUTH_AUTHORITY,
+      });
+  }
+
+  public async getAccessToken(): Promise<string> {
+    return this._client.getAccessToken();
+  }
+
+  public async signInSilent() {
+    if (isBrowserAuthorizationClient(this._client)) {
+      this._client.signInSilent();
+    }
+  }
+
+  public async signInRedirect() {
+    if (isBrowserAuthorizationClient(this._client)) {
+      this._client.signInRedirect();
+    }
+  }
+
+  public async handleSigninCallback() {
+    if (isBrowserAuthorizationClient(this._client)) {
+      this._client.handleSigninCallback();
+    }
+  }
+
+  public get onAccessTokenChanged(): BeEvent<(token: AccessToken) => void> {
+    return this._client.onAccessTokenChanged;
+  }
+}
+
 export interface AuthorizationContext {
-  client: DemoAuthClient | BrowserAuthorizationClient;
+  client: ViewerAuthorizationClient;
   state: AuthorizationState;
 }
 
 const authorizationContext = createContext<AuthorizationContext>({
-  client: new DemoAuthClient(),
-  state: AuthorizationState.Offline,
+  client: new ViewerAuthorizationClient(true),
+  state: AuthorizationState.Authorized,
 })
 
 export function useAuthorizationContext() {
@@ -49,19 +91,9 @@ export function useAuthorizationContext() {
 }
 
 const shouldUseDemoClient = !!process.env.IMJS_DEMO_CLIENT;
-const createAuthClient = (): AuthorizationContext => shouldUseDemoClient ? ({
-  client: new DemoAuthClient(),
-  state: AuthorizationState.Offline
-}) : ({
-  client: new BrowserAuthorizationClient({
-    scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
-    clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
-    redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
-    postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
-    responseType: "code",
-    authority: process.env.IMJS_AUTH_AUTHORITY,
-  }),
-  state: AuthorizationState.Pending,
+const createAuthClient = (): AuthorizationContext => ({
+  client: new ViewerAuthorizationClient(shouldUseDemoClient),
+  state: shouldUseDemoClient ? AuthorizationState.Authorized : AuthorizationState.Pending
 });
 
 export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
@@ -73,9 +105,6 @@ export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
   }, [authClient]);
 
   useEffect(() => {
-    if (!(authClient instanceof BrowserAuthorizationClient))
-      return;
-
     const signIn = async () => {
       try {
         await authClient.signInSilent();
@@ -97,9 +126,6 @@ export function SignInRedirect() {
   const { client } = useAuthorizationContext();
 
   useEffect(() => {
-    if (!(client instanceof BrowserAuthorizationClient))
-      return;
-
     (async () => {
       await client.handleSigninCallback();
     })();
