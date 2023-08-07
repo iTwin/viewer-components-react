@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Persist tree scroll position when switching between widgets.",
-      "type": "none"
+      "comment": "`ModelsTree`: Added ability to show models without elements.",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

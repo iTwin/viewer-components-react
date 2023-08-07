@@ -1,6 +1,41 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 23 May 2023 13:16:11 GMT and should not be manually modified.
+This log was last generated on Mon, 31 Jul 2023 14:10:09 GMT and should not be manually modified.
+
+## 1.0.0
+Mon, 31 Jul 2023 14:10:09 GMT
+
+### Breaking changes
+
+- Trees: Make eye checkboxes static on horizontal scroll.
+- `createVisibilityTreeNodeRenderer` now takes a `props` object of type `VisibilityTreeNodeRendererProps`. It contains two new configuration options: `levelOffset`, and `disableRootNodeCollapse`.
+- Rename `useVisibilityTreeRenderer` to `createVisibilityTreeRenderer`. It now takes a `props` object of type `VisibilityTreeRendererProps`
+- Bumped AppUI peer dependencies to `^4.3.0`.
+- Renamed `TreeWidgetComponent` to `SelectableTree`.
+- Widget: Reworked the way trees are provided to the widget. Instead of having separate configuration properties for hiding default trees and adding additional trees now there is only one property for supplying a list of trees to show.
+- Refactored `IModelContentTreeProps` to not inherit `HTMLDivElement` props.
+- `IVisibilityHandler`: Methods `getVisibilityStatus` and `changeVisibility` don't take `NodeKey` argument anymore.
+- Models tree: `ModelsTreeProps.enableElementsClassGrouping` has been moved to `ModelsTreeProps.hierarchyConfig.enableElementsClassGrouping`.
+
+### Minor changes
+
+- Models tree: Removed expansion toggle for root node.
+- Widget: Added ability to conditionally show trees.
+- Trees: Decrease whitespace size between the node label and eye checkbox.
+- Added base tree props interface for props shared between trees.
+- External sources tree: Add `ExternalSourcesTreeComponent` (currently `@alpha`).
+- Models tree: Added an option to specialize the class of geometric elements loaded into the hierarchy (see `ModelsTreeHierarchyConfiguration.elementClassSpecification`).
+- Trees: Use search box from the `@itwin/itwinui-react` library.
+
+### Patches
+
+- Trees: Keep child nodes state the same after parent node re-expands.
+- Categories tree: Fixed behavior of the Invert button. Previously, only categories were affected, now sub-categories are affected as well.
+- Handle errors thrown from tree components.
+- Persist tree scroll position when switching between widgets.
+- `Tree Header`: Fixed dropdown buttons menu not theming correctly.
+- `ModelsTree`: Refactor ruleset to not use deprecated `ImageIdOverride` rule. 
+- `ModelsTree`: Always render checkbox to avoid UI shifting when checkbox appear.
 
 ## 0.10.0
 Tue, 23 May 2023 13:16:11 GMT

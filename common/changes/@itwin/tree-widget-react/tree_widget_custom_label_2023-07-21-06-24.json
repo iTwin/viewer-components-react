@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "`TreeHeader`: Debounce searchbox input to avoid making multiple requests.",
-      "type": "none"
+      "comment": "Trees: Added ability to customize tree node label",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

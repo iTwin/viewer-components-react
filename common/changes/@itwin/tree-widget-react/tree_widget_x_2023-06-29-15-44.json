@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Handle errors thrown from tree components.",
-      "type": "none"
+      "comment": "Added context menu support.",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

@@ -26,7 +26,7 @@ export interface SingleElementDataProviderProps extends DataProviderProps {
  * Props for `SingleElementPropertyGrid` component.
  * @public
  */
-export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & SingleElementDataProviderProps;
+export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
 
 /**
  * Component that renders property grid for single instance.

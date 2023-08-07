@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Added base tree props interface for props shared between trees.",
-      "type": "none"
+      "comment": "Removed `@itwin/itwinui-variables` from dependencies.",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

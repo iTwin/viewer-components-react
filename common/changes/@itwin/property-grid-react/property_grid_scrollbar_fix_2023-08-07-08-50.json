@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Fixed property grid not hiding empty struct and array properties.",
-      "type": "none"
+      "comment": "Fixed scrollbar not appearing when property grid content starts overflowing.",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/property-grid-react"

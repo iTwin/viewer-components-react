@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 26 Jul 2023 21:49:07 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Aug 2023 12:11:30 GMT and should not be manually modified.
+
+## 0.17.5
+Wed, 02 Aug 2023 12:11:30 GMT
+
+### Patches
+
+- Modified operator validation delay time and behavior
 
 ## 0.17.4
 Wed, 26 Jul 2023 21:49:07 GMT

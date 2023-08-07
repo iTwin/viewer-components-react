@@ -2,13 +2,106 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@itwin/tree-widget-react_v1.0.0",
+      "date": "Mon, 31 Jul 2023 14:10:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Models tree: Removed expansion toggle for root node."
+          },
+          {
+            "comment": "Widget: Added ability to conditionally show trees."
+          },
+          {
+            "comment": "Trees: Decrease whitespace size between the node label and eye checkbox."
+          },
+          {
+            "comment": "Added base tree props interface for props shared between trees."
+          },
+          {
+            "comment": "External sources tree: Add `ExternalSourcesTreeComponent` (currently `@alpha`)."
+          },
+          {
+            "comment": "Models tree: Added an option to specialize the class of geometric elements loaded into the hierarchy (see `ModelsTreeHierarchyConfiguration.elementClassSpecification`)."
+          },
+          {
+            "comment": "Trees: Use search box from the `@itwin/itwinui-react` library."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Trees: Keep child nodes state the same after parent node re-expands."
+          },
+          {
+            "comment": "Categories tree: Fixed behavior of the Invert button. Previously, only categories were affected, now sub-categories are affected as well."
+          },
+          {
+            "comment": "Handle errors thrown from tree components."
+          },
+          {
+            "comment": "Persist tree scroll position when switching between widgets."
+          },
+          {
+            "comment": "`Tree Header`: Fixed dropdown buttons menu not theming correctly."
+          },
+          {
+            "comment": "`ModelsTree`: Refactor ruleset to not use deprecated `ImageIdOverride` rule. "
+          },
+          {
+            "comment": "`ModelsTree`: Always render checkbox to avoid UI shifting when checkbox appear."
+          }
+        ],
+        "major": [
+          {
+            "comment": "Trees: Make eye checkboxes static on horizontal scroll."
+          },
+          {
+            "comment": "`createVisibilityTreeNodeRenderer` now takes a `props` object of type `VisibilityTreeNodeRendererProps`. It contains two new configuration options: `levelOffset`, and `disableRootNodeCollapse`."
+          },
+          {
+            "comment": "Rename `useVisibilityTreeRenderer` to `createVisibilityTreeRenderer`. It now takes a `props` object of type `VisibilityTreeRendererProps`"
+          },
+          {
+            "comment": "Bumped AppUI peer dependencies to `^4.3.0`."
+          },
+          {
+            "comment": "Renamed `TreeWidgetComponent` to `SelectableTree`."
+          },
+          {
+            "comment": "Widget: Reworked the way trees are provided to the widget. Instead of having separate configuration properties for hiding default trees and adding additional trees now there is only one property for supplying a list of trees to show."
+          },
+          {
+            "comment": "Refactored `IModelContentTreeProps` to not inherit `HTMLDivElement` props."
+          },
+          {
+            "comment": "`IVisibilityHandler`: Methods `getVisibilityStatus` and `changeVisibility` don't take `NodeKey` argument anymore."
+          },
+          {
+            "comment": "Models tree: `ModelsTreeProps.enableElementsClassGrouping` has been moved to `ModelsTreeProps.hierarchyConfig.enableElementsClassGrouping`."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Enforce consistent usage of type imports."
+          },
+          {
+            "comment": "`TreeHeader`: Debounce searchbox input to avoid making multiple requests."
+          },
+          {
+            "comment": "Bump dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@itwin/tree-widget-react_v0.10.0",
       "date": "Tue, 23 May 2023 13:16:11 GMT",
       "comments": {
         "none": [
           {
-            "comment": "Updating to iTwin.js core 4.0.0"
+            "comment": "Updating to iTwin.js core 4.0.0."
           }
         ]
       }
@@ -20,10 +113,10 @@
       "comments": {
         "none": [
           {
-            "comment": "updating to core@3.7.0 and appui@4.0.0"
+            "comment": "Updating to core@3.7.0 and appui@4.0.0."
           },
           {
-            "comment": "Removed usage of deprecated `@itwin/presentation-components` APIs"
+            "comment": "Removed usage of deprecated `@itwin/presentation-components` APIs."
           },
           {
             "comment": "Updated trees to use visibility checkbox from `@itwin/itwinui-react`."
@@ -31,7 +124,7 @@
         ],
         "minor": [
           {
-            "comment": "Updated to AppUI 4.0 and Presentation 4.0"
+            "comment": "Updated to AppUI 4.0 and Presentation 4.0."
           }
         ]
       }
@@ -43,15 +136,15 @@
       "comments": {
         "minor": [
           {
-            "comment": "Removed `SpatialTree` and related components in favor of the ones in `@itwin/breakdown-trees-react`"
+            "comment": "Removed `SpatialTree` and related components in favor of the ones in `@itwin/breakdown-trees-react`."
           },
           {
-            "comment": "Updated dependencies (`itwinui@2`, `appui@4`, `presentation-components@4`, `itwinjs-core@3.7`)"
+            "comment": "Updated dependencies (`itwinui@2`, `appui@4`, `presentation-components@4`, `itwinjs-core@3.7`)."
           }
         ],
         "patch": [
           {
-            "comment": "Use iTwin UI components instead of custom ones and CSS variables from `@itwin/itwinui-variables` instead of `@itwin/core-react`"
+            "comment": "Use iTwin UI components instead of custom ones and CSS variables from `@itwin/itwinui-variables` instead of `@itwin/core-react`."
           }
         ]
       }
@@ -63,7 +156,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Fixed tree filtering not being removed when search box is closed"
+            "comment": "Fixed tree filtering not being removed when search box is closed."
           }
         ]
       }
@@ -75,7 +168,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "'ModelsTree': Restored 'HideAll' button behavior to hide only models"
+            "comment": "'ModelsTree': Restored 'HideAll' button behavior to hide only models."
           }
         ]
       }
@@ -87,7 +180,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "ModelsTree: ensure that the \"Show all\" button is going to show all elements when there are elements with an \"exclusive\" flag"
+            "comment": "ModelsTree: ensure that the \"Show all\" button is going to show all elements when there are elements with an \"exclusive\" flag."
           },
           {
             "comment": "'2d' and '3d' buttons react to visibility changes in the viewport. The '2d' button will be disabled if no models with the PlanProjection flag are present in the model."
@@ -98,10 +191,10 @@
             "comment": "Add an option to control what buttons are available in tree toolbars."
           },
           {
-            "comment": "Upgrade `itwinjs-core` dependencies to `^3.6.0`"
+            "comment": "Upgrade `itwinjs-core` dependencies to `^3.6.0`."
           },
           {
-            "comment": "Upgrade `typescript` to `~4.4.0`"
+            "comment": "Upgrade `typescript` to `~4.4.0`."
           }
         ]
       }
@@ -113,10 +206,10 @@
       "comments": {
         "patch": [
           {
-            "comment": "`ModelsTreeComponent`: ensure that the \"show all\" and \"hide all\" buttons affect all iModel content"
+            "comment": "`ModelsTreeComponent`: ensure that the \"show all\" and \"hide all\" buttons affect all iModel content."
           },
           {
-            "comment": "Models Tree: Remove unused feature of filtering the tree by element ids"
+            "comment": "`ModelsTree`: Remove unused feature of filtering the tree by element ids."
           }
         ]
       }
@@ -128,10 +221,10 @@
       "comments": {
         "patch": [
           {
-            "comment": "CategoriesTree: Updated ruleset to not show private SubCategories"
+            "comment": "`CategoryTree`: Updated ruleset to not show private SubCategories."
           },
           {
-            "comment": "Bug fix for changing visibility of multiple nodes at once"
+            "comment": "Bug fix for changing visibility of multiple nodes at once."
           }
         ]
       }
@@ -143,7 +236,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Moved core trees implementation from @itwin/appui-react package to @itwin/tree-widget-react"
+            "comment": "Moved core trees implementation from `@itwin/appui-react` package to `@itwin/tree-widget-react`."
           }
         ]
       }
@@ -155,7 +248,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Add new `defaultTreeId` prop to specify default tree for TreeWidgetUiItemsProvider"
+            "comment": "Add new `defaultTreeId` prop to specify default tree for `TreeWidgetUiItemsProvider`."
           }
         ]
       }
@@ -179,7 +272,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Allow a caller to specify a default priority for Tree Widget item provider."
+            "comment": "Allow a caller to specify a default priority for `TreeWidgetUiItemsProvider`."
           }
         ]
       }
@@ -191,7 +284,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "set restore transient state in tree widget ui items provider to restore state when remounted"
+            "comment": "Set restore transient state in `TreeWidgetUiItemsProvider` to restore state when remounted."
           }
         ]
       }
@@ -203,7 +296,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "set tree-widget-search-bar-button-container z-index to 1"
+            "comment": "Set tree-widget-search-bar-button-container z-index to 1."
           }
         ]
       }
@@ -215,7 +308,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Do not unmount children in AutoSizer when height or width is 0 to avoid losing children state"
+            "comment": "Do not unmount children in `AutoSizer` when height or width is 0 to avoid losing children state."
           }
         ]
       }
@@ -237,15 +330,17 @@
       "tag": "@itwin/tree-widget-react_v0.4.1",
       "date": "Wed, 06 Apr 2022 13:48:44 GMT",
       "comments": {
+        "none": [
+          {
+            "comment": "Add transitive peers as dev deps."
+          }
+        ],
         "patch": [
           {
-            "comment": "Updates to allow specification of default panel location."
+            "comment": "Allow specifying default panel location."
           },
           {
-            "comment": "Add transitive peers as dev deps"
-          },
-          {
-            "comment": "added tree icon to tree widget tab"
+            "comment": "Added tree icon to tree widget tab."
           }
         ]
       }
@@ -257,7 +352,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Remove deprecated WidgetControl, update UiItemsProvider init"
+            "comment": "Remove deprecated `WidgetControl`, update `UiItemsProvider` initialization."
           }
         ]
       }
@@ -269,7 +364,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Add `IModelContentTree`"
+            "comment": "Add `IModelContentTree`."
           }
         ]
       }
@@ -281,7 +376,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Update scss to be pulled from cjs dir"
+            "comment": "Update scss to be pulled from cjs dir."
           }
         ]
       }
@@ -293,7 +388,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Bump to official iTwin.js 3.0 release"
+            "comment": "Bump to official iTwin.js 3.0 release."
           }
         ]
       }
@@ -305,7 +400,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "updated to latest rc, dev-185, and updated deps"
+            "comment": "Updated to latest rc, dev-185, and updated deps."
           }
         ]
       }
@@ -317,274 +412,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "iTwin.js 3.0 first rc"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.4.6",
-      "tag": "@bentley/tree-widget-react_v1.4.6",
-      "date": "Tue, 11 Jan 2022 16:25:27 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fix hide all button blocked by search bar"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.4.5",
-      "tag": "@bentley/tree-widget-react_v1.4.5",
-      "date": "Tue, 23 Nov 2021 21:19:42 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fix an issue where ModelsTree Component could lose its state"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.4.4",
-      "tag": "@bentley/tree-widget-react_v1.4.4",
-      "date": "Thu, 16 Sep 2021 17:55:54 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Stop delivering psuedo-localized strings"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.4.3",
-      "tag": "@bentley/tree-widget-react_v1.4.3",
-      "date": "Thu, 26 Aug 2021 14:00:14 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Search bar was not sized correctly, and alignment was not centered."
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.4.2",
-      "tag": "@bentley/tree-widget-react_v1.4.2",
-      "date": "Mon, 09 Aug 2021 20:24:55 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Updated tree widget barrel file to include UiProvider"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.4.1",
-      "tag": "@bentley/tree-widget-react_v1.4.1",
-      "date": "Mon, 19 Jul 2021 18:07:24 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Model/Category tree was not resizing properly, missing flex=1."
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.4.0",
-      "tag": "@bentley/tree-widget-react_v1.4.0",
-      "date": "Tue, 13 Jul 2021 17:43:28 GMT",
-      "comments": {
-        "none": [
-          {
-            "comment": "add rebuild script"
-          }
-        ],
-        "minor": [
-          {
-            "comment": "Added a UiProvider that implements the existing tree widget"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.1",
-      "tag": "@bentley/tree-widget-react_v1.3.1",
-      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "bump classnames dep"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.0",
-      "tag": "@bentley/tree-widget-react_v1.3.0",
-      "date": "Thu, 13 May 2021 21:15:14 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "update imjs to 2.15.2 to resolve breaking change in usePResentationTreeNodeLoader"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.8",
-      "tag": "@bentley/tree-widget-react_v1.2.8",
-      "date": "Wed, 24 Mar 2021 21:09:25 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Avoid Nested ScrollBars in Tree View widget"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.7",
-      "tag": "@bentley/tree-widget-react_v1.2.7",
-      "date": "Tue, 23 Mar 2021 16:17:57 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Change .component-selectable-content to block to display to fix resize flicker."
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.6",
-      "tag": "@bentley/tree-widget-react_v1.2.6",
-      "date": "Fri, 26 Feb 2021 18:43:33 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fixes for models tree not loading models when using show all, invert and other toggles"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.5",
-      "tag": "@bentley/tree-widget-react_v1.2.5",
-      "date": "Tue, 15 Dec 2020 13:51:37 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fix styling issues in search bar"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.4",
-      "tag": "@bentley/tree-widget-react_v1.2.4",
-      "date": "Wed, 09 Dec 2020 19:09:13 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fixing resizing issues with the SearchBox in Model tree"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.3",
-      "tag": "@bentley/tree-widget-react_v1.2.3",
-      "date": "Tue, 25 Aug 2020 16:57:36 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "rm unecessary dep on react-scripts"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.2",
-      "tag": "@bentley/tree-widget-react_v1.2.2",
-      "date": "Mon, 24 Aug 2020 17:39:24 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "alphabetize package.json"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.1",
-      "tag": "@bentley/tree-widget-react_v1.2.1",
-      "date": "Fri, 21 Aug 2020 21:17:48 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "readme update"
-          },
-          {
-            "comment": "support replacing model/category/spatial trees in TreeWidgetControl"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.0",
-      "tag": "@bentley/tree-widget-react_v1.2.0",
-      "date": "Tue, 11 Aug 2020 14:24:07 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Added 2D / 3D toggle to tree view header"
-          }
-        ],
-        "patch": [
-          {
-            "comment": "Decouple tree header for using in other widgets"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.1",
-      "tag": "@bentley/tree-widget-react_v1.1.1",
-      "date": "Tue, 28 Jul 2020 22:10:32 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fixes for tree widgets consistency: Category tree invert functionality, tooltips on buttons and fix for iFrame height of tree not defined properly"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.0",
-      "tag": "@bentley/tree-widget-react_v1.1.0",
-      "date": "Tue, 14 Jul 2020 22:54:18 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "\"Add classifications tree.\""
-          },
-          {
-            "comment": "Added in tree-widget package"
-          },
-          {
-            "comment": "Replacing ThemedSelect component with SelectableContent component"
-          }
-        ],
-        "patch": [
-          {
-            "comment": "Functional component."
-          },
-          {
-            "comment": "Model tree search box will now properly clear itself in addition to closing when its \"X\" icon is hit"
+            "comment": "iTwin.js 3.0 first rc."
           }
         ]
       }
