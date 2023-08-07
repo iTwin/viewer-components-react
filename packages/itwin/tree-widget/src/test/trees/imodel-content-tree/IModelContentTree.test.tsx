@@ -19,7 +19,7 @@ import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../tree-widget-
 import {
   addDocument, addDrawingCategory, addDrawingGraphic, addGroup, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubject,
 } from "../../IModelUtils";
-import { mockPresentationManager, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, renderWithUser, TestUtils } from "../../TestUtils";
 
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -81,6 +81,23 @@ describe("IModelContentTree", () => {
         const item = result.getByRole("treeitem");
         expect(tree.contains(item)).to.be.true;
         expect(item.contains(node)).to.be.true;
+      });
+
+      it("renders context menu", async () => {
+        setupHierarchy([{ key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("test-node") }]);
+        const { user, getByText, queryByText } = renderWithUser(
+          <IModelContentTree
+            {...sizeProps}
+            iModel={imodelMock.object}
+            contextMenuItems={[
+              () => <div>Test Menu Item</div>,
+            ]}
+          />,
+        );
+        const node = await waitFor(() => getByText("test-node"));
+        await user.pointer({ keys: "[MouseRight>]", target: node });
+
+        await waitFor(() => expect(queryByText("Test Menu Item")).to.not.be.null);
       });
     });
   });
