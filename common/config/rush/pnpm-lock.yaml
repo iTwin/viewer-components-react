@@ -59,7 +59,7 @@ importers:
       '@itwin/appui-abstract': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/appui-layout-react': 4.3.0_a15530b1b218cc32d3ec6ade15225a27
       '@itwin/appui-react': 4.3.0_95010a99ad239167390c73a26ef3edcc
-      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_1584fb1a90fa4816af4b90fecb841064
+      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_c8d1880a3dfbfaf90f7998cb5612f14a
       '@itwin/browser-authorization': 0.8.0_@itwin+core-bentley@4.0.6
       '@itwin/components-react': 4.3.0_a15530b1b218cc32d3ec6ade15225a27
       '@itwin/core-bentley': 4.0.6
@@ -1274,7 +1274,6 @@ importers:
       '@itwin/itwinui-icons-react': ^2.1.0
       '@itwin/itwinui-illustrations-react': ^2.1.0
       '@itwin/itwinui-react': ^2.11.0
-      '@itwin/itwinui-variables': ^2.0.0
       '@itwin/presentation-backend': ^4.0.0
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
@@ -1332,7 +1331,6 @@ importers:
       '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       i18next: 10.6.0
       react-error-boundary: 4.0.10_react@17.0.2
@@ -25507,11 +25505,11 @@ packages:
       react: 17.0.2
       use-sync-external-store: 1.2.0_react@17.0.2
 
-  file:../../packages/itwin/breakdown-trees_1584fb1a90fa4816af4b90fecb841064:
+  file:../../packages/itwin/breakdown-trees_c8d1880a3dfbfaf90f7998cb5612f14a:
     resolution: {directory: ../../packages/itwin/breakdown-trees, type: directory}
     id: file:../../packages/itwin/breakdown-trees
     name: '@itwin/breakdown-trees-react'
-    version: 0.6.2
+    version: 0.6.3
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.3.0
@@ -25526,7 +25524,7 @@ packages:
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
-      '@itwin/tree-widget-react': workspace:^1.0.0-dev.8
+      '@itwin/tree-widget-react': workspace:^1.0.0
       react: ^17.0.0
       react-dom: ^17.0.0
       react-redux: 7.2.6
@@ -25663,7 +25661,7 @@ packages:
     resolution: {directory: ../../packages/itwin/property-grid, type: directory}
     id: file:../../packages/itwin/property-grid
     name: '@itwin/property-grid-react'
-    version: 1.0.0-dev.5
+    version: 1.0.1
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
@@ -25699,7 +25697,7 @@ packages:
     resolution: {directory: ../../packages/itwin/tree-widget, type: directory}
     id: file:../../packages/itwin/tree-widget
     name: '@itwin/tree-widget-react'
-    version: 1.0.0-dev.8
+    version: 1.0.0
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0

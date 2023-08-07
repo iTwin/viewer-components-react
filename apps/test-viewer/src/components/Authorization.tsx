@@ -5,7 +5,6 @@
 
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 import { BrowserAuthorizationClient, isBrowserAuthorizationClient } from "@itwin/browser-authorization";
-import { AuthorizationClient } from "@itwin/core-common";
 import { AccessToken, BeEvent } from "@itwin/core-bentley";
 import { ViewerAuthorizationClient as WebViewerAuthorizationClient } from "@itwin/web-viewer-react";
 
@@ -14,7 +13,7 @@ export enum AuthorizationState {
   Authorized
 }
 
-class DemoAuthClient implements AuthorizationClient {
+class DemoAuthClient implements WebViewerAuthorizationClient {
   readonly onAccessTokenChanged: BeEvent<(token: AccessToken) => void> = new BeEvent();
   private accessToken: Promise<string> | undefined = undefined;
 
@@ -101,7 +100,7 @@ export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
 
   const authClient = contextValue.client;
   useEffect(() => {
-    return authClient.onAccessTokenChanged.addListener(() => setContextValue((prev: any) => ({ ...prev, state: AuthorizationState.Authorized })));
+    return authClient.onAccessTokenChanged.addListener(() => setContextValue((prev) => ({ ...prev, state: AuthorizationState.Authorized })));
   }, [authClient]);
 
   useEffect(() => {
