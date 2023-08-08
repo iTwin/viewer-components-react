@@ -20,29 +20,13 @@
         }
       }
 
-      &.is-selected {
-        >.contents {
-          >.visibility-tree-checkbox-container {
-            background-color: transparent
-          }
-        }
-      }
-
-      .contents {
-        &:hover {
-          .visibility-tree-checkbox-container {
-            background-color: transparent;
-          }
-        }
-      }
-
       .visibility-tree-checkbox-container {
         height: var(--iui-size-l);
         width: var(--iui-size-l);
         position: sticky;
         order: -1;
         left: 0;
-        background-color: var(--iui-color-background);
+        background-color: transparent;
         z-index: 1;
         display: flex;
         align-items: center;
