@@ -297,7 +297,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps): {
     focusedInstanceKey: InstanceKey | undefined;
     focusInstance: (key: InstanceKey) => void;
     ancestorsNavigationProps: {
-        navigateDown: () => Promise<void>;
+        navigateDown: () => void;
         navigateUp: () => Promise<void>;
         canNavigateUp: boolean;
         canNavigateDown: boolean;
