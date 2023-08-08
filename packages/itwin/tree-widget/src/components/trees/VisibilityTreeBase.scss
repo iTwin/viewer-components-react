@@ -23,7 +23,7 @@
       &.is-selected {
         >.contents {
           >.visibility-tree-checkbox-container {
-            background-color: var(--iui-color-background-accent-muted)
+            background-color: transparent
           }
         }
       }
@@ -31,7 +31,7 @@
       .contents {
         &:hover {
           .visibility-tree-checkbox-container {
-            background-color: var(--iui-color-background-hover);
+            background-color: transparent;
           }
         }
       }
