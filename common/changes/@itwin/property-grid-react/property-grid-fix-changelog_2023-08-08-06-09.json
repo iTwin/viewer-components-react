@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Fix changelog",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
