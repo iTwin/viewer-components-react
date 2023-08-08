@@ -2,30 +2,21 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-const fs = require("fs");
+const command = process.argv.slice(2);
+const crossEnv = require("cross-env");
 
-const path = "../../../apps/test-viewer/.env";
-const defaultVariables = `\
-IMJS_DEMO_CLIENT=true
-IMJS_AUTH_CLIENT_REDIRECT_URI = "http://localhost:3000/signin-callback"
-IMJS_AUTH_CLIENT_LOGOUT_URI = "http://localhost:3000"
-IMJS_AUTH_CLIENT_SCOPES = "imodelaccess:read imodels:read realitydata:read"
-IMJS_AUTH_AUTHORITY= "https://ims.bentley.com"
-
-IMJS_ITWIN_ID = "b27dc251-0e53-4a36-9a38-182fc309be07"
-IMJS_IMODEL_ID = "f30566da-8fdf-4cba-b09a-fd39f5397ae6"
-
-SKIP_PREFLIGHT_CHECK=true
-
-USE_FAST_SASS=true
-USE_FULL_SOURCEMAP=true
-TRANSPILE_DEPS=false
-
-IMJS_ENABLED_WIDGETS = "tree-widget"
-`;
-
-try {
-  fs.writeFileSync(path, defaultVariables);
-} catch (err) {
-  console.log("Error creating file:", err);
-}
+crossEnv([
+  'IMJS_DEMO_CLIENT=true',
+  'IMJS_AUTH_CLIENT_REDIRECT_URI="http://localhost:3000/signin-callback"',
+  'IMJS_AUTH_CLIENT_LOGOUT_URI="http://localhost:3000"',
+  'IMJS_AUTH_CLIENT_SCOPES="imodelaccess:read imodels:read realitydata:read"',
+  'IMJS_AUTH_AUTHORITY="https://ims.bentley.com"',
+  'IMJS_ITWIN_ID="b27dc251-0e53-4a36-9a38-182fc309be07"',
+  'IMJS_IMODEL_ID="f30566da-8fdf-4cba-b09a-fd39f5397ae6"',
+  'SKIP_PREFLIGHT_CHECK=true',
+  'USE_FAST_SASS=true',
+  'USE_FULL_SOURCEMAP=true',
+  'TRANSPILE_DEPS=false',
+  'IMJS_ENABLED_WIDGETS="tree-widget"',
+  ...command,
+]);
