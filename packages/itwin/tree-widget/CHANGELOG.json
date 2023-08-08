@@ -2,6 +2,32 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "1.1.0",
+      "tag": "@itwin/tree-widget-react_v1.1.0",
+      "date": "Mon, 07 Aug 2023 13:36:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Trees: Added ability to increase node size in order to make tree more user friendly on touch devices."
+          },
+          {
+            "comment": "Trees: Added ability to customize tree node label"
+          },
+          {
+            "comment": "`ModelsTree`: Added ability to show models without elements."
+          },
+          {
+            "comment": "Added context menu support."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Removed `@itwin/itwinui-variables` from dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@itwin/tree-widget-react_v1.0.0",
       "date": "Mon, 31 Jul 2023 14:10:09 GMT",

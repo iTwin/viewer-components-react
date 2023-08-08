@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Trees: Added ability to customize tree node label",
-      "type": "minor"
+      "comment": "Trees: Fix eye checkbox background when node is selected and hovered.",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"
