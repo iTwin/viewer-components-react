@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Trees: Fix eye checkbox background when node is selected and user is hovering on it.",
+      "comment": "Trees: Fix eye checkbox background when node is selected and hovered.",
       "type": "patch"
     }
   ],
