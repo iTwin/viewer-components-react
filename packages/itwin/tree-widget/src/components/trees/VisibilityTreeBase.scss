@@ -7,15 +7,31 @@
   .tree-widget-tree-nodes-list {
     .core-tree-node {
       &.with-checkbox {
-        >.contents {
+        > .contents {
           padding-left: calc(var(--iui-size-3xs) / 2);
         }
       }
 
       &.disable-expander {
-        >.contents {
-          >.core-tree-expansionToggle {
+        > .contents {
+          > .core-tree-expansionToggle {
             display: none;
+          }
+        }
+      }
+
+      &.is-selected {
+        > .contents {
+          > .visibility-tree-checkbox-container {
+            background-color: var(--iui-color-background-accent-muted);
+          }
+        }
+      }
+
+      &:not(.is-selected) > .contents {
+        &:hover {
+          > .visibility-tree-checkbox-container {
+            background-color: var(--iui-color-background-hover);
           }
         }
       }
@@ -26,7 +42,7 @@
         position: sticky;
         order: -1;
         left: 0;
-        background-color: transparent;
+        background-color: var(--iui-color-background);
         z-index: 1;
         display: flex;
         align-items: center;
@@ -57,7 +73,7 @@
       }
 
       .without-expander {
-        .visibility-tree-checkbox-container+* {
+        .visibility-tree-checkbox-container + * {
           margin-left: var(--enlarged-node-expander-additional-padding);
         }
       }
