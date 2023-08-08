@@ -28,8 +28,8 @@
         }
       }
 
-      &:not(.is-selected) > .contents {
-        &:hover {
+      &:not(.is-selected) {
+        > .contents:hover {
           > .visibility-tree-checkbox-container {
             background-color: var(--iui-color-background-hover);
           }
