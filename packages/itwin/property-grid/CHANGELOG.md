@@ -1,6 +1,6 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Mon, 07 Aug 2023 13:36:23 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 05:55:42 GMT and should not be manually modified.
 
 ## 1.1.0
 Mon, 07 Aug 2023 13:36:23 GMT
@@ -12,6 +12,12 @@ Mon, 07 Aug 2023 13:36:23 GMT
 ### Patches
 
 - Fixed scrollbar not appearing when property grid content starts overflowing.
+
+## 1.0.1
+Mon, 02 Aug 2023 12:11:36 GMT
+
+### Patches
+
 - Render property grid header even when too many elements are selected.
 
 ## 1.0.0

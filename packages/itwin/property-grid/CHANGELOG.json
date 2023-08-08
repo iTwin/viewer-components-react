@@ -14,7 +14,16 @@
         "patch": [
           {
             "comment": "Fixed scrollbar not appearing when property grid content starts overflowing."
-          },
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@itwin/property-grid-react_v1.0.1",
+      "date": "Mon, 02 Aug 2023 12:11:36 GMT",
+      "comments": {
+        "patch": [
           {
             "comment": "Render property grid header even when too many elements are selected."
           }
