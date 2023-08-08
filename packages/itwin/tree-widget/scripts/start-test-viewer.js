@@ -2,8 +2,8 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-const command = process.argv.slice(2);
 const crossEnv = require("cross-env");
+const path = require('path').resolve(__dirname, '../../../../apps/test-viewer')
 
 crossEnv([
   'IMJS_DEMO_CLIENT=true',
@@ -17,6 +17,6 @@ crossEnv([
   'USE_FAST_SASS=true',
   'USE_FULL_SOURCEMAP=true',
   'TRANSPILE_DEPS=false',
-  'IMJS_ENABLED_WIDGETS="tree-widget property-grid"',
-  ...command,
+  'IMJS_ENABLED_WIDGETS="tree-widget"',
+  `npm run start:dev --prefix ${path}`,
 ]);

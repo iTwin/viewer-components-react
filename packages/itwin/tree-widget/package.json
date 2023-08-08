@@ -21,7 +21,7 @@
   "module": "lib/esm/tree-widget-react.js",
   "typings": "lib/cjs/tree-widget-react",
   "scripts": {
-    "start:test-viewer": "node ./scripts/setup-tests.js npm run start:dev --prefix ../../../apps/test-viewer",
+    "start:test-viewer": "node ./scripts/start-test-viewer.js",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
