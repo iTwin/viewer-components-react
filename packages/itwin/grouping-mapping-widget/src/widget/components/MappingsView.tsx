@@ -3,6 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
+import type {
+  Alert,
+} from "@itwin/itwinui-react";
 import {
   Button,
   IconButton,
@@ -16,15 +19,15 @@ import {
   EmptyMessage,
   LoadingOverlay,
 } from "./utils";
-import "./MappingsUI.scss";
+import "./MappingsView.scss";
 import DeleteModal from "./DeleteModal";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import { HorizontalTile } from "./HorizontalTile";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
-import { MappingUIActionGroup } from "./MappingUIActionGroup";
+import { MappingUIActionGroup } from "./MappingViewActionGroup";
 
-export const mappingUIDefaultDisplayStrings = {
+export const mappingViewDefaultDisplayStrings = {
   mappings: "Mappings",
   iTwins: "iTwins",
   iTwinNumber: "Number",
@@ -35,7 +38,7 @@ export const mappingUIDefaultDisplayStrings = {
   iModelDescription: "Description",
 };
 
-export interface MappingsUIProps {
+export interface MappingsViewProps {
   mappings: Mapping[];
   isLoading: boolean;
   isTogglingExtraction: boolean;
@@ -44,15 +47,16 @@ export interface MappingsUIProps {
   onDelete: (mapping: Mapping) => Promise<void>;
   showDeleteModal: Mapping | undefined;
   setShowDeleteModal: (mapping?: Mapping) => void;
-  displayStrings?: Partial<typeof mappingUIDefaultDisplayStrings>;
+  displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
   showImportModal?: boolean;
   setShowImportModal?: (show: boolean) => void;
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
+  alert?: React.ReactElement<typeof Alert>;
 }
 
-export const MappingsUI = ({
+export const MappingsView = ({
   mappings,
   isLoading,
   isTogglingExtraction,
@@ -67,16 +71,17 @@ export const MappingsUI = ({
   onClickAddMapping,
   onClickMappingTitle,
   onClickMappingModify,
-}: MappingsUIProps) => {
+  alert,
+}: MappingsViewProps) => {
   const displayStrings = React.useMemo(
-    () => ({ ...mappingUIDefaultDisplayStrings, ...userDisplayStrings }),
+    () => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
 
   return (
     <>
       <BlockingOverlay isVisible={isTogglingExtraction} />
-      <div className="gmw-mappings-container">
+      <div className="gmw-mappings-view-container">
         <div className="gmw-table-toolbar">
           <div className="gmw-button-spacing">
             {onClickAddMapping &&
@@ -106,6 +111,8 @@ export const MappingsUI = ({
             <SvgRefresh />
           </IconButton>
         </div>
+        {alert}
+        <div className='gmw-mappings-border' />
         {isLoading ? (
           <LoadingOverlay />
         ) : mappings.length === 0 ? (

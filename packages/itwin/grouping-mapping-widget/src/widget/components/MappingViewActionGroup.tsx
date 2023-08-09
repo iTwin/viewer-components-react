@@ -14,7 +14,6 @@ import {
   SvgMore,
   SvgProcess,
 } from "@itwin/itwinui-icons-react";
-import "./Mapping.scss";
 import type { Mapping } from "@itwin/insights-client";
 
 interface MappingUIActionGroupProps {

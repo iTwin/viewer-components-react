@@ -2,14 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { } from "react";
+import React, { useCallback } from "react";
 import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import type { CreateTypeFromInterface } from "../utils";
-import type { mappingUIDefaultDisplayStrings } from "./MappingsUI";
-import { MappingsUI } from "./MappingsUI";
+import type { mappingViewDefaultDisplayStrings } from "./MappingsView";
+import { MappingsView } from "./MappingsView";
 import { useMappingsOperations } from "./hooks/useMappingsOperations";
+import { Alert } from "@itwin/itwinui-react";
 
 export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
@@ -17,7 +18,7 @@ export interface MappingsProps {
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
-  displayStrings?: Partial<typeof mappingUIDefaultDisplayStrings>;
+  displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
 }
 
 export const Mappings = (props: MappingsProps) => {
@@ -32,10 +33,21 @@ export const Mappings = (props: MappingsProps) => {
     setShowDeleteModal,
     showDeleteModal,
     isTogglingExtraction,
+    errorMessage,
+    setErrorMessage,
   } = useMappingsOperations({ ...groupingMappingApiConfig, mappingClient });
 
+  const renderAlert = useCallback(() => {
+    if (!errorMessage) return;
+    return (
+      <Alert type="negative" onClose={() => setErrorMessage(undefined)}>
+        {errorMessage}
+      </Alert>
+    );
+  }, [errorMessage, setErrorMessage]);
+
   return (
-    <MappingsUI
+    <MappingsView
       mappings={mappings}
       isLoading={isLoading}
       onRefresh={refresh}
@@ -44,6 +56,7 @@ export const Mappings = (props: MappingsProps) => {
       showDeleteModal={showDeleteModal}
       setShowDeleteModal={setShowDeleteModal}
       isTogglingExtraction={isTogglingExtraction}
+      alert={renderAlert()}
       {...props}
     />
   );

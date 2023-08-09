@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useState } from "react";
 import {
-  handleError,
+  getErrorMessage,
 } from "../utils";
 import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import type { GroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
@@ -15,7 +15,8 @@ const fetchMappings = async (
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
-  mappingsClient: IMappingsClient
+  mappingsClient: IMappingsClient,
+  setErrorMessage: (message: string | undefined) => void
 ) => {
   try {
     setIsLoading(true);
@@ -23,7 +24,7 @@ const fetchMappings = async (
     const mappings = await mappingsClient.getMappings(accessToken, iModelId);
     setMappings(mappings.sort((a, b) => a.mappingName.localeCompare(b.mappingName)));
   } catch (error: any) {
-    handleError(error.status);
+    setErrorMessage(getErrorMessage(error.status));
   } finally {
     setIsLoading(false);
   }
@@ -37,15 +38,16 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [isTogglingExtraction, setIsTogglingExtraction] = useState<boolean>(false);
 
   useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
+    void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient, setErrorMessage);
   }, [getAccessToken, mappingClient, iModelId]);
 
   const refresh = useCallback(async () => {
     setMappings([]);
-    await fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
+    await fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient, setErrorMessage);
   }, [getAccessToken, mappingClient, iModelId]);
 
   const toggleExtraction = useCallback(async (mapping: Mapping) => {
@@ -57,7 +59,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
         extractionEnabled: newState,
       });
     } catch (error: any) {
-      handleError(error.status);
+      setErrorMessage(getErrorMessage(error.status));
     } finally {
       setIsTogglingExtraction(false);
     }
@@ -69,5 +71,5 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     await refresh();
   };
 
-  return { mappings, isLoading, refresh, toggleExtraction, onDelete, setShowDeleteModal, showDeleteModal, isTogglingExtraction };
+  return { mappings, isLoading, refresh, toggleExtraction, onDelete, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
 };
