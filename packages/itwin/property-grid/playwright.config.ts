@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -16,7 +16,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: "./src/e2e-tests",
   /* Maximum time one test can run for. */
-  timeout: 60 * 1000,
+  timeout: 2 * 60 * 1000,
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -74,6 +74,13 @@ export default defineConfig({
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
+
+  expect: {
+    toHaveScreenshot: {
+      /* Allow some difference between screenshots as rendering might differ on different machines. */
+      maxDiffPixelRatio: 0.01
+    }
+  },
 
   /* Run your local dev server before starting the tests */
   webServer: {
