@@ -17,7 +17,7 @@ import {
 } from "@itwin/presentation-testing";
 import { render, waitFor } from "@testing-library/react";
 import { ExternalSourcesTree, RULESET_EXTERNAL_SOURCES } from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
-import { mockPresentationManager, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, renderWithUser, TestUtils } from "../../TestUtils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ElementProps } from "@itwin/core-common";
@@ -101,6 +101,26 @@ describe("ExternalSourcesTree", () => {
           .and.to.satisfy((item: HTMLElement) => !item.querySelector(`span.bui-webfont-icon`));
         expect(treeItems[1]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-with-icon"]`))
           .and.to.satisfy((item: HTMLElement) => item.querySelector(`span.bui-webfont-icon.test-icon-id`));
+      });
+
+      it("renders context menu", async () => {
+        setupHierarchy([{
+          key: createInvalidNodeKey(),
+          label: LabelDefinition.fromLabelString("test-node"), // eslint-disable-line @itwin/no-internal
+        }]);
+        const { user, getByText, queryByText } = renderWithUser(
+          <ExternalSourcesTree
+            {...sizeProps}
+            iModel={imodelMock.object}
+            contextMenuItems={[
+              () => <div>Test Menu Item</div>,
+            ]}
+          />,
+        );
+        const node = await waitFor(() => getByText("test-node"));
+        await user.pointer({ keys: "[MouseRight>]", target: node });
+
+        await waitFor(() => expect(queryByText("Test Menu Item")).to.not.be.null);
       });
     });
   });

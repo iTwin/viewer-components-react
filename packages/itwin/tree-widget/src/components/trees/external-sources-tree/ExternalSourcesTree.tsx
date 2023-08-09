@@ -6,12 +6,12 @@
 import "../VisibilityTreeBase.scss";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader, useUnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
+import { TreeRenderer } from "../common/TreeRenderer";
+import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
-import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
-import type { Node, Ruleset } from "@itwin/presentation-common";
-import type { BaseTreeProps } from "../Common";
-
+import type { Ruleset } from "@itwin/presentation-common";
+import type { BaseTreeProps } from "../common/Types";
 /**
  * Presentation rules used by ControlledCategoriesTree
  * @internal
@@ -40,7 +40,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   const eventsHandler = useUnifiedSelectionTreeEventHandler({ nodeLoader });
   const treeModel = useTreeModel(nodeLoader.modelSource);
   return (
-    <div className="tree-widget-visibility-tree-base">
+    <div className="tree-widget-tree-container">
       <ControlledTree
         nodeLoader={nodeLoader}
         model={treeModel}
@@ -49,11 +49,22 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         width={props.width}
         height={props.height}
         iconsEnabled={true}
+        treeRenderer={(treeProps) =>
+          <TreeRenderer
+            {...treeProps}
+            contextMenuItems={props.contextMenuItems}
+            nodeLabelRenderer={props.nodeLabelRenderer}
+            density={props.density}
+          />
+        }
       />
     </div>
   );
 }
 
-function customizeTreeNodeItem(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) {
-  item.icon = node.extendedData?.imageId;
-}
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
+  addCustomTreeNodeItemLabelRenderer,
+  (item, node) => {
+    item.icon = node.extendedData?.imageId;
+  },
+]);

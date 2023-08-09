@@ -9,6 +9,7 @@ import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
 import { Viewer } from "./Viewer";
+import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 
 export function App() {
   return (
@@ -16,6 +17,7 @@ export function App() {
       <Routes>
         <Route path="/signin-callback" element={<SignInRedirect />} />
         <Route path="/*" element={<Main />} />
+         <Route path="/esri-oauth2-callback" element={<ArcGisOauthRedirect />} />
       </Routes>
     </AuthorizationProvider>
   );

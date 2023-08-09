@@ -2,6 +2,51 @@
   "name": "@itwin/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.6.4",
+      "tag": "@itwin/breakdown-trees-react_v0.6.4",
+      "date": "Mon, 07 Aug 2023 13:36:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" from `^1.0.0` to `^1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.3",
+      "tag": "@itwin/breakdown-trees-react_v0.6.3",
+      "date": "Mon, 31 Jul 2023 14:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" to `1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" from `^1.0.0-dev.8` to `^1.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.2",
+      "tag": "@itwin/breakdown-trees-react_v0.6.2",
+      "date": "Mon, 24 Jul 2023 17:26:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.12.2` to `^0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.1",
       "tag": "@itwin/breakdown-trees-react_v0.6.1",
       "date": "Thu, 20 Jul 2023 20:15:05 GMT",
