@@ -51,7 +51,7 @@ export interface GroupingProps {
     displayLabel: string,
   ) => void;
   disableActions?: boolean;
-  isVisualizing ?: boolean;
+  isVisualizing?: boolean;
 }
 
 const fetchGroups = async (

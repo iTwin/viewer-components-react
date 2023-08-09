@@ -24,7 +24,7 @@ export const useVisualization = (shouldVisualize: boolean, iModelConnection: IMo
       clearOverriddenElements();
     }
     clearEmphasizedElements();
-  }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor, shouldVisualize]);
+  }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor, shouldVisualize,setNumberOfVisualizedGroups]);
 
   useEffect(() => {
     if (!shouldVisualize) return;

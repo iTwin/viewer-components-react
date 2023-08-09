@@ -68,7 +68,7 @@ export const GroupsVisualization = ({
 
   const visualizeGroupColorsWrapper = useCallback(
     async () => {
-      setIsVisualizing(true)
+      setIsVisualizing(true);
       setLoadingQuery(true);
       const groupsCopy = [...groups];
       await visualizeGroupColors(
@@ -77,11 +77,11 @@ export const GroupsVisualization = ({
         hiddenGroupsIds,
         hilitedElementsQueryCache,
         setNumberOfVisualizedGroups,
-        emphasizeElements,  
+        emphasizeElements,
       );
       isNonEmphasizedSelectable && clearEmphasizedElements();
       setLoadingQuery(false);
-      setIsVisualizing(false)
+      setIsVisualizing(false);
       setNumberOfVisualizedGroups(0);
     },
     [
@@ -91,6 +91,7 @@ export const GroupsVisualization = ({
       hilitedElementsQueryCache,
       emphasizeElements,
       isNonEmphasizedSelectable,
+      setNumberOfVisualizedGroups,
     ]
   );
 
