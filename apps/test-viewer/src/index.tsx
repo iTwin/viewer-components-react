@@ -9,19 +9,19 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./components/App";
 
-// Set custom global variables 
+// Set custom global variables
 if (process.env.IMJS_GLOBAL_PROPS) {
   try {
     const json = JSON.parse(process.env.IMJS_GLOBAL_PROPS);
-    Object.entries(json).forEach(([key, value]) => {Object.defineProperty(globalThis, key, {value}) });
+    Object.entries(json).forEach(([key, value]) => { Object.defineProperty(globalThis, key, { value }) });
   } catch {
     console.log(`Could not read 'IMJS_GLOBAL_PROPS'`);
   }
 }
 
-if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID) {
+if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID && !process.env.IMJS_DEMO_CLIENT) {
   throw new Error(
-    "Please add a valid OIDC client id to the .env file and restart the application. See the README for more information."
+    "Please add a valid OIDC client id (or use demo client) to the .env file and restart the application. See the README for more information."
   );
 }
 if (!process.env.IMJS_AUTH_CLIENT_SCOPES) {
