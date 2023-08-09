@@ -76,6 +76,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [groupProperties, setGroupProperties] = useState<GroupProperty[]>([]);
   const [calculatedProperties, setCalculatedProperties] = useState<CalculatedProperty[]>([]);
   const [customCalculationProperties, setCustomCalculationProperties] = useState<CustomCalculation[]>([]);
+  const [numberOfVisualizedGroups, setNumberOfVisualizedGroups] = useState(0);
 
   useEffect(() => {
     setApiConfig(() => ({
@@ -103,8 +104,10 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       hilitedElementsQueryCache,
       groups,
       setGroups,
+      numberOfVisualizedGroups,
+      setNumberOfVisualizedGroups,
     }),
-    [groups, hiddenGroupsIds, showGroupColor]
+    [groups, hiddenGroupsIds, showGroupColor, numberOfVisualizedGroups]
   );
 
   const propertiesContextValue = useMemo(

@@ -6,6 +6,7 @@
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SelectionMode } from "@itwin/components-react";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { TreeRendererBaseProps } from "./TreeRenderer";
 
 /**
  * An option of how class grouping should work in a component.
@@ -33,7 +34,7 @@ export interface VisibilityTreeFilterInfo {
  * Base props for tree components.
  * @public
  */
-export interface BaseTreeProps {
+export interface BaseTreeProps extends TreeRendererBaseProps {
   /** An iModel to pull data from. */
   iModel: IModelConnection;
   /** Width of the component. */

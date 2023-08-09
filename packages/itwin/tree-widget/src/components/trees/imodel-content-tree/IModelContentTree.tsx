@@ -6,9 +6,11 @@
 import { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import { TreeRenderer } from "../common/TreeRenderer";
+import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 
 import type { Ruleset } from "@itwin/presentation-common";
-import type { BaseTreeProps } from "../Common";
+import type { BaseTreeProps } from "../common/Types";
 
 /**
  * Presentation rules used by IModelContentTree
@@ -28,20 +30,21 @@ export type IModelContentTreeProps = BaseTreeProps;
  * @public
  */
 export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, width, height, selectionMode } = props;
+  const { iModel, width, height, selectionMode, contextMenuItems } = props;
 
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: iModel,
     ruleset: RULESET_IMODEL_CONTENT,
     pagingSize: 20,
     appendChildrenCountForGroupingNodes: true,
+    customizeTreeNodeItem,
   });
   const eventHandler = useTreeEventsHandler(useMemo(() => ({ nodeLoader, modelSource: nodeLoader.modelSource }), [nodeLoader]));
 
   const treeModel = useTreeModel(nodeLoader.modelSource);
 
   return (
-    <div className="imodel-content-tree">
+    <div className="tree-widget-tree-container">
       <ControlledTree
         width={width}
         height={height}
@@ -50,7 +53,19 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         eventsHandler={eventHandler}
         model={treeModel}
         iconsEnabled={true}
+        treeRenderer={(treeProps) =>
+          <TreeRenderer
+            {...treeProps}
+            contextMenuItems={contextMenuItems}
+            nodeLabelRenderer={props.nodeLabelRenderer}
+            density={props.density}
+          />
+        }
       />
     </div>
   );
 };
+
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
+  addCustomTreeNodeItemLabelRenderer,
+]);

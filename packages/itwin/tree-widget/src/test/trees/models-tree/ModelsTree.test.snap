@@ -314,80 +314,87 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
 <body
   class="iui-root"
 >
+  <div
+    id="core-global-context-menu-root"
+  />
   <div>
     <div
-      class="tree-widget-visibility-tree-base"
+      class="tree-widget-visibility-tree-base tree-widget-tree-container"
     >
       <div
-        class="core-tree components-controlledTree components-smallEditor-host"
-        role="tree"
-        tabindex="-1"
+        class="tree-widget-tree-nodes-list"
       >
         <div
-          class="ReactWindow__VariableSizeList"
-          style="position: relative; height: 200px; width: 200px; overflow: auto; will-change: transform; direction: ltr;"
+          class="core-tree components-controlledTree components-smallEditor-host"
+          role="tree"
+          tabindex="-1"
         >
           <div
-            style="height: 25px; width: 100%;"
+            class="ReactWindow__VariableSizeList"
+            style="position: relative; height: 200px; width: 200px; overflow: auto; will-change: transform; direction: ltr;"
           >
             <div
-              class="node-wrapper"
-              style="position: absolute; left: 0px; top: 0px; height: 25px; width: 100%;"
+              style="height: 25px; width: 100%;"
             >
               <div
-                aria-selected="false"
-                class="core-tree-node with-checkbox disable-expander"
-                data-testid="tree-node"
-                role="treeitem"
-                tabindex="-1"
+                class="node-wrapper"
+                style="position: absolute; left: 0px; top: 0px; height: 25px; width: 100%;"
               >
                 <div
-                  class="contents"
-                  data-testid="tree-node-contents"
-                  style="margin-left: 0px;"
+                  aria-selected="false"
+                  class="core-tree-node with-checkbox disable-expander without-expander"
+                  data-testid="tree-node"
+                  role="treeitem"
+                  tabindex="-1"
                 >
                   <div
-                    aria-label="tree.expand"
-                    class="core-tree-expansionToggle expansion-toggle"
-                    data-testid="tree-node-expansion-toggle"
-                    role="button"
-                    tabindex="-1"
+                    class="contents"
+                    data-testid="tree-node-contents"
+                    style="margin-left: 0px;"
                   >
-                    <i
-                      class="icon core-svg-icon toggle icon"
+                    <div
+                      aria-label="tree.expand"
+                      class="core-tree-expansionToggle expansion-toggle"
+                      data-testid="tree-node-expansion-toggle"
+                      role="button"
+                      tabindex="-1"
                     >
-                      <svg
-                        fill="var(--iui-color-icon-muted, currentColor)"
-                        height="1rem"
-                        viewBox="0 0 16 16"
-                        width="1rem"
+                      <i
+                        class="icon core-svg-icon toggle icon"
                       >
-                        <path
-                          d="M4.7 0L3.3 1.4 9.9 8l-6.6 6.6L4.7 16l8-8z"
-                        />
-                      </svg>
-                    </i>
-                  </div>
-                  <div
-                    class="visibility-tree-checkbox-container"
-                    style="margin-right: 24px;"
-                  >
-                    <input
-                      class="iui-checkbox iui-checkbox-visibility visibility-tree-checkbox"
-                      type="checkbox"
-                    />
-                  </div>
-                  <div
-                    class="core-tree-node-icon"
-                  />
-                  <div
-                    class="components-controlledTree-node-content"
-                  >
-                    <span
-                      title="test-node"
+                        <svg
+                          fill="var(--iui-color-icon-muted, currentColor)"
+                          height="1rem"
+                          viewBox="0 0 16 16"
+                          width="1rem"
+                        >
+                          <path
+                            d="M4.7 0L3.3 1.4 9.9 8l-6.6 6.6L4.7 16l8-8z"
+                          />
+                        </svg>
+                      </i>
+                    </div>
+                    <div
+                      class="visibility-tree-checkbox-container"
+                      style="margin-right: 24px;"
                     >
-                      test-node
-                    </span>
+                      <input
+                        class="iui-checkbox iui-checkbox-visibility visibility-tree-checkbox"
+                        type="checkbox"
+                      />
+                    </div>
+                    <div
+                      class="core-tree-node-icon"
+                    />
+                    <div
+                      class="components-controlledTree-node-content"
+                    >
+                      <span
+                        title="test-node"
+                      >
+                        test-node
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

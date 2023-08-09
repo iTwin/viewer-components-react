@@ -68,3 +68,15 @@ export function stubPresentation() {
 export function createFunctionStub<TFunc extends (...args: any) => any>() {
   return sinon.stub<Parameters<TFunc>, ReturnType<TFunc>>();
 }
+
+export function createResolvablePromise<T>() {
+  let resolveFn: (value: T) => void = () => {};
+  const promise = new Promise<T>((resolve) => {resolveFn = resolve;});
+  return {
+    promise,
+    resolve: async (value: T) => {
+      resolveFn(value);
+      await new Promise((resolve) => setTimeout(resolve));
+    },
+  };
+}

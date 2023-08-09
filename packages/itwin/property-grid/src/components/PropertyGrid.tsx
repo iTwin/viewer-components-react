@@ -8,17 +8,19 @@ import { Text } from "@itwin/itwinui-react";
 import { usePropertyDataProviderWithUnifiedSelection } from "@itwin/presentation-components";
 import { useDataProvider } from "../hooks/UseDataProvider";
 import { PropertyGridManager } from "../PropertyGridManager";
+import { FilteringPropertyGrid } from "./FilteringPropertyGrid";
 import { PropertyGridContent } from "./PropertyGridContent";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { DataProviderProps } from "../hooks/UseDataProvider";
+import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { PropertyGridContentProps } from "./PropertyGridContent";
 
 /**
  * Props for `PropertyGrid` component.
  * @public
  */
-export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & DataProviderProps;
+export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & DataProviderProps;
 
 /**
  * Component that renders property grid for instances in `UnifiedSelection`.
@@ -27,18 +29,23 @@ export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> &
 export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps) {
   const { dataProvider, isOverLimit } = useUnifiedSelectionDataProvider({ imodel: props.imodel, createDataProvider });
 
-  if (isOverLimit) {
-    return (
-      <FillCentered style={{ flexDirection: "column" }}>
-        <Text>{PropertyGridManager.translate("selection.too-many-elements-selected")}</Text>
-      </FillCentered>
-    );
-  }
+  const dataRenderer = (dataRendererProps: FilteringPropertyGridProps) => {
+    if (isOverLimit) {
+      return (
+        <FillCentered style={{ flexDirection: "column" }}>
+          <Text>{PropertyGridManager.translate("selection.too-many-elements-selected")}</Text>
+        </FillCentered>
+      );
+    }
+
+    return <FilteringPropertyGrid {...dataRendererProps} />;
+  };
 
   return (
     <PropertyGridContent
       {...props}
       dataProvider={dataProvider}
+      dataRenderer={dataRenderer}
     />
   );
 }

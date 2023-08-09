@@ -17,11 +17,19 @@
     padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
 
+    &.gmw-visualizing-toolbar {
+      border-bottom: none;
+    }
+
     .gmw-toolbar-buttons {
       margin-right: var(--iui-size-s);
       margin-left: auto;
       flex-wrap: wrap;
     }
+  }
+
+  .gmw-group-progress-bar {
+    height: 1px;
   }
 
   .gmw-group-list {
