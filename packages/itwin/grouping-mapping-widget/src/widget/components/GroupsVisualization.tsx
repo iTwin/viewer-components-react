@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Group } from "@itwin/insights-client";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import {
   getHiliteIdsFromGroups,
@@ -42,13 +42,16 @@ export const GroupsVisualization = ({
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
+  const firstUpdate = useRef(true);
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
+  const [isVisualizing, setIsVisualizing] =useState<boolean>(false);
   const {
     hilitedElementsQueryCache,
     groups,
     hiddenGroupsIds,
     showGroupColor,
     setHiddenGroupsIds,
+    setNumberOfVisualizedGroups,
   } = useGroupHilitedElementsContext();
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
@@ -65,6 +68,7 @@ export const GroupsVisualization = ({
 
   const visualizeGroupColorsWrapper = useCallback(
     async () => {
+      setIsVisualizing(true);
       setLoadingQuery(true);
       const groupsCopy = [...groups];
       await visualizeGroupColors(
@@ -72,10 +76,13 @@ export const GroupsVisualization = ({
         groupsCopy,
         hiddenGroupsIds,
         hilitedElementsQueryCache,
-        emphasizeElements
+        setNumberOfVisualizedGroups,
+        emphasizeElements,
       );
       isNonEmphasizedSelectable && clearEmphasizedElements();
       setLoadingQuery(false);
+      setIsVisualizing(false);
+      setNumberOfVisualizedGroups(0);
     },
     [
       iModelConnection,
@@ -84,11 +91,16 @@ export const GroupsVisualization = ({
       hilitedElementsQueryCache,
       emphasizeElements,
       isNonEmphasizedSelectable,
+      setNumberOfVisualizedGroups,
     ]
   );
 
   useEffect(() => {
     const visualize = async () => {
+      if (firstUpdate.current) {
+        firstUpdate.current = false;
+        return;
+      }
       if (groups.length > 0 && showGroupColor) {
         await visualizeGroupColorsWrapper();
       } else {
@@ -207,6 +219,7 @@ export const GroupsVisualization = ({
         actionButtonRenderers={groupActionButtonRenderers}
         {...rest}
         disableActions={isLoadingQuery}
+        isVisualizing = {isVisualizing}
       />
     </div>
   );
