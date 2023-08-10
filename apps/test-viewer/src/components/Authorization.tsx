@@ -4,39 +4,99 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
-import { BrowserAuthorizationClient } from "@itwin/browser-authorization";
+import { BrowserAuthorizationClient, isBrowserAuthorizationClient } from "@itwin/browser-authorization";
+import { AccessToken, BeEvent } from "@itwin/core-bentley";
+import { ViewerAuthorizationClient as WebViewerAuthorizationClient } from "@itwin/web-viewer-react";
 
 export enum AuthorizationState {
   Pending,
-  Authorized,
+  Authorized
+}
+
+class DemoAuthClient implements WebViewerAuthorizationClient {
+  readonly onAccessTokenChanged: BeEvent<(token: AccessToken) => void> = new BeEvent();
+  private accessToken: Promise<string> | undefined = undefined;
+
+  public async getAccessToken(): Promise<string> {
+    this.accessToken ??= (async () => {
+      const response = await fetch(
+        "https://prod-imodeldeveloperservices-eus.azurewebsites.net/api/v0/sampleShowcaseUser/devUser",
+      );
+      const result = await response.json();
+      setTimeout(
+        () => this.accessToken = undefined,
+        new Date(result._expiresAt).getTime() - new Date().getTime() - 5000,
+      );
+      return `Bearer ${result._jwt}`;
+    })();
+    return this.accessToken;
+  }
+}
+
+class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
+  private _client: WebViewerAuthorizationClient;
+
+  constructor(useDemoClient: boolean) {
+    this._client = useDemoClient ? new DemoAuthClient() :
+      new BrowserAuthorizationClient({
+        scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
+        clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
+        redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
+        postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
+        responseType: "code",
+        authority: process.env.IMJS_AUTH_AUTHORITY,
+      });
+  }
+
+  public async getAccessToken(): Promise<string> {
+    return this._client.getAccessToken();
+  }
+
+  public async signInSilent() {
+    if (isBrowserAuthorizationClient(this._client)) {
+      this._client.signInSilent();
+    }
+  }
+
+  public async signInRedirect() {
+    if (isBrowserAuthorizationClient(this._client)) {
+      this._client.signInRedirect();
+    }
+  }
+
+  public async handleSigninCallback() {
+    if (isBrowserAuthorizationClient(this._client)) {
+      this._client.handleSigninCallback();
+    }
+  }
+
+  public get onAccessTokenChanged(): BeEvent<(token: AccessToken) => void> {
+    return this._client.onAccessTokenChanged;
+  }
 }
 
 export interface AuthorizationContext {
-  client: BrowserAuthorizationClient;
+  client: ViewerAuthorizationClient;
   state: AuthorizationState;
 }
 
 const authorizationContext = createContext<AuthorizationContext>({
-  client: new BrowserAuthorizationClient({ clientId: "", redirectUri: "", scope: "" }),
-  state: AuthorizationState.Pending,
+  client: new ViewerAuthorizationClient(true),
+  state: AuthorizationState.Authorized,
 })
 
 export function useAuthorizationContext() {
   return useContext(authorizationContext);
 }
 
+const shouldUseDemoClient = !!process.env.IMJS_DEMO_CLIENT;
+const createAuthClient = (): AuthorizationContext => ({
+  client: new ViewerAuthorizationClient(shouldUseDemoClient),
+  state: shouldUseDemoClient ? AuthorizationState.Authorized : AuthorizationState.Pending
+});
+
 export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
-  const [contextValue, setContextValue] = useState<AuthorizationContext>(() => ({
-    client: new BrowserAuthorizationClient({
-      scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
-      clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
-      redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
-      postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
-      responseType: "code",
-      authority: process.env.IMJS_AUTH_AUTHORITY,
-    }),
-    state: AuthorizationState.Pending,
-  }));
+  const [contextValue, setContextValue] = useState<AuthorizationContext>(() => createAuthClient());
 
   const authClient = contextValue.client;
   useEffect(() => {

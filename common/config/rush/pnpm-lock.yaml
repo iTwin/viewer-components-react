@@ -1026,6 +1026,7 @@ importers:
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
       '@itwin/webgl-compatibility': ^4.0.0
+      '@playwright/test': ^1.36.2
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/dom': ^8.12.0
       '@testing-library/react': ^12.0.0
@@ -1043,6 +1044,7 @@ importers:
       chai: ^4.3.7
       classnames: ^2.3.1
       cpx2: ^3.0.0
+      cross-env: ^7.0.3
       eslint: ^8.41.0
       eslint-plugin-react: ^7.32.2
       eslint-plugin-unused-imports: ^2.0.0
@@ -1088,6 +1090,7 @@ importers:
       '@itwin/presentation-components': 4.0.0_2d55c4275137e2e758b51375fcfe4e1c
       '@itwin/presentation-frontend': 4.0.0_f4ca9731f71cbf5cc67e81c3c0c2cd08
       '@itwin/webgl-compatibility': 4.0.0
+      '@playwright/test': 1.36.2
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/dom': 8.13.0
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
@@ -1104,6 +1107,7 @@ importers:
       '@typescript-eslint/parser': 5.59.8_eslint@8.41.0+typescript@5.0.4
       chai: 4.3.7
       cpx2: 3.0.2
+      cross-env: 7.0.3
       eslint: 8.41.0
       eslint-plugin-react: 7.32.2_eslint@8.41.0
       eslint-plugin-unused-imports: 2.0.0_8f79d00a9ec3b961f83cefe2a4bb478e
@@ -1270,13 +1274,13 @@ importers:
       '@itwin/itwinui-icons-react': ^2.1.0
       '@itwin/itwinui-illustrations-react': ^2.1.0
       '@itwin/itwinui-react': ^2.11.0
-      '@itwin/itwinui-variables': ^2.0.0
       '@itwin/presentation-backend': ^4.0.0
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
       '@itwin/presentation-testing': ^4.0.0
       '@itwin/webgl-compatibility': ^4.0.0
+      '@playwright/test': ^1.36.2
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/dom': ^8.12.0
       '@testing-library/react': ^12.0.0
@@ -1300,6 +1304,7 @@ importers:
       chai-subset: 1.6.0
       classnames: ^2.3.1
       cpx2: ^3.0.0
+      cross-env: ^7.0.3
       deep-equal: ^1.0.0
       eslint: ^8.41.0
       eslint-plugin-react: ^7.32.2
@@ -1326,7 +1331,6 @@ importers:
       '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       i18next: 10.6.0
       react-error-boundary: 4.0.10_react@17.0.2
@@ -1357,6 +1361,7 @@ importers:
       '@itwin/presentation-frontend': 4.0.0_f4ca9731f71cbf5cc67e81c3c0c2cd08
       '@itwin/presentation-testing': 4.0.0_f841fa66e6fb8f13b5f1b4fedf562b3d
       '@itwin/webgl-compatibility': 4.0.0
+      '@playwright/test': 1.36.2
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/dom': 8.13.0
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
@@ -1379,6 +1384,7 @@ importers:
       chai-jest-snapshot: 2.0.0_chai@4.3.7
       chai-subset: 1.6.0
       cpx2: 3.0.2
+      cross-env: 7.0.3
       deep-equal: 1.1.1
       eslint: 8.41.0
       eslint-plugin-react: 7.32.2_eslint@8.41.0
@@ -3741,7 +3747,7 @@ packages:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
     dependencies:
       eslint: 7.32.0
-      eslint-visitor-keys: 3.4.1
+      eslint-visitor-keys: 3.4.2
     dev: true
 
   /@eslint-community/eslint-utils/4.4.0_eslint@8.38.0:
@@ -3751,7 +3757,7 @@ packages:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
     dependencies:
       eslint: 8.38.0
-      eslint-visitor-keys: 3.4.1
+      eslint-visitor-keys: 3.4.2
     dev: false
 
   /@eslint-community/eslint-utils/4.4.0_eslint@8.41.0:
@@ -3761,12 +3767,17 @@ packages:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
     dependencies:
       eslint: 8.41.0
-      eslint-visitor-keys: 3.4.1
+      eslint-visitor-keys: 3.4.2
     dev: true
 
   /@eslint-community/regexpp/4.5.0:
     resolution: {integrity: sha512-vITaYzIcNmjn5tF5uxcZ/ft7/RXGrMUIS9HalWckEOF6ESiwXKoMzAQf2UW0aVd6rnOeExTJVd5hmWXucBKGXQ==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+
+  /@eslint-community/regexpp/4.6.2:
+    resolution: {integrity: sha512-pPTNuaAG3QMH+buKyBIGJs3g/S5y0caxw0ygM3YyE6yJFySwiGGSzA+mM3KJ8QQvzeLh3blwgSonkFjgQdxzMw==}
+    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+    dev: true
 
   /@eslint/eslintrc/0.4.3:
     resolution: {integrity: sha512-J6KFFz5QCYUJq3pf0mjEcCJVERbzv71PUIDczuh9JkwGEzced6CO5ADLHB1rbf/+oPBtoPfMYNOpGDzCANlbXw==}
@@ -8115,6 +8126,17 @@ packages:
     engines: {node: '>=8.0.0'}
     dev: true
 
+  /@playwright/test/1.36.2:
+    resolution: {integrity: sha512-2rVZeyPRjxfPH6J0oGJqE8YxiM1IBRyM8hyrXYK7eSiAqmbNhxwcLa7dZ7fy9Kj26V7FYia5fh9XJRq4Dqme+g==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      '@types/node': 18.15.3
+      playwright-core: 1.36.2
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /@pmmmwh/react-refresh-webpack-plugin/0.5.10_53c33370502146697226d4c22ea13b29:
     resolution: {integrity: sha512-j0Ya0hCFZPd4x40qLzbhGsh9TMtdb+CJQiso+WxLOPNasohq9cc5SNUcwsZaRH6++Xh91Xkm/xHCkuIiIu0LUA==}
     engines: {node: '>= 10.13'}
@@ -9556,7 +9578,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@eslint-community/regexpp': 4.5.0
+      '@eslint-community/regexpp': 4.6.2
       '@typescript-eslint/parser': 5.55.0_eslint@8.41.0+typescript@5.0.4
       '@typescript-eslint/scope-manager': 5.55.0
       '@typescript-eslint/type-utils': 5.55.0_eslint@8.41.0+typescript@5.0.4
@@ -9584,7 +9606,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@eslint-community/regexpp': 4.5.0
+      '@eslint-community/regexpp': 4.6.2
       '@typescript-eslint/parser': 5.55.0_eslint@7.32.0+typescript@4.4.4
       '@typescript-eslint/scope-manager': 5.55.0
       '@typescript-eslint/type-utils': 5.55.0_eslint@7.32.0+typescript@4.4.4
@@ -10782,7 +10804,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       '@typescript-eslint/types': 5.55.0
-      eslint-visitor-keys: 3.4.1
+      eslint-visitor-keys: 3.4.2
     dev: true
 
   /@typescript-eslint/visitor-keys/5.58.0:
@@ -10806,7 +10828,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       '@typescript-eslint/types': 5.62.0
-      eslint-visitor-keys: 3.4.1
+      eslint-visitor-keys: 3.4.2
     dev: true
 
   /@ungap/promise-all-settled/1.1.2:
@@ -12817,6 +12839,14 @@ packages:
       subarg: 1.0.0
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /cross-env/7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.3
     dev: true
 
   /cross-fetch/3.1.5:
@@ -14880,6 +14910,10 @@ packages:
 
   /eslint-visitor-keys/3.4.1:
     resolution: {integrity: sha512-pZnmmLwYzf+kWaM/Qgrvpen51upAktaaiI01nsJD/Yr3lMOdNtq0cxkrrg16w64VtisN6okbs7Q8AfGqj4c9fA==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  /eslint-visitor-keys/3.4.2:
+    resolution: {integrity: sha512-8drBzUEyZ2llkpCA67iYrgEssKDUu68V8ChqqOfFupIaG/LCVPUT+CoGJpT77zJprs4T/W7p07LP7zAIMuweVw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   /eslint-webpack-plugin/3.2.0_eslint@8.38.0+webpack@5.76.0:
@@ -20001,6 +20035,12 @@ packages:
     dependencies:
       find-up: 3.0.0
     dev: false
+
+  /playwright-core/1.36.2:
+    resolution: {integrity: sha512-sQYZt31dwkqxOrP7xy2ggDfEzUxM1lodjhsQ3NMMv5uGTRDsLxU0e4xf4wwMkF2gplIxf17QMBCodSFgm6bFVQ==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dev: true
 
   /pluralize/8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}

@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Render property grid header even when too many elements are selected.",
-      "type": "patch"
+      "comment": "Added e2e tests for `PropertyGrid` component.",
+      "type": "none"
     }
   ],
   "packageName": "@itwin/property-grid-react"

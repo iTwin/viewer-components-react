@@ -15,9 +15,11 @@ export interface GroupHilitedElements {
   hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
   groups: Group[];
+  numberOfVisualizedGroups: number;
   setGroups: (groups: Group[]) => void;
   setHiddenGroupsIds: (hiddenGroupIds: Set<string>) => void;
   setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
+  setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void;
 }
 
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
@@ -25,9 +27,11 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   hiddenGroupsIds: new Set(),
   showGroupColor: false,
   groups: [],
+  numberOfVisualizedGroups: 0,
   setGroups: () => { },
   setHiddenGroupsIds: () => { },
   setShowGroupColor: () => { },
+  setNumberOfVisualizedGroups: () => { },
 });
 
 export const useGroupHilitedElementsContext = (): GroupHilitedElements => {

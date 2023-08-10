@@ -9,12 +9,12 @@ import { KeySet } from "@itwin/presentation-common";
 import { waitFor } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks";
 import { useInstanceSelection } from "../../hooks/UseInstanceSelection";
+import { createResolvablePromise, stubSelectionManager } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ISelectionProvider , SelectionChangeEventArgs  } from "@itwin/presentation-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { InstanceSelectionProps } from "../../hooks/UseInstanceSelection";
-import { stubSelectionManager } from "../TestUtils";
 
 describe("useInstanceSelection", () => {
   const imodel = {} as IModelConnection;
@@ -28,6 +28,12 @@ describe("useInstanceSelection", () => {
 
   before(() => {
     selectionManager = stubSelectionManager();
+  });
+
+  beforeEach(() => {
+    selectionManager.getSelection.reset();
+    selectionManager.replaceSelection.reset();
+    selectionManager.scopes.computeSelection.reset();
     selectionManager.scopes.computeSelection.callsFake(async (_, ids, ) => {
       if (typeof ids !== "string") {
         return new KeySet();
@@ -42,11 +48,6 @@ describe("useInstanceSelection", () => {
 
       return new KeySet();
     });
-  });
-
-  beforeEach(() => {
-    selectionManager.getSelection.reset();
-    selectionManager.replaceSelection.reset();
   });
 
   it("returns selected instance keys", async () => {
@@ -190,7 +191,7 @@ describe("useInstanceSelection", () => {
       expect(selectionManager.replaceSelection).to.be.calledOnceWith("Property Grid", imodel, sinon.match((keys: KeySet) => keys.has(parentKey)));
       selectionManager.replaceSelection.resetHistory();
 
-      await result.current.ancestorsNavigationProps.navigateDown();
+      result.current.ancestorsNavigationProps.navigateDown();
       await waitFor(() => {
         expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
         expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.false;
@@ -220,8 +221,82 @@ describe("useInstanceSelection", () => {
       await result.current.ancestorsNavigationProps.navigateUp();
       expect(selectionManager.replaceSelection).to.not.be.called;
 
-      await result.current.ancestorsNavigationProps.navigateDown();
+      result.current.ancestorsNavigationProps.navigateDown();
       expect(selectionManager.replaceSelection).to.not.be.called;
+    });
+
+    it("cannot navigate up again while navigating", async () => {
+      selectionManager.getSelection.returns(new KeySet([grandChildKey]));
+      const { result } = renderHook(useInstanceSelection, { initialProps });
+
+      selectionManager.scopes.computeSelection.reset();
+      const computeSelection = createResolvablePromise<KeySet>();
+      selectionManager.scopes.computeSelection.returns(computeSelection.promise);
+
+      // wait until navigating up is possible
+      await waitFor(() => {
+        expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+      });
+
+      // initiate navigation up
+      void result.current.ancestorsNavigationProps.navigateUp();
+
+      // expect navigating up again to be not possible
+      await waitFor(() => {
+        expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.false;
+      });
+
+      // finish navigating up
+      await computeSelection.resolve(new KeySet([childKey]));
+
+      // expect navigating up to be possible again
+      await waitFor(() => {
+        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.true;
+      });
+    });
+  });
+
+  it("handles multiple selection changes", async () => {
+    selectionManager.getSelection.returns(new KeySet([]));
+    const { result } = renderHook(useInstanceSelection, { initialProps: { imodel } });
+
+    await waitFor(() => {
+      expect(result.current.selectedKeys).to.have.lengthOf(0);
+    });
+
+    selectionManager.scopes.computeSelection.reset();
+    const firstComputeSelection = createResolvablePromise<KeySet>();
+    const secondComputeSelection = createResolvablePromise<KeySet>();
+
+    // simulate first selection change
+    selectionManager.getSelection.returns(new KeySet([noParentKey]));
+    selectionManager.scopes.computeSelection.returns(firstComputeSelection.promise);
+    selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider);
+
+    // simulate second selection change
+    selectionManager.getSelection.returns(new KeySet([childKey]));
+    selectionManager.scopes.computeSelection.returns(secondComputeSelection.promise);
+    selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider);
+
+    // resolve promise for second selection change
+    await secondComputeSelection.resolve(new KeySet([parentKey]));
+
+    // make sure state matches result of second selection change
+    await waitFor(() => {
+      expect(result.current.selectedKeys).to.have.lengthOf(1);
+      expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
+      expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+    });
+
+    // resolve promise for first selection change
+    await firstComputeSelection.resolve(new KeySet());
+
+    // make sure state still matches result of second selection change
+    await waitFor(() => {
+      expect(result.current.selectedKeys).to.have.lengthOf(1);
+      expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
+      expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
     });
   });
 });
