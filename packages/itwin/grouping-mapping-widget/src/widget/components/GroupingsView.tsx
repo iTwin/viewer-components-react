@@ -30,7 +30,7 @@ export type ActionButtonRenderer = (
   props: ActionButtonRendererProps
 ) => React.ReactNode;
 
-interface GroupingsViewProps {
+export interface GroupingsViewProps {
   mapping: Mapping;
   groups: Group[];
   isLoading: boolean;
