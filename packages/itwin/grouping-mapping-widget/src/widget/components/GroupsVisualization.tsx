@@ -18,13 +18,14 @@ import {
   hideElements,
   zoomToElements,
 } from "./viewerUtils";
-import type { ActionButtonRenderer, ActionButtonRendererProps, GroupingProps } from "./Grouping";
+import type { GroupingProps } from "./Grouping";
 import { Groupings } from "./Grouping";
 import { GroupColorLegend } from "./GroupColorLegend";
 import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupingsView";
 
 export interface GroupsVisualizationProps extends GroupingProps {
   isNonEmphasizedSelectable?: boolean;

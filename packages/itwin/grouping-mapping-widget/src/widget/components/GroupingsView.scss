@@ -13,7 +13,6 @@
     display: flex;
     justify-content: space-between;
     gap: var(--iui-size-xs);
-    border-bottom: 1px solid var(--iui-color-border-subtle);
     padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
 
@@ -26,6 +25,11 @@
       margin-left: auto;
       flex-wrap: wrap;
     }
+  }
+
+  .gmw-groupings-border {
+    padding-top: var(--iui-size-s);
+    border-bottom: 1px solid var(--iui-color-border-subtle);
   }
 
   .gmw-group-progress-bar {
@@ -43,11 +47,4 @@
   .gmw-menu-item {
     padding-left: var(--iui-size-s);
   }
-}
-
-.gmw-nest-menu-item {
-  width: 100%;
-  justify-content: flex-start;
-  padding: 0 var(--iui-size-s);
-  gap: var(--iui-size-xs);
 }
