@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/ec3-widget-react",
-      "comment": "modified toolbar layout in EC3 widget to be consistent with G&M widget.",
+      "comment": "Modified toolbar layout in EC3 widget to be consistent with G&M widget.",
       "type": "patch"
     }
   ],
