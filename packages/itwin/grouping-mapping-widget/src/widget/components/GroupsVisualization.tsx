@@ -50,8 +50,12 @@ export const GroupsVisualization = ({
     groups,
     hiddenGroupsIds,
     showGroupColor,
+    isOverlappedColored,
     setHiddenGroupsIds,
     setNumberOfVisualizedGroups,
+    setOverlappedElementsInfo,
+    setGroupElementsInfo,
+    setTotalNumberOfVisualization,
   } = useGroupHilitedElementsContext();
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
@@ -77,6 +81,9 @@ export const GroupsVisualization = ({
         hiddenGroupsIds,
         hilitedElementsQueryCache,
         setNumberOfVisualizedGroups,
+        setOverlappedElementsInfo,
+        setGroupElementsInfo,
+        setTotalNumberOfVisualization,
         emphasizeElements,
       );
       isNonEmphasizedSelectable && clearEmphasizedElements();
@@ -92,6 +99,8 @@ export const GroupsVisualization = ({
       emphasizeElements,
       isNonEmphasizedSelectable,
       setNumberOfVisualizedGroups,
+      setOverlappedElementsInfo,
+      setGroupElementsInfo,
     ]
   );
 
@@ -101,14 +110,16 @@ export const GroupsVisualization = ({
         firstUpdate.current = false;
         return;
       }
-      if (groups.length > 0 && showGroupColor) {
-        await visualizeGroupColorsWrapper();
-      } else {
-        clearEmphasizedOverriddenElements();
-      }
+      if(isOverlappedColored === false) {
+        if (groups.length > 0 && showGroupColor) {
+          await visualizeGroupColorsWrapper();
+        } else {
+          clearEmphasizedOverriddenElements();
+        }
+      } 
     };
     void visualize();
-  }, [groups, showGroupColor, visualizeGroupColorsWrapper]);
+  }, [groups, showGroupColor, visualizeGroupColorsWrapper, isOverlappedColored]);
 
   const hideAllGroups = useCallback(
     async () => {

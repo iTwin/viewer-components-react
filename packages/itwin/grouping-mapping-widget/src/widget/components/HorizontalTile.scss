@@ -10,7 +10,6 @@
     border-radius: 5px;
     background-color: var(--iui-color-background-backdrop);
     min-height: calc(var(--iui-size-s) * 5);
-    padding: 5.5px var(--iui-size-xs);
 
     .gmw-body-container {
       display: flex;
@@ -33,12 +32,33 @@
         }
       }
     }
-    .gmw-action-button {
-      margin-left: 0;
-      align-self: center;
-      min-width: 36px;
-      margin-right: var(--iui-size-2xs);
-      flex-shrink: 0;
+  
+    .gmw-action-container{ 
+      display: flex;
+      align-items: center;
+      position: relative;
+
+      &.text-visible{
+        min-height: calc(var(--iui-size-s) * 6)
+      }
+      
+      .gmw-action-button {
+        margin-left: 0;
+        align-self: center;
+        min-width: 36px;
+        margin-right: var(--iui-size-2xs);
+        flex-shrink: 0;
+
+        &-text {
+          align-self: flex-end;
+          font-size:smaller;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          position: absolute;
+          bottom: 0;
+        }
+      }
     }
   }
 
