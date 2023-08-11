@@ -42,7 +42,7 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
       <div className={`gmw-action-container ${props.showGroupColor &&  !props.isVisualizing && props.elementsInfo ? "text-visible" : ""}`}>
         <div className="gmw-action-button" data-testid="tile-action-button">
           {props.actionGroup}
-          {props.showGroupColor &&  !props.isVisualizing && props.elementsInfo && 
+          {props.showGroupColor &&  !props.isVisualizing && props.elementsInfo &&
           <Text className="gmw-action-button-text" isMuted={true} title={"Elems-info"} variant="small">{props.elementsInfo}</Text>}
         </div>
       </div>

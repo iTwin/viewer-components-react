@@ -7,13 +7,13 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { Group } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
 import { KeySet } from "@itwin/presentation-common";
-import type { QueryCacheItem, OverlappedInfo } from "./context/GroupHilitedElementsContext";
+import type { OverlappedInfo, QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { clearEmphasizedOverriddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements, zoomToElements } from "./viewerUtils";
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
 
 export const getGroupColor = function (index: number) {
-  var hue = (index * goldenAngle + 60) % 360;
+  let hue = (index * goldenAngle + 60) % 360;
   while (hue >= 335 || hue <= 25) {
     hue = (hue + (index * goldenAngle)) % 360;
   }
@@ -78,7 +78,7 @@ const processGroupVisualization = async (
 
   doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
 
-  for (var id in elementGroups) {
+  for (const id in elementGroups) {
     if (hiddenGroupsIds.has(id)) {
       return [];
     }
@@ -99,7 +99,7 @@ export const visualizeGroupColors = async (
 ) => {
   clearEmphasizedOverriddenElements();
 
-  var { updatedGroups, overlappedElementsInfo, numberOfElementsInGroups } = await getGroups(groups, iModelConnection, hiddenGroupsIds, hilitedElementsQueryCache);
+  const { updatedGroups, overlappedElementsInfo, numberOfElementsInGroups } = await getGroups(groups, iModelConnection, hiddenGroupsIds, hilitedElementsQueryCache);
   setOverlappedElementsInfo(overlappedElementsInfo);
   setGroupElementsInfo(numberOfElementsInGroups);
   setTotalNumberOfVisualization(updatedGroups.length);
@@ -151,8 +151,8 @@ export const getHiliteIdsAndKeysetFromGroup = async (
 
 interface OverlappedElements {
   element: Set<string>;
-  groups: Set<string>
-};
+  groups: Set<string>;
+}
 
 const processGroupIds = async (
   iModelConnection: IModelConnection,
@@ -179,19 +179,18 @@ const getOverlappedElementsInfo = (overlappedElements: OverlappedElements[]) => 
     });
   });
   return overlappedElementsInfo;
-}
+};
 
 const mergeElementsByGroup = (elems: Map<string, Set<string>>) => {
   const mergedList:  Map<string, OverlappedElements> = new Map();
   elems.forEach((groups,elementId) =>{
     const sortedGroups = Array.from(groups).sort();
-    const key = sortedGroups.join('-');
-    var overlap = mergedList.get(key);
+    const key = sortedGroups.join("-");
+    const overlap = mergedList.get(key);
     if (overlap) {
       overlap.element.add(elementId);
-    }
-    else {
-      mergedList.set(key, { element: new Set([elementId]), groups: groups });
+    } else {
+      mergedList.set(key, { element: new Set([elementId]), groups });
     }
   });
   return mergedList;
@@ -203,32 +202,30 @@ const getGroups = async (
   hiddenGroupsIds: Set<string>,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
 ) => {
-  var groupsInformation: {groupName: string, elements: string[]}[] = await Promise.all(groups.map(async (group) => ({
+  const groupsInformation: {groupName: string, elements: string[]}[] = await Promise.all(groups.map(async (group) => ({
     groupName: group.id,
-    elements: await processGroupIds(iModelConnection, group, hiddenGroupsIds, hilitedElementsQueryCache)
+    elements: await processGroupIds(iModelConnection, group, hiddenGroupsIds, hilitedElementsQueryCache),
   })));
 
   const allGroups: OverlappedElements[] = [];
   const elems: Map<string,Set<string>> = new Map();
   const groupElementsMapping: Map<string,number> = new Map();
 
-  for (let i = 0; i < groupsInformation.length; i++) {
-    for (let j = 0; j < groupsInformation[i].elements.length; j++) {
-      var elem = groupsInformation[i].elements[j];
-      var elemGroups = elems.get(elem);
+  for (const groupInfo of groupsInformation) {
+    for (const elem of groupInfo.elements) {
+      const elemGroups = elems.get(elem);
       if (elemGroups) {
-        elemGroups.add(groupsInformation[i].groupName);
-      }
-      else {
-        elems.set(elem,  new Set([groupsInformation[i].groupName])) ;
+        elemGroups.add(groupInfo.groupName);
+      } else {
+        elems.set(elem,  new Set([groupInfo.groupName])) ;
       }
     }
-    allGroups[i] = { element: new Set(groupsInformation[i].elements), groups: new Set([groupsInformation[i].groupName]) };
-    groupElementsMapping.set(groupsInformation[i].groupName,groupsInformation[i].elements.length);
+    allGroups.push({ element: new Set(groupInfo.elements), groups: new Set([groupInfo.groupName]) });
+    groupElementsMapping.set(groupInfo.groupName, groupInfo.elements.length);
   }
 
-  var mergedList = mergeElementsByGroup(elems);
-  const overlappedGroupsInformation: OverlappedElements[] = Array.from(mergedList.values()).filter(value => value.groups.size > 1);
-  return { updatedGroups: [...allGroups, ...overlappedGroupsInformation], overlappedElementsInfo: getOverlappedElementsInfo(overlappedGroupsInformation), numberOfElementsInGroups: groupElementsMapping }
+  const mergedList = mergeElementsByGroup(elems);
+  const overlappedGroupsInformation: OverlappedElements[] = Array.from(mergedList.values()).filter((value) => value.groups.size > 1);
+  return { updatedGroups: [...allGroups, ...overlappedGroupsInformation], overlappedElementsInfo: getOverlappedElementsInfo(overlappedGroupsInformation), numberOfElementsInGroups: groupElementsMapping };
 };
 

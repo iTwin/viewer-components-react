@@ -19,8 +19,8 @@ import {
 import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import type { QueryCacheItem } from "./context/GroupHilitedElementsContext";
-import { GroupHilitedElementsContext, OverlappedInfo } from "./context/GroupHilitedElementsContext";
+import type { OverlappedInfo , QueryCacheItem } from "./context/GroupHilitedElementsContext";
+import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 

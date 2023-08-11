@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Group } from "@itwin/insights-client";
-import { SvgDelete, SvgEdit, SvgMore, SvgInfo } from "@itwin/itwinui-icons-react";
+import { SvgDelete, SvgEdit, SvgInfo, SvgMore } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
@@ -119,11 +119,11 @@ export const GroupMenuActions = ({
           data-testid="gmw-context-menu-item"
         >
           Overlap Info
-        </MenuItem>)
-    };
+        </MenuItem>);
+    }
 
     return menuItems;
-  }, [ groupUIs, onClickGroupModify, contextUIs, onClickRenderContextCustomUI, mapping, iModelId, showGroupColor ]);
+  }, [ groupUIs, disableActions, group, contextUIs, mapping, iModelId, showGroupColor, onModify, setIsOverlappedElementsInfoPanelOpen, setShowDeleteModal,onClickGroupModify, onClickRenderContextCustomUI ]);
 
   return (
     <div className="gmw-actions">

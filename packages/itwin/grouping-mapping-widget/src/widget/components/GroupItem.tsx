@@ -38,11 +38,11 @@ export const GroupItem = ({
     const groupId = group.id;
     const numberOfElementsInGroup = groupElementsInfo.get(groupId);
     const overlappedInfo = overlappedElementsInfo.get(groupId);
-    var numberOfOverlappedElementsInGroup = 0;
+    let numberOfOverlappedElementsInGroup = 0;
     if (overlappedInfo){
       overlappedInfo.forEach((array) => {
         numberOfOverlappedElementsInGroup+=array.elements.length;
-      })
+      });
     }
     return `${numberOfOverlappedElementsInGroup}/${numberOfElementsInGroup} overlaps`;
   };

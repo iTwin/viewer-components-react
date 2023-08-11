@@ -4,12 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { useMemo, useState } from "react";
-import { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface } from "../utils";
 import { InformationPanel, InformationPanelBody, InformationPanelHeader, Table, Text } from "@itwin/itwinui-react";
 import "./OverlappedElementsInformationPanel.scss";
-import { Group } from "@itwin/insights-client";
-import { OverlappedInfo } from "./context/GroupHilitedElementsContext";
-import { CellProps } from 'react-table'
+import type { Group } from "@itwin/insights-client";
+import type { OverlappedInfo } from "./context/GroupHilitedElementsContext";
+import type { CellProps } from "react-table";
 import { OverlappedElementsRadioButton } from "./OverlappedElementsRadioButton";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 
@@ -23,13 +23,13 @@ export interface OverlappedElementsInformationPanelProps {
 export interface OverlappedElementsDisplayProps {
   numberOfElements: string;
   groups: string[];
-  elementsIds: string[]
+  elementsIds: string[];
 }
 type OverlappedTyped = CreateTypeFromInterface<OverlappedElementsDisplayProps>;
 
 export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedElementsInfo, groups }: OverlappedElementsInformationPanelProps) => {
   const [isOverlappedInfoLoading, setIsOverlappedInfoLoading] = useState<boolean>(false);
-  const { isOverlappedColored, setIsOverlappedColored } = useGroupHilitedElementsContext();
+  const { setIsOverlappedColored } = useGroupHilitedElementsContext();
   const [activeToggleIndex, setActiveToggleIndex] = useState<number>(-1);
 
   const columns = useMemo(
@@ -38,14 +38,14 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
         Header: "Table",
         columns: [
           {
-            id: 'number',
-            Header: 'Number of Overlapped elements',
-            accessor: 'numberOfElements',
+            id: "number",
+            Header: "Number of Overlapped elements",
+            accessor: "numberOfElements",
           },
           {
-            id: 'groups',
-            Header: 'Groups',
-            accessor: 'groups',
+            id: "groups",
+            Header: "Groups",
+            accessor: "groups",
             Cell: (value: CellProps<OverlappedTyped>) => {
               return (
                 <div>
@@ -58,7 +58,7 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
           {
             id: "radio",
             width: 80,
-            accessor: 'elementsIds',
+            accessor: "elementsIds",
             Cell: ({ value, row }: CellProps<OverlappedTyped>) => {
 
               const isToggleActive = activeToggleIndex === row.index;
@@ -72,23 +72,23 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
                 }}
 
                 labelPosition="left" />);
-            }
-          }
+            },
+          },
         ],
       },
     ],
-    [activeToggleIndex, isOverlappedColored]
+    [activeToggleIndex]
   );
   const key = group ? group.id : "";
   const overlappedInfo = overlappedElementsInfo.get(key);
 
   const arr: OverlappedElementsDisplayProps[] = useMemo(() => {
     setIsOverlappedInfoLoading(true);
-    const result: OverlappedElementsDisplayProps[] = []
+    const result: OverlappedElementsDisplayProps[] = [];
     if (overlappedInfo) {
       setIsOverlappedColored(true);
       overlappedInfo.forEach((array) => {
-        var groupNames: string[] = [];
+        const groupNames: string[] = [];
         array.groupIds.forEach((groupId) => {
           const group = groups.find((group) => group.id === groupId);
           if (group) {
@@ -100,7 +100,7 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
     }
     setIsOverlappedInfoLoading(false);
     return result;
-  }, [overlappedInfo, groups]);
+  }, [overlappedInfo, groups, setIsOverlappedColored]);
 
   const handleClose = () => {
     setActiveToggleIndex(-1);

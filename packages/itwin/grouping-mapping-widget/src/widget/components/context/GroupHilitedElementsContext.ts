@@ -12,7 +12,7 @@ export interface QueryCacheItem {
 }
 export interface OverlappedInfo {
   groupIds: string[];
-  elements: string[]
+  elements: string[];
 }
 export interface GroupHilitedElements {
   hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;

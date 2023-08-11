@@ -5,11 +5,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
+  Alert,
   ButtonGroup,
   IconButton,
+  InformationPanelWrapper,
   ProgressLinear,
-  Alert,
-  InformationPanelWrapper
 } from "@itwin/itwinui-react";
 import {
   SvgRefresh,
@@ -178,20 +178,20 @@ export const Groupings = ({
           <>
             {overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor && !isVisualizing &&
             <Alert
-            onClose={() => setIsAlertClosed(false)}
-            clickableText={isAlertExpanded ? 'Less Details' : 'More Details'}
-            clickableTextProps={{ onClick: () => setIsAlertExpanded(!isAlertExpanded) }}
-            > 
+              onClose={() => setIsAlertClosed(false)}
+              clickableText={isAlertExpanded ? "Less Details" : "More Details"}
+              clickableTextProps={{ onClick: () => setIsAlertExpanded(!isAlertExpanded) }}
+            >
               {isAlertExpanded ? (
-              <>
+                <>
                 Overlapped elements are colored in red in the viewer. <br />
-                To get overlap info in details, click the "Overlap Info" in the menu icon adjacent to the groups. 
-              </>
+                To get overlap info in details, click the &ldquo;Overlap Info&rdquo; in the menu icon adjacent to the groups.
+                </>
               ) : (
-              <>
+                <>
                 Overlapped elements are colored in red in the viewer.
-              </>
-              )}            
+                </>
+              )}
             </Alert>}
 
             <div className="gmw-group-list">

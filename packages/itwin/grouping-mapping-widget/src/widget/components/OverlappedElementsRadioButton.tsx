@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useState } from "react";
 import type { ToggleSwitchProps } from "@itwin/itwinui-react";
-import { toaster, Radio } from "@itwin/itwinui-react";
+import { Radio, toaster } from "@itwin/itwinui-react";
 import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } from "./viewerUtils";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
@@ -32,7 +32,7 @@ export const OverlappedElementsRadioButton = ({
     const visualize = async () => {
       try {
         setIsLoading(true);
-        
+
         if (showOverlappedColor) {
           clearEmphasizedOverriddenElements();
           Presentation.selection.clearSelection(

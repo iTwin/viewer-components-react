@@ -101,6 +101,7 @@ export const GroupsVisualization = ({
       setNumberOfVisualizedGroups,
       setOverlappedElementsInfo,
       setGroupElementsInfo,
+      setTotalNumberOfVisualization,
     ]
   );
 
@@ -116,7 +117,7 @@ export const GroupsVisualization = ({
         } else {
           clearEmphasizedOverriddenElements();
         }
-      } 
+      }
     };
     void visualize();
   }, [groups, showGroupColor, visualizeGroupColorsWrapper, isOverlappedColored]);
