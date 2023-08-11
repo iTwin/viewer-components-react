@@ -4,13 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 .gmw-overlap-information {
-  display: flex;
-  flex-direction: column;
-  gap: var(--iui-size-s);
-  flex-grow: 1;
-
-  .gmw-information-body {
-    display: flex;
-    justify-content: space-between;
+    max-width: 100%;
+    width: 100%;
+    .gmw-information-body {
+      textarea {
+        resize: vertical;
+      }
+    }
   }
-}

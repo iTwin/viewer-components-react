@@ -10,6 +10,12 @@
     border-radius: 5px;
     background-color: var(--iui-color-background-backdrop);
     min-height: calc(var(--iui-size-s) * 5);
+    padding: 5.5px var(--iui-size-xs);
+    padding-bottom: 2px var(--iui-size-xs);
+    padding-top: 2px var(--iui-size-xs);
+    &.text-visible{
+      min-height: calc(var(--iui-size-s) * 6)
+    }
 
     .gmw-body-container {
       display: flex;
@@ -37,10 +43,6 @@
       display: flex;
       align-items: center;
       position: relative;
-
-      &.text-visible{
-        min-height: calc(var(--iui-size-s) * 6)
-      }
       
       .gmw-action-button {
         margin-left: 0;

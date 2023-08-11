@@ -26,7 +26,7 @@ export interface HorizontalTileProps {
 export const HorizontalTile = (props: HorizontalTileProps) => {
 
   return (
-    <div className={classNames("gmw-horizontal-tile-container", { "gmw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="gmw-horizontal-tile">
+    <div className={classNames(`gmw-horizontal-tile-container ${props.showGroupColor &&  !props.isVisualizing && props.elementsInfo ? "text-visible" : ""}`, { "gmw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="gmw-horizontal-tile">
       <div className="gmw-body-container">
         {props.dragHandle}
         <div className="gmw-body">
@@ -39,7 +39,7 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
           {props.subText && <Text className="gmw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
         </div>
       </div>
-      <div className={`gmw-action-container ${props.showGroupColor &&  !props.isVisualizing && props.elementsInfo ? "text-visible" : ""}`}>
+      <div className="gmw-action-container">
         <div className="gmw-action-button" data-testid="tile-action-button">
           {props.actionGroup}
           {props.showGroupColor &&  !props.isVisualizing && props.elementsInfo &&
