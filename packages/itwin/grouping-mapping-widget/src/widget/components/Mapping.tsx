@@ -58,7 +58,7 @@ export interface MappingsProps {
 
 export interface ExtractionMessageData {
   date: string;
-  catagory: string;
+  category: string;
   level: string;
   message: string;
 }
@@ -87,7 +87,7 @@ const fetchExtractionStatus = async (
         (
           {
             date: log.dateTime,
-            catagory: log.category,
+            category: log.category,
             level: log.level,
             message: String(log.message),
           }
@@ -318,6 +318,7 @@ export const Mappings = ({
         isOpen={showExtractionMessageModal}
         onClose={() => setShowExtractionMessageModal(false)}
         extractionMessageData={extractionMessageData}
+        timestamp={extractionMessageData.length === 0 ? "" : extractionMessageData[0].date}
       />
       <DeleteModal
         entityName={showDeleteModal?.mappingName}

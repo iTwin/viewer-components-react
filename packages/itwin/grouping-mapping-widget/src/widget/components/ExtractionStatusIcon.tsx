@@ -14,14 +14,12 @@ export interface ExtractionStatusIconProps {
 
 export const ExtractionStatusIcon = ({ iconStatus, onClick, iconMessage }: ExtractionStatusIconProps) => {
   return (
-    <>
-      <Tooltip content={iconMessage}>
-        <IconButton styleType='borderless' onClick={onClick}>
-          <NotificationMarker status={iconStatus}>
-            <SvgProcess />
-          </NotificationMarker>
-        </IconButton>
-      </Tooltip>
-    </>
+    <Tooltip content={iconMessage}>
+      <IconButton styleType='borderless' onClick={onClick}>
+        <NotificationMarker status={iconStatus}>
+          <SvgProcess />
+        </NotificationMarker>
+      </IconButton>
+    </Tooltip>
   );
 };
