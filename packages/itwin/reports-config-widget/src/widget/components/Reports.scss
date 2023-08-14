@@ -18,9 +18,8 @@
     flex-wrap: wrap;
 
     .rcw-search-bar-container {
-      flex-basis: var(--iui-size-3xl);
       flex-shrink: 1;
-      flex-grow: 1;
+      flex-grow: 0;
       display: flex;
     }
 
