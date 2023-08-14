@@ -108,7 +108,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
                 }}
               ></ExtractionStatus>
             )}
-          <IconButton
+          {!jobStarted && <IconButton
             styleType="borderless"
             title={ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:Remove"
@@ -116,10 +116,9 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
             onClick={() => {
               props.onClickDelete();
             }}
-            disabled={jobStarted}
           >
             <SvgDelete />
-          </IconButton>
+          </IconButton>}
         </div >
       )}
     />
