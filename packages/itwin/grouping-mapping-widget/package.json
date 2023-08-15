@@ -129,7 +129,7 @@
     "sinon": "^7.5.0",
     "ts-jest": "^27.1.3",
     "typemoq": "^2.1.0",
-    "typescript": "~4.3.0"
+    "typescript": "^4.5.0"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
