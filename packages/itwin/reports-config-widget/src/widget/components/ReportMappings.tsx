@@ -11,7 +11,6 @@ import {
   Button,
   IconButton,
   LabeledInput,
-  Surface,
   Text,
   toaster,
 } from "@itwin/itwinui-react";
@@ -182,7 +181,7 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
 
   return (
     <>
-      <Surface className="rcw-report-mappings-container">
+      <div className="rcw-report-mappings-container">
         <LabeledInput
           label={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:ODataFeedURL"
@@ -195,7 +194,6 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
               title={ReportsConfigWidget.localization.getLocalizedString(
                 "ReportsConfigWidget:Copy"
               )}
-              styleType="borderless"
               onClick={async (_) => {
                 await navigator.clipboard.writeText(odataFeedUrl);
                 toaster.positive(
@@ -273,7 +271,7 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
             ))}
           </div>
         )}
-      </Surface>
+      </div>
       <AddMappingsModal
         show={showAddMapping}
         reportId={report.id}
