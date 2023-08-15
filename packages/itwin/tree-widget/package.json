@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -21,6 +21,7 @@
   "module": "lib/esm/tree-widget-react.js",
   "typings": "lib/cjs/tree-widget-react",
   "scripts": {
+    "start:test-viewer": "node ./scripts/start-test-viewer.js",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
@@ -35,6 +36,8 @@
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build"
   },
@@ -43,7 +46,6 @@
     "@itwin/itwinui-icons-react": "^2.1.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/itwinui-react": "^2.11.0",
-    "@itwin/itwinui-variables": "^2.0.0",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-error-boundary": "^4.0.10",
@@ -75,6 +77,7 @@
     "@itwin/presentation-frontend": "^4.0.0",
     "@itwin/presentation-testing": "^4.0.0",
     "@itwin/webgl-compatibility": "^4.0.0",
+    "@playwright/test": "^1.36.2",
     "@rushstack/eslint-patch": "1.2.0",
     "@testing-library/dom": "^8.12.0",
     "@testing-library/react": "^12.0.0",
@@ -97,6 +100,7 @@
     "chai-jest-snapshot": "^2.0.0",
     "chai-subset": "1.6.0",
     "cpx2": "^3.0.0",
+    "cross-env": "^7.0.3",
     "deep-equal": "^1.0.0",
     "eslint": "^8.41.0",
     "eslint-plugin-unused-imports": "^2.0.0",

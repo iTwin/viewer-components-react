@@ -7,6 +7,7 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { Id64 } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
 import { StandardNodeTypes } from "@itwin/presentation-common";
+import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNodeRenderer";
 
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode } from "@itwin/components-react";
@@ -14,8 +15,9 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassGroupingNodeKey, ECInstancesNodeKey, InstanceKey } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
 
-export const createSimpleTreeModelNode = (id?: string): TreeModelNode => {
-  const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Node Label" });
+export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
+  const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: labelValue ?? "Node Label" });
+  label.property.renderer = { name: TREE_NODE_LABEL_RENDERER };
 
   return {
     id: id || "testId",
@@ -40,6 +42,7 @@ export const createSimpleTreeModelNode = (id?: string): TreeModelNode => {
       id: "node-id",
       label,
     },
+    ...node,
   };
 };
 

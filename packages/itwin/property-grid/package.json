@@ -1,6 +1,6 @@
 {
   "name": "@itwin/property-grid-react",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "This package offers a React widget which provides access to the property grid within an iModel. Designed for use in an iTwin AppUI application",
   "keywords": [
     "Bentley",
@@ -22,6 +22,7 @@
   "module": "lib/esm/property-grid-react.js",
   "typings": "lib/cjs/property-grid-react",
   "scripts": {
+    "start:test-viewer": "node ./scripts/start-test-viewer.js",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
@@ -35,6 +36,8 @@
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build"
@@ -82,6 +85,7 @@
     "@itwin/presentation-components": "^4.0.0",
     "@itwin/presentation-frontend": "^4.0.0",
     "@itwin/webgl-compatibility": "^4.0.0",
+    "@playwright/test": "^1.36.2",
     "@rushstack/eslint-patch": "1.2.0",
     "@testing-library/dom": "^8.12.0",
     "@testing-library/react": "^12.0.0",
@@ -98,6 +102,7 @@
     "@typescript-eslint/parser": "^5.59.8",
     "chai": "^4.3.7",
     "cpx2": "^3.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.41.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "eslint-plugin-react": "^7.32.2",

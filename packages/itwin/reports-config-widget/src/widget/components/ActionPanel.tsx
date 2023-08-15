@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
@@ -24,7 +24,7 @@ const ActionPanel = ({
   isCancelDisabled = false,
   isSavingDisabled = false,
   isLoading = false,
-}: ActionPanelProps): JSX.Element => {
+}: ActionPanelProps): React.ReactElement => {
   return (
     <div className="rcw-action-panel">
       {isLoading && <LoadingSpinner />}

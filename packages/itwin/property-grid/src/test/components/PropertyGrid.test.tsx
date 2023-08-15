@@ -66,4 +66,21 @@ describe("<PropertyGrid />", () => {
 
     await waitFor(() => getByText("selection.too-many-elements-selected"));
   });
+
+  it("renders header controls when too many elements selected", async () => {
+    const imodel = {} as IModelConnection;
+    const keys = Array(500).fill(0).map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
+    selectionManager.getSelection.returns(new KeySet(keys));
+
+    const { getByText } = render(
+      <PropertyGrid
+        imodel={imodel}
+        headerControls={[
+          <div key={1}>TestControl</div>,
+        ]}
+      />
+    );
+
+    await waitFor(() => getByText("TestControl"));
+  });
 });

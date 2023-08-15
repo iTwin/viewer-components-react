@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Added e2e tests for `PropertyGrid` component.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
