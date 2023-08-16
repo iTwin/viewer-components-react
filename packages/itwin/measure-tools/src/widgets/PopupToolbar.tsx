@@ -5,14 +5,13 @@
 /* eslint-disable deprecation/deprecation */
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ToolbarComposer } from "@itwin/appui-react";
-import type { ExtensibleToolbarProps } from "@itwin/appui-react";
+import { Toolbar, ToolbarProps } from "@itwin/appui-react";
 
-export interface PopupToolbarProps extends ExtensibleToolbarProps {
+export interface PopupToolbarProps extends ToolbarProps {
   onClose?: () => void;
 }
 
-export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, usage, orientation, onClose }: PopupToolbarProps) => {
+export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, onClose }: PopupToolbarProps) => {
   const [isClosing, setIsClosing] = useState<boolean>(false);
 
   const ref = useRef(null);
@@ -42,6 +41,6 @@ export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, usage, orient
   }, [handleMouseWheel, handleMouseDown]);
 
   return <div ref={ref}>
-    <ToolbarComposer items={items} orientation={orientation} usage={usage} />
+    <Toolbar items={items}/>
   </div>;
 };
