@@ -442,9 +442,7 @@ export class MeasurementActionToolbar {
       itemDef.measurements = measurements;
       return ToolbarItemUtilities.createActionItem(itemDef.id, index * 10, itemDef.iconSpec, itemDef.label, itemDef.execute);
     });
-    return <PopupToolbar
-      items={toolItems}
-    />;
+    return <PopupToolbar items={toolItems} />;
   }
 }
 

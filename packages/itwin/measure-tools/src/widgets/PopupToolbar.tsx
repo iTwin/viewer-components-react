@@ -5,7 +5,8 @@
 /* eslint-disable deprecation/deprecation */
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Toolbar, ToolbarProps } from "@itwin/appui-react";
+import type { ToolbarProps } from "@itwin/appui-react";
+import { Toolbar } from "@itwin/appui-react";
 
 export interface PopupToolbarProps extends ToolbarProps {
   onClose?: () => void;
