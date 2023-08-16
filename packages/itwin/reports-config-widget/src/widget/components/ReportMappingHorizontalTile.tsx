@@ -99,7 +99,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
                   }}
                   disabled={jobStarted}
                 >
-                  <SvgRefresh />
+                  <SvgPlay />
                 </IconButton>
                 <IconButton
                   styleType="borderless"
