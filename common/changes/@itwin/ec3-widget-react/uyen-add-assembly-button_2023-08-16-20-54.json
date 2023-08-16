@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/ec3-widget-react",
+      "comment": "Removed frame around Add Assembly button and changed button type.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/ec3-widget-react"
+}
