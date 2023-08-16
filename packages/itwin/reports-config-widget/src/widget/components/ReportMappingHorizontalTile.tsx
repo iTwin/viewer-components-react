@@ -11,7 +11,7 @@ import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { IconButton } from "@itwin/itwinui-react";
 import {
   SvgDelete,
-  SvgRefresh,
+  SvgPlay,
 } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
 import type { ReportMappingAndMapping } from "./ReportMappings";
