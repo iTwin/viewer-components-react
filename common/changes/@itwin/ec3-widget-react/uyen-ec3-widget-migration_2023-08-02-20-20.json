@@ -1,10 +1,10 @@
 {
   "changes": [
     {
-      "packageName": "@itwin/reports-config-widget-react",
+      "packageName": "@itwin/ec3-widget-react",
       "comment": "Migrated UI items for iTwin UI 2.x and iTwinJS 4.x upgrade.",
       "type": "minor"
     }
   ],
-  "packageName": "@itwin/reports-config-widget-react"
+  "packageName": "@itwin/ec3-widget-react"
 }

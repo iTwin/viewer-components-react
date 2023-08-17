@@ -20,7 +20,7 @@ export const LabelActionModal = (props: LabelActionModalProps) => {
       isOpen={props.show}
       onClose={props.onClose}
     >
-      <LabelAction {...props} />
+      <LabelAction {...props}/>
     </Modal>
   );
 };

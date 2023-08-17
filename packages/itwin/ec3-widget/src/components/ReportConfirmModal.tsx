@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   Button,
-  Leading,
   Modal,
   ModalButtonBar,
+  Text,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./ReportConfirmModal.scss";
@@ -55,9 +55,9 @@ export const ReportConfirmModal = ({
       }}
     >
       <div className="ec3w-delete-modal-body-text">
-        <Leading>
+        <Text variant="leading">
           Are you sure you want to change template report? All labels will be reset.
-        </Leading>
+        </Text>
       </div>
       <ModalButtonBar>
         {isLoading &&
