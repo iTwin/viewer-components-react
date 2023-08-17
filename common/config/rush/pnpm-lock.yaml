@@ -265,6 +265,8 @@ importers:
       '@itwin/core-orbitgt': ^4.0.0
       '@itwin/core-quantity': ^4.0.0
       '@itwin/core-react': ^4.0.0
+      '@itwin/core-telemetry': ^4.0.0
+      '@itwin/ecschema-metadata': ^4.0.0
       '@itwin/eslint-plugin': ^3.7.8
       '@itwin/imodel-components-react': ^4.0.0
       '@itwin/insights-client': ^0.4.0
@@ -282,6 +284,7 @@ importers:
       '@types/react': ^17.0.38
       '@types/testing-library__jest-dom': ^5.14.3
       '@typescript-eslint/eslint-plugin': ^5.60.0
+      '@typescript-eslint/parser': ^5.10.1
       classnames: ^2.3.1
       cpx2: ^3.0.0
       eslint: ^7.32.0
@@ -308,7 +311,7 @@ importers:
       '@faker-js/faker': 6.3.1
       '@itwin/appui-abstract': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/appui-layout-react': 4.4.0_177e26d1bbcf906fed73be4fa487d1bc
-      '@itwin/appui-react': 4.4.0_36ace9bd72d18a4f9372827300a5e023
+      '@itwin/appui-react': 4.4.0_a767264fc1d12d0919dcc8379bba39ef
       '@itwin/build-tools': 4.0.6_@types+node@14.18.12
       '@itwin/components-react': 4.4.0_177e26d1bbcf906fed73be4fa487d1bc
       '@itwin/core-bentley': 4.0.6
@@ -319,10 +322,12 @@ importers:
       '@itwin/core-orbitgt': 4.0.6
       '@itwin/core-quantity': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/core-react': 4.4.0_ee36221829551e48b04f84197abaa039
+      '@itwin/core-telemetry': 4.0.6_@itwin+core-geometry@4.0.6
+      '@itwin/ecschema-metadata': 4.0.0_09c4582d1d8caaf201675060e5754d41
       '@itwin/eslint-plugin': 3.7.8_eslint@7.32.0+typescript@4.5.5
       '@itwin/imodel-components-react': 4.4.0_cc52ddea37becb8c3c66f6a0925d69d8
-      '@itwin/presentation-common': 4.0.0_ba3cb7d223ce459cd163e7ffe7ae5424
-      '@itwin/presentation-frontend': 4.0.0_11c73f855a02b231999953b253489c51
+      '@itwin/presentation-common': 4.0.0_06de44eec71810a373bcecebaf159d09
+      '@itwin/presentation-frontend': 4.0.0_7a455481de461478ee0dcad483614010
       '@itwin/webgl-compatibility': 4.0.6
       '@testing-library/dom': 8.13.0
       '@testing-library/jest-dom': 5.16.4
@@ -332,7 +337,8 @@ importers:
       '@types/node': 14.18.12
       '@types/react': 17.0.44
       '@types/testing-library__jest-dom': 5.14.3
-      '@typescript-eslint/eslint-plugin': 5.62.0_eslint@7.32.0+typescript@4.5.5
+      '@typescript-eslint/eslint-plugin': 5.62.0_aac9b8ebe38935c0bd935fc37417ef56
+      '@typescript-eslint/parser': 5.59.8_eslint@7.32.0+typescript@4.5.5
       cpx2: 3.0.2
       eslint: 7.32.0
       jest: 27.5.1
@@ -4408,7 +4414,7 @@ packages:
       rxjs: 6.6.7
     dev: true
 
-  /@itwin/appui-react/4.4.0_36ace9bd72d18a4f9372827300a5e023:
+  /@itwin/appui-react/4.4.0_a767264fc1d12d0919dcc8379bba39ef:
     resolution: {integrity: sha512-Km9G4zna8+bJw3Ogv76xGO4v4MgP6h5rC8Q7HWDLV/t73sUUxibF/2VSW6nrcSAAFEyXbeDT6x2CV35cRFHptw==}
     peerDependencies:
       '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
@@ -4437,6 +4443,7 @@ packages:
       '@itwin/core-geometry': 4.0.6
       '@itwin/core-quantity': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/core-react': 4.4.0_ee36221829551e48b04f84197abaa039
+      '@itwin/core-telemetry': 4.0.6_@itwin+core-geometry@4.0.6
       '@itwin/imodel-components-react': 4.4.0_cc52ddea37becb8c3c66f6a0925d69d8
       '@itwin/itwinui-icons': 1.16.0
       '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
@@ -5607,7 +5614,6 @@ packages:
       '@itwin/core-bentley': 4.0.6
       '@itwin/core-quantity': 4.0.6_@itwin+core-bentley@4.0.6
       almost-equal: 1.1.0
-    dev: false
 
   /@itwin/ecschema-metadata/4.0.0_30ffdc5308dd22bc25a719275cab883f:
     resolution: {integrity: sha512-eeh4HsdeS1DbcN03h/lInfB0EPaWQzr/r7niuELN1I/0jRsigjDnpePPR8OGtpkSh3NC9PZcTGYWbUVmeYYVHw==}
@@ -6480,7 +6486,6 @@ packages:
       '@itwin/core-common': 4.0.6_20f5f1c1c0d148a7918b2325ae4ad76c
       '@itwin/core-quantity': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/ecschema-metadata': 4.0.0_09c4582d1d8caaf201675060e5754d41
-    dev: false
 
   /@itwin/presentation-common/4.0.0_b65abb2eba6f77a1811421d5706635e7:
     resolution: {integrity: sha512-lH7mUeve9si8SmHNPTk3V8pgieehLgKnfhKYnEUWzqlAutpJsMF7LW7czEqZOiyXQnbOvClcVP2TgsJ0vH0sYg==}
@@ -6754,7 +6759,6 @@ packages:
       '@itwin/core-quantity': 4.0.6_@itwin+core-bentley@4.0.6
       '@itwin/ecschema-metadata': 4.0.0_09c4582d1d8caaf201675060e5754d41
       '@itwin/presentation-common': 4.0.0_06de44eec71810a373bcecebaf159d09
-    dev: false
 
   /@itwin/presentation-frontend/4.0.0_f4ca9731f71cbf5cc67e81c3c0c2cd08:
     resolution: {integrity: sha512-DujxZccIq2q1HP0Nknt7W78svq4Dq3fbVDfUyBVYHqv5S79iQ1a13t2ijmuAjX5VMEnktH6e0UOcndtssOStyQ==}
@@ -9218,7 +9222,7 @@ packages:
       - supports-color
     dev: true
 
-  /@typescript-eslint/eslint-plugin/5.62.0_eslint@7.32.0+typescript@4.5.5:
+  /@typescript-eslint/eslint-plugin/5.62.0_aac9b8ebe38935c0bd935fc37417ef56:
     resolution: {integrity: sha512-TiZzBSJja/LbhNPvk6yc0JrX9XqhQ0hdh6M2svYfsHGejaKFIAGd9MQ+ERIMzLGlN/kZoYIgdxFV0PuljTKXag==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -9230,6 +9234,7 @@ packages:
         optional: true
     dependencies:
       '@eslint-community/regexpp': 4.5.0
+      '@typescript-eslint/parser': 5.59.8_eslint@7.32.0+typescript@4.5.5
       '@typescript-eslint/scope-manager': 5.62.0
       '@typescript-eslint/type-utils': 5.62.0_eslint@7.32.0+typescript@4.5.5
       '@typescript-eslint/utils': 5.62.0_eslint@7.32.0+typescript@4.5.5
@@ -9557,6 +9562,26 @@ packages:
       debug: 4.3.4
       eslint: 8.41.0
       typescript: 5.0.4
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@typescript-eslint/parser/5.59.8_eslint@7.32.0+typescript@4.5.5:
+    resolution: {integrity: sha512-AnR19RjJcpjoeGojmwZtCwBX/RidqDZtzcbG3xHrmz0aHHoOcbWnpDllenRDmDvsV0RQ6+tbb09/kyc+UT9Orw==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@typescript-eslint/scope-manager': 5.59.8
+      '@typescript-eslint/types': 5.59.8
+      '@typescript-eslint/typescript-estree': 5.59.8_typescript@4.5.5
+      debug: 4.3.4
+      eslint: 7.32.0
+      typescript: 4.5.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -10158,6 +10183,27 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
+
+  /@typescript-eslint/typescript-estree/5.59.8_typescript@4.5.5:
+    resolution: {integrity: sha512-Jy/lPSDJGNow14vYu6IrW790p7HIf/SOV1Bb6lZ7NUkLc2iB2Z9elESmsaUtLw8kVqogSbtLH9tut5GCX1RLDg==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@typescript-eslint/types': 5.59.8
+      '@typescript-eslint/visitor-keys': 5.59.8
+      debug: 4.3.4
+      globby: 11.1.0
+      is-glob: 4.0.3
+      semver: 7.5.0
+      tsutils: 3.21.0_typescript@4.5.5
+      typescript: 4.5.5
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
 
   /@typescript-eslint/typescript-estree/5.59.8_typescript@5.0.4:
     resolution: {integrity: sha512-Jy/lPSDJGNow14vYu6IrW790p7HIf/SOV1Bb6lZ7NUkLc2iB2Z9elESmsaUtLw8kVqogSbtLH9tut5GCX1RLDg==}
