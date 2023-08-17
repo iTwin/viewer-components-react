@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added the `MappingsUI` component: a reusable, state-agnostic UI component for managing Mappings.",
+      "comment": "Added the `MappingsView` component: a reusable, state-agnostic UI component for managing Mappings.",
       "type": "minor"
     }
   ],
