@@ -9,7 +9,7 @@ import { GroupAction } from "./GroupAction";
 import type { Route } from "./GroupingMapping";
 import { RouteStep } from "./GroupingMapping";
 import { GroupPropertyAction } from "./GroupPropertyAction";
-import { Mappings } from "./Mapping";
+import { Mappings } from "./Mappings";
 import { MappingAction } from "./MappingAction";
 import { CalculatedPropertyActionWithVisuals } from "./CalculatedPropertyActionWithVisuals";
 import { PropertyMenuWithVisualization } from "./PropertyMenuWithVisualization";
