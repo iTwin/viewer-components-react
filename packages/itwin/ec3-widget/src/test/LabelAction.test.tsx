@@ -124,15 +124,15 @@ describe("LabelAction", () => {
     const elementQuantityInput = screen.getByTestId("ec3-element-quantity-select");
     const dropdownTileInput = screen.getByTestId("ec3-dropdown-tile-select");
 
-    expect(elementInput.querySelector(".iui-disabled")).toBeInTheDocument();
-    expect(elementQuantityInput.querySelector(".iui-disabled")).toBeInTheDocument();
-    expect(dropdownTileInput.querySelector(".iui-disabled")).toBeInTheDocument();
+    expect(elementInput.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
+    expect(elementQuantityInput.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
+    expect(dropdownTileInput.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
 
     await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_0");
 
-    expect(elementInput.querySelector(".iui-disabled")).toBeNull();
-    expect(elementQuantityInput.querySelector(".iui-disabled")).toBeNull();
-    expect(dropdownTileInput.querySelector(".iui-disabled")).toBeNull();
+    expect(elementInput.querySelector('[aria-disabled="true"]')).toBeNull();
+    expect(elementQuantityInput.querySelector('[aria-disabled="true"]')).toBeNull();
+    expect(dropdownTileInput.querySelector('[aria-disabled="true"]')).toBeNull();
   });
 
   it("String colunms appear in the element select, number collumns in the quantity select", async () => {
