@@ -86,20 +86,33 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
           data-testid="tile-action-button">
           {extractionState === ExtractionStates.None ?
             (
-              <IconButton
-                styleType="borderless"
-                title={ReportsConfigWidget.localization.getLocalizedString(
-                  "ReportsConfigWidget:UpdateDataset"
-                )}
-                onClick={async () => {
-                  setExtractionState(ExtractionStates.Starting);
-                  await props.bulkExtractor.runIModelExtraction(props.mapping.imodelId);
-                  props.jobStartEvent.raiseEvent(props.mapping.imodelId);
-                }}
-                disabled={jobStarted}
-              >
-                <SvgPlay />
-              </IconButton>
+              <>
+                <IconButton
+                  styleType="borderless"
+                  title={ReportsConfigWidget.localization.getLocalizedString(
+                    "ReportsConfigWidget:UpdateDataset"
+                  )}
+                  onClick={async () => {
+                    setExtractionState(ExtractionStates.Starting);
+                    await props.bulkExtractor.runIModelExtraction(props.mapping.imodelId);
+                    props.jobStartEvent.raiseEvent(props.mapping.imodelId);
+                  }}
+                  disabled={jobStarted}
+                >
+                  <SvgPlay />
+                </IconButton>
+                <IconButton
+                  styleType="borderless"
+                  title={ReportsConfigWidget.localization.getLocalizedString(
+                    "ReportsConfigWidget:Remove"
+                  )}
+                  onClick={() => {
+                    props.onClickDelete();
+                  }}
+                >
+                  <SvgDelete />
+                </IconButton>
+              </>
             ) : (
               <ExtractionStatus
                 state={extractionState}
@@ -108,18 +121,6 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
                 }}
               ></ExtractionStatus>
             )}
-          <IconButton
-            styleType="borderless"
-            title={ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:Remove"
-            )}
-            onClick={() => {
-              props.onClickDelete();
-            }}
-            disabled={jobStarted}
-          >
-            <SvgDelete />
-          </IconButton>
         </div >
       )}
     />
