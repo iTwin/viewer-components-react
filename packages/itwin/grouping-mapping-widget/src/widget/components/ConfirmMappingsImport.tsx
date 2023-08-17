@@ -10,7 +10,7 @@ import {
   Text,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
-import type { IMappingTyped } from "./Mapping";
+import type { IMappingTyped } from "./Mappings";
 import "./ConfirmMappingsImport.scss";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";

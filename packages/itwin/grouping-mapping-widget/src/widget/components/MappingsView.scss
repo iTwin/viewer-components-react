@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.gmw-mappings-container {
+.gmw-mappings-view-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -13,7 +13,6 @@
     display: flex;
     justify-content: space-between;
     gap: var(--iui-size-xs);
-    border-bottom: 1px solid var(--iui-color-border-subtle);
     padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
 
@@ -21,6 +20,11 @@
       display: flex;
       gap: var(--iui-size-xs);
     }
+  }
+
+  .gmw-mappings-border {
+    padding-top: var(--iui-size-s);
+    border-bottom: 1px solid var(--iui-color-border-subtle);
   }
 
   .gmw-mappings-list {
