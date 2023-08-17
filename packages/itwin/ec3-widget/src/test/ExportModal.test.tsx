@@ -146,7 +146,7 @@ describe("ExportModal", () => {
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Succeeded));
     await act(async () => { await event!(); });
-    expect(modal.querySelector(".iui-button-label")).toHaveTextContent("Open in EC3");
+    expect(modal.querySelector(".ec3w-report-button")).toHaveTextContent("Open in EC3");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Failed));
     await act(async () => { await event!(); });
