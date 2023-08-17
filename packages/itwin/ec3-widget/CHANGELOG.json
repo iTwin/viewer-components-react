@@ -2,6 +2,18 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@itwin/ec3-widget-react_v0.3.0",
+      "date": "Thu, 17 Aug 2023 14:42:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Typescript version bump to ^4.5.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@itwin/ec3-widget-react_v0.2.0",
       "date": "Tue, 18 Jul 2023 14:40:24 GMT",
