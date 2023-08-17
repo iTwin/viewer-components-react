@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 07 Aug 2023 13:36:23 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+
+## 1.1.1
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Patches
+
+- Trees: Fix eye checkbox background when node is selected and hovered.
 
 ## 1.1.0
 Mon, 07 Aug 2023 13:36:23 GMT

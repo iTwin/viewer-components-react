@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 08 Aug 2023 05:55:42 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+
+## 1.1.1
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Patches
+
+- Fixed `Selected elements` button not appearing sometimes when selection changes quickly.
 
 ## 1.1.0
 Mon, 07 Aug 2023 13:36:23 GMT
