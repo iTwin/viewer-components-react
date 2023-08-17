@@ -19,7 +19,6 @@ import {
 
 import {
   Button,
-  Surface,
   Text,
   toaster,
 } from "@itwin/itwinui-react";
@@ -186,10 +185,10 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
           </div>
         </Fieldset>
         <Fieldset legend='Assemblies' className='ec3w-template-details'>
-          <Surface className="ec3w-labels-container">
+          <div className="ec3w-labels-container">
             <Button
               data-testid="ec3-add-assembly-button"
-              styleType="default"
+              styleType="high-visibility"
               startIcon={<SvgAdd />}
               onClick={() => { setSelectedLabel(undefined); setShowLabelActionModal(true); }}
               disabled={!childTemplate.reportId}
@@ -218,7 +217,7 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
                     />
                   ))}
             </div>
-          </Surface>
+          </div>
         </Fieldset>
       </div>
       <TemplateActionPanel

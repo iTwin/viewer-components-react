@@ -1,6 +1,13 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Tue, 18 Jul 2023 14:40:24 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+
+## 0.3.0
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Minor changes
+
+- Typescript version bump to ^4.5.0
 
 ## 0.2.0
 Tue, 18 Jul 2023 14:40:24 GMT

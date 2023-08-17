@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/ec3-widget-react",
-      "comment": "Typescript version bump to ^4.5.0",
-      "type": "minor"
+      "comment": "Removed frame around Add Assembly button and changed button type.",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/ec3-widget-react"
