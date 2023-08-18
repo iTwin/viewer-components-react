@@ -1,6 +1,17 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Aug 2023 11:01:29 GMT and should not be manually modified.
+
+## 0.4.0
+Fri, 18 Aug 2023 11:01:29 GMT
+
+### Minor changes
+
+- Migrated UI items for iTwin UI 2.x and iTwinJS 4.x upgrade.
+
+### Patches
+
+- Removed frame around Add Assembly button and changed button type.
 
 ## 0.3.0
 Thu, 17 Aug 2023 14:42:37 GMT

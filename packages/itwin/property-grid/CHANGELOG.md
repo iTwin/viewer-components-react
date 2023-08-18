@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Aug 2023 11:01:29 GMT and should not be manually modified.
+
+## 1.1.2
+Fri, 18 Aug 2023 11:01:29 GMT
+
+### Patches
+
+- Correctly determine if element has parent element when both are instances of the same class.
 
 ## 1.1.1
 Thu, 17 Aug 2023 14:42:37 GMT
