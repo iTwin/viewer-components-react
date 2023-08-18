@@ -65,17 +65,17 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
           const selectionSet = Presentation.selection.getSelection(imodel);
           const selectedInstanceKeys = getInstanceKeys(selectionSet);
           // if only single instance is selected and navigation through ancestors is enabled determine if selected instance has single parent and we can navigate up
-          const hasParent = selectedInstanceKeys.length === 1 && (await getParentKey(imodel, selectedInstanceKeys[0])) !== undefined;
+          const hasAncestor = selectedInstanceKeys.length === 1 && await hasParent(imodel, selectedInstanceKeys[0]);
           return {
             selectedInstanceKeys,
-            hasParent,
+            hasAncestor,
           };
         },
-        (_, { selectedInstanceKeys, hasParent }) => {
+        (_, { selectedInstanceKeys, hasAncestor }) => {
           return {
             selectedKeys: selectedInstanceKeys,
             previousKeys: [],
-            canNavigateUp: hasParent,
+            canNavigateUp: hasAncestor,
             focusedInstanceKey: undefined,
           };
         }
@@ -112,7 +112,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
         );
 
         const parentInstanceKeys = getInstanceKeys(parentKeys);
-        const hasGrandParent = parentInstanceKeys.length === 1 && (await getParentKey(imodel, parentInstanceKeys[0])) !== undefined;
+        const hasGrandParent = parentInstanceKeys.length === 1 && await hasParent(imodel, parentInstanceKeys[0]);
 
         Presentation.selection.replaceSelection(
           PropertyGridSelectionScope,
@@ -177,7 +177,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
   };
 }
 
-async function getParentKey(imodel: IModelConnection, key: InstanceKey) {
+async function hasParent(imodel: IModelConnection, key: InstanceKey) {
   const parentKeys = await Presentation.selection.scopes.computeSelection(
     imodel,
     key.id,
@@ -185,12 +185,8 @@ async function getParentKey(imodel: IModelConnection, key: InstanceKey) {
   );
 
   // current instance key is returned from `computeSelection` if it does not have parent. Need to filter it out.
-  const instanceKeys = getInstanceKeys(parentKeys).filter((parentKey) => parentKey.className !== key.className && parentKey.id !== key.id);
-  if (instanceKeys.length !== 1) {
-    return undefined;
-  }
-
-  return instanceKeys[0];
+  const instanceKeys = getInstanceKeys(parentKeys).filter((parentKey) => parentKey.className !== key.className || parentKey.id !== key.id);
+  return instanceKeys.length === 1;
 }
 
 function getInstanceKeys(keys: Readonly<KeySet>) {
