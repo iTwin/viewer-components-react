@@ -4,10 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   Button,
-  Leading,
   MiddleTextTruncation,
   Modal,
   ModalButtonBar,
+  Text,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./DeleteModal.scss";
@@ -55,9 +55,9 @@ export const DeleteModal = ({
       }}
     >
       <div className="ec3w-delete-modal-body-text">
-        <Leading>
+        <Text variant="leading">
           Are you sure you want to delete
-        </Leading>
+        </Text>
         <strong>
           <MiddleTextTruncation text={`${entityName}?`} />
         </strong>

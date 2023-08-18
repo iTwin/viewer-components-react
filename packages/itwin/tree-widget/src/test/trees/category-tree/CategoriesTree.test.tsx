@@ -21,7 +21,7 @@ import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/cate
 import {
   addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory,
 } from "../../IModelUtils";
-import { mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, mockViewport, renderWithUser, TestUtils } from "../../TestUtils";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
@@ -152,6 +152,27 @@ describe("CategoryTree", () => {
           />,
         );
         await waitFor(() => result.getByText("test-node"));
+      });
+
+      it("renders context menu", async () => {
+        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
+        const { user, getByText, queryByText } = renderWithUser(
+          <CategoryTree
+            {...sizeProps}
+            categories={[]}
+            viewManager={viewManagerMock.object}
+            iModel={imodelMock.object}
+            categoryVisibilityHandler={visibilityHandler.object}
+            activeView={viewportMock.object}
+            contextMenuItems={[
+              () => <div>Test Menu Item</div>,
+            ]}
+          />,
+        );
+        const node = await waitFor(() => getByText("test-node"));
+        await user.pointer({ keys: "[MouseRight>]", target: node });
+
+        await waitFor(() => expect(queryByText("Test Menu Item")).to.not.be.null);
       });
 
       it("sets ruleset variable 'ViewType' to '3d'", async () => {

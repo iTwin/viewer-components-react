@@ -1,6 +1,18 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 02 Aug 2023 12:11:30 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+
+## 0.18.0
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Minor changes
+
+- Added the `MappingsView` component: a reusable, state-agnostic UI component for managing Mappings.
+- Typescript version bump to ^4.5.0
+
+### Patches
+
+- Added a Progress bar when Color By Group
 
 ## 0.17.5
 Wed, 02 Aug 2023 12:11:30 GMT

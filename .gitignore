@@ -43,3 +43,8 @@ package-deps.json
 
 # IDE configuration
 .idea
+
+# e2e tests output
+/**/test-results
+/**/playwright-report
+/**/playwright/.cache

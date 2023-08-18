@@ -28,7 +28,7 @@ import type { VirtualizedPropertyGridWithDataProviderProps } from '@itwin/compon
 import type { Widget } from '@itwin/appui-react';
 
 // @public
-export function AddFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
+export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
 
 // @public
 export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps): JSX.Element | null;
@@ -55,7 +55,7 @@ export interface ContextMenuProps {
 }
 
 // @public
-export function CopyPropertyTextContextMenuItem({ record }: ContextMenuItemProps): JSX.Element;
+export function CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element;
 
 // @public
 export interface DataProviderProps {
@@ -63,7 +63,12 @@ export interface DataProviderProps {
 }
 
 // @public
-export interface FavoritePropertiesContextMenuItemProps extends ContextMenuItemProps {
+export interface DefaultContextMenuItemProps extends ContextMenuItemProps {
+    onSelect?: (defaultAction: () => Promise<void>) => Promise<void>;
+}
+
+// @public
+export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMenuItemProps {
     scope?: FavoritePropertiesScope;
 }
 
@@ -223,7 +228,7 @@ export interface PropertyGridUiItemsProviderProps {
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
 // @public
-export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
+export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
 
 // @internal
 export function SettingsDropdownMenu({ settingsMenuItems, dataProvider }: SettingsDropdownMenuProps): JSX.Element | null;
@@ -292,7 +297,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps): {
     focusedInstanceKey: InstanceKey | undefined;
     focusInstance: (key: InstanceKey) => void;
     ancestorsNavigationProps: {
-        navigateDown: () => Promise<void>;
+        navigateDown: () => void;
         navigateUp: () => Promise<void>;
         canNavigateUp: boolean;
         canNavigateDown: boolean;

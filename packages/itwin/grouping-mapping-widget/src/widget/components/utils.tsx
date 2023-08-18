@@ -48,41 +48,37 @@ export const fetchIdsFromQuery = async (
   return ids;
 };
 
-export const handleError = (errorStatus: number) => {
-  let errorMessage = "Error! ";
+export const getErrorMessage = (errorStatus: number): string => {
   switch (errorStatus) {
     case 401:
-      errorMessage += `You are unauthorized to do this operation.`;
-      break;
+      return "You are unauthorized to do this operation.";
     case 403:
-      errorMessage += `You don't have permission to access the requested resource.`;
-      break;
+      return "You don't have permission to access the requested resource.";
     case 404:
-      errorMessage += `The requested resource was not found.`;
-      break;
+      return "The requested resource was not found.";
     case 409:
-      errorMessage += `This property name is already being used.`;
-      break;
+      return "This property name is already being used.";
     case 422:
-      errorMessage += `Unable to process the request.`;
-      break;
+      return "Unable to process the request.";
     case 429:
-      errorMessage += `Too many requests.`;
-      break;
+      return "Too many requests.";
     case 500:
-      errorMessage += `Internal server error.`;
-      break;
+      return "Internal server error.";
     case 502:
-      errorMessage += `Bad gateway.`;
-      break;
+      return "Bad gateway.";
     case 503:
-      errorMessage += `Service unavailable.`;
-      break;
+      return "Service unavailable.";
     default:
-      errorMessage += `Something went wrong!`;
+      return "Something went wrong!";
   }
-  toaster.negative(errorMessage);
+};
 
+export const handleError = (errorStatus: number) => {
+  const baseErrorMessage = "Error!";
+  const specificErrorMessage = getErrorMessage(errorStatus);
+  const fullErrorMessage = `${baseErrorMessage} ${specificErrorMessage}`;
+
+  toaster.negative(fullErrorMessage);
 };
 
 export const LoadingOverlay = () => (

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, DropdownMenu, IconButton, MenuItem, Surface, toaster } from "@itwin/itwinui-react";
+import { Button, DropdownMenu, IconButton, MenuItem, toaster } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
@@ -103,7 +103,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
 
   return (
     <>
-      <Surface className="ec3w-templates-list-container">
+      <div className="ec3w-templates-list-container">
         <div className="ec3w-toolbar" data-testid="ec3-templates">
           <div className="ec3w-toolbar-left">
             <Button
@@ -176,7 +176,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
                       </MenuItem>,
                     ]}
                   >
-                    <IconButton styleType="borderless">
+                    <IconButton styleType="borderless" title="Template Options">
                       <SvgMore
                         style={{
                           width: "16px",
@@ -190,7 +190,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
             ))}
           </div>
         )}
-      </Surface>
+      </div>
 
       <ExportModal
         projectName={selectedTemplate?.displayName ?? ""}

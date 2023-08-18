@@ -201,6 +201,16 @@ describe("Default context menu items", () => {
 
       await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
     });
+
+    it("calls custom `onSelect` handler", async () => {
+      favoritesManager.has.returns(false);
+      const spy = sinon.spy();
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} onSelect={spy}/>);
+      const item = getByText("context-menu.add-favorite.label");
+      await userEvents.click(item);
+
+      expect(spy).to.be.calledOnce;
+    });
   });
 
   describe("RemoveFavoritePropertyContextMenuItem", () => {
@@ -233,6 +243,16 @@ describe("Default context menu items", () => {
 
       await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
     });
+
+    it("calls custom `onSelect` handler", async () => {
+      favoritesManager.has.returns(true);
+      const spy = sinon.spy();
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} onSelect={spy}/>);
+      const item = getByText("context-menu.remove-favorite.label");
+      await userEvents.click(item);
+
+      expect(spy).to.be.calledOnce;
+    });
   });
 
   describe("CopyPropertyTextContextMenuItem", () => {
@@ -249,6 +269,16 @@ describe("Default context menu items", () => {
       await userEvents.click(item);
 
       expect(copyStub).to.be.calledOnceWithExactly(record.description);
+    });
+
+    it("calls custom `onSelect` handler", async () => {
+      const spy = sinon.stub();
+      const { getByText } = render(<CopyPropertyTextContextMenuItem {...itemProps} onSelect={spy}/>);
+      const item = getByText("context-menu.copy-text.label");
+
+      await userEvents.click(item);
+
+      expect(spy).to.be.calledOnce;
     });
   });
 });

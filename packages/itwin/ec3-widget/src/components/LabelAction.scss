@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .ec3w-label-details-container {
   overflow-x: auto;
@@ -11,12 +10,12 @@
   .ec3w-label-details {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
-    margin-bottom: $iui-baseline;
+    gap: var(--iui-size-s);
+    margin-bottom: var(--iui-size-s);
   }
 
   .ec3w-label-field-legend {
-    color: $iui-color-system-gray;
+    color: darkgray;
   }
 }
 
@@ -31,7 +30,7 @@
   .ec3w-delete-icon {
     margin-left: 0;
     align-self: center;
-    min-width: $iui-l;
+    min-width: var(--iui-size-l);
     cursor: pointer;
   }
 }
@@ -40,7 +39,7 @@
   margin-left: 0;
   align-self: center;
   min-width: 36px;
-  margin-right: $iui-xs;
+  margin-right: var(--iui-size-2xs);
   width: 49%;
   display: inline-block;
 }
