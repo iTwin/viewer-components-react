@@ -2,6 +2,7 @@
 
 trigger:
   - master
+  - gh-readonly-queue/master
 
 pr:
   drafts: false
