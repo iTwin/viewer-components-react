@@ -104,6 +104,7 @@ export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
     variant="eyeball"
     checked={props.checked}
     onChange={(e) => props.onChange(e.currentTarget.checked)}
+    onClick={props.onClick}
     disabled={props.disabled}
     title={props.title}
   />;

@@ -4,9 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { CheckBoxState } from "@itwin/core-react";
 import { render, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createVisibilityTreeNodeRenderer } from "../../components/trees/VisibilityTreeRenderer";
 
 import type { TreeActions, TreeModelNode } from "@itwin/components-react";
@@ -100,6 +102,27 @@ describe("VisibilityTreeRenderer", () => {
       rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: leafNode, treeActions: {} as TreeActions })));
       const renderedLeafNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("34px");
+    });
+
+    it("does not select node when checkbox is clicked", async () => {
+      const user = userEvent.setup();
+      const nodeClickSpy = sinon.spy();
+      const checkboxChangeSpy = sinon.spy();
+      const { getByRole } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({
+        node: rootNode,
+        treeActions: {
+          onNodeClicked: nodeClickSpy,
+          onNodeCheckboxClicked: checkboxChangeSpy,
+        } as unknown as TreeActions
+      }));
+
+      const checkbox = await waitFor(() => getByRole("checkbox"));
+      await user.click(checkbox);
+
+      await waitFor(() => {
+        expect(checkboxChangeSpy).to.be.calledOnce;
+        expect(nodeClickSpy).to.not.be.called;
+      })
     });
   });
 });
