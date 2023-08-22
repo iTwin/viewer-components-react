@@ -2,6 +2,18 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.14.1",
+      "tag": "@itwin/measure-tools-react_v0.14.1",
+      "date": "Tue, 22 Aug 2023 14:39:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix measurement action toolbar to close for scroll/click outside"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.0",
       "tag": "@itwin/measure-tools-react_v0.14.0",
       "date": "Thu, 17 Aug 2023 14:42:37 GMT",
