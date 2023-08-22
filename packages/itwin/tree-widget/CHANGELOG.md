@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Aug 2023 14:39:05 GMT and should not be manually modified.
+
+## 1.1.2
+Tue, 22 Aug 2023 14:39:05 GMT
+
+### Patches
+
+- `Trees`: Do not select node when checkbox is clicked.
 
 ## 1.1.1
 Thu, 17 Aug 2023 14:42:37 GMT
