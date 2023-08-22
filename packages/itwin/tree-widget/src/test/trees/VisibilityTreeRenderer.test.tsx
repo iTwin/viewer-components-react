@@ -113,7 +113,7 @@ describe("VisibilityTreeRenderer", () => {
         treeActions: {
           onNodeClicked: nodeClickSpy,
           onNodeCheckboxClicked: checkboxChangeSpy,
-        } as unknown as TreeActions
+        } as unknown as TreeActions,
       }));
 
       const checkbox = await waitFor(() => getByRole("checkbox"));
@@ -122,7 +122,7 @@ describe("VisibilityTreeRenderer", () => {
       await waitFor(() => {
         expect(checkboxChangeSpy).to.be.calledOnce;
         expect(nodeClickSpy).to.not.be.called;
-      })
+      });
     });
   });
 });
