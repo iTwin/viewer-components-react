@@ -2,11 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .ec3w-template-action-panel {
   display: flex;
   justify-content: right;
-  padding: $iui-baseline * 2 $iui-m $iui-baseline;
-  gap: $iui-s;
+  padding: calc(var(--iui-size-s) * 2) var(--iui-size-m) var(--iui-size-s);
+  gap: var(--iui-size-xs);
 }

@@ -29,6 +29,7 @@ export const PropertyMenuWithVisualization = ({
         <IconButton
           styleType='borderless'
           onClick={() => setIsInformationPanelOpen(true)}
+          title='Group Information'
         >
           <SvgProperties />
         </IconButton>

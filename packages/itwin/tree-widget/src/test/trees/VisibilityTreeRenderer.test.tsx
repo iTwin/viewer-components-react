@@ -2,11 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { createVisibilityTreeNodeRenderer } from "../../components/trees/VisibilityTreeRenderer";
-import { render, waitFor } from "@testing-library/react";
+
+import { expect } from "chai";
+import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { CheckBoxState } from "@itwin/core-react";
-import { expect } from "chai";
+import { render, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { createVisibilityTreeNodeRenderer } from "../../components/trees/VisibilityTreeRenderer";
 
 import type { TreeActions, TreeModelNode } from "@itwin/components-react";
 
@@ -59,46 +62,67 @@ describe("VisibilityTreeRenderer", () => {
 
   describe("createVisibilityTreeNodeRenderer", () => {
     it("renders nodes with default values", async () => {
-      const { getByTestId, ...result } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({ node: rootNode, treeActions: {} as TreeActions }));
+      const { getByTestId, rerender } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({ node: rootNode, treeActions: {} as TreeActions }));
       const renderedRootNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedRootNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("0px");
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({ node: middleNode, treeActions: {} as TreeActions })));
+      rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({ node: middleNode, treeActions: {} as TreeActions })));
       const renderedMiddleNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedMiddleNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("20px");
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({ node: leafNode, treeActions: {} as TreeActions })));
+      rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({ node: leafNode, treeActions: {} as TreeActions })));
       const renderedLeafNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("44px");
     });
 
     it("disables expander for root node when `disableRootNodeCollapse` is set to true", async () => {
-      const { getByTestId, ...result } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, disableRootNodeCollapse: true })({ node: rootNode, treeActions: {} as TreeActions }));
+      const { getByTestId, rerender } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, disableRootNodeCollapse: true })({ node: rootNode, treeActions: {} as TreeActions }));
       const renderedRootNode = await waitFor(() => getByTestId("tree-node"));
       expect(renderedRootNode.className.includes("disable-expander")).to.be.eq(true);
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, disableRootNodeCollapse: true })({ node: middleNode, treeActions: {} as TreeActions })));
+      rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, disableRootNodeCollapse: true })({ node: middleNode, treeActions: {} as TreeActions })));
 
       const renderedMiddleNode = await waitFor(() => getByTestId("tree-node"));
       expect(renderedMiddleNode.className.includes("disable-expander")).to.be.eq(false);
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, disableRootNodeCollapse: true })({ node: leafNode, treeActions: {} as TreeActions })));
+      rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, disableRootNodeCollapse: true })({ node: leafNode, treeActions: {} as TreeActions })));
       const renderedLeafNode = await waitFor(() => getByTestId("tree-node"));
       expect(renderedLeafNode.className.includes("disable-expander")).to.be.eq(true);
     });
 
     it("renders nodes with custom `levelOffset` value", async () => {
-      const { getByTestId, ...result } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: rootNode, treeActions: {} as TreeActions }));
+      const { getByTestId, rerender } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: rootNode, treeActions: {} as TreeActions }));
       const renderedRootNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedRootNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("0px");
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: middleNode, treeActions: {} as TreeActions })));
+      rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: middleNode, treeActions: {} as TreeActions })));
       const renderedMiddleNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedMiddleNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("10px");
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: leafNode, treeActions: {} as TreeActions })));
+      rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: leafNode, treeActions: {} as TreeActions })));
       const renderedLeafNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("34px");
+    });
+
+    it("does not select node when checkbox is clicked", async () => {
+      const user = userEvent.setup();
+      const nodeClickSpy = sinon.spy();
+      const checkboxChangeSpy = sinon.spy();
+      const { getByRole } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false })({
+        node: rootNode,
+        treeActions: {
+          onNodeClicked: nodeClickSpy,
+          onNodeCheckboxClicked: checkboxChangeSpy,
+        } as unknown as TreeActions,
+      }));
+
+      const checkbox = await waitFor(() => getByRole("checkbox"));
+      await user.click(checkbox);
+
+      await waitFor(() => {
+        expect(checkboxChangeSpy).to.be.calledOnce;
+        expect(nodeClickSpy).to.not.be.called;
+      });
     });
   });
 });

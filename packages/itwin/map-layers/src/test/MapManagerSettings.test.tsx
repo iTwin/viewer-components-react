@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 /* eslint-disable deprecation/deprecation */
 
-import { assert, expect } from "chai";
+import { assert, expect, should } from "chai";
 import * as enzyme from "enzyme";
 import * as React from "react";
 import * as sinon from "sinon";
@@ -21,6 +21,7 @@ import { SourceMapContext } from "../ui/widget/MapLayerManager";
 import { MapManagerSettings } from "../ui/widget/MapManagerSettings";
 import { TestUtils } from "./TestUtils";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
+import { act, fireEvent, render } from "@testing-library/react";
 
 describe("MapManagerSettings", () => {
   const viewportMock = moq.Mock.ofType<ScreenViewport>();
@@ -177,41 +178,72 @@ describe("MapManagerSettings", () => {
   });
 
   // Disabled slider testing until we find a reliable way to 'move' the slider
-  xit("Transparency slider", () => {
+  it("Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    const component = mountComponent();
 
-    const sliders = component.find(".iui-slider-thumb");
-    sliders.at(0).simulate("keydown", { key: SpecialKey.ArrowRight });
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ transparency: 0.01 }), moq.Times.once());
-    component.unmount();
+    const { container }  =  render(
+      <SourceMapContext.Provider value={{
+        activeViewport: viewportMock.object,
+        loadingSources: false,
+        sources: [],
+        bases: [],
+        refreshFromStyle,
+      }}>
+        <MapManagerSettings />
+      </SourceMapContext.Provider>);
+
+    const sliders = container.querySelectorAll(".iui-slider-thumb");
+    expect(sliders.length).to.eq(2);
+    act(() => {
+      fireEvent.keyUp(sliders[0], { key: "ArrowLeft" });
+    });
+    viewportMock.verify((x) => x.changeBackgroundMapProps({ transparency: 0 }), moq.Times.once());
+
   });
 
-  // Disabled slider testing until we find a reliable way to 'move' the slider
-  xit("Mask Transparency slider", () => {
+  it("Mask Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    const component = mountComponent();
+    const { container }  =  render(
+      <SourceMapContext.Provider value={{
+        activeViewport: viewportMock.object,
+        loadingSources: false,
+        sources: [],
+        bases: [],
+        refreshFromStyle,
+      }}>
+        <MapManagerSettings />
+      </SourceMapContext.Provider>);
 
-    let sliders = component.find(".iui-slider-thumb");
+    const sliders = container.querySelectorAll(".iui-slider-thumb");
+    expect(sliders.length).to.eq(2);
+
+    const sliderThumb = sliders[1];
 
     // Make sure the slider is disabled by default
-    expect(sliders.at(1).props()["aria-disabled"]).to.be.true;
+    expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("true");
 
     // Turn on the mask toggle
-    const toggles = component.find(ToggleSwitch);
-    toggles.at(getToggleIndex("mask")).find("input").simulate("change", { target: { checked: true } });
-    toggles.at(getToggleIndex("overrideMaskTransparency")).find("input").simulate("change", { target: { checked: true } });
+    const toggles = container.querySelectorAll(".iui-toggle-switch");
+    const maskToggle = toggles[getToggleIndex("mask")];
+    should().exist(maskToggle);
+    fireEvent.click(maskToggle);
+    // Enabling the 'mask' toggle should set mask transparency to undefined
+    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: undefined } }), moq.Times.once());
 
-    component.update();
+    const overrideMaskTransToggle = toggles[getToggleIndex("overrideMaskTransparency")];
+    should().exist(overrideMaskTransToggle);
+    fireEvent.click(overrideMaskTransToggle);
 
-    // Make sure the slider is now enabled
-    sliders = component.find(".iui-slider-thumb");
-    expect(sliders.at(1).props()["aria-disabled"]).to.be.false;
-
-    sliders.at(0).simulate("keydown", { key: SpecialKey.ArrowUp });
-
+    // Enabling the 'overrideMaskTransparency' toggle should set mask transparency to 0
     viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }), moq.Times.once());
-    component.unmount();
+
+    expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("false");
+
+    // Make sure the slider event are handled
+    act(() => {
+      fireEvent.keyUp(sliderThumb, { key: "ArrowLeft" });
+    });
+    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }), moq.Times.exactly(2));
   });
 
   it("Locatable toggle", () => {

@@ -8,6 +8,8 @@ import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
+import { render } from "@testing-library/react";
+import userEvents from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
 
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
@@ -127,4 +129,11 @@ export function createResolvablePromise<T>() {
   let resolve: (value: T) => void = () => {};
   const promise = new Promise<T>((resolvePromise) => {resolve = resolvePromise;});
   return { promise, resolve };
+}
+
+export function renderWithUser(...args: Parameters<typeof render>): ReturnType<typeof render> & { user: ReturnType<typeof userEvents["setup"]> } {
+  return {
+    user: userEvents.setup(),
+    ...render(...args),
+  };
 }

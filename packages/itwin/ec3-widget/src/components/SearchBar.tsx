@@ -42,6 +42,7 @@ export const SearchBar = ({
             data-testid="ec3-close-search-bar"
             onClick={() => setSearchBarClosing(true)}
             styleType="borderless"
+            title="Clear Search"
           >
             <SvgCloseSmall />
           </IconButton>
@@ -53,7 +54,7 @@ export const SearchBar = ({
       />{" "}
     </div>
   ) : (
-    <IconButton styleType="borderless" onClick={() => setSearchBarOpened(true)}>
+    <IconButton styleType="borderless" title="Search" onClick={() => setSearchBarOpened(true)}>
       <SvgSearch />
     </IconButton>
   );

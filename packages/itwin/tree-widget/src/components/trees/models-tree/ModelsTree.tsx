@@ -4,21 +4,23 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
+import classNames from "classnames";
 import { useCallback, useEffect, useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
 import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { ClassGroupingOption } from "../Common";
+import { ClassGroupingOption } from "../common/Types";
+import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
-import { createRuleset, createSearchRuleset } from "./Utils";
+import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps } from "../Common";
+import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
 
 const PAGING_SIZE = 20;
@@ -35,10 +37,12 @@ export interface ModelsTreeHierarchyConfiguration {
    * Defaults to `bis.GeometricElement3d`. It's expected for the given class to derive from it.
    */
   elementClassSpecification?: SingleSchemaClassSpecification;
+  /** Should the tree show models without elements. */
+  showEmptyModels?: boolean;
 }
 
 /**
- * Props for [[ModelsTree]] component
+ * Props for [[ModelsTree]] component.
  * @public
  */
 export interface ModelsTreeProps extends BaseFilterableTreeProps {
@@ -50,10 +54,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * Active view used to determine and control visibility
    */
   activeView: Viewport;
-  /**
-   * Ref to the root HTML element used by this component
-   */
-  rootElementRef?: React.Ref<HTMLDivElement>;
   /**
    * Configuration options for the hierarchy loaded in the component.
    */
@@ -97,6 +97,9 @@ export function ModelsTree(props: ModelsTreeProps) {
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const treeRenderer = createVisibilityTreeRenderer({
+    contextMenuItems: props.contextMenuItems,
+    nodeLabelRenderer: props.nodeLabelRenderer,
+    density: props.density,
     nodeRendererProps: {
       iconsEnabled: true,
       descriptionEnabled: false,
@@ -116,7 +119,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }, []);
 
   return (
-    <div className="tree-widget-visibility-tree-base" ref={props.rootElementRef}>
+    <div className={classNames("tree-widget-visibility-tree-base", "tree-widget-tree-container")}>
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}
@@ -134,15 +137,23 @@ export function ModelsTree(props: ModelsTreeProps) {
   );
 }
 
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
+  addCustomTreeNodeItemLabelRenderer,
+  addTreeNodeItemCheckbox,
+  addModelsTreeNodeItemIcons,
+]);
+
 function useModelsTreeNodeLoader(props: ModelsTreeProps) {
   const rulesets = {
     general: useMemo(() => createRuleset({
       enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
       elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-    }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification]),
+      showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+    }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels]),
     search: useMemo(() => createSearchRuleset({
       elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-    }), [props.hierarchyConfig?.elementClassSpecification]),
+      showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+    }), [props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels]),
   };
 
   const { nodeLoader, onItemsRendered } = usePresentationTreeNodeLoader({
@@ -151,12 +162,14 @@ function useModelsTreeNodeLoader(props: ModelsTreeProps) {
     appendChildrenCountForGroupingNodes: (props.hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
+    customizeTreeNodeItem,
   });
   const { nodeLoader: searchNodeLoader, onItemsRendered: onSearchItemsRendered } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: rulesets.search,
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
+    customizeTreeNodeItem,
   });
 
   const activeNodeLoader = props.filterInfo?.filter ? searchNodeLoader : nodeLoader;

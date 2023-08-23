@@ -3,16 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import classNames from "classnames";
 import { useEffect } from "react";
-import { TreeImageLoader, TreeNodeRenderer, TreeRenderer } from "@itwin/components-react";
+import { TreeImageLoader, TreeNodeRenderer } from "@itwin/components-react";
 import { Checkbox } from "@itwin/itwinui-react";
 import { useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
-import classNames from "classnames";
+import { TreeRenderer } from "./common/TreeRenderer";
 
+import type { TreeRendererBaseProps } from "./common/TreeRenderer";
 import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
 import type { NodeCheckboxRenderProps } from "@itwin/core-react";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { VisibilityTreeFilterInfo } from "./Common";
+import type { VisibilityTreeFilterInfo } from "./common/Types";
 
 /**
  * This constant is taken from `@itwin/core-react`.
@@ -26,7 +28,7 @@ const EXPANSION_TOGGLE_WIDTH = 24;
  * Props for visibility tree renderer.
  * @public
  */
-export interface VisibilityTreeRendererProps {
+export interface VisibilityTreeRendererProps extends TreeRendererBaseProps {
   /** Props for single node renderer. */
   nodeRendererProps: VisibilityTreeNodeRendererProps;
 }
@@ -60,14 +62,9 @@ export interface VisibilityTreeNodeRendererProps {
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
  * @public
  */
-export function createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps) {
-  return function VisibilityTreeRenderer(props: TreeRendererProps) {
-    return (
-      <TreeRenderer
-        {...props}
-        nodeRenderer={createVisibilityTreeNodeRenderer(nodeRendererProps)}
-      />
-    );
+export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps) {
+  return function VisibilityTreeRenderer(treeProps: TreeRendererProps) {
+    return <TreeRenderer {...treeProps} {...restProps} nodeRenderer={createVisibilityTreeNodeRenderer(nodeRendererProps)} />;
   };
 }
 
@@ -86,7 +83,7 @@ export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRoot
         node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }} // if we want to disable TreeNodeRenderer style calculations for tree nodes, we need to override these values.
         checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
           <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
-            <VisibilityTreeNodeCheckbox { ...checkboxProps }/>
+            <VisibilityTreeNodeCheckbox {...checkboxProps} />
           </div>
         )}
         descriptionEnabled={descriptionEnabled}
@@ -107,6 +104,7 @@ export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
     variant="eyeball"
     checked={props.checked}
     onChange={(e) => props.onChange(e.currentTarget.checked)}
+    onClick={props.onClick}
     disabled={props.disabled}
     title={props.title}
   />;

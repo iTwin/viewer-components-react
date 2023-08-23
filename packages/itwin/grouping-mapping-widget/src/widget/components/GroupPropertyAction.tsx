@@ -439,11 +439,11 @@ export const GroupPropertyAction = ({
                 }}
                 svgIcon={
                   searched ? (
-                    <IconButton onClick={clearSearch} styleType="borderless">
+                    <IconButton onClick={clearSearch} styleType="borderless" title='Clear Search'>
                       <SvgClose />
                     </IconButton>
                   ) : (
-                    <IconButton onClick={startSearch} styleType="borderless">
+                    <IconButton onClick={startSearch} styleType="borderless" title='Search'>
                       <SvgSearch />
                     </IconButton>
                   )

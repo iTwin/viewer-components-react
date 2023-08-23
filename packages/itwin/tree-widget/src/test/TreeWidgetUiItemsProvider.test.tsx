@@ -4,14 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { createRef } from "react";
 import sinon from "sinon";
-import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
-import { render } from "@testing-library/react";
+import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework } from "@itwin/appui-react";
+import { BeEvent } from "@itwin/core-bentley";
+import { render, waitFor } from "@testing-library/react";
+import * as selectableTreeModule from "../components/SelectableTree";
 import * as categoriesTreeComponents from "../components/trees/category-tree/CategoriesTreeComponent";
 import * as modelsTreeComponents from "../components/trees/models-tree/ModelsTreeComponent";
-import * as widgetComponent from "../components/TreeWidgetComponent";
 import { TreeWidgetUiItemsProvider } from "../components/TreeWidgetUiItemsProvider";
+import * as useTreeTransientStateModule from "../components/utils/UseTreeTransientState";
+import { TreeWidget } from "../TreeWidget";
 import { TestUtils } from "./TestUtils";
+
+import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("TreeWidgetUiItemsProvider", () => {
   before(async () => {
@@ -20,6 +26,11 @@ describe("TreeWidgetUiItemsProvider", () => {
 
   after(() => {
     TestUtils.terminate();
+  });
+
+  beforeEach(() => {
+    const ref = createRef<HTMLDivElement>();
+    sinon.stub(useTreeTransientStateModule, "useTreeTransientState").callsFake(() => ref);
   });
 
   afterEach(() => {
@@ -46,7 +57,7 @@ describe("TreeWidgetUiItemsProvider", () => {
   });
 
   it("renders default trees", () => {
-    const widgetComponentStub = sinon.stub(widgetComponent, "TreeWidgetComponent").returns(null);
+    const widgetComponentStub = sinon.stub(selectableTreeModule, "SelectableTree").returns(null);
     const modelsTreeComponentStub = sinon.stub(modelsTreeComponents, "ModelsTreeComponent").returns(null);
     const categoriesTreeComponentStub = sinon.stub(categoriesTreeComponents, "CategoriesTreeComponent").returns(null);
     const provider = new TreeWidgetUiItemsProvider();
@@ -65,8 +76,8 @@ describe("TreeWidgetUiItemsProvider", () => {
   });
 
   it("renders supplied trees", () => {
-    const widgetComponentStub = sinon.stub(widgetComponent, "TreeWidgetComponent").returns(null);
-    const trees: widgetComponent.TreeDefinition[] = [{
+    const widgetComponentStub = sinon.stub(selectableTreeModule, "SelectableTree").returns(null);
+    const trees: selectableTreeModule.TreeDefinition[] = [{
       id: "tree",
       getLabel: () => "Tree Label",
       render: () => <div>Tree Content</div>,
@@ -78,5 +89,29 @@ describe("TreeWidgetUiItemsProvider", () => {
     expect(widgetComponentStub).to.be.called;
     const [props] = widgetComponentStub.args[0];
     expect(props.trees).to.be.eq(trees);
+  });
+
+  it("renders error message if tree component throws", async () => {
+    UiFramework.setIModelConnection({
+      isBlankConnection: () => true,
+      selectionSet: {
+        onChanged: new BeEvent(),
+      },
+    } as IModelConnection);
+
+    function TestTree(): React.ReactElement {
+      throw new Error("Error");
+    }
+
+    const trees: selectableTreeModule.TreeDefinition[] = [{
+      id: "tree",
+      getLabel: () => "Tree Label",
+      render: () => <TestTree />,
+    }];
+    const provider = new TreeWidgetUiItemsProvider({ trees });
+    const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.Start);
+    const { queryByText } = render(<>{widget.content}</>);
+
+    await waitFor(() => expect(queryByText(TreeWidget.translate("error"))).to.not.be.null);
   });
 });

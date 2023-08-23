@@ -19,8 +19,10 @@ import type { IDisposable } from "@itwin/core-bentley";
  * @public
  */
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
-  filterer: IPropertyDataFilterer;
+  /** Specifies whether child categories should be auto expanded or not. */
   autoExpandChildCategories?: boolean;
+  /** @internal */
+  filterer: IPropertyDataFilterer;
 }
 
 /**

@@ -1,6 +1,58 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 09 Jun 2023 17:54:42 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+
+## 0.18.0
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Minor changes
+
+- Added the `MappingsView` component: a reusable, state-agnostic UI component for managing Mappings.
+- Typescript version bump to ^4.5.0
+
+### Patches
+
+- Added a Progress bar when Color By Group
+
+## 0.17.5
+Wed, 02 Aug 2023 12:11:30 GMT
+
+### Patches
+
+- Modified operator validation delay time and behavior
+
+## 0.17.4
+Wed, 26 Jul 2023 21:49:07 GMT
+
+### Patches
+
+- Adds an informational icon that the user can hover over to learn about custom calculation formulas. Also adds a placeholder to the formula Textarea with an example formula.
+
+## 0.17.3
+Mon, 24 Jul 2023 17:26:29 GMT
+
+### Patches
+
+- Added tooltips to buttons.
+
+## 0.17.2
+Thu, 20 Jul 2023 20:15:04 GMT
+
+### Patches
+
+- Made Selected Items section expand by default
+- Made group creation options fully shown when there is space
+- Fixed unicode bug to meet OData simple identifier requirement
+
+## 0.17.1
+Tue, 18 Jul 2023 14:40:24 GMT
+
+### Patches
+
+- Added a dropdown arrow for the Add Group button.
+- Fixed Color Legend not appearing bug.
+- Fixed Enable/Disable Extraction bug
+- Added a modal to confirm a property name change.
 
 ## 0.17.0
 Fri, 09 Jun 2023 17:54:42 GMT

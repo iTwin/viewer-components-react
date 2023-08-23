@@ -2,11 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .rcw-delete-modal-body-text {
   display: flex;
-  gap: $iui-xs;
+  gap: var(--iui-size-2xs);
   flex-wrap: wrap;
 
   >strong {
@@ -15,5 +14,5 @@
 }
 
 .rcw-loading-delete {
-  margin-right: $iui-s;
+  margin-right: var(--iui-size-xs);
 }

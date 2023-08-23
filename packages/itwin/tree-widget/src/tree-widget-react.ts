@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 export * from "./TreeWidget";
-export * from "./components/TreeWidgetComponent";
+export * from "./components/SelectableTree";
 export * from "./components/trees";
 export * from "./components/TreeWidgetUiItemsProvider";
+export * from "./components/utils/UseTreeTransientState";
