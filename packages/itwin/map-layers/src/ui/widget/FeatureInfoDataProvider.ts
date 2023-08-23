@@ -43,7 +43,8 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
     this._removeListener();
   }
 
-  private async _handleMapHit(mapHit: HitDetail) {
+  private async _handleMapHit(_mapHit: HitDetail) {
+    /*
     this._data = new SimplePropertyData();
 
     let recordCount = 0;
@@ -91,6 +92,7 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
     }
     this.onDataUpdated.raiseEvent({ recordCount });
     this.onDataChanged.raiseEvent();
+    */
   }
 
   public addSubCategory(categoryName: string) {
