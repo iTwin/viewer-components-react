@@ -53,6 +53,33 @@ describe("<ElementList />", () => {
     expect(getLabelsStub).to.be.calledOnce;
   });
 
+
+  it("loads and orders elements by labels", async () => {
+    const instanceKeys =
+      [
+        { id: "0x0", className: "B_Second" },
+        { id: "0x0", className: "A_First" },
+        { id: "0x0", className: "C_Last" },
+      ]
+
+    const expectedLabels = instanceKeys.map(buildLabel).sort();
+
+    const elementList = render(
+      <ElementList
+        imodel={imodel}
+        instanceKeys={instanceKeys}
+        onBack={() => {}}
+        onSelect={() => {}}
+      />
+    );
+
+    var listItems = await elementList.findAllByRole("listitem");
+
+    listItems.forEach((item, index) => {
+      expect(item.textContent).to.be.equal(expectedLabels[index]);
+    });
+  });
+
   it("loads instance labels in chunks", async () => {
     const instanceKeys = Array(1500).fill(0).map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
     const expectedLabels = instanceKeys.map(buildLabel);

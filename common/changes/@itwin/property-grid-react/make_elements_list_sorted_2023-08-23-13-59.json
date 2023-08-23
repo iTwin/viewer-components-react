@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Sort selected items by their label in an ascending order.  ",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
