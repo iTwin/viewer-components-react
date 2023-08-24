@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/ec3-widget-react",
-      "comment": "Migrated UI items for iTwin UI 2.x and iTwinJS 4.x upgrade.",
-      "type": "minor"
+      "comment": "Truncated long assembly name when in narrow width.",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/ec3-widget-react"
