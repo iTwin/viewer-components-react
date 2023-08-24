@@ -35,6 +35,7 @@ export interface MappingsOperationsProps extends GroupingMappingApiConfig {
 }
 
 export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient }: MappingsOperationsProps) => {
+  const [showImportModal, setShowImportModal] = useState<boolean | undefined>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
@@ -71,5 +72,5 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     await refresh();
   };
 
-  return { mappings, isLoading, refresh, toggleExtraction, onDelete, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
+  return { mappings, isLoading, refresh, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
 };
