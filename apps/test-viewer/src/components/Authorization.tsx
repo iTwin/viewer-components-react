@@ -13,6 +13,8 @@ export enum AuthorizationState {
   Authorized
 }
 
+const shouldUseDemoClient = !!process.env.IMJS_DEMO_CLIENT;
+
 class DemoAuthClient implements WebViewerAuthorizationClient {
   readonly onAccessTokenChanged: BeEvent<(token: AccessToken) => void> = new BeEvent();
   private accessToken: Promise<string> | undefined = undefined;
@@ -54,19 +56,19 @@ class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
 
   public async signInSilent() {
     if (isBrowserAuthorizationClient(this._client)) {
-      this._client.signInSilent();
+      await this._client.signInSilent();
     }
   }
 
   public async signInRedirect() {
     if (isBrowserAuthorizationClient(this._client)) {
-      this._client.signInRedirect();
+      await this._client.signInRedirect();
     }
   }
 
   public async handleSigninCallback() {
     if (isBrowserAuthorizationClient(this._client)) {
-      this._client.handleSigninCallback();
+      await this._client.handleSigninCallback();
     }
   }
 
@@ -81,19 +83,20 @@ export interface AuthorizationContext {
 }
 
 const authorizationContext = createContext<AuthorizationContext>({
-  client: new ViewerAuthorizationClient(true),
+  client: new ViewerAuthorizationClient(shouldUseDemoClient),
   state: AuthorizationState.Authorized,
-})
+});
 
 export function useAuthorizationContext() {
   return useContext(authorizationContext);
 }
 
-const shouldUseDemoClient = !!process.env.IMJS_DEMO_CLIENT;
 const createAuthClient = (): AuthorizationContext => ({
-  client: new ViewerAuthorizationClient(shouldUseDemoClient),
-  state: shouldUseDemoClient ? AuthorizationState.Authorized : AuthorizationState.Pending
-});
+    client: new ViewerAuthorizationClient(shouldUseDemoClient),
+    state: shouldUseDemoClient
+      ? AuthorizationState.Authorized
+      : AuthorizationState.Pending,
+  });
 
 export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
   const [contextValue, setContextValue] = useState<AuthorizationContext>(() => createAuthClient());
