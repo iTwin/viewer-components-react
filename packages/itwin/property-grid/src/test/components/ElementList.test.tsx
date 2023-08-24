@@ -53,14 +53,13 @@ describe("<ElementList />", () => {
     expect(getLabelsStub).to.be.calledOnce;
   });
 
-
   it("loads and orders elements by labels", async () => {
     const instanceKeys =
       [
         { id: "0x0", className: "B_Second" },
         { id: "0x0", className: "A_First" },
         { id: "0x0", className: "C_Last" },
-      ]
+      ];
 
     const expectedLabels = instanceKeys.map(buildLabel).sort();
 
@@ -73,8 +72,7 @@ describe("<ElementList />", () => {
       />
     );
 
-    var listItems = await elementList.findAllByRole("listitem");
-
+    const listItems = await elementList.findAllByRole("listitem");
     listItems.forEach((item, index) => {
       expect(item.textContent).to.be.equal(expectedLabels[index]);
     });

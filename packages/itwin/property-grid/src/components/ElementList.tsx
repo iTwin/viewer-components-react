@@ -30,9 +30,9 @@ export interface ElementListProps {
  * Props for data that is needed for displaying an element in a list.
  * @internal
  */
-type RowElementData = {
-  label: string,
-  instanceKey: InstanceKey,
+interface RowElementData {
+  label: string;
+  instanceKey: InstanceKey;
 }
 
 /**
@@ -89,10 +89,10 @@ async function getSortedLabelToInstanceKeyPairs(labelsProvider: PresentationLabe
   const labelKeyPairs: RowElementData[] = [];
 
   labels.forEach((label, index) => {
-    labelKeyPairs.push({ label: label, instanceKey: instanceKeys[index] });
-  })
+    labelKeyPairs.push({ label, instanceKey: instanceKeys[index] });
+  });
 
-  return labelKeyPairs.sort((a, b) => { return ((a.label < b.label) ? -1 : ((a.label == b.label ? 0 : 1))) });
+  return labelKeyPairs.sort((a, b) => { return ((a.label < b.label) ? -1 : ((a.label === b.label ? 0 : 1))); });
 }
 
 /** Gets labels from presentation layer, chunks up requests if necessary */
