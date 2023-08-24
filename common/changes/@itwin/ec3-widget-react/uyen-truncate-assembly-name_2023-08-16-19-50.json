@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/ec3-widget-react",
+      "comment": "Truncated long assembly name when in narrow width.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/ec3-widget-react"
+}
