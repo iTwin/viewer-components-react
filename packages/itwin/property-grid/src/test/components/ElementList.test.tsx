@@ -63,7 +63,7 @@ describe("<ElementList />", () => {
 
     const expectedLabels = instanceKeys.map(buildLabel).sort();
 
-    const elementList = render(
+    const { findAllByRole } = render(
       <ElementList
         imodel={imodel}
         instanceKeys={instanceKeys}
@@ -72,9 +72,9 @@ describe("<ElementList />", () => {
       />
     );
 
-    const listItems = await elementList.findAllByRole("listitem");
+    const listItems = await findAllByRole("listitem");
     listItems.forEach((item, index) => {
-      expect(item.textContent).to.be.equal(expectedLabels[index]);
+       expect(item.textContent).to.be.equal(expectedLabels[index]);
     });
   });
 

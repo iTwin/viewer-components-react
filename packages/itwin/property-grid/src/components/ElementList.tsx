@@ -52,7 +52,7 @@ export function ElementList({
 
   React.useEffect(() => {
     const createRowElementData = async () => {
-      const sortedRowElementData = await getSortedLabelToInstanceKeyPairs(labelsProvider, instanceKeys);
+      const sortedRowElementData = await getSortedLabelInstanceKeyPairs(labelsProvider, instanceKeys);
       setData(sortedRowElementData);
     };
 
@@ -84,7 +84,7 @@ export function ElementList({
 }
 
 /** Queries labels and orders Label-InstanceKey pairs in ascending order */
-async function getSortedLabelToInstanceKeyPairs(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
+async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
   const labels = await getLabels(labelsProvider, instanceKeys);
   const labelKeyPairs: RowElementData[] = [];
 
@@ -92,7 +92,15 @@ async function getSortedLabelToInstanceKeyPairs(labelsProvider: PresentationLabe
     labelKeyPairs.push({ label, instanceKey: instanceKeys[index] });
   });
 
-  return labelKeyPairs.sort((a, b) => { return ((a.label < b.label) ? -1 : ((a.label === b.label ? 0 : 1))); });
+  return labels
+  .map((label, index) => ({ label, instanceKey: instanceKeys[index] }))
+  .sort((a, b) => {
+    return a.label < b.label
+      ? -1
+      : a.label == b.label
+        ? 0
+        : 1;
+  });
 }
 
 /** Gets labels from presentation layer, chunks up requests if necessary */
