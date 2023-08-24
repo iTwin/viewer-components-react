@@ -1,6 +1,11 @@
 # Change Log - @itwin/breakdown-trees-react
 
-This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Aug 2023 14:39:05 GMT and should not be manually modified.
+
+## 0.6.6
+Tue, 22 Aug 2023 14:39:05 GMT
+
+_Version update only_
 
 ## 0.6.5
 Thu, 17 Aug 2023 14:42:37 GMT

@@ -19,10 +19,10 @@ import type { InstanceSelectionProps } from "../../hooks/UseInstanceSelection";
 describe("useInstanceSelection", () => {
   const imodel = {} as IModelConnection;
 
-  const parentKey: InstanceKey = { id: "0x1", className: "ParentClass" };
-  const childKey: InstanceKey = { id: "0x2", className: "ChildClass" };
-  const grandChildKey: InstanceKey = { id: "0x3", className: "GranChildClass" };
-  const noParentKey: InstanceKey = { id: "0x4", className: "NoParentElementClass" };
+  const parentKey: InstanceKey = { id: "0x1", className: "TestClass" };
+  const childKey: InstanceKey = { id: "0x2", className: "TestClass" };
+  const grandChildKey: InstanceKey = { id: "0x3", className: "TestClass" };
+  const noParentKey: InstanceKey = { id: "0x4", className: "TestClass" };
 
   let selectionManager: ReturnType<typeof stubSelectionManager>;
 
