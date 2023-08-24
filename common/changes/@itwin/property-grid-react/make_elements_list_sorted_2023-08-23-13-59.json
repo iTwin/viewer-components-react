@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Sort selected elements list by label in an ascending order. ",
+      "comment": "Sort selected elements list by label in an ascending order.",
       "type": "minor"
     }
   ],
