@@ -93,14 +93,14 @@ async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabels
   });
 
   return labels
-  .map((label, index) => ({ label, instanceKey: instanceKeys[index] }))
-  .sort((a, b) => {
-    return a.label < b.label
-      ? -1
-      : a.label == b.label
-        ? 0
-        : 1;
-  });
+    .map((label, index) => ({ label, instanceKey: instanceKeys[index] }))
+    .sort((a, b) => {
+      return a.label < b.label
+        ? -1
+        : a.label === b.label
+          ? 0
+          : 1;
+    });
 }
 
 /** Gets labels from presentation layer, chunks up requests if necessary */

@@ -74,7 +74,7 @@ describe("<ElementList />", () => {
 
     const listItems = await findAllByRole("listitem");
     listItems.forEach((item, index) => {
-       expect(item.textContent).to.be.equal(expectedLabels[index]);
+      expect(item.textContent).to.be.equal(expectedLabels[index]);
     });
   });
 
