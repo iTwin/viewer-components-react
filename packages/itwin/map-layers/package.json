@@ -56,6 +56,7 @@
     "@itwin/core-telemetry": "^4.1.1",
     "@itwin/eslint-plugin": "^4.0.0-dev.44",
     "@itwin/imodel-components-react": "^4.0.1",
+    "@itwin/itwinui-icons-react": "^2.6.0",
     "@itwin/itwinui-variables": "^2.0.0",
     "@itwin/itwinui-react": "^2.11.2",
     "@itwin/map-layers-formats": "^4.1.1",

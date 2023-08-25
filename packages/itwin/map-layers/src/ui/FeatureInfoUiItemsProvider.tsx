@@ -10,12 +10,13 @@ import { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersUI } from "../mapLayers";
 import { IModelApp } from "@itwin/core-frontend";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
+import { SvgAddCircular, SvgMapInfo } from "@itwin/itwinui-icons-react";
 
 export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({
     toolId: MapFeatureInfoTool.toolId,
-    iconSpec: MapFeatureInfoTool.iconSpec,
-    label: () => MapFeatureInfoTool.flyover,
+    iconSpec: <SvgMapInfo/>,
+    label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
     description: () => MapFeatureInfoTool.description,
     execute: async () => { await IModelApp.tools.run(MapFeatureInfoTool.toolId); },
   });
@@ -54,7 +55,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
       widgets.push({
         id: FeatureInfoUiItemsProvider.widgetId,
         label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
-        icon: "icon-map",
+        icon: <SvgMapInfo/>,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
         defaultState: WidgetState.Closed,
       });

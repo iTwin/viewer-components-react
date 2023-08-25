@@ -704,6 +704,7 @@ importers:
       '@itwin/eslint-plugin': ^4.0.0-dev.44
       '@itwin/imodel-components-react': ^4.0.1
       '@itwin/itwinui-icons-color-react': ~1.0.3
+      '@itwin/itwinui-icons-react': ^2.6.0
       '@itwin/itwinui-react': ^2.11.2
       '@itwin/itwinui-variables': ^2.0.0
       '@itwin/map-layers-formats': ^4.1.1
@@ -762,6 +763,7 @@ importers:
       '@itwin/core-telemetry': 4.1.1_@itwin+core-geometry@4.1.1
       '@itwin/eslint-plugin': 4.0.0-dev.48_eslint@7.32.0+typescript@5.0.4
       '@itwin/imodel-components-react': 4.4.0_ed7e2da997c8c6352ed31725fc038a48
+      '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.12.5_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.1.1
       '@itwin/map-layers-formats': 4.1.1_4acfbd8397f5f7653d6b024fc1aa698e
