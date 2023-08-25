@@ -14,10 +14,12 @@ import type { IPresentationPropertyDataProvider } from '@itwin/presentation-comp
 import type { IPropertyDataFilterer } from '@itwin/components-react';
 import type { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
+import type { PropertyCategory } from '@itwin/components-react';
 import type { PropertyDataFilterResult } from '@itwin/components-react';
 import type { PropertyGridContextMenuArgs } from '@itwin/components-react';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import { PropertyRecordDataFiltererBase } from '@itwin/components-react';
+import type { PropertyUpdatedArgs } from '@itwin/components-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
 import { Ref } from 'react';
@@ -154,10 +156,10 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
 }
 
 // @internal
-export function PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, ...props }: PropertyGridContentProps): JSX.Element;
+export function PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, onPropertyUpdated, ...props }: PropertyGridContentProps): JSX.Element;
 
 // @public
-export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
+export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"> {
     // (undocumented)
     className?: string;
     // @internal (undocumented)
@@ -170,6 +172,8 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
     imodel: IModelConnection;
     // (undocumented)
     onBackButton?: () => void;
+    // (undocumented)
+    onPropertyUpdated?: (args: PropertyGridPropertyUpdatedArgs, category: PropertyCategory) => Promise<boolean>;
 }
 
 // @public
@@ -192,6 +196,11 @@ export class PropertyGridManager {
     static initialize(i18n?: Localization): Promise<void>;
     static terminate(): void;
     static translate(key: string, options?: LocalizationOptions): string;
+}
+
+// @public
+export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
+    dataProvider: IPresentationPropertyDataProvider;
 }
 
 // @public
