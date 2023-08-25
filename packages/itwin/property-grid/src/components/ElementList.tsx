@@ -27,6 +27,15 @@ export interface ElementListProps {
 }
 
 /**
+ * Props for data that is needed for displaying an element in a list.
+ * @internal
+ */
+interface RowElementData {
+  label: string;
+  instanceKey: InstanceKey;
+}
+
+/**
  * Shows a list of elements to inspect properties for.
  * @internal
  */
@@ -37,17 +46,17 @@ export function ElementList({
   onSelect,
   className,
 }: ElementListProps) {
-  const [data, setData] = React.useState<string[]>();
+  const [data, setData] = React.useState<RowElementData[]>();
 
   const labelsProvider: PresentationLabelsProvider = React.useMemo(() => new PresentationLabelsProvider({ imodel }), [imodel]);
 
   React.useEffect(() => {
-    const createLabels = async () => {
-      const labels = await getLabels(labelsProvider, instanceKeys);
-      setData(labels);
+    const createRowElementData = async () => {
+      const sortedRowElementData = await getSortedLabelInstanceKeyPairs(labelsProvider, instanceKeys);
+      setData(sortedRowElementData);
     };
 
-    void createLabels();
+    void createRowElementData();
   }, [labelsProvider, instanceKeys]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
@@ -58,20 +67,34 @@ export function ElementList({
         <Text className="property-grid-react-element-list-title" variant="leading">{title}</Text>
       </Header>
       <div className="property-grid-react-element-list-container" role="list">
-        {data?.map((label, index) => (
+        {data?.map((dataItem, index) => (
           <MenuItem
             key={index}
             role="listitem"
             onClick={() => {
-              onSelect(instanceKeys[index]);
+              onSelect(dataItem.instanceKey);
             }}
           >
-            {label}
+            {dataItem.label}
           </MenuItem>
         ))}
       </div>
     </div>
   );
+}
+
+/** Queries labels and orders Label-InstanceKey pairs in ascending order */
+async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
+  const labels = await getLabels(labelsProvider, instanceKeys);
+  const labelKeyPairs: RowElementData[] = [];
+
+  labels.forEach((label, index) => {
+    labelKeyPairs.push({ label, instanceKey: instanceKeys[index] });
+  });
+
+  return labels
+    .map((label, index) => ({ label, instanceKey: instanceKeys[index] }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 /** Gets labels from presentation layer, chunks up requests if necessary */

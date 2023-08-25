@@ -2,6 +2,21 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@itwin/ec3-widget-react_v0.4.1",
+      "date": "Thu, 24 Aug 2023 21:32:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Modified toolbar layout in EC3 widget to be consistent with G&M widget."
+          },
+          {
+            "comment": "Truncated long assembly name when in narrow width."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@itwin/ec3-widget-react_v0.4.0",
       "date": "Fri, 18 Aug 2023 11:01:29 GMT",

@@ -94,7 +94,7 @@ export const MappingsView = ({
                 New
               </Button>
             }
-            {showImportModal && setShowImportModal && <IconButton
+            {showImportModal !== undefined && setShowImportModal && <IconButton
               title={`Import ${displayStrings.mappings}`}
               onClick={() => setShowImportModal(true)}
             >
