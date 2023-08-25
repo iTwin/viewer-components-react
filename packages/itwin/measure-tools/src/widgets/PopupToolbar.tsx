@@ -26,6 +26,7 @@ export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, onClose }: Po
 
   const handleMouseDown = useCallback(() => {
     if (!isClosing && onClose) {
+      onClose();
       setIsClosing(true);
     }
   }, [isClosing, onClose]);

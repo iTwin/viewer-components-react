@@ -10,6 +10,7 @@
   .ec3w-template-details {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: var(--iui-size-s);
     margin-bottom: var(--iui-size-s);
   }

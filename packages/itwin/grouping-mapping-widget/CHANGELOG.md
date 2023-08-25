@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Aug 2023 21:32:34 GMT and should not be manually modified.
+
+## 0.18.1
+Thu, 24 Aug 2023 21:32:34 GMT
+
+### Patches
+
+- Added missing state to restore missing import mapping button to default UI.
 
 ## 0.18.0
 Thu, 17 Aug 2023 14:42:37 GMT
