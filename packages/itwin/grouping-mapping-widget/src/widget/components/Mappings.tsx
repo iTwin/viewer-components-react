@@ -35,6 +35,8 @@ export const Mappings = (props: MappingsProps) => {
     refresh,
     toggleExtraction,
     onDelete,
+    setShowImportModal,
+    showImportModal,
     setShowDeleteModal,
     showDeleteModal,
     isTogglingExtraction,
@@ -63,6 +65,8 @@ export const Mappings = (props: MappingsProps) => {
       onRefresh={refresh}
       onToggleExtraction={toggleExtraction}
       onDelete={onDelete}
+      showImportModal={showImportModal}
+      setShowImportModal={setShowImportModal}
       showDeleteModal={showDeleteModal}
       setShowDeleteModal={setShowDeleteModal}
       isTogglingExtraction={isTogglingExtraction}

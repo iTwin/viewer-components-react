@@ -1,6 +1,14 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 18 Aug 2023 11:01:29 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Aug 2023 14:06:04 GMT and should not be manually modified.
+
+## 1.2.0
+Fri, 25 Aug 2023 14:06:04 GMT
+
+### Minor changes
+
+- Sort selected elements list by label in an ascending order.
+- Improved property editing workflow by adding data provider to `onPropertyUpdated` callback arguments.
 
 ## 1.1.2
 Fri, 18 Aug 2023 11:01:29 GMT

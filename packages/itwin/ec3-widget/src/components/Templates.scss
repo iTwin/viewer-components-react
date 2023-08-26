@@ -54,6 +54,7 @@
   }
 
   .ec3w-search-bar-container {
+    display: flex;
     flex-basis: var(--iui-size-3xl);
     flex-shrink: 1;
     flex-grow: 1;

@@ -8,6 +8,8 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import { render } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { FavoritePropertiesManager, SelectionManager, SelectionScopesManager  } from "@itwin/presentation-frontend";
@@ -78,5 +80,12 @@ export function createResolvablePromise<T>() {
       resolveFn(value);
       await new Promise((resolve) => setTimeout(resolve));
     },
+  };
+}
+
+export function renderWithUser(...args: Parameters<typeof render>): ReturnType<typeof render> & { user: ReturnType<typeof userEvent.setup>} {
+  return {
+    ...render(...args),
+    user: userEvent.setup(),
   };
 }

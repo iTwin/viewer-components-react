@@ -80,6 +80,7 @@ export interface ExtractionMessageData {
 }
 
 export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient }: MappingsOperationsProps) => {
+  const [showImportModal, setShowImportModal] = useState<boolean | undefined>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);

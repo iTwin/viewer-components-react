@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.18.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.18.1",
+      "date": "Thu, 24 Aug 2023 21:32:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added missing state to restore missing import mapping button to default UI."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.18.0",
       "tag": "@itwin/grouping-mapping-widget_v0.18.0",
       "date": "Thu, 17 Aug 2023 14:42:37 GMT",

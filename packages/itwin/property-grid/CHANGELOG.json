@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@itwin/property-grid-react_v1.2.0",
+      "date": "Fri, 25 Aug 2023 14:06:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Sort selected elements list by label in an ascending order."
+          },
+          {
+            "comment": "Improved property editing workflow by adding data provider to `onPropertyUpdated` callback arguments."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.2",
       "tag": "@itwin/property-grid-react_v1.1.2",
       "date": "Fri, 18 Aug 2023 11:01:29 GMT",
