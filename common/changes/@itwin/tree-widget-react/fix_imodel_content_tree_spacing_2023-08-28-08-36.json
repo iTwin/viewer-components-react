@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Fix spacing between expander and label in iModelContentTree Component.",
+      "comment": "Fix spacing between expander and label in iModelContentTree component.",
       "type": "patch"
     }
   ],
