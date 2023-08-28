@@ -132,5 +132,5 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     await mappingClient.deleteMapping(accessToken, iModelId, mapping.id);
     await refresh();
   };
-  return { mappings, isLoading, iconStatus, iconMessage, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, refresh, toggleExtraction, onDelete, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
+  return { mappings, isLoading, iconStatus, iconMessage, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, refresh, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
 };
