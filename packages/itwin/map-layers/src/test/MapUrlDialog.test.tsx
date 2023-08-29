@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { ImageMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
-import { DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NoRenderApp, NotifyMessageDetails, OutputMessagePriority, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+import { DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, NoRenderApp, NotifyMessageDetails, OutputMessagePriority, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { Select } from "@itwin/itwinui-react";
 import { assert, expect } from "chai";
 import * as enzyme from "enzyme";
@@ -123,7 +123,7 @@ describe("MapUrlDialog", () => {
     component.unmount();
   };
 
-  const getOkButton = (component:any) => {
+  const getOkButton = (component: any) => {
     return component.find("button").at(1);
   };
 
