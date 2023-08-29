@@ -52,7 +52,6 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         selectionMode={selectionMode ?? SelectionMode.None}
         eventsHandler={eventHandler}
         model={treeModel}
-        iconsEnabled={true}
         treeRenderer={(treeProps) =>
           <TreeRenderer
             {...treeProps}

@@ -1,6 +1,14 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Fri, 18 Aug 2023 11:01:29 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Aug 2023 21:32:34 GMT and should not be manually modified.
+
+## 0.4.1
+Thu, 24 Aug 2023 21:32:34 GMT
+
+### Patches
+
+- Modified toolbar layout in EC3 widget to be consistent with G&M widget.
+- Truncated long assembly name when in narrow width.
 
 ## 0.4.0
 Fri, 18 Aug 2023 11:01:29 GMT

@@ -29,7 +29,7 @@
     "@itwin/map-layers-formats": "^4.0.6",
     "@itwin/map-layers-auth": "^4.0.6",
     "@itwin/presentation-common": "^4.0.0",
-    "@itwin/presentation-components": "^4.0.0",
+    "@itwin/presentation-components": "^4.1.0",
     "@itwin/presentation-frontend": "^4.0.0",
     "@itwin/property-grid-react": "workspace:*",
     "@itwin/tree-widget-react": "workspace:*",

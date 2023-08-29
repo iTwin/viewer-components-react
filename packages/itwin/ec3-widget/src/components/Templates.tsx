@@ -110,8 +110,9 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
               startIcon={<SvgAdd />}
               onClick={onClickCreate}
               styleType="high-visibility"
+              title="New Template"
             >
-              Create Template
+              New
             </Button>
             <Button
               data-testid="ec3-export-button"
@@ -121,6 +122,8 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
             >
               Export
             </Button>
+          </div>
+          <div className="ec3w-search-bar-container">
             <IconButton
               title="Refresh"
               onClick={refresh}
@@ -129,9 +132,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
             >
               <SvgRefresh />
             </IconButton>
-          </div>
-          <div className="ec3w-search-bar-container" data-testid="ec3-search-bar">
-            <div className="ec3w-search-button">
+            <div className="ec3w-search-button" data-testid="ec3-search-bar">
               <SearchBar
                 searchValue={searchValue}
                 setSearchValue={setSearchValue}
