@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { ImageMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
-import { DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NotifyMessageDetails, OutputMessagePriority, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+import { DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NoRenderApp, NotifyMessageDetails, OutputMessagePriority, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { Select } from "@itwin/itwinui-react";
 import { assert, expect } from "chai";
 import * as enzyme from "enzyme";
@@ -73,8 +73,7 @@ describe("MapUrlDialog", () => {
 
     // We need to click the 'Ok' button a first time to trigger the layer source
     // validation and make the credentials fields appear
-    let okButton = component.find(".core-dialog-buttons").childAt(0);
-    expect(okButton.length).to.equals(1);
+    let okButton = getOkButton(component);
     okButton.simulate("click");
 
     await TestUtils.flushAsyncOperations();
@@ -98,8 +97,7 @@ describe("MapUrlDialog", () => {
     });
 
     // By clicking the 'ok' button we expect the layer to be added to the display style
-    okButton = component.find(".core-dialog-buttons").childAt(0);
-    expect(okButton.length).to.equals(1);
+    okButton = getOkButton(component);
     okButton.simulate("click");
 
     await TestUtils.flushAsyncOperations();
@@ -125,14 +123,17 @@ describe("MapUrlDialog", () => {
     component.unmount();
   };
 
+  const getOkButton = (component:any) => {
+    return component.find("button").at(1);
+  };
+
   before(async () => {
-    await MockRender.App.startup();
+    await NoRenderApp.startup();
     await TestUtils.initialize();
 
   });
 
   after(async () => {
-    await MockRender.App.shutdown();
     TestUtils.terminateUiComponents();
   });
 
@@ -194,9 +195,7 @@ describe("MapUrlDialog", () => {
     expect(allInputs.length).to.be.greaterThan(2);
     allInputs.at(0).simulate("change", { target: { value: sampleWmsLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleWmsLayerSettings?.url } });
-
-    const okButton = component.find(".core-dialog-buttons").childAt(0);
-    expect(okButton.length).to.equals(1);
+    const okButton = getOkButton(component);
     okButton.simulate("click");
 
     await TestUtils.flushAsyncOperations();
@@ -271,7 +270,7 @@ describe("MapUrlDialog", () => {
     allInputs.at(0).simulate("change", { target: { value: sampleLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleLayerSettings?.url } });
 
-    const okButton = component.find(".core-dialog-buttons").childAt(0);
+    const okButton = getOkButton(component);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 

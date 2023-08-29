@@ -23,6 +23,13 @@ const {
 } = require('jsdom');
 global.DOMParser = new JSDOM().window.DOMParser;
 
+global.DOMMatrix = class DOMMatrix {
+  constructor(init) {
+    this.m41 = 0;
+    this.m42 = 0;
+  }
+};
+
 /** Enzyme mount with automatic unmount after the test. */
 let mounted = [];
 const isMounted = Symbol("isMounted");
