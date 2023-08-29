@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Add missing dev dependencies",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
