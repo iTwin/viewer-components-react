@@ -310,6 +310,391 @@ Array [
 ]
 `;
 
+exports[`ModelsTree #integration search hides private models 1`] = `
+Array [
+  Object {
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..hides-private-models",
+        "value": "modelstree-#integrat..hides-private-models",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration search hides subjects with \`Subject.Job.Bridge\` json property 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "extendedData": Object {
+          "icon": "icon-model",
+          "isModel": true,
+        },
+        "filtering": Object {
+          "descriptor": [Function],
+        },
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "Model X",
+            "value": "Model X",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..ridge\`-json-property",
+        "value": "modelstree-#integrat..ridge\`-json-property",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration search hides subjects with \`Subject.Model.Type = "Hierarchy"\` json property 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "extendedData": Object {
+          "icon": "icon-model",
+          "isModel": true,
+        },
+        "filtering": Object {
+          "descriptor": [Function],
+        },
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "Model X",
+            "value": "Model X",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..archy\`-json-property",
+        "value": "modelstree-#integrat..archy\`-json-property",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration search hides subjects with childless models 1`] = `
+Array [
+  Object {
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..ith-childless-models",
+        "value": "modelstree-#integrat..ith-childless-models",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration search shows childless subjects with hidden child models that have \`GraphicalPartition3d.Model.Content\` json property 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "extendedData": Object {
+          "icon": "icon-folder",
+          "isSubject": true,
+        },
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "Subject X",
+            "value": "Subject X",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..ntent\`-json-property",
+        "value": "modelstree-#integrat..ntent\`-json-property",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration search shows childless subjects with hidden child models that have \`PhysicalPartition.Model.Content\` json property 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "extendedData": Object {
+          "icon": "icon-folder",
+          "isSubject": true,
+        },
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "Subject X",
+            "value": "Subject X",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..ntent\`-json-property",
+        "value": "modelstree-#integrat..ntent\`-json-property",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration search shows subjects with child models 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [
+          Object {
+            "extendedData": Object {
+              "icon": "icon-model",
+              "isModel": true,
+            },
+            "filtering": Object {
+              "descriptor": [Function],
+            },
+            "label": PropertyRecord {
+              "property": Object {
+                "displayLabel": "Label",
+                "name": "node_label",
+                "typename": "string",
+              },
+              "value": Object {
+                "displayValue": "Model X",
+                "value": "Model X",
+                "valueFormat": 0,
+              },
+            },
+          },
+        ],
+        "extendedData": Object {
+          "icon": "icon-folder",
+          "isSubject": true,
+        },
+        "hasChildren": true,
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "Subject X",
+            "value": "Subject X",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..ts-with-child-models",
+        "value": "modelstree-#integrat..ts-with-child-models",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration search shows subjects with child models related with subject through \`Subject.Model.TargetPartition\` json property 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [
+          Object {
+            "extendedData": Object {
+              "icon": "icon-model",
+              "isModel": true,
+            },
+            "filtering": Object {
+              "descriptor": [Function],
+            },
+            "label": PropertyRecord {
+              "property": Object {
+                "displayLabel": "Label",
+                "name": "node_label",
+                "typename": "string",
+              },
+              "value": Object {
+                "displayValue": "Model X",
+                "value": "Model X",
+                "valueFormat": 0,
+              },
+            },
+          },
+        ],
+        "extendedData": Object {
+          "icon": "icon-folder",
+          "isSubject": true,
+        },
+        "hasChildren": true,
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "Subject X",
+            "value": "Subject X",
+            "valueFormat": 0,
+          },
+        },
+      },
+      Object {
+        "extendedData": Object {
+          "icon": "icon-model",
+          "isModel": true,
+        },
+        "filtering": Object {
+          "descriptor": [Function],
+        },
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "Model X",
+            "value": "Model X",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "icon": "icon-imodel-hollow-2",
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "modelstree-#integrat..ition\`-json-property",
+        "value": "modelstree-#integrat..ition\`-json-property",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
 exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
 <body
   class="iui-root"
