@@ -1,6 +1,14 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 22 Aug 2023 14:39:05 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Aug 2023 13:48:47 GMT and should not be manually modified.
+
+## 1.1.3
+Tue, 29 Aug 2023 13:48:47 GMT
+
+### Patches
+
+- Fix spacing between expander and label in iModelContentTree component.
+- Fix Models tree search not loading Subject nodes with hidden content models
 
 ## 1.1.2
 Tue, 22 Aug 2023 14:39:05 GMT
