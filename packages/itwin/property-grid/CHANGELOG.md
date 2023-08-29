@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 25 Aug 2023 14:06:04 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Aug 2023 13:48:47 GMT and should not be manually modified.
+
+## 1.3.0
+Tue, 29 Aug 2023 13:48:47 GMT
+
+### Minor changes
+
+- Make selected items list striped.
 
 ## 1.2.0
 Fri, 25 Aug 2023 14:06:04 GMT
