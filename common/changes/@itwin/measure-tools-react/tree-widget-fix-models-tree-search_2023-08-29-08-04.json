@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Bump `@itwin/presentation-components` dev dependency to `4.1.0`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}

@@ -73,7 +73,7 @@
     "@itwin/imodel-components-react": "^4.3.0",
     "@itwin/presentation-backend": "^4.0.0",
     "@itwin/presentation-common": "^4.0.0",
-    "@itwin/presentation-components": "^4.0.0",
+    "@itwin/presentation-components": "^4.1.0",
     "@itwin/presentation-frontend": "^4.0.0",
     "@itwin/presentation-testing": "^4.0.0",
     "@itwin/webgl-compatibility": "^4.0.0",

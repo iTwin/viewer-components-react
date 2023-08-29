@@ -91,7 +91,7 @@
     "@itwin/eslint-plugin": "^3.7.7",
     "@itwin/imodel-components-react": "^4.0.0",
     "@itwin/presentation-common": "^4.0.0",
-    "@itwin/presentation-components": "^4.0.0",
+    "@itwin/presentation-components": "^4.1.0",
     "@itwin/presentation-frontend": "^4.0.0",
     "@itwin/webgl-compatibility": "^4.0.0",
     "@testing-library/dom": "^8.12.0",
