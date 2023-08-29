@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Bump `@itwin/presentation-components` dev dependency to `4.1.0`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
