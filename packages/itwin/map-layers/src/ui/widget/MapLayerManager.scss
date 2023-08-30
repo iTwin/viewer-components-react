@@ -68,10 +68,8 @@ $default-font-size: --iui-font-size-1;
     padding: 10px;
   }
 
-  .map-manager-underlays,
-  .map-manager-overlays {
+  .map-manager-layers {
     display: flex;
-    align-content: center;
 
     .map-manager-attach-layer-button {
       margin-left: auto;
@@ -104,13 +102,14 @@ $default-font-size: --iui-font-size-1;
     margin-top: 0;
   }
 
-  .map-manager-overlays-label {
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .map-manager-underlays-label {
-    display: block;
+  .map-manager-layers-label {
+    // display: block;
+    flex: 1 1;
+    text-overflow: ellipsis;
+    /* Required for text-overflow to do anything */
+    white-space: nowrap;
+    overflow: hidden;
+    margin-left: 2px;
     margin-bottom: 4px;
   }
 

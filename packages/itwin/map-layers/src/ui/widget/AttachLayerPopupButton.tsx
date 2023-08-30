@@ -10,11 +10,12 @@ import { UiFramework } from "@itwin/appui-react";
 import { useSourceMapContext } from "./MapLayerManager";
 import { MapUrlDialog, SourceState } from "./MapUrlDialog";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
-import { Button, Input } from "@itwin/itwinui-react";
+import { Button, IconButton, Input } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
 import { MapSubLayerProps } from "@itwin/core-common";
+import { SvgAdd } from "@itwin/itwinui-icons-react";
 
 // cSpell:ignore droppable Sublayer
 
@@ -531,10 +532,10 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
 
     if (props.buttonType === undefined || props.buttonType === AttachLayerButtonType.Icon) {
       button = (
-        <Button disabled={props.disabled} size="small" styleType="borderless" ref={buttonRef} className="map-manager-attach-layer-button" title={popupOpen ? hideAttachLayerLabel : showAttachLayerLabel}
+        <IconButton disabled={props.disabled} size="small" styleType="borderless" ref={buttonRef} className="map-manager-attach-layer-button" title={popupOpen ? hideAttachLayerLabel : showAttachLayerLabel}
           onClick={togglePopup}>
-          <UiCore.WebFontIcon iconName="icon-add" />
-        </Button>
+          <SvgAdd/>
+        </IconButton>
       );
     } else {
       const determineStyleType = () => {

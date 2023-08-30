@@ -18,12 +18,13 @@ import * as React from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../../MapLayerPreferences";
 import { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
-import { AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { BasemapPanel } from "./BasemapPanel";
 import { MapLayerDroppable } from "./MapLayerDroppable";
 import "./MapLayerManager.scss";
 import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 import { MapLayersUI } from "../../mapLayers";
+import { MapLayerVisibilityAction } from "./MapLayerVisibilityActions";
+import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
 
 /** @internal */
 export interface SourceMapContextProps {
@@ -100,6 +101,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   const [baseSources, setBaseSources] = React.useState<MapLayerSource[] | undefined>();
   const [overlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.OverlayLayers"));
   const [underlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.BackgroundLayers"));
+  const [removeAllLayersTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.DetachAllLayersTitle"));
   const { activeViewport, mapLayerOptions } = props;
   const hideExternalMapLayersSection = mapLayerOptions?.hideExternalMapLayers ? mapLayerOptions.hideExternalMapLayers : false;
   const fetchPublicMapLayerSources = mapLayerOptions?.fetchPublicMapLayerSources ? mapLayerOptions.fetchPublicMapLayerSources : false;
@@ -428,6 +430,25 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       loadMapLayerSettingsFromViewport(activeViewport);
   }, [activeViewport, loadMapLayerSettingsFromViewport]);
 
+  const changeLayerVisibility = React.useCallback((visible: boolean, index: number, isOverlay: boolean) => {
+    activeViewport.displayStyle.changeMapLayerProps({ visible }, {index, isOverlay});
+  }, [activeViewport]);
+
+  const changeAllLayerVisibility = React.useCallback(async (visible: boolean) => {
+    backgroundMapLayers?.forEach(layer => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
+    overlayMapLayers?.forEach(layer => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
+  }, [backgroundMapLayers, overlayMapLayers, changeLayerVisibility]);
+
+  const invertAllLayerVisibility = React.useCallback(async () => {
+    backgroundMapLayers?.forEach(layer => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
+    overlayMapLayers?.forEach(layer => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
+  }, [backgroundMapLayers, overlayMapLayers, changeLayerVisibility]);
+
+  const detachAllLayers = React.useCallback(async (isOverlay:boolean) => {
+    activeViewport.displayStyle.detachMapLayerByIndex({isOverlay, index:-1});
+
+  }, [activeViewport]);
+
   const [baseMapPanelLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.BaseMapPanelTitle"));
 
   return (
@@ -454,12 +475,20 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         <div className="map-manager-basemap">
           <BasemapPanel disabled={!backgroundMapVisible} />
         </div>
+
         {!hideExternalMapLayersSection &&
+        <div>
+         <MapLayerVisibilityAction disabled={!backgroundMapVisible} hideAll={() => changeAllLayerVisibility(false)} showAll={() => changeAllLayerVisibility(true)} invert={async ()=>{invertAllLayerVisibility()}}></MapLayerVisibilityAction>
           <DragDropContext onDragEnd={handleOnMapLayerDragEnd}>
             <div className="map-manager-layer-wrapper">
-              <div className="map-manager-underlays" >
-                <span className="map-manager-underlays-label">{underlaysLabel}</span><AttachLayerPopupButton disabled={!backgroundMapVisible} isOverlay={false} />
-              </div>
+              <MapManagerLayersHeader
+                label={underlaysLabel}
+                detachAllTitle={removeAllLayersTitle}
+                isOverlay={false}
+                disabled={!backgroundMapVisible}
+                disabledDetachAll={!backgroundMapVisible||!backgroundMapLayers?.length}
+                onDetachAllClick= {()=>detachAllLayers(false)}
+                />
               <MapLayerDroppable
                 disabled={!backgroundMapVisible}
                 isOverlay={false}
@@ -473,9 +502,14 @@ export function MapLayerManager(props: MapLayerManagerProps) {
             </div>
 
             <div className="map-manager-layer-wrapper">
-              <div className="map-manager-overlays" >
-                <span className="map-manager-overlays-label">{overlaysLabel}</span><AttachLayerPopupButton disabled={!backgroundMapVisible} isOverlay={true} />
-              </div>
+            <MapManagerLayersHeader
+                label={overlaysLabel}
+                detachAllTitle={removeAllLayersTitle}
+                isOverlay={true}
+                disabled={!backgroundMapVisible}
+                disabledDetachAll={!backgroundMapVisible||!overlayMapLayers?.length}
+                onDetachAllClick= {()=>detachAllLayers(true)}
+                />
               <MapLayerDroppable
                 disabled={!backgroundMapVisible}
                 isOverlay={true}
@@ -488,6 +522,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
                 onItemEdited={handleRefreshFromStyle} />
             </div>
           </DragDropContext>
+        </div>
         }
       </div >
     </SourceMapContext.Provider >

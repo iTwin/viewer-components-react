@@ -12,6 +12,11 @@
   "ColorDialog": {
     "Title": "Specify Base Color"
   },
+  "MapLayerVisibilityActions": {
+    "ShowAllLabel": "Show all",
+    "HideAllLabel": "Hide",
+    "InvertAllLabel": "Invert"
+  },
   "CustomAttach": {
     "LayerWithUrlExistsOverwriting": "Map layer with URL: {{url}} already exists. Updating name from {{oldName}} to {{newName}}.",
     "LayerWithUrlExistsAsITwinSetting": "Map Layer with URL: {{url}} already exists as a iTwin setting under name {{name}}. Cannot overwrite with a model setting!",
@@ -80,6 +85,7 @@
   },
   "Widget": {
     "BackgroundLayers": "Background",
+    "DetachAllLayersTitle": "Detach all map layers",
     "DropLayerLabel": "Drop layer here",
     "Label": "Map Layers",
     "layerOutOfRange": "Invisible at current scale",
