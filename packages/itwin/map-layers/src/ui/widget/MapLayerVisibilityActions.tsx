@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { ButtonGroup, IconButton } from "@itwin/itwinui-react";
-import React from "react";
+import * as React from "react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { MapLayersUI } from "../../mapLayers";
 

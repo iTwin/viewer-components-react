@@ -96,7 +96,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           <Icon iconSpec={activeLayer.visible ? "icon-visibility" : "icon-visibility-hide-2"} />
         </Button>
         {/* Label */}
-        <span className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
+        <span data-testid="map-manager-item-label" className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
           title={outOfRange ? outOfRangeTitle : undefined}
           {...dragProvided.dragHandleProps}
 

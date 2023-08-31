@@ -8,12 +8,13 @@ import { expect, should } from "chai";
 import * as React from "react";
 import * as sinon from "sinon";
 import * as coreFrontend from "@itwin/core-frontend";
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, getAllByTitle, getByText, getByTitle, queryByText, render } from "@testing-library/react";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { GuidString } from "@itwin/core-bentley";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { ViewportMock } from "./ViewportMock";
+import { ImageMapLayerSettings, MapLayerSettings } from "@itwin/core-common";
 
 describe("MapLayerManager", () => {
   const sourceDataset: any = [
@@ -193,4 +194,99 @@ describe("MapLayerManager", () => {
     });
   });
 
+  it("should detach layers", async () => {
+    viewportMock.reset();
+    const backgroundLayerSettings = ImageMapLayerSettings.fromJSON({
+      formatId: "WMS",
+      name: "background",
+      visible: true,
+      transparentBackground: true,
+      subLayers: [{ name: "subLayer1", visible: false }],
+      accessKey: undefined,
+      transparency: 0,
+      url: "https://server/MapServer",
+    });
+    const overlayLayerSetting = ImageMapLayerSettings.fromJSON({...backgroundLayerSettings.toJSON(), name: "overlay"});
+    viewportMock.backgroundLayers = [backgroundLayerSettings];
+    viewportMock.overlayLayers = [overlayLayerSetting];
+    viewportMock.detachMapLayerByIndexFunc = (mapLayerIndex: coreFrontend.MapLayerIndex)=> {( mapLayerIndex.isOverlay? viewportMock.overlayLayers = [] : viewportMock.backgroundLayers = []);}
+    viewportMock.setup();
+    let renderResult = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
+    const {container} = renderResult;
+    await TestUtils.flushAsyncOperations();
+    //console.log(container.innerHTML);
+    let backgroundListItem = queryByText(container, backgroundLayerSettings.name);
+    let overlayListItem = queryByText(container, overlayLayerSetting.name);
+    should().exist(backgroundListItem);
+    should().exist(overlayListItem);
+    let detachAllButtons = getAllByTitle(container, "Widget.DetachAllLayersTitle");
+    should().exist(detachAllButtons);
+    expect(detachAllButtons.length).to.eq(2);
+
+    // Click on the detachAll button of the background section, it should clear layer items *only* in the background section
+    detachAllButtons!.at(0)!.click();
+    await TestUtils.flushAsyncOperations();
+    backgroundListItem = queryByText(container, backgroundLayerSettings.name);
+    overlayListItem = queryByText(container, overlayLayerSetting.name);
+    should().not.exist(backgroundListItem);
+    should().exist(overlayListItem);
+
+    // Now click on the detachAll button of the overlay section, it should clear layer items
+    detachAllButtons = getAllByTitle(container, "Widget.DetachAllLayersTitle");
+    detachAllButtons!.at(1)!.click();
+    await TestUtils.flushAsyncOperations();
+    overlayListItem = queryByText(container, overlayLayerSetting.name);
+    should().not.exist(overlayListItem);
+  });
+
+  it("should change layers visibility", async () => {
+    const checkLayerItemsVisibility = (container: HTMLElement, nbVisibleLayers: number, nbNonVisibleLayers:number) => {
+      const iconVisibilityIcons = container.querySelectorAll("i.icon-visibility");
+      expect(iconVisibilityIcons.length).to.eq(nbVisibleLayers);
+      let iconInvisibilityIcons = container.querySelectorAll("i.icon-visibility-hide-2");
+      expect(iconInvisibilityIcons.length).to.eq(nbNonVisibleLayers);
+    }
+
+    viewportMock.reset();
+    const backgroundLayerSettings = ImageMapLayerSettings.fromJSON({
+      formatId: "WMS",
+      name: "background",
+      visible: true,
+      transparentBackground: true,
+      subLayers: [{ name: "subLayer1", visible: false }],
+      accessKey: undefined,
+      transparency: 0,
+      url: "https://server/MapServer",
+    });
+    const overlayLayerSetting = ImageMapLayerSettings.fromJSON({...backgroundLayerSettings.toJSON(), name: "overlay"});
+    viewportMock.backgroundLayers = [backgroundLayerSettings];
+    viewportMock.overlayLayers = [overlayLayerSetting];
+
+    viewportMock.setup();
+    let renderResult = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
+    const {container} = renderResult;
+    await TestUtils.flushAsyncOperations();
+    checkLayerItemsVisibility(container, 2, 0);
+
+    // Click on the HideAll  it should change the eye icon
+    const hideAllButton = getByTitle(container, "MapLayerVisibilityActions.HideAllLabel");
+    should().exist(hideAllButton)
+    hideAllButton!.click();
+    await TestUtils.flushAsyncOperations();
+    checkLayerItemsVisibility(container, 0, 2);
+
+    // Click on the HideAll  it should change the eye icon
+    const showAllButton = getByTitle(container, "MapLayerVisibilityActions.ShowAllLabel");
+    should().exist(showAllButton)
+    showAllButton!.click();
+    await TestUtils.flushAsyncOperations();
+    checkLayerItemsVisibility(container, 2, 0);
+
+    // Click on the HideAll  it should change the eye icon
+    const InvertButton = getByTitle(container, "MapLayerVisibilityActions.InvertAllLabel");
+    should().exist(InvertButton)
+    InvertButton!.click();
+    await TestUtils.flushAsyncOperations();
+    checkLayerItemsVisibility(container, 0, 2);
+  });
 });
