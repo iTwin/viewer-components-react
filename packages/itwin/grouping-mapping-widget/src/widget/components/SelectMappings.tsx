@@ -14,7 +14,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { IMappingTyped } from "./Mapping";
+import type { IMappingTyped } from "./Mappings";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Added e2e tests for `PropertyGrid` component.",
+      "comment": "Update to AppUI 4.5.0",
       "type": "none"
     }
   ],

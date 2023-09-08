@@ -1,6 +1,28 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 07 Aug 2023 13:36:23 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Aug 2023 13:48:47 GMT and should not be manually modified.
+
+## 1.1.3
+Tue, 29 Aug 2023 13:48:47 GMT
+
+### Patches
+
+- Fix spacing between expander and label in iModelContentTree component.
+- Fix Models tree search not loading Subject nodes with hidden content models
+
+## 1.1.2
+Tue, 22 Aug 2023 14:39:05 GMT
+
+### Patches
+
+- `Trees`: Do not select node when checkbox is clicked.
+
+## 1.1.1
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Patches
+
+- Trees: Fix eye checkbox background when node is selected and hovered.
 
 ## 1.1.0
 Mon, 07 Aug 2023 13:36:23 GMT

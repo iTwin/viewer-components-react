@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .ec3w {
   &-scrollable-table {
@@ -24,8 +23,8 @@
   &-template-container {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
-    margin-bottom: $iui-line-height;
+    gap: var(--iui-size-s);
+    margin-bottom: var(--iui-size-l);
     max-height: 80%;
   }
 
@@ -38,25 +37,25 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: $iui-baseline $iui-m;
   min-height: 0;
 
   .ec3w-toolbar {
     display: flex;
     justify-content: space-between;
-    gap: $iui-s;
-    border-bottom: 1px solid var(--iui-color-background-4);
-    padding-bottom: $iui-baseline;
+    gap: var(--iui-size-xs);
+    border-bottom: 1px solid var(--iui-color-border-subtle);
+    padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
     .ec3w-toolbar-left {
       display: flex;
-      gap: $iui-s;
+      gap: var(--iui-size-xs);
       flex-wrap: wrap;
     }
   }
 
   .ec3w-search-bar-container {
-    flex-basis: $iui-3xl;
+    display: flex;
+    flex-basis: var(--iui-size-3xl);
     flex-shrink: 1;
     flex-grow: 1;
   }

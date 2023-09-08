@@ -1,6 +1,20 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 24 Jul 2023 17:26:29 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Aug 2023 14:39:05 GMT and should not be manually modified.
+
+## 0.14.1
+Tue, 22 Aug 2023 14:39:05 GMT
+
+### Patches
+
+- Fix measurement action toolbar to close for scroll/click outside
+
+## 0.14.0
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Minor changes
+
+- Switch to Toolbar instead of ToolbarComposer for Measure Actions toolbar
 
 ## 0.13.0
 Mon, 24 Jul 2023 17:26:29 GMT

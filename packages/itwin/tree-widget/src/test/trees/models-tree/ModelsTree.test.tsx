@@ -16,17 +16,17 @@ import { KeySet, LabelDefinition } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel, createFileNameFromString, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
+import { ClassGroupingOption } from "../../../components/trees/common/Types";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import { createRuleset } from "../../../components/trees/models-tree/Utils";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
-import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement } from "../../IModelUtils";
+import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, renderWithUser, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
-import { ClassGroupingOption } from "../../../components/trees/common/Types";
 
 import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTree";
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -224,6 +224,34 @@ describe("ModelsTree", () => {
         visibilityHandlerMock.verify(async (x) => x.changeVisibility(node, true), moq.Times.once());
       });
 
+      it("respects `hierarchyConfig` prop", async () => {
+        const createRulesetSpy = sinon.stub(modelsTreeUtils, "createRuleset").returns({
+          id: "testRulesetId",
+          rules: [],
+        });
+        const hierarchyConfig: ModelsTreeHierarchyConfiguration = {
+          enableElementsClassGrouping: ClassGroupingOption.YesWithCounts,
+          elementClassSpecification: {
+            schemaName: "testSchemaName",
+            className: "testClassName",
+          },
+          showEmptyModels: false,
+        };
+        render(
+          <ModelsTree
+            {...sizeProps}
+            iModel={imodelMock.object}
+            modelsVisibilityHandler={visibilityHandlerMock.object}
+            activeView={mockViewport().object}
+            hierarchyConfig={hierarchyConfig}
+          />
+        );
+        await waitFor(() => expect(createRulesetSpy).to.be.calledWith({
+          ...hierarchyConfig,
+          enableElementsClassGrouping: true, // `createRuleset` takes a boolean for this prop - counts are handled after the nodes are loaded
+        }));
+      });
+
       describe("selection", () => {
         it("adds node to unified selection", async () => {
           const element = createElementNode();
@@ -369,6 +397,8 @@ describe("ModelsTree", () => {
   });
 
   describe("#integration", () => {
+    const createRuleset = modelsTreeUtils.createRuleset;
+
     beforeEach(async () => {
       await initializePresentationTesting({
         backendProps: {
@@ -440,32 +470,162 @@ describe("ModelsTree", () => {
       expect(hierarchy).to.matchSnapshot();
     });
 
-    it("createRuleset uses hierarchyConfig from props when provided", async () => {
-      const visibilityChangeEvent = new BeEvent<VisibilityChangeListener>();
-      const visibilityHandlerMock = moq.Mock.ofType<ModelsVisibilityHandler>();
-      visibilityHandlerMock.setup((x) => x.onVisibilityChange).returns(() => visibilityChangeEvent);
-      const createRulesetSpy = sinon.stub(modelsTreeUtils, "createRuleset").returns({
-        id: "testRulesetId",
-        rules: [],
+    describe("search", () => {
+      const createSearchRuleset = modelsTreeUtils.createSearchRuleset;
+
+      it("hides subjects with `Subject.Job.Bridge` json property", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // hidden - `Subject.Job.Bridge` json property
+            - Model X (with elements)      // visible
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Job: { Bridge: "Test" } } } });
+          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
+          addPhysicalObject(builder, modelX, category);
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
       });
-      const hierarchyConfig: ModelsTreeHierarchyConfiguration = {
-        enableElementsClassGrouping: ClassGroupingOption.YesWithCounts,
-        elementClassSpecification: {
-          schemaName: "testSchemaName",
-          className: "testClassName",
-        },
-        showEmptyModels: false,
-      };
-      render(
-        <ModelsTree
-          {...sizeProps}
-          iModel={imodelMock.object}
-          modelsVisibilityHandler={visibilityHandlerMock.object}
-          activeView={mockViewport().object}
-          hierarchyConfig={hierarchyConfig}
-        />
-      );
-      await waitFor(() => expect(createRulesetSpy).to.be.calledWith({ enableElementsClassGrouping: true, elementClassSpecification: { schemaName: "testSchemaName", className: "testClassName" }, showEmptyModels: false }));
+
+      it("hides subjects with `Subject.Model.Type = \"Hierarchy\"` json property", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // hidden - `Subject.Model.Type = \"Hierarchy\"` json property
+            - Model X (with elements)      // visible
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } } });
+          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
+          addPhysicalObject(builder, modelX, category);
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
+      });
+
+      it("hides subjects with childless models", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // hidden - no child nodes
+            - Model X (no elements)        // hidden - no elements
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
+          addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
+      });
+
+      it("shows subjects with child models", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X (with elements)      // visible
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
+          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
+          addPhysicalObject(builder, modelX, category);
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
+      });
+
+      it("shows subjects with child models related with subject through `Subject.Model.TargetPartition` json property", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X                      // visible - related through json property
+          - Model X                        // visible - related through direct relationship
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+          const partitionX = addPartition(builder, "BisCore:PhysicalPartition", "Model X", IModel.rootSubjectId);
+          const modelX = addModel(builder, "BisCore:PhysicalModel", partitionX);
+          addPhysicalObject(builder, modelX, category);
+          addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Model: { TargetPartition: partitionX } } } });
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
+      });
+
+      it("shows childless subjects with hidden child models that have `PhysicalPartition.Model.Content` json property", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
+          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }));
+          addPhysicalObject(builder, modelX, category);
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
+      });
+
+      it("shows childless subjects with hidden child models that have `GraphicalPartition3d.Model.Content` json property", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
+          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }));
+          addPhysicalObject(builder, modelX, category);
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
+      });
+
+      it("hides private models", async function () {
+        /*
+        Create the following hierarchy:
+        - Root subject                  // visible
+          - Model X                     // hidden - private
+        */
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
+          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX), { isPrivate: true });
+          addPhysicalObject(builder, modelX, category);
+        });
+        const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+        const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
+        expect(hierarchy).to.matchSnapshot();
+      });
+
+      function createIModelName(m: Mocha.Context) {
+        const MAX_FILENAME_LENGTH = 40;
+        // eslint-disable-next-line @itwin/no-internal
+        const name = createFileNameFromString(m.test!.fullTitle());
+        if (name.length <= MAX_FILENAME_LENGTH) {
+          return name;
+        }
+        const substringLength = Math.floor(MAX_FILENAME_LENGTH / 2);
+        return `${name.slice(0, substringLength)}..${name.slice(name.length - substringLength)}`;
+      }
     });
   });
 });

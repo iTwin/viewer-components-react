@@ -20,19 +20,30 @@ import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDro
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
 
 /**
+ * Arguments for the `onPropertyUpdated` callback.
+ * @public
+ */
+export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
+  /** Data provider used by property grid. */
+  dataProvider: IPresentationPropertyDataProvider;
+}
+
+/**
  * Base props for rendering `PropertyGridContent` component.
  * @public
  */
-export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
+export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"> {
   imodel: IModelConnection;
   className?: string;
   onBackButton?: () => void;
   headerControls?: ReactNode;
+  onPropertyUpdated?: (args: PropertyGridPropertyUpdatedArgs, category: PropertyCategory) => Promise<boolean>;
   /** @internal */
   dataProvider: IPresentationPropertyDataProvider;
   /** @internal */
@@ -58,6 +69,7 @@ export function PropertyGridContent({
   headerControls,
   settingsMenuItems,
   dataRenderer,
+  onPropertyUpdated,
   ...props
 }: PropertyGridContentProps) {
   const { item } = useLoadedInstanceInfo({ dataProvider });
@@ -88,6 +100,9 @@ export function PropertyGridContent({
     onPropertyContextMenu,
     width,
     height,
+    onPropertyUpdated: onPropertyUpdated
+      ? async (args, category) => onPropertyUpdated({ ...args, dataProvider }, category)
+      : undefined,
   };
 
   return (

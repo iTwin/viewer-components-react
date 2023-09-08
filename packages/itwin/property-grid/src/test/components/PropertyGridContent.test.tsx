@@ -7,17 +7,18 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
-import { render, waitFor } from "@testing-library/react";
-import userEvents from "@testing-library/user-event";
+import { waitFor } from "@testing-library/react";
 import { PropertyGridContent } from "../../components/PropertyGridContent";
 import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
-import { createPropertyRecord, stubSelectionManager } from "../TestUtils";
+import { createPropertyRecord, renderWithUser, stubSelectionManager } from "../TestUtils";
 
 import type { ReactElement } from "react";
+import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { PropertyGridContentProps } from "../../components/PropertyGridContent";
 
 describe("<PropertyGridContent />", () => {
   before(() => {
@@ -50,7 +51,7 @@ describe("<PropertyGridContent />", () => {
   } as unknown as IPresentationPropertyDataProvider;
 
   function renderWithContext(ui: ReactElement) {
-    return render(
+    return renderWithUser(
       <NullValueSettingContext>
         {ui}
       </NullValueSettingContext>
@@ -74,7 +75,7 @@ describe("<PropertyGridContent />", () => {
     const imodel = {} as IModelConnection;
     const onBackClickSpy = sinon.spy();
 
-    const { getByText, getByRole } = renderWithContext(
+    const { getByText, getByRole, user } = renderWithContext(
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
@@ -84,7 +85,7 @@ describe("<PropertyGridContent />", () => {
 
     await waitFor(() => getByText("Test Prop"));
     const backButton = getByRole("button", { name: "header.back" });
-    await userEvents.click(backButton);
+    await user.click(backButton);
     expect(onBackClickSpy).to.be.calledOnce;
   });
 
@@ -92,7 +93,7 @@ describe("<PropertyGridContent />", () => {
     const imodel = {} as IModelConnection;
     const spy = sinon.spy();
 
-    const { getByText, getByRole } = renderWithContext(
+    const { getByText, getByRole, user } = renderWithContext(
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
@@ -103,10 +104,10 @@ describe("<PropertyGridContent />", () => {
     );
 
     const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
-    await userEvents.click(settingsButton);
+    await user.click(settingsButton);
 
     const setting = await waitFor(() => getByText("Test Setting"));
-    await userEvents.click(setting);
+    await user.click(setting);
 
     expect(spy).to.be.calledOnce;
   });
@@ -114,7 +115,7 @@ describe("<PropertyGridContent />", () => {
   it("allows filtering out empty values", async () => {
     const imodel = {} as IModelConnection;
 
-    const { getByText, getByRole, queryByText } = renderWithContext(
+    const { getByText, getByRole, queryByText, user } = renderWithContext(
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
@@ -130,14 +131,44 @@ describe("<PropertyGridContent />", () => {
     });
 
     const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
-    await userEvents.click(settingsButton);
+    await user.click(settingsButton);
 
     const setting = await waitFor(() => getByText("settings.hide-null.label"));
-    await userEvents.click(setting);
+    await user.click(setting);
 
     await waitFor(() => {
       expect(queryByText("Test Prop")).to.not.be.null;
       expect(queryByText("Null Prop")).to.be.null;
+    });
+  });
+
+  it("allows editing property", async () => {
+    const imodel = {} as IModelConnection;
+    const stub = sinon.stub<Parameters<Required<PropertyGridContentProps>["onPropertyUpdated"]>, ReturnType<Required<PropertyGridContentProps>["onPropertyUpdated"]>>().resolves(true);
+
+    const { findByText, findByDisplayValue, user } = renderWithContext(
+      <PropertyGridContent
+        dataProvider={provider}
+        imodel={imodel}
+        isPropertyEditingEnabled={true}
+        onPropertyUpdated={stub}
+      />
+    );
+
+    const propertyValue = await findByText("Prop Value");
+
+    // enter editing mode
+    await user.dblClick(propertyValue);
+
+    const editor = await findByDisplayValue("Prop Value");
+    // type ` Updated` and press enter to commit new value
+    await user.type(editor, " Updated{Enter}");
+
+    await waitFor(() => {
+      expect(stub).to.be.calledOnce;
+      const [{ dataProvider, newValue }] = stub.args[0];
+      expect(dataProvider).to.be.eq(provider);
+      expect((newValue as PrimitiveValue).value).to.be.eq("Prop Value Updated");
     });
   });
 });
