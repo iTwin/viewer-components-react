@@ -81,7 +81,7 @@ jest.mock("../widget/components/context/MappingClientContext", () => ({
 
 const mockGroups = groupsFactory();
 
-describe("Groupings View", () => {
+describe("Groups View", () => {
   beforeEach(async () => {
     connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
     connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);

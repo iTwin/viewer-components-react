@@ -38,13 +38,13 @@ const fetchGroups = async (
   }
 };
 
-export interface GroupingsOperationsProps {
+export interface GroupsOperationsProps {
   mappingId: string;
 }
 
-export const useGroupingsOperations = ({
+export const useGroupsOperations = ({
   mappingId,
-}: GroupingsOperationsProps) => {
+}: GroupsOperationsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const { groups, setGroups, numberOfVisualizedGroups } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();

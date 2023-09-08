@@ -12,11 +12,11 @@ export * from "@itwin/insights-client";
 
 /** Internal components for custom UIs */
 export { Mappings, MappingsProps } from "./widget/components/Mapping";
-export { useGroupingsOperations, GroupingsOperationsProps } from "./widget/components/hooks/useGroupingsOperations";
+export { useGroupsOperations, GroupsOperationsProps } from "./widget/components/hooks/useGroupsOperations";
 export { MappingAction, MappingActionProps } from "./widget/components/MappingAction";
 export { GroupsView, GroupsViewProps } from "./widget/components/GroupsView";
 export { GroupingMappingContext, GroupingMappingContextProps } from "./widget/components/GroupingMappingContext";
-export { Groups, GroupsProps } from "./widget/components/Grouping";
+export { Groups, GroupsProps } from "./widget/components/Groups";
 export { GroupsVisualization, GroupsVisualizationProps } from "./widget/components/GroupsVisualization";
 export { GroupAction, GroupActionProps } from "./widget/components/GroupAction";
 export { PropertyMenu, PropertyMenuProps } from "./widget/components/PropertyMenu";

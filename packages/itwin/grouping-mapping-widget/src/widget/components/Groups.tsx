@@ -9,7 +9,7 @@ import type {
 } from "./customUI/GroupingMappingCustomUI";
 import type { ActionButtonRenderer } from "./GroupsView";
 import { GroupsView } from "./GroupsView";
-import { useGroupingsOperations } from "./hooks/useGroupingsOperations";
+import { useGroupsOperations } from "./hooks/useGroupsOperations";
 import { Alert } from "@itwin/itwinui-react";
 
 export interface GroupsProps {
@@ -49,7 +49,7 @@ export const Groups = ({
     numberOfVisualizedGroups,
     errorMessage,
     setErrorMessage,
-  } = useGroupingsOperations({ mappingId: mapping.id });
+  } = useGroupsOperations({ mappingId: mapping.id });
 
   const addGroup = useCallback((type: string) => {
     if (!onClickAddGroup) return;

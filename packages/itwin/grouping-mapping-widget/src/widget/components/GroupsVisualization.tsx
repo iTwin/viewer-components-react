@@ -18,8 +18,8 @@ import {
   hideElements,
   zoomToElements,
 } from "./viewerUtils";
-import type { GroupsProps } from "./Grouping";
-import { Groups } from "./Grouping";
+import type { GroupsProps } from "./Groups";
+import { Groups } from "./Groups";
 import { GroupColorLegend } from "./GroupColorLegend";
 import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";

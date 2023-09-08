@@ -15,7 +15,7 @@ import {
   SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import DeleteModal from "./DeleteModal";
-import "./GroupingsView.scss";
+import "./GroupsView.scss";
 import { EmptyMessage, LoadingOverlay } from "./utils";
 import type { Group, Mapping } from "@itwin/insights-client";
 import { GroupItem } from "./GroupItem";
@@ -97,7 +97,7 @@ export const GroupsView = ({
         </ButtonGroup>
       </div>
       {alert}
-      <div className='gmw-groupings-border' />
+      <div className='gmw-groups-border' />
       {!!numberOfVisualizedGroups &&
         <div className="gmw-group-progress-bar">
           <ProgressLinear
