@@ -5,7 +5,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { faker } from "@faker-js/faker";
-import { GroupingMappingCustomUIType, Groupings } from "../grouping-mapping-widget";
+import { GroupingMappingCustomUIType, Groups } from "../grouping-mapping-widget";
 import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
 import type { IModelConnection, ViewManager } from "@itwin/core-frontend";
@@ -103,7 +103,7 @@ describe("Groupings View", () => {
     // Act
     const user = userEvent.setup();
     render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={jest.fn()}
         onClickGroupModify={jest.fn()}
@@ -160,7 +160,7 @@ describe("Groupings View", () => {
 
     // Act
     const { user } = render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={jest.fn()}
         onClickGroupModify={jest.fn()}
@@ -227,7 +227,7 @@ describe("Groupings View", () => {
 
     // Act
     const { user } = render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={jest.fn()}
         onClickGroupModify={jest.fn()}
@@ -287,7 +287,7 @@ describe("Groupings View", () => {
 
     // Act
     const { user } = render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={onClickAddGroup}
         onClickGroupModify={jest.fn()}

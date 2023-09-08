@@ -6,10 +6,10 @@ import type { Group } from "@itwin/insights-client";
 import React from "react";
 import { HorizontalTile } from "./HorizontalTile";
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import type { GroupingProps } from "./Grouping";
+import type { GroupsProps } from "./Grouping";
 import { GroupMenuActions } from "./GroupMenuActions";
 
-export interface GroupItemProps extends Omit<GroupingProps, "onClickAddGroup"> {
+export interface GroupItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
   group: Group;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];

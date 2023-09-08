@@ -30,7 +30,7 @@ export type ActionButtonRenderer = (
   props: ActionButtonRendererProps
 ) => React.ReactNode;
 
-export interface GroupingsViewProps {
+export interface GroupsViewProps {
   mapping: Mapping;
   groups: Group[];
   isLoading: boolean;
@@ -55,7 +55,7 @@ export interface GroupingsViewProps {
   alert?: React.ReactElement<typeof Alert>;
 }
 
-export const GroupingsView = ({
+export const GroupsView = ({
   mapping,
   groups,
   isLoading,
@@ -74,7 +74,7 @@ export const GroupingsView = ({
   contextUIs,
   numberOfVisualizedGroups,
   alert,
-}: GroupingsViewProps) => {
+}: GroupsViewProps) => {
   return (
     <div className="gmw-groups-container">
       <div className="gmw-toolbar">

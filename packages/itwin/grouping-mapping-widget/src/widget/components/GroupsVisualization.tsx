@@ -18,16 +18,16 @@ import {
   hideElements,
   zoomToElements,
 } from "./viewerUtils";
-import type { GroupingProps } from "./Grouping";
-import { Groupings } from "./Grouping";
+import type { GroupsProps } from "./Grouping";
+import { Groups } from "./Grouping";
 import { GroupColorLegend } from "./GroupColorLegend";
 import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupingsView";
+import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupsView";
 
-export interface GroupsVisualizationProps extends GroupingProps {
+export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
 }
@@ -45,7 +45,7 @@ export const GroupsVisualization = ({
   }
   const firstUpdate = useRef(true);
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
-  const [isVisualizing, setIsVisualizing] =useState<boolean>(false);
+  const [isVisualizing, setIsVisualizing] = useState<boolean>(false);
   const {
     hilitedElementsQueryCache,
     groups,
@@ -214,13 +214,13 @@ export const GroupsVisualization = ({
         showAll={showAll}
         hideAll={hideAll}
       />
-      <Groupings
+      <Groups
         onClickGroupModify={onModify}
         onClickAddGroup={onAddGroup}
         actionButtonRenderers={groupActionButtonRenderers}
         {...rest}
         disableActions={isLoadingQuery}
-        isVisualizing = {isVisualizing}
+        isVisualizing={isVisualizing}
       />
     </div>
   );

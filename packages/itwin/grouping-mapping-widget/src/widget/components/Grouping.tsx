@@ -7,12 +7,12 @@ import type { Group, Mapping } from "@itwin/insights-client";
 import type {
   ContextCustomUI,
 } from "./customUI/GroupingMappingCustomUI";
-import type { ActionButtonRenderer } from "./GroupingsView";
-import { GroupingsView } from "./GroupingsView";
+import type { ActionButtonRenderer } from "./GroupsView";
+import { GroupsView } from "./GroupsView";
 import { useGroupingsOperations } from "./hooks/useGroupingsOperations";
 import { Alert } from "@itwin/itwinui-react";
 
-export interface GroupingProps {
+export interface GroupsProps {
   mapping: Mapping;
   actionButtonRenderers?: ActionButtonRenderer[];
   onClickAddGroup?: (queryGenerationType: string) => void;
@@ -27,7 +27,7 @@ export interface GroupingProps {
   isVisualizing?: boolean;
 }
 
-export const Groupings = ({
+export const Groups = ({
   mapping,
   actionButtonRenderers,
   onClickAddGroup,
@@ -36,7 +36,7 @@ export const Groupings = ({
   onClickRenderContextCustomUI,
   disableActions,
   isVisualizing,
-}: GroupingProps) => {
+}: GroupsProps) => {
   const {
     groups,
     isLoading,
@@ -66,7 +66,7 @@ export const Groupings = ({
   }, [errorMessage, setErrorMessage]);
 
   return (
-    <GroupingsView
+    <GroupsView
       mapping={mapping}
       groups={groups}
       isLoading={isLoading}
