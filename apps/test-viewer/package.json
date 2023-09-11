@@ -74,6 +74,7 @@
   "scripts": {
     "start": "react-scripts --max_old_space_size=4096 start",
     "start:dev": "run-p start link:deps",
+    "start:dev:no-watch": "run-p start link:deps:no-watch",
     "build": "",
     "eject": "",
     "test": "",
@@ -81,7 +82,8 @@
     "lint": "",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",
-    "link:deps": "node ./scripts/linkWorkspaceDeps.js"
+    "link:deps": "node ./scripts/linkWorkspaceDeps.js",
+    "link:deps:no-watch": "node ./scripts/linkWorkspaceDeps.js --no-watch"
   },
   "eslintConfig": {
     "extends": [

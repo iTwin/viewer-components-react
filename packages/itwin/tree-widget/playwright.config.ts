@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -77,7 +77,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run start:test-viewer",
+    command: "npm run start:test-viewer:no-watch",
     url: "http://localhost:3000/",
     reuseExistingServer: !process.env.CI,
     timeout: 5 * 60 * 1000,

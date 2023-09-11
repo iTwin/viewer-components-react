@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 const fs = require("fs");
 const path = require("path");
+const watch = !(process.argv[2] && process.argv[2] === "--no-watch");
 
 const packages = [{
   name: "@itwin/tree-widget-react",
@@ -39,20 +40,22 @@ function linkPackages() {
 
     copyChangedFiles(package.name, sourcePath, targetPath);
 
-    let lastChange = undefined;
-    fs.watch(sourcePath, { recursive: true }, () => {
-      const now = new Date();
-      if (now === lastChange) {
-        return;
-      }
-      lastChange = now;
-      setTimeout(() => {
+    if (watch){
+      let lastChange = undefined;
+      fs.watch(sourcePath, { recursive: true }, () => {
+        const now = new Date();
         if (now === lastChange) {
-          copyChangedFiles(package.name, sourcePath, targetPath);
-          lastChange = undefined;
+          return;
         }
-      }, 100);
-    });
+        lastChange = now;
+        setTimeout(() => {
+          if (now === lastChange) {
+            copyChangedFiles(package.name, sourcePath, targetPath);
+            lastChange = undefined;
+          }
+        }, 100);
+      });
+    }
   }
 }
 

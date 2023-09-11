@@ -23,6 +23,7 @@
   "typings": "lib/cjs/property-grid-react",
   "scripts": {
     "start:test-viewer": "node ./scripts/start-test-viewer.js",
+    "start:test-viewer:no-watch": "node ./scripts/start-test-viewer-no-watch.js",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
