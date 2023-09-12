@@ -1,6 +1,13 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Fri, 28 Jul 2023 18:31:57 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Sep 2023 14:07:42 GMT and should not be manually modified.
+
+## 5.1.2
+Tue, 12 Sep 2023 14:07:42 GMT
+
+### Patches
+
+- Removed deep import of icons
 
 ## 5.1.1
 Fri, 28 Jul 2023 18:31:57 GMT
