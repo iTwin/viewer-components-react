@@ -36,7 +36,8 @@
     "url": "http://www.bentley.com"
   },
   "dependencies": {
-    "@itwin/itwinui-icons-color-react": "~1.0.3",
+    "@itwin/itwinui-icons-color-react": "^2.1.0",
+    "@itwin/itwinui-icons-react": "^2.6.0",
     "classnames": "^2.3.1",
     "react-beautiful-dnd": "^13.0.0"
   },

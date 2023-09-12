@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Removed deep import of icons",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
