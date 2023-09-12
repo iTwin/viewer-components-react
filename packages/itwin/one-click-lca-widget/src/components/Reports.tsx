@@ -11,6 +11,7 @@ import type { Report } from "@itwin/insights-client";
 import { ReportsClient } from "@itwin/insights-client";
 import { WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
+import type { Column } from "react-table";
 import "./Reports.scss";
 
 type CreateTypeFromInterface<Interface> = {
@@ -32,21 +33,16 @@ const Reports = () => {
   const [modalIsOpen, openModal] = useState(false);
 
   const reportsColumns = useMemo(
-    () => [
+    (): Column<CreateTypeFromInterface<Report>>[] => [
       {
-        Header: "Table",
-        columns: [
-          {
-            id: "displayName",
-            Header: "Name",
-            accessor: "displayName",
-          },
-          {
-            id: "description",
-            Header: "Description",
-            accessor: "description",
-          },
-        ],
+        id: "displayName",
+        Header: "Name",
+        accessor: "displayName",
+      },
+      {
+        id: "description",
+        Header: "Description",
+        accessor: "description",
       },
     ],
     []
