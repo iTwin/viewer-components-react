@@ -121,29 +121,6 @@ describe("ModelsTree", () => {
         expect(result.baseElement).to.matchSnapshot();
       });
 
-      it("should call visibilityHandler with correct parameters when it is passed as a function", async () => {
-        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
-        visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
-        const getVisibilityStatusSpy = sinon.spy(visibilityHandlerMock, "getVisibilityStatus");
-        const visibilityHandlerCallback = (_: ModelsVisibilityHandlerProps) => {return visibilityHandlerMock;};
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerCallback} activeView={mockViewport().object} />);
-        await waitFor(() => result.getByText("test-node"), { container: result.container });
-        expect(getVisibilityStatusSpy.calledOnceWith({ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }));
-      });
-
-      it("should dispose of the visibilityHandler when ModelTree component is unmounted", async () => {
-        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
-        visibilityHandlerMock.getVisibilityStatus = (() => {return { state: "hidden" };});
-        visibilityHandlerMock.dispose = (() => {});
-        const disposeSpy = sinon.spy(visibilityHandlerMock, "dispose");
-        const visibilityHandlerCallback = (_: ModelsVisibilityHandlerProps) => {return visibilityHandlerMock;};
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerCallback} activeView={mockViewport().object} />);
-        await waitFor(() => result.getByText("test-node"), { container: result.container });
-
-        result.unmount();
-        expect(disposeSpy.called);
-      });
-
       it("renders root node without expansion toggle", async () => {
         setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
@@ -275,6 +252,29 @@ describe("ModelsTree", () => {
           ...hierarchyConfig,
           enableElementsClassGrouping: true, // `createRuleset` takes a boolean for this prop - counts are handled after the nodes are loaded
         }));
+      });
+
+      it("should call visibilityHandler with correct parameters when it is passed as a function", async () => {
+        const node: TreeNodeItem = { id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true };
+        setupDataProvider([node]);
+        visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
+        const getVisibilityStatusSpy = sinon.spy(visibilityHandlerMock, "getVisibilityStatus");
+        const visibilityHandlerCallback = (_: ModelsVisibilityHandlerProps) => {return visibilityHandlerMock;};
+        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerCallback} activeView={mockViewport().object} />);
+        await waitFor(() => result.getByText("test-node"), { container: result.container });
+        expect(getVisibilityStatusSpy.calledOnceWith(node));
+      });
+
+      it("should dispose of the visibilityHandler when ModelTree component is unmounted", async () => {
+        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
+        visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
+        visibilityHandlerMock.dispose = () => {};
+        const disposeSpy = sinon.spy(visibilityHandlerMock, "dispose");
+        const visibilityHandlerCallback = (_: ModelsVisibilityHandlerProps) => {return visibilityHandlerMock;};
+        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerCallback} activeView={mockViewport().object} />);
+        await waitFor(() => result.getByText("test-node"), { container: result.container });
+        result.unmount();
+        expect(disposeSpy.calledOnce);
       });
 
       describe("selection", () => {
