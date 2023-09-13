@@ -4,8 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
+import { IModelApp } from "@itwin/core-frontend";
 import { render, waitFor } from "@testing-library/react";
 import { SelectableTree } from "../components/SelectableTree";
 import { TreeWidget } from "../TreeWidget";
@@ -18,11 +20,15 @@ describe("<SelectableTree />", () => {
   stubCancelAnimationFrame();
 
   before(async () => {
+    sinon.stub(IModelApp, "viewManager").get(() => ({
+      onSelectedViewportChanged: new BeEvent(),
+    }));
     await TestUtils.initialize();
   });
 
   after(() => {
     TestUtils.terminate();
+    sinon.restore();
   });
 
   beforeEach(() => {
@@ -30,6 +36,7 @@ describe("<SelectableTree />", () => {
       isBlankConnection: () => true,
       selectionSet: {
         onChanged: new BeEvent(),
+        elements: { size: 0 },
       },
     } as IModelConnection);
   });
