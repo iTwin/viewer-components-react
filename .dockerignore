@@ -1,0 +1,6 @@
+common/temp/
+**/node_modules/
+lib/
+.github/
+.vscode/
+.devcontainer/
