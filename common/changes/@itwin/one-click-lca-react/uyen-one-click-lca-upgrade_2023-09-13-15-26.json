@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/one-click-lca-react",
+      "comment": "Migrated UI items for iTwinUI 2.x and iTwinJS 4.x upgrade",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/one-click-lca-react"
+}
