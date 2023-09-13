@@ -3,45 +3,37 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { expect } from "chai";
+import { join } from "path";
+import sinon from "sinon";
+import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
+import { SelectionMode } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
+import { IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import { KeySet, LabelDefinition } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, createFileNameFromString,
-  HierarchyBuilder, HierarchyCacheMode,
-  initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel, createFileNameFromString, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { expect } from "chai";
-import sinon from "sinon";
-import * as moq from "typemoq";
 import { ClassGroupingOption } from "../../../components/trees/common/Types";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
-import type { ModelsVisibilityHandler, ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
+import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, renderWithUser, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
-
+import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
+import type { ModelsVisibilityHandler, ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTree";
-
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SelectionManager } from "@itwin/presentation-frontend";
-
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-
-import { join } from "path";
-
-import { SelectionMode } from "@itwin/components-react";
-
-import { IModel } from "@itwin/core-common";
-
-import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 
 describe("ModelsTree", () => {
 
@@ -508,11 +500,11 @@ describe("ModelsTree", () => {
 
       it("hides subjects with `Subject.Job.Bridge` json property", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                     // visible
-              - Child subject X                // hidden - `Subject.Job.Bridge` json property
-                - Model X (with elements)      // visible
-            */
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // hidden - `Subject.Job.Bridge` json property
+            - Model X (with elements)      // visible
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Job: { Bridge: "Test" } } } });
@@ -526,11 +518,11 @@ describe("ModelsTree", () => {
 
       it("hides subjects with `Subject.Model.Type = \"Hierarchy\"` json property", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                     // visible
-              - Child subject X                // hidden - `Subject.Model.Type = \"Hierarchy\"` json property
-                - Model X (with elements)      // visible
-            */
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // hidden - `Subject.Model.Type = \"Hierarchy\"` json property
+            - Model X (with elements)      // visible
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } } });
@@ -544,11 +536,11 @@ describe("ModelsTree", () => {
 
       it("hides subjects with childless models", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                     // visible
-              - Child subject X                // hidden - no child nodes
-                - Model X (no elements)        // hidden - no elements
-            */
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // hidden - no child nodes
+            - Model X (no elements)        // hidden - no elements
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
           addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
@@ -560,11 +552,11 @@ describe("ModelsTree", () => {
 
       it("shows subjects with child models", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                     // visible
-              - Child subject X                // visible
-                - Model X (with elements)      // visible
-            */
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X (with elements)      // visible
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
@@ -578,12 +570,12 @@ describe("ModelsTree", () => {
 
       it("shows subjects with child models related with subject through `Subject.Model.TargetPartition` json property", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                     // visible
-              - Child subject X                // visible
-                - Model X                      // visible - related through json property
-              - Model X                        // visible - related through direct relationship
-            */
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X                      // visible - related through json property
+          - Model X                        // visible - related through direct relationship
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const partitionX = addPartition(builder, "BisCore:PhysicalPartition", "Model X", IModel.rootSubjectId);
@@ -598,11 +590,11 @@ describe("ModelsTree", () => {
 
       it("shows childless subjects with hidden child models that have `PhysicalPartition.Model.Content` json property", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                     // visible
-              - Child subject X                // visible
-                - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
-            */
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
@@ -616,11 +608,11 @@ describe("ModelsTree", () => {
 
       it("shows childless subjects with hidden child models that have `GraphicalPartition3d.Model.Content` json property", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                     // visible
-              - Child subject X                // visible
-                - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
-            */
+        Create the following hierarchy:
+        - Root subject                     // visible
+          - Child subject X                // visible
+            - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
@@ -634,10 +626,10 @@ describe("ModelsTree", () => {
 
       it("hides private models", async function () {
         /*
-            Create the following hierarchy:
-            - Root subject                  // visible
-              - Model X                     // hidden - private
-            */
+        Create the following hierarchy:
+        - Root subject                  // visible
+          - Model X                     // hidden - private
+        */
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
