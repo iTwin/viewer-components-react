@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Add the ability to pass in visibilityHandler as a callback in ModelsTree component.",
+      "comment": "`ModelsTree`: Add an option to pass `modelsVisibilityHandler` as a factory function.",
       "type": "minor"
     }
   ],

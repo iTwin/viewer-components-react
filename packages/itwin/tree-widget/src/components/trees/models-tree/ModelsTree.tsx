@@ -192,9 +192,18 @@ function useVisibilityHandler(
   const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
 
   const disposableVisibilityHandler = useDisposable(useCallback(
-    () => typeof visibilityHandler === "function"
-      ? visibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache })
-      : new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache }),
+    () => {
+      const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
+        rulesetId,
+        viewport: activeView,
+        hierarchyAutoUpdateEnabled,
+        subjectModelIdsCache,
+      };
+
+      return typeof visibilityHandler === "function"
+        ? visibilityHandler(visibilityHandlerProps)
+        : new ModelsVisibilityHandler(visibilityHandlerProps);
+    },
     [visibilityHandler, rulesetId, activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache])
   );
 
