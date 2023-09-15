@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Enabled query experimental features e.g $->.",
+      "comment": "Enabled query experimental features e.g '$->'.",
       "type": "patch"
     }
   ],
