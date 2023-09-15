@@ -162,7 +162,7 @@ describe("ModelsTree", () => {
 
       it("renders nodes as checked when they're displayed", async () => {
         setupDataProviderForEachNodeType();
-        visibilityHandlerMock.getVisibilityStatus = () => ({ state: "visible" });
+        visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
 
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
         await waitFor(() => result.getByText("model"));
@@ -200,7 +200,7 @@ describe("ModelsTree", () => {
         const node = createModelNode();
         setupDataProvider([node]);
 
-        visibilityHandlerMock.getVisibilityStatus = () => ({ state: "visible" });
+        visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
         const renderedNode = await result.findByTestId("tree-node");
         expect(renderedNode.querySelectorAll("input").length).to.eq(1);
@@ -213,14 +213,15 @@ describe("ModelsTree", () => {
       it("calls visibility handler's `changeVisibility` on node checkbox state changes to 'checked'", async () => {
         const node = createModelNode();
         setupDataProvider([node]);
-        visibilityHandlerMock.getVisibilityStatus = sinon.stub().resolves({ state: "hidden" });
+        visibilityHandlerMock.changeVisibility = sinon.spy();
+        visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
         await result.findByText("model");
         const renderedNode = result.getByTestId("tree-node");
         const cb = renderedNode.querySelector("input");
         fireEvent.click(cb!);
 
-        expect(visibilityHandlerMock.getVisibilityStatus).to.be.calledOnce;
+        expect(visibilityHandlerMock.changeVisibility).to.be.calledOnce;
       });
 
       it("respects `hierarchyConfig` prop", async () => {
@@ -257,7 +258,7 @@ describe("ModelsTree", () => {
         const visibilityHandlerSpy = sinon.stub().returns(visibilityHandlerMock);
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerSpy} activeView={mockViewport().object} />);
         await waitFor(() => result.getByText("test-node"), { container: result.container });
-        expect(visibilityHandlerSpy.calledOnce);
+        expect(visibilityHandlerSpy).to.be.calledOnce;
       });
 
       it("should dispose of the visibilityHandler when ModelTree component is unmounted", async () => {
