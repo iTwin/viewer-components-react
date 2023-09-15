@@ -7,11 +7,11 @@ import { SvgDelete, SvgEdit, SvgMore } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import type { GroupingProps } from "./Grouping";
+import type { GroupsProps } from "./Groups";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./GroupMenuActions.scss";
 
-export interface GroupMenuActionsProps extends Omit<GroupingProps, "onClickAddGroup" | "onClickGroupTitle"> {
+export interface GroupMenuActionsProps extends Omit<GroupsProps, "onClickAddGroup" | "onClickGroupTitle"> {
   group: Group;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];

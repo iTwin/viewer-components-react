@@ -106,3 +106,8 @@ export const LoadingSpinner = () => {
     </div>
   );
 };
+
+export const enableExperimentalFeatures = async (iModelConnection: IModelConnection) => {
+  const reader = iModelConnection.createQueryReader("PRAGMA experimental_features_enabled=true");
+  await reader.step();
+};
