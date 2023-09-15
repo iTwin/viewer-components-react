@@ -5,7 +5,7 @@
 import type { IModelConnection, ViewChangeOptions } from "@itwin/core-frontend";
 import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
 import type { FeatureAppearance } from "@itwin/core-common";
-import { ColorDef, FeatureOverrideType, QueryRowFormat } from "@itwin/core-common";
+import { ColorDef, FeatureOverrideType } from "@itwin/core-common";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { KeySet } from "@itwin/presentation-common";
 import { HiliteSetProvider } from "@itwin/presentation-frontend";
@@ -355,15 +355,10 @@ export const manufactureKeys = async (
     return new KeySet();
   }
   const queryWithIdAndECClassName = `SELECT q.ECInstanceId, ec_classname(e.ECClassId) FROM (${query}) q JOIN BisCore.Element e on e.ECInstanceId = q.ECInstanceId`;
-
-  const rowIterator = iModelConnection.query(queryWithIdAndECClassName, undefined, {
-    rowFormat: QueryRowFormat.UseECSqlPropertyIndexes,
-  });
-
   const keys: InstanceKey[] = [];
 
-  for await (const value of rowIterator) {
-    keys.push({ id: value[0], className: value[1] });
+  for await (const row of iModelConnection.createQueryReader(queryWithIdAndECClassName)) {
+    keys.push({ id: row[0], className: row[1] });
   }
 
   return new KeySet(keys);
