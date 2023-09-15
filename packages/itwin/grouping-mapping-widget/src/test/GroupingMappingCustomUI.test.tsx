@@ -79,6 +79,11 @@ jest.mock("../widget/components/context/MappingClientContext", () => ({
   useMappingClient: () => mappingClientMock.object,
 }));
 
+jest.mock("../widget/components/utils", () => ({
+  ...jest.requireActual("../widget/components/utils"),
+  enableExperimentalFeatures: jest.fn,
+}));
+
 const mockGroups = groupsFactory();
 
 describe("Groups View", () => {
