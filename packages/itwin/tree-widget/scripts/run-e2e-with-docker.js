@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-const path = require('path');
-const { exec } = require('child_process');
+const path = require("path");
+const { exec } = require("child_process");
 const packageName = "tree-widget";
 const dockerImageName = `${packageName}-e2e-test-image`;
 const dockerContainerName = `${packageName}-e2e-test-container`;
@@ -24,10 +24,10 @@ const execute = command => new Promise((resolve, reject) => {
 try {
   const currentDirectory = process.cwd();
   // cd to the root directory from tree-widget directory
-  const rootDirectory = path.resolve(currentDirectory, '../../../');
+  const rootDirectory = path.resolve(currentDirectory, "../../../");
   process.chdir(rootDirectory);
 } catch (err) {
-  console.error('Failed to change directory:', err);
+  console.error(`Failed to change directory: ${err}`);
   return;
 }
 

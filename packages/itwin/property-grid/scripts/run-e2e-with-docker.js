@@ -2,11 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-const path = require('path');
-const { exec } = require('child_process');
-const packageName = "property-grid"
-const dockerImageName = `${packageName}-e2e-test-image`
-const dockerContainerName = `${packageName}-e2e-test-container`
+const path = require("path");
+const { exec } = require("child_process");
+const packageName = "property-grid";
+const dockerImageName = `${packageName}-e2e-test-image`;
+const dockerContainerName = `${packageName}-e2e-test-container`;
+const e2eFolderLocation = `packages/itwin/${packageName}/src/e2e-tests`;
 
 const execute = command => new Promise((resolve, reject) => {
   exec(command, (error, stdout, stderr) => {
@@ -23,10 +24,10 @@ const execute = command => new Promise((resolve, reject) => {
 try {
   const currentDirectory = process.cwd();
   // cd to the root directory from property-grid directory
-  const rootDirectory = path.resolve(currentDirectory, '../../../');
+  const rootDirectory = path.resolve(currentDirectory, "../../../");
   process.chdir(rootDirectory);
 } catch (err) {
-  console.error('Failed to change directory:', err);
+  console.error(`Failed to change directory: ${err}`);
   return;
 }
 
@@ -39,7 +40,7 @@ execute(`docker build -t ${dockerImageName} -f packages/itwin/${packageName}/Doc
   .then(() => {
     if (process.env.UPDATE_SNAPSHOTS) {
       // Copy snapshots from docker container to the local repo
-      return execute(`docker cp ${dockerContainerName}:/workspaces/viewer-components-react/packages/itwin/${packageName}/src/e2e-tests/PropertyGrid.test.ts-snapshots ./packages/itwin/${packageName}/src/e2e-tests`);
+      return execute(`docker cp ${dockerContainerName}:/workspaces/viewer-components-react/${e2eFolderLocation}/PropertyGrid.test.ts-snapshots ./${e2eFolderLocation}`);
     };
   })
   .catch(() => {

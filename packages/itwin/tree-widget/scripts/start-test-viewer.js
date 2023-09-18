@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 const crossEnv = require("cross-env");
-const path = require('path').resolve(__dirname, '../../../../apps/test-viewer')
+const path = require("path").resolve(__dirname, "../../../../apps/test-viewer")
 
 crossEnv([
   'IMJS_DEMO_CLIENT=true',
