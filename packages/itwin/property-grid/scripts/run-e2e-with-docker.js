@@ -9,7 +9,7 @@ const dockerImageName = `${packageName}-e2e-test-image`;
 const dockerContainerName = `${packageName}-e2e-test-container`;
 const e2eFolderLocation = `packages/itwin/${packageName}/src/e2e-tests`;
 
-const execute = command => new Promise((resolve, reject) => {
+const execute = (command) => new Promise((resolve, reject) => {
   exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error executing command: ${error}`);
