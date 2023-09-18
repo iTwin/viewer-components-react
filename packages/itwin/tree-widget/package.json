@@ -22,7 +22,7 @@
   "typings": "lib/cjs/tree-widget-react",
   "scripts": {
     "start:test-viewer": "node ./scripts/start-test-viewer.js",
-    "start:test-viewer:no-watch": "node ./scripts/start-test-viewer-no-watch.js",
+    "start:test-viewer:watch": "node ./scripts/start-test-viewer.js --watch",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",

@@ -4,6 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 const crossEnv = require("cross-env");
 const path = require("path").resolve(__dirname, "../../../../apps/test-viewer")
+const watch = process.argv[2] && process.argv[2] === "--watch";
+let options = {};
+let startDevPrefix = ":no-watch";
+if (watch) {
+  options = {
+    shell: true,
+  };
+  startDevPrefix = "";
+}
 
 crossEnv([
   'IMJS_DEMO_CLIENT=true',
@@ -18,5 +27,5 @@ crossEnv([
   'USE_FULL_SOURCEMAP=true',
   'TRANSPILE_DEPS=false',
   'IMJS_ENABLED_WIDGETS="tree-widget"',
-  `npm run start:dev --prefix ${path}`,
-]);
+  `npm run start:dev${startDevPrefix} --prefix ${path}`,
+], options);
