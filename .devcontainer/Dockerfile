@@ -32,5 +32,4 @@ RUN \
   && mkdir -p /workspaces/viewer-components-react
 
 WORKDIR /workspaces/viewer-components-react
-
 CMD ["/usr/bin/zsh"]
