@@ -48,9 +48,4 @@ execute(`docker build --build-arg PACKAGE_NAME=${packageName} -t ${dockerImageNa
     return execute(`docker logs ${dockerContainerName}`).then(() => {
       process.exit(1);
     });
-  })
-  .finally(() => {
-    // Delete docker image and container
-    execute(`docker rm ${dockerContainerName}`);
-    // .then(() => { execute(`docker rmi ${dockerImageName}`)});
   });
