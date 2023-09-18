@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "e2e tests running with docker",
+      "comment": "running e2e tests with docker",
       "type": "none"
     }
   ],
