@@ -1,8 +1,17 @@
+#----------------------------------------------------------------------------------------------
+# Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+# Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+#----------------------------------------------------------------------------------------------
+
 FROM docker.io/library/debian:11
 
-RUN \
-  apt-get update \
+# Downloads needed for git, npm and playwright to work
+RUN apt-get update \
   && apt-get install -y curl \
+  && apt-get install -y libnss3 libatk-bridge2.0-0 libasound2 \
+  libcairo2 libcups2 libdbus-1-3 libatk1.0-0 libdrm2 libxrandr2 \
+  libglib2.0-0 libxkbcommon0 libnspr4 libatspi2.0-0 libgbm1\
+  libpango-1.0-0 libxcomposite1  libxdamage1  libxfixes3\
   && curl -sL https://deb.nodesource.com/setup_18.x | bash - \
   && apt-get install -y git nodejs locales zsh procps
 
@@ -15,22 +24,21 @@ COPY . .
 RUN git config --local user.email imodeljs-admin@users.noreply.github.com
 RUN git config --local user.name imodeljs-admin
 
-# Install rush globally
+# Setup rush
 RUN npm install -g @microsoft/rush
-
-# Install dependencies using rush
 RUN rush install
-
-# Build the project using rush
 RUN rush build
 
-# Switch to the package directory where you want to run E2E tests
+# Switch to property-grid directory where E2E tests will run
 WORKDIR /workspaces/viewer-components-react/packages/itwin/property-grid
 
-# Install playwright
+# Installations to run playwright
 RUN npx playwright install
 
-RUN npx playwright install-deps
-
 # Run E2E tests
-CMD ["npm", "run", "test:e2e"]
+CMD [ "sh", "-c", \
+  "if [ \"$UPDATE_SNAPSHOTS\" = \"1\" ]; then \
+  npm run test:e2e:local:update; \
+  else \
+  npm run test:e2e:local; \
+  fi" ]
