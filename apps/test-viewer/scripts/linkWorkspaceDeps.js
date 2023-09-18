@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 const fs = require("fs");
 const path = require("path");
-const watch = !(process.argv[2] && process.argv[2] === "--no-watch");
+const watch = process.argv[2] && process.argv[2] === "--watch";
 
 const packages = [{
   name: "@itwin/tree-widget-react",
