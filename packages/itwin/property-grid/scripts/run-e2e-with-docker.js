@@ -43,6 +43,7 @@ execute(`docker build -t ${dockerImageName} -f packages/itwin/${packageName}/Doc
     };
   })
   .catch(() => {
+    // If error ocurred print the output from docker container
     execute(`docker logs ${dockerContainerName}`).then(() => {
       process.exit(1);
     });
