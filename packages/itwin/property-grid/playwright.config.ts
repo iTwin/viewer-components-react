@@ -75,13 +75,6 @@ export default defineConfig({
     // },
   ],
 
-  expect: {
-    toHaveScreenshot: {
-      /* Allow some difference between screenshots as rendering might differ on different machines. */
-      maxDiffPixelRatio: 0.01
-    }
-  },
-
   /* Run your local dev server before starting the tests */
   webServer: {
     command: "npm run start:test-viewer:no-watch",
