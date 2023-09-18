@@ -5,6 +5,8 @@
 
 FROM docker.io/library/debian:11
 
+ARG PACKAGE_NAME=""
+
 # Downloads needed for git, npm and playwright to work
 RUN apt-get update \
   && apt-get install -y curl \
@@ -29,8 +31,8 @@ RUN npm install -g @microsoft/rush
 RUN rush install
 RUN rush build
 
-# Switch to property-grid directory where E2E tests will run
-WORKDIR /workspaces/viewer-components-react/packages/itwin/property-grid
+# Switch to tree-widget directory where E2E tests will run
+WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
 
 # Installations to run playwright
 RUN npx playwright install

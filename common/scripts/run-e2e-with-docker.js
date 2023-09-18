@@ -32,7 +32,7 @@ try {
 }
 
 // Build the Docker image
-execute(`docker build -t ${dockerImageName} -f packages/itwin/${packageName}/Dockerfile .`)
+execute(`docker build --build-arg PACKAGE_NAME=${packageName} -t ${dockerImageName} .`)
   .then(() => {
       // Run Docker container
       return execute(`docker run --name ${dockerContainerName} -e UPDATE_SNAPSHOTS=${process.env.UPDATE_SNAPSHOTS} ${dockerImageName}`);
