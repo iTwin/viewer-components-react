@@ -40,7 +40,7 @@ function linkPackages() {
 
     copyChangedFiles(package.name, sourcePath, targetPath);
 
-    if (watch){
+    if (watch) {
       let lastChange = undefined;
       fs.watch(sourcePath, { recursive: true }, () => {
         const now = new Date();
