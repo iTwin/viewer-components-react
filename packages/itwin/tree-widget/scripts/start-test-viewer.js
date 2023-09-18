@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 const crossEnv = require("cross-env");
-const path = require("path").resolve(__dirname, "../../../../apps/test-viewer")
+const path = require("path").resolve(__dirname, "../../../../apps/test-viewer");
 const watch = process.argv[2] && process.argv[2] === "--watch";
-let options = {};
+let options = {
+  shell: true,
+};
 let startDevPrefix = ":no-watch";
 if (watch) {
-  options = {
-    shell: true,
-  };
+  options = {};
   startDevPrefix = "";
 }
 

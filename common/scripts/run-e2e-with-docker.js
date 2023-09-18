@@ -4,26 +4,26 @@
 *--------------------------------------------------------------------------------------------*/
 const path = require("path");
 const { exec } = require("child_process");
-const packageName = "tree-widget";
+const packageName = process.argv[2];
 const dockerImageName = `${packageName}-e2e-test-image`;
 const dockerContainerName = `${packageName}-e2e-test-container`;
-const e2eFolderLocation = `packages/itwin/${packageName}/src/e2e-tests`;
+const srcFolderLocation = `packages/itwin/${packageName}/src`;
 
 const execute = (command) => new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error executing command: ${error}`);
-            return reject(error);
-        }
-        console.log(stdout);
-        console.error(stderr);
-        resolve();
-    });
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error executing command: ${error}`);
+      return reject(error);
+    }
+    console.log(stdout);
+    console.error(stderr);
+    resolve();
+  });
 });
 
 try {
   const currentDirectory = process.cwd();
-  // cd to the root directory from tree-widget directory
+  // cd to the root directory from property-grid directory
   const rootDirectory = path.resolve(currentDirectory, "../../../");
   process.chdir(rootDirectory);
 } catch (err) {
@@ -40,16 +40,17 @@ execute(`docker build -t ${dockerImageName} -f packages/itwin/${packageName}/Doc
   .then(() => {
     if (process.env.UPDATE_SNAPSHOTS) {
       // Copy snapshots from docker container to the local repo
-      return execute(`docker cp ${dockerContainerName}:/workspaces/viewer-components-react/${e2eFolderLocation}/TreeWidget.test.ts-snapshots ./${e2eFolderLocation}`);
+      return execute(`docker cp ${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests ./${srcFolderLocation}`);
     };
   })
   .catch(() => {
     // If error ocurred print the output from docker container
-    execute(`docker logs ${dockerContainerName}`).then(() => {
+    return execute(`docker logs ${dockerContainerName}`).then(() => {
       process.exit(1);
     });
   })
   .finally(() => {
     // Delete docker image and container
-    execute(`docker rm ${dockerContainerName}`).then(() => { execute(`docker rmi ${dockerImageName}`)});
+    execute(`docker rm ${dockerContainerName}`);
+    // .then(() => { execute(`docker rmi ${dockerImageName}`)});
   });
