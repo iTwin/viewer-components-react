@@ -21,7 +21,7 @@ import type { SingleSchemaClassSpecification } from "@itwin/presentation-common"
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
-import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
+import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 
 const PAGING_SIZE = 20;
 
@@ -66,7 +66,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
   /**
    * Custom visibility handler.
    */
-  modelsVisibilityHandler?: ModelsVisibilityHandler;
+  modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
 }
 
 /**
@@ -185,19 +185,31 @@ function useVisibilityHandler(
   rulesetId: string,
   iModel: IModelConnection,
   activeView: Viewport,
-  visibilityHandler?: ModelsVisibilityHandler,
+  visibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler),
   filteredDataProvider?: IFilteredPresentationTreeDataProvider,
   hierarchyAutoUpdateEnabled?: boolean,
 ) {
   const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
 
-  const defaultVisibilityHandler = useDisposable(useCallback(
-    () =>
-      new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache }),
-    [rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled])
+  const disposableVisibilityHandler = useDisposable(useCallback(
+    () => {
+      const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
+        rulesetId,
+        viewport: activeView,
+        hierarchyAutoUpdateEnabled,
+        subjectModelIdsCache,
+      };
+
+      return typeof visibilityHandler === "function"
+        ? visibilityHandler(visibilityHandlerProps)
+        : new ModelsVisibilityHandler(visibilityHandlerProps);
+    },
+    [visibilityHandler, rulesetId, activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache])
   );
 
-  const handler = visibilityHandler ?? defaultVisibilityHandler;
+  const handler = typeof visibilityHandler === "function" || visibilityHandler === undefined
+    ? disposableVisibilityHandler
+    : visibilityHandler;
 
   useEffect(() => {
     handler && handler.setFilteredDataProvider(filteredDataProvider);
