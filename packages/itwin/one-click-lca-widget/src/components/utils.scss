@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 .oclca-widget-header-container {
   display: flex;
-  margin-bottom: var(--iui-size-s) * 3;
+  margin-bottom: calc(var(--iui-size-s) * 3);
   .oclca-chevron {
     cursor: pointer;
     align-self: center;
-    margin-right: $iui-s;
+    margin-right: var(--iui-size-xs);
   }
 
   .oclca-chevron-disabled {
