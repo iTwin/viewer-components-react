@@ -45,7 +45,7 @@ async function buildAndRunDocker() {
     process.exitCode = 1;
   } finally {
     // Remove the Docker container
-      await execute("docker", ["rm", "-f", `${dockerContainerName}`]);
+    await execute("docker", ["rm", "-f", `${dockerContainerName}`]);
   };
 }
 
