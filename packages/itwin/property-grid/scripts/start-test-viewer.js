@@ -5,14 +5,8 @@
 const crossEnv = require("cross-env");
 const path = require("path").resolve(__dirname, "../../../../apps/test-viewer");
 const watch = process.argv[2] && process.argv[2] === "--watch";
-let options = {
-  shell: true,
-};
-let startDevPrefix = ":no-watch";
-if (watch) {
-  options = {};
-  startDevPrefix = "";
-}
+const scriptName = watch ? "start:dev" : "start:dev:no-watch";
+const options = watch ? undefined : { shell: true };
 
 crossEnv([
   'IMJS_DEMO_CLIENT=true',
@@ -27,5 +21,5 @@ crossEnv([
   'USE_FULL_SOURCEMAP=true',
   'TRANSPILE_DEPS=false',
   'IMJS_ENABLED_WIDGETS="tree-widget property-grid"',
-  `npm run start:dev${startDevPrefix} --prefix ${path}`,
+  `npm run ${scriptName} --prefix ${path}`,
 ], options);
