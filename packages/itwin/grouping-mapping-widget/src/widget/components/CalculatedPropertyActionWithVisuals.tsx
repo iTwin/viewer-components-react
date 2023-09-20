@@ -28,6 +28,9 @@ import type { CalculatedProperty, CalculatedPropertyType, Group } from "@itwin/i
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
+import { SaveValidationModal } from "./SaveValidationModal";
+import type { invalids } from "./PropertyValidationUtils";
+import { PropertyValidation } from "./PropertyValidationUtils";
 
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
@@ -57,6 +60,19 @@ export const CalculatedPropertyActionWithVisuals = ({
   const [validator, showValidationMessage] = useValidator();
   const [resolvedHiliteIds, setResolvedHiliteIds] = useState<string[]>([]);
   const [colorProperty, setColorProperty] = useState<boolean>(false);
+  const origPropertyName = calculatedProperty?.propertyName ?? "";
+  const [showSaveValidationModal, setShowSaveValidationModal] = useState<boolean>(false);
+  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<invalids[]>([]);
+
+  async function checkOutliers(changedPropName: string): Promise<invalids[]> {
+    const accessToken = await getAccessToken();
+    const [customCalcProps] = await Promise.all([
+      mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id),
+    ]);
+    const changes: invalids[] = await PropertyValidation({origPropertyName, changedPropertyName: changedPropName, customCalcProps});
+    setInvalidCustomCalcs(changes);
+    return Promise.resolve(changes);
+  }
 
   useEffect(() => {
     const decorator = new BboxDimensionsDecorator();
@@ -111,16 +127,44 @@ export const CalculatedPropertyActionWithVisuals = ({
     }
   }, [bboxDecorator, colorProperty, inferredSpatialData, type]);
 
-  const onSave = async () => {
+  const handleCustomCalcUpdate = async (customCalculation: {id: string, propertyName: string, formula: string}) => {
+    try {
+      const accessToken = await getAccessToken();
+      const origCustomCalc = await mappingClient.getCustomCalculation(accessToken, iModelId, mappingId, group.id, customCalculation.id);
+      await mappingClient.updateCustomCalculation(
+        accessToken,
+        iModelId,
+        mappingId,
+        group.id,
+        customCalculation.id,
+        {
+          propertyName: customCalculation.propertyName,
+          formula: customCalculation.formula,
+          quantityType: origCustomCalc.quantityType,
+        }
+      );
+    } catch (error: any) {
+      if (error.status === 422) {
+        error = error as Response;
+        const erroredResponse = await error.json();
+        if (
+          erroredResponse.error.code === "InvalidInsightsRequest" &&
+          erroredResponse.error.target === "formula"
+        ) {}
+      } else {
+        handleError(error.status);
+      }
+    } finally {
+    }
+  };
+
+  const onSave = async (selectedRows: {id: string, customCalcName: string, formula: string}[]) => {
     if (!validator.allValid() || !type) {
       showValidationMessage(true);
       return;
     }
     try {
-      setIsLoading(true);
-
       const accessToken = await getAccessToken();
-
       calculatedProperty
         ? await mappingClient.updateCalculatedProperty(
           accessToken,
@@ -143,6 +187,16 @@ export const CalculatedPropertyActionWithVisuals = ({
             type,
           },
         );
+      const promises: any[] = [];
+      selectedRows.forEach(async (ele: {id: string, customCalcName: string, formula: string}) => {
+        const customCalculation = {
+          id: ele.id,
+          propertyName: ele.customCalcName,
+          formula: ele.formula,
+        };
+        promises.push(handleCustomCalcUpdate(customCalculation));
+      });
+      await Promise.all(promises);
       onSaveSuccess();
       setPropertyName("");
       setType(undefined);
@@ -151,6 +205,55 @@ export const CalculatedPropertyActionWithVisuals = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSaveClick = async () => {
+    if (!validator.allValid() || !type) {
+      showValidationMessage(true);
+      return;
+    }
+    if (origPropertyName !== propertyName && origPropertyName !== "") {
+      const changedPropName = propertyName;
+      const changes = await checkOutliers(changedPropName);
+      if (changes.length > 0) {
+        setShowSaveValidationModal(true);
+      } else {
+        await onSave([]);
+      }
+    } else {
+      await onSave([]);
+    }
+  };
+
+  const handleSaveValidationModal = async (rows: string) => {
+    try {
+      setIsLoading(true);
+      let updatedRows: any = [];
+      const selectedRows: {id: string, customCalcName: string, formula: string}[] = [];
+      if (rows !== "") {
+        updatedRows = JSON.parse(rows);
+        if (updatedRows.length > 0) {
+          updatedRows.forEach((ele: invalids) => {
+            selectedRows.push({
+              id: ele.id,
+              customCalcName: ele.customCalcName,
+              formula: ele.changedFormula,
+            });
+          });
+        }
+      } else {
+        updatedRows = [];
+      }
+      await onSave(selectedRows);
+    } catch (error: any) {
+      handleError(error.status);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseSaveValidationModal = () => {
+    setShowSaveValidationModal(false);
   };
 
   const getSpatialData = (value: string) =>
@@ -177,7 +280,7 @@ export const CalculatedPropertyActionWithVisuals = ({
               labelPosition='left'
               disabled={isLoading}
               checked={colorProperty}
-              onChange={() => setColorProperty((b) => !b)}
+              onChange={() => setColorProperty((b: any) => !b)}
             ></ToggleSwitch>
           </div>
           <SharedCalculatedPropertyForms
@@ -204,10 +307,17 @@ export const CalculatedPropertyActionWithVisuals = ({
         </Fieldset>
       </div>
       <ActionPanel
-        onSave={onSave}
+        onSave={handleSaveClick}
         onCancel={onClickCancel}
         isSavingDisabled={!(type && propertyName)}
         isLoading={isLoading}
+      />
+      <SaveValidationModal
+        onSave={handleSaveValidationModal}
+        onClose={handleCloseSaveValidationModal}
+        showSaveValidationModal={showSaveValidationModal}
+        invalidCustomCalcs={invalidCustomCalcs}
+        setInvalidCustomCalcs={setInvalidCustomCalcs}
       />
     </>
   );

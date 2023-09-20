@@ -66,7 +66,9 @@ import {
   findProperties,
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "./viewerUtils";
-import { SaveModal } from "./SaveModal";
+import { SaveValidationModal } from "./SaveValidationModal";
+import type { invalids } from "./PropertyValidationUtils";
+import { PropertyValidation } from "./PropertyValidationUtils";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -97,7 +99,6 @@ export const GroupPropertyAction = ({
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
-  const [oldPropertyName, setOldPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
   const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
@@ -116,7 +117,144 @@ export const GroupPropertyAction = ({
     })
   );
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
+  const [showSaveValidationModal, setShowSaveValidationModal] = useState<boolean>(false);
+  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<invalids[]>([]);
+  const origPropertyName = groupProperty?.propertyName ?? "";
+
+  async function checkOutliers(changedPropName: string): Promise<invalids[]> {
+    const accessToken = await getAccessToken();
+    const [customCalcProps] = await Promise.all([
+      mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id),
+    ]);
+    const changes: invalids[] = await PropertyValidation({origPropertyName, changedPropertyName: changedPropName, customCalcProps});
+    setInvalidCustomCalcs(changes);
+    return Promise.resolve(changes);
+  }
+
+  const handleCustomCalcUpdate = async (customCalculation: {id: string, propertyName: string, formula: string}) => {
+    try {
+      const accessToken = await getAccessToken();
+      const origCustomCalc = await mappingClient.getCustomCalculation(accessToken, iModelId, mappingId, group.id, customCalculation.id);
+      await mappingClient.updateCustomCalculation(
+        accessToken,
+        iModelId,
+        mappingId,
+        group.id,
+        customCalculation.id,
+        {
+          propertyName: customCalculation.propertyName,
+          formula: customCalculation.formula,
+          quantityType: origCustomCalc.quantityType,
+        }
+      );
+    } catch (error: any) {
+      if (error.status === 422) {
+        error = error as Response;
+        const erroredResponse = await error.json();
+        if (
+          erroredResponse.error.code === "InvalidInsightsRequest" &&
+          erroredResponse.error.target === "formula"
+        ) {}
+      } else {
+        handleError(error.status);
+      }
+    } finally {
+    }
+  };
+
+  const onSave = async (selectedRows: {id: string, customCalcName: string, formula: string}[]) => {
+    try {
+      setIsLoading(true);
+      const accessToken = await getAccessToken();
+      const newGroupProperty: GroupPropertyCreate = {
+        propertyName,
+        dataType,
+        quantityType,
+        ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
+      };
+      groupProperty
+        ? await mappingClient.updateGroupProperty(
+          accessToken,
+          iModelId,
+          mappingId,
+          group.id,
+          groupProperty.id,
+          newGroupProperty
+        )
+        : await mappingClient.createGroupProperty(
+          accessToken,
+          iModelId,
+          mappingId,
+          group.id,
+          newGroupProperty
+        );
+      const promises: any[] = [];
+      selectedRows.forEach(async (ele: {id: string, customCalcName: string, formula: string}) => {
+        const customCalculation = {
+          id: ele.id,
+          propertyName: ele.customCalcName,
+          formula: ele.formula,
+        };
+        promises.push(handleCustomCalcUpdate(customCalculation));
+      });
+      await Promise.all(promises);
+      onSaveSuccess();
+      reset();
+    } catch (error: any) {
+      handleError(error.status);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveClick = async () => {
+    if (!validator.allValid()) {
+      showValidationMessage(true);
+      return;
+    }
+    if (origPropertyName !== propertyName && origPropertyName !== "") {
+      const changedPropName = propertyName;
+      const changes = await checkOutliers(changedPropName);
+      if (changes.length > 0) {
+        setShowSaveValidationModal(true);
+      } else {
+        await onSave([]);
+      }
+    } else {
+      await onSave([]);
+    }
+  };
+
+  const handleSaveValidationModal = async (rows: string) => {
+    try {
+      setIsLoading(true);
+      let updatedRows: any = [];
+      const selectedRows: {id: string, customCalcName: string, formula: string}[] = [];
+      if (rows !== "") {
+        updatedRows = JSON.parse(rows);
+        if (updatedRows.length > 0) {
+          updatedRows.forEach((ele: invalids) => {
+            selectedRows.push({
+              id: ele.id,
+              customCalcName: ele.customCalcName,
+              formula: ele.changedFormula,
+            });
+          });
+        }
+      } else {
+        updatedRows = [];
+      }
+      await onSave(selectedRows);
+    } catch (error: any) {
+      handleError(error.status);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseSaveValidationModal = () => {
+    setShowSaveValidationModal(false);
+  };
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -190,7 +328,7 @@ export const GroupPropertyAction = ({
           );
 
           setPropertyName(response.propertyName);
-          setOldPropertyName(response.propertyName);
+          // setOldPropertyName(response.propertyName);
           setDataType(response.dataType);
           setQuantityType(response.quantityType);
           const properties = findProperties(response.ecProperties, propertiesMetaData);
@@ -208,57 +346,6 @@ export const GroupPropertyAction = ({
     };
     void generateProperties();
   }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
-
-  const handleSaveClick = async () => {
-    if (!validator.allValid()) {
-      showValidationMessage(true);
-      return;
-    }
-    if (oldPropertyName !== propertyName && oldPropertyName !== "") {
-      setShowSaveModal(true);
-    } else {
-      await onSave();
-    }
-  };
-
-  const handleCloseSaveModal = () => {
-    setShowSaveModal(false);
-  };
-
-  const onSave = async () => {
-    try {
-      setIsLoading(true);
-      const accessToken = await getAccessToken();
-      const newGroupProperty: GroupPropertyCreate = {
-        propertyName,
-        dataType,
-        quantityType,
-        ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
-      };
-      groupProperty
-        ? await mappingClient.updateGroupProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          groupProperty.id,
-          newGroupProperty
-        )
-        : await mappingClient.createGroupProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          newGroupProperty
-        );
-      onSaveSuccess();
-      reset();
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const startSearch = useCallback(() => {
     if (!searchInput) return;
@@ -528,10 +615,12 @@ export const GroupPropertyAction = ({
           </Button>
         </ModalButtonBar>
       </Modal>
-      <SaveModal
-        onSave={onSave}
-        onClose={handleCloseSaveModal}
-        showSaveModal={showSaveModal}
+      <SaveValidationModal
+        onSave={handleSaveValidationModal}
+        onClose={handleCloseSaveValidationModal}
+        showSaveValidationModal={showSaveValidationModal}
+        invalidCustomCalcs={invalidCustomCalcs}
+        setInvalidCustomCalcs={setInvalidCustomCalcs}
       />
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
