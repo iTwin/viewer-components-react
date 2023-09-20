@@ -42,20 +42,19 @@ jobs:
         clean: all
       - template: templates/build.yaml
 
-  - job: E2E test
+  - job: E2E_test
     condition: succeeded()
-    strategy:
-      matrix:
-        "Linux - Node 18.16.0":
-          NodeVersion: 18.16.0
-          OS: ubuntu-latest
-
     workspace:
       clean: all
-
     pool:
-      vmImage: $(OS)
+      vmImage: ubuntu-latest
     steps:
       - checkout: self
-        clean: all
-      - template: templates/e2e-test.yaml
+        clean: true
+      - task: NodeTool@0
+        displayName: "Use Node 18.16.0"
+        inputs:
+          versionSpec: "18.16.0"
+          checkLatest: true
+      - script: node common/scripts/install-run-rush.js test:e2e --verbose
+        displayName: "rush test:e2e"
