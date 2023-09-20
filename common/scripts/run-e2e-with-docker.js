@@ -41,7 +41,7 @@ async function buildAndRunDocker() {
       // Copy snapshots from docker container to the local repo
       await execute("docker", ["cp", `${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests`, `./${srcFolderLocation}`]);
     }
-  } catch(_e) {
+  } catch {
     process.exitCode = 1;
   } finally {
     // Remove the Docker container
