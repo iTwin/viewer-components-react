@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Update to AppUI 4.5.0",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}

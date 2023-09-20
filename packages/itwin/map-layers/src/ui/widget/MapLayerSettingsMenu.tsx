@@ -8,7 +8,7 @@ import { DropdownMenu, IconButton, MenuItem, Slider } from "@itwin/itwinui-react
 import "./MapLayerManager.scss";
 import { StyleMapLayerSettings } from "../Interfaces";
 import { MapLayersUI } from "../../mapLayers";
-import { SvgMoreVertical } from "@itwin/itwinui-react/cjs/core/utils";
+import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 
 interface MapLayerSettingsMenuProps {
   mapLayerSettings: StyleMapLayerSettings;

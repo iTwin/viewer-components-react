@@ -260,6 +260,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
           {
             ...createRelatedNonHierarchySubjectSpecification(),
             hideExpression: `NOT ThisNode.HasChildren ANDALSO NOT ThisNode.ChildrenArtifacts.AnyMatches(x => x.isContentModel)`,
+            hideIfNoChildren: undefined,
           },
         ],
         customizationRules: [
@@ -289,7 +290,10 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          createNonContentModelsSpecification(context),
+          {
+            ...createNonContentModelsSpecification(context),
+            hasChildren: "Unknown",
+          },
         ],
         customizationRules: [
           {
@@ -305,7 +309,10 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
-          createContentModelsSpecification(context),
+          {
+            ...createContentModelsSpecification(context),
+            hasChildren: "Unknown",
+          },
         ],
         customizationRules: [
           {

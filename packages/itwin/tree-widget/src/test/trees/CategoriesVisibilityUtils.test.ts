@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { expect } from "chai";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
 import { TestUtils } from "../TestUtils";
-import { expect } from "chai";
 
 import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
@@ -17,8 +17,7 @@ import type { Id64String } from "@itwin/core-bentley";
 
 describe("CategoryVisibilityUtils", () => {
   before(async () => {
-    // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-    await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
+    await NoRenderApp.startup();
     await TestUtils.initialize();
   });
 
