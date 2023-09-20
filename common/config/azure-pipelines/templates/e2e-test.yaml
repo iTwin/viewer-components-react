@@ -1,0 +1,8 @@
+steps:
+  - task: NodeTool@0
+    displayName: "Use Node $(NodeVersion)"
+    inputs:
+      versionSpec: "$(NodeVersion)"
+      checkLatest: true
+  - script: node common/scripts/install-run-rushx.js test:e2e --verbose
+    displayName: rush test:e2e

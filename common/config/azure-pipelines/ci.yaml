@@ -41,3 +41,21 @@ jobs:
       - checkout: self
         clean: all
       - template: templates/build.yaml
+
+  - job: E2E test
+    condition: succeeded()
+    strategy:
+      matrix:
+        "Linux - Node 18.16.0":
+          NodeVersion: 18.16.0
+          OS: ubuntu-latest
+
+    workspace:
+      clean: all
+
+    pool:
+      vmImage: $(OS)
+    steps:
+      - checkout: self
+        clean: all
+      - template: templates/e2e-test.yaml
