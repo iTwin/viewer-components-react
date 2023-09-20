@@ -18,7 +18,7 @@ steps:
     displayName: rush build
   - script: node common/scripts/install-run-rush.js lint
     displayName: rush lint
-  - script: rush test:e2e --verbose
+  - script: node common/scripts/install-run-rush.js test:e2e --verbose
     displayName: rush test:e2e
 
   # By default linux agents do not have a real display so use the virtual framebuffer
