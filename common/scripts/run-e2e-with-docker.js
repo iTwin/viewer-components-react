@@ -3,27 +3,26 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 const path = require("path");
-const { exec } = require("child_process");
+const { spawn } = require("child_process");
 const packageName = process.argv[2];
 const dockerImageName = `${packageName}-e2e-test-image`;
 const dockerContainerName = `${packageName}-e2e-test-container`;
 const srcFolderLocation = `packages/itwin/${packageName}/src`;
 
-const execute = (command) => new Promise((resolve, reject) => {
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error executing command: ${error}`);
-      return reject(error);
+const execute = (command, args = []) => new Promise((resolve, reject) => {
+  const spawnProcess = spawn(command, args, { stdio: "inherit" });
+
+  spawnProcess.on("close", (status) => {
+    if (status !== 0) {
+      console.error(`Command failed with code ${status}`);
+      return reject(new Error(`Command failed: ${command} ${args.join(" ")}`));
     }
-    console.log(stdout);
-    console.error(stderr);
     resolve();
   });
 });
 
 try {
   const currentDirectory = process.cwd();
-  // cd to the root directory from property-grid directory
   const rootDirectory = path.resolve(currentDirectory, "../../../");
   process.chdir(rootDirectory);
 } catch (err) {
@@ -31,21 +30,23 @@ try {
   return;
 }
 
-// Build the Docker image
-execute(`docker build --build-arg PACKAGE_NAME=${packageName} -t ${dockerImageName} .`)
-  .then(() => {
-      // Run Docker container
-      return execute(`docker run --name ${dockerContainerName} -e UPDATE_SNAPSHOTS=${process.env.UPDATE_SNAPSHOTS} ${dockerImageName}`);
-  })
-  .then(() => {
-    if (process.env.UPDATE_SNAPSHOTS) {
+async function buildAndRunDocker() {
+  try {
+    // Build the Docker image
+    await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", `${dockerImageName}`, "-f", "e2e.Dockerfile", "."]);
+    // Run Docker container
+    await execute("docker", ["run", "--name", `${dockerContainerName}`, "-e", `UPDATE_SNAPSHOTS=${process.env.UPDATE_SNAPSHOTS}`, `${dockerImageName}`]);
+
+    if(process.env.UPDATE_SNAPSHOTS) {
       // Copy snapshots from docker container to the local repo
-      return execute(`docker cp ${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests ./${srcFolderLocation}`);
-    };
-  })
-  .catch(() => {
-    // If error ocurred print the output from docker container
-    return execute(`docker logs ${dockerContainerName}`).then(() => {
-      process.exit(1);
-    });
-  });
+      await execute("docker", ["cp", `${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests`, `./${srcFolderLocation}`]);
+    }
+  } catch(_e) {
+    process.exitCode = 1;
+  } finally {
+    // Remove the Docker container
+      await execute("docker", ["rm", "-f", `${dockerContainerName}`]);
+  };
+}
+
+buildAndRunDocker();
