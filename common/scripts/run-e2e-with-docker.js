@@ -37,7 +37,7 @@ async function buildAndRunDocker() {
     // Run Docker container
     await execute("docker", ["run", "--name", `${dockerContainerName}`, "-e", `UPDATE_SNAPSHOTS=${process.env.UPDATE_SNAPSHOTS}`, `${dockerImageName}`]);
 
-    if(process.env.UPDATE_SNAPSHOTS) {
+    if (process.env.UPDATE_SNAPSHOTS) {
       // Copy snapshots from docker container to the local repo
       await execute("docker", ["cp", `${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests`, `./${srcFolderLocation}`]);
     }
