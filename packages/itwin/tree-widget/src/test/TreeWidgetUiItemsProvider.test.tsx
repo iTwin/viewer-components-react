@@ -8,6 +8,7 @@ import { createRef } from "react";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
+import { IModelApp } from "@itwin/core-frontend";
 import { render, waitFor } from "@testing-library/react";
 import * as selectableTreeModule from "../components/SelectableTree";
 import * as categoriesTreeComponents from "../components/trees/category-tree/CategoriesTreeComponent";
@@ -20,20 +21,17 @@ import { TestUtils } from "./TestUtils";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("TreeWidgetUiItemsProvider", () => {
-  before(async () => {
+  beforeEach(async () => {
+    sinon.stub(IModelApp, "viewManager").get(() => ({ onSelectedViewportChanged: new BeEvent() }));
+
+    const ref = createRef<HTMLDivElement>();
+    sinon.stub(useTreeTransientStateModule, "useTreeTransientState").callsFake(() => ref);
+
     await TestUtils.initialize();
   });
 
-  after(() => {
-    TestUtils.terminate();
-  });
-
-  beforeEach(() => {
-    const ref = createRef<HTMLDivElement>();
-    sinon.stub(useTreeTransientStateModule, "useTreeTransientState").callsFake(() => ref);
-  });
-
   afterEach(() => {
+    TestUtils.terminate();
     sinon.restore();
   });
 
@@ -96,6 +94,7 @@ describe("TreeWidgetUiItemsProvider", () => {
       isBlankConnection: () => true,
       selectionSet: {
         onChanged: new BeEvent(),
+        elements: { size: 0 },
       },
     } as IModelConnection);
 
