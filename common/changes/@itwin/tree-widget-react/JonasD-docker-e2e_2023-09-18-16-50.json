@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "running e2e tests with docker",
+      "comment": "",
       "type": "none"
     }
   ],
