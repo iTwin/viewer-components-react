@@ -136,6 +136,7 @@ function getStringFunction(name: string): FormulaFunction | undefined {
     case "padend": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "String" }], returnType: "String" };
     case "padstart": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "String" }], returnType: "String" };
     case "substring": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "Number" }], returnType: "String" };
+    case "indexof": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "String" }, { dataType: "Number" }], returnType: "Number" };
     case "tolowercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
     case "touppercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
     case "trim": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
