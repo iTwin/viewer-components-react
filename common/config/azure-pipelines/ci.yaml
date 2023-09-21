@@ -42,7 +42,8 @@ jobs:
         clean: all
       - template: templates/build.yaml
 
-  - job: "Run e2e tests"
+  - job: "Run_e2e_tests"
+    displayName: "Run e2e tests"
     condition: succeeded()
     workspace:
       clean: all
