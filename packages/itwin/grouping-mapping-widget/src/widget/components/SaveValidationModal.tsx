@@ -11,14 +11,14 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
-import type { invalids } from "./PropertyValidationUtils";
+import type { Invalids } from "./PropertyValidationUtils";
 
 export interface SaveValidationModalProps {
   onSave: (rows: string) => void;
   onClose: () => void;
-  invalidCustomCalcs: invalids[];
+  invalidCustomCalcs: Invalids[];
   showSaveValidationModal: boolean;
-  setInvalidCustomCalcs: (updatesCals: invalids[]) => void;
+  setInvalidCustomCalcs: (updatesCals: Invalids[]) => void;
 }
 
 export const SaveValidationModal = ({
@@ -48,15 +48,15 @@ export const SaveValidationModal = ({
   const columns = useMemo(() => [{
     id: "customCalcName",
     Header: "Custom Calculation",
-    accessor: "customCalcName" as keyof invalids,
+    accessor: "customCalcName" as keyof Invalids,
   }, {
     id: "origFormula",
     Header: "Original Formula",
-    accessor: "origFormula" as keyof invalids,
+    accessor: "origFormula" as keyof Invalids,
   }, {
     id: "changedFormula",
     Header: "Formula",
-    accessor: "changedFormula" as keyof invalids,
+    accessor: "changedFormula" as keyof Invalids,
   }], []);
 
   return (
@@ -67,12 +67,12 @@ export const SaveValidationModal = ({
       onClose={onClose}
     >
       <Text variant="leading" as="h3">
-          Update to this property will cause the following custom calculations to be invalid. Do you also want to make the suggested changes to their formula(s) ?
-          Please select the custom calculation(s) that you want to update along with the change in the property.
+        Update to this property will cause the following custom calculations to be invalid. Do you also want to make the suggested changes to their formula(s) ?
+        Please select the custom calculation(s) that you want to update along with the change in the property.
       </Text>
-      <Table<CreateTypeFromInterface<invalids>>
+      <Table<CreateTypeFromInterface<Invalids>>
         columns={columns}
-        data={isLoading ? []: invalidCustomCalcs}
+        data={isLoading ? [] : invalidCustomCalcs}
         emptyTableContent='No data.'
         isSelectable={true}
         isLoading={isLoading}
@@ -81,13 +81,13 @@ export const SaveValidationModal = ({
       />
       <ModalButtonBar>
         <Button styleType='high-visibility' onClick={handleOnSave}>
-            Save
+          Save
         </Button>
         <Button
           onClick={onClose}
           styleType='default'
         >
-            Cancel
+          Cancel
         </Button>
       </ModalButtonBar>
     </Modal>

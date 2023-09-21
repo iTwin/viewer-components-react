@@ -67,7 +67,7 @@ import {
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "./viewerUtils";
 import { SaveValidationModal } from "./SaveValidationModal";
-import type { invalids } from "./PropertyValidationUtils";
+import type { Invalids } from "./PropertyValidationUtils";
 import { PropertyValidation } from "./PropertyValidationUtils";
 
 export interface GroupPropertyActionProps {
@@ -118,20 +118,18 @@ export const GroupPropertyAction = ({
   );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showSaveValidationModal, setShowSaveValidationModal] = useState<boolean>(false);
-  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<invalids[]>([]);
+  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<Invalids[]>([]);
   const origPropertyName = groupProperty?.propertyName ?? "";
 
-  async function checkOutliers(changedPropName: string): Promise<invalids[]> {
+  const checkOutliers = async (changedPropName: string): Promise<Invalids[]> => {
     const accessToken = await getAccessToken();
-    const [customCalcProps] = await Promise.all([
-      mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id),
-    ]);
-    const changes: invalids[] = await PropertyValidation({origPropertyName, changedPropertyName: changedPropName, customCalcProps});
+    const customCalcProps = await mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id);
+    const changes: Invalids[] = await PropertyValidation({ origPropertyName, changedPropertyName: changedPropName, customCalcProps });
     setInvalidCustomCalcs(changes);
     return Promise.resolve(changes);
-  }
+  };
 
-  const handleCustomCalcUpdate = async (customCalculation: {id: string, propertyName: string, formula: string}) => {
+  const handleCustomCalcUpdate = async (customCalculation: { id: string, propertyName: string, formula: string }) => {
     try {
       const accessToken = await getAccessToken();
       const origCustomCalc = await mappingClient.getCustomCalculation(accessToken, iModelId, mappingId, group.id, customCalculation.id);
@@ -154,7 +152,7 @@ export const GroupPropertyAction = ({
         if (
           erroredResponse.error.code === "InvalidInsightsRequest" &&
           erroredResponse.error.target === "formula"
-        ) {}
+        ) { }
       } else {
         handleError(error.status);
       }
@@ -162,7 +160,7 @@ export const GroupPropertyAction = ({
     }
   };
 
-  const onSave = async (selectedRows: {id: string, customCalcName: string, formula: string}[]) => {
+  const onSave = async (selectedRows: { id: string, customCalcName: string, formula: string }[]) => {
     try {
       setIsLoading(true);
       const accessToken = await getAccessToken();
@@ -189,7 +187,7 @@ export const GroupPropertyAction = ({
           newGroupProperty
         );
       const promises: any[] = [];
-      selectedRows.forEach(async (ele: {id: string, customCalcName: string, formula: string}) => {
+      selectedRows.forEach(async (ele: { id: string, customCalcName: string, formula: string }) => {
         const customCalculation = {
           id: ele.id,
           propertyName: ele.customCalcName,
@@ -228,12 +226,12 @@ export const GroupPropertyAction = ({
   const handleSaveValidationModal = async (rows: string) => {
     try {
       setIsLoading(true);
-      let updatedRows: any = [];
-      const selectedRows: {id: string, customCalcName: string, formula: string}[] = [];
+      let updatedRows: Invalids[] = [];
+      const selectedRows: { id: string, customCalcName: string, formula: string }[] = [];
       if (rows !== "") {
         updatedRows = JSON.parse(rows);
         if (updatedRows.length > 0) {
-          updatedRows.forEach((ele: invalids) => {
+          updatedRows.forEach((ele: Invalids) => {
             selectedRows.push({
               id: ele.id,
               customCalcName: ele.customCalcName,
@@ -328,7 +326,6 @@ export const GroupPropertyAction = ({
           );
 
           setPropertyName(response.propertyName);
-          // setOldPropertyName(response.propertyName);
           setDataType(response.dataType);
           setQuantityType(response.quantityType);
           const properties = findProperties(response.ecProperties, propertiesMetaData);

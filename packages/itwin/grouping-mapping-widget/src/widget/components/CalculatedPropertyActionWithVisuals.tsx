@@ -29,7 +29,7 @@ import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsCo
 import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { SaveValidationModal } from "./SaveValidationModal";
-import type { invalids } from "./PropertyValidationUtils";
+import type { Invalids } from "./PropertyValidationUtils";
 import { PropertyValidation } from "./PropertyValidationUtils";
 
 export interface CalculatedPropertyActionWithVisualsProps {
@@ -62,17 +62,15 @@ export const CalculatedPropertyActionWithVisuals = ({
   const [colorProperty, setColorProperty] = useState<boolean>(false);
   const origPropertyName = calculatedProperty?.propertyName ?? "";
   const [showSaveValidationModal, setShowSaveValidationModal] = useState<boolean>(false);
-  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<invalids[]>([]);
+  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<Invalids[]>([]);
 
-  async function checkOutliers(changedPropName: string): Promise<invalids[]> {
+  const checkOutliers = async (changedPropName: string): Promise<Invalids[]> => {
     const accessToken = await getAccessToken();
-    const [customCalcProps] = await Promise.all([
-      mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id),
-    ]);
-    const changes: invalids[] = await PropertyValidation({origPropertyName, changedPropertyName: changedPropName, customCalcProps});
+    const customCalcProps = await mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id);
+    const changes: Invalids[] = await PropertyValidation({ origPropertyName, changedPropertyName: changedPropName, customCalcProps });
     setInvalidCustomCalcs(changes);
     return Promise.resolve(changes);
-  }
+  };
 
   useEffect(() => {
     const decorator = new BboxDimensionsDecorator();
@@ -127,7 +125,7 @@ export const CalculatedPropertyActionWithVisuals = ({
     }
   }, [bboxDecorator, colorProperty, inferredSpatialData, type]);
 
-  const handleCustomCalcUpdate = async (customCalculation: {id: string, propertyName: string, formula: string}) => {
+  const handleCustomCalcUpdate = async (customCalculation: { id: string, propertyName: string, formula: string }) => {
     try {
       const accessToken = await getAccessToken();
       const origCustomCalc = await mappingClient.getCustomCalculation(accessToken, iModelId, mappingId, group.id, customCalculation.id);
@@ -158,7 +156,7 @@ export const CalculatedPropertyActionWithVisuals = ({
     }
   };
 
-  const onSave = async (selectedRows: {id: string, customCalcName: string, formula: string}[]) => {
+  const onSave = async (selectedRows: { id: string, customCalcName: string, formula: string }[]) => {
     if (!validator.allValid() || !type) {
       showValidationMessage(true);
       return;
@@ -188,7 +186,7 @@ export const CalculatedPropertyActionWithVisuals = ({
           },
         );
       const promises: any[] = [];
-      selectedRows.forEach(async (ele: {id: string, customCalcName: string, formula: string}) => {
+      selectedRows.forEach(async (ele: { id: string, customCalcName: string, formula: string }) => {
         const customCalculation = {
           id: ele.id,
           propertyName: ele.customCalcName,
@@ -228,12 +226,12 @@ export const CalculatedPropertyActionWithVisuals = ({
   const handleSaveValidationModal = async (rows: string) => {
     try {
       setIsLoading(true);
-      let updatedRows: any = [];
-      const selectedRows: {id: string, customCalcName: string, formula: string}[] = [];
+      let updatedRows: Invalids[] = [];
+      const selectedRows: { id: string, customCalcName: string, formula: string }[] = [];
       if (rows !== "") {
         updatedRows = JSON.parse(rows);
         if (updatedRows.length > 0) {
-          updatedRows.forEach((ele: invalids) => {
+          updatedRows.forEach((ele: Invalids) => {
             selectedRows.push({
               id: ele.id,
               customCalcName: ele.customCalcName,
@@ -280,7 +278,7 @@ export const CalculatedPropertyActionWithVisuals = ({
               labelPosition='left'
               disabled={isLoading}
               checked={colorProperty}
-              onChange={() => setColorProperty((b: any) => !b)}
+              onChange={() => setColorProperty((b) => !b)}
             ></ToggleSwitch>
           </div>
           <SharedCalculatedPropertyForms

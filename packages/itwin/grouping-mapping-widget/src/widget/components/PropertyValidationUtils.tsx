@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import type { CalculatedProperty, CustomCalculation, GroupProperty } from "@itwin/insights-client";
 
 class Graph {
@@ -29,7 +33,7 @@ class Graph {
   public hasCyclicDep(node: string, visited: Set<string>, stack: Set<string>, outliers: string[]): boolean {
     visited.add(node);
     stack.add(node);
-    for(const neigh of this.adjList.get(node) || []) {
+    for (const neigh of this.adjList.get(node) || []) {
       if (!visited.has(neigh)) {
         if (this.hasCyclicDep(neigh, visited, stack, outliers)) {
           return true;
@@ -90,7 +94,7 @@ class Graph {
   }
 }
 
-export interface invalids {
+export interface Invalids {
   id: string;
   customCalcName: string;
   origName: string;
@@ -109,7 +113,7 @@ export const PropertyValidation = async ({
   origPropertyName,
   changedPropertyName,
   customCalcProps,
-}: PropertyValidationProps): Promise<invalids[]> => {
+}: PropertyValidationProps): Promise<Invalids[]> => {
   let outliers: string[] | null = [];
   async function checkOutliers(changedPropName: string) {
     const graph: Graph = new Graph();
@@ -120,7 +124,7 @@ export const PropertyValidation = async ({
     });
     const calcPropsArray = graph.cleanFromula(customCalcProps);
     outliers = graph.validateSanity(calcPropsArray);
-    const changes: invalids[] = [];
+    const changes: Invalids[] = [];
     for (const prop of customCalcProps) {
       const propName = prop.propertyName;
       const propertyFormula = prop.formula;
@@ -128,7 +132,7 @@ export const PropertyValidation = async ({
         const regex = new RegExp(origPropertyName, "g");
         const newFormula = propertyFormula.replace(regex, changedPropName);
         if (newFormula !== prop.formula) {
-          const change: invalids = {
+          const change: Invalids = {
             id: prop.id,
             customCalcName: prop.propertyName,
             origName: origPropertyName,
@@ -167,7 +171,7 @@ export const getOutliers = async ({
   });
   const calcPropsArray = graph.cleanFromula(customCalcProps);
   let outliers: string[] | null = [];
-  outliers =  graph.validateSanity(calcPropsArray);
+  outliers = graph.validateSanity(calcPropsArray);
   if (outliers) {
     return outliers;
   } else {

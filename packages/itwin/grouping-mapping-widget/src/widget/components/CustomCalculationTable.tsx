@@ -24,14 +24,14 @@ import { usePropertiesContext } from "./context/PropertiesContext";
 import { handleError } from "./utils";
 import { getOutliers } from "./PropertyValidationUtils";
 
-class TableData implements CustomCalculation {
-  id!: string;
-  propertyName!: string;
-  formula!: string;
-  dataType!: DataType;
-  quantityType!: QuantityType;
-  _links!: CalculatedPropertyLinks;
-  startIcon?: React.JSX.Element;
+interface TableData extends CustomCalculation {
+  id: string;
+  propertyName: string;
+  formula: string;
+  dataType: DataType;
+  quantityType: QuantityType;
+  _links: CalculatedPropertyLinks;
+  startIcon?: JSX.Element;
   customCalc?: CustomCalculation;
 }
 
@@ -63,14 +63,10 @@ export const CustomCalculationTable = ({
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
 
   const {
-    groupProperties,
     setGroupProperties,
-    calculatedProperties,
     setCalculatedProperties,
-    customCalculationProperties,
     setCustomCalculationProperties,
   } = usePropertiesContext();
-  const [ifLoading, setIfLoading] = useState<boolean>(true);
   const [tableData, setTableData] = useState<TableData[]>(customCalculations);
   const [outliers, setOutliers] = useState<string[]>([]);
 
@@ -87,7 +83,7 @@ export const CustomCalculationTable = ({
     setCustomCalculationProperties(customCalcProps);
     setTableData(customCalcProps);
 
-    const localOutliers = await getOutliers({groupProps, calcProps, customCalcProps, allProps});
+    const localOutliers = await getOutliers({ groupProps, calcProps, customCalcProps, allProps });
 
     if (localOutliers.length > 0) {
       setOutliers(localOutliers);
@@ -112,7 +108,7 @@ export const CustomCalculationTable = ({
           styleType="borderless"
           title="Warning: Some variable/s from the formula aren't defined"
           onClick={() => getValues}>
-          <SvgStatusWarning style={{fill: "#a05c08", width: "16px", height: "16px"}}>
+          <SvgStatusWarning style={{ fill: "#a05c08", width: "16px", height: "16px" }}>
           </SvgStatusWarning>
         </IconButton>;
       }
@@ -121,7 +117,6 @@ export const CustomCalculationTable = ({
   }, [getValues, outliers, tableData]);
 
   const fetchAllProperties = useCallback(async () => {
-    setIfLoading(true);
     try {
       if (!groupProps || !calcProps || !customCalcProps) {
         await getValues();
@@ -129,7 +124,6 @@ export const CustomCalculationTable = ({
     } catch (error: any) {
       handleError(error.status);
     } finally {
-      setIfLoading(false);
     }
   }, [getValues]);
 
@@ -146,9 +140,9 @@ export const CustomCalculationTable = ({
             id: "propertyName",
             Header: "Custom Calculation",
             accessor: "propertyName",
-            cellRenderer: (props: CellRendererProps<{startIcon: JSX.Element, customCalc: CustomCalculation}>) =>
+            cellRenderer: (props: CellRendererProps<{ startIcon: JSX.Element, customCalc: CustomCalculation }>) =>
               onClickModify ? (
-                <DefaultCell {...props} endIcon={props.cellProps.row.original.startIcon} className="iui-anchor" onClick={() => onClickModify(props.cellProps.row.original.customCalc)}/>
+                <DefaultCell {...props} endIcon={props.cellProps.row.original.startIcon} className="iui-anchor" onClick={() => onClickModify(props.cellProps.row.original.customCalc)} />
               ) : (
                 <DefaultCell {...props} endIcon={props.cellProps.row.original.startIcon} className="iui-anchor" />
               ),
