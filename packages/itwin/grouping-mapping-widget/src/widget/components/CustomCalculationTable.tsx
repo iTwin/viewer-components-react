@@ -24,7 +24,7 @@ import { usePropertiesContext } from "./context/PropertiesContext";
 import { handleError } from "./utils";
 import { getOutliers } from "./PropertyValidationUtils";
 
-interface TableData extends CustomCalculation {
+interface CustomCalculationTableData extends CustomCalculation {
   id: string;
   propertyName: string;
   formula: string;
@@ -39,7 +39,7 @@ export interface CustomCalculationTableProps {
   mappingId: string;
   groupId: string;
   onClickAdd?: () => void;
-  onClickModify?: (value: TableData) => void;
+  onClickModify?: (value: CustomCalculationTableData) => void;
   isLoading: boolean;
   customCalculations: CustomCalculation[];
   refresh: () => Promise<void>;
@@ -67,7 +67,7 @@ export const CustomCalculationTable = ({
     setCalculatedProperties,
     setCustomCalculationProperties,
   } = usePropertiesContext();
-  const [tableData, setTableData] = useState<TableData[]>(customCalculations);
+  const [tableData, setTableData] = useState<CustomCalculationTableData[]>(customCalculations);
   const [outliers, setOutliers] = useState<string[]>([]);
 
   const getValues = useCallback(async () => {
