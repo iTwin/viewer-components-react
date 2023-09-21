@@ -1,9 +1,12 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 const crossEnv = require("cross-env");
-const path = require('path').resolve(__dirname, '../../../../apps/test-viewer')
+const path = require("path").resolve(__dirname, "../../../../apps/test-viewer");
+const watch = process.argv[2] && process.argv[2] === "--watch";
+const scriptName = watch ? "start:dev" : "start:dev:no-watch";
+const options = watch ? undefined : { shell: "/bin/sh" };
 
 crossEnv([
   'IMJS_DEMO_CLIENT=true',
@@ -18,5 +21,5 @@ crossEnv([
   'USE_FULL_SOURCEMAP=true',
   'TRANSPILE_DEPS=false',
   'IMJS_ENABLED_WIDGETS="tree-widget"',
-  `npm run start:dev --prefix ${path}`,
-]);
+  `npm run ${scriptName} --prefix ${path}`,
+], options);
