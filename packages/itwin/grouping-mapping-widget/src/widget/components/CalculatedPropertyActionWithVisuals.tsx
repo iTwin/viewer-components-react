@@ -29,7 +29,7 @@ import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsCo
 import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { SaveValidationModal } from "./SaveValidationModal";
-import type { Invalids } from "./PropertyValidationUtils";
+import type { InvalidCalculations } from "./PropertyValidationUtils";
 import { PropertyValidation } from "./PropertyValidationUtils";
 
 export interface CalculatedPropertyActionWithVisualsProps {
@@ -62,14 +62,14 @@ export const CalculatedPropertyActionWithVisuals = ({
   const [colorProperty, setColorProperty] = useState<boolean>(false);
   const origPropertyName = calculatedProperty?.propertyName ?? "";
   const [showSaveValidationModal, setShowSaveValidationModal] = useState<boolean>(false);
-  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<Invalids[]>([]);
+  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<InvalidCalculations[]>([]);
 
-  const checkOutliers = async (changedPropName: string): Promise<Invalids[]> => {
+  const checkOutliers = async (changedPropName: string) => {
     const accessToken = await getAccessToken();
     const customCalcProps = await mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id);
-    const changes: Invalids[] = await PropertyValidation({ origPropertyName, changedPropertyName: changedPropName, customCalcProps });
+    const changes: InvalidCalculations[] = await PropertyValidation({ origPropertyName, changedPropertyName: changedPropName, customCalcProps });
     setInvalidCustomCalcs(changes);
-    return Promise.resolve(changes);
+    return changes;
   };
 
   useEffect(() => {
@@ -148,7 +148,7 @@ export const CalculatedPropertyActionWithVisuals = ({
         if (
           erroredResponse.error.code === "InvalidInsightsRequest" &&
           erroredResponse.error.target === "formula"
-        ) {}
+        ) { }
       } else {
         handleError(error.status);
       }
@@ -185,7 +185,7 @@ export const CalculatedPropertyActionWithVisuals = ({
             type,
           },
         );
-      const promises: any[] = [];
+      const promises: Promise<void>[] = [];
       selectedRows.forEach(async (ele: { id: string, customCalcName: string, formula: string }) => {
         const customCalculation = {
           id: ele.id,
@@ -226,12 +226,12 @@ export const CalculatedPropertyActionWithVisuals = ({
   const handleSaveValidationModal = async (rows: string) => {
     try {
       setIsLoading(true);
-      let updatedRows: Invalids[] = [];
+      let updatedRows: InvalidCalculations[] = [];
       const selectedRows: { id: string, customCalcName: string, formula: string }[] = [];
       if (rows !== "") {
         updatedRows = JSON.parse(rows);
         if (updatedRows.length > 0) {
-          updatedRows.forEach((ele: Invalids) => {
+          updatedRows.forEach((ele: InvalidCalculations) => {
             selectedRows.push({
               id: ele.id,
               customCalcName: ele.customCalcName,

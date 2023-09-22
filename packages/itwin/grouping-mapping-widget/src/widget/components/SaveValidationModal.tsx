@@ -11,14 +11,14 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
-import type { Invalids } from "./PropertyValidationUtils";
+import type { InvalidCalculations } from "./PropertyValidationUtils";
 
 export interface SaveValidationModalProps {
   onSave: (rows: string) => void;
   onClose: () => void;
-  invalidCustomCalcs: Invalids[];
+  invalidCustomCalcs: InvalidCalculations[];
   showSaveValidationModal: boolean;
-  setInvalidCustomCalcs: (updatesCals: Invalids[]) => void;
+  setInvalidCustomCalcs: (updatesCals: InvalidCalculations[]) => void;
 }
 
 export const SaveValidationModal = ({
@@ -48,15 +48,15 @@ export const SaveValidationModal = ({
   const columns = useMemo(() => [{
     id: "customCalcName",
     Header: "Custom Calculation",
-    accessor: "customCalcName" as keyof Invalids,
+    accessor: "customCalcName" as keyof InvalidCalculations,
   }, {
     id: "origFormula",
     Header: "Original Formula",
-    accessor: "origFormula" as keyof Invalids,
+    accessor: "origFormula" as keyof InvalidCalculations,
   }, {
     id: "changedFormula",
     Header: "Formula",
-    accessor: "changedFormula" as keyof Invalids,
+    accessor: "changedFormula" as keyof InvalidCalculations,
   }], []);
 
   return (
@@ -70,7 +70,7 @@ export const SaveValidationModal = ({
         Update to this property will cause the following custom calculations to be invalid. Do you also want to make the suggested changes to their formula(s) ?
         Please select the custom calculation(s) that you want to update along with the change in the property.
       </Text>
-      <Table<CreateTypeFromInterface<Invalids>>
+      <Table<CreateTypeFromInterface<InvalidCalculations>>
         columns={columns}
         data={isLoading ? [] : invalidCustomCalcs}
         emptyTableContent='No data.'

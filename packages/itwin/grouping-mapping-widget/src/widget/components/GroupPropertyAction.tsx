@@ -67,7 +67,7 @@ import {
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "./viewerUtils";
 import { SaveValidationModal } from "./SaveValidationModal";
-import type { Invalids } from "./PropertyValidationUtils";
+import type { InvalidCalculations } from "./PropertyValidationUtils";
 import { PropertyValidation } from "./PropertyValidationUtils";
 
 export interface GroupPropertyActionProps {
@@ -118,15 +118,15 @@ export const GroupPropertyAction = ({
   );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showSaveValidationModal, setShowSaveValidationModal] = useState<boolean>(false);
-  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<Invalids[]>([]);
+  const [invalidCustomCalcs, setInvalidCustomCalcs] = useState<InvalidCalculations[]>([]);
   const origPropertyName = groupProperty?.propertyName ?? "";
 
-  const checkOutliers = async (changedPropName: string): Promise<Invalids[]> => {
+  const checkOutliers = async (changedPropName: string) => {
     const accessToken = await getAccessToken();
     const customCalcProps = await mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, group.id);
-    const changes: Invalids[] = await PropertyValidation({ origPropertyName, changedPropertyName: changedPropName, customCalcProps });
+    const changes: InvalidCalculations[] = await PropertyValidation({ origPropertyName, changedPropertyName: changedPropName, customCalcProps });
     setInvalidCustomCalcs(changes);
-    return Promise.resolve(changes);
+    return changes;
   };
 
   const handleCustomCalcUpdate = async (customCalculation: { id: string, propertyName: string, formula: string }) => {
@@ -226,12 +226,12 @@ export const GroupPropertyAction = ({
   const handleSaveValidationModal = async (rows: string) => {
     try {
       setIsLoading(true);
-      let updatedRows: Invalids[] = [];
+      let updatedRows: InvalidCalculations[] = [];
       const selectedRows: { id: string, customCalcName: string, formula: string }[] = [];
       if (rows !== "") {
         updatedRows = JSON.parse(rows);
         if (updatedRows.length > 0) {
-          updatedRows.forEach((ele: Invalids) => {
+          updatedRows.forEach((ele: InvalidCalculations) => {
             selectedRows.push({
               id: ele.id,
               customCalcName: ele.customCalcName,
@@ -640,4 +640,3 @@ export const GroupPropertyAction = ({
     </DndContext>
   );
 };
-

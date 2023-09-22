@@ -16,7 +16,7 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CellProps, CellRendererProps } from "react-table";
-import type { CalculatedProperty, CalculatedPropertyLinks, CustomCalculation, DataType, GroupProperty, QuantityType } from "@itwin/insights-client";
+import type { CalculatedProperty, CustomCalculation, GroupProperty } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { PropertyTable } from "./PropertyTable";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
@@ -25,12 +25,6 @@ import { handleError } from "./utils";
 import { getOutliers } from "./PropertyValidationUtils";
 
 interface CustomCalculationTableData extends CustomCalculation {
-  id: string;
-  propertyName: string;
-  formula: string;
-  dataType: DataType;
-  quantityType: QuantityType;
-  _links: CalculatedPropertyLinks;
   startIcon?: JSX.Element;
   customCalc?: CustomCalculation;
 }
@@ -212,17 +206,14 @@ export const CustomCalculationTable = ({
   }, [getAccessToken, groupId, iModelId, mappingClient, mappingId]);
 
   return (
-    <div>
-      <PropertyTable
-        propertyType="Custom Calculation"
-        columnsFactory={columnsFactory}
-        data={tableData}
-        isLoading={isLoading}
-        onClickAdd={onClickAdd}
-        refreshProperties={refresh}
-        deleteProperty={deleteProperty}
-      />
-    </div>
+    <PropertyTable
+      propertyType="Custom Calculation"
+      columnsFactory={columnsFactory}
+      data={tableData}
+      isLoading={isLoading}
+      onClickAdd={onClickAdd}
+      refreshProperties={refresh}
+      deleteProperty={deleteProperty}
+    />
   );
 };
-

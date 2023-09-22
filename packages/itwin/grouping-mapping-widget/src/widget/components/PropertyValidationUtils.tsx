@@ -94,7 +94,7 @@ class Graph {
   }
 }
 
-export interface Invalids {
+export interface InvalidCalculations {
   id: string;
   customCalcName: string;
   origName: string;
@@ -113,7 +113,7 @@ export const PropertyValidation = async ({
   origPropertyName,
   changedPropertyName,
   customCalcProps,
-}: PropertyValidationProps): Promise<Invalids[]> => {
+}: PropertyValidationProps): Promise<InvalidCalculations[]> => {
   let outliers: string[] | null = [];
   async function checkOutliers(changedPropName: string) {
     const graph: Graph = new Graph();
@@ -124,7 +124,7 @@ export const PropertyValidation = async ({
     });
     const calcPropsArray = graph.cleanFromula(customCalcProps);
     outliers = graph.validateSanity(calcPropsArray);
-    const changes: Invalids[] = [];
+    const changes: InvalidCalculations[] = [];
     for (const prop of customCalcProps) {
       const propName = prop.propertyName;
       const propertyFormula = prop.formula;
@@ -132,7 +132,7 @@ export const PropertyValidation = async ({
         const regex = new RegExp(origPropertyName, "g");
         const newFormula = propertyFormula.replace(regex, changedPropName);
         if (newFormula !== prop.formula) {
-          const change: Invalids = {
+          const change: InvalidCalculations = {
             id: prop.id,
             customCalcName: prop.propertyName,
             origName: origPropertyName,
