@@ -24,6 +24,7 @@ import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsConte
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
+import { enableExperimentalFeatures } from "./utils";
 
 export interface GroupingMappingContextProps {
   /**
@@ -93,6 +94,11 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       iModelConnection: props.iModelConnection ?? activeIModelConntextion,
     }));
   }, [activeIModelConntextion, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
+
+  useEffect(() => {
+    if (!apiConfig.iModelConnection) return;
+    void enableExperimentalFeatures(apiConfig.iModelConnection);
+  }, [apiConfig.iModelConnection]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(clientProp));

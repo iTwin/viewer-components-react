@@ -51,6 +51,16 @@
       "allowWarningsInSuccessfulBuild": true
     },
     {
+      "name": "test:e2e",
+      "commandKind": "bulk",
+      "summary": "Run test:e2e script for each package",
+      "description": "Iterates through each package in the monorepo and runs the 'test:e2e' script",
+      "enableParallelism": true,
+      "ignoreMissingScript": true,
+      "ignoreDependencyOrder": true,
+      "allowWarningsInSuccessfulBuild": true
+    },
+    {
       "name": "rebuild",
       "commandKind": "bulk",
       "summary": "Run build for each package",

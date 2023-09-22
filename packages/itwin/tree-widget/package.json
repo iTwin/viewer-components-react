@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -22,6 +22,7 @@
   "typings": "lib/cjs/tree-widget-react",
   "scripts": {
     "start:test-viewer": "node ./scripts/start-test-viewer.js",
+    "start:test-viewer:watch": "node ./scripts/start-test-viewer.js --watch",
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
@@ -36,7 +37,9 @@
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
-    "test:e2e": "playwright test",
+    "test:e2e": "node ../../../common/scripts/run-e2e-with-docker.js tree-widget",
+    "test:e2e:local": "playwright test",
+    "test:e2e:local:update": "playwright test --update-snapshots",
     "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build"
