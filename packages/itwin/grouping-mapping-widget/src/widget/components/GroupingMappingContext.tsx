@@ -23,7 +23,6 @@ import type { QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { enableExperimentalFeatures } from "./utils";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
 
 export interface GroupingMappingContextProps {
@@ -96,11 +95,6 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   }, [activeIModelConntextion, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
-    if (!apiConfig.iModelConnection) return;
-    void enableExperimentalFeatures(apiConfig.iModelConnection);
-  }, [apiConfig.iModelConnection]);
-
-  useEffect(() => {
     setMappingClient(createMappingClient(clientProp));
   }, [clientProp]);
 
@@ -148,7 +142,8 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
 
   return (
     <GroupingMappingApiConfigContext.Provider value={apiConfig}>
-      <ExtractionClientContext.Provider value={extractionClient}>
+      <MappingClientContext.Provider value={mappingClient}>
+        <ExtractionClientContext.Provider value={extractionClient}>
           <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
             <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
               <PropertiesContext.Provider value={propertiesContextValue}>
@@ -157,6 +152,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
             </GroupHilitedElementsContext.Provider>
           </GroupingMappingCustomUIContext.Provider>
         </ExtractionClientContext.Provider>
+      </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
   );
 };

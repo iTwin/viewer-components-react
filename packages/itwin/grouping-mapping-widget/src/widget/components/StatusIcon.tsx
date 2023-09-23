@@ -12,7 +12,7 @@ const StatusIconMap = {
   error: SvgStatusError,
   warning: SvgStatusWarning,
   informational: SvgInfoCircular,
-  trace: SvgFlag
+  trace: SvgFlag,
 } as const;
 
 export const StatusIcon = ({
