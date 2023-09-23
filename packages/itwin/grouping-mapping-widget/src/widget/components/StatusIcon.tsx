@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import React from "react";
 import classnames from "classnames";
-import { SvgInfoCircular, SvgStatusError, SvgStatusSuccess, SvgStatusWarning } from "@itwin/itwinui-icons-react";
+import { SvgFlag, SvgInfoCircular, SvgStatusError, SvgStatusSuccess, SvgStatusWarning } from "@itwin/itwinui-icons-react";
 import "./StatusIcon.scss";
 
 const StatusIconMap = {
@@ -12,6 +12,7 @@ const StatusIconMap = {
   error: SvgStatusError,
   warning: SvgStatusWarning,
   informational: SvgInfoCircular,
+  trace: SvgFlag
 } as const;
 
 export const StatusIcon = ({
