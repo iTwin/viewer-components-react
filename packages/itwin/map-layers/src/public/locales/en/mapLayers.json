@@ -12,10 +12,11 @@
   "ColorDialog": {
     "Title": "Specify Base Color"
   },
-  "MapLayerVisibilityActions": {
+  "MapLayerActionButtons": {
     "ShowAllLabel": "Show all",
-    "HideAllLabel": "Hide",
-    "InvertAllLabel": "Invert"
+    "HideAllLabel": "Hide all",
+    "InvertAllLabel": "Invert visibility",
+    "DetachSelectedLabel": "Detach selected map layers"
   },
   "CustomAttach": {
     "LayerWithUrlExistsOverwriting": "Map layer with URL: {{url}} already exists. Updating name from {{oldName}} to {{newName}}.",
@@ -85,7 +86,6 @@
   },
   "Widget": {
     "BackgroundLayers": "Background",
-    "DetachAllLayersTitle": "Detach all map layers",
     "DropLayerLabel": "Drop layer here",
     "Label": "Map Layers",
     "layerOutOfRange": "Invisible at current scale",

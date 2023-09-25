@@ -21,9 +21,8 @@ import { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 import { BasemapPanel } from "./BasemapPanel";
 import { MapLayerDroppable } from "./MapLayerDroppable";
 import "./MapLayerManager.scss";
-import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 import { MapLayersUI } from "../../mapLayers";
-import { MapLayerVisibilityAction } from "./MapLayerVisibilityActions";
+import { MapLayerActionButtons } from "./MapLayerActionButtons";
 import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
 
 /** @internal */
@@ -81,6 +80,7 @@ function getMapLayerSettingsFromViewport(viewport: Viewport, getBackgroundMap: b
       isOverlay,
       layerIndex,
       provider: layerProvider,
+      selected: false,
     });
   }
 
@@ -101,7 +101,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   const [baseSources, setBaseSources] = React.useState<MapLayerSource[] | undefined>();
   const [overlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.OverlayLayers"));
   const [underlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.BackgroundLayers"));
-  const [removeAllLayersTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.DetachAllLayersTitle"));
   const { activeViewport, mapLayerOptions } = props;
   const hideExternalMapLayersSection = mapLayerOptions?.hideExternalMapLayers ? mapLayerOptions.hideExternalMapLayers : false;
   const fetchPublicMapLayerSources = mapLayerOptions?.fetchPublicMapLayerSources ? mapLayerOptions.fetchPublicMapLayerSources : false;
@@ -430,24 +429,116 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       loadMapLayerSettingsFromViewport(activeViewport);
   }, [activeViewport, loadMapLayerSettingsFromViewport]);
 
+  const handleItemSelected = React.useCallback((isOverlay: boolean, _index: number) => {
+    if (isOverlay ) {
+      if (overlayMapLayers)
+        setOverlayMapLayers([...overlayMapLayers]);
+    } else {
+      if (backgroundMapLayers)
+        setBackgroundMapLayers([...backgroundMapLayers]);
+    }
+  }, [backgroundMapLayers, overlayMapLayers]);
+
+  const hasItemSelected = React.useCallback((isOverlay: boolean) => {
+    const layerList = (isOverlay ? overlayMapLayers : backgroundMapLayers);
+    if (!layerList)
+      return false;
+    return undefined !== layerList?.find((value) => value.selected === true);
+  }, [backgroundMapLayers, overlayMapLayers]);
+
   const changeLayerVisibility = React.useCallback((visible: boolean, index: number, isOverlay: boolean) => {
     activeViewport.displayStyle.changeMapLayerProps({ visible }, {index, isOverlay});
   }, [activeViewport]);
 
-  const changeAllLayerVisibility = React.useCallback(async (visible: boolean) => {
-    backgroundMapLayers?.forEach(layer => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
-    overlayMapLayers?.forEach(layer => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
+  const changeAllLayerVisibility = React.useCallback(async (visible: boolean, isOverlay?: boolean) => {
+    if (isOverlay === undefined || !isOverlay)
+      backgroundMapLayers?.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
+
+    if (isOverlay === undefined || isOverlay)
+      overlayMapLayers?.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
   }, [backgroundMapLayers, overlayMapLayers, changeLayerVisibility]);
 
-  const invertAllLayerVisibility = React.useCallback(async () => {
-    backgroundMapLayers?.forEach(layer => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
-    overlayMapLayers?.forEach(layer => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
+  const invertAllLayerVisibility = React.useCallback(async (isOverlay?: boolean) => {
+    if (isOverlay === undefined || !isOverlay)
+      backgroundMapLayers?.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
+
+    if (isOverlay === undefined || isOverlay)
+      overlayMapLayers?.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
   }, [backgroundMapLayers, overlayMapLayers, changeLayerVisibility]);
 
-  const detachAllLayers = React.useCallback(async (isOverlay:boolean) => {
-    activeViewport.displayStyle.detachMapLayerByIndex({isOverlay, index:-1});
+  const detachSelectedLayers = React.useCallback(async (isOverlay: boolean) => {
+    const layerList = (isOverlay ? overlayMapLayers : backgroundMapLayers);
+    if (!layerList || layerList.length === 0)
+      return;
 
-  }, [activeViewport]);
+    for (let i=0; i<layerList.length; i++) {
+      if (layerList[i].selected) {
+        const index = (layerList.length -1) - i;    // Layers are reverted order is display style
+        activeViewport.displayStyle.detachMapLayerByIndex({isOverlay, index});
+      }
+    }
+
+  }, [activeViewport, overlayMapLayers, backgroundMapLayers]);
+
+  const selectAllLayers = React.useCallback(async (isOverlay: boolean) => {
+    if (!overlayMapLayers || !backgroundMapLayers)
+      return;
+
+    const layerList = (isOverlay ? [...overlayMapLayers] : [...backgroundMapLayers]);
+    const hasCheckedLayer = undefined !== layerList?.find((value) => value.selected === true);
+    layerList.forEach((layer) => {layer.selected = !hasCheckedLayer;} );
+
+    if (isOverlay)
+      setOverlayMapLayers(layerList);
+    else
+      setBackgroundMapLayers(layerList);
+
+  }, [overlayMapLayers, backgroundMapLayers]);
+
+  const renderMapLayersList = React.useCallback((options: {isOverlay: boolean}): React.ReactElement<HTMLElement>  => {
+    if (!overlayMapLayers || !backgroundMapLayers)
+      return <></>;
+
+    const {isOverlay} = options;
+    const layerList = (isOverlay ? [...overlayMapLayers] : [...backgroundMapLayers]);
+
+    const label =  (isOverlay ? overlaysLabel : underlaysLabel);
+    return (
+      <div className="map-manager-layer-wrapper">
+        <MapManagerLayersHeader
+          label={label}
+          isOverlay={isOverlay}
+          disabled={!backgroundMapVisible}
+        />
+        {(layerList && layerList.length > 0) &&
+      <>
+        <MapLayerActionButtons
+          disabled={!backgroundMapVisible}
+          disabledUnlink={!hasItemSelected(isOverlay)}
+          hideAll={async () => changeAllLayerVisibility(false, isOverlay)}
+          showAll={async () => changeAllLayerVisibility(true, isOverlay)}
+          invert={async ()=>invertAllLayerVisibility(isOverlay)}
+          selectAll={async ()=>selectAllLayers(isOverlay)}
+          unlink={async ()=>detachSelectedLayers(isOverlay)}
+          checked={hasItemSelected(isOverlay)}
+        />
+      </>
+        }
+        <MapLayerDroppable
+          disabled={!backgroundMapVisible}
+          isOverlay={isOverlay}
+          layersList={layerList}
+          mapTypesOptions={props.mapLayerOptions?.mapTypeOptions}
+          getContainerForClone={props.getContainerForClone as any}
+          activeViewport={props.activeViewport}
+          onMenuItemSelected={handleOnMenuItemSelection}
+          onItemVisibilityToggleClicked={handleLayerVisibilityChange}
+          onItemSelected={handleItemSelected}
+          onItemEdited={handleRefreshFromStyle} />
+      </div>
+    );
+
+  },[backgroundMapLayers, backgroundMapVisible, changeAllLayerVisibility, detachSelectedLayers, handleItemSelected, handleLayerVisibilityChange, handleOnMenuItemSelection, handleRefreshFromStyle, hasItemSelected, invertAllLayerVisibility, overlayMapLayers, overlaysLabel, props.activeViewport, props.getContainerForClone, props.mapLayerOptions?.mapTypeOptions, selectAllLayers, underlaysLabel]);
 
   const [baseMapPanelLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.BaseMapPanelTitle"));
 
@@ -462,65 +553,27 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       overlayLayers: overlayMapLayers,
       mapLayerOptions,
     }}>
+      {/* Header*/}
       <div className="map-manager-top-header">
         <span className="map-manager-header-label">{baseMapPanelLabel}</span>
         <div className="map-manager-header-buttons-group">
           <ToggleSwitch className="map-manager-toggle" checked={backgroundMapVisible} onChange={handleMapLayersToggle} />
-          <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />
         </div>
       </div>
 
       <div className="map-manager-container">
 
+        {/* Base map*/}
         <div className="map-manager-basemap">
           <BasemapPanel disabled={!backgroundMapVisible} />
         </div>
 
+        {/* List of Layers (droppable) */}
         {!hideExternalMapLayersSection &&
         <div>
-         <MapLayerVisibilityAction disabled={!backgroundMapVisible} hideAll={() => changeAllLayerVisibility(false)} showAll={() => changeAllLayerVisibility(true)} invert={async ()=>{invertAllLayerVisibility()}}></MapLayerVisibilityAction>
           <DragDropContext onDragEnd={handleOnMapLayerDragEnd}>
-            <div className="map-manager-layer-wrapper">
-              <MapManagerLayersHeader
-                label={underlaysLabel}
-                detachAllTitle={removeAllLayersTitle}
-                isOverlay={false}
-                disabled={!backgroundMapVisible}
-                disabledDetachAll={!backgroundMapVisible||!backgroundMapLayers?.length}
-                onDetachAllClick= {()=>detachAllLayers(false)}
-                />
-              <MapLayerDroppable
-                disabled={!backgroundMapVisible}
-                isOverlay={false}
-                layersList={backgroundMapLayers}
-                mapTypesOptions={props.mapLayerOptions?.mapTypeOptions}
-                getContainerForClone={props.getContainerForClone as any}
-                activeViewport={props.activeViewport}
-                onMenuItemSelected={handleOnMenuItemSelection}
-                onItemVisibilityToggleClicked={handleLayerVisibilityChange}
-                onItemEdited={handleRefreshFromStyle} />
-            </div>
-
-            <div className="map-manager-layer-wrapper">
-            <MapManagerLayersHeader
-                label={overlaysLabel}
-                detachAllTitle={removeAllLayersTitle}
-                isOverlay={true}
-                disabled={!backgroundMapVisible}
-                disabledDetachAll={!backgroundMapVisible||!overlayMapLayers?.length}
-                onDetachAllClick= {()=>detachAllLayers(true)}
-                />
-              <MapLayerDroppable
-                disabled={!backgroundMapVisible}
-                isOverlay={true}
-                layersList={overlayMapLayers}
-                mapTypesOptions={props.mapLayerOptions?.mapTypeOptions}
-                getContainerForClone={props.getContainerForClone as any}
-                activeViewport={props.activeViewport}
-                onMenuItemSelected={handleOnMenuItemSelection}
-                onItemVisibilityToggleClicked={handleLayerVisibilityChange}
-                onItemEdited={handleRefreshFromStyle} />
-            </div>
+            {renderMapLayersList({isOverlay: false})}
+            {renderMapLayersList({isOverlay: true})}
           </DragDropContext>
         </div>
         }
@@ -528,4 +581,3 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     </SourceMapContext.Provider >
   );
 }
-

@@ -13,7 +13,7 @@ import { IModelApp, MapLayerImageryProviderStatus, MapLayerIndex, MapTileTreeSca
 import { Icon } from "@itwin/core-react";
 import { assert } from "@itwin/core-bentley";
 import { UiFramework } from "@itwin/appui-react";
-import { Button } from "@itwin/itwinui-react";
+import { Button, Checkbox } from "@itwin/itwinui-react";
 import { SubLayersPopupButton } from "./SubLayersPopupButton";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { MapTypesOptions, StyleMapLayerSettings } from "../Interfaces";
@@ -32,7 +32,8 @@ interface MapLayerDroppableProps {
   activeViewport: ScreenViewport;
   onMenuItemSelected: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
   onItemVisibilityToggleClicked: (mapLayerSettings: StyleMapLayerSettings) => void;
-  onItemEdited: () => void;
+  onItemSelected: (isOverlay: boolean, index: number) => void;
+  onItemEdited: ( ) => void;
   disabled?: boolean;
 }
 
@@ -82,6 +83,12 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
     props.onItemEdited();
   }, [props]);
 
+  const changeSettingsMenuVisibility = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, visible: boolean)=>{
+    const menuDiv = event.currentTarget.querySelector("#MapLayerSettingsMenuWrapper");
+    if (menuDiv)
+      menuDiv.setAttribute("style", `visibility: ${visible ? "visible" : "hidden"}`);
+  };
+
   const renderItem: DraggableChildrenFn = (dragProvided, _, rubric) => {
     assert(props.layersList !== undefined);
     const activeLayer = props.layersList[rubric.source.index];
@@ -90,27 +97,42 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
     return (
       <div className="map-manager-source-item" data-id={rubric.source.index} key={activeLayer.name}
         {...dragProvided.draggableProps}
-        ref={dragProvided.innerRef} >
+        ref={dragProvided.innerRef}
+        onMouseEnter={(event)=>changeSettingsMenuVisibility(event, true)}
+        onMouseLeave={(event)=>changeSettingsMenuVisibility(event, false)} >
+
+        {/* Checkbox */}
+        <Checkbox checked={activeLayer.selected} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          activeLayer.selected = event.target.checked;
+          props.onItemSelected(props.isOverlay, rubric.source.index);
+        }
+
+        }></Checkbox>
         {/* Visibility icon */}
-        <Button disabled={props.disabled} size="small" styleType="borderless" className="map-manager-item-visibility" title={toggleVisibility} onClick={() => { props.onItemVisibilityToggleClicked(activeLayer); }}>
+        <Button disabled={props.disabled} size="small" styleType="borderless" className="map-manager-item-visibility map-manager-visibility-icon" title={toggleVisibility} onClick={() => { props.onItemVisibilityToggleClicked(activeLayer); }}>
           <Icon iconSpec={activeLayer.visible ? "icon-visibility" : "icon-visibility-hide-2"} />
         </Button>
+
         {/* Label */}
-        <span data-testid="map-manager-item-label" className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
+        <span className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
           title={outOfRange ? outOfRangeTitle : undefined}
           {...dragProvided.dragHandleProps}
 
         >
           {activeLayer.name}
         </span>
-        <div className="map-manager-item-sub-layer-container">
+
+        {/* SubLayersPopupButton */}
+        <div className="map-manager-item-sub-layer-container" >
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 &&
             <SubLayersPopupButton
               checkboxStyle="eye"
               expandMode="rootGroupOnly"
               subLayers={props.activeViewport ? activeLayer.subLayers : undefined}
               singleVisibleSubLayer={activeLayer.provider?.mutualExclusiveSubLayer}
-              onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }} />
+              onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }
+
+              } />
           }
         </div>
         {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth &&
@@ -139,7 +161,10 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             <Icon className="map-layer-source-item-warnMessage-icon" iconSpec="icon-status-warning" />
           </Button>
         }
-        <MapLayerSettingsMenu activeViewport={props.activeViewport} mapLayerSettings={activeLayer} onMenuItemSelection={props.onMenuItemSelected} disabled={props.disabled} />
+        <div id="MapLayerSettingsMenuWrapper" style={{visibility: "hidden"}} >
+          <MapLayerSettingsMenu activeViewport={props.activeViewport} mapLayerSettings={activeLayer} onMenuItemSelection={props.onMenuItemSelected} disabled={props.disabled} />
+        </div>
+
       </div>
     );
   };
