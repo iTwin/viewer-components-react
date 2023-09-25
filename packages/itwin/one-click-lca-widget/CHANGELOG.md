@@ -1,6 +1,13 @@
 # Change Log - @itwin/one-click-lca-react
 
-This log was last generated on Tue, 07 Mar 2023 15:47:41 GMT and should not be manually modified.
+This log was last generated on Mon, 25 Sep 2023 18:53:12 GMT and should not be manually modified.
+
+## 0.4.0
+Mon, 25 Sep 2023 18:53:12 GMT
+
+### Minor changes
+
+- Migrated UI items for iTwinUI 2.x and iTwinJS 4.x upgrade
 
 ## 0.3.0
 Tue, 07 Mar 2023 15:47:41 GMT
