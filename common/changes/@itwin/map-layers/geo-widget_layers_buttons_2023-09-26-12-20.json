@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Improved UI to better control the state of multiple map layers in a single operation",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
