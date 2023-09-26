@@ -28,6 +28,8 @@ export interface StyleMapLayerSettings {
   showSubLayers: boolean;
   /** Some format can publish only a single layer at a time (i.e WMTS) */
   provider?: MapLayerImageryProvider;
+
+  selected: boolean;
 }
 
 export interface MapTypesOptions {

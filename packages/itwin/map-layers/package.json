@@ -63,6 +63,8 @@
     "@testing-library/dom": "^8.12.0",
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^7.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.10.1",
     "@types/chai": "4.3.5",
     "@types/jsdom-global": "^3.0.4",
     "@types/enzyme": "3.9.3",
@@ -79,7 +81,15 @@
     "cpx2": "^3.0.0",
     "enzyme": "3.10.0",
     "enzyme-to-json": "^3.3.4",
-    "eslint": "^7.11.0",
+    "eslint": "^8.41.0",
+    "eslint-plugin-deprecation": "^1.2.1",
+    "eslint-plugin-import" : "^2.27.5",
+    "eslint-plugin-jam3" : "^0.2.3",
+    "eslint-plugin-jsx-a11y" : "^6.7.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-react": "^7.25.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "jsdom": "^22.1.0",
     "jsdom-global": "3.0.2",
     "mocha": "^10.0.0",
@@ -113,9 +123,17 @@
   },
   "eslintConfig": {
     "plugins": [
+      "react-hooks",
       "@itwin"
     ],
-    "extends": "plugin:@itwin/ui"
+    "extends": [
+      "plugin:react-hooks/recommended",
+      "plugin:@itwin/ui"
+    ],
+    "rules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error"
+    }
   },
   "mocha": {
     "require": [
