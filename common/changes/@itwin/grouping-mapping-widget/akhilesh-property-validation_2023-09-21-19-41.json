@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Added the Property Validation Changes",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}
