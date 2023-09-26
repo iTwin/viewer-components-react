@@ -8,7 +8,9 @@ import * as coreFrontend from "@itwin/core-frontend";
 import { MapLayerIndex } from "@itwin/core-frontend";
 import * as moq from "typemoq";
 
-/** @internal */
+/**
+ * ViewportMock
+ *  @internal */
 export class ViewportMock {
   public viewportMock = moq.Mock.ofType<coreFrontend.ScreenViewport>();
   public viewMock = moq.Mock.ofType<coreFrontend.ViewState3d>();
