@@ -24,7 +24,6 @@ export class ViewportMock {
   public baseMap = coreCommon.BaseMapLayerSettings.fromJSON(coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Hybrid} )));
 
   public detachMapLayerByIndexFunc: ((mapLayerIndex: coreFrontend.MapLayerIndex) => void) | undefined;
-  // public detachMapLayerByIndexFunc: ((mapLayerIndex: coreFrontend.MapLayerIndex)=>void) | undefined;
   public backgroundLayers: coreCommon.MapLayerSettings[] = [];
   public overlayLayers: coreCommon.MapLayerSettings[] = [];
   public get object() {
