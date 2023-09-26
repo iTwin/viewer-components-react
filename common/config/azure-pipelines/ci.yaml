@@ -41,3 +41,28 @@ jobs:
       - checkout: self
         clean: all
       - template: templates/build.yaml
+
+  - job: "Run_e2e_tests"
+    displayName: "Run e2e tests"
+    condition: succeeded()
+    workspace:
+      clean: all
+
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - checkout: self
+        clean: true
+      - task: NodeTool@0
+        displayName: "Use Node 18.16.0"
+        inputs:
+          versionSpec: "18.16.0"
+          checkLatest: true
+      - script: |
+          git config --local user.email imodeljs-admin@users.noreply.github.com
+          git config --local user.name imodeljs-admin
+        displayName: git config
+      - script: node common/scripts/install-run-rush.js install
+        displayName: rush install
+      - script: node common/scripts/install-run-rush.js test:e2e --verbose
+        displayName: "rush test:e2e"
