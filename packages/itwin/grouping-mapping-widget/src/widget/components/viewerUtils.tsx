@@ -138,7 +138,7 @@ export const overrideElements = (
     vp,
     ColorDef.fromString(color),
     overrideType,
-    true,
+    false,
   );
 };
 

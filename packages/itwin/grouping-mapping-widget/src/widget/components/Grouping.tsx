@@ -5,8 +5,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
+  Alert,
   ButtonGroup,
   IconButton,
+  InformationPanelWrapper,
+  ProgressLinear,
 } from "@itwin/itwinui-react";
 import {
   SvgRefresh,
@@ -27,6 +30,7 @@ import type {
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { GroupsAddButton } from "./GroupsAddButton";
 import { GroupItem } from "./GroupItem";
+import { OverlappedElementsInformationPanel } from "./OverlappedElementsInformationPanel";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
@@ -50,6 +54,7 @@ export interface GroupingProps {
     displayLabel: string,
   ) => void;
   disableActions?: boolean;
+  isVisualizing?: boolean;
 }
 
 const fetchGroups = async (
@@ -84,9 +89,10 @@ export const Groupings = ({
   onClickGroupModify,
   onClickRenderContextCustomUI,
   disableActions,
+  isVisualizing,
 }: GroupingProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const { groups, setGroups } = useGroupHilitedElementsContext();
+  const { groups, setGroups, numberOfVisualizedGroups, overlappedElementsInfo, showGroupColor, totalNumberOfVisualization } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] =
     useGroupingMappingCustomUI().customUIs.filter(
@@ -100,6 +106,9 @@ export const Groupings = ({
     undefined
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isOverlappedElementsInfoPanelOpen, setIsOverlappedElementsInfoPanelOpen] = useState<Group | undefined>(undefined);
+  const [isAlertClosed, setIsAlertClosed] = useState<boolean>(true);
+  const [isAlertExpanded,setIsAlertExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     const initialize = async () => {
@@ -133,8 +142,8 @@ export const Groupings = ({
 
   return (
     <>
-      <div className="gmw-groups-container">
-        <div className="gmw-toolbar">
+      <InformationPanelWrapper className="gmw-groups-container">
+        <div className={ `gmw-toolbar ${ isVisualizing ? "gmw-visualizing-toolbar" : "" }` }>
           {onClickAddGroup && groupUIs.length > 0 && (
             <GroupsAddButton
               disabled={disableActions}
@@ -153,30 +162,67 @@ export const Groupings = ({
             </IconButton>
           </ButtonGroup>
         </div>
+
+        {isVisualizing && (numberOfVisualizedGroups !== undefined) &&
+        <div className = "gmw-group-progress-bar">
+          <ProgressLinear
+            value={ 25 + ( numberOfVisualizedGroups / totalNumberOfVisualization* 65 ) }
+          />
+        </div>}
+
         {isLoading ? (
           <LoadingOverlay />
         ) : groups.length === 0 ? (
           <EmptyMessage message="No Groups available." />
         ) : (
-          <div className="gmw-group-list">
-            {groups.map((g) => (
-              <GroupItem
-                key={g.id}
-                mapping={mapping}
-                group={g}
-                groupUIs={groupUIs}
-                contextUIs={contextUIs}
-                actionButtonRenderers={actionButtonRenderers}
-                onClickGroupTitle={onClickGroupTitle}
-                onClickGroupModify={onClickGroupModify}
-                onClickRenderContextCustomUI={onClickRenderContextCustomUI}
-                disableActions={disableActions}
-                setShowDeleteModal={setShowDeleteModal}
-              />
-            ))}
-          </div>
+          <>
+            {overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor && !isVisualizing &&
+            <Alert
+              onClose={() => setIsAlertClosed(false)}
+              clickableText={isAlertExpanded ? "Less Details" : "More Details"}
+              clickableTextProps={{ onClick: () => setIsAlertExpanded(!isAlertExpanded) }}
+            >
+              {isAlertExpanded ? (
+                <>
+                Overlapped elements are colored in red in the viewer. <br />
+                To get overlap info in details, click the &ldquo;Overlap Info&rdquo; in the menu icon adjacent to the groups.
+                </>
+              ) : (
+                <>
+                Overlapped elements are colored in red in the viewer.
+                </>
+              )}
+            </Alert>}
+
+            <div className="gmw-group-list">
+              {groups.map((g) => (
+                <GroupItem
+                  key={g.id}
+                  mapping={mapping}
+                  group={g}
+                  groupUIs={groupUIs}
+                  contextUIs={contextUIs}
+                  actionButtonRenderers={actionButtonRenderers}
+                  onClickGroupTitle={onClickGroupTitle}
+                  onClickGroupModify={onClickGroupModify}
+                  onClickRenderContextCustomUI={onClickRenderContextCustomUI}
+                  disableActions={disableActions}
+                  setShowDeleteModal={setShowDeleteModal}
+                  setIsOverlappedElementsInfoPanelOpen={setIsOverlappedElementsInfoPanelOpen}
+                  isVisualizing={isVisualizing}
+                />
+              ))}
+            </div>
+          </>
         )}
-      </div>
+
+        <OverlappedElementsInformationPanel
+          group={isOverlappedElementsInfoPanelOpen}
+          onClose={() => setIsOverlappedElementsInfoPanelOpen(undefined)}
+          overlappedElementsInfo={overlappedElementsInfo}
+          groups={groups}
+        />
+      </InformationPanelWrapper>
       <DeleteModal
         entityName={showDeleteModal?.groupName}
         onClose={() => setShowDeleteModal(undefined)}
