@@ -5,7 +5,7 @@
 
 import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
 import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
@@ -77,10 +77,56 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  */
 export function ModelsTree(props: ModelsTreeProps) {
   const { nodeLoader, onItemsRendered } = useModelsTreeNodeLoader(props);
+  const [ objectsOutsideExtents, setObjectsOutsideExtents ] = useState(new Set<string>());
   const { filteredNodeLoader, isFiltering, nodeHighlightingProps } = useVisibilityTreeFiltering(nodeLoader, props.filterInfo, props.onFilterApplied);
   const filterApplied = filteredNodeLoader !== nodeLoader;
 
   const { activeView, modelsVisibilityHandler, selectionPredicate } = props;
+
+  useEffect(() => {
+    const getOuterSpatialElements = async () => {
+      const range = props.iModel.projectExtents;
+      const queryToFetchElementIds = `SELECT e.ECInstanceId, e.Model.Id 
+        FROM bis.SpatialElement e JOIN bis.SpatialIndex i 
+        ON e.ECInstanceId=i.ECInstanceId 
+        WHERE NOT 
+        (i.MinX<=${range.xHigh} AND i.MinY<=${range.yHigh} AND i.MinZ<=${range.zHigh} AND 
+        i.MaxX >= ${range.xLow} AND i.MaxY >= ${range.yLow} AND i.MaxZ >= ${range.zLow})`;
+      const elementIdsOutsideExtents = new Set<string>();
+      const modelIds = new Set<string>();
+      const subjectRefs = new Set<string>();
+
+      for await (const element of props.iModel.createQueryReader(queryToFetchElementIds)) {
+        elementIdsOutsideExtents.add(element[0] as string);
+        modelIds.add(element[1] as string);
+      }
+
+      const queryToFetchSubjectRefs = `SELECT p.Parent.Id 
+        FROM bis.InformationPartitionElement p INNER JOIN bis.GeometricModel3d m 
+        ON m.ModeledElement.Id = p.ECInstanceId 
+        WHERE NOT m.IsPrivate AND p.ECInstanceId IN (${Array.from(modelIds)})`;
+      for await (const result of props.iModel.createQueryReader(queryToFetchSubjectRefs)) {
+        subjectRefs.add(result[0] as string);
+      }
+
+      const queryToFetchSpatialCategoryIds = `SELECT DISTINCT TargetECInstanceId 
+        FROM bis.GeometricElement3dIsInCategory 
+        WHERE ECInstanceId in (${Array.from(elementIdsOutsideExtents)})`;
+      for await (const result of props.iModel.createQueryReader(queryToFetchSpatialCategoryIds)) {
+        elementIdsOutsideExtents.add(result[0] as string);
+      }
+
+      // element nesting child physical elements
+      await recursivelyGetParentPhysicalElements(props.iModel, elementIdsOutsideExtents);
+      // subject nesting child subjects
+      await recursivelyGetParentPhysicalElements(props.iModel, subjectRefs);
+
+      await recursivelyGetRootRefs(props.iModel, subjectRefs);
+      setObjectsOutsideExtents(new Set([...elementIdsOutsideExtents, ...subjectRefs]));
+    };
+
+    void getOuterSpatialElements();
+  }, [props.iModel, props.iModel.models]);
 
   const visibilityHandler = useVisibilityHandler(
     nodeLoader.dataProvider.rulesetId,
@@ -105,6 +151,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       descriptionEnabled: false,
       levelOffset: 10,
       disableRootNodeCollapse: true,
+      objectsOutsideExtents,
     },
   });
 
@@ -136,6 +183,35 @@ export function ModelsTree(props: ModelsTreeProps) {
     </div>
   );
 }
+
+const recursivelyGetRootRefs = async (iModel: IModelConnection, trackingSet: Set<string>) => {
+  const queryToFetchParentOfRef = `SELECT Parent.Id parentId FROM bis.Subject WHERE ECInstanceId IN (${Array.from(trackingSet)})`;
+
+  for await (const result of iModel.createQueryReader(queryToFetchParentOfRef)) {
+    const parentId = result[0] as string;
+    if(parentId === "0x1"){
+      return;
+    }
+    trackingSet.add(parentId);
+  }
+  await recursivelyGetRootRefs(iModel, trackingSet);
+};
+
+const recursivelyGetParentPhysicalElements = async (iModel: IModelConnection, trackingSet: Set<string>) => {
+  const queryToFetchParentOfNestElementIds = `SELECT DISTINCT SourceECInstanceId 
+    FROM bis.ElementOwnsChildElements 
+    WHERE TargetECInstanceId IN (${Array.from(trackingSet)})`;
+  const initialSize = trackingSet.size;
+  for await (const result of iModel.createQueryReader(queryToFetchParentOfNestElementIds)) {
+    const parentId = result[0] as string;
+    parentId === "0x1" ? null : trackingSet.add(parentId);
+  }
+
+  if(initialSize === trackingSet.size) {
+    return;
+  }
+  await recursivelyGetParentPhysicalElements(iModel, trackingSet);
+};
 
 const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
   addCustomTreeNodeItemLabelRenderer,
