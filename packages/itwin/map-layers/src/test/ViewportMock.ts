@@ -10,6 +10,7 @@ import * as moq from "typemoq";
 
 /**
  * ViewportMock
+ *
  *  @internal */
 export class ViewportMock {
   public viewportMock = moq.Mock.ofType<coreFrontend.ScreenViewport>();
