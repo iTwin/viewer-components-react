@@ -504,7 +504,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
     const label =  (isOverlay ? overlaysLabel : underlaysLabel);
     return (
-      <div className="map-manager-layer-wrapper">
+      <div className="map-manager-layer-wrapper" data-testid={"map-manager-layer-section"}>
         <MapManagerLayersHeader
           label={label}
           isOverlay={isOverlay}

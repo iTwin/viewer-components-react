@@ -102,7 +102,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         onMouseLeave={(event)=>changeSettingsMenuVisibility(event, false)} >
 
         {/* Checkbox */}
-        <Checkbox checked={activeLayer.selected} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+        <Checkbox data-testid={"select-item-checkbox"} checked={activeLayer.selected} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
           activeLayer.selected = event.target.checked;
           props.onItemSelected(props.isOverlay, rubric.source.index);
         }

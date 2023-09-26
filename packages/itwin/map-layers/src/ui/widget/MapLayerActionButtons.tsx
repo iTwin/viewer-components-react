@@ -36,7 +36,7 @@ export const MapLayerActionButtons = ({
   const [detachSelectedLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:MapLayerActionButtons.DetachSelectedLabel"));
   return (
     <div className= "map-manager-layer-action-buttons">
-      <Checkbox checked={checked} onChange={selectAll} className="map-manager-layer-action-unlink-button" ></Checkbox>
+      <Checkbox data-testid={"select-all-checkbox"} checked={checked} onChange={selectAll} className="map-manager-layer-action-unlink-button" ></Checkbox>
       <ButtonGroup>
         <IconButton
           disabled={disabled || disabledUnlink}

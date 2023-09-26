@@ -23,10 +23,10 @@ export class ViewportMock {
 
   public baseMap = coreCommon.BaseMapLayerSettings.fromJSON(coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Hybrid} )));
 
-  public detachMapLayerByIndexFunc: ((mapLayerIndex: coreFrontend.MapLayerIndex)=>void) | undefined;
-  //public detachMapLayerByIndexFunc: ((mapLayerIndex: coreFrontend.MapLayerIndex)=>void) | undefined;
-  public backgroundLayers:coreCommon.MapLayerSettings[] = [];
-  public overlayLayers:coreCommon.MapLayerSettings[] = [];
+  public detachMapLayerByIndexFunc: ((mapLayerIndex: coreFrontend.MapLayerIndex) => void) | undefined;
+  // public detachMapLayerByIndexFunc: ((mapLayerIndex: coreFrontend.MapLayerIndex)=>void) | undefined;
+  public backgroundLayers: coreCommon.MapLayerSettings[] = [];
+  public overlayLayers: coreCommon.MapLayerSettings[] = [];
   public get object() {
     return this.viewportMock.object;
   }
@@ -42,23 +42,22 @@ export class ViewportMock {
     // displayStyleSettingsMock.setup((dsSettings) => dsSettings.onMapImageryChanged).returns(() => new BeEvent<(newImagery: Readonly<MapImagerySettings>) => void>());
     this.displayStyleSettingsMock.setup((dsSettings) => dsSettings.onMapImageryChanged).returns(() => this.onMapImageryChanged);
 
-
     this.displayStyleMock.setup((ds) => ds.settings).returns(() => this.displayStyleSettingsMock.object);
 
     this.displayStyleMock.setup((ds) => ds.changeMapLayerProps(moq.It.isAny(), moq.It.isAny())).returns((props: Partial<coreCommon.MapLayerProps>, mapLayerIndex: MapLayerIndex) => {
-        const index = mapLayerIndex.index;
-        const layers = mapLayerIndex.isOverlay ? this.overlayLayers : this.backgroundLayers;
-        if (index < 0 || index >= layers.length)
-          return;
-        layers[index] = layers[index].clone(props);
-        this.onMapImageryChanged.raiseEvent(this.mapImageryMock.object);
-        this.onDisplayStyleChanged.raiseEvent(this.viewportMock.object);    // Indirectly raised by Viewport.renderFrame() at runtime
-      });
+      const index = mapLayerIndex.index;
+      const layers = mapLayerIndex.isOverlay ? this.overlayLayers : this.backgroundLayers;
+      if (index < 0 || index >= layers.length)
+        return;
+      layers[index] = layers[index].clone(props);
+      this.onMapImageryChanged.raiseEvent(this.mapImageryMock.object);
+      this.onDisplayStyleChanged.raiseEvent(this.viewportMock.object);    // Indirectly raised by Viewport.renderFrame() at runtime
+    });
     this.displayStyleMock.setup((ds) => ds.detachMapLayerByIndex(moq.It.isAny())).returns((mapLayerIndex: MapLayerIndex) => {
-    if (this.detachMapLayerByIndexFunc)
+      if (this.detachMapLayerByIndexFunc)
         this.detachMapLayerByIndexFunc(mapLayerIndex);
 
-        // Not too sure about this one, but
+      // Not too sure about this one, but
       this.onMapImageryChanged.raiseEvent(this.mapImageryMock.object);
     });
     this.imodelMock.setup((iModel) => iModel.iModelId).returns(() => "fakeGuid");
