@@ -16,17 +16,17 @@ import {
   clearEmphasizedOverriddenElements,
   clearHiddenElements,
   hideElements,
-  zoomToElements,
 } from "./viewerUtils";
-import type { ActionButtonRenderer, ActionButtonRendererProps, GroupingProps } from "./Grouping";
-import { Groupings } from "./Grouping";
+import type { GroupsProps } from "./Groups";
+import { Groups } from "./Groups";
 import { GroupColorLegend } from "./GroupColorLegend";
 import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupsView";
 
-export interface GroupsVisualizationProps extends GroupingProps {
+export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
 }
@@ -44,7 +44,7 @@ export const GroupsVisualization = ({
   }
   const firstUpdate = useRef(true);
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
-  const [isVisualizing, setIsVisualizing] =useState<boolean>(false);
+  const [isVisualizing, setIsVisualizing] = useState<boolean>(false);
   const {
     hilitedElementsQueryCache,
     groups,
@@ -66,34 +66,28 @@ export const GroupsVisualization = ({
     [iModelConnection, hilitedElementsQueryCache]
   );
 
-  const visualizeGroupColorsWrapper = useCallback(
-    async () => {
-      setIsVisualizing(true);
-      setLoadingQuery(true);
-      const groupsCopy = [...groups];
-      await visualizeGroupColors(
-        iModelConnection,
-        groupsCopy,
-        hiddenGroupsIds,
-        hilitedElementsQueryCache,
-        setNumberOfVisualizedGroups,
-        emphasizeElements,
-      );
-      isNonEmphasizedSelectable && clearEmphasizedElements();
-      setLoadingQuery(false);
-      setIsVisualizing(false);
+  const handleVisualizationStates = useCallback((start = true) => {
+    setIsVisualizing(start);
+    setLoadingQuery(start);
+    if (!start) {
       setNumberOfVisualizedGroups(0);
-    },
-    [
+    }
+  }, [setNumberOfVisualizedGroups]);
+
+  const triggerVisualization = useCallback(async () => {
+    handleVisualizationStates(true);
+    const groupsCopy = [...groups];
+    await visualizeGroupColors(
       iModelConnection,
-      groups,
+      groupsCopy,
       hiddenGroupsIds,
       hilitedElementsQueryCache,
-      emphasizeElements,
-      isNonEmphasizedSelectable,
       setNumberOfVisualizedGroups,
-    ]
-  );
+      emphasizeElements,
+    );
+    isNonEmphasizedSelectable && clearEmphasizedElements();
+    handleVisualizationStates(false);
+  }, [handleVisualizationStates, groups, iModelConnection, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, emphasizeElements, isNonEmphasizedSelectable]);
 
   useEffect(() => {
     const visualize = async () => {
@@ -102,13 +96,15 @@ export const GroupsVisualization = ({
         return;
       }
       if (groups.length > 0 && showGroupColor) {
-        await visualizeGroupColorsWrapper();
+        await triggerVisualization();
       } else {
         clearEmphasizedOverriddenElements();
       }
     };
     void visualize();
-  }, [groups, showGroupColor, visualizeGroupColorsWrapper]);
+    // We don't want to trigger full visualization when toggling individual groups.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groups, showGroupColor]);
 
   const hideAllGroups = useCallback(
     async () => {
@@ -130,6 +126,7 @@ export const GroupsVisualization = ({
 
   const showGroup = useCallback(
     async (viewGroup: Group) => {
+      setLoadingQuery(true);
       clearHiddenElements();
 
       // hide group Ids filter
@@ -142,6 +139,7 @@ export const GroupsVisualization = ({
       let hiddenIds = await getHiliteIdsFromGroupsWrapper(newHiddenGroups);
       hiddenIds = hiddenIds.filter((id) => !viewIds.includes(id));
       hideElements(hiddenIds);
+      setLoadingQuery(false);
     },
     [groups, hiddenGroupsIds, getHiliteIdsFromGroupsWrapper]
   );
@@ -151,8 +149,7 @@ export const GroupsVisualization = ({
 
     clearHiddenElements();
     setHiddenGroupsIds(new Set());
-    const allIds = await getHiliteIdsFromGroupsWrapper(groups);
-    await zoomToElements(allIds);
+    await getHiliteIdsFromGroupsWrapper(groups);
 
     setLoadingQuery(false);
   }, [getHiliteIdsFromGroupsWrapper, groups, setHiddenGroupsIds]);
@@ -162,8 +159,7 @@ export const GroupsVisualization = ({
     setHiddenGroupsIds(
       new Set(groups.map((g) => g.id))
     );
-    const allIds = await getHiliteIdsFromGroupsWrapper(groups);
-    await zoomToElements(allIds);
+    await getHiliteIdsFromGroupsWrapper(groups);
   }, [
     setHiddenGroupsIds,
     groups,
@@ -213,13 +209,13 @@ export const GroupsVisualization = ({
         showAll={showAll}
         hideAll={hideAll}
       />
-      <Groupings
+      <Groups
         onClickGroupModify={onModify}
         onClickAddGroup={onAddGroup}
         actionButtonRenderers={groupActionButtonRenderers}
         {...rest}
         disableActions={isLoadingQuery}
-        isVisualizing = {isVisualizing}
+        isVisualizing={isVisualizing}
       />
     </div>
   );

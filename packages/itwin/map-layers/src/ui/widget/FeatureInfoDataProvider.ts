@@ -5,7 +5,7 @@
 
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataChangeEvent } from "@itwin/components-react";
-import {  IModelApp, MapFeatureInfo, MapLayerFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
+import {  IModelApp, MapFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
 import { MapFeatureInfoTool, MapFeatureInfoToolData  } from "@itwin/map-layers-formats";
 
 /**

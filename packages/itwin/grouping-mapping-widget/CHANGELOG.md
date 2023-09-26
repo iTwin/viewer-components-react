@@ -1,6 +1,25 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 14:55:43 GMT and should not be manually modified.
+
+## 0.19.0
+Tue, 19 Sep 2023 14:55:43 GMT
+
+### Minor changes
+
+- Added the `GroupsViews` component: a reusable, state-agnostic UI component for managing Groups.
+- Renamed Groupings component to Groups for consistency.
+
+### Patches
+
+- Enabled query experimental features e.g '$->'.
+
+## 0.18.1
+Thu, 24 Aug 2023 21:32:34 GMT
+
+### Patches
+
+- Added missing state to restore missing import mapping button to default UI.
 
 ## 0.18.0
 Thu, 17 Aug 2023 14:42:37 GMT

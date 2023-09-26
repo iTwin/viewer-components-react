@@ -10,7 +10,7 @@ import { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersUI } from "../mapLayers";
 import { IModelApp } from "@itwin/core-frontend";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
-import { SvgAddCircular, SvgMapInfo } from "@itwin/itwinui-icons-react";
+import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 
 export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({

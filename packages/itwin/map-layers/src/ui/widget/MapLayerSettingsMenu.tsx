@@ -8,7 +8,7 @@ import { DropdownMenu, IconButton, MenuItem, Slider } from "@itwin/itwinui-react
 import "./MapLayerManager.scss";
 import { StyleMapLayerSettings } from "../Interfaces";
 import { MapLayersUI } from "../../mapLayers";
-import { SvgMoreVertical } from "@itwin/itwinui-react/cjs/core/utils";
+import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 
 interface MapLayerSettingsMenuProps {
   mapLayerSettings: StyleMapLayerSettings;
@@ -80,7 +80,7 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
 
   return (
     <>
-      <DropdownMenu placement="auto-start" menuItems={dropdownMenuItems} disabled={disabled} data-testid="map-layer-settings"  >
+      <DropdownMenu placement="auto-start" menuItems={dropdownMenuItems} disabled={disabled} >
         <IconButton size="small" styleType="borderless">
           <SvgMoreVertical />
         </IconButton>
