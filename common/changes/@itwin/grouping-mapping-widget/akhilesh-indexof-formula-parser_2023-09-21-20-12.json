@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added a formula parser for indexof",
+      "comment": "Added a formula parser for indexof in Custom Calculation properties.",
       "type": "patch"
     }
   ],
