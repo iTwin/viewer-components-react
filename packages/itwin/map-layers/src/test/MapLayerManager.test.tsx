@@ -8,7 +8,7 @@ import { expect, should } from "chai";
 import * as React from "react";
 import * as sinon from "sinon";
 import * as coreFrontend from "@itwin/core-frontend";
-import { fireEvent, getAllByRole, getAllByTestId, getAllByTitle, getByRole, getByTestId, getByTitle, queryByText, render } from "@testing-library/react";
+import { fireEvent, getAllByTestId, getByTestId, getByTitle, queryByText, render } from "@testing-library/react";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { GuidString } from "@itwin/core-bentley";
@@ -194,7 +194,7 @@ describe("MapLayerManager", () => {
     });
   });
 
-  it("should maintain layer checkbox in synch", async () => {
+  it("should maintain checkboxes in synch", async () => {
     viewportMock.reset();
     const layer1 = ImageMapLayerSettings.fromJSON({
       formatId: "WMS",
