@@ -419,6 +419,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     }
     // Note: display style change is automatically applied to view via DisplayStyleState._synchBackgroundMapImagery()
     // So no need to call Viewport.invalidateRenderPlan() here
+    //
 
     // force UI to update
     loadMapLayerSettingsFromViewport(activeViewport);
