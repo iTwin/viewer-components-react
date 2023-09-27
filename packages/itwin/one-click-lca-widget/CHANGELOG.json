@@ -2,6 +2,18 @@
   "name": "@itwin/one-click-lca-react",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@itwin/one-click-lca-react_v0.4.0",
+      "date": "Mon, 25 Sep 2023 18:53:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Migrated UI items for iTwinUI 2.x and iTwinJS 4.x upgrade"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@itwin/one-click-lca-react_v0.3.0",
       "date": "Tue, 07 Mar 2023 15:47:41 GMT",

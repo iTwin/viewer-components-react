@@ -190,7 +190,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
   return (
     <>
       <div className="map-manager-base-item" >
-        <Button size="small" styleType="borderless" title={toggleVisibility} onClick={handleVisibilityChange} disabled={props.disabled || !activeViewport || !(activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings)}>
+        <Button className="map-manager-basemap-visibility map-manager-visibility-icon" size="small" styleType="borderless" title={toggleVisibility} onClick={handleVisibilityChange} disabled={props.disabled || !activeViewport || !(activeViewport.displayStyle.backgroundMapBase instanceof ImageMapLayerSettings)}>
           <WebFontIcon iconName={baseMapVisible ? "icon-visibility" : "icon-visibility-hide-2"} />
         </Button>
         <span className="map-manager-base-label">{baseLayerLabel}</span>
