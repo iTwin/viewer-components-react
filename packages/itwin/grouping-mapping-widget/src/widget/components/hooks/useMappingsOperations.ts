@@ -68,7 +68,7 @@ const fetchExtractionStatus = async (
   } catch (error: any) {
     setIconStatus("negative");
     setIconMessage("Operation failed. Please try again.");
-   }
+  }
 };
 
 export interface MappingsOperationsProps extends GroupingMappingApiConfig {
