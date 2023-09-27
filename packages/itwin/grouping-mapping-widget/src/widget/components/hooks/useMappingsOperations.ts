@@ -43,21 +43,21 @@ const fetchExtractionStatus = async (
   setIconMessage("Extraction status pending.");
   try {
     const accessToken = await getAccessToken();
-    const extractions = await extractionClient.getExtractionHistory(accessToken, iModelId);
+    const extractions = await extractionClient.getExtractionHistory(accessToken, iModelId, 1);
     const jobId = extractions[0].jobId;
     const status = await extractionClient.getExtractionStatus(accessToken, jobId);
     if (status.containsIssues) {
       setIconStatus("negative");
       setIconMessage("Extraction contains issues. Click to view extraction logs.");
-      let logs = await extractionClient.getExtractionLogs(accessToken, jobId);
-      logs = logs.filter((log) => log.message != null);
-      const extractionMessageData = logs.map((log) =>
+      const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
+      const filteredLogs = logs.filter((log) => log.message != null);
+      const extractionMessageData = filteredLogs.map((filteredLog) =>
         (
           {
-            date: log.dateTime,
-            category: log.category,
-            level: log.level,
-            message: String(log.message),
+            date: filteredLog.dateTime,
+            category: filteredLog.category,
+            level: filteredLog.level,
+            message: String(filteredLog.message),
           }
         ));
       setExtractionMessageData(extractionMessageData);
@@ -65,7 +65,10 @@ const fetchExtractionStatus = async (
       setIconStatus("positive");
       setIconMessage("Extraction Successful.");
     }
-  } catch (error: any) { }
+  } catch (error: any) {
+    setIconStatus("negative");
+    setIconMessage("Operation failed. Please try again.");
+   }
 };
 
 export interface MappingsOperationsProps extends GroupingMappingApiConfig {
