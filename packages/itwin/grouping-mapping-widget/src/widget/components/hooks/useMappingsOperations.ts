@@ -35,39 +35,53 @@ const fetchExtractionStatus = async (
   iModelId: string,
   getAccessToken: GetAccessTokenFn,
   extractionClient: IExtractionClient,
-  setIconStatus: React.Dispatch<React.SetStateAction<"negative" | "positive" | "warning">>,
-  setIconMessage: React.Dispatch<React.SetStateAction<string>>,
+  setExtractionIconData: React.Dispatch<React.SetStateAction<ExtractionIconData>>,
   setExtractionMessageData: React.Dispatch<React.SetStateAction<ExtractionMessageData[]>>
 ) => {
-  setIconStatus("warning");
-  setIconMessage("Extraction status pending.");
+  setExtractionIconData({
+    iconStatus: "warning",
+    iconMessage: "Extraction status pending.",
+  });
   try {
     const accessToken = await getAccessToken();
     const extractions = await extractionClient.getExtractionHistory(accessToken, iModelId, 1);
-    const jobId = extractions[0].jobId;
-    const status = await extractionClient.getExtractionStatus(accessToken, jobId);
-    if (status.containsIssues) {
-      setIconStatus("negative");
-      setIconMessage("Extraction contains issues. Click to view extraction logs.");
-      const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
-      const filteredLogs = logs.filter((log) => log.message != null);
-      const extractionMessageData = filteredLogs.map((filteredLog) =>
-        (
-          {
-            date: filteredLog.dateTime,
-            category: filteredLog.category,
-            level: filteredLog.level,
-            message: String(filteredLog.message),
-          }
-        ));
-      setExtractionMessageData(extractionMessageData);
+    if(extractions.length === 0){
+      setExtractionIconData({
+        iconStatus: "negative",
+        iconMessage: "No extraction found.",
+      });
     } else {
-      setIconStatus("positive");
-      setIconMessage("Extraction Successful.");
+      const jobId = extractions[0].jobId;
+      const status = await extractionClient.getExtractionStatus(accessToken, jobId);
+      if (status.containsIssues) {
+        setExtractionIconData({
+          iconStatus: "negative",
+          iconMessage: "Extraction contains issues. Click to view extraction logs.",
+        });
+        const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
+        const filteredLogs = logs.filter((log) => log.message !== null);
+        const extractionMessageData = filteredLogs.map((filteredLog) =>
+          (
+            {
+              date: filteredLog.dateTime,
+              category: filteredLog.category,
+              level: filteredLog.level,
+              message: String(filteredLog.message),
+            }
+          ));
+        setExtractionMessageData(extractionMessageData);
+      } else {
+        setExtractionIconData({
+          iconStatus: "positive",
+          iconMessage: "Extraction successful.",
+        });
+      }
     }
   } catch (error: any) {
-    setIconStatus("negative");
-    setIconMessage("Operation failed. Please try again.");
+    setExtractionIconData({
+      iconStatus: "negative",
+      iconMessage: "Operation failed. Please try again.",
+    });
   }
 };
 
@@ -82,6 +96,11 @@ export interface ExtractionMessageData {
   message: string;
 }
 
+export interface ExtractionIconData {
+  iconStatus: "negative" | "positive" | "warning";
+  iconMessage: string;
+}
+
 export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient }: MappingsOperationsProps) => {
   const [showImportModal, setShowImportModal] = useState<boolean | undefined>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
@@ -90,8 +109,10 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const extractionClient = useExtractionClient();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [isTogglingExtraction, setIsTogglingExtraction] = useState<boolean>(false);
-  const [iconStatus, setIconStatus] = useState<"negative" | "positive" | "warning">("warning");
-  const [iconMessage, setIconMessage] = useState<string>("");
+  const [extractionIconData, setExtractionIconData] = useState<ExtractionIconData>({
+    iconStatus: "warning",
+    iconMessage: "",
+  });
   const [showExtractionMessageModal, setShowExtractionMessageModal] = useState<boolean>(false);
   const [extractionMessageData, setExtractionMessageData] = useState<ExtractionMessageData[]>([]);
 
@@ -104,8 +125,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
       iModelId,
       getAccessToken,
       extractionClient,
-      setIconStatus,
-      setIconMessage,
+      setExtractionIconData,
       setExtractionMessageData
     );
   }, [iModelId, getAccessToken, extractionClient]);
@@ -136,5 +156,5 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     await refresh();
   };
 
-  return { mappings, isLoading, iconStatus, iconMessage, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, refresh, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
+  return { mappings, isLoading, extractionIconData, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, refresh, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
 };

@@ -27,6 +27,7 @@ import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { MappingUIActionGroup } from "./MappingViewActionGroup";
 import type { ExtractionMessageData } from "./hooks/useMappingsOperations";
+import type { ExtractionIconData } from "./hooks/useMappingsOperations";
 import { ExtractionStatusIcon } from "./ExtractionStatusIcon";
 import { ExtractionMessageModal } from "./ExtractionMessageModal";
 
@@ -44,8 +45,7 @@ export const mappingViewDefaultDisplayStrings = {
 export interface MappingsViewProps {
   mappings: Mapping[];
   isLoading: boolean;
-  iconStatus: "negative" | "positive" | "warning";
-  iconMessage: string;
+  extractionIconData: ExtractionIconData;
   showExtractionMessageModal: boolean;
   extractionMessageData: ExtractionMessageData[];
   setShowExtractionMessageModal: (show: boolean) => void;
@@ -67,8 +67,7 @@ export interface MappingsViewProps {
 export const MappingsView = ({
   mappings,
   isLoading,
-  iconStatus,
-  iconMessage,
+  extractionIconData,
   showExtractionMessageModal,
   extractionMessageData,
   setShowExtractionMessageModal,
@@ -117,13 +116,13 @@ export const MappingsView = ({
           </div>
           <div className="gmw-button-spacing">
             <ExtractionStatusIcon
-              iconStatus={iconStatus}
+              iconStatus={extractionIconData.iconStatus}
               onClick={() => {
-                if (iconStatus === "negative") {
+                if (extractionIconData.iconStatus === "negative") {
                   setShowExtractionMessageModal(true);
                 }
               }}
-              iconMessage={iconMessage}
+              iconMessage={extractionIconData.iconMessage}
             />
             <IconButton
               title="Refresh"

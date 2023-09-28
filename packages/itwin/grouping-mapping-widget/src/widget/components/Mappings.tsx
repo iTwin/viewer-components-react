@@ -27,8 +27,7 @@ export const Mappings = (props: MappingsProps) => {
   const {
     mappings,
     isLoading,
-    iconStatus,
-    iconMessage,
+    extractionIconData,
     showExtractionMessageModal,
     extractionMessageData,
     setShowExtractionMessageModal,
@@ -57,8 +56,7 @@ export const Mappings = (props: MappingsProps) => {
     <MappingsView
       mappings={mappings}
       isLoading={isLoading}
-      iconStatus={iconStatus}
-      iconMessage={iconMessage}
+      extractionIconData={extractionIconData}
       showExtractionMessageModal={showExtractionMessageModal}
       extractionMessageData={extractionMessageData}
       setShowExtractionMessageModal={setShowExtractionMessageModal}
