@@ -5,22 +5,13 @@
 
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataChangeEvent } from "@itwin/components-react";
-import { BeEvent } from "@itwin/core-bentley";
-import { HitDetail } from "@itwin/core-frontend";
-import { MapHitEvent } from "../Interfaces";
+import {  IModelApp, MapFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
+import { MapFeatureInfoTool, MapFeatureInfoToolData  } from "@itwin/map-layers-formats";
 
 /**
  * Implementation of [IPropertyDataProvider] that uses an associative array.
- * @public
+ * @internal
  */
-
-export enum MapFeatureInfoLoadState { DataLoadStart, DataLoadEnd }
-export declare type MapFeatureInfoLoadListener = (state: MapFeatureInfoLoadState) => void;
-
-export interface MapFeatureInfoDataUpdate {
-  recordCount: number;
-}
-export declare type MapFeatureInfoDataUpdatedListener = (data: MapFeatureInfoDataUpdate) => void;
 
 class SimplePropertyData implements PropertyData {
   public label: PropertyRecord = PropertyRecord.fromString("");
@@ -29,73 +20,103 @@ class SimplePropertyData implements PropertyData {
   public records: { [categoryName: string]: PropertyRecord[] } = {};
 }
 
+/**
+ * @internal
+ */
 export class FeatureInfoDataProvider implements IPropertyDataProvider {
-  private _removeListener: () => void;
+  private _detachActiveToolListener: VoidFunction|undefined;
+  private readonly _detachToolAdminListener: VoidFunction;
+
   public onDataChanged = new PropertyDataChangeEvent();
-  public onDataLoadStateChanged = new BeEvent<MapFeatureInfoLoadListener>();
-  public onDataUpdated = new BeEvent<MapFeatureInfoDataUpdatedListener>();
   private _data = new SimplePropertyData();
-  constructor(onMapHit: MapHitEvent) {
-    this._removeListener = onMapHit.addListener(this._handleMapHit, this);
+
+  constructor( ){
+    this._detachToolAdminListener = (IModelApp.toolAdmin.activeToolChanged.addListener(this.handleActiveToolChanged));
   }
+
+  private handleActiveToolChanged = (tool: Tool, _start: StartOrResume) => {
+
+    if (this._detachActiveToolListener) {
+      this._detachActiveToolListener();
+      this._detachActiveToolListener = undefined;
+    }
+
+    if (tool.toolId === MapFeatureInfoTool.toolId) {
+      const mapInfoTool = tool as MapFeatureInfoTool;
+      this._detachActiveToolListener =  mapInfoTool.onInfoReady.addListener(this.handleOnInfoReadyChanged);
+      this._data = new SimplePropertyData();
+      this.onDataChanged.raiseEvent();
+    }
+  };
+
+  private handleOnInfoReadyChanged = (data: MapFeatureInfoToolData) => {
+    void this.setInfo(data.mapInfo).then();    // No need to wait for data parsing.
+
+  };
 
   public onUnload() {
-    this._removeListener();
+    this._detachToolAdminListener();
+    if (this._detachActiveToolListener) {
+      this._detachActiveToolListener();
+      this._detachActiveToolListener = undefined;
+    }
   }
 
-  private async _handleMapHit(mapHit: HitDetail) {
+  public get hasRecords() {
+    return this._data.categories.length > 0;
+  }
+
+  private async setInfo(mapInfo?: MapFeatureInfo) {
     this._data = new SimplePropertyData();
 
-    let recordCount = 0;
-    if (mapHit?.isMapHit) {
-      this.onDataLoadStateChanged.raiseEvent(MapFeatureInfoLoadState.DataLoadStart);
-      const mapInfo = await mapHit.viewport.getMapFeatureInfo(mapHit);
-      this.onDataLoadStateChanged.raiseEvent(MapFeatureInfoLoadState.DataLoadEnd);
-      if (mapInfo.layerInfo !== undefined) {
-        for (const curLayerInfo of mapInfo.layerInfo) {
-          const layerCatIdx = this.findCategoryIndexByName(curLayerInfo.layerName);
-          let nbRecords = 0;
-          const layerCategory = (
-            layerCatIdx === -1 ?
-              { name: curLayerInfo.layerName, label: curLayerInfo.layerName, expand: true, childCategories: [] }
-              : this._data.categories[layerCatIdx]);
+    if(mapInfo?.layerInfos) {
+      for (const curLayerInfo of mapInfo.layerInfos) {
+        const layerCatIdx = this.findCategoryIndexByName(curLayerInfo.layerName);
+        let nbRecords = 0;
 
-          if (curLayerInfo.info && !(curLayerInfo.info instanceof HTMLElement)) {
-            // This is not an HTMLElement, so iterate over each sub-layer info
-            for (const subLayerInfo of curLayerInfo.info) {
+        const layerCategory = (
+          layerCatIdx === -1 ?
+            { name: curLayerInfo.layerName, label: curLayerInfo.layerName, expand: true, childCategories: [] }
+            : this._data.categories[layerCatIdx]);
+
+        if (curLayerInfo.subLayerInfos) {
+          for (const subLayerInfo of curLayerInfo.subLayerInfos) {
+            this.addSubLayerCategory(subLayerInfo, layerCategory);
+
+            // Add every feature records for this sub-layer
+            for (const feature of subLayerInfo.features) {
               nbRecords++;
-              const subCatIdx = layerCategory.childCategories?.findIndex((testCategory: PropertyCategory) => {
-                return testCategory.name === subLayerInfo.subLayerName;
-              });
-              let subLayerCategory;
-              if (subCatIdx === -1) {
-                subLayerCategory = { name: subLayerInfo.subLayerName, label: subLayerInfo.subLayerName, expand: true };
-                this.addSubCategory(subLayerCategory.name);
-                layerCategory.childCategories?.push(subLayerCategory);
-              }
-              if (subLayerInfo.records) {
-                for (const record of subLayerInfo.records) {
-                  // Always use the string value for now
-                  this.addProperty(record, subLayerInfo.subLayerName);
-
-                }
+              for (const attribute of feature.attributes) {
+                // Always use the string value for now
+                this.addProperty(MapLayerFeatureRecord.createRecordFromAttribute(attribute), subLayerInfo.subLayerName);
               }
             }
           }
           if (layerCatIdx === -1 && nbRecords > 0)
             this.addCategory(layerCategory);
-
-          recordCount = recordCount + nbRecords;
         }
       }
     }
-    this.onDataUpdated.raiseEvent({ recordCount });
+
     this.onDataChanged.raiseEvent();
   }
 
+  public addSubLayerCategory(subLayerInfo: MapSubLayerFeatureInfo, layerCategory: PropertyCategory) {
+    const subCatIdx = layerCategory.childCategories?.findIndex((testCategory: PropertyCategory) => {
+      return testCategory.name === subLayerInfo.subLayerName;
+    });
+
+    let subLayerCategory;
+    if (subCatIdx === -1) {
+      subLayerCategory = { name: subLayerInfo.subLayerName, label: subLayerInfo.subLayerName, expand: true };
+      this.addSubCategory(subLayerCategory.name);
+      layerCategory.childCategories?.push(subLayerCategory);
+    }
+  }
   public addSubCategory(categoryName: string) {
     this._data.records[categoryName] = [];
   }
+
   public addCategory(category: PropertyCategory): number {
 
     const categoryIdx = this._data.categories.push(category) - 1;
