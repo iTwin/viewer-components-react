@@ -28,6 +28,8 @@ export interface StyleMapLayerSettings {
   showSubLayers: boolean;
   /** Some format can publish only a single layer at a time (i.e WMTS) */
   provider?: MapLayerImageryProvider;
+
+  selected: boolean;
 }
 
 export interface MapTypesOptions {
@@ -48,12 +50,6 @@ export interface MapFeatureInfoPropertyGridOptions {
 export type MapHitEvent = BeEvent<(hit: HitDetail) => void>;
 
 export interface MapFeatureInfoOptions {
-  /**
-   * HitDetail Event whenever the map is clicked.
-   * Typically the HitDetail object is provided by ElementLocateManager.doLocate.
-   * Every time this event is raised, FeatureInfoWidget will attempt to retrieve data from MapLayerImageryProviders.
-   */
-  onMapHit: MapHitEvent;
   disableDefaultFeatureInfoTool?: boolean;
   showLoadProgressAnimation?: boolean;
   propertyGridOptions?: MapFeatureInfoPropertyGridOptions;

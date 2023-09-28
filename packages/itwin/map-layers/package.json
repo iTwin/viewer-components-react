@@ -1,6 +1,6 @@
 {
   "name": "@itwin/map-layers",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "Extension that adds a Map Layers Widget",
   "main": "lib/cjs/map-layers.js",
   "module": "lib/esm/map-layers.js",
@@ -36,32 +36,36 @@
     "url": "http://www.bentley.com"
   },
   "dependencies": {
-    "@itwin/itwinui-icons-color-react": "~1.0.3",
+    "@itwin/itwinui-icons-color-react": "^2.1.0",
+    "@itwin/itwinui-icons-react": "^2.6.0",
     "classnames": "^2.3.1",
     "react-beautiful-dnd": "^13.0.0"
   },
   "devDependencies": {
-    "@itwin/appui-abstract": "^4.0.6",
+    "@itwin/appui-abstract": "^4.1.3",
     "@itwin/appui-layout-react": "^4.0.1",
     "@itwin/appui-react": "^4.0.1",
-    "@itwin/build-tools": "^4.0.6",
+    "@itwin/build-tools": "^4.1.2",
     "@itwin/components-react": "^4.0.1",
-    "@itwin/core-bentley": "^4.0.6",
-    "@itwin/core-common": "^4.0.6",
-    "@itwin/core-frontend": "^4.0.6",
-    "@itwin/core-geometry": "^4.0.6",
-    "@itwin/core-orbitgt": "^4.0.6",
-    "@itwin/core-quantity": "^4.0.6",
+    "@itwin/core-bentley": "^4.1.2",
+    "@itwin/core-common": "^4.1.2",
+    "@itwin/core-frontend": "^4.1.2",
+    "@itwin/core-geometry": "^4.1.2",
+    "@itwin/core-orbitgt": "^4.1.2",
+    "@itwin/core-quantity": "^4.1.2",
     "@itwin/core-react": "^4.0.1",
-    "@itwin/core-telemetry": "^4.0.6",
+    "@itwin/core-telemetry": "^4.1.2",
     "@itwin/eslint-plugin": "^4.0.0-dev.38",
     "@itwin/imodel-components-react": "^4.0.1",
     "@itwin/itwinui-variables": "^2.0.0",
     "@itwin/itwinui-react": "^2.11.2",
-    "@itwin/webgl-compatibility": "^4.0.6",
+    "@itwin/map-layers-formats": "^4.1.2",
+    "@itwin/webgl-compatibility": "^4.1.2",
     "@testing-library/dom": "^8.12.0",
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^7.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.10.1",
     "@types/chai": "4.3.5",
     "@types/jsdom-global": "^3.0.4",
     "@types/enzyme": "3.9.3",
@@ -78,7 +82,15 @@
     "cpx2": "^3.0.0",
     "enzyme": "3.10.0",
     "enzyme-to-json": "^3.3.4",
-    "eslint": "^7.11.0",
+    "eslint": "^8.41.0",
+    "eslint-plugin-deprecation": "^1.2.1",
+    "eslint-plugin-import" : "^2.27.5",
+    "eslint-plugin-jam3" : "^0.2.3",
+    "eslint-plugin-jsx-a11y" : "^6.7.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-react": "^7.25.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "jsdom": "^22.1.0",
     "jsdom-global": "3.0.2",
     "mocha": "^10.0.0",
@@ -91,7 +103,7 @@
     "sinon": "^9.0.2",
     "sinon-chai": "^3.2.0",
     "typemoq": "^2.1.0",
-    "typescript": "~4.4.0"
+    "typescript": "~4.5.5"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
@@ -100,7 +112,7 @@
     "@itwin/components-react": "^4.0.0",
     "@itwin/core-bentley": "^4.0.0",
     "@itwin/core-common": "^4.0.0",
-    "@itwin/core-frontend": "^4.0.0",
+    "@itwin/core-frontend": "^4.1.2",
     "@itwin/core-react": "^4.0.0",
     "@itwin/imodel-components-react": "^4.0.0",
     "react": "^17.0.0",
@@ -112,9 +124,17 @@
   },
   "eslintConfig": {
     "plugins": [
+      "react-hooks",
       "@itwin"
     ],
-    "extends": "plugin:@itwin/ui"
+    "extends": [
+      "plugin:react-hooks/recommended",
+      "plugin:@itwin/ui"
+    ],
+    "rules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error"
+    }
   },
   "mocha": {
     "require": [

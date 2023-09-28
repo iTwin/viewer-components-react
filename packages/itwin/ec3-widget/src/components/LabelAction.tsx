@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Fieldset, LabeledInput, LabeledSelect, Small } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
@@ -126,9 +126,9 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
     <>
       <div className='ec3w-label-details-container' data-testid="ec3-label-action">
         <Fieldset legend='Assembly' className='ec3w-label-details'>
-          <Small className='ec3w-label-field-legend'>
+          <Text variant="small" className='ec3w-label-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
 
           <ReportTableSelector
             selectedReportTable={reportTable}

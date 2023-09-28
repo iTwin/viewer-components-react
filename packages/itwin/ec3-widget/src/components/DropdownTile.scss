@@ -2,13 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .ec3w-dropdown-tile-container {
   justify-content: space-between;
   border-radius: 5px;
-  height: $iui-baseline * 6;
-  margin-top: $iui-baseline;
+  height: calc(var(--iui-size-s) * 6);
+  margin-top: var(--iui-size-s);
 
   .ec3w-body {
     display: flex;
@@ -28,7 +27,7 @@
     margin-left: 0;
     align-self: flex-end;
     min-width: 36px;
-    margin-left: $iui-xs;
+    margin-left: var(--iui-size-2xs);
     flex-shrink: 0;
   }
 
@@ -36,7 +35,7 @@
     margin-left: 0;
     align-self: center;
     min-width: 36px;
-    margin-right: $iui-xs;
+    margin-right: var(--iui-size-2xs);
   }
 
   .ec3w-material-combo {

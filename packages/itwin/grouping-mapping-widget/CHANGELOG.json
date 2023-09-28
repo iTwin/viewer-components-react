@@ -2,6 +2,58 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.19.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.19.0",
+      "date": "Tue, 19 Sep 2023 14:55:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enabled query experimental features e.g '$->'."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Added the `GroupsViews` component: a reusable, state-agnostic UI component for managing Groups."
+          },
+          {
+            "comment": "Renamed Groupings component to Groups for consistency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.18.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.18.1",
+      "date": "Thu, 24 Aug 2023 21:32:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added missing state to restore missing import mapping button to default UI."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.18.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.18.0",
+      "date": "Thu, 17 Aug 2023 14:42:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added a Progress bar when Color By Group"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Added the `MappingsView` component: a reusable, state-agnostic UI component for managing Mappings."
+          },
+          {
+            "comment": "Typescript version bump to ^4.5.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.5",
       "tag": "@itwin/grouping-mapping-widget_v0.17.5",
       "date": "Wed, 02 Aug 2023 12:11:30 GMT",

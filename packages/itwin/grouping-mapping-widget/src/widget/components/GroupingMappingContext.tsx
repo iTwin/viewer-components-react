@@ -23,6 +23,7 @@ import type { OverlappedInfo , QueryCacheItem } from "./context/GroupHilitedElem
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import { enableExperimentalFeatures } from "./utils";
 
 export interface GroupingMappingContextProps {
   /**
@@ -90,6 +91,11 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       iModelConnection: props.iModelConnection ?? activeIModelConntextion,
     }));
   }, [activeIModelConntextion, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
+
+  useEffect(() => {
+    if (!apiConfig.iModelConnection) return;
+    void enableExperimentalFeatures(apiConfig.iModelConnection);
+  }, [apiConfig.iModelConnection]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(clientProp));

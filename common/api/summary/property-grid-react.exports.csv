@@ -23,12 +23,13 @@ public;PreferencesStorage
 public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element
 public;PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps): JSX.Element | null
 public;PropertyGridComponentProps 
-internal;PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, ...props }: PropertyGridContentProps): JSX.Element
+internal;PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, onPropertyUpdated, ...props }: PropertyGridContentProps): JSX.Element
 public;PropertyGridContentBaseProps 
 public;PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsMenuProps
 public;PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren
 public;PropertyGridContextMenuItemProps
 public;PropertyGridManager
+public;PropertyGridPropertyUpdatedArgs 
 public;PropertyGridProps = Omit
 public;PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren
 public;PropertyGridSettingsMenuItemProps

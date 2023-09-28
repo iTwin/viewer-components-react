@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, Text } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -70,11 +70,11 @@ export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportAct
           )}
           className="rcw-details-form"
         >
-          <Small className="field-legend">
+          <Text variant='small' className="field-legend">
             {ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:MandatoryFields"
             )}
-          </Small>
+          </Text>
           <LabeledInput
             name="name"
             label={ReportsConfigWidget.localization.getLocalizedString(

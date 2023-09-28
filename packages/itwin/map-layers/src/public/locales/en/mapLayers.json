@@ -12,6 +12,12 @@
   "ColorDialog": {
     "Title": "Specify Base Color"
   },
+  "MapLayerActionButtons": {
+    "ShowAllLabel": "Show all",
+    "HideAllLabel": "Hide all",
+    "InvertAllLabel": "Invert visibility",
+    "DetachSelectedLabel": "Detach selected map layers"
+  },
   "CustomAttach": {
     "LayerWithUrlExistsOverwriting": "Map layer with URL: {{url}} already exists. Updating name from {{oldName}} to {{newName}}.",
     "LayerWithUrlExistsAsITwinSetting": "Map Layer with URL: {{url}} already exists as a iTwin setting under name {{name}}. Cannot overwrite with a model setting!",

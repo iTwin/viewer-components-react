@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, DropdownMenu, IconButton, MenuItem, Surface, toaster } from "@itwin/itwinui-react";
+import { Button, DropdownMenu, IconButton, MenuItem, toaster } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
@@ -103,15 +103,16 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
 
   return (
     <>
-      <Surface className="ec3w-templates-list-container">
+      <div className="ec3w-templates-list-container">
         <div className="ec3w-toolbar" data-testid="ec3-templates">
           <div className="ec3w-toolbar-left">
             <Button
               startIcon={<SvgAdd />}
               onClick={onClickCreate}
               styleType="high-visibility"
+              title="New Template"
             >
-              Create Template
+              New
             </Button>
             <Button
               data-testid="ec3-export-button"
@@ -121,6 +122,8 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
             >
               Export
             </Button>
+          </div>
+          <div className="ec3w-search-bar-container">
             <IconButton
               title="Refresh"
               onClick={refresh}
@@ -129,9 +132,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
             >
               <SvgRefresh />
             </IconButton>
-          </div>
-          <div className="ec3w-search-bar-container" data-testid="ec3-search-bar">
-            <div className="ec3w-search-button">
+            <div className="ec3w-search-button" data-testid="ec3-search-bar">
               <SearchBar
                 searchValue={searchValue}
                 setSearchValue={setSearchValue}
@@ -175,7 +176,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
                       </MenuItem>,
                     ]}
                   >
-                    <IconButton styleType="borderless">
+                    <IconButton styleType="borderless" title="Template Options">
                       <SvgMore
                         style={{
                           width: "16px",
@@ -189,7 +190,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
             ))}
           </div>
         )}
-      </Surface>
+      </div>
 
       <ExportModal
         projectName={selectedTemplate?.displayName ?? ""}

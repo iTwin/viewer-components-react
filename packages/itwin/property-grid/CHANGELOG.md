@@ -1,6 +1,35 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 08 Aug 2023 05:55:42 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Aug 2023 13:48:47 GMT and should not be manually modified.
+
+## 1.3.0
+Tue, 29 Aug 2023 13:48:47 GMT
+
+### Minor changes
+
+- Make selected items list striped.
+
+## 1.2.0
+Fri, 25 Aug 2023 14:06:04 GMT
+
+### Minor changes
+
+- Sort selected elements list by label in an ascending order.
+- Improved property editing workflow by adding data provider to `onPropertyUpdated` callback arguments.
+
+## 1.1.2
+Fri, 18 Aug 2023 11:01:29 GMT
+
+### Patches
+
+- Correctly determine if element has parent element when both are instances of the same class.
+
+## 1.1.1
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Patches
+
+- Fixed `Selected elements` button not appearing sometimes when selection changes quickly.
 
 ## 1.1.0
 Mon, 07 Aug 2023 13:36:23 GMT
