@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/imodel-react-hooks",
       "comment": "update @itwin/imodel-react-hooks to support itwin.js@4",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/imodel-react-hooks"
