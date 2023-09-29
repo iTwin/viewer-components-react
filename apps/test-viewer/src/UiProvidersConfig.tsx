@@ -8,7 +8,7 @@ import { AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPr
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { SelectionMode } from "@itwin/components-react";
@@ -126,7 +126,7 @@ const configuredUiItems = new Map<string, UiItem>([
       },
       createUiItemsProviders: () => [
         new MapLayersUiItemsProvider(),
-        new FeatureInfoUiItemsProvider({ onMapHit: DefaultMapFeatureInfoTool.onMapHit })
+        new FeatureInfoUiItemsProvider({})
       ]
     }
   ],

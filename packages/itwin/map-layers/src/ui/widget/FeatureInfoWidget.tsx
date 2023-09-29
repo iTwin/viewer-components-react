@@ -7,8 +7,7 @@ import * as React from "react";
 import { VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
 import { FillCentered, Orientation, ResizableContainerObserver } from "@itwin/core-react";
 
-import { FeatureInfoDataProvider, MapFeatureInfoDataUpdate, MapFeatureInfoLoadState } from "./FeatureInfoDataProvider";
-import { ProgressRadial } from "@itwin/itwinui-react";
+import { FeatureInfoDataProvider} from "./FeatureInfoDataProvider";
 import { MapFeatureInfoOptions } from "../Interfaces";
 import { MapLayersUI } from "../../mapLayers";
 
@@ -20,55 +19,37 @@ interface MapFeatureInfoWidgetProps {
 export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetProps) {
 
   const dataProvider = React.useRef<FeatureInfoDataProvider>();
-  const [loadingData, setLoadingData] = React.useState<boolean>(false);
   const [hasData, setHasData] = React.useState<boolean>(false);
+
   const [noRecordsMessage] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.NoRecords"));
 
   const [{ width, height }, setSize] = React.useState({ width: 0, height: 0 });
 
-  const handleLoadStateChange = (state: MapFeatureInfoLoadState) => {
-    setLoadingData(state === MapFeatureInfoLoadState.DataLoadStart);
-  };
-  const handleDataUpdated = (state: MapFeatureInfoDataUpdate) => {
-    setHasData(state.recordCount !== 0);
+  const handleDataChanged = () => {
+    setHasData(dataProvider.current !== undefined && dataProvider.current.hasRecords);
   };
 
   React.useEffect(() => {
-    if (featureInfoOpts?.onMapHit) {
-      dataProvider.current = new FeatureInfoDataProvider(featureInfoOpts.onMapHit);
-    }
+    dataProvider.current = new FeatureInfoDataProvider();
     return () => {
       dataProvider?.current?.onUnload();
     };
-  }, [featureInfoOpts?.onMapHit]);
-
-  React.useEffect(() => {
-
-    dataProvider.current?.onDataUpdated.addListener(handleDataUpdated);
-    return () => {
-      dataProvider.current?.onDataUpdated.removeListener(handleDataUpdated);
-    };
-
   }, []);
 
   React.useEffect(() => {
-    if (featureInfoOpts?.showLoadProgressAnimation) {
-      dataProvider.current?.onDataLoadStateChanged.addListener(handleLoadStateChange);
-      return () => {
-        dataProvider.current?.onDataLoadStateChanged.removeListener(handleLoadStateChange);
-      };
-    }
-    return;
 
-  }, [featureInfoOpts?.showLoadProgressAnimation]);
+    dataProvider.current?.onDataChanged.addListener(handleDataChanged);
+    return () => {
+      dataProvider.current?.onDataChanged.removeListener(handleDataChanged);
+    };
+
+  }, []);
 
   const handleResize = React.useCallback((w: number, h: number) => {
     setSize({ width: w, height: h });
   }, []);
 
-  if (loadingData) {
-    return (<FillCentered><ProgressRadial indeterminate={true}></ProgressRadial></FillCentered>);
-  } else if (!hasData) {
+  if (!hasData) {
     return (<FillCentered><span><i>{noRecordsMessage}</i></span></FillCentered>);
   } else {
     if (dataProvider.current)
