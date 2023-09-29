@@ -1,6 +1,14 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 19 Sep 2023 14:55:43 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Sep 2023 20:08:20 GMT and should not be manually modified.
+
+## 0.19.1
+Fri, 29 Sep 2023 20:08:20 GMT
+
+### Patches
+
+- Added a formula parser for indexof in Custom Calculation properties.
+- Added an icon and modal to expose extraction log messages.
 
 ## 0.19.0
 Tue, 19 Sep 2023 14:55:43 GMT
