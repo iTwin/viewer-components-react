@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { TableFilterProps } from "@itwin/itwinui-react";
-import {  BaseFilter , FilterButtonBar, InputGroup, Radio } from "@itwin/itwinui-react";
+import {  BaseFilter , Checkbox, FilterButtonBar, InputGroup } from "@itwin/itwinui-react";
 import React, { useMemo, useState } from "react";
 
 export function ExtractionLogCustomFilter({
@@ -29,7 +29,7 @@ export function ExtractionLogCustomFilter({
     <BaseFilter>
       <InputGroup displayStyle="default">
         {filterOptionList.map((option, id) => (
-          <Radio
+          <Checkbox
             key={id}
             label={option}
             onChange={() => setValue(option)}
