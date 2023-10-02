@@ -24,6 +24,7 @@ import "./MapLayerManager.scss";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerActionButtons } from "./MapLayerActionButtons";
 import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
+import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 
 /** @internal */
 export interface SourceMapContextProps {
@@ -558,6 +559,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         <span className="map-manager-header-label">{baseMapPanelLabel}</span>
         <div className="map-manager-header-buttons-group">
           <ToggleSwitch className="map-manager-toggle" checked={backgroundMapVisible} onChange={handleMapLayersToggle} />
+          <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />
         </div>
       </div>
 
