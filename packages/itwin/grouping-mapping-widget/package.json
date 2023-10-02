@@ -1,6 +1,6 @@
 {
   "name": "@itwin/grouping-mapping-widget",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
