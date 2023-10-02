@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 29 Sep 2023 20:08:20 GMT and should not be manually modified.
+This log was last generated on Mon, 02 Oct 2023 20:32:55 GMT and should not be manually modified.
+
+## 0.19.2
+Mon, 02 Oct 2023 20:32:55 GMT
+
+### Patches
+
+- Changed filter radio buttons to checkboxes
 
 ## 0.19.1
 Fri, 29 Sep 2023 20:08:20 GMT
