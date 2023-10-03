@@ -42,10 +42,6 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "files": [
-    "lib/**/*",
-    "!lib/**/test/**/*"
-  ],
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
     "@itwin/appui-layout-react": "^4.4.0",
