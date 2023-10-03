@@ -18,6 +18,11 @@
     "Cancel" : "Cancel",
     "Edit" : "Edit"
   },
+  "SelectFeaturesDialog":
+  {
+    "AllOn": "Select All",
+    "AllOff": "Select None"
+  },
   "MapLayerActionButtons": {
     "ShowAllLabel": "Show all",
     "HideAllLabel": "Hide all",
@@ -62,7 +67,7 @@
     "StoreOnModelSettings": "Store on Model Settings",
     "StoreOnITwinSettings": "Store on iTwin Settings",
     "TechPreviewBadgeTooltip": "Technology preview",
-    "TooManyLayersSelected": "There are currently {{layerCount}} layers selected; Adding too many layers may impact performance.",
+    "TooManyLayersSelected": "{{layerCount}} layers selected; performance may be affected.",
     "Type": "Type",
     "URL": "URL",
     "UrlInputPlaceHolder": "Enter Map Source URL",

@@ -137,6 +137,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
           <IconButton
             key="show-all-btn"
             size="small"
+            title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOn") : MapLayersUI.translate("SelectFeaturesDialog.AllOn")}
             onClick={async () => changeAll(true)}
           >
             {props.checkboxStyle === "eye" ? <SvgVisibilityShow /> : <SvgCheckboxSelect /> }
@@ -145,6 +146,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
             style={{ marginLeft: "5px" }}
             key="hide-all-btn"
             size="small"
+            title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
             onClick={async () => changeAll(false)}
           >
             {props.checkboxStyle === "eye" ? <SvgVisibilityHide /> : <SvgCheckboxDeselect /> }

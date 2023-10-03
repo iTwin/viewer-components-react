@@ -29,9 +29,14 @@
     }
   }
 }
+
 .map-layer-select-features-dialog {
   .map-manager-sublayer-tree-content {
-    margin-left: -28px // Revert margin added by ControlledTree
+    .core-tree-node {
+    // Revert margin added by ControlledTree on each node (there is no options to disable it)
+      margin-left: -28px;
+    }
+
   }
 }
 

@@ -103,18 +103,18 @@ margin-right: 10px;
 display: flex;
 }
 
+.map-layer-features-footer-buttons {
+  margin-top: auto;
+}
+
 .map-layer-features-footer-button {
   margin-left: 5px;
  }
 
  .map-layer-features-footer-warnMessage {
   flex: 1 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
   margin-left: 2px;
-  margin-bottom: 4px;
-  height: 2rem;
+  height: 3rem;
  }
 
 .map-layer-source-warnMessage {

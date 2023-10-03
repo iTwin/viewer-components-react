@@ -69,7 +69,7 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
           {renderWarningMessage()}
         </div>
 
-        <div>
+        <div className="map-layer-features-footer-buttons">
           <Button
             className="map-layer-features-footer-button"
             styleType='high-visibility'
