@@ -9,4 +9,4 @@
 !lib/public/**/*
 lib/public/locales/en-PSEUDO/
 !*.md
-lib/test/
+lib/**/test/**
