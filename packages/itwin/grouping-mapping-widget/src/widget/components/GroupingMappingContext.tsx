@@ -16,14 +16,14 @@ import {
   createMappingClient,
   MappingClientContext,
 } from "./context/MappingClientContext";
-import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IMappingsClient } from "@itwin/insights-client";
+import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IExtractionClient, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import type { OverlappedInfo , QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { enableExperimentalFeatures } from "./utils";
+import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
 
 export interface GroupingMappingContextProps {
   /**
@@ -44,6 +44,10 @@ export interface GroupingMappingContextProps {
    */
   client?: IMappingsClient;
   /**
+   * A custom implementation of ExtractionClient.
+   */
+  extractionClient?: IExtractionClient;
+  /**
    * Custom UI to add and update groups or provide additional group context capabilities.
    */
   customUIs?: GroupingMappingCustomUI[];
@@ -60,7 +64,9 @@ const authorizationClientGetAccessToken = async () =>
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const activeIModelConntextion = useActiveIModelConnection();
   const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
+  const extractionClientProp: IExtractionClient | ClientPrefix = props.extractionClient ?? props.prefix;
   const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
+  const [extractionClient, setExtractionClient] = useState<IExtractionClient>(createExtractionClient(extractionClientProp));
   const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
     createGroupingMappingCustomUI(props.customUIs),
   );
@@ -93,13 +99,12 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   }, [activeIModelConntextion, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
-    if (!apiConfig.iModelConnection) return;
-    void enableExperimentalFeatures(apiConfig.iModelConnection);
-  }, [apiConfig.iModelConnection]);
-
-  useEffect(() => {
     setMappingClient(createMappingClient(clientProp));
   }, [clientProp]);
+
+  useEffect(() => {
+    setExtractionClient(createExtractionClient(extractionClientProp));
+  }, [extractionClientProp]);
 
   useEffect(() => {
     setCustomUIs(createGroupingMappingCustomUI(props.customUIs));
@@ -150,13 +155,15 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   return (
     <GroupingMappingApiConfigContext.Provider value={apiConfig}>
       <MappingClientContext.Provider value={mappingClient}>
-        <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
-          <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-            <PropertiesContext.Provider value={propertiesContextValue}>
-              {props.children}
-            </PropertiesContext.Provider>
-          </GroupHilitedElementsContext.Provider>
-        </GroupingMappingCustomUIContext.Provider>
+        <ExtractionClientContext.Provider value={extractionClient}>
+          <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
+            <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
+              <PropertiesContext.Provider value={propertiesContextValue}>
+                {props.children}
+              </PropertiesContext.Provider>
+            </GroupHilitedElementsContext.Provider>
+          </GroupingMappingCustomUIContext.Provider>
+        </ExtractionClientContext.Provider>
       </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
   );

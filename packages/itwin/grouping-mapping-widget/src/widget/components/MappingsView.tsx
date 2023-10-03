@@ -26,6 +26,10 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { MappingUIActionGroup } from "./MappingViewActionGroup";
+import type { ExtractionMessageData } from "./hooks/useMappingsOperations";
+import type { ExtractionIconData } from "./hooks/useMappingsOperations";
+import { ExtractionStatusIcon } from "./ExtractionStatusIcon";
+import { ExtractionMessageModal } from "./ExtractionMessageModal";
 
 export const mappingViewDefaultDisplayStrings = {
   mappings: "Mappings",
@@ -41,6 +45,10 @@ export const mappingViewDefaultDisplayStrings = {
 export interface MappingsViewProps {
   mappings: Mapping[];
   isLoading: boolean;
+  extractionIconData: ExtractionIconData;
+  showExtractionMessageModal: boolean;
+  extractionMessageData: ExtractionMessageData[];
+  setShowExtractionMessageModal: (show: boolean) => void;
   isTogglingExtraction: boolean;
   onRefresh: () => Promise<void>;
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
@@ -59,6 +67,10 @@ export interface MappingsViewProps {
 export const MappingsView = ({
   mappings,
   isLoading,
+  extractionIconData,
+  showExtractionMessageModal,
+  extractionMessageData,
+  setShowExtractionMessageModal,
   isTogglingExtraction,
   onRefresh,
   onToggleExtraction,
@@ -102,14 +114,25 @@ export const MappingsView = ({
             </IconButton>
             }
           </div>
-          <IconButton
-            title="Refresh"
-            onClick={onRefresh}
-            disabled={isLoading}
-            styleType='borderless'
-          >
-            <SvgRefresh />
-          </IconButton>
+          <div className="gmw-button-spacing">
+            <ExtractionStatusIcon
+              iconStatus={extractionIconData.iconStatus}
+              onClick={() => {
+                if (extractionIconData.iconStatus === "negative") {
+                  setShowExtractionMessageModal(true);
+                }
+              }}
+              iconMessage={extractionIconData.iconMessage}
+            />
+            <IconButton
+              title="Refresh"
+              onClick={onRefresh}
+              disabled={isLoading}
+              styleType='borderless'
+            >
+              <SvgRefresh />
+            </IconButton>
+          </div>
         </div>
         {alert}
         <div className='gmw-mappings-border' />
@@ -141,6 +164,12 @@ export const MappingsView = ({
           </div>
         )}
       </div>
+      <ExtractionMessageModal
+        isOpen={showExtractionMessageModal}
+        onClose={() => setShowExtractionMessageModal(false)}
+        extractionMessageData={extractionMessageData}
+        timestamp={extractionMessageData.length === 0 ? "" : extractionMessageData[0].date}
+      />
       {showDeleteModal &&
         <DeleteModal
           entityName={showDeleteModal?.mappingName}

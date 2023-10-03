@@ -1,6 +1,13 @@
 # Change Log - @itwin/imodel-react-hooks
 
-This log was last generated on Tue, 19 Apr 2022 14:15:57 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Sep 2023 20:08:20 GMT and should not be manually modified.
+
+## 0.2.0
+Fri, 29 Sep 2023 20:08:20 GMT
+
+### Minor changes
+
+- update @itwin/imodel-react-hooks to support itwin.js@4
 
 ## 0.1.5
 Tue, 19 Apr 2022 14:15:57 GMT

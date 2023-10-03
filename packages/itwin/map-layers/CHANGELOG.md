@@ -1,6 +1,20 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Tue, 12 Sep 2023 14:07:42 GMT and should not be manually modified.
+This log was last generated on Mon, 02 Oct 2023 20:32:55 GMT and should not be manually modified.
+
+## 5.2.1
+Mon, 02 Oct 2023 20:32:55 GMT
+
+### Patches
+
+- Restore settings icon that got incorrectly removed
+
+## 5.2.0
+Fri, 29 Sep 2023 20:08:20 GMT
+
+### Minor changes
+
+- Updated Feature Selection UI to consume new itwin.js API
 
 ## 5.1.2
 Tue, 12 Sep 2023 14:07:42 GMT
