@@ -75,8 +75,7 @@ MeasurementActionToolbar.addActionProvider((measurements: Measurement[], actionI
       execute: (args: Measurement[]) => {
         const notAllFaded = args.some((m) => m.style !== WellKnownMeasurementStyle.Faded);
         args.forEach((m) => {
-          if (notAllFaded && m.style !== WellKnownMeasurementStyle.Faded) m.style = WellKnownMeasurementStyle.Faded;
-          else if (m.style !== WellKnownMeasurementStyle.Default) m.style = WellKnownMeasurementStyle.Default;
+          m.style = notAllFaded ? WellKnownMeasurementStyle.faded : WellKnownMeasurementStyle.Default;
         });
 
         Measurement.invalidateDecorationsForAll(args);
