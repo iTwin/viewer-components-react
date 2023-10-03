@@ -37,6 +37,11 @@ interface MapLayerDroppableProps {
   disabled?: boolean;
 }
 
+const changeVisibilityByElementId = (element: Element|null, visible: boolean) => {
+  if (element)
+    element.setAttribute("style", `visibility: ${visible ? "visible" : "hidden"}`);
+};
+
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerDroppable(props: MapLayerDroppableProps) {
@@ -84,9 +89,8 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
   }, [props]);
 
   const changeSettingsMenuVisibility = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, visible: boolean)=>{
-    const menuDiv = event.currentTarget.querySelector("#MapLayerSettingsMenuWrapper");
-    if (menuDiv)
-      menuDiv.setAttribute("style", `visibility: ${visible ? "visible" : "hidden"}`);
+    changeVisibilityByElementId(event.currentTarget.querySelector("#MapLayerSettingsMenuWrapper"), visible);
+    changeVisibilityByElementId(event.currentTarget.querySelector("#MapLayerSettingsSubLayersMenu"), visible);
   };
 
   const renderItem: DraggableChildrenFn = (dragProvided, _, rubric) => {
@@ -123,7 +127,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         </span>
 
         {/* SubLayersPopupButton */}
-        <div className="map-manager-item-sub-layer-container" >
+        <div id="MapLayerSettingsSubLayersMenu" style={{visibility: "hidden"}}  className="map-manager-item-sub-layer-container" >
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 &&
             <SubLayersPopupButton
               checkboxStyle="eye"

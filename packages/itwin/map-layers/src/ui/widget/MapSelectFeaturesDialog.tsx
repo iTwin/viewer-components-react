@@ -4,15 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Dialog, Icon } from "@itwin/core-react";
+import { Dialog } from "@itwin/core-react";
 import * as React from "react";
 import "./MapSelectFeaturesDialog.scss";
 
-import { DialogButtonType } from "@itwin/appui-abstract";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerSource } from "@itwin/core-frontend";
 import { MapSubLayerProps } from "@itwin/core-common";
 import { SubLayersTree } from "./SubLayersTree";
+import { Button, Icon } from "@itwin/itwinui-react";
+import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
 
 export interface MapSelectFeaturesProps {
   source: MapLayerSource;
@@ -26,8 +27,6 @@ const maxSubLayers = 30;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
   const [subLayers, setSubLayers] = React.useState(props.subLayers);
-  const [NoLayersSelectedMsg] = React.useState(()=>MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.NoLayersSelected"));
-  const [dialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.SelectLayersToCreate"));
 
   const dialogContainer = React.useRef<HTMLDivElement>(null);
 
@@ -42,41 +41,65 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
   const hasVisibleLayers = () => subLayers.some((entry)=>entry.visible);
   const hasTooManyVisibleLayers = () => subLayers.filter((entry)=>entry.visible).length > maxSubLayers;
   const readyToSave = () => hasVisibleLayers();
-  const buttonCluster = [
-    { type: DialogButtonType.OK, onClick: handleOk, disabled: !readyToSave() },
-    { type: DialogButtonType.Cancel, onClick: handleCancel },
-  ];
 
   function renderWarningMessage(): React.ReactNode {
     let warningMessage: string | undefined;
 
     // Get the proper warning message
     if (!hasVisibleLayers()) {
-      warningMessage = NoLayersSelectedMsg;
+      warningMessage = MapLayersUI.translate("CustomAttach.NoLayersSelected");
     } else if (hasTooManyVisibleLayers()) {
-      warningMessage = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.TooManyLayersSelected", { layerCount: subLayers.filter((entry)=>entry.visible).length});
+      warningMessage = MapLayersUI.translate("CustomAttach.TooManyLayersSelected", { layerCount: subLayers.filter((entry)=>entry.visible).length});
     }
 
-    if (warningMessage !== undefined) {
-      return (
-        <div className="map-layer-source-warnMessage">
-          <Icon className="map-layer-source-warnMessage-icon" iconSpec="icon-status-warning" />
+    return (
+      <div className="map-layer-source-warnMessage">
+        {warningMessage !== undefined && <>
+          <Icon size="small"><SvgStatusWarning></SvgStatusWarning></Icon>
           <span className="map-layer-source-warnMessage-label">{warningMessage}</span >
-        </div>);
-    }
-    return <></>;
+        </>}
+      </div>);
+
+  }
+
+  function getFooter() {
+    return (
+      <div className="map-layer-features-footer">
+        <div className="map-layer-features-footer-warnMessage">
+          {renderWarningMessage()}
+        </div>
+
+        <div>
+          <Button
+            className="map-layer-features-footer-button"
+            styleType='high-visibility'
+            onClick={handleOk}
+            disabled={!readyToSave()}
+          >
+            {MapLayersUI.translate("Dialog.Add")}
+          </Button>
+          <Button
+            className="map-layer-features-footer-button"
+            styleType='default'
+            onClick={handleCancel}
+          >
+            {MapLayersUI.translate("Dialog.Cancel")}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div ref={dialogContainer}>
       <Dialog
         className="map-layer-select-features-dialog"
-        title={dialogTitle}
+        title={MapLayersUI.translate("CustomAttach.SelectLayersToCreate")}
         opened={true}
         resizable={true}
         movable={true}
         modal={true}
-        buttonCluster={buttonCluster}
+        footer={getFooter()}
         onClose={handleCancel}
         onEscape={handleCancel}
         minHeight={minHeight}
@@ -88,8 +111,6 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         {/* 'onSubLayerStateChange' is used to trigger hook state change only, no need to update subLayer objects */}
         <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])}/>
 
-        {/* Warning message */}
-        {renderWarningMessage()}
       </Dialog>
     </div >
   );

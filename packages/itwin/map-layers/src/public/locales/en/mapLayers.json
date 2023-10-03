@@ -12,6 +12,12 @@
   "ColorDialog": {
     "Title": "Specify Base Color"
   },
+  "Dialog":
+  {
+    "Add" : "Add",
+    "Cancel" : "Cancel",
+    "Edit" : "Edit"
+  },
   "MapLayerActionButtons": {
     "ShowAllLabel": "Show all",
     "HideAllLabel": "Hide all",
@@ -24,7 +30,7 @@
     "LayerExistsOverwriting": "Map layer {{layer}} already exists, overwriting info for that layer.",
     "LayerExistsAsITwinSetting": "Map layer {{layer}} already exists as a iTwin setting. Cannot overwrite with a model setting!",
     "AddCustomLayerButtonLabel": "Add Layer",
-    "AttachCustomLayer": "Attach New Layer",
+    "AttachCustomLayer": "Add New Layer",
     "AttacheInfo": "Map layer attached from URL:",
     "Custom": "New",
     "LoadingMapSources": "Loading Map Sources",
@@ -52,7 +58,7 @@
     "RemoveLayerDefError": "Could not delete map layer definition: {{layerName}}",
     "RemoveLayerDefSuccess": "Successfully deleted map layer definition: {{layerName}}",
     "SearchPlaceholder": "Search...",
-    "SelectLayersToCreate": "Select layers to be created",
+    "SelectLayersToCreate": "Select Layers To Add",
     "StoreOnModelSettings": "Store on Model Settings",
     "StoreOnITwinSettings": "Store on iTwin Settings",
     "TechPreviewBadgeTooltip": "Technology preview",
