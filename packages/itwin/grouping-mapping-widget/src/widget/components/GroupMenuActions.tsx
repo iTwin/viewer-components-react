@@ -17,7 +17,7 @@ export interface GroupMenuActionsProps extends Omit<GroupsProps, "onClickAddGrou
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
   setShowDeleteModal: (showDeleteModal: Group) => void;
-  setIsOverlappedElementsInfoPanelOpen: (isOverlappedElementsInfoPanelOpen: Group) => void;
+  setIsOverlappedElementsInfoPanelOpen?: (isOverlappedElementsInfoPanelOpen: Group) => void;
 }
 
 export const GroupMenuActions = ({
@@ -101,13 +101,13 @@ export const GroupMenuActions = ({
           close();
         }}
         icon={<SvgDelete />}
-        data-testid="gmw-context-menu-item"
+        data-testid="gmw-overlap-menu-item"
       >
         Remove
       </MenuItem>,
     ];
 
-    if (showGroupColor) {
+    if (showGroupColor && setIsOverlappedElementsInfoPanelOpen) {
       menuItems.push(
         <MenuItem
           key={3}
@@ -123,7 +123,7 @@ export const GroupMenuActions = ({
     }
 
     return menuItems;
-  }, [ groupUIs, disableActions, group, contextUIs, mapping, iModelId, showGroupColor, onModify, setIsOverlappedElementsInfoPanelOpen, setShowDeleteModal,onClickGroupModify, onClickRenderContextCustomUI ]);
+  }, [groupUIs, disableActions, group, contextUIs, mapping, iModelId, showGroupColor, onModify, setIsOverlappedElementsInfoPanelOpen, setShowDeleteModal, onClickGroupModify, onClickRenderContextCustomUI]);
 
   return (
     <div className="gmw-actions">
@@ -134,7 +134,7 @@ export const GroupMenuActions = ({
       <DropdownMenu
         className="gmw-action-dropdown"
         disabled={disableActions}
-        menuItems= {createMenuItems}
+        menuItems={createMenuItems}
       >
         <IconButton
           disabled={disableActions}

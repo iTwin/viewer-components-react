@@ -13,18 +13,18 @@ import { clearEmphasizedElements, clearOverriddenElements, transparentOverridden
 
 export const useVisualization = (shouldVisualize: boolean, iModelConnection: IModelConnection, query: string, queryGenerationType: string) => {
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const { showGroupColor, groups, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setTotalNumberOfVisualization } = useGroupHilitedElementsContext();
+  const { showGroupColor, groups, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs } = useGroupHilitedElementsContext();
   const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
 
   const resetView = useCallback(async () => {
     if (!shouldVisualize) return;
     if (showGroupColor) {
-      await visualizeGroupColors(iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setTotalNumberOfVisualization);
+      await visualizeGroupColors(iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs);
     } else {
       clearOverriddenElements();
     }
     clearEmphasizedElements();
-  }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor, shouldVisualize,setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setTotalNumberOfVisualization ]);
+  }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor, shouldVisualize, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs]);
 
   useEffect(() => {
     if (!shouldVisualize) return;

@@ -18,15 +18,15 @@ export interface HorizontalTileProps {
   subtextToolTip?: string;
   selected?: boolean;
   dragHandle?: ReactNode;
-  elementsInfo?: string;
+  elementsInfo?: React.ReactNode;
   showGroupColor?: boolean;
-  isVisualizing?: boolean;
+  isLoading?: boolean;
 }
 
 export const HorizontalTile = (props: HorizontalTileProps) => {
 
   return (
-    <div className={classNames(`gmw-horizontal-tile-container ${props.showGroupColor &&  !props.isVisualizing && props.elementsInfo ? "text-visible" : ""}`, { "gmw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="gmw-horizontal-tile">
+    <div className={classNames(`gmw-horizontal-tile-container`, { "gmw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="gmw-horizontal-tile">
       <div className="gmw-body-container">
         {props.dragHandle}
         <div className="gmw-body">
@@ -42,8 +42,8 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
       <div className="gmw-action-container">
         <div className="gmw-action-button" data-testid="tile-action-button">
           {props.actionGroup}
-          {props.showGroupColor &&  !props.isVisualizing && props.elementsInfo &&
-          <Text className="gmw-action-button-text" isMuted={true} title={"Elems-info"} variant="small">{props.elementsInfo}</Text>}
+          {props.showGroupColor && !props.isLoading && props.elementsInfo &&
+            props.elementsInfo}
         </div>
       </div>
     </div>

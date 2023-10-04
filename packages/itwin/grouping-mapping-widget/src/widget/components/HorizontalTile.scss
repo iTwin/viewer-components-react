@@ -13,9 +13,6 @@
     padding: 5.5px var(--iui-size-xs);
     padding-bottom: 2px var(--iui-size-xs);
     padding-top: 2px var(--iui-size-xs);
-    &.text-visible{
-      min-height: calc(var(--iui-size-s) * 6)
-    }
 
     .gmw-body-container {
       display: flex;
@@ -38,42 +35,28 @@
         }
       }
     }
-  
-    .gmw-action-container{ 
+
+    .gmw-action-container {
       display: flex;
       align-items: center;
       position: relative;
-      
+
       .gmw-action-button {
         margin-left: 0;
         align-self: center;
         min-width: 36px;
         margin-right: var(--iui-size-2xs);
         flex-shrink: 0;
-
-        &-text {
-          align-self: flex-end;
-          font-size:smaller;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          position: absolute;
-          bottom: 0;
-        }
       }
     }
   }
 
   &-selected {
     border: 1px solid var(--iui-color-border-accent);
-    background: 
-      linear-gradient(
+    background: linear-gradient(
         hsl(var(--iui-color-accent-hsl) / var(--iui-opacity-6)),
         hsl(var(--iui-color-accent-hsl) / var(--iui-opacity-6))
       ),
-      linear-gradient(
-        var(--iui-color-background),
-        var(--iui-color-background)
-      );
+      linear-gradient(var(--iui-color-background), var(--iui-color-background));
   }
 }

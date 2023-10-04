@@ -10,3 +10,9 @@
   flex-grow: 1;
   min-height: 0;
 }
+
+.gmw-red-text {
+  display: inline-block;
+  color: var(--iui-color-border-negative);
+  font-weight: bold;
+}

@@ -5,17 +5,23 @@
 import type { Group } from "@itwin/insights-client";
 import React from "react";
 import { HorizontalTile } from "./HorizontalTile";
-import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
+import type {
+  ContextCustomUI,
+  GroupingCustomUI,
+} from "./customUI/GroupingMappingCustomUI";
 import type { GroupsProps } from "./Groups";
 import { GroupMenuActions } from "./GroupMenuActions";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { OverlapProgress } from "./GroupOverlapProgressBar";
 
 export interface GroupItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
   group: Group;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
   setShowDeleteModal: (showDeleteModal: Group) => void;
-  setIsOverlappedElementsInfoPanelOpen: (isOverlappedElementsInfoPanelOpen: Group) => void;
+  setIsOverlappedElementsInfoPanelOpen?: (
+    isOverlappedElementsInfoPanelOpen: Group
+  ) => void;
 }
 
 export const GroupItem = ({
@@ -25,26 +31,13 @@ export const GroupItem = ({
   isVisualizing,
   ...rest
 }: GroupItemProps) => {
-
-  const {groupElementsInfo, overlappedElementsInfo, showGroupColor} = useGroupHilitedElementsContext();
+  const { groupElementsInfo, overlappedElementsInfo, showGroupColor } =
+    useGroupHilitedElementsContext();
 
   const onTitleClick = () => {
     if (onClickGroupTitle) {
       onClickGroupTitle(group);
     }
-  };
-
-  const elementsInfoString = () => {
-    const groupId = group.id;
-    const numberOfElementsInGroup = groupElementsInfo.get(groupId);
-    const overlappedInfo = overlappedElementsInfo.get(groupId);
-    let numberOfOverlappedElementsInGroup = 0;
-    if (overlappedInfo){
-      overlappedInfo.forEach((array) => {
-        numberOfOverlappedElementsInGroup+=array.elements.length;
-      });
-    }
-    return `${numberOfOverlappedElementsInGroup}/${numberOfElementsInGroup} overlaps`;
   };
 
   return (
@@ -58,10 +51,19 @@ export const GroupItem = ({
           {...rest}
         />
       }
-      elementsInfo = {elementsInfoString()}
-      showGroupColor = {showGroupColor}
-      isVisualizing = {isVisualizing}
-      onClickTitle={onClickGroupTitle && !disableActions ? onTitleClick : undefined}
+      elementsInfo={
+        overlappedElementsInfo.size > 0 &&
+        <OverlapProgress
+          group={group}
+          overlappedElementsInfo={overlappedElementsInfo}
+          groupElementsInfo={groupElementsInfo}
+        />
+      }
+      showGroupColor={showGroupColor}
+      isLoading={isVisualizing}
+      onClickTitle={
+        onClickGroupTitle && !disableActions ? onTitleClick : undefined
+      }
     />
   );
 };

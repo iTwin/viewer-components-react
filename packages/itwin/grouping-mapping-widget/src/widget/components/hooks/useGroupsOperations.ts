@@ -46,7 +46,7 @@ export const useGroupsOperations = ({
   mappingId,
 }: GroupsOperationsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const { groups, setGroups, numberOfVisualizedGroups } = useGroupHilitedElementsContext();
+  const { groups, setGroups, numberOfVisualizedGroups, overlappedElementsInfo, overlappedElementGroupPairs } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] =
     useGroupingMappingCustomUI().customUIs.filter(
@@ -61,6 +61,7 @@ export const useGroupsOperations = ({
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  const [isOverlappedElementsInfoPanelOpen, setIsOverlappedElementsInfoPanelOpen] = useState<Group | undefined>(undefined);
 
   useEffect(() => {
     const initialize = async () => {
@@ -109,8 +110,11 @@ export const useGroupsOperations = ({
     showDeleteModal,
     groupUIs,
     contextUIs,
-    numberOfVisualizedGroups,
     errorMessage,
     setErrorMessage,
+    isOverlappedElementsInfoPanelOpen,
+    setIsOverlappedElementsInfoPanelOpen,
+    overlappedElementsInfo,
+    visualizedGroups: { numberOfVisualizedGroups, totalNumberOfVisualization: overlappedElementGroupPairs.length },
   };
 };

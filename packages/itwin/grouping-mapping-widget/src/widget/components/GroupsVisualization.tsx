@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Group } from "@itwin/insights-client";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import {
   getHiliteIdsFromGroups,
@@ -25,6 +25,7 @@ import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupsView";
+import { Alert, Text } from "@itwin/itwinui-react";
 
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
@@ -42,9 +43,10 @@ export const GroupsVisualization = ({
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const firstUpdate = useRef(true);
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
   const [isVisualizing, setIsVisualizing] = useState<boolean>(false);
+  const [isAlertClosed, setIsAlertClosed] = useState<boolean>(true);
+  const [isAlertExpanded, setIsAlertExpanded] = useState<boolean>(false);
   const {
     hilitedElementsQueryCache,
     groups,
@@ -55,7 +57,9 @@ export const GroupsVisualization = ({
     setNumberOfVisualizedGroups,
     setOverlappedElementsInfo,
     setGroupElementsInfo,
-    setTotalNumberOfVisualization,
+    overlappedElementsInfo,
+    overlappedElementGroupPairs,
+    setOverlappedElementGroupPairs,
   } = useGroupHilitedElementsContext();
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
@@ -70,7 +74,7 @@ export const GroupsVisualization = ({
     [iModelConnection, hilitedElementsQueryCache]
   );
 
-  const handleVisualizationStates = useCallback((start = true) => {
+  const handleVisualizationStates = useCallback((start: boolean = true) => {
     setIsVisualizing(start);
     setLoadingQuery(start);
     if (!start) {
@@ -89,19 +93,15 @@ export const GroupsVisualization = ({
       setNumberOfVisualizedGroups,
       setOverlappedElementsInfo,
       setGroupElementsInfo,
-      setTotalNumberOfVisualization,
+      setOverlappedElementGroupPairs,
       emphasizeElements,
     );
     isNonEmphasizedSelectable && clearEmphasizedElements();
     handleVisualizationStates(false);
-  }, [handleVisualizationStates, groups, iModelConnection, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setTotalNumberOfVisualization, emphasizeElements, isNonEmphasizedSelectable]);
+  }, [handleVisualizationStates, groups, iModelConnection, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs, emphasizeElements, isNonEmphasizedSelectable]);
 
   useEffect(() => {
     const visualize = async () => {
-      if (firstUpdate.current) {
-        firstUpdate.current = false;
-        return;
-      }
       if (isOverlappedColored === false) {
         if (groups.length > 0 && showGroupColor) {
           await triggerVisualization();
@@ -211,6 +211,23 @@ export const GroupsVisualization = ({
     ),
   ].flat(), [groups, hideSingleGroupWrapper, isLoadingQuery, showGroup, showGroupColor]);
 
+  const overlappedAlert = useMemo(() =>
+    overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor && !isVisualizing ?
+      <Alert
+        onClose={() => setIsAlertClosed(false)}
+        clickableText={isAlertExpanded ? "Less Details" : "More Details"}
+        clickableTextProps={{ onClick: () => setIsAlertExpanded(!isAlertExpanded) }}
+      >
+        Overlapping elements are colored <Text className="gmw-red-text">red</Text> in the viewer.
+        {isAlertExpanded ? (
+          <>
+            <br />
+            To get overlap info in details, click the &ldquo;Overlap Info&rdquo; in the menu icon adjacent to the groups.
+          </>
+        ) : undefined}
+      </Alert> : undefined, [isAlertClosed, isAlertExpanded, isVisualizing, overlappedElementsInfo.size, showGroupColor]
+  );
+
   return (
     <div className="gmw-groups-vis-container">
       <GroupVisualizationActions
@@ -225,6 +242,7 @@ export const GroupsVisualization = ({
         {...rest}
         disableActions={isLoadingQuery}
         isVisualizing={isVisualizing}
+        alert={overlappedAlert}
       />
     </div>
   );

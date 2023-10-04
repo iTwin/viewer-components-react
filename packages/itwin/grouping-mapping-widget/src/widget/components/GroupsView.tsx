@@ -9,6 +9,7 @@ import type {
 import {
   ButtonGroup,
   IconButton,
+  InformationPanelWrapper,
   ProgressLinear,
 } from "@itwin/itwinui-react";
 import {
@@ -21,6 +22,8 @@ import type { Group, Mapping } from "@itwin/insights-client";
 import { GroupItem } from "./GroupItem";
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { GroupsAddButton } from "./GroupsAddButton";
+import { OverlappedElementsInformationPanel } from "./OverlappedElementsInformationPanel";
+import type { OverlappedInfo } from "./context/GroupHilitedElementsContext";
 
 export interface ActionButtonRendererProps {
   group: Group;
@@ -51,8 +54,11 @@ export interface GroupsViewProps {
   setSelectedGroupForDeletion: (group: Group) => void;
   onDeleteGroup: (group: Group) => Promise<void>;
   onCloseDeleteModal: () => void;
-  numberOfVisualizedGroups?: number;
+  visualizedGroups?: { numberOfVisualizedGroups: number, totalNumberOfVisualization: number };
   alert?: React.ReactElement<typeof Alert>;
+  setIsOverlappedElementsInfoPanelOpen?: (isOverlappedElementsInfoPanelOpen: Group | undefined) => void;
+  isOverlappedElementsInfoPanelOpen?: Group | undefined;
+  overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
 }
 
 export const GroupsView = ({
@@ -72,11 +78,15 @@ export const GroupsView = ({
   onCloseDeleteModal,
   setSelectedGroupForDeletion,
   contextUIs,
-  numberOfVisualizedGroups,
+  visualizedGroups,
   alert,
+  // TODO Turn to single object
+  setIsOverlappedElementsInfoPanelOpen,
+  isOverlappedElementsInfoPanelOpen,
+  overlappedElementsInfo,
 }: GroupsViewProps) => {
   return (
-    <div className="gmw-groups-container">
+    <InformationPanelWrapper className="gmw-groups-container">
       <div className="gmw-toolbar">
         {onClickAddGroup && groupUIs.length > 0 && (
           <GroupsAddButton
@@ -98,10 +108,10 @@ export const GroupsView = ({
       </div>
       {alert}
       <div className='gmw-groups-border' />
-      {!!numberOfVisualizedGroups &&
+      {!!visualizedGroups &&
         <div className="gmw-group-progress-bar">
           <ProgressLinear
-            value={25 + (numberOfVisualizedGroups / groups.length * 65)}
+            value={25 + (visualizedGroups.numberOfVisualizedGroups / visualizedGroups.totalNumberOfVisualization * 65)}
           />
         </div>}
       {isLoading ? (
@@ -123,10 +133,18 @@ export const GroupsView = ({
               disableActions={disableActions}
               setShowDeleteModal={setSelectedGroupForDeletion}
               contextUIs={contextUIs}
+              setIsOverlappedElementsInfoPanelOpen={setIsOverlappedElementsInfoPanelOpen}
             />
           ))}
         </div>
       )}
+      {overlappedElementsInfo && setIsOverlappedElementsInfoPanelOpen &&
+        <OverlappedElementsInformationPanel
+          group={isOverlappedElementsInfoPanelOpen}
+          onClose={() => setIsOverlappedElementsInfoPanelOpen(undefined)}
+          overlappedElementsInfo={overlappedElementsInfo}
+          groups={groups}
+        />}
       {selectedGroupForDeletion && (
         <DeleteModal
           entityName={selectedGroupForDeletion.groupName}
@@ -137,6 +155,6 @@ export const GroupsView = ({
           refresh={onRefresh}
         />
       )}
-    </div>
+    </InformationPanelWrapper>
   );
 };
