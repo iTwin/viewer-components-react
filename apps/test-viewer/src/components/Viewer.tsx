@@ -12,7 +12,7 @@ import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
-import { AppNotificationManager } from "@itwin/appui-react";
+import { AppNotificationManager, StandardStatusbarUiItemsProvider } from "@itwin/appui-react";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -47,7 +47,8 @@ export function Viewer() {
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
       uiProviders={[
-        ...uiConfig.uiItemsProviders
+        ...uiConfig.uiItemsProviders,
+        new StandardStatusbarUiItemsProvider({messageCenter: true, activityCenter:true })
       ]}
       notifications={new AppNotificationManager()}
       defaultUiConfig={{
