@@ -12,6 +12,7 @@ import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
+import { AppNotificationManager } from "@itwin/appui-react";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -48,6 +49,7 @@ export function Viewer() {
       uiProviders={[
         ...uiConfig.uiItemsProviders
       ]}
+      notifications={new AppNotificationManager()}
       defaultUiConfig={{
         hideNavigationAid: true,
         hideStatusBar: true,
