@@ -18,11 +18,10 @@ $default-font-size: --iui-font-size-1;
 }
 
 .map-layer-source-select-previewBadge {
-margin-right: 10px;
+  margin-right: 10px;
 }
 
 .map-layer-source-url-subLayers {
-
   height: 200px;
   width: 500px;
   // height: calc(100% - 40px);
@@ -31,7 +30,6 @@ margin-right: 10px;
   // border-radius: 16px
 }
 .map-layer-source-url {
-
   height: 100%;
   width: 100%;
   display: grid;
@@ -79,17 +77,16 @@ margin-right: 10px;
   white-space: pre-wrap;
 }
 
-
 .map-layer-source-footer {
   display: flex;
   margin-top: 10px;
-  }
+}
 
 .map-layer-source-footer-button {
   margin-left: 5px;
-  }
+}
 
-  .map-layer-source-footer-status {
+.map-layer-source-footer-status {
   flex: 1 1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -97,7 +94,7 @@ margin-right: 10px;
   margin-left: 2px;
   margin-bottom: 4px;
   height: 2rem;
-  }
+}
 
 .map-layer-features-footer {
 display: flex;
