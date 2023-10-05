@@ -10,12 +10,13 @@ import {
   TreeNodeRenderer, TreeNodeRendererProps, TreeRenderer, TreeRendererProps, useTreeModel,
 } from "@itwin/components-react";
 import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
-import { CheckBoxState, ImageCheckBox, NodeCheckboxRenderProps, ResizableContainerObserver, useDisposable, WebFontIcon } from "@itwin/core-react";
-import { Button, Input } from "@itwin/itwinui-react";
+import { CheckBoxState, ImageCheckBox, NodeCheckboxRenderProps, ResizableContainerObserver, useDisposable } from "@itwin/core-react";
+import { IconButton, Input } from "@itwin/itwinui-react";
 import * as React from "react";
 import { SubLayersDataProvider, SubLayersTreeExpandMode } from "./SubLayersDataProvider";
 import "./SubLayersTree.scss";
 import { MapLayersUI } from "../../mapLayers";
+import { SvgCheckboxDeselect, SvgCheckboxSelect, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 
 interface ToolbarProps {
   searchField?: React.ReactNode;
@@ -76,14 +77,16 @@ export function SubLayersTree(props: SubLayersTreeProps) {
 
   const [placeholderLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.SearchPlaceholder"));
   const [noResults] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.NoResults"));
-  const [allOnLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.AllOn"));
-  const [allOffLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.AllOff"));
   const [subLayers, setSubLayers] = React.useState(props.subLayers);
   const [layerFilterString, setLayerFilterString] = React.useState<string>("");
 
   // create data provider to get some nodes to show in tree
   // `React.useMemo' is used avoid creating new object on each render cycle
-  const dataProvider = React.useMemo(() => new SubLayersDataProvider(subLayers, props.expandMode), [subLayers, props.expandMode]);
+  // We DO want a dependency on 'layerFilterString' (event though eslint doesn't like it)..
+  // each time the filter is updated the provider must be refreshed otherwise the state of model is out of synch.
+  const dataProvider = React.useMemo(() => new SubLayersDataProvider(subLayers, props.expandMode),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [subLayers, props.expandMode, layerFilterString]);
 
   const {
     modelSource,
@@ -95,7 +98,8 @@ export function SubLayersTree(props: SubLayersTreeProps) {
   // it selects/deselects node when checkbox is checked/unchecked and vice versa.
   // `useDisposable` takes care of disposing old event handler when new is created in case 'nodeLoader' has changed
   // `React.useCallback` is used to avoid creating new callback that creates handler on each render
-  const eventHandler = useDisposable(React.useCallback(() => new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange), [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer]));
+  const eventHandler = useDisposable(React.useCallback(() => new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange),
+    [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer]));
 
   // Get an immutable tree model from the model source. The model is regenerated every time the model source
   // emits the `onModelChanged` event.
@@ -130,12 +134,23 @@ export function SubLayersTree(props: SubLayersTreeProps) {
         }
       >
         {props.singleVisibleSubLayer ? undefined : [
-          <Button size="small" styleType="borderless" key="show-all-btn" title={allOnLabel} onClick={async () => changeAll(true)}>
-            <WebFontIcon iconName={props.checkboxStyle === "eye" ? "icon-visibility" : "icon-checkbox-select" } />
-          </Button>,
-          <Button size="small" styleType="borderless" key="hide-all-btn" title={allOffLabel} onClick={async () => changeAll(false)}>
-            <WebFontIcon iconName={props.checkboxStyle === "eye" ? "icon-visibility-hide-2" : "icon-checkbox-deselect" } />
-          </Button>,
+          <IconButton
+            key="show-all-btn"
+            size="small"
+            title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOn") : MapLayersUI.translate("SelectFeaturesDialog.AllOn")}
+            onClick={async () => changeAll(true)}
+          >
+            {props.checkboxStyle === "eye" ? <SvgVisibilityShow /> : <SvgCheckboxSelect /> }
+          </IconButton>,
+          <IconButton
+            style={{ marginLeft: "5px" }}
+            key="hide-all-btn"
+            size="small"
+            title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
+            onClick={async () => changeAll(false)}
+          >
+            {props.checkboxStyle === "eye" ? <SvgVisibilityHide /> : <SvgCheckboxDeselect /> }
+          </IconButton>,
         ]}
       </Toolbar>
       <div className="map-manager-sublayer-tree-content" >
