@@ -35,7 +35,7 @@
     "@itwin/tree-widget-react": "workspace:*",
     "@itwin/map-layers": "workspace:*",
     "@itwin/measure-tools-react": "workspace:*",
-    "@itwin/web-viewer-react": "^4.2.1",
+    "@itwin/web-viewer-react": "^4.0.0",
     "@itwin/webgl-compatibility": "^4.0.0",
     "@types/history": "^4.7.11",
     "@types/node": "^14.18.42",

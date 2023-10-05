@@ -12,7 +12,6 @@ import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
-import { AppNotificationManager, StandardStatusbarUiItemsProvider } from "@itwin/appui-react";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -48,12 +47,10 @@ export function Viewer() {
       onIModelAppInit={onIModelAppInit}
       uiProviders={[
         ...uiConfig.uiItemsProviders,
-        new StandardStatusbarUiItemsProvider({messageCenter: true, activityCenter:true })
       ]}
-      notifications={new AppNotificationManager()}
       defaultUiConfig={{
         hideNavigationAid: true,
-        hideStatusBar: true,
+        hideStatusBar: false,
         hideToolSettings: true
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}

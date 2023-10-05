@@ -39,7 +39,7 @@ importers:
       '@itwin/presentation-frontend': ^4.0.0
       '@itwin/property-grid-react': workspace:*
       '@itwin/tree-widget-react': workspace:*
-      '@itwin/web-viewer-react': ^4.2.1
+      '@itwin/web-viewer-react': ^4.0.0
       '@itwin/webgl-compatibility': ^4.0.0
       '@types/history': ^4.7.11
       '@types/node': ^14.18.42
@@ -87,7 +87,7 @@ importers:
       '@itwin/presentation-frontend': 4.0.0_0cda8632b5c6b653bb52ba7d5b886d8a
       '@itwin/property-grid-react': file:../../packages/itwin/property-grid_7afa005083f1b83b0dbffa26e14b7454
       '@itwin/tree-widget-react': file:../../packages/itwin/tree-widget_2a6df53bd2a94780d21c351a817d449a
-      '@itwin/web-viewer-react': 4.2.2_dad75ea574f34e7ad621a1add6dba9f5
+      '@itwin/web-viewer-react': 4.0.3_dad75ea574f34e7ad621a1add6dba9f5
       '@itwin/webgl-compatibility': 4.0.0
       '@types/history': 4.7.11
       '@types/node': 14.18.42
@@ -5981,6 +5981,14 @@ packages:
       - debug
     dev: false
 
+  /@itwin/imodels-client-management/4.1.0:
+    resolution: {integrity: sha512-mv/NPBtzNlHH2Oi0EL2fOBCOEjI5vEd4SekyQwNVVBCdG59AcH9d0OXwgT+YvGDGn/6wXXzrBIfR5rCLWuTQ+w==}
+    dependencies:
+      axios: 1.4.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /@itwin/imodels-client-management/4.1.1:
     resolution: {integrity: sha512-vW2U5Iv0Lv2juz/fj/tCFIUwXJ2zH5LyBr4LkrERd0FE24knVg5ryl5yzHLTVb+VUtsNvh6ImLnMSiqQ3Zw3iQ==}
     dependencies:
@@ -6579,8 +6587,8 @@ packages:
       - debug
     dev: false
 
-  /@itwin/viewer-react/4.6.1_0250b08170f3f8b312a6b7a81c1d63b7:
-    resolution: {integrity: sha512-tuUhFiGncp4HhVB/YKrTqDxzCTAhAckbP9NZYvcUXNSlPVLubotNmyLh8akGI48aXnNPjU84fgnzhrU2xnGHMg==}
+  /@itwin/viewer-react/4.0.3_f88fcc287a2ccd5298e6e70b3ce5e212:
+    resolution: {integrity: sha512-fmIPywC+wh2Xe8umkGDTxKm98o1qi2OxI3TBmsMGeavHetemq8JmqtbYPQ7m7VxoPkQpMaWfOjL307FDsLw/Gg==}
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.0.0
@@ -6596,8 +6604,8 @@ packages:
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
-      react: ^17.0.2 || ^18.0.0
-      react-dom: ^17.0.2 || ^18.0.0
+      react: ^17.0.2
+      react-dom: ^17.0.2
       react-redux: ^7.2.0
       redux: ^4.0.5
     dependencies:
@@ -6612,7 +6620,7 @@ packages:
       '@itwin/core-geometry': 4.1.6
       '@itwin/core-react': 4.5.0_c038d3212fcee7cac2bc196d9357d1f9
       '@itwin/imodels-access-frontend': 3.0.0_c0f2c1436abc340cce715d3b75868d69
-      '@itwin/imodels-client-management': 4.1.1
+      '@itwin/imodels-client-management': 4.1.0
       '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.12.2_react-dom@17.0.2+react@17.0.2
       '@itwin/presentation-common': 4.0.0_6a3e06406b9091a694950419548f437c
@@ -6628,16 +6636,16 @@ packages:
       - debug
     dev: false
 
-  /@itwin/web-viewer-react/4.2.2_dad75ea574f34e7ad621a1add6dba9f5:
-    resolution: {integrity: sha512-a44YP7R/sLDZJvThxfzLsTukuLQv7k7+w9Gf3OqzjYstFKg/E5xALvyrbdCcpTutF15hzu+5v1oeVlxnDeqNWw==}
+  /@itwin/web-viewer-react/4.0.3_dad75ea574f34e7ad621a1add6dba9f5:
+    resolution: {integrity: sha512-/TYpJCvlqkU3rT74/a+xXb9OvACzHqcqg4wbq5EZTRH/KDmS6J3CKrxkfDgNBmr+rkUlhV1fVp3Opdy36ZXFqQ==}
     peerDependencies:
       '@itwin/core-bentley': ^4.0.0
       '@itwin/core-common': ^4.0.0
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-react': ^4.0.0
       '@itwin/presentation-common': ^4.0.0
-      react: ^17.0.2 || ^18.0.0
-      react-dom: ^17.0.2 || ^18.0.0
+      react: ^17.0.2
+      react-dom: ^17.0.2
       react-redux: ^7.2.0
       redux: ^4.0.5
     dependencies:
@@ -6645,9 +6653,9 @@ packages:
       '@itwin/core-common': 4.1.6_0fb61c652738bb63b1fbe6298cd68e4e
       '@itwin/core-frontend': 4.1.6_a0dd95b449ac526cbab27edb8e2ac6ec
       '@itwin/core-react': 4.5.0_c038d3212fcee7cac2bc196d9357d1f9
-      '@itwin/imodels-client-management': 4.1.1
+      '@itwin/imodels-client-management': 4.1.0
       '@itwin/presentation-common': 4.0.0_6a3e06406b9091a694950419548f437c
-      '@itwin/viewer-react': 4.6.1_0250b08170f3f8b312a6b7a81c1d63b7
+      '@itwin/viewer-react': 4.0.3_f88fcc287a2ccd5298e6e70b3ce5e212
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-redux: 7.2.9_react-dom@17.0.2+react@17.0.2
@@ -24315,7 +24323,7 @@ packages:
     resolution: {directory: ../../packages/itwin/map-layers, type: directory}
     id: file:../../packages/itwin/map-layers
     name: '@itwin/map-layers'
-    version: 5.2.1
+    version: 5.1.2
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.0.0
