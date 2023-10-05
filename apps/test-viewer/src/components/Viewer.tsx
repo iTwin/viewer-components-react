@@ -46,7 +46,7 @@ export function Viewer() {
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
       uiProviders={[
-        ...uiConfig.uiItemsProviders,
+        ...uiConfig.uiItemsProviders
       ]}
       defaultUiConfig={{
         hideNavigationAid: true,
