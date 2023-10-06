@@ -1,12 +1,14 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
-import type { Locator, Page } from "@playwright/test";
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
 import assert from "assert";
+import { expect } from "@playwright/test";
+
+import type { Locator, Page } from "@playwright/test";
 
 export const locateNode = (tree: Page | Locator, name: string) => tree.getByRole("treeitem", { name });
-
 export const locateWidget = (page: Page | Locator, widgetName: string) => page.locator(`.${widgetName}-widget`);
 
 type PanelSide = "left" | "right" | "top" | "bottom";
@@ -39,3 +41,9 @@ export const expandStagePanel = async (page: Page, side: PanelSide, px: number) 
   }
   await page.mouse.up();
 };
+
+export async function takeScreenshot(page: Page, component: Locator) {
+  const boundingBox = await component.boundingBox();
+  assert(boundingBox);
+  await expect(page).toHaveScreenshot({ clip: boundingBox });
+}
