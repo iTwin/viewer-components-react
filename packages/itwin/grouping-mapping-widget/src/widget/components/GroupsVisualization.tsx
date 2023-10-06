@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import {
   getHiliteIdsFromGroups,
-  hideGroup,
+  hideGroupConsideringOverlaps,
   hideGroups,
   visualizeGroupColors,
 } from "./groupsHelpers";
@@ -125,12 +125,14 @@ export const GroupsVisualization = ({
   );
 
   const hideSingleGroupWrapper = useCallback(
-    async (group: Group) => {
+    async (groupToHide: Group) => {
       setLoadingQuery(true);
-      await hideGroup(iModelConnection, group, hilitedElementsQueryCache);
+
+      await hideGroupConsideringOverlaps(overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
+
       setLoadingQuery(false);
     },
-    [hilitedElementsQueryCache, iModelConnection]
+    [overlappedElementGroupPairs, hiddenGroupsIds]
   );
 
   const showGroup = useCallback(

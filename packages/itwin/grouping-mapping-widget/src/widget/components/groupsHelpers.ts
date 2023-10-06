@@ -8,19 +8,17 @@ import type { Group } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
 import { KeySet } from "@itwin/presentation-common";
 import type { OverlappedElementGroupPairs, OverlappedInfo, QueryCacheItem } from "./context/GroupHilitedElementsContext";
-import { clearEmphasizedOverriddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements, zoomToElements } from "./viewerUtils";
+import { clearEmphasizedOverriddenElements, clearHiddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements, zoomToElements } from "./viewerUtils";
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
 
 export const getGroupColor = function (index: number) {
-  let hue = (index * goldenAngle + 60) % 360;
-  // Remove red from the color wheel.
-  if (hue >= 335) {
-    hue = (hue + goldenAngle) % 360;
-  } else if (hue <= 25) {
-    hue = (hue - goldenAngle) % 360;
-    if (hue < 0) hue += 360;  // Make sure hue is still within [0, 359] range
+  let hue = (index * goldenAngle * 1.5 + 60) % 360;
+
+  while ((hue >= 330) || (hue <= 30)) {  // Avoiding a larger "red" range
+    hue = (hue + 15) % 360;  // Larger hue adjustment
   }
+
   return `hsl(${hue}, 100%, 50%)`;
 };
 
@@ -69,21 +67,20 @@ export const hideGroup = async (
 };
 
 const processGroupVisualization = async (
-  elements: Set<string>,
-  elementGroups: Set<string>,
+  overlappedElementGroupPairs: OverlappedElementGroupPairs,
   hiddenGroupsIds: Set<string>,
   doEmphasizeElements: boolean,
   index: number,
   setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void,
 ) => {
-  const hilitedIds = Array.from(elements);
+  const hilitedIds = Array.from(overlappedElementGroupPairs.elementIds);
   const redHsl = "hsl(0, 100%, 50%)";
-  overrideElements(hilitedIds, elementGroups.size === 1 ? getGroupColor(index) : redHsl, FeatureOverrideType.ColorAndAlpha);
+  overrideElements(hilitedIds, overlappedElementGroupPairs.groupIds.size === 1 ? getGroupColor(index) : redHsl, FeatureOverrideType.ColorAndAlpha);
   setNumberOfVisualizedGroups((numberOfVisualizedGroups) => numberOfVisualizedGroups + 1);
 
   doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
 
-  for (const id of elementGroups) {
+  for (const id of overlappedElementGroupPairs.groupIds) {
     if (hiddenGroupsIds.has(id)) {
       return [];
     }
@@ -104,21 +101,26 @@ export const visualizeGroupColors = async (
 ) => {
   clearEmphasizedOverriddenElements();
 
-  const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = await getGroups(groups, iModelConnection, hilitedElementsQueryCache);
+  const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = await generateOverlappedGroups(groups, iModelConnection, hilitedElementsQueryCache);
   setOverlappedElementsInfo(overlappedElementsInfo);
   setGroupElementsInfo(numberOfElementsInGroups);
   setOverlappedElementGroupPairs(groupsWithGroupedOverlaps);
 
   const allIdsPromises = groupsWithGroupedOverlaps.map(async (group, index) =>
     processGroupVisualization(
-      group.elementIds,
-      group.groups,
+      group,
       hiddenGroupsIds,
       doEmphasizeElements,
       index,
       setNumberOfVisualizedGroups,
     )
   );
+
+  clearHiddenElements();
+
+  hiddenGroupsIds.forEach(async (groupId) => {
+    await hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupsIds);
+  });
 
   const allIdsArrays = await Promise.all(allIdsPromises);
   const allIds = allIdsArrays.flat();
@@ -168,10 +170,10 @@ const getOverlappedElementsInfo = (overlappedElements: OverlappedElementGroupPai
   const overlappedElementsInfo: Map<string, OverlappedInfo[]> = new Map();
 
   overlappedElements.forEach((elementGroup) => {
-    const { elementIds, groups } = elementGroup;
+    const { elementIds, groupIds } = elementGroup;
 
-    groups.forEach((group) => {
-      const otherGroups = Array.from(groups).filter((grp) => grp !== group);
+    groupIds.forEach((group) => {
+      const otherGroups = Array.from(groupIds).filter((grp) => grp !== group);
       const overlappedInfoArray = overlappedElementsInfo.get(group) ?? [];
       overlappedInfoArray.push({ groupIds: otherGroups, elements: Array.from(elementIds) });
       overlappedElementsInfo.set(group, overlappedInfoArray);
@@ -182,20 +184,20 @@ const getOverlappedElementsInfo = (overlappedElements: OverlappedElementGroupPai
 
 const mergeElementsByGroup = (elems: Map<string, Set<string>>) => {
   const mergedList: Map<string, OverlappedElementGroupPairs> = new Map();
-  elems.forEach((groups, elementId) => {
-    const sortedGroups = Array.from(groups).sort();
+  elems.forEach((groupIds, elementId) => {
+    const sortedGroups = Array.from(groupIds).sort();
     const key = sortedGroups.join("-");
     const overlap = mergedList.get(key);
     if (overlap) {
       overlap.elementIds.add(elementId);
     } else {
-      mergedList.set(key, { elementIds: new Set([elementId]), groups });
+      mergedList.set(key, { elementIds: new Set([elementId]), groupIds });
     }
   });
   return mergedList;
 };
 
-const getGroups = async (
+const generateOverlappedGroups = async (
   groups: Group[],
   iModelConnection: IModelConnection,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
@@ -205,25 +207,63 @@ const getGroups = async (
     elementIds: await processGroupIds(iModelConnection, group, hilitedElementsQueryCache),
   })));
 
-  const allGroups: OverlappedElementGroupPairs[] = [];
   const elems: Map<string, Set<string>> = new Map();
   const groupElementCount: Map<string, number> = new Map();
 
+  // Build the elems map for associations between elements and their groups.
   for (const groupInfo of groupsElementIds) {
     for (const elem of groupInfo.elementIds) {
-      const elemGroups = elems.get(elem);
-      if (elemGroups) {
-        elemGroups.add(groupInfo.groupId);
-      } else {
-        elems.set(elem, new Set([groupInfo.groupId]));
-      }
+      const elemGroups = elems.get(elem) || new Set<string>();
+      elemGroups.add(groupInfo.groupId);
+      elems.set(elem, elemGroups);
     }
-    allGroups.push({ elementIds: new Set(groupInfo.elementIds), groups: new Set([groupInfo.groupId]) });
     groupElementCount.set(groupInfo.groupId, groupInfo.elementIds.length);
   }
 
+  // Construct the unique list of all groups and their overlapped groups combinations
+  const allGroups: OverlappedElementGroupPairs[] = groupsElementIds.map((groupInfo) => {
+    const nonOverlappingElements = Array.from(new Set(groupInfo.elementIds)).filter((elem) => elems.get(elem)!.size === 1);
+    groupElementCount.set(groupInfo.groupId, groupInfo.elementIds.length); // fixed line
+    return { elementIds: new Set(nonOverlappingElements), groupIds: new Set([groupInfo.groupId]) };
+  });
+
   const mergedList = mergeElementsByGroup(elems);
-  const overlappedGroupsInformation: OverlappedElementGroupPairs[] = Array.from(mergedList.values()).filter((value) => value.groups.size > 1);
+  const overlappedGroupsInformation: OverlappedElementGroupPairs[] = Array.from(mergedList.values()).filter((value) => value.groupIds.size > 1);
+
   return { groupsWithGroupedOverlaps: [...allGroups, ...overlappedGroupsInformation], overlappedElementsInfo: getOverlappedElementsInfo(overlappedGroupsInformation), numberOfElementsInGroups: groupElementCount };
 };
 
+export const hideGroupConsideringOverlaps = async (
+  overlappedElementGroupPairs: OverlappedElementGroupPairs[],
+  groupIdToHide: string,
+  hiddenGroupsIds: Set<string>
+) => {
+  const elementsToPotentiallyHide = new Set<string>();
+
+  // Check each entry in overlappedElementGroupPairs
+  for (const entry of overlappedElementGroupPairs) {
+    // If the groupToHide is part of this entry
+    if (entry.groupIds.has(groupIdToHide)) {
+      // If this is a unique entry (no overlaps for this group), add all its elements to hide list
+      if (entry.groupIds.size === 1) {
+        for (const elem of entry.elementIds) {
+          elementsToPotentiallyHide.add(elem);
+        }
+      } else {
+        // If there are overlaps, only hide if all overlapping groups are hidden
+        const allOtherGroupsHidden = Array.from(entry.groupIds).every(
+          (groupId) =>
+            groupId === groupIdToHide || hiddenGroupsIds.has(groupId)
+        );
+        if (allOtherGroupsHidden) {
+          for (const elem of entry.elementIds) {
+            elementsToPotentiallyHide.add(elem);
+          }
+        }
+      }
+    }
+  }
+
+  // Now hide all elements in elementsToPotentiallyHide
+  hideElements(Array.from(elementsToPotentiallyHide));
+};

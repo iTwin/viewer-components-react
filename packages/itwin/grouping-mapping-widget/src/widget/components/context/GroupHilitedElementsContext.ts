@@ -17,7 +17,7 @@ export interface OverlappedInfo {
 
 export interface OverlappedElementGroupPairs {
   elementIds: Set<string>;
-  groups: Set<string>;
+  groupIds: Set<string>;
 }
 
 export interface GroupHilitedElements {

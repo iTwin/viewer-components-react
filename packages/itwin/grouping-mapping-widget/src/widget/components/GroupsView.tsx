@@ -80,7 +80,6 @@ export const GroupsView = ({
   contextUIs,
   visualizedGroups,
   alert,
-  // TODO Turn to single object
   setIsOverlappedElementsInfoPanelOpen,
   isOverlappedElementsInfoPanelOpen,
   overlappedElementsInfo,

@@ -3,15 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
-import { InformationPanel, InformationPanelBody, InformationPanelHeader, Table, Text } from "@itwin/itwinui-react";
+import {
+  InformationPanel,
+  InformationPanelBody,
+  InformationPanelHeader,
+  Table,
+  Text,
+  toaster,
+} from "@itwin/itwinui-react";
 import "./OverlappedElementsInformationPanel.scss";
 import type { Group } from "@itwin/insights-client";
 import type { OverlappedInfo } from "./context/GroupHilitedElementsContext";
 import type { CellProps } from "react-table";
-import { OverlappedElementsRadioButton } from "./OverlappedElementsRadioButton";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { clearEmphasizedOverriddenElements, clearHiddenElements, visualizeElements, zoomToElements } from "./viewerUtils";
 
 export interface OverlappedElementsInformationPanelProps {
   group?: Group;
@@ -27,10 +34,16 @@ export interface OverlappedElementsDisplayProps {
 }
 type OverlappedTyped = CreateTypeFromInterface<OverlappedElementsDisplayProps>;
 
-export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedElementsInfo, groups }: OverlappedElementsInformationPanelProps) => {
-  const [isOverlappedInfoLoading, setIsOverlappedInfoLoading] = useState<boolean>(false);
+export const OverlappedElementsInformationPanel = ({
+  group,
+  onClose,
+  overlappedElementsInfo,
+  groups,
+}: OverlappedElementsInformationPanelProps) => {
+  const [isOverlappedInfoLoading, setIsOverlappedInfoLoading] =
+    useState<boolean>(false);
   const { setIsOverlappedColored } = useGroupHilitedElementsContext();
-  const [activeToggleIndex, setActiveToggleIndex] = useState<number>(-1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const columns = useMemo(
     () => [
@@ -39,7 +52,7 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
         columns: [
           {
             id: "number",
-            Header: "Number of Overlapped elements",
+            Header: "Overlapped elements",
             accessor: "numberOfElements",
           },
           {
@@ -52,33 +65,16 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
                   {value.row.original.groups.map((groupName, index) => (
                     <div key={index}>{groupName}</div>
                   ))}
-                </div>);
-            },
-          },
-          {
-            id: "radio",
-            width: 80,
-            accessor: "elementsIds",
-            Cell: ({ value, row }: CellProps<OverlappedTyped>) => {
-
-              const isToggleActive = activeToggleIndex === row.index;
-
-              return (<OverlappedElementsRadioButton
-                color={"red"}
-                ids={value}
-                showOverlappedColor={isToggleActive}
-                setShowOverlappedColor={() => {
-                  setActiveToggleIndex(row.index);
-                }}
-
-                labelPosition="left" />);
+                </div>
+              );
             },
           },
         ],
       },
     ],
-    [activeToggleIndex]
+    []
   );
+
   const key = group ? group.id : "";
   const overlappedInfo = overlappedElementsInfo.get(key);
 
@@ -95,7 +91,11 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
             groupNames.push(group.groupName);
           }
         });
-        result.push({ numberOfElements: array.elements.length.toString(), groups: groupNames, elementsIds: array.elements });
+        result.push({
+          numberOfElements: array.elements.length.toString(),
+          groups: groupNames,
+          elementsIds: array.elements,
+        });
       });
     }
     setIsOverlappedInfoLoading(false);
@@ -103,23 +103,49 @@ export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedE
   }, [overlappedInfo, groups, setIsOverlappedColored]);
 
   const handleClose = () => {
-    setActiveToggleIndex(-1);
     setIsOverlappedColored(false);
     onClose();
   };
 
+  const onSelect = useCallback(
+    async (
+      selectedData: CreateTypeFromInterface<OverlappedElementsDisplayProps>[] | undefined
+    ) => {
+      try {
+        setIsLoading(true);
+        clearEmphasizedOverriddenElements();
+        clearHiddenElements();
+        if (selectedData && selectedData.length !== 0) {
+          visualizeElements(selectedData[0].elementsIds, "red");
+          await zoomToElements(selectedData[0].elementsIds);
+        }
+      } catch (error) {
+        toaster.negative("There was an error visualizing overlapped elements.");
+        /* eslint-disable no-console */
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   return (
     <InformationPanel isOpen={!!group} className="gmw-overlap-information">
       <InformationPanelHeader onClose={handleClose}>
-        <Text variant="leading">{`${group?.groupName} Overlap Info`}</Text>
+        <Text variant="leading">{`Overlap Info of ${group?.groupName} `}</Text>
       </InformationPanelHeader>
       <InformationPanelBody className="gmw-information-body">
         <Table<OverlappedTyped>
           columns={columns}
           data={arr}
-          emptyTableContent='No Overlaps.'
+          emptyTableContent="No Overlaps."
           isLoading={isOverlappedInfoLoading}
           isSortable={true}
+          isSelectable
+          selectionMode="single"
+          onSelect={onSelect}
+          isRowDisabled={() => isLoading}
         />
       </InformationPanelBody>
     </InformationPanel>
