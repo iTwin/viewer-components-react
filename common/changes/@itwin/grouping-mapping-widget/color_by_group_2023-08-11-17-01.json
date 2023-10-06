@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Major Change for Color by Group",
-      "type": "patch"
+      "comment": "New visualization logic to distinctly highlight elements that overlap across multiple groups",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"
