@@ -15,8 +15,8 @@ const goldenAngle = 180 * (3 - Math.sqrt(5));
 export const getGroupColor = function (index: number) {
   let hue = (index * goldenAngle * 1.5 + 60) % 360;
 
-  while ((hue >= 330) || (hue <= 30)) {  // Avoiding a larger "red" range
-    hue = (hue + 15) % 360;  // Larger hue adjustment
+  while ((hue >= 330) || (hue <= 30)) { // Avoids red
+    hue = (hue + 15) % 360;
   }
 
   return `hsl(${hue}, 100%, 50%)`;
