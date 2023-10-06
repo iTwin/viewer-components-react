@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { IconButton, MenuItem, Select, SelectOption } from "@itwin/itwinui-react";
+import { Icon, MenuItem, Select, SelectOption } from "@itwin/itwinui-react";
 import * as React from "react";
 import { MapTypesOptions } from "../Interfaces";
 import "./MapUrlDialog.scss";
@@ -72,10 +72,8 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
         (option) => (
           <MenuItem
             badge={option.id?.includes("techPreview") ?
-              <div title={techPreviewTooltip}>
-                <IconButton className="map-layer-source-select-previewBadge"  size="small">
-                  <SvgTechnicalPreviewMini />
-                </IconButton>
+              <div title={techPreviewTooltip} className="map-layer-source-select-previewBadge">
+                <Icon size="small"><SvgTechnicalPreviewMini /></Icon>
               </div>
               : undefined}>
             {option.label}

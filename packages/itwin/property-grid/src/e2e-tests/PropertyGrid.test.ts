@@ -1,10 +1,11 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
-import { expect, test } from "@playwright/test";
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
 import assert from "assert";
-import { expandStagePanel, locateWidget } from "./utils";
+import { test } from "@playwright/test";
+import { expandStagePanel, locateWidget, takeScreenshot } from "./utils";
 
 test.beforeEach(async ({ page, baseURL }) => {
   assert(baseURL);
@@ -21,7 +22,7 @@ test.describe("should match image snapshot", () => {
 
       const propertyWidget = locateWidget(page, "property-grid");
       await propertyWidget.getByText("BayTown").first().waitFor();
-      await expect(propertyWidget).toHaveScreenshot();
+      await takeScreenshot(page, propertyWidget);
     });
 
     test("multiple elements selected", async ({ page }) => {
@@ -31,7 +32,7 @@ test.describe("should match image snapshot", () => {
 
       const propertyWidget = locateWidget(page, "property-grid");
       await propertyWidget.getByText("Multiple items").first().waitFor();
-      await expect(propertyWidget).toHaveScreenshot();
+      await takeScreenshot(page, propertyWidget);
     });
 
   };

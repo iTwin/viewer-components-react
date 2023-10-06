@@ -1,6 +1,6 @@
 {
   "name": "@itwin/measure-tools-react",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
@@ -42,10 +42,6 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "files": [
-    "lib/**/*",
-    "!lib/**/test/**/*"
-  ],
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
     "@itwin/appui-layout-react": "^4.4.0",

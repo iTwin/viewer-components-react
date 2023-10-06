@@ -50,7 +50,7 @@ export function Viewer() {
       ]}
       defaultUiConfig={{
         hideNavigationAid: true,
-        hideStatusBar: true,
+        hideStatusBar: false,
         hideToolSettings: true
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}

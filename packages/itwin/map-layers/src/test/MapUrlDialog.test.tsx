@@ -73,7 +73,7 @@ describe("MapUrlDialog", () => {
 
     // We need to click the 'Ok' button a first time to trigger the layer source
     // validation and make the credentials fields appear
-    let okButton = component.find(".core-dialog-buttons").childAt(0);
+    let okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 
@@ -98,7 +98,7 @@ describe("MapUrlDialog", () => {
     });
 
     // By clicking the 'ok' button we expect the layer to be added to the display style
-    okButton = component.find(".core-dialog-buttons").childAt(0);
+    okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 
@@ -195,7 +195,7 @@ describe("MapUrlDialog", () => {
     allInputs.at(0).simulate("change", { target: { value: sampleWmsLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleWmsLayerSettings?.url } });
 
-    const okButton = component.find(".core-dialog-buttons").childAt(0);
+    const okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 
@@ -271,7 +271,7 @@ describe("MapUrlDialog", () => {
     allInputs.at(0).simulate("change", { target: { value: sampleLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleLayerSettings?.url } });
 
-    const okButton = component.find(".core-dialog-buttons").childAt(0);
+    const okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 

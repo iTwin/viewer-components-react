@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { DialogButtonType, SpecialKey } from "@itwin/appui-abstract";
-import { Button, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
+import { SpecialKey } from "@itwin/appui-abstract";
+import { Button, Icon, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
 import { ImageMapLayerProps } from "@itwin/core-common";
 import {
   IModelApp, MapLayerAccessClient, MapLayerSource,
   MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority, ScreenViewport,
 } from "@itwin/core-frontend";
-import { Dialog, Icon, useCrossOriginPopup } from "@itwin/core-react";
+import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
 import * as React from "react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
@@ -19,6 +19,7 @@ import { MapTypesOptions } from "../Interfaces";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { SelectMapFormat } from "./SelectMapFormat";
 import "./MapUrlDialog.scss";
+import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -375,10 +376,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       && (externalLoginUrl === undefined || (externalLoginUrl !== undefined && oauthProcessSucceeded));
   }, [userName, password, mapUrl, mapName, serverRequireCredentials, layerAttachPending, invalidCredentialsProvided, externalLoginUrl, oauthProcessSucceeded]);
 
-  const buttonCluster = React.useMemo(() => [
-    { type: DialogButtonType.OK, onClick: handleOk, disabled: !readyToSave() },
-    { type: DialogButtonType.Cancel, onClick: handleCancel },
-  ], [readyToSave, handleCancel, handleOk]);
+  // const buttonCluster = React.useMemo(() => [
+  //   { type: DialogButtonType.OK, onClick: handleOk, disabled: !readyToSave() },
+  //   { type: DialogButtonType.Cancel, onClick: handleCancel },
+  // ], [readyToSave, handleCancel, handleOk]);
 
   const handleOnKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === SpecialKey.Enter) {
@@ -455,7 +456,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     if (warningMessage !== undefined) {
       return (
         <div className="map-layer-source-warnMessage">
-          <Icon className="map-layer-source-warnMessage-icon" iconSpec="icon-status-warning" />
+          <Icon size="small"><SvgStatusWarning></SvgStatusWarning></Icon>
           <span className="map-layer-source-warnMessage-label">{warningMessage}</span >
           {extraNode}
         </div>);
@@ -468,6 +469,33 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   // Use a hook to display the popup.
   // The display of the popup is controlled by the 'showOauthPopup' state variable.
   useCrossOriginPopup(showOauthPopup, externalLoginUrl, externalLoginTitle, 450, 450, handleOAuthPopupClose);
+
+  function getFooter() {
+
+    return (
+      <div className="map-layer-source-footer">
+        <div className="map-layer-source-footer-status"/>
+        <div>
+          <Button
+            className="map-layer-features-footer-button"
+            styleType='high-visibility'
+            onClick={handleOk}
+            disabled={!readyToSave()}
+          >
+            {props?.mapLayerSourceToEdit ? MapLayersUI.translate("Dialog.Edit") : MapLayersUI.translate("Dialog.Add")}
+          </Button>
+          <Button
+            className="map-layer-source-footer-button"
+            styleType='default'
+            onClick={handleCancel}
+          >
+            {MapLayersUI.translate("Dialog.Cancel")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div ref={dialogContainer}>
       <Dialog
@@ -477,7 +505,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
         resizable={true}
         movable={true}
         modal={true}
-        buttonCluster={buttonCluster}
+        footer={getFooter()}
         onClose={handleCancel}
         onEscape={handleCancel}
         minHeight={120}
