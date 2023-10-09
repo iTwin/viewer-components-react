@@ -101,7 +101,7 @@ export const GroupMenuActions = ({
           close();
         }}
         icon={<SvgDelete />}
-        data-testid="gmw-overlap-menu-item"
+        data-testid="gmw-context-menu-item"
       >
         Remove
       </MenuItem>,
@@ -116,7 +116,7 @@ export const GroupMenuActions = ({
             close();
           }}
           icon={<SvgInfo />}
-          data-testid="gmw-context-menu-item"
+          data-testid="gmw-overlap-menu-item"
         >
           Overlap Info
         </MenuItem>);
