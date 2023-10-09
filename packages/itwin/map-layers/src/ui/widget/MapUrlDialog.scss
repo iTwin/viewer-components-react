@@ -17,15 +17,11 @@ $default-font-size: --iui-font-size-1;
   padding-left: 5px;
 }
 
-.map-layer-source-select-previewBadge.iui-button.iui-small {
-  // Make button appear as a simple icon
-  border: 0;
-  background: 0;
-  padding: 0;
+.map-layer-source-select-previewBadge {
+  margin-right: 10px;
 }
 
 .map-layer-source-url-subLayers {
-
   height: 200px;
   width: 500px;
   // height: calc(100% - 40px);
@@ -34,7 +30,6 @@ $default-font-size: --iui-font-size-1;
   // border-radius: 16px
 }
 .map-layer-source-url {
-
   height: 100%;
   width: 100%;
   display: grid;
@@ -72,7 +67,6 @@ $default-font-size: --iui-font-size-1;
   .map-layer-warning-icon {
     margin-left: 3%;
   }
-
 }
 
 .map-layer-source-progressBar {
@@ -83,8 +77,44 @@ $default-font-size: --iui-font-size-1;
   white-space: pre-wrap;
 }
 
+.map-layer-source-footer {
+  display: flex;
+  margin-top: 10px;
+}
+
+.map-layer-source-footer-button {
+  margin-left: 5px;
+}
+
+.map-layer-source-footer-status {
+  flex: 1 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-left: 2px;
+  margin-bottom: 4px;
+  height: 2rem;
+}
+
+.map-layer-features-footer {
+display: flex;
+}
+
+.map-layer-features-footer-buttons {
+  margin-top: auto;
+}
+
+.map-layer-features-footer-button {
+  margin-left: 5px;
+ }
+
+ .map-layer-features-footer-warnMessage {
+  flex: 1 1;
+  margin-left: 2px;
+  height: 3rem;
+ }
+
 .map-layer-source-warnMessage {
-  margin-top: 5px;
 
   .map-layer-source-warnMessage-label {
     margin-left: 5px;
@@ -96,5 +126,4 @@ $default-font-size: --iui-font-size-1;
     color: var(--iui-color-icon-warning);
     background-color: transparent;
   }
-
 }

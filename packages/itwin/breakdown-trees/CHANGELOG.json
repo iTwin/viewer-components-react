@@ -2,6 +2,21 @@
   "name": "@itwin/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.6.9",
+      "tag": "@itwin/breakdown-trees-react_v0.6.9",
+      "date": "Thu, 05 Oct 2023 18:48:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.14.2`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.14.1` to `^0.14.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.8",
       "tag": "@itwin/breakdown-trees-react_v0.6.8",
       "date": "Tue, 19 Sep 2023 14:55:43 GMT",
