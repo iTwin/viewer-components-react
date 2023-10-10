@@ -25,7 +25,8 @@ import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupsView";
-import { Alert, Text } from "@itwin/itwinui-react";
+import { Alert, Icon, Text } from "@itwin/itwinui-react";
+import { SvgMore } from "@itwin/itwinui-icons-react";
 
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
@@ -224,7 +225,7 @@ export const GroupsVisualization = ({
         {isAlertExpanded ? (
           <>
             <br />
-            To get overlap info in details, click the &ldquo;Overlap Info&rdquo; from the menu adjacent to the groups.
+            To get overlap info in detail, click the <Icon><SvgMore/></Icon> button then &ldquo;Overlap Info&rdquo;
           </>
         ) : undefined}
       </Alert> : undefined,
