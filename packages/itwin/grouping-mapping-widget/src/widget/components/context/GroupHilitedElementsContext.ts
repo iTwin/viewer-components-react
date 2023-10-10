@@ -20,12 +20,13 @@ export interface OverlappedElementGroupPairs {
   groupIds: Set<string>;
 }
 
+
 export interface GroupHilitedElements {
   hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;
   hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
   groups: Group[];
-  numberOfVisualizedGroups: number;
+  currentHilitedGroups: number;
   overlappedElementsInfo: Map<string, OverlappedInfo[]>;
   groupElementsInfo: Map<string, number>;
   isOverlappedColored: boolean;
@@ -45,7 +46,7 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   hiddenGroupsIds: new Set(),
   showGroupColor: false,
   groups: [],
-  numberOfVisualizedGroups: 0,
+  currentHilitedGroups: 0,
   overlappedElementsInfo: new Map(),
   groupElementsInfo: new Map(),
   isOverlappedColored: false,

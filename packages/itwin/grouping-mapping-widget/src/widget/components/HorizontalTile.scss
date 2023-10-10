@@ -36,18 +36,14 @@
       }
     }
 
-    .gmw-action-container {
-      display: flex;
-      align-items: center;
+    .gmw-interactables {
       position: relative;
-
-      .gmw-action-button {
-        margin-left: 0;
-        align-self: center;
-        min-width: 36px;
-        margin-right: var(--iui-size-2xs);
-        flex-shrink: 0;
-      }
+      margin-left: 0;
+      align-items: center;
+      align-self: center;
+      min-width: 36px;
+      margin-right: var(--iui-size-2xs);
+      flex-shrink: 0;
     }
   }
 

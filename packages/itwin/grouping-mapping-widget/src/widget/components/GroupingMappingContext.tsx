@@ -87,7 +87,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [overlappedElementsInfo, setOverlappedElementsInfo] = useState<Map<string, OverlappedInfo[]>>(new Map());
   const [groupElementsInfo, setGroupElementsInfo] = useState<Map<string, number>>(new Map());
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
-  const [totalNumberOfVisualization, setTotalNumberOfVisualization] = useState<number>(1);
+  const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
   const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
 
   useEffect(() => {
@@ -128,12 +128,12 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       setGroupElementsInfo,
       isOverlappedColored,
       setIsOverlappedColored,
-      totalNumberOfVisualization,
-      setTotalNumberOfVisualization,
+      currentHilitedGroups,
+      setCurrentHilitedGroups,
       overlappedElementGroupPairs,
       setOverlappedElementGroupPairs,
     }),
-    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, overlappedElementsInfo, groupElementsInfo, isOverlappedColored, totalNumberOfVisualization, overlappedElementGroupPairs]
+    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, overlappedElementsInfo, groupElementsInfo, isOverlappedColored, currentHilitedGroups, overlappedElementGroupPairs]
   );
 
   const propertiesContextValue = useMemo(

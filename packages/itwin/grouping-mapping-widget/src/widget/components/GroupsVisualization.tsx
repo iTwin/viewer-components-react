@@ -224,10 +224,11 @@ export const GroupsVisualization = ({
         {isAlertExpanded ? (
           <>
             <br />
-            To get overlap info in details, click the &ldquo;Overlap Info&rdquo; in the menu icon adjacent to the groups.
+            To get overlap info in details, click the &ldquo;Overlap Info&rdquo; from the menu adjacent to the groups.
           </>
         ) : undefined}
-      </Alert> : undefined, [isAlertClosed, isAlertExpanded, isVisualizing, overlappedElementsInfo.size, showGroupColor]
+      </Alert> : undefined,
+  [isAlertClosed, isAlertExpanded, isVisualizing, overlappedElementsInfo.size, showGroupColor]
   );
 
   return (

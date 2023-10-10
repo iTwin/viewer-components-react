@@ -53,7 +53,7 @@ export const Groups = ({
     isOverlappedElementsInfoPanelOpen,
     setIsOverlappedElementsInfoPanelOpen,
     overlappedElementsInfo,
-    visualizedGroups,
+    hilitedGroupsProgress,
   } = useGroupsOperations({ mappingId: mapping.id });
 
   const addGroup = useCallback((type: string) => {
@@ -90,7 +90,7 @@ export const Groups = ({
       onDeleteGroup={onDeleteGroup}
       onCloseDeleteModal={() => setShowDeleteModal(undefined)}
       contextUIs={contextUIs}
-      visualizedGroups={isVisualizing ? visualizedGroups : undefined}
+      progressConfig={isVisualizing ? { hilitedGroupsProgress } : undefined}
       alert={renderAlert()}
       setIsOverlappedElementsInfoPanelOpen={setIsOverlappedElementsInfoPanelOpen}
       isOverlappedElementsInfoPanelOpen={isOverlappedElementsInfoPanelOpen}

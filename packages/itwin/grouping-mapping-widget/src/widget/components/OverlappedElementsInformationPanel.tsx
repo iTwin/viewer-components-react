@@ -16,7 +16,7 @@ import {
 import "./OverlappedElementsInformationPanel.scss";
 import type { Group } from "@itwin/insights-client";
 import type { OverlappedInfo } from "./context/GroupHilitedElementsContext";
-import type { CellProps } from "react-table";
+import type { CellProps, Column } from "react-table";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { clearEmphasizedOverriddenElements, clearHiddenElements, visualizeElements, zoomToElements } from "./viewerUtils";
 
@@ -28,7 +28,7 @@ export interface OverlappedElementsInformationPanelProps {
 }
 
 export interface OverlappedElementsDisplayProps {
-  numberOfElements: string;
+  overlappedElements: string;
   groups: string[];
   elementsIds: string[];
 }
@@ -46,30 +46,25 @@ export const OverlappedElementsInformationPanel = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const columns = useMemo(
-    () => [
+    (): Column<OverlappedTyped>[] =>[
       {
-        Header: "Table",
-        columns: [
-          {
-            id: "number",
-            Header: "Overlapped elements",
-            accessor: "numberOfElements",
-          },
-          {
-            id: "groups",
-            Header: "Groups",
-            accessor: "groups",
-            Cell: (value: CellProps<OverlappedTyped>) => {
-              return (
-                <div>
-                  {value.row.original.groups.map((groupName, index) => (
-                    <div key={index}>{groupName}</div>
-                  ))}
-                </div>
-              );
-            },
-          },
-        ],
+        id: "number",
+        Header: "Overlapped elements",
+        accessor: "overlappedElements",
+      },
+      {
+        id: "groups",
+        Header: "Groups",
+        accessor: "groups",
+        Cell: (value: CellProps<OverlappedTyped>) => {
+          return (
+            <div>
+              {value.row.original.groups.map((groupName, index) => (
+                <div key={index}>{groupName}</div>
+              ))}
+            </div>
+          );
+        },
       },
     ],
     []
@@ -92,7 +87,7 @@ export const OverlappedElementsInformationPanel = ({
           }
         });
         result.push({
-          numberOfElements: array.elements.length.toString(),
+          overlappedElements: array.elements.length.toString(),
           groups: groupNames,
           elementsIds: array.elements,
         });
@@ -133,7 +128,7 @@ export const OverlappedElementsInformationPanel = ({
   return (
     <InformationPanel isOpen={!!group} className="gmw-overlap-information">
       <InformationPanelHeader onClose={handleClose}>
-        <Text variant="leading">{`Overlap Info of ${group?.groupName} `}</Text>
+        <Text variant="leading">{`Overlap Info of ${group?.groupName}`}</Text>
       </InformationPanelHeader>
       <InformationPanelBody className="gmw-information-body">
         <Table<OverlappedTyped>

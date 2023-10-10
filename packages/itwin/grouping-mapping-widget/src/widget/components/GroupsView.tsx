@@ -33,6 +33,15 @@ export type ActionButtonRenderer = (
   props: ActionButtonRendererProps
 ) => React.ReactNode;
 
+export interface ProgressConfig {
+  hilitedGroupsProgress?: {
+    currentHilitedGroups: number;
+    totalNumberOfGroups: number;
+  };
+  baseProgress?: number;
+  maxDynamicProgress?: number;
+}
+
 export interface GroupsViewProps {
   mapping: Mapping;
   groups: Group[];
@@ -54,11 +63,11 @@ export interface GroupsViewProps {
   setSelectedGroupForDeletion: (group: Group) => void;
   onDeleteGroup: (group: Group) => Promise<void>;
   onCloseDeleteModal: () => void;
-  visualizedGroups?: { numberOfVisualizedGroups: number, totalNumberOfVisualization: number };
   alert?: React.ReactElement<typeof Alert>;
   setIsOverlappedElementsInfoPanelOpen?: (isOverlappedElementsInfoPanelOpen: Group | undefined) => void;
   isOverlappedElementsInfoPanelOpen?: Group | undefined;
   overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
+  progressConfig?: ProgressConfig;
 }
 
 export const GroupsView = ({
@@ -78,12 +87,14 @@ export const GroupsView = ({
   onCloseDeleteModal,
   setSelectedGroupForDeletion,
   contextUIs,
-  visualizedGroups,
   alert,
   setIsOverlappedElementsInfoPanelOpen,
   isOverlappedElementsInfoPanelOpen,
   overlappedElementsInfo,
+  progressConfig,
 }: GroupsViewProps) => {
+  const { baseProgress = 25, maxDynamicProgress = 65, hilitedGroupsProgress } = progressConfig || {};
+
   return (
     <InformationPanelWrapper className="gmw-groups-container">
       <div className="gmw-toolbar">
@@ -107,10 +118,10 @@ export const GroupsView = ({
       </div>
       {alert}
       <div className='gmw-groups-border' />
-      {!!visualizedGroups &&
+      {!!hilitedGroupsProgress &&
         <div className="gmw-group-progress-bar">
           <ProgressLinear
-            value={25 + (visualizedGroups.numberOfVisualizedGroups / visualizedGroups.totalNumberOfVisualization * 65)}
+            value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups * maxDynamicProgress)}
           />
         </div>}
       {isLoading ? (

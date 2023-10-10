@@ -46,7 +46,7 @@ export const useGroupsOperations = ({
   mappingId,
 }: GroupsOperationsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const { groups, setGroups, numberOfVisualizedGroups, overlappedElementsInfo, overlappedElementGroupPairs } = useGroupHilitedElementsContext();
+  const { groups, setGroups, currentHilitedGroups, overlappedElementsInfo, overlappedElementGroupPairs } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] =
     useGroupingMappingCustomUI().customUIs.filter(
@@ -115,6 +115,6 @@ export const useGroupsOperations = ({
     isOverlappedElementsInfoPanelOpen,
     setIsOverlappedElementsInfoPanelOpen,
     overlappedElementsInfo,
-    visualizedGroups: { numberOfVisualizedGroups, totalNumberOfVisualization: overlappedElementGroupPairs.length },
+    hilitedGroupsProgress: { currentHilitedGroups, totalNumberOfGroups: overlappedElementGroupPairs.length },
   };
 };

@@ -10,13 +10,18 @@ import { KeySet } from "@itwin/presentation-common";
 import type { OverlappedElementGroupPairs, OverlappedInfo, QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { clearEmphasizedOverriddenElements, clearHiddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements, zoomToElements } from "./viewerUtils";
 
-const goldenAngle = 180 * (3 - Math.sqrt(5));
+const GOLDEN_ANGLE_MULTIPLIER = 1.5;  // Multiplier to spread colors more uniformly.
+const BASE_HUE_OFFSET = 60;           // Initial hue offset to avoid certain colors e.g 0 offset would begin with red.
+const HUE_ADJUSTMENT_STEP = 15;       // Step to adjust the hue to avoid the red spectrum.
+const RED_HUE_LOWER_BOUND = 330;      // Lower bound of the red hue spectrum to avoid.
+const RED_HUE_UPPER_BOUND = 30;       // Upper bound of the red hue spectrum to avoid.
+const GOLDENANGLE = 180 * (3 - Math.sqrt(5));
 
 export const getGroupColor = function (index: number) {
-  let hue = (index * goldenAngle * 1.5 + 60) % 360;
+  let hue = (index * GOLDENANGLE * GOLDEN_ANGLE_MULTIPLIER + BASE_HUE_OFFSET) % 360;
 
-  while ((hue >= 330) || (hue <= 30)) { // Avoids red
-    hue = (hue + 15) % 360;
+  while (hue >= RED_HUE_LOWER_BOUND || hue <= RED_HUE_UPPER_BOUND) {
+    hue = (hue + HUE_ADJUSTMENT_STEP) % 360;
   }
 
   return `hsl(${hue}, 100%, 50%)`;
@@ -70,12 +75,13 @@ const processGroupVisualization = async (
   overlappedElementGroupPairs: OverlappedElementGroupPairs,
   hiddenGroupsIds: Set<string>,
   doEmphasizeElements: boolean,
-  index: number,
+  color: string,
+  replace: boolean,
   setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void,
 ) => {
   const hilitedIds = Array.from(overlappedElementGroupPairs.elementIds);
-  const redHsl = "hsl(0, 100%, 50%)";
-  overrideElements(hilitedIds, overlappedElementGroupPairs.groupIds.size === 1 ? getGroupColor(index) : redHsl, FeatureOverrideType.ColorAndAlpha);
+
+  overrideElements(hilitedIds, color, FeatureOverrideType.ColorAndAlpha, replace);
   setNumberOfVisualizedGroups((numberOfVisualizedGroups) => numberOfVisualizedGroups + 1);
 
   doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
@@ -106,15 +112,31 @@ export const visualizeGroupColors = async (
   setGroupElementsInfo(numberOfElementsInGroups);
   setOverlappedElementGroupPairs(groupsWithGroupedOverlaps);
 
-  const allIdsPromises = groupsWithGroupedOverlaps.map(async (group, index) =>
-    processGroupVisualization(
-      group,
-      hiddenGroupsIds,
-      doEmphasizeElements,
-      index,
-      setNumberOfVisualizedGroups,
-    )
-  );
+  const singleGroupPromises = groupsWithGroupedOverlaps
+    .filter((group) => group.groupIds.size === 1)
+    .map(async (group, index) =>
+      processGroupVisualization(
+        group,
+        hiddenGroupsIds,
+        doEmphasizeElements,
+        getGroupColor(index),  // color for single group
+        true,
+        setNumberOfVisualizedGroups,
+      )
+    );
+
+  const overlappedGroupPromises = groupsWithGroupedOverlaps
+    .filter((group) => group.groupIds.size !== 1)
+    .map(async (group) =>
+      processGroupVisualization(
+        group,
+        hiddenGroupsIds,
+        doEmphasizeElements,
+        "hsl(0, 100%, 50%)",  // color for overlapped group,
+        false,
+        setNumberOfVisualizedGroups,
+      )
+    );
 
   clearHiddenElements();
 
@@ -122,8 +144,10 @@ export const visualizeGroupColors = async (
     await hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupsIds);
   });
 
-  const allIdsArrays = await Promise.all(allIdsPromises);
-  const allIds = allIdsArrays.flat();
+  const singleGroupIds = await Promise.all(singleGroupPromises);
+  const overlappedGroupIds = await Promise.all(overlappedGroupPromises);
+
+  const allIds = [...singleGroupIds.flat(), ...overlappedGroupIds.flat()];
 
   await zoomToElements(allIds);
 };
@@ -156,7 +180,7 @@ export const getHiliteIdsAndKeysetFromGroup = async (
 
 };
 
-const processGroupIds = async (
+const getHiliteIdsForGroup = async (
   iModelConnection: IModelConnection,
   group: Group,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
@@ -204,7 +228,7 @@ const generateOverlappedGroups = async (
 ) => {
   const groupsElementIds: { groupId: string, elementIds: string[] }[] = await Promise.all(groups.map(async (group) => ({
     groupId: group.id,
-    elementIds: await processGroupIds(iModelConnection, group, hilitedElementsQueryCache),
+    elementIds: await getHiliteIdsForGroup(iModelConnection, group, hilitedElementsQueryCache),
   })));
 
   const elems: Map<string, Set<string>> = new Map();
@@ -223,7 +247,7 @@ const generateOverlappedGroups = async (
   // Construct the unique list of all groups and their overlapped groups combinations
   const allGroups: OverlappedElementGroupPairs[] = groupsElementIds.map((groupInfo) => {
     const nonOverlappingElements = Array.from(new Set(groupInfo.elementIds)).filter((elem) => elems.get(elem)!.size === 1);
-    groupElementCount.set(groupInfo.groupId, groupInfo.elementIds.length); // fixed line
+    groupElementCount.set(groupInfo.groupId, groupInfo.elementIds.length);
     return { elementIds: new Set(nonOverlappingElements), groupIds: new Set([groupInfo.groupId]) };
   });
 
