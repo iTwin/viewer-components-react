@@ -20,7 +20,6 @@ export interface OverlappedElementGroupPairs {
   groupIds: Set<string>;
 }
 
-
 export interface GroupHilitedElements {
   hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;
   hiddenGroupsIds: Set<string>;
