@@ -96,7 +96,7 @@ export const GroupsView = ({
   /**
    * UX Progress Bar Logic:
    * - Start non-zero for immediate feedback.
-   * - Restrict motion to a range (e.g., 10-90%) for perceived continuity.
+   * - Restrict motion to a range (e.g., 25-90%) for perceived continuity.
    * - Jump to 100% when confirmed complete.
    * Goal: Smooth experience for unpredictable durations.
    */
