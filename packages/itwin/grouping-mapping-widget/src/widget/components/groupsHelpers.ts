@@ -17,14 +17,18 @@ const RED_HUE_LOWER_BOUND = 330;      // Lower bound of the red hue spectrum to 
 const RED_HUE_UPPER_BOUND = 30;       // Upper bound of the red hue spectrum to avoid.
 const GOLDENANGLE = 180 * (3 - Math.sqrt(5));
 
-export const getGroupColor = function (index: number) {
+const generateHSL = (hue: number, saturation: number = 100, lightness: number = 50) => {
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
+
+export const getGroupColor = (index: number) => {
   let hue = (index * GOLDENANGLE * GOLDEN_ANGLE_MULTIPLIER + BASE_HUE_OFFSET) % 360;
 
   while (hue >= RED_HUE_LOWER_BOUND || hue <= RED_HUE_UPPER_BOUND) {
     hue = (hue + HUE_ADJUSTMENT_STEP) % 360;
   }
 
-  return `hsl(${hue}, 100%, 50%)`;
+  return generateHSL(hue);
 };
 
 export const getHiliteIdsFromGroups = async (
@@ -132,7 +136,7 @@ export const visualizeGroupColors = async (
         group,
         hiddenGroupsIds,
         doEmphasizeElements,
-        "hsl(0, 100%, 50%)",  // color for group of overlapped elements
+        generateHSL(0),  // color for group of overlapped elements
         false,
         setNumberOfVisualizedGroups,
       )

@@ -17,7 +17,7 @@ export interface GroupMenuActionsProps extends Omit<GroupsProps, "onClickAddGrou
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
   setShowDeleteModal: (showDeleteModal: Group) => void;
-  setIsOverlappedElementsInfoPanelOpen?: (isOverlappedElementsInfoPanelOpen: Group) => void;
+  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group) => void;
 }
 
 export const GroupMenuActions = ({
@@ -30,7 +30,7 @@ export const GroupMenuActions = ({
   contextUIs,
   disableActions,
   setShowDeleteModal,
-  setIsOverlappedElementsInfoPanelOpen,
+  setActiveOverlapInfoPanelGroup,
 }: GroupMenuActionsProps) => {
   const { iModelId } = useGroupingMappingApiConfig();
   const { showGroupColor } = useGroupHilitedElementsContext();
@@ -107,12 +107,12 @@ export const GroupMenuActions = ({
       </MenuItem>,
     ];
 
-    if (showGroupColor && setIsOverlappedElementsInfoPanelOpen) {
+    if (showGroupColor && setActiveOverlapInfoPanelGroup) {
       menuItems.push(
         <MenuItem
           key={3}
           onClick={() => {
-            setIsOverlappedElementsInfoPanelOpen(group);
+            setActiveOverlapInfoPanelGroup(group);
             close();
           }}
           icon={<SvgInfo />}
@@ -123,7 +123,7 @@ export const GroupMenuActions = ({
     }
 
     return menuItems;
-  }, [groupUIs, disableActions, group, contextUIs, mapping, iModelId, showGroupColor, onModify, setIsOverlappedElementsInfoPanelOpen, setShowDeleteModal, onClickGroupModify, onClickRenderContextCustomUI]);
+  }, [groupUIs, disableActions, group, contextUIs, mapping, iModelId, showGroupColor, onModify, setActiveOverlapInfoPanelGroup, setShowDeleteModal, onClickGroupModify, onClickRenderContextCustomUI]);
 
   return (
     <div className="gmw-actions">

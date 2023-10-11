@@ -125,7 +125,7 @@ export const overrideElements = (
   hilitedIds: string[],
   color: string,
   overrideType = FeatureOverrideType.ColorOnly,
-  replace = false
+  replace = true
 ) => {
   if (!IModelApp.viewManager.selectedView) {
     return;

@@ -61,7 +61,7 @@ export const useGroupsOperations = ({
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const [isOverlappedElementsInfoPanelOpen, setIsOverlappedElementsInfoPanelOpen] = useState<Group | undefined>(undefined);
+  const [activeOverlapInfoPanelGroup, setActiveOverlapInfoPanelGroup] = useState<Group | undefined>(undefined);
 
   useEffect(() => {
     const initialize = async () => {
@@ -112,8 +112,8 @@ export const useGroupsOperations = ({
     contextUIs,
     errorMessage,
     setErrorMessage,
-    isOverlappedElementsInfoPanelOpen,
-    setIsOverlappedElementsInfoPanelOpen,
+    activeOverlapInfoPanelGroup,
+    setActiveOverlapInfoPanelGroup,
     overlappedElementsInfo,
     hilitedGroupsProgress: { currentHilitedGroups, totalNumberOfGroups: overlappedElementGroupPairs.length },
   };

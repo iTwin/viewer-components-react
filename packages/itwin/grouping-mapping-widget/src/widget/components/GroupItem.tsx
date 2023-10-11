@@ -19,8 +19,8 @@ export interface GroupItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
   setShowDeleteModal: (showDeleteModal: Group) => void;
-  setIsOverlappedElementsInfoPanelOpen?: (
-    isOverlappedElementsInfoPanelOpen: Group
+  setActiveOverlapInfoPanelGroup?: (
+    activeOverlapInfoPanelGroup: Group
   ) => void;
 }
 

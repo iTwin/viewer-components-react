@@ -64,8 +64,8 @@ export interface GroupsViewProps {
   onDeleteGroup: (group: Group) => Promise<void>;
   onCloseDeleteModal: () => void;
   alert?: React.ReactElement<typeof Alert>;
-  setIsOverlappedElementsInfoPanelOpen?: (isOverlappedElementsInfoPanelOpen: Group | undefined) => void;
-  isOverlappedElementsInfoPanelOpen?: Group | undefined;
+  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group | undefined) => void;
+  activeOverlapInfoPanelGroup?: Group | undefined;
   overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
   progressConfig?: ProgressConfig;
 }
@@ -88,8 +88,8 @@ export const GroupsView = ({
   setSelectedGroupForDeletion,
   contextUIs,
   alert,
-  setIsOverlappedElementsInfoPanelOpen,
-  isOverlappedElementsInfoPanelOpen,
+  setActiveOverlapInfoPanelGroup,
+  activeOverlapInfoPanelGroup,
   overlappedElementsInfo,
   progressConfig,
 }: GroupsViewProps) => {
@@ -143,15 +143,15 @@ export const GroupsView = ({
               disableActions={disableActions}
               setShowDeleteModal={setSelectedGroupForDeletion}
               contextUIs={contextUIs}
-              setIsOverlappedElementsInfoPanelOpen={setIsOverlappedElementsInfoPanelOpen}
+              setActiveOverlapInfoPanelGroup={setActiveOverlapInfoPanelGroup}
             />
           ))}
         </div>
       )}
-      {overlappedElementsInfo && setIsOverlappedElementsInfoPanelOpen &&
+      {overlappedElementsInfo && setActiveOverlapInfoPanelGroup &&
         <OverlappedElementsInformationPanel
-          group={isOverlappedElementsInfoPanelOpen}
-          onClose={() => setIsOverlappedElementsInfoPanelOpen(undefined)}
+          group={activeOverlapInfoPanelGroup}
+          onClose={() => setActiveOverlapInfoPanelGroup(undefined)}
           overlappedElementsInfo={overlappedElementsInfo}
           groups={groups}
         />}

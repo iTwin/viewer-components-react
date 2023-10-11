@@ -50,8 +50,8 @@ export const Groups = ({
     contextUIs,
     errorMessage,
     setErrorMessage,
-    isOverlappedElementsInfoPanelOpen,
-    setIsOverlappedElementsInfoPanelOpen,
+    activeOverlapInfoPanelGroup,
+    setActiveOverlapInfoPanelGroup,
     overlappedElementsInfo,
     hilitedGroupsProgress,
   } = useGroupsOperations({ mappingId: mapping.id });
@@ -92,8 +92,8 @@ export const Groups = ({
       contextUIs={contextUIs}
       progressConfig={isVisualizing ? { hilitedGroupsProgress } : undefined}
       alert={renderAlert()}
-      setIsOverlappedElementsInfoPanelOpen={setIsOverlappedElementsInfoPanelOpen}
-      isOverlappedElementsInfoPanelOpen={isOverlappedElementsInfoPanelOpen}
+      setActiveOverlapInfoPanelGroup={setActiveOverlapInfoPanelGroup}
+      activeOverlapInfoPanelGroup={activeOverlapInfoPanelGroup}
       overlappedElementsInfo={overlappedElementsInfo}
     />
   );
