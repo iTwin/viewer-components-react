@@ -132,7 +132,7 @@ export const visualizeGroupColors = async (
         group,
         hiddenGroupsIds,
         doEmphasizeElements,
-        "hsl(0, 100%, 50%)",  // color for overlapped group,
+        "hsl(0, 100%, 50%)",  // color for group of overlapped elements
         false,
         setNumberOfVisualizedGroups,
       )
