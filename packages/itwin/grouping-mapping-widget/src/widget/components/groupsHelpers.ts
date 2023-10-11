@@ -120,7 +120,7 @@ export const visualizeGroupColors = async (
         hiddenGroupsIds,
         doEmphasizeElements,
         getGroupColor(index),  // color for single group
-        true,
+        false, // Shouldn't matter as replacement only accounts for same colored overrides.
         setNumberOfVisualizedGroups,
       )
     );
@@ -144,10 +144,9 @@ export const visualizeGroupColors = async (
     await hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupsIds);
   });
 
-  const singleGroupIds = await Promise.all(singleGroupPromises);
-  const overlappedGroupIds = await Promise.all(overlappedGroupPromises);
+  const allPromises = [...singleGroupPromises, ...overlappedGroupPromises];
 
-  const allIds = [...singleGroupIds.flat(), ...overlappedGroupIds.flat()];
+  const allIds = (await Promise.all(allPromises)).flat();
 
   await zoomToElements(allIds);
 };
