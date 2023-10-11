@@ -97,7 +97,7 @@ export const GroupsView = ({
    * UX Progress Bar Logic:
    * - Start non-zero for immediate feedback.
    * - Restrict motion to a range (e.g., 25-90%) for perceived continuity.
-   * - Disapear when compplete.
+   * - Disappear when compplete.
    * Goal: Smooth experience for unpredictable durations.
    */
   const { baseProgress = 25, maxDynamicProgress = 65, hilitedGroupsProgress } = progressConfig || {};
