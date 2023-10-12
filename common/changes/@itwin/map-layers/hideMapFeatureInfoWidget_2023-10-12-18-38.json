@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Make the MapFeatureInfo Widget appear only when results are available.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
