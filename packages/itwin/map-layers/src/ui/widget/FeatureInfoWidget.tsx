@@ -17,6 +17,8 @@ export function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
   return frontstageDef?.findWidgetDef(id);
 }
+
+// MapFeatureInfoWidgetProps
 interface MapFeatureInfoWidgetProps {
   featureInfoOpts: MapFeatureInfoOptions;
 }
