@@ -9,6 +9,7 @@ import type {
 import {
   ButtonGroup,
   IconButton,
+  InformationPanelWrapper,
   ProgressLinear,
 } from "@itwin/itwinui-react";
 import {
@@ -21,6 +22,8 @@ import type { Group, Mapping } from "@itwin/insights-client";
 import { GroupItem } from "./GroupItem";
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { GroupsAddButton } from "./GroupsAddButton";
+import { OverlappedElementsInformationPanel } from "./OverlappedElementsInformationPanel";
+import type { OverlappedInfo } from "./context/GroupHilitedElementsContext";
 
 export interface ActionButtonRendererProps {
   group: Group;
@@ -29,6 +32,15 @@ export interface ActionButtonRendererProps {
 export type ActionButtonRenderer = (
   props: ActionButtonRendererProps
 ) => React.ReactNode;
+
+export interface ProgressConfig {
+  hilitedGroupsProgress?: {
+    currentHilitedGroups: number;
+    totalNumberOfGroups: number;
+  };
+  baseProgress?: number;
+  maxDynamicProgress?: number;
+}
 
 export interface GroupsViewProps {
   mapping: Mapping;
@@ -51,8 +63,11 @@ export interface GroupsViewProps {
   setSelectedGroupForDeletion: (group: Group) => void;
   onDeleteGroup: (group: Group) => Promise<void>;
   onCloseDeleteModal: () => void;
-  numberOfVisualizedGroups?: number;
   alert?: React.ReactElement<typeof Alert>;
+  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group | undefined) => void;
+  activeOverlapInfoPanelGroup?: Group | undefined;
+  overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
+  progressConfig?: ProgressConfig;
 }
 
 export const GroupsView = ({
@@ -72,11 +87,23 @@ export const GroupsView = ({
   onCloseDeleteModal,
   setSelectedGroupForDeletion,
   contextUIs,
-  numberOfVisualizedGroups,
   alert,
+  setActiveOverlapInfoPanelGroup,
+  activeOverlapInfoPanelGroup,
+  overlappedElementsInfo,
+  progressConfig,
 }: GroupsViewProps) => {
+  /**
+   * UX Progress Bar Logic:
+   * - Start non-zero for immediate feedback.
+   * - Restrict motion to a range (e.g., 25-90%) for perceived continuity.
+   * - Disappear when compplete.
+   * Goal: Smooth experience for unpredictable durations.
+   */
+  const { baseProgress = 25, maxDynamicProgress = 65, hilitedGroupsProgress } = progressConfig || {};
+
   return (
-    <div className="gmw-groups-container">
+    <InformationPanelWrapper className="gmw-groups-container">
       <div className="gmw-toolbar">
         {onClickAddGroup && groupUIs.length > 0 && (
           <GroupsAddButton
@@ -98,10 +125,10 @@ export const GroupsView = ({
       </div>
       {alert}
       <div className='gmw-groups-border' />
-      {!!numberOfVisualizedGroups &&
+      {!!hilitedGroupsProgress &&
         <div className="gmw-group-progress-bar">
           <ProgressLinear
-            value={25 + (numberOfVisualizedGroups / groups.length * 65)}
+            value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups * maxDynamicProgress)}
           />
         </div>}
       {isLoading ? (
@@ -123,10 +150,18 @@ export const GroupsView = ({
               disableActions={disableActions}
               setShowDeleteModal={setSelectedGroupForDeletion}
               contextUIs={contextUIs}
+              setActiveOverlapInfoPanelGroup={setActiveOverlapInfoPanelGroup}
             />
           ))}
         </div>
       )}
+      {overlappedElementsInfo && setActiveOverlapInfoPanelGroup &&
+        <OverlappedElementsInformationPanel
+          group={activeOverlapInfoPanelGroup}
+          onClose={() => setActiveOverlapInfoPanelGroup(undefined)}
+          overlappedElementsInfo={overlappedElementsInfo}
+          groups={groups}
+        />}
       {selectedGroupForDeletion && (
         <DeleteModal
           entityName={selectedGroupForDeletion.groupName}
@@ -137,6 +172,6 @@ export const GroupsView = ({
           refresh={onRefresh}
         />
       )}
-    </div>
+    </InformationPanelWrapper>
   );
 };

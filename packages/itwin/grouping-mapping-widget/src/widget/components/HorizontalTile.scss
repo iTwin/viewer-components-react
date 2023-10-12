@@ -11,6 +11,8 @@
     background-color: var(--iui-color-background-backdrop);
     min-height: calc(var(--iui-size-s) * 5);
     padding: 5.5px var(--iui-size-xs);
+    padding-bottom: 2px var(--iui-size-xs);
+    padding-top: 2px var(--iui-size-xs);
 
     .gmw-body-container {
       display: flex;
@@ -33,8 +35,11 @@
         }
       }
     }
-    .gmw-action-button {
+
+    .gmw-interactables {
+      position: relative;
       margin-left: 0;
+      align-items: center;
       align-self: center;
       min-width: 36px;
       margin-right: var(--iui-size-2xs);
@@ -44,14 +49,10 @@
 
   &-selected {
     border: 1px solid var(--iui-color-border-accent);
-    background: 
-      linear-gradient(
+    background: linear-gradient(
         hsl(var(--iui-color-accent-hsl) / var(--iui-opacity-6)),
         hsl(var(--iui-color-accent-hsl) / var(--iui-opacity-6))
       ),
-      linear-gradient(
-        var(--iui-color-background),
-        var(--iui-color-background)
-      );
+      linear-gradient(var(--iui-color-background), var(--iui-color-background));
   }
 }
