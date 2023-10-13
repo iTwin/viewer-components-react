@@ -18,6 +18,9 @@ export interface HorizontalTileProps {
   subtextToolTip?: string;
   selected?: boolean;
   dragHandle?: ReactNode;
+  elementsInfo?: React.ReactNode;
+  showGroupColor?: boolean;
+  isLoading?: boolean;
 }
 
 export const HorizontalTile = (props: HorizontalTileProps) => {
@@ -36,8 +39,10 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
           {props.subText && <Text className="gmw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
         </div>
       </div>
-      <div className="gmw-action-button" data-testid="tile-action-button">
+      <div className="gmw-interactables">
         {props.actionGroup}
+        {props.showGroupColor && !props.isLoading && props.elementsInfo &&
+            props.elementsInfo}
       </div>
     </div>
   );

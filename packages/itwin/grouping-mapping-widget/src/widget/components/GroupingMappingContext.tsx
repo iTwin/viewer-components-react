@@ -19,7 +19,7 @@ import {
 import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IExtractionClient, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import type { QueryCacheItem } from "./context/GroupHilitedElementsContext";
+import type { OverlappedElementGroupPairs, OverlappedInfo, QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
@@ -84,6 +84,11 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [calculatedProperties, setCalculatedProperties] = useState<CalculatedProperty[]>([]);
   const [customCalculationProperties, setCustomCalculationProperties] = useState<CustomCalculation[]>([]);
   const [numberOfVisualizedGroups, setNumberOfVisualizedGroups] = useState(0);
+  const [overlappedElementsInfo, setOverlappedElementsInfo] = useState<Map<string, OverlappedInfo[]>>(new Map());
+  const [groupElementsInfo, setGroupElementsInfo] = useState<Map<string, number>>(new Map());
+  const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
+  const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
+  const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
 
   useEffect(() => {
     setApiConfig(() => ({
@@ -117,8 +122,18 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       setGroups,
       numberOfVisualizedGroups,
       setNumberOfVisualizedGroups,
+      overlappedElementsInfo,
+      setOverlappedElementsInfo,
+      groupElementsInfo,
+      setGroupElementsInfo,
+      isOverlappedColored,
+      setIsOverlappedColored,
+      currentHilitedGroups,
+      setCurrentHilitedGroups,
+      overlappedElementGroupPairs,
+      setOverlappedElementGroupPairs,
     }),
-    [groups, hiddenGroupsIds, showGroupColor, numberOfVisualizedGroups]
+    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, overlappedElementsInfo, groupElementsInfo, isOverlappedColored, currentHilitedGroups, overlappedElementGroupPairs]
   );
 
   const propertiesContextValue = useMemo(

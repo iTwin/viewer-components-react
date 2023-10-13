@@ -125,6 +125,7 @@ export const overrideElements = (
   hilitedIds: string[],
   color: string,
   overrideType = FeatureOverrideType.ColorOnly,
+  replace = true
 ) => {
   if (!IModelApp.viewManager.selectedView) {
     return;
@@ -138,7 +139,7 @@ export const overrideElements = (
     vp,
     ColorDef.fromString(color),
     overrideType,
-    true,
+    replace,
   );
 };
 

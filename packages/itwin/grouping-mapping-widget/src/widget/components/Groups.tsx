@@ -25,6 +25,7 @@ export interface GroupsProps {
   ) => void;
   disableActions?: boolean;
   isVisualizing?: boolean;
+  alert?: React.ReactElement<typeof Alert>;
 }
 
 export const Groups = ({
@@ -36,6 +37,7 @@ export const Groups = ({
   onClickRenderContextCustomUI,
   disableActions,
   isVisualizing,
+  alert,
 }: GroupsProps) => {
   const {
     groups,
@@ -46,9 +48,12 @@ export const Groups = ({
     showDeleteModal,
     groupUIs,
     contextUIs,
-    numberOfVisualizedGroups,
     errorMessage,
     setErrorMessage,
+    activeOverlapInfoPanelGroup,
+    setActiveOverlapInfoPanelGroup,
+    overlappedElementsInfo,
+    hilitedGroupsProgress,
   } = useGroupsOperations({ mappingId: mapping.id });
 
   const addGroup = useCallback((type: string) => {
@@ -57,13 +62,15 @@ export const Groups = ({
   }, [onClickAddGroup]);
 
   const renderAlert = useCallback(() => {
-    if (!errorMessage) return;
+    if (!errorMessage) {
+      return alert;
+    }
     return (
       <Alert type="negative" onClose={() => setErrorMessage(undefined)}>
         {errorMessage}
       </Alert>
     );
-  }, [errorMessage, setErrorMessage]);
+  }, [alert, errorMessage, setErrorMessage]);
 
   return (
     <GroupsView
@@ -83,8 +90,11 @@ export const Groups = ({
       onDeleteGroup={onDeleteGroup}
       onCloseDeleteModal={() => setShowDeleteModal(undefined)}
       contextUIs={contextUIs}
-      numberOfVisualizedGroups={isVisualizing ? numberOfVisualizedGroups : undefined}
+      progressConfig={isVisualizing ? { hilitedGroupsProgress } : undefined}
       alert={renderAlert()}
+      setActiveOverlapInfoPanelGroup={setActiveOverlapInfoPanelGroup}
+      activeOverlapInfoPanelGroup={activeOverlapInfoPanelGroup}
+      overlappedElementsInfo={overlappedElementsInfo}
     />
   );
 };
