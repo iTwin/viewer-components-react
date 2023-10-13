@@ -10,7 +10,15 @@ import { FillCentered, Orientation, ResizableContainerObserver } from "@itwin/co
 import { FeatureInfoDataProvider} from "./FeatureInfoDataProvider";
 import { MapFeatureInfoOptions } from "../Interfaces";
 import { MapLayersUI } from "../../mapLayers";
+import { useActiveFrontstageDef, WidgetState } from "@itwin/appui-react";
+import { FeatureInfoUiItemsProvider } from "../FeatureInfoUiItemsProvider";
 
+export function useSpecificWidgetDef(id: string) {
+  const frontstageDef = useActiveFrontstageDef();
+  return frontstageDef?.findWidgetDef(id);
+}
+
+// MapFeatureInfoWidgetProps
 interface MapFeatureInfoWidgetProps {
   featureInfoOpts: MapFeatureInfoOptions;
 }
@@ -35,6 +43,16 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
       dataProvider?.current?.onUnload();
     };
   }, []);
+
+  const widgetDef = useSpecificWidgetDef(FeatureInfoUiItemsProvider.widgetId);
+
+  React.useEffect(() => {
+    if (hasData) {
+      widgetDef?.setWidgetState(WidgetState.Open);
+    } else {
+      widgetDef?.setWidgetState(WidgetState.Hidden);
+    }
+  }, [widgetDef, hasData]);
 
   React.useEffect(() => {
 
