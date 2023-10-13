@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { BentleyError, compareStrings } from "@itwin/core-bentley";
-import { ImageMapLayerSettings, MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
+import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings, MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
 import {
   ImageryMapTileTree, IModelApp, MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, MapLayerSources, NotifyMessageDetails, OutputMessagePriority,
   ScreenViewport, TileTreeOwner, Viewport,
@@ -30,13 +30,20 @@ import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 export interface SourceMapContextProps {
   readonly sources: MapLayerSource[];
   readonly loadingSources: boolean;
-  readonly bases: MapLayerSource[];
+  readonly bases: BaseMapLayerSettings[];
   readonly refreshFromStyle: () => void;
   readonly activeViewport?: ScreenViewport;
   readonly backgroundLayers?: StyleMapLayerSettings[];
   readonly overlayLayers?: StyleMapLayerSettings[];
   readonly mapLayerOptions?: MapLayerOptions;
 }
+
+/** @internal */
+export const defaultBaseMapLayers =  [
+  BaseMapLayerSettings.fromProvider(BackgroundMapProvider.fromJSON({name: "BingProvider", type: BackgroundMapType.Aerial})),
+  BaseMapLayerSettings.fromProvider(BackgroundMapProvider.fromJSON({name: "BingProvider", type: BackgroundMapType.Hybrid})),
+  BaseMapLayerSettings.fromProvider(BackgroundMapProvider.fromJSON({name: "BingProvider", type: BackgroundMapType.Street})),
+];
 
 /** @internal */
 export const SourceMapContext = React.createContext<SourceMapContextProps>({ // eslint-disable-line @typescript-eslint/naming-convention
@@ -99,7 +106,7 @@ interface MapLayerManagerProps {
 export function MapLayerManager(props: MapLayerManagerProps) {
   const [mapSources, setMapSources] = React.useState<MapLayerSource[] | undefined>();
   const [loadingSources, setLoadingSources] = React.useState(false);
-  const [baseSources, setBaseSources] = React.useState<MapLayerSource[] | undefined>();
+  const [bgProviders] = React.useState<BaseMapLayerSettings[]>(props.mapLayerOptions?.baseMapLayers ?? defaultBaseMapLayers);
   const [overlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.OverlayLayers"));
   const [underlaysLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.BackgroundLayers"));
   const { activeViewport, mapLayerOptions } = props;
@@ -238,8 +245,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
       // This is where the list of layers first gets populated...
       const sources: MapLayerSource[] = [];
-      const bases: MapLayerSource[] = [];
-      const addSource = (source: MapLayerSource) => source.baseMap ? bases.push(source) : sources.push(source);
+      const addSource = (source: MapLayerSource) => !source.baseMap && sources.push(source);  // No longer let MapLayerSources drive bg maps.
       sourceLayers?.allSource.forEach(addSource);
       preferenceSources.forEach((source) => {
         // Do not add duplicate
@@ -249,7 +255,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       sources.sort((a: MapLayerSource, b: MapLayerSource) => compareStrings(a.name.toLowerCase(), b.name.toLowerCase()));
 
       setMapSources(sources);
-      setBaseSources(bases);
     }
 
     setLoadingSources(true);
@@ -548,7 +553,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       activeViewport,
       loadingSources,
       sources: mapSources ? mapSources : [],
-      bases: baseSources ? baseSources : [],
+      bases: bgProviders,
       refreshFromStyle: handleRefreshFromStyle,
       backgroundLayers: backgroundMapLayers,
       overlayLayers: overlayMapLayers,

@@ -10,7 +10,7 @@ import * as sinon from "sinon";
 import * as coreCommon from "@itwin/core-common";
 import * as coreFrontend from "@itwin/core-frontend";
 import { fireEvent, render } from "@testing-library/react";
-import { SourceMapContext } from "../ui/widget/MapLayerManager";
+import { defaultBaseMapLayers, SourceMapContext } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
 import { BasemapPanel } from "../ui/widget/BasemapPanel";
@@ -18,6 +18,17 @@ import { BasemapPanel } from "../ui/widget/BasemapPanel";
 describe("BasemapPanel", () => {
   const sandbox = sinon.createSandbox();
   const viewportMock = new ViewportMock();
+
+  const customBaseMap: coreCommon.BaseMapLayerSettings = coreCommon.BaseMapLayerSettings.fromJSON({
+    formatId: "WMS",
+    name: "Custom Layer",
+    visible: true,
+    transparentBackground: true,
+    subLayers: [{ name: "subLayer1", visible: false }],
+    accessKey: undefined,
+    transparency: 0,
+    url: "https://server/MapServer",
+  });
 
   before(async () => {
     await coreFrontend.MockRender.App.startup();
@@ -40,14 +51,11 @@ describe("BasemapPanel", () => {
   });
 
   it("renders base maps", async () => {
-    const mls = await coreFrontend.MapLayerSources.create();
-
-    const bases = mls?.bases;
     const { container } = render( <SourceMapContext.Provider value={{
       activeViewport: viewportMock.object,
       loadingSources: false,
       sources: [],
-      bases,
+      bases: defaultBaseMapLayers,
       refreshFromStyle: ()=>{},
     }}>
       <BasemapPanel />
@@ -59,42 +67,57 @@ describe("BasemapPanel", () => {
 
     const selectContent = container.querySelector(".iui-content") as HTMLElement;
     should().exist(selectContent);
-    expect(selectContent.textContent).to.eql("Bing Maps: Aerial Imagery with labels");
+    expect(selectContent.textContent).to.eql("WellKnownBaseMaps.BingProvider.Hybrid");
   });
 
   it("should refresh select content after API call", async () => {
-    const mls = await coreFrontend.MapLayerSources.create();
-
-    const bases = mls?.bases;
     const { container } = render( <SourceMapContext.Provider value={{
       activeViewport: viewportMock.object,
       loadingSources: false,
       sources: [],
-      bases,
+      bases: defaultBaseMapLayers,
       refreshFromStyle: ()=>{},
     }}>
       <BasemapPanel />
     </SourceMapContext.Provider>);
 
-    const baseMap = coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Street}));
+    // let baseMap = coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Street}));
+    let baseMap: coreCommon.BaseLayerSettings = defaultBaseMapLayers[2];
     viewportMock.baseMap = baseMap;
     viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({backgroundBase: baseMap}));
     await TestUtils.flushAsyncOperations();
 
-    const selectContent = container.querySelector(".iui-content");
+    let selectContent = container.querySelector(".iui-content");
     should().exist(selectContent);
-    expect(selectContent!.textContent).to.eql("Bing Maps: Streets");
+    expect(selectContent!.textContent).to.eql("WellKnownBaseMaps.BingProvider.Street");
+
+    // Now test with a custom map-layer definition
+    baseMap = customBaseMap;
+    viewportMock.baseMap = baseMap;
+    viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({backgroundBase: baseMap}));
+    await TestUtils.flushAsyncOperations();
+
+    selectContent = container.querySelector(".iui-content");
+    should().exist(selectContent);
+    expect(selectContent!.textContent).to.eql(customBaseMap.name);
+
+    // Now test with a ColorDef
+    const color = coreCommon.ColorDef.create(coreCommon.ColorByName.aliceBlue);
+    viewportMock.baseMap = color;
+    viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({backgroundBase: color.toJSON()}));
+    await TestUtils.flushAsyncOperations();
+
+    selectContent = container.querySelector(".iui-content");
+    should().exist(selectContent);
+    expect(selectContent!.textContent).to.eql("Basemap.ColorFill");
   });
 
   it("should refresh transparency slider and visibility icon after API call", async () => {
-    const mls = await coreFrontend.MapLayerSources.create();
-
-    const bases = mls?.bases;
     const { container } = render( <SourceMapContext.Provider value={{
       activeViewport: viewportMock.object,
       loadingSources: false,
       sources: [],
-      bases,
+      bases: defaultBaseMapLayers,
       refreshFromStyle: ()=>{},
     }}>
       <BasemapPanel />
