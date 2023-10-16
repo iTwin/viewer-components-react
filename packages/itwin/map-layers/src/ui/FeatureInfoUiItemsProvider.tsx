@@ -57,7 +57,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
         label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
         icon: <SvgMapInfo/>,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
-        defaultState: WidgetState.Closed,
+        defaultState: WidgetState.Hidden,
       });
     }
 
