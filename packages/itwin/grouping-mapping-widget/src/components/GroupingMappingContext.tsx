@@ -23,7 +23,6 @@ import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsConte
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
-import { enableExperimentalFeatures } from "../common/utils";
 
 export interface GroupingMappingContextProps {
   /**
