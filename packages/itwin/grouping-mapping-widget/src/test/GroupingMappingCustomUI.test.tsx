@@ -80,7 +80,7 @@ jest.mock("../components/context/MappingClientContext", () => ({
 }));
 
 jest.mock("../common/utils", () => ({
-  ...jest.requireActual("..../common/utils"),
+  ...jest.requireActual("../common/utils"),
   enableExperimentalFeatures: jest.fn,
 }));
 
