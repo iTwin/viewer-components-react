@@ -1,11 +1,11 @@
-import { QueryRowFormat } from "@itwin/core-common";
-import type { IModelConnection } from "@itwin/core-frontend";
-import { toaster } from "@itwin/itwinui-react";
-
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import { QueryRowFormat } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { toaster } from "@itwin/itwinui-react";
+
 export type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
 };
