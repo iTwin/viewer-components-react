@@ -37,11 +37,11 @@ describe("Group properties utilities", () => {
 
   it("multiple primitive properies of different types", () => {
     const testProperties = [createTestPropertyInfo({ name: "propString" }),
-    createTestPropertyInfo({ name: "propInt", type: "int" }),
-    createTestPropertyInfo({ name: "propBool", type: "boolean" }),
-    createTestPropertyInfo({ name: "propEnum", type: "enum" }),
-    createTestPropertyInfo({ name: "propLong", type: "long" }),
-    createTestPropertyInfo({ name: "propNumber", type: "number" }),
+      createTestPropertyInfo({ name: "propInt", type: "int" }),
+      createTestPropertyInfo({ name: "propBool", type: "boolean" }),
+      createTestPropertyInfo({ name: "propEnum", type: "enum" }),
+      createTestPropertyInfo({ name: "propLong", type: "long" }),
+      createTestPropertyInfo({ name: "propNumber", type: "number" }),
     ];
     const propertyFields = testProperties.map((p) => createTestPropertiesContentField({ properties: [{ property: p }] }));
 

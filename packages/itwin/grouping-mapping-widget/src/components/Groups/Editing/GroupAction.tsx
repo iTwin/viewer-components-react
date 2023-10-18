@@ -10,9 +10,7 @@ import {
   toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  LoadingSpinner,
-} from "../../SharedComponents/utils";
+import { LoadingSpinner } from "../../SharedComponents/LoadingSpinner";
 import { handleError } from "../../../common/utils";
 import "./GroupAction.scss";
 import useValidator from "../../Properties/hooks/useValidator";

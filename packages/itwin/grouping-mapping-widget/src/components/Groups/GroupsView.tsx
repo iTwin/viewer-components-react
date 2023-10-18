@@ -17,7 +17,8 @@ import {
 } from "@itwin/itwinui-icons-react";
 import DeleteModal from "../SharedComponents/DeleteModal";
 import "./GroupsView.scss";
-import { EmptyMessage, LoadingOverlay } from "../SharedComponents/utils";
+import { EmptyMessage } from "../SharedComponents/EmptyMessage";
+import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
 import type { Group, Mapping } from "@itwin/insights-client";
 import { GroupItem } from "./GroupItem";
 import type { ContextCustomUI, GroupingCustomUI } from "../customUI/GroupingMappingCustomUI";

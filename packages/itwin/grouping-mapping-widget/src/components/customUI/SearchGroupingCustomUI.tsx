@@ -5,7 +5,7 @@
 import React from "react";
 import { Alert, Button, LabeledTextarea } from "@itwin/itwinui-react";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
-import { LoadingSpinner } from "../SharedComponents/utils";
+import { LoadingSpinner } from "../SharedComponents/LoadingSpinner";
 import "./SearchGroupingCustomUI.scss";
 
 export const SearchGroupingCustomUI = ({

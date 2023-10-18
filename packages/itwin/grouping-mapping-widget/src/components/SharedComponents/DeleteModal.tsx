@@ -12,7 +12,7 @@ import {
 import React, { useState } from "react";
 import { handleError } from "../../common/utils";
 import "./DeleteModal.scss";
-import { LoadingSpinner } from "./utils";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 export interface DeleteModalProps {
   entityName?: string;

@@ -58,15 +58,12 @@ const fetchExtractionStatus = async (
         });
         const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
         const filteredLogs = logs.filter((log) => log.message !== null);
-        const extractionMessageData = filteredLogs.map((filteredLog) =>
-        (
-          {
-            date: filteredLog.dateTime,
-            category: filteredLog.category,
-            level: filteredLog.level,
-            message: String(filteredLog.message),
-          }
-        ));
+        const extractionMessageData = filteredLogs.map((filteredLog) => ({
+          date: filteredLog.dateTime,
+          category: filteredLog.category,
+          level: filteredLog.level,
+          message: String(filteredLog.message),
+        }));
         setExtractionMessageData(extractionMessageData);
       } else {
         setExtractionIconData({

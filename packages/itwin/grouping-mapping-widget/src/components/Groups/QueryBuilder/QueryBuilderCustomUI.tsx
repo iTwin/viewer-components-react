@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import type { GroupingCustomUI } from "../../customUI/GroupingMappingCustomUI";
-import { EmptyMessage } from "../../SharedComponents/utils";
+import { EmptyMessage } from "../../SharedComponents/EmptyMessage";
 import type { Group } from "@itwin/insights-client";
 
 export interface QueryBuilderCustomUIProps {

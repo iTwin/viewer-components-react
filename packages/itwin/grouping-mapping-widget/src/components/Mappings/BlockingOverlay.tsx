@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import classnames from "classnames";
 import React from "react";
-import { LoadingSpinner } from "../SharedComponents/utils";
+import { LoadingSpinner } from "../SharedComponents/LoadingSpinner";
 import "./BlockingOverlay.scss";
 
 export interface BlockingOverlayProps {

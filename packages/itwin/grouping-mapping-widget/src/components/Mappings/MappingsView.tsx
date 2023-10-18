@@ -15,10 +15,8 @@ import {
   SvgImport,
   SvgRefresh,
 } from "@itwin/itwinui-icons-react";
-import {
-  EmptyMessage,
-  LoadingOverlay,
-} from "../SharedComponents/utils";
+import { EmptyMessage } from "../SharedComponents/EmptyMessage";
+import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
 import "./MappingsView.scss";
 import DeleteModal from "../SharedComponents/DeleteModal";
 import { MappingImportWizardModal } from "./Import/MappingImportWizardModal";

@@ -5,7 +5,7 @@
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
 import "./ActionPanel.scss";
-import { LoadingSpinner } from "./utils";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 export interface ActionPanelProps {
   onSave: () => void;
