@@ -1,0 +1,8 @@
+.gmw-loading-center-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: var(--iui-size-s);
+  height: 100%;
+}
