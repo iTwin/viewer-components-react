@@ -74,13 +74,13 @@ jest.mock("@itwin/core-frontend", () => ({
   },
 }));
 
-jest.mock("../widget/components/context/MappingClientContext", () => ({
-  ...jest.requireActual("../widget/components/context/MappingClientContext"),
+jest.mock("../components/context/MappingClientContext", () => ({
+  ...jest.requireActual("../components/context/MappingClientContext"),
   useMappingClient: () => mappingClientMock.object,
 }));
 
-jest.mock("../widget/components/utils", () => ({
-  ...jest.requireActual("../widget/components/utils"),
+jest.mock("../common/utils", () => ({
+  ...jest.requireActual("../common/utils"),
   enableExperimentalFeatures: jest.fn,
 }));
 
