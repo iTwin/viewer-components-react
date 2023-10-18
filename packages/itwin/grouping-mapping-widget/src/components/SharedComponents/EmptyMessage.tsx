@@ -4,8 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import { Text } from "@itwin/itwinui-react";
 import React from "react";
-import type { EmptyMessageProps } from "./utils";
 import "./EmptyMessage.scss";
+
+export interface EmptyMessageProps {
+  message: string;
+}
 
 export const EmptyMessage = ({ message }: EmptyMessageProps) => (
   <div className='gmw-empty-message-center-overlay'>

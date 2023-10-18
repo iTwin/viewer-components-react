@@ -23,6 +23,7 @@ import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsConte
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
+import { enableExperimentalFeatures } from "../common/utils";
 
 export interface GroupingMappingContextProps {
   /**
@@ -88,6 +89,11 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
   const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
   const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
+
+  useEffect(() => {
+    if (!apiConfig.iModelConnection) return;
+    void enableExperimentalFeatures(apiConfig.iModelConnection);
+  }, [apiConfig.iModelConnection]);
 
   useEffect(() => {
     setApiConfig(() => ({

@@ -6,12 +6,11 @@ import { Fieldset, LabeledInput, Text, ToggleSwitch } from "@itwin/itwinui-react
 import React, { useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../../Properties/hooks/useValidator";
-import { handleInputChange } from "../../SharedComponents/utils";
 import "./MappingAction.scss";
 import { useMappingClient } from "../../context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import { handleError } from "../../../common/utils";
+import { handleError, handleInputChange } from "../../../common/utils";
 
 const defaultDisplayStrings = {
   mappingDetails: "Mapping Details",

@@ -5,8 +5,8 @@
 import { LabeledInput, Text } from "@itwin/itwinui-react";
 import React from "react";
 import type SimpleReactValidator from "simple-react-validator";
+import { handleInputChange } from "../../../common/utils";
 import { NAME_REQUIREMENTS } from "../../Properties/hooks/useValidator";
-import { handleInputChange } from "../../SharedComponents/utils";
 
 export interface GroupDetailsType {
   groupName: string;
