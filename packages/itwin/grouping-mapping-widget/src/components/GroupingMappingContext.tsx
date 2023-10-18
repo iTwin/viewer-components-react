@@ -91,11 +91,6 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
 
   useEffect(() => {
-    if (!apiConfig.iModelConnection) return;
-    void enableExperimentalFeatures(apiConfig.iModelConnection);
-  }, [apiConfig.iModelConnection]);
-
-  useEffect(() => {
     setApiConfig(() => ({
       prefix: props.prefix,
       iModelId: props.iModelId,
