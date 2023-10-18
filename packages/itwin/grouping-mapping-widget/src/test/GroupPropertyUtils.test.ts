@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ECProperty } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
-import type { PropertyMetaData } from "../widget/components/GroupPropertyUtils";
-import { convertPresentationFields, convertToECProperties, findProperties } from "../widget/components/GroupPropertyUtils";
+import type { PropertyMetaData } from "../widget/Properties/GroupProperties/GroupPropertyUtils";
+import { convertPresentationFields, convertToECProperties, findProperties } from "../widget/Properties/GroupProperties/GroupPropertyUtils";
 import { createTestECClassInfo, createTestNestedContentField, createTestPropertiesContentField, createTestPropertyInfo, createTestRelatedClassInfo } from "./PropertyFieldsHelpers";
 import { assert, expect } from "chai";
 import type { NavigationPropertyInfo, StructTypeDescription } from "@itwin/presentation-common";
@@ -37,11 +37,11 @@ describe("Group properties utilities", () => {
 
   it("multiple primitive properies of different types", () => {
     const testProperties = [createTestPropertyInfo({ name: "propString" }),
-      createTestPropertyInfo({ name: "propInt", type: "int" }),
-      createTestPropertyInfo({ name: "propBool", type: "boolean" }),
-      createTestPropertyInfo({ name: "propEnum", type: "enum" }),
-      createTestPropertyInfo({ name: "propLong", type: "long" }),
-      createTestPropertyInfo({ name: "propNumber", type: "number" }),
+    createTestPropertyInfo({ name: "propInt", type: "int" }),
+    createTestPropertyInfo({ name: "propBool", type: "boolean" }),
+    createTestPropertyInfo({ name: "propEnum", type: "enum" }),
+    createTestPropertyInfo({ name: "propLong", type: "long" }),
+    createTestPropertyInfo({ name: "propNumber", type: "number" }),
     ];
     const propertyFields = testProperties.map((p) => createTestPropertiesContentField({ properties: [{ property: p }] }));
 

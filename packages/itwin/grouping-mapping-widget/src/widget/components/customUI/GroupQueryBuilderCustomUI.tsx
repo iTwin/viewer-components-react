@@ -10,7 +10,7 @@ import type {
 } from "@itwin/presentation-frontend";
 import { KeySet } from "@itwin/presentation-common";
 import "./GroupQueryBuilderCustomUI.scss";
-import { QueryBuilder } from "../QueryBuilder";
+import { QueryBuilder } from "../Groups/QueryBuilder/QueryBuilder";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 import {
   DEFAULT_PROPERTY_GRID_RULESET,
@@ -22,7 +22,7 @@ import { VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react
 import { ResizableContainerObserver } from "@itwin/core-react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
-import { PropertyAction } from "../PropertyAction";
+import { PropertyAction } from "../../Properties/PropertyAction";
 import { Alert, Button } from "@itwin/itwinui-react";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import { IModelApp } from "@itwin/core-frontend";

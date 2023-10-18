@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useState } from "react";
-import { handleError } from "../components/utils";
+import { handleError } from "../components/SharedComponents/utils";
 
 const fetchData = async<T>(
   setData: (data: T[]) => void,

@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Alert, Button, LabeledTextarea } from "@itwin/itwinui-react";
-import { LoadingSpinner } from "../utils";
+import { LoadingSpinner } from "../SharedComponents/utils";
 import "./ManualGroupingCustomUI.scss";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 

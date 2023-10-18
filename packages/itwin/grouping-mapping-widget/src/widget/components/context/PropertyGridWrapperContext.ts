@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { QueryBuilder } from "../QueryBuilder";
+import type { QueryBuilder } from "../Groups/QueryBuilder/QueryBuilder";
 
 export interface PropertySelection {
   currentPropertyList: PropertyRecord[];

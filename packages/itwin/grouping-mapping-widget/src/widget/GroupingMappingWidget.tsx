@@ -12,8 +12,8 @@ import {
   StageUsage,
 } from "@itwin/appui-react";
 import React from "react";
-import type { GroupingMappingProps } from "./components/GroupingMapping";
-import GroupingMapping from "./components/GroupingMapping";
+import type { GroupingMappingProps } from "./components/WidgetShell/GroupingMapping";
+import GroupingMapping from "./components/WidgetShell/GroupingMapping";
 
 export class GroupingMappingProvider implements UiItemsProvider {
   public readonly id = "GroupingMappingProvider";

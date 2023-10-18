@@ -8,7 +8,7 @@ import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presen
 import { Presentation } from "@itwin/presentation-frontend";
 import { useCallback, useEffect, useState } from "react";
 import { useGroupHilitedElementsContext } from "../components/context/GroupHilitedElementsContext";
-import { visualizeGroupColors } from "../components/groupsHelpers";
+import { visualizeGroupColors } from "../components/Groups/groupsHelpers";
 import { clearEmphasizedElements, clearOverriddenElements, transparentOverriddenElements, visualizeElementsByQuery, zoomToElements } from "../components/viewerUtils";
 
 export const useVisualization = (shouldVisualize: boolean, iModelConnection: IModelConnection, query: string, queryGenerationType: string) => {

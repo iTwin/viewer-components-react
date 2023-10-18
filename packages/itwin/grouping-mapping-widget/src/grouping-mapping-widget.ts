@@ -11,22 +11,22 @@ export { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig, GroupingMappi
 export * from "@itwin/insights-client";
 
 /** Internal components for custom UIs */
-export { Mappings, MappingsProps } from "./widget/components/Mappings";
-export { useMappingsOperations, MappingsOperationsProps } from "./widget/components/hooks/useMappingsOperations";
-export { MappingAction, MappingActionProps } from "./widget/components/MappingAction";
-export { MappingsView, MappingsViewProps } from "./widget/components/MappingsView";
-export { useGroupsOperations, GroupsOperationsProps } from "./widget/components/hooks/useGroupsOperations";
-export { GroupsView, GroupsViewProps } from "./widget/components/GroupsView";
+export { Mappings, MappingsProps } from "./widget/components/Mappings/Mappings";
+export { useMappingsOperations, MappingsOperationsProps } from "./widget/components/Mappings/hooks/useMappingsOperations";
+export { MappingAction, MappingActionProps } from "./widget/components/Mappings/Editing/MappingAction";
+export { MappingsView, MappingsViewProps } from "./widget/components/Mappings/MappingsView";
+export { useGroupsOperations, GroupsOperationsProps } from "./widget/components/Groups/hooks/useGroupsOperations";
+export { GroupsView, GroupsViewProps } from "./widget/components/Groups/GroupsView";
 export { GroupingMappingContext, GroupingMappingContextProps } from "./widget/components/GroupingMappingContext";
-export { Groups, GroupsProps } from "./widget/components/Groups";
-export { GroupsVisualization, GroupsVisualizationProps } from "./widget/components/GroupsVisualization";
-export { GroupAction, GroupActionProps } from "./widget/components/GroupAction";
-export { PropertyMenu, PropertyMenuProps } from "./widget/components/PropertyMenu";
-export { PropertyMenuWithVisualization, PropertyMenuWithVisualizationProps } from "./widget/components/PropertyMenuWithVisualization";
-export { GroupPropertyAction, GroupPropertyActionProps } from "./widget/components/GroupPropertyAction";
+export { Groups, GroupsProps } from "./widget/components/Groups/Groups";
+export { GroupsVisualization, GroupsVisualizationProps } from "./widget/components/Groups/GroupsVisualization";
+export { GroupAction, GroupActionProps } from "./widget/components/Groups/Editing/GroupAction";
+export { PropertyMenu, PropertyMenuProps } from "./widget/Properties/PropertyMenu";
+export { PropertyMenuWithVisualization, PropertyMenuWithVisualizationProps } from "./widget/Properties/PropertyMenuWithVisualization";
+export { GroupPropertyAction, GroupPropertyActionProps } from "./widget/Properties/GroupProperties/GroupPropertyAction";
 export { CalculatedPropertyAction, CalculatedPropertyActionProps } from "./widget/components/CalculatedPropertyAction";
-export { CalculatedPropertyActionWithVisuals, CalculatedPropertyActionWithVisualsProps } from "./widget/components/CalculatedPropertyActionWithVisuals";
-export { CustomCalculationAction, CustomCalculationActionProps } from "./widget/components/CustomCalculationAction";
+export { CalculatedPropertyActionWithVisuals, CalculatedPropertyActionWithVisualsProps } from "./widget/Properties/CalculatedProperties/CalculatedPropertyActionWithVisuals";
+export { CustomCalculationAction, CustomCalculationActionProps } from "./widget/Properties/CustomCalculations/CustomCalculationAction";
 export { SearchGroupingCustomUI } from "./widget/components/customUI/SearchGroupingCustomUI";
 export { ManualGroupingCustomUI } from "./widget/components/customUI/ManualGroupingCustomUI";
 export { GroupQueryBuilderCustomUI } from "./widget/components/customUI/GroupQueryBuilderCustomUI";
