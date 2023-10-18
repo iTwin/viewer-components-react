@@ -69,6 +69,12 @@ const fetchExtractionStatus = async (
               message: String(filteredLog.message),
             }
           ));
+        extractionMessageData.push({
+          date: "05/23/2023",
+          category: "QueryTranslation",
+          level: "Warning",
+          message: "MappingId: 1b59719f-91f1-4351-ae3c-05f53e5f9c77 GroupId: d421a28a-5740-4407-8d13-7f6537b2439e",
+        });
         setExtractionMessageData(extractionMessageData);
       } else {
         setExtractionIconData({

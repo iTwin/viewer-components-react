@@ -14,6 +14,7 @@ import { SvgClock } from "@itwin/itwinui-icons-react";
 import type { CellRendererProps, Column } from "react-table";
 import { StatusIcon } from "./StatusIcon";
 import { ExtractionLogCustomFilter } from "./ExtractionLogCustomFilter";
+import type { Group } from "@itwin/insights-client";
 
 export interface ExtractionMessageModalProps {
   isOpen: boolean;
@@ -24,42 +25,51 @@ export interface ExtractionMessageModalProps {
 
 export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData, timestamp }: ExtractionMessageModalProps) => {
   const [formattedTimestamp, setFormattedTimestamp] = useState<string>("");
+  const [formattedExtractionMessage, setFormattedExtractionMessage] = useState<ExtractionMessageData[]>([]);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [mappingId, setMappingId] = useState<string>("");
-  const [groupId, setGroupId]  = useState<string>("");
   const { mappings } = useMappingsOperations({...groupingMappingApiConfig, mappingClient});
-  useEffect(() => {
-    extractionMessageData.forEach((extractionMessage) => {
-      if(extractionMessage.message.includes("iModel")){
-        extractionMessage.message = extractionMessage.message.replace(/iModel [\w-]+/, "iModel");
-      }
-    });
-  }, [extractionMessageData]);
-  const setMappingandGroupNames = useCallback (async (extractionMessage: ExtractionMessageData) => {
-    if(mappingId){
-      const mappingName = mappings.filter((mapping) => {return mapping.id === mappingId;});
-      const accessToken = await groupingMappingApiConfig.getAccessToken();
+  const getMappingName = useCallback(async (mappingId: string) => {
+    return mappings.find((mapping) => {return mapping.id === mappingId;})?.mappingName ?? "";
+  }, [mappings]);
+  const getGroupNames = useCallback(async (mappingId: string, groupId: string, groupsCache: Map<string, Group[]>) => {
+    const accessToken = await groupingMappingApiConfig.getAccessToken();
+    if(!groupsCache.has(mappingId)){
       const groups = await mappingClient.getGroups(
         accessToken,
         groupingMappingApiConfig.iModelId,
         mappingId
       );
-      const groupName = groups.filter((group) => {return group.id === groupId;});
-      extractionMessage.message = extractionMessage.message.replace(/MappingId: [\w-]+/, `Mapping: ${  mappingName[0].mappingName}`);
-      extractionMessage.message = extractionMessage.message.replace(/GroupingId: [\w-]+/, `Group: ${  groupName[0].groupName}`);
+      groupsCache.set(mappingId, groups);
     }
-  }, [mappingId, groupId, groupingMappingApiConfig, mappings, mappingClient]);
+    return groupsCache.get(mappingId)?.find((group) => {return group.id === groupId;})?.groupName ?? "";
+  }, [groupingMappingApiConfig, mappingClient]);
   useEffect(() => {
-    extractionMessageData.forEach(async (extractionMessage) => {
-      if(extractionMessage.message.includes("MappingId:")){
-        const splittedMessage = extractionMessage.message.split(" ");
-        setMappingId(splittedMessage[splittedMessage.indexOf("MappingId:") + 1]);
-        setGroupId(splittedMessage[splittedMessage.indexOf("GroupingId:") + 1]);
-        await setMappingandGroupNames(extractionMessage);
-      }
-    });
-  }, [extractionMessageData, setMappingandGroupNames]);
+    const formatMessages = async () => {
+      const groupsCache = new Map<string,Group[]>();
+      const extractionMessageDataPromises = extractionMessageData.map(async (extractionMessage) => {
+        let replacedMessage = extractionMessage.message;
+        if(extractionMessage.message.includes("iModel")){
+          replacedMessage = replacedMessage.replace(/iModel [\w-]+/, "iModel");
+        }
+        if(replacedMessage.includes("MappingId:")){
+          const splittedMessage = replacedMessage.split(" ");
+          const mappingId = splittedMessage[splittedMessage.indexOf("MappingId:") + 1];
+          const groupId = splittedMessage[splittedMessage.indexOf("GroupId:") + 1];
+          const mappingName = await getMappingName(mappingId);
+          const groupName = await getGroupNames(mappingId, groupId, groupsCache);
+          replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
+          replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName}`);
+        }
+        return {...extractionMessage, message: replacedMessage};
+      });
+
+      const newMessages = await Promise.all(extractionMessageDataPromises);
+      setFormattedExtractionMessage(newMessages);
+    };
+    void formatMessages();
+  }, [extractionMessageData, groupingMappingApiConfig, mappings, mappingClient, getGroupNames, getMappingName]);
+
   useEffect(() => {
     const newDateTime: Date = new Date(timestamp);
     const options: Intl.DateTimeFormatOptions = {
@@ -140,7 +150,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
         </div>
         <Table<CreateTypeFromInterface<ExtractionMessageData>>
           columns={columns}
-          data={extractionMessageData}
+          data={formattedExtractionMessage}
           emptyTableContent={""}
           emptyFilteredTableContent="No results match filters."
           className="gmw-extraction-message-table-container"
