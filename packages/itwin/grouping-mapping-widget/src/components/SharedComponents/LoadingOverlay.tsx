@@ -4,9 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import { ProgressRadial, Text } from "@itwin/itwinui-react";
 import React from "react";
+import "./LoadingOverlay.scss";
 
 export const LoadingOverlay = () => (
-  <div className='gmw-center-overlay'>
+  <div className='gmw-loading-center-overlay'>
     <Text>Loading</Text>
     <ProgressRadial indeterminate />
     <Text>Please wait...</Text>

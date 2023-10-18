@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { ProgressRadial } from "@itwin/itwinui-react";
 import React from "react";
+import "./LoadingSpinner.scss";
 
 export const LoadingSpinner = () => {
   return (
