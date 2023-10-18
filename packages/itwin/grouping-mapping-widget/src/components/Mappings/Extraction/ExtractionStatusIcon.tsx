@@ -7,7 +7,7 @@ import React from "react";
 import { SvgProcess } from "@itwin/itwinui-icons-react";
 
 export interface ExtractionStatusIconProps {
-  iconStatus: "negative" | "positive" | "warning";
+  iconStatus: "negative" | "positive" | "warning" | undefined;
   onClick: () => void;
   iconMessage: string;
 }

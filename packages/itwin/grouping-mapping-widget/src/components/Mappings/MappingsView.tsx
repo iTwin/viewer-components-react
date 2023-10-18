@@ -24,8 +24,8 @@ import { HorizontalTile } from "../SharedComponents/HorizontalTile";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { MappingUIActionGroup } from "./MappingViewActionGroup";
-import type { ExtractionMessageData } from "./hooks/useMappingsOperations";
-import type { ExtractionIconData } from "./hooks/useMappingsOperations";
+import type { ExtractionMessageData } from "../context/ExtractionStatusDataContext";
+import type { ExtractionStatusData } from "../context/ExtractionStatusDataContext";
 import { ExtractionStatusIcon } from "./Extraction/ExtractionStatusIcon";
 import { ExtractionMessageModal } from "./Extraction/ExtractionMessageModal";
 
@@ -43,7 +43,7 @@ export const mappingViewDefaultDisplayStrings = {
 export interface MappingsViewProps {
   mappings: Mapping[];
   isLoading: boolean;
-  extractionIconData: ExtractionIconData;
+  extractionStatusData: ExtractionStatusData;
   showExtractionMessageModal: boolean;
   extractionMessageData: ExtractionMessageData[];
   setShowExtractionMessageModal: (show: boolean) => void;
@@ -65,7 +65,7 @@ export interface MappingsViewProps {
 export const MappingsView = ({
   mappings,
   isLoading,
-  extractionIconData,
+  extractionStatusData,
   showExtractionMessageModal,
   extractionMessageData,
   setShowExtractionMessageModal,
@@ -114,13 +114,13 @@ export const MappingsView = ({
           </div>
           <div className="gmw-button-spacing">
             <ExtractionStatusIcon
-              iconStatus={extractionIconData.iconStatus}
+              iconStatus={extractionStatusData.iconStatus}
               onClick={() => {
-                if (extractionIconData.iconStatus === "negative") {
+                if (extractionStatusData.iconStatus === "negative") {
                   setShowExtractionMessageModal(true);
                 }
               }}
-              iconMessage={extractionIconData.iconMessage}
+              iconMessage={extractionStatusData.iconMessage}
             />
             <IconButton
               title="Refresh"
