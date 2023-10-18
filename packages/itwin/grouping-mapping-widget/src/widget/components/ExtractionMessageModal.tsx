@@ -29,9 +29,11 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const { mappings } = useMappingsOperations({...groupingMappingApiConfig, mappingClient});
+  
   const getMappingName = useCallback(async (mappingId: string) => {
     return mappings.find((mapping) => {return mapping.id === mappingId;})?.mappingName ?? "";
   }, [mappings]);
+  
   const getGroupNames = useCallback(async (mappingId: string, groupId: string, groupsCache: Map<string, Group[]>) => {
     const accessToken = await groupingMappingApiConfig.getAccessToken();
     if(!groupsCache.has(mappingId)){
@@ -44,6 +46,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
     }
     return groupsCache.get(mappingId)?.find((group) => {return group.id === groupId;})?.groupName ?? "";
   }, [groupingMappingApiConfig, mappingClient]);
+  
   useEffect(() => {
     const formatMessages = async () => {
       const groupsCache = new Map<string,Group[]>();
@@ -83,6 +86,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
     filter: "Filter",
     clear: "Clear",
   }), []);
+  
   const columns = useMemo(
     (): Column<CreateTypeFromInterface<ExtractionMessageData>>[] => [
       {
