@@ -20,7 +20,7 @@ export interface IExtractionStatusDataProps {
   extractionStatusIcon: ExtractionStatusData;
   extractionMessageData: ExtractionMessageData[];
   setExtractionStatusIcon: (extractionStatusIcon: ExtractionStatusData | ((extractionStatusIcon: ExtractionStatusData) => ExtractionStatusData)) => void;
-  setExtractionMessageData: (extractionMessageData: ExtractionMessageData[] | ((extractionMessageData: ExtractionMessageData[]) => ExtractionMessageData[])) => void;
+  setExtractionMessageData: (extractionMessageData: ExtractionMessageData[]) => void;
 }
 
 export const ExtractionStatusDataContext = createContext<IExtractionStatusDataProps>({

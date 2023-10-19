@@ -37,7 +37,7 @@ const fetchExtractionStatus = async (
   getAccessToken: GetAccessTokenFn,
   extractionClient: IExtractionClient,
   setExtractionStatusIcon: (extractionStatusIcon: ExtractionStatusData | ((extractionStatusIcon: ExtractionStatusData) => ExtractionStatusData)) => void,
-  setExtractionMessageData: (extractionMessageData: ExtractionMessageData[] | ((extractionMessageData: ExtractionMessageData[]) => ExtractionMessageData[])) => void
+  setExtractionMessageData: (extractionMessageData: ExtractionMessageData[]) => void
 ) => {
   try {
     setExtractionStatusIcon({
@@ -45,14 +45,14 @@ const fetchExtractionStatus = async (
       iconMessage: "Loading...",
     });
     const accessToken = await getAccessToken();
-    const extraction = await extractionClient.getExtractionHistory(accessToken, iModelId, 1);
-    if(extraction.length === 0){
+    const extraction = extractionClient.getExtractionHistoryIterator(accessToken, iModelId, 1);
+    if((await extraction.next()).done){
       setExtractionStatusIcon({
         iconStatus: "negative",
         iconMessage: "No extraction found.",
       });
     } else {
-      const jobId = extraction[0].jobId;
+      const jobId = (await extraction.next()).value.jobId;
       const status = await extractionClient.getExtractionStatus(accessToken, jobId);
       if (status.containsIssues) {
         const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
