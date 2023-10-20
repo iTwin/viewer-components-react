@@ -8,8 +8,8 @@ import userEvent from "@testing-library/user-event";
 import type { IMappingsClient } from "@itwin/insights-client";
 import type { GroupingMappingCustomUI } from "../grouping-mapping-widget";
 import * as moq from "typemoq";
-import type { GroupingMappingContextProps } from "../widget/components/GroupingMappingContext";
-import { GroupingMappingContext } from "../widget/components/GroupingMappingContext";
+import type { GroupingMappingContextProps } from "../components/GroupingMappingContext";
+import { GroupingMappingContext } from "../components/GroupingMappingContext";
 
 export const mockAccessToken = async () => "Bearer eyJhbGci";
 export const mockMappingClient = moq.Mock.ofType<IMappingsClient>();
