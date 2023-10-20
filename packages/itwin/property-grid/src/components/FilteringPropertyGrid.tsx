@@ -8,7 +8,7 @@ import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
   FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
-import { useDisposable } from "@itwin/core-react";
+import { useDisposable } from "../hooks/UseDisposable";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IPropertyDataFilterer, IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataFilterResult, VirtualizedPropertyGridWithDataProviderProps } from "@itwin/components-react";

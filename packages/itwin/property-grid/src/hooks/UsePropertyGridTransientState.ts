@@ -24,7 +24,7 @@ import { useVirtualizedPropertyGridLayoutStorage } from "@itwin/components-react
  *
  * @public
  */
-export function usePropertyGridTransientState<T extends Element>() {
+export function usePropertyGridTransientState<T extends Element>(): React.Ref<T> {
   const { ref, persist, restore } = useVirtualizedPropertyGridLayoutStorage<T>();
   useTransientState(persist, restore);
   return ref;

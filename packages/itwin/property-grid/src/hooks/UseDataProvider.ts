@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { useCallback } from "react";
-import { useDisposable } from "@itwin/core-react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { useDisposable } from "./UseDisposable";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
