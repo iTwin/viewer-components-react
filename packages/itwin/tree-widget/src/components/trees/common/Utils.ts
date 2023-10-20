@@ -3,12 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { useEffect, useRef, useState } from "react";
 import { PropertyValueRendererManager } from "@itwin/components-react";
 import { CheckBoxState } from "@itwin/core-react";
 import { TREE_NODE_LABEL_RENDERER, TreeNodeLabelRenderer } from "./TreeNodeRenderer";
 
 import type { DelayLoadedTreeNodeItem, IPropertyValueRenderer } from "@itwin/components-react";
 import type { Node } from "@itwin/presentation-common";
+import type { IDisposable } from "@itwin/core-bentley";
 
 /** @internal */
 export function combineTreeNodeItemCustomizations(customizations: Array<(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) => void>) {
@@ -49,4 +51,26 @@ export function registerRenderers() {
       PropertyValueRendererManager.defaultManager.unregisterRenderer(name);
     }
   };
+}
+
+// TODO: Remove when `useDisposable` from `@itwin/core-react` works fine with React 18 strict mode
+/** @internal */
+export function useDisposable<TDisposable extends IDisposable>(factory: () => TDisposable): TDisposable {
+  const [value, setValue] = useState(() => factory());
+  const initialValue = useRef(true);
+
+  useEffect(() => {
+    if (!initialValue.current) {
+      setValue(factory());
+    }
+    initialValue.current = false;
+    return () => {
+      setValue((prev) => {
+        prev.dispose();
+        return prev;
+      });
+    };
+  }, [factory]);
+
+  return value;
 }

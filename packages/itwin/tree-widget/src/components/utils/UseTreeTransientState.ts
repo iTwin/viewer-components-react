@@ -6,6 +6,8 @@
 import { useTransientState } from "@itwin/appui-react";
 import { useControlledTreeLayoutStorage } from "@itwin/components-react";
 
+import type { Ref } from "react";
+
 // istanbul ignore file
 
 /**
@@ -24,7 +26,7 @@ import { useControlledTreeLayoutStorage } from "@itwin/components-react";
  *
  * @public
  */
-export function useTreeTransientState<T extends Element>() {
+export function useTreeTransientState<T extends Element>(): Ref<T> {
   const { ref, persist, restore } = useControlledTreeLayoutStorage<T>();
   useTransientState(persist, restore);
   return ref;

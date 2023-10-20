@@ -44,14 +44,24 @@
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build"
   },
+  "peerDependencies": {
+    "@itwin/appui-abstract": "^4.0.0",
+    "@itwin/appui-react": "^4.3.0",
+    "@itwin/components-react": "^4.3.0",
+    "@itwin/core-frontend": "^4.0.0",
+    "@itwin/core-react": "^4.3.0",
+    "@itwin/presentation-components": "^4.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  },
   "dependencies": {
     "@bentley/icons-generic": "^1.0.34",
     "@itwin/itwinui-icons-react": "^2.1.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "^2.11.0",
+    "@itwin/itwinui-react": "^2.12.14",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
-    "react-error-boundary": "^4.0.10",
+    "react-error-boundary": "^4.0.11",
     "rxjs": "^6.6.2"
   },
   "devDependencies": {
@@ -125,16 +135,6 @@
     "typemoq": "^2.1.0",
     "typescript": "~5.0.0",
     "xmlhttprequest": "^1.8.0"
-  },
-  "peerDependencies": {
-    "@itwin/appui-abstract": "^4.0.0",
-    "@itwin/appui-react": "^4.3.0",
-    "@itwin/components-react": "^4.3.0",
-    "@itwin/core-frontend": "^4.0.0",
-    "@itwin/core-react": "^4.3.0",
-    "@itwin/presentation-components": "^4.0.0",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0"
   },
   "eslintConfig": {
     "extends": [

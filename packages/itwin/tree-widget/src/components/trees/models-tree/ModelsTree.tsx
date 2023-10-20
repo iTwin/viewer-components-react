@@ -5,13 +5,12 @@
 
 import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
-import { useDisposable } from "@itwin/core-react";
 import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { ClassGroupingOption } from "../common/Types";
-import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
+import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations, useDisposable } from "../common/Utils";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
@@ -82,6 +81,11 @@ export function ModelsTree(props: ModelsTreeProps) {
 
   const { activeView, modelsVisibilityHandler, selectionPredicate } = props;
 
+  const selectionPredicateRef = useRef(selectionPredicate);
+  useEffect(() => {
+    selectionPredicateRef.current = selectionPredicate;
+  }, [selectionPredicate]);
+
   const visibilityHandler = useVisibilityHandler(
     nodeLoader.dataProvider.rulesetId,
     props.iModel,
@@ -92,8 +96,8 @@ export function ModelsTree(props: ModelsTreeProps) {
   const eventHandler = useDisposable(useCallback(() => new VisibilityTreeEventHandler({
     nodeLoader: filteredNodeLoader,
     visibilityHandler,
-    selectionPredicate: (node) => !selectionPredicate || !isPresentationTreeNodeItem(node) ? true : selectionPredicate(node.key, ModelsVisibilityHandler.getNodeType(node)),
-  }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
+    selectionPredicate: (node) => !selectionPredicateRef.current || !isPresentationTreeNodeItem(node) ? true : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
+  }), [filteredNodeLoader, visibilityHandler]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const treeRenderer = createVisibilityTreeRenderer({
