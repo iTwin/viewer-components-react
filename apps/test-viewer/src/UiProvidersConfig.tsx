@@ -64,7 +64,7 @@ const configuredUiItems = new Map<string, UiItem>([
         trees: [{
           id: ModelsTreeComponent.id,
           getLabel: ModelsTreeComponent.getLabel,
-          render: () => <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} />
+          render: () => <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Extended} />
         }, {
           id: CategoriesTreeComponent.id,
           getLabel: CategoriesTreeComponent.getLabel,
