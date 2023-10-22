@@ -46,13 +46,14 @@ const fetchExtractionStatus = async (
     });
     const accessToken = await getAccessToken();
     const extraction = extractionClient.getExtractionHistoryIterator(accessToken, iModelId, 1);
-    if((await extraction.next()).done){
+    const latestExtractionResult = await extraction.next();
+    if(latestExtractionResult.done){
       setExtractionStatusIcon({
         iconStatus: "negative",
         iconMessage: "No extraction found.",
       });
     } else {
-      const jobId = (await extraction.next()).value.jobId;
+      const jobId = latestExtractionResult.value.jobId;
       const status = await extractionClient.getExtractionStatus(accessToken, jobId);
       if (status.containsIssues) {
         const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
