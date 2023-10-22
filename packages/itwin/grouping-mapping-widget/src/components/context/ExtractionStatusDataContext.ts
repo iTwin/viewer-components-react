@@ -28,12 +28,7 @@ export const ExtractionStatusDataContext = createContext<IExtractionStatusDataPr
     iconStatus: undefined,
     iconMessage: "",
   },
-  extractionMessageData: [{
-    date: "",
-    category: "",
-    level: "",
-    message: "",
-  }],
+  extractionMessageData: [],
   setExtractionStatusIcon: () => { },
   setExtractionMessageData: () => { },
 });
