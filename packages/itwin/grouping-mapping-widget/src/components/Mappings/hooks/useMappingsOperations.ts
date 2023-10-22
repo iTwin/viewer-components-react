@@ -36,7 +36,7 @@ const fetchExtractionStatus = async (
   iModelId: string,
   getAccessToken: GetAccessTokenFn,
   extractionClient: IExtractionClient,
-  setExtractionStatusIcon: (extractionStatusIcon: ExtractionStatusData | ((extractionStatusIcon: ExtractionStatusData) => ExtractionStatusData)) => void,
+  setExtractionStatusIcon: (extractionStatusIcon: ExtractionStatusData) => void,
   setExtractionMessageData: (extractionMessageData: ExtractionMessageData[]) => void
 ) => {
   try {
