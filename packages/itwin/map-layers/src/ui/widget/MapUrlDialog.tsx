@@ -165,7 +165,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   // return true if authorization is needed
   const updateAuthState = React.useCallback(async (source: MapLayerSource, sourceValidation: MapLayerSourceValidation) => {
     const sourceRequireAuth = (sourceValidation.status === MapLayerSourceStatus.RequireAuth);
-    const invalidCredentials = (sourceValidation.status === MapLayerSourceStatus.InvalidCredentials);
+    let invalidCredentials = (sourceValidation.status === MapLayerSourceStatus.InvalidCredentials);
     if (sourceRequireAuth) {
       const settings = source.toLayerSettings();
 
@@ -180,6 +180,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
         } catch (_error) {
 
         }
+      } else if (userName.length > 0 || password.length > 0 ) {
+        // This is a patch until @itwin\core-frontend return the expected 'InvalidCredentials' status .
+        invalidCredentials = true;
       }
 
     }
@@ -191,7 +194,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     }
 
     return sourceRequireAuth || invalidCredentials;
-  }, [accessClient, invalidCredentialsProvided]);
+  }, [accessClient, invalidCredentialsProvided, password.length, userName.length]);
 
   const onNameChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setMapName(event.target.value);
