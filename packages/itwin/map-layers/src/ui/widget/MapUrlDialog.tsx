@@ -114,6 +114,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [onOauthProcessEnd] = React.useState(new BeEvent());
   const [accessClient, setAccessClient] = React.useState<MapLayerAccessClient | undefined>();
   const [isAccessClientInitialized, setAccessClientInitialized] = React.useState(false);
+  const [shouldAutoAttachSource, setShouldAutoAttachSource] = React.useState(true);
 
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
 
@@ -167,6 +168,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     const sourceRequireAuth = (sourceValidation.status === MapLayerSourceStatus.RequireAuth);
     let invalidCredentials = (sourceValidation.status === MapLayerSourceStatus.InvalidCredentials);
     if (sourceRequireAuth) {
+      let hasTokenEndPoint = false;
       const settings = source.toLayerSettings();
 
       if (accessClient !== undefined && accessClient.getTokenServiceEndPoint !== undefined && settings !== undefined) {
@@ -175,16 +177,18 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           if (tokenEndpoint !== undefined) {
             const loginUrl = tokenEndpoint.getLoginUrl();
             setExternalLoginUrl(loginUrl);
+            hasTokenEndPoint = true;
           }
 
         } catch (_error) {
 
         }
-      } else if (userName.length > 0 || password.length > 0 ) {
+      }
+
+      if (!hasTokenEndPoint && (userName.length > 0 || password.length > 0 )) {
         // This is a patch until @itwin\core-frontend return the expected 'InvalidCredentials' status.
         invalidCredentials = true;
       }
-
     }
     setServerRequireCredentials(sourceRequireAuth || invalidCredentials);
     if (invalidCredentials) {
@@ -307,9 +311,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       onOauthProcessEnd.raiseEvent(success, _state);
     };
 
-    // Currently only arcgis support AccessClient
-
-    const ac = IModelApp.mapLayerFormatRegistry.getAccessClient(MAP_TYPES.arcGis);
+    const ac = IModelApp.mapLayerFormatRegistry.getAccessClient(mapType);
     if (ac?.onOAuthProcessEnd) {
       setAccessClient(ac);   // cache it, so we dont need to make another lookup;
       ac.onOAuthProcessEnd.addListener(handleOAuthProcessEnd);
@@ -342,8 +344,12 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   React.useEffect(() => {
     // Attach source asynchronously.
     void (async () => {
-      if (isAccessClientInitialized && props.layerRequiringCredentials?.url !== undefined && props.layerRequiringCredentials?.name !== undefined) {
+      if (isAccessClientInitialized
+        && shouldAutoAttachSource
+        && props.layerRequiringCredentials?.url !== undefined
+        && props.layerRequiringCredentials?.name !== undefined) {
         try {
+
           const source = MapLayerSource.fromJSON({
             url: props.layerRequiringCredentials.url,
             name: props.layerRequiringCredentials.name,
@@ -352,6 +358,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
           if (source !== undefined) {
             setLayerAttachPending(true);
+            setShouldAutoAttachSource(false);
             const validation = await source.validateSource(true);
             if (isMounted.current) {
               setLayerAttachPending(false);
@@ -362,21 +369,18 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       }
     })();
 
-  }, [isAccessClientInitialized,
-    props.layerRequiringCredentials?.formatId,
-    props.layerRequiringCredentials?.name,
-    props.layerRequiringCredentials?.url,
-    updateAuthState]);
+  }, [isAccessClientInitialized, props.layerRequiringCredentials?.formatId, props.layerRequiringCredentials?.name, props.layerRequiringCredentials?.url, shouldAutoAttachSource, updateAuthState]);
 
   const dialogContainer = React.useRef<HTMLDivElement>(null);
 
   const readyToSave = React.useCallback(() => {
     const credentialsSet = !!userName && !!password;
-    return (!!mapUrl && !!mapName)
+    const ready = (!!mapUrl && !!mapName)
       && !layerAttachPending
       && (!serverRequireCredentials || credentialsSet)
       && !invalidCredentialsProvided
       && (externalLoginUrl === undefined || (externalLoginUrl !== undefined && oauthProcessSucceeded));
+    return ready;
   }, [userName, password, mapUrl, mapName, serverRequireCredentials, layerAttachPending, invalidCredentialsProvided, externalLoginUrl, oauthProcessSucceeded]);
 
   // const buttonCluster = React.useMemo(() => [
