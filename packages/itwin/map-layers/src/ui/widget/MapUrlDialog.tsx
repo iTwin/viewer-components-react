@@ -184,7 +184,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
         }
       } else if (userName.length > 0 || password.length > 0 ) {
-        // This is a patch until @itwin\core-frontend return the expected 'InvalidCredentials' status .
+        // This is a patch until @itwin\core-frontend return the expected 'InvalidCredentials' status.
         invalidCredentials = true;
       }
 
