@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Removed iModelId and replaced MappingId and GroupId with names in log messages.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}
