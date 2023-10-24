@@ -9,7 +9,7 @@ import { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibility } f
 export interface StyleMapLayerSettings {
   /** Name */
   name: string;
-  /** source (i.URL for ImageMapLayerSettings or modelId for ModelMapLayerSettings) */
+  /** source (i.URL for ImageMapLayerSettings or modelId for ModelMapLayerSettings)  */
   source: string;
   /** Controls visibility of layer */
   visible: boolean;
