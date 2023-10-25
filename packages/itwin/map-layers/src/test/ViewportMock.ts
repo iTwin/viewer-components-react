@@ -24,7 +24,7 @@ export class ViewportMock {
 
   public onDisplayStyleChanged: BeEvent<(vp: Readonly<coreFrontend.Viewport>) => void> = new BeEvent<(vp: Readonly<coreFrontend.Viewport>) => void>();
 
-  public baseMap = coreCommon.BaseMapLayerSettings.fromJSON(coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Hybrid} )));
+  public baseMap: coreCommon.BaseLayerSettings = coreCommon.BaseMapLayerSettings.fromJSON(coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Hybrid} )));
 
   public detachMapLayerByIndexFunc: ((mapLayerIndex: coreFrontend.MapLayerIndex) => void) | undefined;
   public backgroundLayers: coreCommon.MapLayerSettings[] = [];

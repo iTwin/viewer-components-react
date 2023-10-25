@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Fixed base map translation issues",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
