@@ -42,7 +42,7 @@ const reportsFactory = (): ReportCollection => ({
 });
 
 const mockGetReports = jest.fn();
-const mockDeleteReport = jest.fn()
+const mockDeleteReport = jest.fn();
 
 const mockReportsClient = moq.Mock.ofType<ReportsClient>();
 
@@ -54,9 +54,8 @@ beforeAll(async () => {
   mockReportsClient.setup(async (x) => x.deleteReport(moq.It.isAny(), moq.It.isAny())).returns(mockDeleteReport);
 });
 
-
 afterEach(() => {
-  mockGetReports.mockReset()
+  mockGetReports.mockReset();
   mockDeleteReport.mockReset();
 });
 
@@ -134,7 +133,7 @@ describe("Reports View", () => {
   });
 
   it("remove a report", async () => {
-    let mockedReports: ReportCollection = reportsFactory();
+    const mockedReports: ReportCollection = reportsFactory();
 
     mockGetReports.mockReturnValue(mockedReports.reports);
 
