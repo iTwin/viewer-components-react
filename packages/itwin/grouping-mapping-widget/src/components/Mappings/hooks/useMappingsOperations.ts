@@ -122,8 +122,10 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
 
   const refresh = useCallback(async () => {
     setMappings([]);
-    void fetchExtractionStatus(iModelId, getAccessToken, extractionClient, setExtractionStatusIcon, setExtractionMessageData);
-    await fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient, setErrorMessage);
+    await Promise.all([
+      fetchExtractionStatus(iModelId, getAccessToken, extractionClient, setExtractionStatusIcon, setExtractionMessageData),
+      fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient, setErrorMessage),
+    ]);
   }, [extractionClient, getAccessToken, mappingClient, iModelId, setExtractionMessageData, setExtractionStatusIcon]);
 
   const toggleExtraction = useCallback(async (mapping: Mapping) => {
