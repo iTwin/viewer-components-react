@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Fix warning message after a failed attempt to provide credentials",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
