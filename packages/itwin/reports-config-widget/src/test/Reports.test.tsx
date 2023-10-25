@@ -159,6 +159,7 @@ describe("Reports View", () => {
     await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
 
     expect(mockDeleteReport).toBeCalled();
+    // Two calls, when it is first rendered and when it is refreshed.
     expect(mockGetReports).toBeCalledTimes(2);
   });
 
