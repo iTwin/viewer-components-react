@@ -66,7 +66,7 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
       options={mapFormats}
       value={mapFormat}
       disabled={props.disabled}
-      onChange={handleOnChange}
+      // onChange={handleOnChange}
       size="small"
       itemRenderer={
         (option) => (

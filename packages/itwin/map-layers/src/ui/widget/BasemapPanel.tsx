@@ -198,7 +198,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
           options={baseMapOptions}
           placeholder={selectBaseMapLabel}
           value={selectedBaseMapValue.value}
-          onChange={handleBaseMapSelection} size="small"
+          // onChange={handleBaseMapSelection} size="small"
           disabled={props.disabled}
         />
         {

@@ -57,7 +57,6 @@
     "@itwin/core-telemetry": "^4.2.0",
     "@itwin/eslint-plugin": "^4.0.0-dev.38",
     "@itwin/imodel-components-react": "^4.0.1",
-    "@itwin/itwinui-variables": "^2.0.0",
     "@itwin/itwinui-react": "^3.0.0",
     "@itwin/map-layers-formats": "^4.2.0",
     "@itwin/webgl-compatibility": "^4.2.0",
