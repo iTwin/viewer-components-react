@@ -4,10 +4,10 @@
     "Close": "Close source map layers pop-up"
   },
   "Basemap": {
-    "BaseLayer": "Base:",
+    "BaseLayer": "Base",
     "BaseMapPanelTitle": "Map Layers",
     "ColorFill": "Solid Fill Color",
-    "SelectBaseMap": "Select Map for base layer"
+    "SelectBaseMap": "Select base layer"
   },
   "ColorDialog": {
     "Title": "Specify Base Color"
@@ -147,5 +147,12 @@
   },
   "TransparencyPopup": {
     "SetTransparency": "Set transparency"
+  },
+  "WellKnownBaseMaps" : {
+    "BingProvider" : {
+      "Aerial" : "Bing Maps: Aerial Imagery",
+      "Hybrid" : "Bing Maps: Aerial Imagery with labels",
+      "Street" : "Bing Maps: Streets"
+    }
   }
 }
