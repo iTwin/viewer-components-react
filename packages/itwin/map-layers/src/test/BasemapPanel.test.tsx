@@ -124,7 +124,7 @@ describe("BasemapPanel", () => {
     </SourceMapContext.Provider>);
 
     const baseMap = coreCommon.BaseMapLayerSettings.fromProvider(coreCommon.BackgroundMapProvider.fromJSON({name: "BingProvider", type: coreCommon.BackgroundMapType.Street}), {invisible: true, transparency: 0.5});
-    viewportMock.baseMap = baseMap;   // mock needs to be updated too because the component refresh from the viewport too.
+    viewportMock.baseMap = baseMap;   // mock needs to be updated too because the component refresh from the viewport too .
     viewportMock.onMapImageryChanged.raiseEvent(coreCommon.MapImagerySettings.fromJSON({backgroundBase: baseMap}));
     await TestUtils.flushAsyncOperations();
 
