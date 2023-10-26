@@ -97,7 +97,7 @@ export function PropertyGridContent({
     ...props,
     dataProvider,
     filterer,
-    highlight: filterText && filterText.length !== 0 ? { highlightedText: filterText, filteredTypes: [FilteredType.Category, FilteredType.Label, FilteredType.Value] } : undefined,
+    highlight: filterText ? { highlightedText: filterText, filteredTypes: [FilteredType.Category, FilteredType.Label, FilteredType.Value] } : undefined,
     isPropertyHoverEnabled: true,
     isPropertySelectionEnabled: true,
     onPropertyContextMenu,
@@ -108,27 +108,20 @@ export function PropertyGridContent({
       : undefined,
   };
 
-  // const contentSize = useEffect(async () => {
-
-  //   async function getContentSetSize() {
-  //     const contentSetSize = await dataProvider.getContentSetSize();
-  //     return contentSetSize;
-  //   }
-
-  //   const bruh = await getContentSetSize();
-  // }, [dataProvider]);
-
-  const onFilterStart = (searchText: string) => {
-    setFilterText(searchText);
-  };
-
-  const onFilterClear = () => {
-    setFilterText("");
-  };
-
   return (
     <div className={classnames("property-grid-react-container", className)}>
-      <PropertyGridHeader controls={headerControls} item={item} onBackButtonClick={onBackButton} settingsProps={settingsProps} onFilterStart={onFilterStart} onFilterClear={onFilterClear} />
+      <PropertyGridHeader
+        controls={headerControls}
+        item={item}
+        onBackButtonClick={onBackButton}
+        settingsProps={settingsProps}
+        onFilterStart={(searchText: string) => {
+          setFilterText(searchText);
+        }}
+        onFilterClear={() => {
+          setFilterText("");
+        }}
+      />
       <div className="property-grid-react-data">
         <ResizableContainerObserver onResize={handleResize}>
           {
@@ -155,8 +148,8 @@ interface PropertyGridHeaderProps {
 function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, onFilterStart, onFilterClear }: PropertyGridHeaderProps) {
   const [searchBarIsExpanded, setSearchBarIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState<string>("");
+  // save latest `onFilterStart` reference into `useRef` to avoid restarting timeout when `onFilterStart` reference changes.
   const onFilterStartRef = useRef(onFilterStart);
-  // save latest `onFiltertStart` reference into `useRef` to avoid restarting timeout when `onFiltertStart` reference changes.
   onFilterStartRef.current = onFilterStart;
 
   useEffect(() => {
