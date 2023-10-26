@@ -190,7 +190,6 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
         >
           <SearchBox.CollapsedState>
             <SearchBox.ExpandButton
-              size="small"
               title="Expand Searchbar"
             />
           </SearchBox.CollapsedState>
