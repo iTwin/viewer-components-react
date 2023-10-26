@@ -2,6 +2,27 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "version": "5.2.3",
+      "tag": "@itwin/map-layers_v5.2.3",
+      "date": "Thu, 26 Oct 2023 13:09:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed base map translation issues"
+          },
+          {
+            "comment": "Fix warning message after a failed attempt to provide credentials"
+          },
+          {
+            "comment": "Fix an issue in the 'Add New Layer' dialog where invalid credentials warning would not appear after a first invalid attempt."
+          },
+          {
+            "comment": "Make the MapFeatureInfo Widget appear only when results are available."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.2",
       "tag": "@itwin/map-layers_v5.2.2",
       "date": "Thu, 05 Oct 2023 18:48:11 GMT",
