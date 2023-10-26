@@ -108,6 +108,16 @@ export function PropertyGridContent({
       : undefined,
   };
 
+  // const contentSize = useEffect(async () => {
+
+  //   async function getContentSetSize() {
+  //     const contentSetSize = await dataProvider.getContentSetSize();
+  //     return contentSetSize;
+  //   }
+
+  //   const bruh = await getContentSetSize();
+  // }, [dataProvider]);
+
   const onFilterStart = (searchText: string) => {
     setFilterText(searchText);
   };
@@ -118,11 +128,8 @@ export function PropertyGridContent({
 
   return (
     <div className={classnames("property-grid-react-container", className)}>
-      <div>
-        <PropertyGridHeader controls={headerControls} item={item} onBackButtonClick={onBackButton} settingsProps={settingsProps} onFilterStart={onFilterStart} onFilterClear={onFilterClear} />
-      </div>
+      <PropertyGridHeader controls={headerControls} item={item} onBackButtonClick={onBackButton} settingsProps={settingsProps} onFilterStart={onFilterStart} onFilterClear={onFilterClear} />
       <div className="property-grid-react-data">
-
         <ResizableContainerObserver onResize={handleResize}>
           {
             dataRenderer
@@ -146,7 +153,7 @@ interface PropertyGridHeaderProps {
 }
 
 function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, onFilterStart, onFilterClear }: PropertyGridHeaderProps) {
-  const [filteringSearchBar, setFilteringSearchBar] = useState(false);
+  const [searchBarIsExpanded, setSearchBarIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState<string>("");
   const onFilterStartRef = useRef(onFilterStart);
   // save latest `onFiltertStart` reference into `useRef` to avoid restarting timeout when `onFiltertStart` reference changes.
@@ -171,118 +178,46 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
     return null;
   }
 
-  // <FilteringInput
-  //       onFilterCancel={() => {
-  //         onFilterClear();
-  //         setFilteringSearchBar(false);
-  //       }}
-  //       onFilterClear={() => {
-  //         setFilteringStatus(0);
-  //       }}
-  //       onFilterStart={(searchText: string) => {
-  //         onFilterStart(searchText);
-  //         setFilteringStatus(1);
-  //       }}
-  //       // style={{
-
-  //       //  }}
-  //       status={filteringStatus}
-  //     />
-
-  // return <SearchBox
-  //   expandable
-  //   onExpand={onOpen}
-  //   onCollapse={onClose}
-  //   className={classnames("tree-widget-search-box", !isOpened && "contracted")}
-  // >
-  //   <SearchBox.CollapsedState>
-  //     <SearchBox.ExpandButton
-  //       title={TreeWidget.translate("searchBox.searchForSomething")}
-  //       aria-label={TreeWidget.translate("searchBox.open")}
-  //       size="small"
-  //     />
-  //   </SearchBox.CollapsedState>
-  //   <SearchBox.ExpandedState >
-  //     <SearchBox.Input
-  //       placeholder={TreeWidget.translate("searchBox.search")}
-  //       onChange={(e) => setInputValue(e.currentTarget.value)}
-  //       className="search-input"
-  //     />
-  //     <SearchResultStepper
-  //       selectedIndex={selectedResultIndex}
-  //       total={resultCount}
-  //       onStep={onSelectedResultChanged}
-  //     />
-  //     <SearchBox.CollapseButton
-  //       onClick={() => {
-  //         setInputValue("");
-  //         onClose();
-  //       }}
-  //       size="small"
-  //       aria-label={TreeWidget.translate("searchBox.close")}
-  //     />
-  //   </SearchBox.ExpandedState>
-  // </SearchBox>;
-
   return (
-  // <div><div> {!filteringSearchBar ? undefined :
-  //   <SearchBox
-  //     onCollapse={() => setFilteringSearchBar(false)}
-  //   >
-  //     <SearchBox.ExpandedState >
-  //       <SearchBox.Input
-  //         onChange={(e) => setInputValue(e.currentTarget.value)}
-  //       />
-  //       <SearchBox.CollapseButton
-  //         onClick={() => {
-  //           onFilterClear();
-  //         }}
-  //       />
-  //     </SearchBox.ExpandedState>
-  //   </SearchBox>
-  // }</div>
-
-    <Header onBackButtonClick={onBackButtonClick}>
-      <div className="property-grid-react-panel-label-and-class">
-        {!filteringSearchBar ? <div><Text variant="leading">
+    <Header onBackButtonClick={onBackButtonClick} className={classnames("property-grid-react-panel-header", searchBarIsExpanded && "search-bar-expanded")}>
+      <div className="header-title">
+        <Text variant="leading">
           {PropertyValueRendererManager.defaultManager.render(item.label)}
         </Text>
-        <Text>{item.className}</Text></div> : undefined
-
-        }</div><SearchBox
-        expandable
-        onCollapse={() => setFilteringSearchBar(false)}
-        onExpand={() => setFilteringSearchBar(true)}
-        className={classnames("ooga-booga", !filteringSearchBar && "contracted")}
-      >
-        <SearchBox.CollapsedState>
-          <SearchBox.ExpandButton
-            size="small"
-          />
-        </SearchBox.CollapsedState>
-        <SearchBox.ExpandedState >
-          <SearchBox.Input
-            placeholder={"Search"}
-            onChange={(e) => setInputValue(e.currentTarget.value)}
-          />
-          <SearchBox.CollapseButton
-            onClick={() => {
-              onFilterClear();
-            }}
-          />
-        </SearchBox.ExpandedState>
-      </SearchBox>
-      {/* <Text variant="leading">
-          {PropertyValueRendererManager.defaultManager.render(item.label)}
+        <Text>
+          {item.className}
         </Text>
-        <Text>{item.className}</Text> */}
-
-      {controls}
-
-      {/* {filteringSearchBar ? undefined : <SvgSearch onClick={() => { setFilteringSearchBar(true);}}/>} */}
-      <SettingsDropdownMenu {...settingsProps} />
+      </div>
+      <div className={classnames("header-tools")}>
+        <SearchBox
+          expandable
+          onCollapse={() => setSearchBarIsExpanded(false)}
+          onExpand={() => setSearchBarIsExpanded(true)}
+          className={classnames("expandable-search-bar", !searchBarIsExpanded && "contracted")}
+        >
+          <SearchBox.CollapsedState>
+            <SearchBox.ExpandButton
+              size="small"
+              title="Expand Searchbar"
+            />
+          </SearchBox.CollapsedState>
+          <SearchBox.ExpandedState >
+            <SearchBox.Input
+              placeholder={"Search"}
+              onChange={(e) => setInputValue(e.currentTarget.value)}
+            />
+            <SearchBox.CollapseButton
+              title="Contract Searchbar"
+              onClick={() => {
+                onFilterClear();
+              }}
+            />
+          </SearchBox.ExpandedState>
+        </SearchBox>
+        {controls}
+        <SettingsDropdownMenu {...settingsProps}/>
+      </div>
     </Header>
-    // </div>
   );
 }
 
