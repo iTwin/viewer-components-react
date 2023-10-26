@@ -163,9 +163,9 @@ describe("<PropertyGridContent />", () => {
     await user.click(searchButton);
 
     const searchTextInput =  await waitFor(() => getByRole("searchbox"));
+    // input text that should match
     await user.type(searchTextInput, "test");
 
-    // input text that should match
     await waitFor(() => {
       expect(queryByText("Test Category")).to.not.be.null;
     });
