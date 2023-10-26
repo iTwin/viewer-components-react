@@ -1,6 +1,18 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 02 Oct 2023 20:32:55 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Oct 2023 13:09:22 GMT and should not be manually modified.
+
+## 0.20.0
+Thu, 26 Oct 2023 13:09:22 GMT
+
+### Minor changes
+
+- New visualization logic to distinctly highlight elements that overlap across multiple groups
+
+### Patches
+
+- Removed iModelId and replaced MappingId and GroupId with names in log messages.
+- Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log.
 
 ## 0.19.2
 Mon, 02 Oct 2023 20:32:55 GMT

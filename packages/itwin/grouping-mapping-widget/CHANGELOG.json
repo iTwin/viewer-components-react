@@ -2,6 +2,26 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.20.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.20.0",
+      "date": "Thu, 26 Oct 2023 13:09:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "New visualization logic to distinctly highlight elements that overlap across multiple groups"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Removed iModelId and replaced MappingId and GroupId with names in log messages."
+          },
+          {
+            "comment": "Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.19.2",
       "tag": "@itwin/grouping-mapping-widget_v0.19.2",
       "date": "Mon, 02 Oct 2023 20:32:55 GMT",
