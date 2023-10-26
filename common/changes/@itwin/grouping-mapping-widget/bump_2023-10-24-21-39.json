@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "iTwin.js version bump",
+      "comment": "iTwin.js minimum version bumped to 4.1",
       "type": "minor"
     }
   ],
