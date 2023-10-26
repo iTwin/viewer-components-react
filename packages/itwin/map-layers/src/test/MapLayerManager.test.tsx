@@ -100,9 +100,9 @@ describe("MapLayerManager", () => {
 
     expect(menuItems.length).to.eq(4);
     expect(menuItems[0].textContent).to.eql("Basemap.ColorFill");
-    expect(menuItems[1].textContent).to.eql("Bing Maps: Aerial Imagery");
-    expect(menuItems[2].textContent).to.eql("Bing Maps: Aerial Imagery with labels");
-    expect(menuItems[3].textContent).to.eql("Bing Maps: Streets");
+    expect(menuItems[1].textContent).to.eql("WellKnownBaseMaps.BingProvider.Aerial");
+    expect(menuItems[2].textContent).to.eql("WellKnownBaseMaps.BingProvider.Hybrid");
+    expect(menuItems[3].textContent).to.eql("WellKnownBaseMaps.BingProvider.Street");
 
   });
 
