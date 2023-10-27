@@ -23,6 +23,8 @@ import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsConte
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
+import type { ExtractionMessageData, ExtractionStatusData, IExtractionStatusDataProps } from "./context/ExtractionStatusDataContext";
+import { ExtractionStatusDataContext } from "./context/ExtractionStatusDataContext";
 
 export interface GroupingMappingContextProps {
   /**
@@ -88,7 +90,8 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
   const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
   const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
-
+  const [extractionStatusIcon, setExtractionStatusIcon] = useState<ExtractionStatusData>({iconStatus: undefined, iconMessage: "Loading..."});
+  const [extractionMessageData, setExtractionMessageData] = useState<ExtractionMessageData[]>([]);
   useEffect(() => {
     setApiConfig(() => ({
       prefix: props.prefix,
@@ -154,17 +157,26 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     setCustomUIs,
   }), [customUIs]);
 
+  const extractionStatusDataValue: IExtractionStatusDataProps = useMemo (() => ({
+    extractionStatusIcon,
+    extractionMessageData,
+    setExtractionMessageData,
+    setExtractionStatusIcon,
+  }), [extractionStatusIcon, extractionMessageData]);
+
   return (
     <GroupingMappingApiConfigContext.Provider value={apiConfig}>
       <MappingClientContext.Provider value={mappingClient}>
         <ExtractionClientContext.Provider value={extractionClient}>
-          <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
-            <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-              <PropertiesContext.Provider value={propertiesContextValue}>
-                {props.children}
-              </PropertiesContext.Provider>
-            </GroupHilitedElementsContext.Provider>
-          </GroupingMappingCustomUIContext.Provider>
+          <ExtractionStatusDataContext.Provider value={extractionStatusDataValue}>
+            <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
+              <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
+                <PropertiesContext.Provider value={propertiesContextValue}>
+                  {props.children}
+                </PropertiesContext.Provider>
+              </GroupHilitedElementsContext.Provider>
+            </GroupingMappingCustomUIContext.Provider>
+          </ExtractionStatusDataContext.Provider>
         </ExtractionClientContext.Provider>
       </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>

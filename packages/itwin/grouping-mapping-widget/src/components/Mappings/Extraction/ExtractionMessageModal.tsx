@@ -5,7 +5,7 @@
 import { Button, DefaultCell, Icon, Modal, ModalButtonBar, ModalContent, Table, tableFilters, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../../../common/utils";
-import type { ExtractionMessageData } from "../hooks/useMappingsOperations";
+import type { ExtractionMessageData } from "../../context/ExtractionStatusDataContext";
 import "./ExtractionMessageModal.scss";
 import { SvgClock } from "@itwin/itwinui-icons-react";
 import type { CellRendererProps, Column } from "react-table";
