@@ -87,7 +87,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
     return activeViewport?.displayStyle.settings.onMapImageryChanged.addListener(handleMapImageryChanged);
   }, [activeViewport, handleMapImageryChanged]);
 
-  // Monitor viewport updates, and refresh the widget accordingly.
+  // Monitor viewport updates, and refresh the widget accordingly .
   // Note: This is needed for multiple viewport applications.
   React.useEffect(() => {
     if (activeViewport) {
