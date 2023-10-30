@@ -5,10 +5,10 @@
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CompositeFilterType, CompositePropertyDataFilterer, DisplayValuePropertyDataFilterer, FilteredType, LabelPropertyDataFilterer, PropertyCategoryLabelFilterer, PropertyValueRendererManager } from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
-import { SearchBox, Text } from "@itwin/itwinui-react";
+import { Text } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
 import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
@@ -115,11 +115,8 @@ export function PropertyGridContent({
         item={item}
         onBackButtonClick={onBackButton}
         settingsProps={settingsProps}
-        onFilterStart={(searchText: string) => {
+        updateSearchText={(searchText: string) => {
           setFilterText(searchText);
-        }}
-        onFilterClear={() => {
-          setFilterText("");
         }}
       />
       <div className="property-grid-react-data">
@@ -141,75 +138,35 @@ interface PropertyGridHeaderProps {
   item?: { className: string, label: PropertyRecord };
   onBackButtonClick?: () => void;
   settingsProps: SettingsDropdownMenuProps;
-  onFilterStart: (searchText: string) => void;
-  onFilterClear: () => void;
+  updateSearchText: (searchText: string) => void;
 }
 
-function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, onFilterStart, onFilterClear }: PropertyGridHeaderProps) {
-  const [searchBarIsExpanded, setSearchBarIsExpanded] = useState(false);
-  const [inputValue, setInputValue] = useState<string>("");
-  // save latest `onFilterStart` reference into `useRef` to avoid restarting timeout when `onFilterStart` reference changes.
-  const onFilterStartRef = useRef(onFilterStart);
-  onFilterStartRef.current = onFilterStart;
-
-  useEffect(() => {
-    if (!inputValue) {
-      onFilterStartRef.current("");
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      onFilterStartRef.current(inputValue);
-    }, 50);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [inputValue]);
+function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, updateSearchText }: PropertyGridHeaderProps) {
 
   if (!item) {
     return null;
   }
 
+  const headerTools = (<>
+    {controls}
+    {<SettingsDropdownMenu {...settingsProps}/>}
+  </>);
+
+  const titleItem = (<>
+    <Text variant="leading">
+      {PropertyValueRendererManager.defaultManager.render(item.label)}
+    </Text>
+    <Text>
+      {item.className}
+    </Text>
+  </>);
+
   return (
-    <Header onBackButtonClick={onBackButtonClick} className={classnames("property-grid-react-panel-header", searchBarIsExpanded && "search-bar-expanded")}>
-      <div className="header-title">
-        <Text variant="leading">
-          {PropertyValueRendererManager.defaultManager.render(item.label)}
-        </Text>
-        <Text>
-          {item.className}
-        </Text>
-      </div>
-      <div className={classnames("header-tools")}>
-        <SearchBox
-          expandable
-          onCollapse={() => setSearchBarIsExpanded(false)}
-          onExpand={() => setSearchBarIsExpanded(true)}
-          className={classnames("expandable-search-bar", !searchBarIsExpanded && "contracted")}
-        >
-          <SearchBox.CollapsedState>
-            <SearchBox.ExpandButton
-              title="Expand Searchbar"
-            />
-          </SearchBox.CollapsedState>
-          <SearchBox.ExpandedState >
-            <SearchBox.Input
-              placeholder={"Search"}
-              onChange={(e) => setInputValue(e.currentTarget.value)}
-            />
-            <SearchBox.CollapseButton
-              title="Contract Searchbar"
-              onClick={() => {
-                onFilterClear();
-              }}
-            />
-          </SearchBox.ExpandedState>
-        </SearchBox>
-        {controls}
-        <SettingsDropdownMenu {...settingsProps}/>
-      </div>
-    </Header>
+    <Header onBackButtonClick={onBackButtonClick}
+      setSearchInput={updateSearchText}
+      titleItem={titleItem}
+      headerTools={headerTools}
+    />
   );
 }
 
