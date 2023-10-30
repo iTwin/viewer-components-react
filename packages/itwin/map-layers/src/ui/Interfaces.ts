@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { BeEvent } from "@itwin/core-bentley";
-import {  BaseMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
+import {  BaseMapLayerSettings, MapLayerKey, MapSubLayerProps } from "@itwin/core-common";
 import { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
 
 export interface StyleMapLayerSettings {
@@ -56,4 +56,13 @@ export interface MapFeatureInfoOptions {
   disableDefaultFeatureInfoTool?: boolean;
   showLoadProgressAnimation?: boolean;
   propertyGridOptions?: MapFeatureInfoPropertyGridOptions;
+}
+
+export interface ApiKeyItem {
+  name: string;
+  key: MapLayerKey;
+}
+
+export interface ApiKeyMappingItem {
+  apiKeyName: string;
 }

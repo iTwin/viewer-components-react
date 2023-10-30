@@ -1,0 +1,64 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+button.apiKeySettings-button {
+  font-size: 12px;
+  }
+
+.apiKeySettings-enterprise-header {
+  display: flex;
+  align-content: center;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding-left: 10px;
+}
+
+.apiKeySettings-enterprise-clientIds {
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+
+  .apiKeySettings-enterprise-header {
+    display: flex;
+    align-content: center;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-left: 10px;
+  }
+
+  button.apiKeySettings-enterprise-add-clientId-button {
+    background-color: transparent;
+    margin-left: auto;
+    width: 40px;
+    border: none;
+    margin-right: 2px;
+  }
+
+.apiKeySettings-clientIds {
+  height: 100px;
+  min-height: 60px;
+
+    .apiKeySettings-clientIds-list {
+      margin-top: 0;
+      border: none;
+    }
+
+    .apiKeySettings-clientIds-entry {
+      button.apiKeySettings-clientIds-entry-button {
+        padding: 0 4px 0 4px;
+        margin: 0;
+        background-color: transparent;
+        border: none;
+
+      }
+      .apiKeySettings-clientIds-entry-name {
+        flex: 1 1 auto;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        margin-right: 4px;
+      }
+    }
+  }
+}

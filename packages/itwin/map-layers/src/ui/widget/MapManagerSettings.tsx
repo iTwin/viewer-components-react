@@ -13,6 +13,7 @@ import "./MapManagerSettings.scss";
 import { Select, SelectOption, Slider, ToggleSwitch } from "@itwin/itwinui-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
 import { MapLayersUI } from "../../mapLayers";
+import { ApiKeySettingsPanel } from "./ApiKeySettings";
 
 /* eslint-disable deprecation/deprecation */
 
@@ -250,6 +251,7 @@ export function MapManagerSettings() {
 
         </fieldset>
       </div>
+      <ApiKeySettingsPanel></ApiKeySettingsPanel>
     </>
   );
 }
