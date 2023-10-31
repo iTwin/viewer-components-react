@@ -7,11 +7,12 @@ import * as React from "react";
 import { Dialog, Icon, Listbox, ListboxItem, ListboxValue, WebFontIcon } from "@itwin/core-react";
 import { UiFramework } from "@itwin/appui-react";
 import { DialogButtonType } from "@itwin/appui-abstract";
-import { Button, LabeledInput } from "@itwin/itwinui-react";
+import { Button, IconButton, LabeledInput } from "@itwin/itwinui-react";
 import { ApiKeyItem } from "../Interfaces";
 import { ApiKeysStorage } from "../../ApiKeysStorage";
 import { ApiKeyMappingStorage } from "../../ApiKeyMappingStorage";
 import "./ApiKeySettings.scss";
+import { SvgAdd } from "@itwin/itwinui-icons-react";
 
 interface ApiKeyEditDialogProps {
   item?: ApiKeyItem;
@@ -95,8 +96,10 @@ export function ApiKeySettingsPanel() {
    */
   const onItemRemoveButtonClicked = React.useCallback((name: string, event) => {
     event.stopPropagation();  // We don't want the owning ListBox to react on mouse click.
-    delete keys[name];
-    setKeys(keys);
+
+    const tmpKeys = {...keys};
+    delete tmpKeys[name];
+    setKeys(tmpKeys);
     storage.delete(name);
 
     // Cascade delete to api key mapping
@@ -113,8 +116,10 @@ export function ApiKeySettingsPanel() {
     UiFramework.dialogs.modal.close();
 
     storage.save(params.name, params);
-    keys[params.name] = params;
-    setKeys(keys);
+
+    const tmpKeys = {...keys};
+    tmpKeys[params.name] = params;
+    setKeys(tmpKeys);
     setSelectedValue(undefined); // clear listbox focus
   }, [keys, storage]);
 
@@ -138,45 +143,44 @@ export function ApiKeySettingsPanel() {
 
   return (
     <div className="apiKeySettings-container">
-      <div className="apiKeySettings-listbox-clientIds">
-        <div className="apiKeySettings-listbox-header">
-          <b><span className="map-manager-overlays-label">API keys</span></b>
-          <button className="apiKeySettings-listbox-add-clientId-button" onClick={()=> handleAddClick()}>
-            <WebFontIcon iconName="icon-add" />
-          </button>
-        </div>
-        <div className="apiKeySettings-ApiKeys">
-          <Listbox
-            selectedValue={selectedValue}
-            onListboxValueChange={onListboxValueChange}
-            className="apiKeySettings-ApiKeys-list" >
-            {
-              Object.keys(keys).map((keyName) =>
-                <ListboxItem
-                  key={keyName}
-                  className="apiKeySettings-ApiKeys-entry"
-                  value={keyName}
-                  onMouseEnter={() => setListItemUnderCursor(keyName)}
-                  onMouseLeave={() => setListItemUnderCursor(undefined)}
-                >
-                  <span className="apiKeySettings-ApiKeys-entry-name" title={keyName}>{keyName}</span>
+      <div className="apiKeySettings-header">
+        <span className="apiKeySettings-header-label">API keys</span>
+        <IconButton size="small" styleType="borderless" className="apiKeySettings-header-add-button" onClick={handleAddClick}>
+          <SvgAdd/>
+        </IconButton>
 
-                  { // Display the delete icon only when the mouse over a specific item otherwise list feels cluttered.
-                    (listItemUnderCursor && listItemUnderCursor === keyName) &&
+      </div>
+      <div className="apiKeySettings-content">
+        <Listbox
+          selectedValue={selectedValue}
+          onListboxValueChange={onListboxValueChange}
+          className="apiKeySettings-content-listbox" >
+          {
+            Object.keys(keys).map((keyName) =>
+              <ListboxItem
+                key={keyName}
+                className="apiKeySettings-content-entry"
+                value={keyName}
+                onMouseEnter={() => setListItemUnderCursor(keyName)}
+                onMouseLeave={() => setListItemUnderCursor(undefined)}
+              >
+                <span className="apiKeySettings-content-entry-name" title={keyName}>{keyName}</span>
+
+                { // Display the delete icon only when the mouse over a specific item otherwise list feels cluttered.
+                  (listItemUnderCursor && listItemUnderCursor === keyName) &&
                   <>
                     <Button
                       size="small"
                       styleType="borderless"
-                      className="apiKeySettings-ApiKeys-entry-button"
+                      className="apiKeySettings-content-entry-button"
                       onClick={(event) => {onItemRemoveButtonClicked(keyName, event);}}>
                       <Icon iconSpec="icon-delete" />
                     </Button>
                   </>}
-                </ListboxItem>
-              )
-            }
-          </Listbox>
-        </div>
+              </ListboxItem>
+            )
+          }
+        </Listbox>
       </div>
     </div>
   );

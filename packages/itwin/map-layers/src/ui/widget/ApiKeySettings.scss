@@ -3,57 +3,53 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.apiKeySettings--container {
-  margin-top: 1rem;
-}
+
 
 button.apiKeySettings-button {
   font-size: 12px;
   }
 
-.apiKeySettings-listbox-header {
+.apiKeySettings-header {
   display: flex;
   align-content: center;
   margin-top: 8px;
   margin-bottom: 8px;
-  padding-left: 10px;
 }
 
-.apiKeySettings-listbox-clientIds {
+.apiKeySettings-container {
+  margin-top: 1rem;
   border: 1px solid #ccc;
   margin-bottom: 15px;
 
-  .apiKeySettings-listbox-header {
-    display: flex;
-    align-content: center;
-    margin-top: 8px;
-    margin-bottom: 8px;
+  .apiKeySettings-header-label {
+    width: auto;
+    white-space: nowrap;
+    flex: 1 1 auto;
     padding-left: 10px;
   }
 
-  button.apiKeySettings-listbox-add-clientId-button {
-    background-color: transparent;
-    margin-left: auto;
-    width: 40px;
-    border: none;
+  button.apiKeySettings-header-add-button {
     margin-right: 2px;
   }
 
-.apiKeySettings-ApiKeys {
+.apiKeySettings-content {
   height: 100px;
   min-height: 60px;
+  border-top: 1px solid #ccc;
 
-    .apiKeySettings-ApiKeys-list {
+    .apiKeySettings-content-listbox {
       margin-top: 0;
       border: none;
     }
 
-    .apiKeySettings-ApiKeys-entry {
-      button.apiKeySettings-ApiKeys-entry-button {
+    .apiKeySettings-content-entry {
+       margin-left: 4px;
+
+      button.apiKeySettings-content-entry-button {
         height: auto;
         padding: 0 4px 0 4px;
       }
-      .apiKeySettings-ApiKeys-entry-name {
+      .apiKeySettings-content-entry-name {
         flex: 1 1 auto;
         text-overflow: ellipsis;
         white-space: nowrap;

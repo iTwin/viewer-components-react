@@ -73,6 +73,7 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
         <SvgSettings/>
       </IconButton>
       <Popup
+        className="maplayers-settings-popup"
         isOpen={isSettingsOpen}
         position={RelativePosition.BottomRight}
         onClose={handleCloseSetting}
