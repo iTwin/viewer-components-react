@@ -89,7 +89,6 @@ export function ApiKeySettingsPanel() {
 
   const [listItemUnderCursor, setListItemUnderCursor] = React.useState<string | undefined>();
   const [selectedValue, setSelectedValue] = React.useState<string | undefined>();
-  const [uniqueId, setUniqueId] = React.useState(0);
 
   /*
    Handle Remove layer button clicked
@@ -104,15 +103,10 @@ export function ApiKeySettingsPanel() {
     mappingStorage.deleteMatchingContent({apiKeyName: name});
   }, [keys, mappingStorage, storage]);
 
-  const clearListBoxSelectValue = React.useCallback(() => {
-    setSelectedValue(`${uniqueId+1}`); // workaround to display the new added item
-    setUniqueId(uniqueId+1);
-  }, [uniqueId]);
-
   const onCancelEdit = React.useCallback(() => {
     UiFramework.dialogs.modal.close();
-    clearListBoxSelectValue();
-  }, [clearListBoxSelectValue]);
+    setSelectedValue(undefined); // clear listbox focus
+  }, []);
 
   const onOkEdit = React.useCallback((params: ApiKeyItem) => {
 
@@ -121,10 +115,8 @@ export function ApiKeySettingsPanel() {
     storage.save(params.name, params);
     keys[params.name] = params;
     setKeys(keys);
-    setSelectedValue(`${uniqueId+1}`); // workaround to display the new added item
-    setUniqueId(uniqueId+1);
-
-  }, [keys, storage, uniqueId]);
+    setSelectedValue(undefined); // clear listbox focus
+  }, [keys, storage]);
 
   const handleAddClick = React.useCallback(() => {
     UiFramework.dialogs.modal.open(
@@ -140,6 +132,7 @@ export function ApiKeySettingsPanel() {
     if (item)
       UiFramework.dialogs.modal.open(<ApiKeyEditDialog item={item} onOkResult={onOkEdit} onCancelResult={onCancelEdit}/>);
 
+    setSelectedValue(newValue);
     return;
   }, [keys, onCancelEdit, onOkEdit]);
 
