@@ -12,6 +12,7 @@ import { Button, LabeledInput } from "@itwin/itwinui-react";
 import "./ApiKeySettings.scss";
 import { ApiKeyItem } from "../Interfaces";
 import { ApiKeysStorage } from "../../ApiKeysStorage";
+import { ApiKeyMappingStorage } from "../../ApiKeyMappingStorage";
 
 interface ApiKeyEditDialogProps {
   item?: ApiKeyItem;
@@ -73,6 +74,7 @@ export function ApiKeyEditDialog(props: ApiKeyEditDialogProps) {
 export function ApiKeySettingsPanel() {
 
   const [storage] = React.useState(() => new ApiKeysStorage());
+  const [mappingStorage] = React.useState(() => new ApiKeyMappingStorage());
 
   const [keys, setKeys] = React.useState<ApiKeyItem[]>(() => storage.get(undefined) ?? []);
 
@@ -88,7 +90,10 @@ export function ApiKeySettingsPanel() {
     const filtered = keys.filter((item) => item.name !== name);
     setKeys(filtered);
     storage.delete(name);
-  }, [keys, storage]);
+
+    // Cascade delete to api key mapping
+    mappingStorage.deleteMatchingContent({apiKeyName: name});
+  }, [keys, mappingStorage, storage]);
 
   const clearListBoxSelectValue = React.useCallback(() => {
     setSelectedValue(`${uniqueId+1}`); // workaround to display the new added item
@@ -112,10 +117,11 @@ export function ApiKeySettingsPanel() {
   }, [keys, storage, uniqueId]);
 
   const handleAddClick = React.useCallback(() => {
-    UiFramework.dialogs.modal.open(<ApiKeyEditDialog
-      onOkResult={onOkEdit}
-      onCancelResult={onCancelEdit}
-    />);
+    UiFramework.dialogs.modal.open(
+      <ApiKeyEditDialog
+        onOkResult={onOkEdit}
+        onCancelResult={onCancelEdit}
+      />);
     return;
   }, [onCancelEdit, onOkEdit]);
 

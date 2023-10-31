@@ -80,6 +80,20 @@ export class BrowserStorage<Type>  {
     window.localStorage.setItem(this._itemKeyName, JSON.stringify(map));
   }
 
+  public deleteMatchingContent(content: Type) {
+    const map = this.loadFromStorage();
+    if (map === undefined) {
+      return;
+    }
+    const contentJson = JSON.stringify(content);
+    for (const [key, value] of Object.entries(map)) {
+      if (JSON.stringify(value) === contentJson)
+        delete map[key];
+    }
+
+    window.localStorage.setItem(this._itemKeyName, JSON.stringify(map));
+  }
+
   public save(key: string, content: Type) {
     let map = this.loadFromStorage();
     if (map === undefined)

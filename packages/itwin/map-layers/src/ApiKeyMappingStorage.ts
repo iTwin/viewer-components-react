@@ -5,7 +5,7 @@
 import { BrowserStorage } from "./BrowserStorage";
 import { ApiKeyMappingItem } from "./ui/Interfaces";
 
-export class ApiKeysStorage extends BrowserStorage<ApiKeyMappingItem>  {
+export class ApiKeyMappingStorage extends BrowserStorage<ApiKeyMappingItem>  {
   constructor() {
     super({itemKeyName: "itwinjs.mapLayers.apiKeyMapping"});
   }

@@ -14,8 +14,10 @@ import { Button, IconButton, Input } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
-import { MapSubLayerProps } from "@itwin/core-common";
+import { MapLayerKey, MapSubLayerProps } from "@itwin/core-common";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
+import { ApiKeyMappingStorage } from "../../ApiKeyMappingStorage";
+import { ApiKeysStorage } from "../../ApiKeysStorage";
 
 // cSpell:ignore droppable Sublayer
 
@@ -92,7 +94,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         return {layerNameUpdate: layerNameIdx>1, uniqueLayerName};
       };
 
-      const doAttachLayer = (layerName: string, subLayer?: MapSubLayerProps) => {
+      const doAttachLayer = (layerName: string, subLayer?: MapSubLayerProps, _accessKey?: MapLayerKey) => {
         const generatedName = generateUniqueMapLayerName(layerName);
         let sourceToAdd = source;
         if (generatedName.layerNameUpdate || sourceToAdd.name !== generatedName.uniqueLayerName) {
@@ -103,10 +105,10 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
             clonedSource.password = source.password;
             sourceToAdd = clonedSource;
           }
-
         }
 
         const settings = sourceToAdd.toLayerSettings(subLayer ? [subLayer] : subLayers);
+        // TODO: Set access key here
         if (settings) {
           activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: {index: -1, isOverlay} });
           return generatedName.uniqueLayerName;
@@ -114,11 +116,21 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         return undefined;
       };
 
+      // Lookup access key by URL, and apply it if found.
+      const apiKeyMappingStorage = new ApiKeyMappingStorage();
+      const keyMapping = apiKeyMappingStorage.get(source.url.toLowerCase());
+      let accessKey: MapLayerKey| undefined;
+      if (keyMapping && keyMapping.length > 0) {
+        const apiKeyStorage = new ApiKeysStorage();
+        const apiKey = apiKeyStorage.get(keyMapping[0].apiKeyName);
+        if (apiKey && apiKey.length > 0)
+          accessKey = apiKey[0].key;
+      }
+
       if (oneMapLayerPerSubLayer && subLayers) {
         const layerNamesAttached: string[] = [];
         for (const subLayer of subLayers) {
-
-          const attachedLayerName = doAttachLayer(`${source.name} - ${subLayer.name}`, subLayer);
+          const attachedLayerName = doAttachLayer(`${source.name} - ${subLayer.name}`, subLayer, accessKey);
           if (attachedLayerName !== undefined)  {
             layerNamesAttached.push(attachedLayerName);
           }
@@ -129,7 +141,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
         }
       } else {
-        const attachedLayerName = doAttachLayer(source.name);
+        const attachedLayerName = doAttachLayer(source.name, undefined, accessKey);
         if (attachedLayerName !== undefined) {
           const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: attachedLayerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));

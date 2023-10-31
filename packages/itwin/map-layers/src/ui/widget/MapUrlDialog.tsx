@@ -20,6 +20,8 @@ import { BeEvent, Guid } from "@itwin/core-bentley";
 import { SelectMapFormat } from "./SelectMapFormat";
 import "./MapUrlDialog.scss";
 import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
+import { SelectApiKey } from "./SelectApiKey";
+import { ApiKeyMappingStorage } from "../../ApiKeyMappingStorage";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -79,6 +81,14 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     return undefined;
   }, [props.layerRequiringCredentials, props.mapLayerSourceToEdit]);
 
+  const getApiKeyMapping = React.useCallback((url: string) => {
+    const apiKeyMappingStorage = new ApiKeyMappingStorage();
+    const apiKeyMapping = apiKeyMappingStorage.get(url.toLowerCase());
+    if (apiKeyMapping && apiKeyMapping.length > 0)
+      return apiKeyMapping[0].apiKeyName;
+    return undefined;
+  }, []);
+
   const [dialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString(props.layerRequiringCredentials || props.mapLayerSourceToEdit ? "mapLayers:CustomAttach.EditCustomLayer" : "mapLayers:CustomAttach.AttachCustomLayer"));
   const [typeLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.Type"));
   const [nameLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.Name"));
@@ -117,6 +127,11 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [shouldAutoAttachSource, setShouldAutoAttachSource] = React.useState(true);
 
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
+  const [apiKeyName, setApiKeyName] = React.useState<string|undefined>(() => {
+    if (mapUrl)
+      return getApiKeyMapping(mapUrl);
+    return undefined;
+  });
 
   // 'isMounted' is used to prevent any async operation once the hook has been
   // unloaded.  Otherwise we get a 'Can't perform a React state update on an unmounted component.' warning in the console.
@@ -212,8 +227,13 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   }, [setSettingsStorageRadio]);
 
   const onUrlChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setMapUrl(event.target.value);
-  }, [setMapUrl]);
+    const value = event.target.value;
+    setMapUrl(value);
+
+    const keyName = getApiKeyMapping(value);
+    if (keyName)
+      setApiKeyName(keyName);
+  }, [getApiKeyMapping]);
 
   const createSource = React.useCallback(() => {
     let source: MapLayerSource | undefined;
@@ -287,6 +307,12 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             }
           }
 
+          // Link an API key to this map-layer URL
+          if (apiKeyName) {
+            const storage = new ApiKeyMappingStorage();
+            storage.save(mapUrl.toLowerCase(), {apiKeyName});
+          }
+
           onOkResult({source, validation});
         } else if (validation.status === MapLayerSourceStatus.InvalidCoordinateSystem) {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
@@ -307,7 +333,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       }
     })();
 
-  }, [createSource, mapName, props.mapLayerSourceToEdit, props.activeViewport, onOkResult, isSettingsStorageAvailable, updateAuthState, hasImodelContext, props.layerRequiringCredentials, settingsStorage]);
+  }, [createSource, props.mapLayerSourceToEdit, props.activeViewport, props.layerRequiringCredentials, onOkResult, mapName, isSettingsStorageAvailable, apiKeyName, hasImodelContext, settingsStorage, mapUrl, updateAuthState]);
 
   React.useEffect(() => {
     const handleOAuthProcessEnd = (success: boolean, _state: any) => {
@@ -437,6 +463,12 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       setOAuthProcessSucceeded(false);  // indicates there was a failed attempt
   }, [oauthProcessSucceeded]);
 
+  const handleApiKeyNameChange = React.useCallback((value: string) => {
+    if (apiKeyName !== value) {
+      setApiKeyName(value);
+    }
+  }, [apiKeyName]);
+
   // Utility function to get warning message section
   function renderWarningMessage(): React.ReactNode {
     let node: React.ReactNode;
@@ -537,6 +569,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={props.layerRequiringCredentials !== undefined || layerAttachPending || layerAuthPending} />
             <span className="map-layer-source-label">{urlLabel}</span>
             <Input className="map-layer-source-input" placeholder={urlInputPlaceHolder} onKeyPress={handleOnKeyDown} onChange={onUrlChange} disabled={props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending} value={mapUrl} />
+            <span className="map-layer-source-label">API Key</span>
+            <SelectApiKey value={apiKeyName} onChange={handleApiKeyNameChange}/>
+
             {serverRequireCredentials
               && externalLoginUrl === undefined  // external login is handled in popup
               && props.mapLayerSourceToEdit === undefined &&
@@ -553,7 +588,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
                 <span className="map-layer-source-label">{passwordLabel}</span>
                 <LabeledInput className="map-layer-source-input"
-
                   displayStyle="inline"
                   type="password" placeholder={serverRequireCredentials ? passwordRequiredLabel : passwordLabel}
                   status={(!password && serverRequireCredentials) || invalidCredentialsProvided ? "warning" : undefined}
