@@ -12,6 +12,8 @@ import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
+import { Select } from "@itwin/itwinui-react";
+import "@itwin/itwinui-react/styles.css";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -38,7 +40,9 @@ export function Viewer() {
   const { iTwinId, iModelId } = useIModelInfo();
 
   return (
-    <WebViewer
+    <>
+    <Select value={1} options={[{value: 1, label: "Item #1"}, {value: 2, label: "Item #2"}]} />
+    {/* <WebViewer
       iTwinId={iTwinId ?? ""}
       iModelId={iModelId ?? ""}
       authClient={authClient}
@@ -56,7 +60,8 @@ export function Viewer() {
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
       theme="os"
-    />
+    /> */}
+    </>
   );
 }
 

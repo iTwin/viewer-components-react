@@ -242,7 +242,9 @@ export function MapManagerSettings() {
 
             <span className="map-manager-settings-label">{heightOriginLabel}</span>
             {/* elevation correction component:  'popoverProps' is needed here otherwise selecting an option closes the menu popup.*/}
-            <Select popoverProps={{ appendTo: "parent" }} options={terrainHeightOptions.current} disabled={!applyTerrain} value={heightOriginMode} onChange={handleElevationTypeSelected} size="small" />
+            <Select options={terrainHeightOptions.current} disabled={!applyTerrain} value={heightOriginMode}
+            // onChange={handleElevationTypeSelected}
+              size="small" />
 
             <span className="map-manager-settings-label">{exaggerationLabel}</span>
             <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
