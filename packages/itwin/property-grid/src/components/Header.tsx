@@ -16,31 +16,31 @@ import type React from "react";
 export interface HeaderProps {
   className?: string;
   onBackButtonClick?: () => void;
-  titleItem?: React.ReactNode;
+  title?: React.ReactNode;
   headerTools?: React.ReactNode;
-  setSearchInput?: (searchInput: string) => void;
+  onSearchStringChange?: (searchInput: string) => void;
 }
 
 export interface DebouncedSearchBoxProps {
-  setSearchInput: (value: string) => void;
+  onSearchStringChange: (searchInput: string) => void;
   onClose: () => void;
   onOpen: () => void;
   className: string;
 }
 
-export function DebouncedSearchBox({ setSearchInput, onClose, onOpen, className }: DebouncedSearchBoxProps){
+export function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }: DebouncedSearchBoxProps){
   const [inputValue, setInputValue] = useState<string>("");
-  const setSearchInputRef = useRef(setSearchInput);
-  setSearchInputRef.current = setSearchInput;
+  const onSearchStringChangeRef = useRef(onSearchStringChange);
+  onSearchStringChangeRef.current = onSearchStringChange;
 
   useEffect(() => {
     if (!inputValue) {
-      setSearchInputRef.current("");
+      onSearchStringChangeRef.current("");
       return;
     }
 
     const timeoutId = setTimeout(() => {
-      setSearchInputRef.current(inputValue);
+      onSearchStringChangeRef.current(inputValue);
     }, 25);
 
     return () => {
@@ -75,7 +75,7 @@ export function DebouncedSearchBox({ setSearchInput, onClose, onOpen, className 
 }
 
 /** @internal */
-export function Header({ className, onBackButtonClick, headerTools, titleItem, setSearchInput }: PropsWithChildren<HeaderProps>) {
+export function Header({ className, onBackButtonClick, headerTools, title, onSearchStringChange }: PropsWithChildren<HeaderProps>) {
   const [searchBarIsExpanded, setSearchBarIsExpanded] = useState(false);
 
   return <div className={classnames("property-grid-react-panel-header", searchBarIsExpanded && "search-bar-expanded", className)}>
@@ -93,13 +93,13 @@ export function Header({ className, onBackButtonClick, headerTools, titleItem, s
           : null
       }
       <div className={"header-text"}>
-        {titleItem}
+        {title}
       </div>
     </div>
     <div className="header-tools">
-      { setSearchInput &&
+      { onSearchStringChange &&
       <DebouncedSearchBox
-        setSearchInput={setSearchInput}
+        onSearchStringChange={onSearchStringChange}
         onClose={() => setSearchBarIsExpanded(false)}
         onOpen={() => setSearchBarIsExpanded(true)}
         className={classnames("expandable-search-bar", !searchBarIsExpanded && "contracted")}

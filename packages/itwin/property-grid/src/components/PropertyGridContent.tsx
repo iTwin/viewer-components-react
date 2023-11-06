@@ -152,7 +152,7 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
     {<SettingsDropdownMenu {...settingsProps}/>}
   </>);
 
-  const titleItem = (<>
+  const title = (<>
     <Text variant="leading">
       {PropertyValueRendererManager.defaultManager.render(item.label)}
     </Text>
@@ -163,8 +163,8 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
 
   return (
     <Header onBackButtonClick={onBackButtonClick}
-      setSearchInput={updateSearchText}
-      titleItem={titleItem}
+      onSearchStringChange={updateSearchText}
+      title={title}
       headerTools={headerTools}
     />
   );
