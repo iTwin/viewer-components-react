@@ -45,6 +45,7 @@ export class ViewportMock {
     this.displayStyleSettingsMock.setup((dsSettings) => dsSettings.onMapImageryChanged).returns(() => this.onMapImageryChanged);
 
     this.displayStyleMock.setup((ds) => ds.settings).returns(() => this.displayStyleSettingsMock.object);
+    this.displayStyleMock.setup((ds) => ds.backgroundMapBase).returns(() => this.baseMap);
 
     this.displayStyleMock.setup((ds) => ds.changeMapLayerProps(moq.It.isAny(), moq.It.isAny())).returns((props: Partial<coreCommon.MapLayerProps>, mapLayerIndex: MapLayerIndex) => {
       const index = mapLayerIndex.index;

@@ -2,12 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getErrorMessage } from "../../../common/utils";
 import type { IExtractionClient, IMappingsClient, Mapping } from "@itwin/insights-client";
 import type { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 import { useExtractionClient } from "../../context/ExtractionClientContext";
+import type { ExtractionStatusData } from "../../context/ExtractionStatusDataContext";
+import type { ExtractionMessageData } from "../../context/ExtractionStatusDataContext";
+import { useExtractionStatusDataContext } from "../../context/ExtractionStatusDataContext";
 
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
@@ -33,29 +36,26 @@ const fetchExtractionStatus = async (
   iModelId: string,
   getAccessToken: GetAccessTokenFn,
   extractionClient: IExtractionClient,
-  setExtractionIconData: React.Dispatch<React.SetStateAction<ExtractionIconData>>,
-  setExtractionMessageData: React.Dispatch<React.SetStateAction<ExtractionMessageData[]>>
+  setExtractionStatusIcon: (extractionStatusIcon: ExtractionStatusData) => void,
+  setExtractionMessageData: (extractionMessageData: ExtractionMessageData[]) => void
 ) => {
-  setExtractionIconData({
-    iconStatus: "warning",
-    iconMessage: "Extraction status pending.",
-  });
   try {
+    setExtractionStatusIcon({
+      iconStatus: undefined,
+      iconMessage: "Loading...",
+    });
     const accessToken = await getAccessToken();
-    const extractions = await extractionClient.getExtractionHistory(accessToken, iModelId, 1);
-    if (extractions.length === 0) {
-      setExtractionIconData({
+    const extraction = extractionClient.getExtractionHistoryIterator(accessToken, iModelId, 1);
+    const latestExtractionResult = await extraction.next();
+    if(latestExtractionResult.done){
+      setExtractionStatusIcon({
         iconStatus: "negative",
         iconMessage: "No extraction found.",
       });
     } else {
-      const jobId = extractions[0].jobId;
+      const jobId = latestExtractionResult.value.jobId;
       const status = await extractionClient.getExtractionStatus(accessToken, jobId);
       if (status.containsIssues) {
-        setExtractionIconData({
-          iconStatus: "negative",
-          iconMessage: "Extraction contains issues. Click to view extraction logs.",
-        });
         const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
         const filteredLogs = logs.filter((log) => log.message !== null);
         const extractionMessageData = filteredLogs.map((filteredLog) => ({
@@ -65,15 +65,19 @@ const fetchExtractionStatus = async (
           message: String(filteredLog.message),
         }));
         setExtractionMessageData(extractionMessageData);
+        setExtractionStatusIcon({
+          iconStatus: "negative",
+          iconMessage: "Extraction contains issues. Click to view extraction logs.",
+        });
       } else {
-        setExtractionIconData({
+        setExtractionStatusIcon({
           iconStatus: "positive",
           iconMessage: "Extraction successful.",
         });
       }
     }
   } catch (error: any) {
-    setExtractionIconData({
+    setExtractionStatusIcon({
       iconStatus: "negative",
       iconMessage: "Operation failed. Please try again.",
     });
@@ -84,18 +88,6 @@ export interface MappingsOperationsProps extends GroupingMappingApiConfig {
   mappingClient: IMappingsClient;
 }
 
-export interface ExtractionMessageData {
-  date: string;
-  category: string;
-  level: string;
-  message: string;
-}
-
-export interface ExtractionIconData {
-  iconStatus: "negative" | "positive" | "warning";
-  iconMessage: string;
-}
-
 export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient }: MappingsOperationsProps) => {
   const [showImportModal, setShowImportModal] = useState<boolean | undefined>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
@@ -104,31 +96,37 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const extractionClient = useExtractionClient();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [isTogglingExtraction, setIsTogglingExtraction] = useState<boolean>(false);
-  const [extractionIconData, setExtractionIconData] = useState<ExtractionIconData>({
-    iconStatus: "warning",
-    iconMessage: "",
-  });
+  const {extractionStatusIcon, extractionMessageData, setExtractionStatusIcon, setExtractionMessageData} = useExtractionStatusDataContext();
   const [showExtractionMessageModal, setShowExtractionMessageModal] = useState<boolean>(false);
-  const [extractionMessageData, setExtractionMessageData] = useState<ExtractionMessageData[]>([]);
+  const previousStatusIcon = useRef<ExtractionStatusData>();
 
   useEffect(() => {
     void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient, setErrorMessage);
   }, [getAccessToken, mappingClient, iModelId]);
 
   useEffect(() => {
-    void fetchExtractionStatus(
-      iModelId,
-      getAccessToken,
-      extractionClient,
-      setExtractionIconData,
-      setExtractionMessageData
-    );
-  }, [iModelId, getAccessToken, extractionClient]);
+    previousStatusIcon.current = extractionStatusIcon;
+  }, [extractionStatusIcon]);
+
+  useEffect(() => {
+    if(previousStatusIcon.current?.iconStatus === undefined) {
+      void fetchExtractionStatus(
+        iModelId,
+        getAccessToken,
+        extractionClient,
+        setExtractionStatusIcon,
+        setExtractionMessageData
+      );
+    }
+  }, [iModelId, getAccessToken, extractionClient, isLoading, setExtractionStatusIcon, setExtractionMessageData]);
 
   const refresh = useCallback(async () => {
     setMappings([]);
-    await fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient, setErrorMessage);
-  }, [getAccessToken, mappingClient, iModelId]);
+    await Promise.all([
+      fetchExtractionStatus(iModelId, getAccessToken, extractionClient, setExtractionStatusIcon, setExtractionMessageData),
+      fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient, setErrorMessage),
+    ]);
+  }, [extractionClient, getAccessToken, mappingClient, iModelId, setExtractionMessageData, setExtractionStatusIcon]);
 
   const toggleExtraction = useCallback(async (mapping: Mapping) => {
     try {
@@ -151,5 +149,5 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     await refresh();
   };
 
-  return { mappings, isLoading, extractionIconData, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, refresh, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
+  return { mappings, isLoading, extractionStatusIcon, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, refresh, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, errorMessage, setErrorMessage };
 };

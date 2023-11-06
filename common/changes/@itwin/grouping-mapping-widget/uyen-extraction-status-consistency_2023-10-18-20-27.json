@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log.",
+      "comment": "Kept extraction status data consistent when navigating through Mapping and Group components.",
       "type": "patch"
     }
   ],
