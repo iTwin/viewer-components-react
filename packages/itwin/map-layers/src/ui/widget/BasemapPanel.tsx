@@ -55,7 +55,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
   const handleMapImageryChanged = React.useCallback((args: Readonly<MapImagerySettings>) => {
     const baseMap = args.backgroundBase;
 
-    // Optimization: If serialized 'backgroundBase' objects are identical, skip refresh
+    // Optimization:  If serialized 'backgroundBase' objects are identical, skip refresh
     if (JSON.stringify(baseMap.toJSON()) === JSON.stringify(selectedBaseMap?.toJSON()))
       return;
 
