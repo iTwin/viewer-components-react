@@ -6,12 +6,14 @@
 .property-grid-react-panel-header {
   display: grid;
   grid-template-areas: "title tools";;
-  grid-template-columns: auto auto;
-  grid-template-rows: auto;
-
   .property-grid-react-header-back-button {
     margin-right: var(--iui-size-xs);
   }
+
+    .header-text {
+      width: 100%;
+      overflow-wrap: break-word;
+    }
 
     .header-title {
       display: flex;
@@ -19,6 +21,7 @@
       grid-area: title;
       padding-block: 5px;
       align-items: center;
+      overflow: hidden;
     }
 
     .header-tools {
@@ -26,9 +29,12 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      overflow: visible;
     }
 
     .expandable-search-bar {
+      overflow: hidden;
+
       &.contracted {
         outline: none;
 
@@ -39,20 +45,12 @@
 
     &.search-bar-expanded {
       display: grid;
-      grid-template-columns: auto;
-      grid-template-rows: auto auto;
       grid-template-areas:
       "tools"
       "title";
 
-      .header-title {
-        grid-area: title
-      }
-
       .header-tools {
-        grid-area: tools;
-        display: flex;
-        align-items: center;
+        overflow: hidden;
       }
     }
 }
