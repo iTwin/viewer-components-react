@@ -107,7 +107,6 @@
     "jest": "^27.5.1",
     "jest-cli": "^27.5.1",
     "jest-transform-stub": "^2.0.0",
-    "msw": "^0.39.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.0",
