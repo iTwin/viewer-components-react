@@ -15,6 +15,7 @@ import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
 import * as React from "react";
 import "./BasemapPanel.scss";
+import { Viewport } from "@itwin/core-frontend";
 
 const customBaseMapValue = "customBaseMap";
 const getSelectKeyFromProvider = (base: BaseMapLayerSettings) => `${base.provider ? `${base.provider.name}.${BackgroundMapType[base.provider.type]}` : `${base.name}`}`;
@@ -52,30 +53,41 @@ export function BasemapPanel(props: BasemapPanelProps) {
   });
 
   const handleMapImageryChanged = React.useCallback((args: Readonly<MapImagerySettings>) => {
-    // selectedBaseMap
     const baseMap = args.backgroundBase;
-    if (JSON.stringify(baseMap) !== JSON.stringify(selectedBaseMap))
-      setSelectedBaseMap(baseMap);
 
-    // baseMapTransparencyValue
-    if (args.backgroundBase instanceof ImageMapLayerSettings &&  args.backgroundBase.transparency !== baseMapTransparencyValue) {
-      setBaseMapTransparencyValue(args.backgroundBase.transparency);
-    } else if (args.backgroundBase instanceof ColorDef && args.backgroundBase.getAlpha() !== baseMapTransparencyValue ) {
-      setBaseMapTransparencyValue(args.backgroundBase.getAlpha()/255);
-    }
+    // Optimization:  If serialized 'backgroundBase' objects are identical, skip refresh
+    if (JSON.stringify(baseMap.toJSON()) === JSON.stringify(selectedBaseMap?.toJSON()))
+      return;
 
-    // baseMapVisible
-    if (args.backgroundBase instanceof ImageMapLayerSettings &&  args.backgroundBase.visible !== baseMapVisible) {
-      setBaseMapVisible(args.backgroundBase.visible);
+    setSelectedBaseMap(baseMap);  // cache current base map objects
+
+    if (baseMap instanceof ImageMapLayerSettings) {
+      if (baseMap.transparency !== baseMapTransparencyValue)
+        setBaseMapTransparencyValue(baseMap.transparency);
+
+      if (baseMap.visible !== baseMapVisible)
+        setBaseMapVisible(baseMap.visible);
+
+    } else if (baseMap instanceof ColorDef) {
+      if (baseMap.getAlpha() !== baseMapTransparencyValue ) {
+        setBaseMapTransparencyValue(baseMap.getAlpha()/255);
+      }
     }
-  }, [baseMapTransparencyValue, baseMapVisible, selectedBaseMap, setBaseMapTransparencyValue, setBaseMapVisible, setSelectedBaseMap]);
+  }, [baseMapTransparencyValue, baseMapVisible, selectedBaseMap]);
+
+  React.useEffect(() => {
+    const handleDisplayStyleChange = (vp: Viewport) => {
+      handleMapImageryChanged(vp.displayStyle.settings.mapImagery);
+    };
+    return activeViewport?.onDisplayStyleChanged.addListener(handleDisplayStyleChange);
+  }, [activeViewport, handleMapImageryChanged]);
 
   // Monitor display style's onMapImageryChanged event
   React.useEffect(() => {
     return activeViewport?.displayStyle.settings.onMapImageryChanged.addListener(handleMapImageryChanged);
   }, [activeViewport, handleMapImageryChanged]);
 
-  // Monitor viewport updates, and refresh the widget accordingly.
+  // Monitor viewport updates, and refresh the widget accordingly .
   // Note: This is needed for multiple viewport applications.
   React.useEffect(() => {
     if (activeViewport) {
