@@ -13,8 +13,7 @@ test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
 });
 
-test.describe("property grid snapshots", () => {
-
+test.describe("property grid", () => {
   const testCases = () => {
 
     const selectSingleElement = async (page: Page) => {
@@ -34,9 +33,9 @@ test.describe("property grid snapshots", () => {
 
     test("single element selected - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
-      await propertyWidget.getByTitle("Expand Searchbar").click();
+      await propertyWidget.getByTitle("Open search bar").click();
 
-      await propertyWidget.getByTitle("Contract Searchbar").first().waitFor();
+      await propertyWidget.getByTitle("Close search bar").first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -60,9 +59,9 @@ test.describe("property grid snapshots", () => {
 
     test("single element with ancestry navigation - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectSingleElementWithAncestry(page);
-      await propertyWidget.getByTitle("Expand Searchbar").click();
+      await propertyWidget.getByTitle("Open search bar").click();
 
-      await propertyWidget.getByTitle("Contract Searchbar").first().waitFor();
+      await propertyWidget.getByTitle("Close search bar").first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -86,8 +85,8 @@ test.describe("property grid snapshots", () => {
 
     test("multiple elements selected - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
-      await propertyWidget.getByTitle("Expand Searchbar").click();
-      await propertyWidget.getByTitle("Contract Searchbar").first().waitFor();
+      await propertyWidget.getByTitle("Open search bar").click();
+      await propertyWidget.getByTitle("Close search bar").first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -120,12 +119,12 @@ test.describe("property grid snapshots", () => {
 
     test("single element selected from elements list - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectElementFromElementList(page);
-      const expandSearchbarButtons = await propertyWidget.getByTitle("Expand Searchbar").all();
+      const expandSearchbarButtons = await propertyWidget.getByTitle("Open search bar").all();
 
       // use the second one, since the first one is hidden because of animation that is used for property grid.
       await expandSearchbarButtons[1].click();
 
-      await propertyWidget.getByTitle("Contract Searchbar").first().waitFor();
+      await propertyWidget.getByTitle("Close search bar").first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -167,14 +166,13 @@ test.describe("property grid snapshots", () => {
 
       await takeScreenshot(page, propertyWidget);
     });
-
   };
 
-  test.describe("stage panel size - narrow", () => {
+  test.describe("narrow", () => {
     testCases();
   });
 
-  test.describe("stage panel size - wide", () => {
+  test.describe("wide", () => {
     test.beforeEach(async ({ page }) => {
       await expandStagePanel(page, "right", 400);
     });

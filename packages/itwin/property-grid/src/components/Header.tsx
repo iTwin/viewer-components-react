@@ -56,7 +56,7 @@ export function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, clas
   >
     <SearchBox.CollapsedState>
       <SearchBox.ExpandButton
-        title="Expand Searchbar"
+        title="Open search bar"
       />
     </SearchBox.CollapsedState>
     <SearchBox.ExpandedState >
@@ -65,7 +65,7 @@ export function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, clas
         onChange={(e) => setInputValue(e.currentTarget.value)}
       />
       <SearchBox.CollapseButton
-        title="Contract Searchbar"
+        title="Close search bar"
         onClick={() => {
           setInputValue("");
         }}

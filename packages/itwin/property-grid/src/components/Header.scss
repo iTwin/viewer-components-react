@@ -10,9 +10,15 @@
     margin-right: var(--iui-size-xs);
   }
 
+    .property-grid-header-title-text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
     .header-text {
       width: 100%;
-      overflow-wrap: break-word;
+      overflow: hidden;
     }
 
     .header-title {

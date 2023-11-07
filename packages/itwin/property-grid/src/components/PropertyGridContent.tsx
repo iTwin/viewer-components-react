@@ -153,10 +153,10 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
   </>);
 
   const title = (<>
-    <Text variant="leading">
+    <Text variant="leading" className="property-grid-header-title-text">
       {PropertyValueRendererManager.defaultManager.render(item.label)}
     </Text>
-    <Text>
+    <Text className="property-grid-header-title-text">
       {item.className}
     </Text>
   </>);
