@@ -13,7 +13,8 @@
   },
   "search-bar": {
     "open": "Open search bar",
-    "close": "Close search bar"
+    "close": "Close search bar",
+    "placeholder": "Search"
   },
   "selection": {
     "too-many-elements-selected": "Too many elements selected",
