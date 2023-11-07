@@ -159,7 +159,7 @@ describe("<PropertyGridContent />", () => {
       expect(queryByText("Test Category")).to.not.be.null;
     });
 
-    const searchButton = await waitFor(() => getByTitle("Open search bar"));
+    const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
     await user.click(searchButton);
 
     const searchTextInput =  await waitFor(() => getByRole("searchbox"));
@@ -194,7 +194,7 @@ describe("<PropertyGridContent />", () => {
       expect(queryByText("Test Category")).to.not.be.null;
     });
 
-    const searchButton = await waitFor(() => getByTitle("Open search bar"));
+    const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
     await user.click(searchButton);
 
     // input text that should not match anything, thus rendering nothing
@@ -206,7 +206,7 @@ describe("<PropertyGridContent />", () => {
     });
 
     // press collapse button which should clear the filter
-    const collapseSearchButton =  await waitFor(() => getByTitle("Close search bar"));
+    const collapseSearchButton =  await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.close")));
     await user.click(collapseSearchButton);
 
     await waitFor(() => {

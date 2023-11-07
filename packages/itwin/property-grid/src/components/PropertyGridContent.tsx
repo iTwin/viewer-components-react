@@ -142,7 +142,6 @@ interface PropertyGridHeaderProps {
 }
 
 function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, updateSearchText }: PropertyGridHeaderProps) {
-
   if (!item) {
     return null;
   }
@@ -152,14 +151,15 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
     {<SettingsDropdownMenu {...settingsProps}/>}
   </>);
 
-  const title = (<>
-    <Text variant="leading" className="property-grid-header-title-text">
-      {PropertyValueRendererManager.defaultManager.render(item.label)}
-    </Text>
-    <Text className="property-grid-header-title-text">
-      {item.className}
-    </Text>
-  </>);
+  const title = (
+    <div className="property-grid-header-title">
+      <Text variant="leading" className="property-grid-header-title-text">
+        {PropertyValueRendererManager.defaultManager.render(item.label)}
+      </Text>
+      <Text className="property-grid-header-title-text">
+        {item.className}
+      </Text>
+    </div>);
 
   return (
     <Header onBackButtonClick={onBackButtonClick}

@@ -28,7 +28,7 @@ export interface DebouncedSearchBoxProps {
   className: string;
 }
 
-export function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }: DebouncedSearchBoxProps){
+function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }: DebouncedSearchBoxProps){
   const [inputValue, setInputValue] = useState<string>("");
   const onSearchStringChangeRef = useRef(onSearchStringChange);
   onSearchStringChangeRef.current = onSearchStringChange;
@@ -92,9 +92,7 @@ export function Header({ className, onBackButtonClick, headerTools, title, onSea
           </IconButton>
           : null
       }
-      <div className={"header-text"}>
-        {title}
-      </div>
+      {title}
     </div>
     <div className="header-tools">
       { onSearchStringChange &&
