@@ -1,6 +1,13 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Thu, 26 Oct 2023 13:09:22 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Nov 2023 13:43:31 GMT and should not be manually modified.
+
+## 5.2.4
+Tue, 07 Nov 2023 13:43:31 GMT
+
+### Patches
+
+- Fix UI refresh issues after a saved view is applied.
 
 ## 5.2.3
 Thu, 26 Oct 2023 13:09:22 GMT
