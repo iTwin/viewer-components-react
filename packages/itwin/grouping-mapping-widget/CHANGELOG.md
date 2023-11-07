@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 26 Oct 2023 13:09:22 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Nov 2023 13:43:31 GMT and should not be manually modified.
+
+## 0.20.1
+Tue, 07 Nov 2023 13:43:31 GMT
+
+### Patches
+
+- Kept extraction status data consistent when navigating through Mapping and Group components.
 
 ## 0.20.0
 Thu, 26 Oct 2023 13:09:22 GMT
