@@ -31,7 +31,10 @@ export interface DebouncedSearchBoxProps {
 function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }: DebouncedSearchBoxProps){
   const [inputValue, setInputValue] = useState<string>("");
   const onSearchStringChangeRef = useRef(onSearchStringChange);
-  onSearchStringChangeRef.current = onSearchStringChange;
+
+  useEffect(() => {
+    onSearchStringChangeRef.current = onSearchStringChange;
+  }, [onSearchStringChange]);
 
   useEffect(() => {
     if (!inputValue) {
