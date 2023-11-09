@@ -73,7 +73,7 @@ test.describe("property grid", () => {
       const propertyWidget = locateWidget(page, "property-grid");
       await treeWidget.getByText("ProcessPhysicalModel").click();
 
-      await propertyWidget.getByTitle("Selected Elements").first().waitFor();
+      await propertyWidget.getByText("Multiple items").first().waitFor();
 
       return propertyWidget;
     };
