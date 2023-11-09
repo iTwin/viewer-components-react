@@ -35,12 +35,9 @@ async function buildAndRunDocker() {
     // Build the Docker image
     await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", `${dockerImageName}`, "-f", "e2e.Dockerfile", "."]);
     // Run Docker container
-    await execute("docker", ["run", "--name", `${dockerContainerName}`, "-e", `UPDATE_SNAPSHOTS=${process.env.UPDATE_SNAPSHOTS}`, `${dockerImageName}`]);
-
-    if (process.env.UPDATE_SNAPSHOTS) {
-      // Copy snapshots from docker container to the local repo
-      await execute("docker", ["cp", `${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests`, `./${srcFolderLocation}`]);
-    }
+    await execute("docker", ["run", "--name", `${dockerContainerName}`, "-e", `CI=${process.env.CI}`, `${dockerImageName}`]);
+    // Copy snapshots from docker container to the local repo
+    await execute("docker", ["cp", `${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests`, `./${srcFolderLocation}`]);
   } catch {
     process.exitCode = 1;
   } finally {
