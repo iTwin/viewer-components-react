@@ -115,7 +115,7 @@ export function PropertyGridContent({
         item={item}
         onBackButtonClick={onBackButton}
         settingsProps={settingsProps}
-        updateSearchText={(searchText: string) => {
+        onSearchTextChange={(searchText: string) => {
           setFilterText(searchText);
         }}
       />
@@ -138,10 +138,10 @@ interface PropertyGridHeaderProps {
   item?: { className: string, label: PropertyRecord };
   onBackButtonClick?: () => void;
   settingsProps: SettingsDropdownMenuProps;
-  updateSearchText: (searchText: string) => void;
+  onSearchTextChange: (searchText: string) => void;
 }
 
-function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, updateSearchText }: PropertyGridHeaderProps) {
+function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, onSearchTextChange }: PropertyGridHeaderProps) {
   if (!item) {
     return null;
   }
@@ -163,7 +163,7 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
 
   return (
     <Header onBackButtonClick={onBackButtonClick}
-      onSearchStringChange={updateSearchText}
+      onSearchStringChange={onSearchTextChange}
       title={title}
       headerTools={headerTools}
     />
