@@ -234,3 +234,15 @@ new PropertyGridUiItemsProvider({
 Result:
 
 ![Custom settings menu item](./media/custom-settings-menu-item.png)
+
+### Property filtering / search
+
+Searching for properties that match your input can be done as follows:
+
+When an item is selected, click the magnifying glass button.
+
+// image here.
+
+One can type into the field and notice how properties are automatically filtered to only display those that match the search bar input
+
+// image here
