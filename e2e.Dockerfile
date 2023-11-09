@@ -27,13 +27,8 @@ RUN npm install -g @microsoft/rush
 RUN rush install
 RUN rush build -t test-viewer
 
-# Switch to tree-widget directory where E2E tests will run
+# Switch to the directory where E2E tests will run
 WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
 
 # Run E2E tests
-CMD [ "sh", "-c", \
-  "if [ \"$UPDATE_SNAPSHOTS\" = \"1\" ]; then \
-  npm run test:e2e:local:update; \
-  else \
-  npm run test:e2e:local; \
-  fi" ]
+RUN npm run test:e2e:local
