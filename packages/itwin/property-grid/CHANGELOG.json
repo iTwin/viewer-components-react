@@ -2,6 +2,23 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@itwin/property-grid-react_v1.4.0",
+      "date": "Fri, 10 Nov 2023 14:46:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update to AppUI 4.5.0"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add filtering support."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.0",
       "tag": "@itwin/property-grid-react_v1.3.0",
       "date": "Tue, 29 Aug 2023 13:48:47 GMT",

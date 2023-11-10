@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.21.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.21.0",
+      "date": "Fri, 10 Nov 2023 14:46:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "iTwin.js minimum version bumped to 4.1"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.1",
       "tag": "@itwin/grouping-mapping-widget_v0.20.1",
       "date": "Tue, 07 Nov 2023 13:43:31 GMT",
