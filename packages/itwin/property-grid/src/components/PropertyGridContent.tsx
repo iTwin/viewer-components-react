@@ -5,14 +5,14 @@
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
-import { useCallback, useState } from "react";
-import { PropertyValueRendererManager } from "@itwin/components-react";
+import { useCallback, useMemo, useState } from "react";
+import { CompositeFilterType, CompositePropertyDataFilterer, DisplayValuePropertyDataFilterer, FilteredType, LabelPropertyDataFilterer, PropertyCategoryLabelFilterer, PropertyValueRendererManager } from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
 import { Text } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
 import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
-import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "./FilteringPropertyGrid";
+import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid";
 import { Header } from "./Header";
 import { SettingsDropdownMenu } from "./SettingsDropdownMenu";
 
@@ -20,7 +20,7 @@ import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDro
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-react";
+import type { PropertyCategory , PropertyUpdatedArgs } from "@itwin/components-react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
@@ -78,8 +78,10 @@ export function PropertyGridContent({
     imodel,
     contextMenuItems,
   });
+
+  const [filterText, setFilterText] = useState<string>("");
   const { showNullValues } = useNullValueSettingContext();
-  const filterer = useFilterer({ showNullValues });
+  const filterer = useFilterer({ showNullValues, filterText });
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const handleResize = useCallback((w: number, h: number) => {
@@ -95,6 +97,7 @@ export function PropertyGridContent({
     ...props,
     dataProvider,
     filterer,
+    highlight: filterText ? { highlightedText: filterText, filteredTypes: [FilteredType.Category, FilteredType.Label, FilteredType.Value] } : undefined,
     isPropertyHoverEnabled: true,
     isPropertySelectionEnabled: true,
     onPropertyContextMenu,
@@ -107,7 +110,15 @@ export function PropertyGridContent({
 
   return (
     <div className={classnames("property-grid-react-container", className)}>
-      <PropertyGridHeader controls={headerControls} item={item} onBackButtonClick={onBackButton} settingsProps={settingsProps} />
+      <PropertyGridHeader
+        controls={headerControls}
+        item={item}
+        onBackButtonClick={onBackButton}
+        settingsProps={settingsProps}
+        onSearchTextChange={(searchText: string) => {
+          setFilterText(searchText);
+        }}
+      />
       <div className="property-grid-react-data">
         <ResizableContainerObserver onResize={handleResize}>
           {
@@ -127,40 +138,61 @@ interface PropertyGridHeaderProps {
   item?: { className: string, label: PropertyRecord };
   onBackButtonClick?: () => void;
   settingsProps: SettingsDropdownMenuProps;
+  onSearchTextChange: (searchText: string) => void;
 }
 
-function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick }: PropertyGridHeaderProps) {
+function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, onSearchTextChange }: PropertyGridHeaderProps) {
   if (!item) {
     return null;
   }
 
+  const headerTools = (<>
+    {controls}
+    {<SettingsDropdownMenu {...settingsProps}/>}
+  </>);
+
+  const title = (
+    <div className="property-grid-header-title">
+      <Text variant="leading" className="property-grid-header-title-text">
+        {PropertyValueRendererManager.defaultManager.render(item.label)}
+      </Text>
+      <Text className="property-grid-header-title-text">
+        {item.className}
+      </Text>
+    </div>);
+
   return (
-    <Header onBackButtonClick={onBackButtonClick}>
-      <div className="property-grid-react-panel-label-and-class">
-        <Text variant="leading">
-          {PropertyValueRendererManager.defaultManager.render(item.label)}
-        </Text>
-        <Text>{item.className}</Text>
-      </div>
-      {controls}
-      <SettingsDropdownMenu {...settingsProps} />
-    </Header>
+    <Header onBackButtonClick={onBackButtonClick}
+      onSearchStringChange={onSearchTextChange}
+      title={title}
+      headerTools={headerTools}
+    />
   );
 }
 
 interface UseFiltererProps {
   showNullValues: boolean;
+  filterText: string;
 }
 
-function useFilterer({ showNullValues }: UseFiltererProps) {
+function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
   const [defaultFilterers] = useState(() => ({
-    noop: new NoopPropertyDataFilterer(),
     nonEmpty: new NonEmptyValuesPropertyDataFilterer(),
   }));
 
-  if (!showNullValues) {
-    return defaultFilterers.nonEmpty;
-  }
+  const compositeFilterer = useMemo(() => {
+    const valueFilterer = new DisplayValuePropertyDataFilterer(filterText);
+    const labelFilterer = new LabelPropertyDataFilterer(filterText);
+    const categoryFilterer = new PropertyCategoryLabelFilterer(filterText);
+    const valueAndRecordFilterer = new CompositePropertyDataFilterer(valueFilterer, CompositeFilterType.Or, labelFilterer);
+    const textFilterer = new CompositePropertyDataFilterer(valueAndRecordFilterer, CompositeFilterType.Or, categoryFilterer);
 
-  return defaultFilterers.noop;
+    if(!showNullValues){
+      return new CompositePropertyDataFilterer(textFilterer, CompositeFilterType.And, defaultFilterers.nonEmpty);
+    }
+
+    return textFilterer;
+  }, [defaultFilterers.nonEmpty, filterText, showNullValues]);
+
+  return compositeFilterer;
 }

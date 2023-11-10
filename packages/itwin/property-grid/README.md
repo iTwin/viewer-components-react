@@ -234,3 +234,19 @@ new PropertyGridUiItemsProvider({
 Result:
 
 ![Custom settings menu item](./media/custom-settings-menu-item.png)
+
+## Property filtering
+
+Property grid allows its users to filter out properties of an element based on text input.
+
+When an item is selected, click the magnifying glass button and notice the search bar expand.
+
+| Search bar closed                                                 | Search bar opened                                             |
+| ----------------------------------------------------------------- | ------------------------------------------------------------- |
+| ![Search bar closed](./media/widget.png)                          | ![Search bar opened](./media/search-bar-expanded.png)         |
+
+One can type into the search bar and notice how properties are automatically filtered based on the search bar input:
+
+![Widget search bar expanded](./media/search-bar-filtering.png)
+
+Note that when the search bar is closed, the filter is discarded and all properties are visible again.
