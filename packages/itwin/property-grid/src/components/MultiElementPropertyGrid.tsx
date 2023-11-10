@@ -149,7 +149,6 @@ export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavig
 
   return <>
     <IconButton
-      size="small"
       styleType="borderless"
       title={PropertyGridManager.translate("header.navigateUp")}
       onClick={navigateUp}
@@ -158,7 +157,6 @@ export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavig
       <SvgArrowUp />
     </IconButton>
     <IconButton
-      size="small"
       styleType="borderless"
       title={PropertyGridManager.translate("header.navigateDown")}
       onClick={navigateDown}
@@ -188,7 +186,6 @@ function HeaderControls({
 
   return <IconButton
     className="property-grid-react-multi-select-icon"
-    size="small"
     styleType="borderless"
     onClick={onElementListButtonClick}
     title={PropertyGridManager.translate("element-list.title")}
