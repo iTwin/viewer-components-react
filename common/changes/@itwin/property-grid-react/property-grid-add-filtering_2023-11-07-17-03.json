@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Add filtering to property grid.",
-      "type": "patch"
+      "comment": "Add filtering support.",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/property-grid-react"
