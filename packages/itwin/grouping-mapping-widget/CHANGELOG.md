@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 07 Nov 2023 13:43:31 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Nov 2023 14:46:30 GMT and should not be manually modified.
+
+## 0.21.0
+Fri, 10 Nov 2023 14:46:30 GMT
+
+### Minor changes
+
+- iTwin.js minimum version bumped to 4.1
 
 ## 0.20.1
 Tue, 07 Nov 2023 13:43:31 GMT
