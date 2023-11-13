@@ -61,16 +61,6 @@
         }
       }
 
-      &.enlarge {
-        .visibility-tree-checkbox-container {
-          height: var(--enlarged-node-height);
-          width: var(--enlarged-node-height);
-
-          .visibility-tree-checkbox {
-            --iui-checkbox-target-size: var(--enlarged-node-height);
-          }
-        }
-      }
 
       &.is-selected {
         > .contents {
