@@ -74,8 +74,5 @@
     "source.fixAll.markdownlint": true, // first run the markdown linter
     "editor.action.fixAll": true, // Run the default formatter before eslint, it handles whitespace better
     "source.fixAll.eslint": true, // then run ESLint auto-fix
-    "source.fixAll.stylelint": true,
   },
-  "stylelint.config": { "extends": ["./packages/itwin/tree-widget/.stylelintrc.json", "./packages/itwin/property-grid/.stylelintrc.json"]},
-  "stylelint.validate": ["scss"],
 }
