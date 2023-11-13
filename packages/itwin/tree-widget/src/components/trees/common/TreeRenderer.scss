@@ -20,8 +20,9 @@
   height: 100%;
   width: 100%;
 
+  /* stylelint-disable-next-line selector-class-pattern */
   .ReactWindow__VariableSizeList {
-    >div {
+    > div {
       min-width: max-content !important; // to override inline class
     }
   }
@@ -30,21 +31,16 @@
     --enlarged-node-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
     --enlarged-node-icon-size: var(--iui-size-m);
     --enlarged-node-icon-padding: calc(var(--enlarged-node-height) - var(--enlarged-node-icon-size));
-    --enlarged-node-expander-additional-padding: calc(var(--iui-size-m) + var(--iui-size-3xs));
+    --enlarged-node-expander-additional-padding: calc(var(--iui-size-l) - var(--iui-size-3xs) / 2);
 
     .core-tree-node {
-      &.without-expander {
-        >.contents {
-          padding-left: var(--enlarged-node-expander-additional-padding);
-        }
-      }
-
-      >.contents {
+      > .contents {
         height: var(--enlarged-node-height);
         font-size: var(--iui-font-size-2);
 
+        /* stylelint-disable-next-line selector-class-pattern */
         .core-tree-expansionToggle {
-          >.icon {
+          > .icon {
             height: var(--enlarged-node-height);
             width: var(--enlarged-node-height);
             padding: calc(var(--enlarged-node-icon-padding) / 2);
@@ -56,10 +52,18 @@
           }
         }
 
+        &.without-expander {
+          > .contents {
+            padding-left: var(--enlarged-node-expander-additional-padding);
+          }
+        }
+
         .iui-progress-indicator-radial {
           height: var(--enlarged-node-height);
           width: var(--enlarged-node-height);
-          padding: calc(var(--enlarged-node-icon-padding) / 2 - 1px); // need to reduce padding by `1px` to make sure icon is centered
+          padding: calc(var(--enlarged-node-icon-padding) / 2 - 1px);
+
+          // need to reduce padding by `1px` to make sure icon is centered
           margin: 0;
         }
       }
@@ -74,6 +78,7 @@
   flex-direction: column;
   position: relative;
 
+  /* stylelint-disable selector-class-pattern */
   .filteredTreeOverlay {
     position: absolute;
     top: 0;
