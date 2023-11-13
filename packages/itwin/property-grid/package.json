@@ -34,7 +34,7 @@
     "copy:esm": "cpx \"./src/**/*.scss\" ./lib/esm",
     "cover": "nyc npm run test",
     "extract-api": "betools extract-api --entry=property-grid-react",
-    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2 && npx stylelint \"**/*.scss\"",
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2 && stylelint \"./src/**/*.scss\"",
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
