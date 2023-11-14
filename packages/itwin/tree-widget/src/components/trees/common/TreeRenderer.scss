@@ -26,6 +26,16 @@
     }
   }
 
+  .core-tree-node {
+    &.without-expander {
+      >.contents {
+        >.core-tree-node-icon {
+          padding-left: 5px;
+        }
+      }
+    }
+  }
+
   &.enlarge {
     --enlarged-node-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
     --enlarged-node-icon-size: var(--iui-size-m);
