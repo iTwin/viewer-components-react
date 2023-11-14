@@ -149,14 +149,12 @@ describe("<PropertyGridContent />", () => {
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
-        settingsMenuItems={[
-          (props) => <ShowHideNullValuesSettingsMenuItem {...props} />,
-        ]}
       />
     );
 
     await waitFor(() => {
-      expect(queryByText("Test Category")).to.not.be.null;
+      expect(queryByText("Test Prop")).to.not.be.null;
+      expect(queryByText("Null Prop")).to.not.be.null;
     });
 
     const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
@@ -164,16 +162,19 @@ describe("<PropertyGridContent />", () => {
 
     const searchTextInput =  await waitFor(() => getByRole("searchbox"));
     // input text that should match
-    await user.type(searchTextInput, "test");
+    await user.type(searchTextInput, "test prop");
 
     await waitFor(() => {
-      expect(queryByText("Test Category")).to.not.be.null;
+      expect(queryByText("Test Prop")).to.not.be.null;
+      expect(queryByText("Null Prop")).to.be.null;
     });
 
     // input text that should not match
-    await user.type(searchTextInput, "input text for test");
+    await user.clear(searchTextInput);
+    await user.type(searchTextInput, "null prop");
     await waitFor(() => {
-      expect(queryByText("Test Category")).to.be.null;
+      expect(queryByText("Test Prop")).to.be.null;
+      expect(queryByText("Null Prop")).to.not.be.null;
     });
   });
 
