@@ -8,7 +8,7 @@ import type { StepProperties } from "@itwin/itwinui-react";
 import { Stepper } from "@itwin/itwinui-react";
 import { Modal } from "@itwin/itwinui-react";
 import React, { useEffect, useRef, useState } from "react";
-import ConfirmMappingImport from "../ConfirmMappingsImport";
+import ConfirmMappingImport from "./ConfirmMappingsImport";
 import type { IMappingTyped } from "../Mappings";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
@@ -173,10 +173,7 @@ export const MappingImportWizardModal = ({
                       setSelectedMappings={setSelectedMappings}
                       backFn={() => setCurrentStep(currentStep - 1)}
                       onCancel={onClose}
-                      onFinish={async () => {
-                        await onClose();
-                        setImporting(false);
-                      }}
+                      onFinish={onClose}
                       displayStrings={displayStrings}
                     />
                   )}

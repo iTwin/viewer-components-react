@@ -25,6 +25,9 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
 import type { ExtractionMessageData, ExtractionStatusData, IExtractionStatusDataProps } from "./context/ExtractionStatusDataContext";
 import { ExtractionStatusDataContext } from "./context/ExtractionStatusDataContext";
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { toaster } from "@itwin/itwinui-react";
+import { getErrorMessage } from "../common/utils";
 
 export interface GroupingMappingContextProps {
   /**
@@ -62,6 +65,30 @@ export interface GroupingMappingContextProps {
 const authorizationClientGetAccessToken = async () =>
   (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+  queryCache: new QueryCache({
+    onError: (error: any) => {
+      if (error.status)
+        toaster.negative(getErrorMessage(error.status));
+      else
+        toaster.negative("Error occurred while fetching data.");
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error: any) => {
+      if (error.status)
+        toaster.negative(getErrorMessage(error.status));
+      else
+        toaster.negative("Error occurred modifying data.");
+    },
+  }),
+});
+
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const activeIModelConntextion = useActiveIModelConnection();
   const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
@@ -90,7 +117,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
   const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
   const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
-  const [extractionStatusIcon, setExtractionStatusIcon] = useState<ExtractionStatusData>({iconStatus: undefined, iconMessage: "Loading..."});
+  const [extractionStatusIcon, setExtractionStatusIcon] = useState<ExtractionStatusData>({ iconStatus: undefined, iconMessage: "Loading..." });
   const [extractionMessageData, setExtractionMessageData] = useState<ExtractionMessageData[]>([]);
   useEffect(() => {
     setApiConfig(() => ({
@@ -157,7 +184,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     setCustomUIs,
   }), [customUIs]);
 
-  const extractionStatusDataValue: IExtractionStatusDataProps = useMemo (() => ({
+  const extractionStatusDataValue: IExtractionStatusDataProps = useMemo(() => ({
     extractionStatusIcon,
     extractionMessageData,
     setExtractionMessageData,
@@ -165,20 +192,22 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   }), [extractionStatusIcon, extractionMessageData]);
 
   return (
-    <GroupingMappingApiConfigContext.Provider value={apiConfig}>
-      <MappingClientContext.Provider value={mappingClient}>
-        <ExtractionClientContext.Provider value={extractionClient}>
-          <ExtractionStatusDataContext.Provider value={extractionStatusDataValue}>
-            <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
-              <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-                <PropertiesContext.Provider value={propertiesContextValue}>
-                  {props.children}
-                </PropertiesContext.Provider>
-              </GroupHilitedElementsContext.Provider>
-            </GroupingMappingCustomUIContext.Provider>
-          </ExtractionStatusDataContext.Provider>
-        </ExtractionClientContext.Provider>
-      </MappingClientContext.Provider>
-    </GroupingMappingApiConfigContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <GroupingMappingApiConfigContext.Provider value={apiConfig}>
+        <MappingClientContext.Provider value={mappingClient}>
+          <ExtractionClientContext.Provider value={extractionClient}>
+            <ExtractionStatusDataContext.Provider value={extractionStatusDataValue}>
+              <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
+                <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
+                  <PropertiesContext.Provider value={propertiesContextValue}>
+                    {props.children}
+                  </PropertiesContext.Provider>
+                </GroupHilitedElementsContext.Provider>
+              </GroupingMappingCustomUIContext.Provider>
+            </ExtractionStatusDataContext.Provider>
+          </ExtractionClientContext.Provider>
+        </MappingClientContext.Provider>
+      </GroupingMappingApiConfigContext.Provider>
+    </QueryClientProvider>
   );
 };

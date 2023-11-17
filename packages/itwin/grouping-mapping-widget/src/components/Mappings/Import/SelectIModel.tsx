@@ -2,16 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { EntityListIterator, IModel, IModelsClient } from "@itwin/imodels-client-management";
+import type { IModel, IModelsClient } from "@itwin/imodels-client-management";
 import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
 import { Button, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import type { CreateTypeFromInterface } from "../../../common/utils";
 import "./SelectIModel.scss";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useIModelsClient } from "../../context/IModelsClientContext";
-import { handleError } from "../../../common/utils";
+import { useQuery } from "@tanstack/react-query";
+import type { Column } from "react-table";
 
 type IIModelTyped = CreateTypeFromInterface<IModel>;
 
@@ -22,38 +23,26 @@ const defaultDisplayStrings = {
 };
 
 const fetchIModels = async (
-  setIModels: (iModels: IModel[]) => void,
-  setIsLoading: (isLoading: boolean) => void,
   getAccessToken: GetAccessTokenFn,
   iTwinId: string,
   iModelsClient: IModelsClient,
 ) => {
-  try {
-    setIModels([]);
-    setIsLoading(true);
-    const iModelIterator: EntityListIterator<IModel> = iModelsClient.iModels.getRepresentationList({
-      authorization: async () => {
-        const token = await getAccessToken();
-        const splitToken = token.split(" ");
-        return {
-          scheme: splitToken[0],
-          token: splitToken[1],
-        };
-      },
-      urlParams: {
-        iTwinId,
-      },
-    });
-    const iModels: IModel[] = [];
-    for await (const iModel of iModelIterator) {
-      iModels.push(iModel);
-    }
-    setIModels(iModels);
-  } catch (error: any) {
-    handleError(error.status);
-  } finally {
-    setIsLoading(false);
+  const accessToken = await getAccessToken();
+  const iModelIterator = iModelsClient.iModels.getRepresentationList({
+    authorization: async () => ({
+      scheme: accessToken.split(" ")[0],
+      token: accessToken.split(" ")[1],
+    }),
+    urlParams: {
+      iTwinId,
+    },
+  });
+
+  const iModels = [];
+  for await (const iModel of iModelIterator) {
+    iModels.push(iModel);
   }
+  return iModels;
 };
 
 interface SelectIModelProps {
@@ -72,36 +61,31 @@ const SelectIModel = ({
 }: SelectIModelProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const iModelsClient = useIModelsClient();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [iModels, setIModels] = useState<IModel[]>([]);
 
-  useEffect(() => {
-    void fetchIModels(setIModels, setIsLoading, getAccessToken, iTwinId, iModelsClient);
-  }, [getAccessToken, iModelsClient, setIsLoading, iTwinId]);
+  const { data: iModels, isLoading } = useQuery({
+    queryKey: ["iModels", iTwinId],
+    queryFn: async () => fetchIModels(getAccessToken, iTwinId, iModelsClient),
+    initialData: [],
+  });
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
 
-  const iModelsColumns = useMemo(
+  const iModelsColumns = useMemo<Column<IIModelTyped>[]>(
     () => [
       {
-        Header: "Table",
-        columns: [
-          {
-            id: "iModelName",
-            Header: `${displayStrings.iModelName}`,
-            accessor: "name",
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "iModelDescription",
-            Header: `${displayStrings.iModelDescription}`,
-            accessor: "description",
-            Filter: tableFilters.TextFilter(),
-          },
-        ],
+        id: "iModelName",
+        Header: `${displayStrings.iModelName}`,
+        accessor: "name",
+        Filter: tableFilters.TextFilter(),
+      },
+      {
+        id: "iModelDescription",
+        Header: `${displayStrings.iModelDescription}`,
+        accessor: "description",
+        Filter: tableFilters.TextFilter(),
       },
     ],
     [displayStrings.iModelName, displayStrings.iModelDescription]
