@@ -27,11 +27,21 @@
     }
   }
 
+  .core-tree-node {
+    &.without-expander {
+      >.contents {
+        >.core-tree-node-icon {
+          margin-left: 5px;
+        }
+      }
+    }
+  }
+
   &.enlarge {
     --enlarged-node-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
     --enlarged-node-icon-size: var(--iui-size-m);
     --enlarged-node-icon-padding: calc(var(--enlarged-node-height) - var(--enlarged-node-icon-size));
-    --enlarged-node-expander-additional-padding: calc(var(--iui-size-m) + var(--iui-size-3xs));
+    --enlarged-node-expander-additional-padding: calc(var(--iui-size-l) - var(--iui-size-3xs) / 2);
 
     .core-tree-node {
       > .contents {
