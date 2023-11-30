@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Fix node loading icon sizing.",
+      "comment": "Fix progress indicator sizing in `enlarged` layout",
       "type": "patch"
     }
   ],
