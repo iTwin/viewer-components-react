@@ -5,6 +5,23 @@
 
 .tree-widget-visibility-tree-base {
   .tree-widget-tree-nodes-list {
+    &.enlarge {
+      .without-expander {
+        .visibility-tree-checkbox-container + * {
+          margin-left: var(--enlarged-node-expander-additional-padding);
+        }
+      }
+
+      .visibility-tree-checkbox-container {
+        height: var(--enlarged-node-height);
+        width: var(--enlarged-node-height);
+
+        .visibility-tree-checkbox {
+          --iui-checkbox-target-size: var(--enlarged-node-height);
+        }
+      }
+    }
+
     .core-tree-node {
       &.with-checkbox {
         > .contents {
@@ -14,24 +31,9 @@
 
       &.disable-expander {
         > .contents {
+          /* stylelint-disable-next-line selector-class-pattern */
           > .core-tree-expansionToggle {
             display: none;
-          }
-        }
-      }
-
-      &.is-selected {
-        > .contents {
-          > .visibility-tree-checkbox-container {
-            background-color: var(--iui-color-background-accent-muted);
-          }
-        }
-      }
-
-      &:not(.is-selected) {
-        > .contents:hover {
-          > .visibility-tree-checkbox-container {
-            background-color: var(--iui-color-background-hover);
           }
         }
       }
@@ -58,23 +60,21 @@
           }
         }
       }
-    }
 
-    &.enlarge {
-      .core-tree-node {
-        .visibility-tree-checkbox-container {
-          height: var(--enlarged-node-height);
-          width: var(--enlarged-node-height);
 
-          .visibility-tree-checkbox {
-            --iui-checkbox-target-size: var(--enlarged-node-height);
+      &.is-selected {
+        > .contents {
+          > .visibility-tree-checkbox-container {
+            background-color: var(--iui-color-background-accent-muted);
           }
         }
       }
 
-      .without-expander {
-        .visibility-tree-checkbox-container + * {
-          margin-left: var(--enlarged-node-expander-additional-padding);
+      &:not(.is-selected) {
+        > .contents:hover {
+          > .visibility-tree-checkbox-container {
+            background-color: var(--iui-color-background-hover);
+          }
         }
       }
     }

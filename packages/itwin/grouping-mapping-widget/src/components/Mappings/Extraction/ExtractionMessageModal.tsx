@@ -51,20 +51,24 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
     const formatMessages = async () => {
       const groupsCache = new Map<string,Group[]>();
       const extractionMessageDataPromises = extractionMessageData.map(async (extractionMessage) => {
-        let replacedMessage = extractionMessage.message;
-        if(extractionMessage.message.includes("iModel")){
-          replacedMessage = replacedMessage.replace(/iModel [\w-]+/, "iModel");
-        }
-        if(replacedMessage.includes("MappingId:")){
+        {
+          let replacedMessage = extractionMessage.message;
           const splittedMessage = replacedMessage.split(" ");
-          const mappingId = splittedMessage[splittedMessage.indexOf("MappingId:") + 1];
-          const groupId = splittedMessage[splittedMessage.indexOf("GroupId:") + 1];
-          const mappingName = getMappingName(mappingId);
-          const groupName = await getGroupNames(mappingId, groupId, groupsCache);
-          replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
-          replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName}`);
+          const mappingId = splittedMessage[splittedMessage.indexOf("MappingId:") + 1].match(/^([^,]+),$/) ?? [];
+          if(extractionMessage.message.includes("iModel")){
+            replacedMessage = replacedMessage.replace(/iModel [\w-]+/, "iModel");
+          }
+          if(replacedMessage.includes("MappingId:")){
+            const mappingName = await getMappingName(mappingId[1]);
+            replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
+          }
+          if(replacedMessage.includes("GroupId:")){
+            const groupId = splittedMessage[splittedMessage.indexOf("GroupId:") + 1].match(/^([^,]+).$/) ?? [];
+            const groupName = await getGroupNames(mappingId[1], groupId[1], groupsCache);
+            replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName}`);
+          }
+          return {...extractionMessage, message: replacedMessage};
         }
-        return {...extractionMessage, message: replacedMessage};
       });
 
       const newMessages = await Promise.all(extractionMessageDataPromises);
