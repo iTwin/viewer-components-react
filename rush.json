@@ -21,7 +21,8 @@
     {
       "packageName": "@itwin/breakdown-trees-react",
       "projectFolder": "packages/itwin/breakdown-trees",
-      "versionPolicyName": "itwin-breakdown-trees"
+      "versionPolicyName": "itwin-breakdown-trees",
+      "decoupledLocalDependencies": ["@itwin/tree-widget-react"]
     },
     {
       "packageName": "@itwin/geo-tools-react",
