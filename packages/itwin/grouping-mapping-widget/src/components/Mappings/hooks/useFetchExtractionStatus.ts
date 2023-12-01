@@ -4,8 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import type { IExtractionClient } from "@itwin/insights-client";
 import { useQuery } from "@tanstack/react-query";
-import type { ExtractionMessageData, ExtractionStatusData } from "../../context/ExtractionStatusDataContext";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
+import type { ExtractionMessageData } from "../Extraction/ExtractionMessageModal";
+import type { ExtractionStatusData } from "../Extraction/ExtractionStatusIcon";
 
 export const useFetchExtractionStatus = ({
   iModelId,

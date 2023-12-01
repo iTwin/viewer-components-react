@@ -5,7 +5,6 @@
 import { Button, DefaultCell, Icon, Modal, ModalButtonBar, ModalContent, Table, tableFilters, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../../../common/utils";
-import type { ExtractionMessageData } from "../../context/ExtractionStatusDataContext";
 import "./ExtractionMessageModal.scss";
 import { SvgClock } from "@itwin/itwinui-icons-react";
 import type { CellRendererProps, Column } from "react-table";
@@ -17,6 +16,13 @@ import { useMappingsOperations } from "../hooks/useMappingsOperations";
 import type { Mapping } from "@itwin/insights-client";
 import { useQueries } from "@tanstack/react-query";
 import { useMemoizedCollecionPick } from "../../../common/hooks/useMemoizedCollecionPick";
+
+export interface ExtractionMessageData {
+  date: string;
+  category: string;
+  level: string;
+  message: string;
+}
 
 export interface ExtractionMessageModalProps {
   isOpen: boolean;

@@ -24,9 +24,9 @@ import { HorizontalTile } from "../SharedComponents/HorizontalTile";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { MappingUIActionGroup } from "./MappingViewActionGroup";
-import type { ExtractionMessageData } from "../context/ExtractionStatusDataContext";
-import type { ExtractionStatusData } from "../context/ExtractionStatusDataContext";
+import type { ExtractionStatusData } from "./Extraction/ExtractionStatusIcon";
 import { ExtractionStatusIcon } from "./Extraction/ExtractionStatusIcon";
+import type { ExtractionMessageData } from "./Extraction/ExtractionMessageModal";
 import { ExtractionMessageModal } from "./Extraction/ExtractionMessageModal";
 
 export const mappingViewDefaultDisplayStrings = {
