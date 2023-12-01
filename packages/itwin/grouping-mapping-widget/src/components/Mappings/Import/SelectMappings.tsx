@@ -44,7 +44,7 @@ const SelectMappings = ({
 
   const {
     data: mappings,
-    isLoading,
+    isFetching: isLoading,
   } = useFetchMappings(iModelId, getAccessToken, mappingClient);
 
   const displayStrings = React.useMemo(

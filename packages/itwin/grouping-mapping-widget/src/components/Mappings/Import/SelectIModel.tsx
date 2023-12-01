@@ -62,7 +62,7 @@ const SelectIModel = ({
   const { getAccessToken } = useGroupingMappingApiConfig();
   const iModelsClient = useIModelsClient();
 
-  const { data: iModels, isLoading } = useQuery({
+  const { data: iModels, isFetching: isLoading } = useQuery({
     queryKey: ["iModels", iTwinId],
     queryFn: async () => fetchIModels(getAccessToken, iTwinId, iModelsClient),
     initialData: [],
