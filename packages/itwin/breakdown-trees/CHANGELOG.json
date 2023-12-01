@@ -2,6 +2,21 @@
   "name": "@itwin/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.6.10",
+      "tag": "@itwin/breakdown-trees-react_v0.6.10",
+      "date": "Fri, 01 Dec 2023 13:46:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" to `1.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" from `^1.2.0` to `^1.2.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.9",
       "tag": "@itwin/breakdown-trees-react_v0.6.9",
       "date": "Thu, 05 Oct 2023 18:48:11 GMT",
