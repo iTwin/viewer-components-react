@@ -69,12 +69,7 @@
         }
 
         .iui-progress-indicator-radial {
-          height: var(--enlarged-node-height);
-          width: var(--enlarged-node-height);
-
-          // need to reduce padding by `1px` to make sure icon is centered
-          padding: calc(var(--enlarged-node-icon-padding) / 2 - 1px);
-          margin: 0;
+          margin: 0 calc(var(--enlarged-node-icon-padding) / 2);
         }
       }
     }
