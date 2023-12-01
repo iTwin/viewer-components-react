@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Fix progress indicator sizing in `enlarged` layout",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
