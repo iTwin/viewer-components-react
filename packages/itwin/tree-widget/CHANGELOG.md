@@ -1,6 +1,14 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 19 Sep 2023 14:55:43 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Dec 2023 13:46:38 GMT and should not be manually modified.
+
+## 1.2.1
+Fri, 01 Dec 2023 13:46:38 GMT
+
+### Patches
+
+- Fix padding for icons when elements are enlarged.
+- Fix progress indicator sizing in `enlarged` layout
 
 ## 1.2.0
 Tue, 19 Sep 2023 14:55:43 GMT
