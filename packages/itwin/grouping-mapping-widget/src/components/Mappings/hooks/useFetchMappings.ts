@@ -9,7 +9,6 @@ import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 export const useFetchMappings = (iModelId: string, getAccessToken: GetAccessTokenFn, mappingsClient: IMappingsClient) =>
   useQuery({
     queryKey: ["mappings", iModelId],
-    initialData: [],
     queryFn: async () => {
       const accessToken = await getAccessToken();
       const mappings = await mappingsClient.getMappings(accessToken, iModelId);

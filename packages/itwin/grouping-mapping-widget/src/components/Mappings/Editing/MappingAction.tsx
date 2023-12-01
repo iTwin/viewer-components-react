@@ -41,15 +41,15 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
   );
 
   const { mutate: saveMutation, isLoading } = useMutation(
-    async (newMapping: MappingCreate) => {
-      const accessToken = await getAccessToken();
-      return mapping
-        ? mappingClient.updateMapping(accessToken, iModelId, mapping.id, newMapping)
-        : mappingClient.createMapping(accessToken, iModelId, newMapping);
-    },
     {
+      mutationFn: async (newMapping: MappingCreate) => {
+        const accessToken = await getAccessToken();
+        return mapping
+          ? mappingClient.updateMapping(accessToken, iModelId, mapping.id, newMapping)
+          : mappingClient.createMapping(accessToken, iModelId, newMapping);
+      },
       onSuccess: async () => {
-        await queryClient.invalidateQueries(["mappings"]);
+        await queryClient.invalidateQueries({ queryKey: ["mappings"] });
         onSaveSuccess();
       },
     }

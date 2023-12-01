@@ -25,7 +25,8 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
 import type { ExtractionMessageData, ExtractionStatusData, IExtractionStatusDataProps } from "./context/ExtractionStatusDataContext";
 import { ExtractionStatusDataContext } from "./context/ExtractionStatusDataContext";
-import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/query-core";
 import { toaster } from "@itwin/itwinui-react";
 import { getErrorMessage } from "../common/utils";
 
@@ -69,6 +70,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      staleTime: 20 * 60 * 1000, // 20 minutes
     },
   },
   queryCache: new QueryCache({
@@ -76,7 +78,7 @@ const queryClient = new QueryClient({
       if (error.status)
         toaster.negative(getErrorMessage(error.status));
       else
-        toaster.negative("Error occurred while fetching data.");
+        toaster.negative("An error occurred while fetching data.");
     },
   }),
   mutationCache: new MutationCache({
@@ -84,7 +86,7 @@ const queryClient = new QueryClient({
       if (error.status)
         toaster.negative(getErrorMessage(error.status));
       else
-        toaster.negative("Error occurred modifying data.");
+        toaster.negative("A network error occured while processing this action.");
     },
   }),
 });

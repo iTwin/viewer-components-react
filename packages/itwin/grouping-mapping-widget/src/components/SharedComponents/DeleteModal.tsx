@@ -29,7 +29,8 @@ export const DeleteModal = ({
 }: DeleteModalProps) => {
   const [localEntityName] = useState(entityName);
 
-  const deleteMutation = useMutation(onDelete, {
+  const deleteMutation = useMutation({
+    mutationFn: onDelete,
     onSuccess: async () => {
       refresh && await refresh();
       onClose();

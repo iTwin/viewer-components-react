@@ -66,11 +66,9 @@ const SelectITwin = ({
   const iTwinsClient = useITwinsClient();
   const [iTwinType, setITwinType] = useState<number>(defaultITwinType);
 
-  const { data: iTwins, isLoading } = useQuery({
+  const { data: iTwins, isFetching: isLoading } = useQuery({
     queryKey: ["iTwin", iTwinType],
     queryFn: async () => (await fetchITwins(getAccessToken, iTwinsClient, iTwinType)).data!,
-    initialData: [],
-    keepPreviousData: true,
   });
 
   const displayStrings = React.useMemo(
@@ -124,7 +122,7 @@ const SelectITwin = ({
         contentClassName="gmw-table-holding-tab">
       </Tabs>
       <Table<IITwinTyped>
-        data={iTwins}
+        data={iTwins ?? []}
         columns={iTwinsColumns}
         className='gmw-select-itwin-table'
         emptyTableContent={`No ${displayStrings.iTwins} available.`}

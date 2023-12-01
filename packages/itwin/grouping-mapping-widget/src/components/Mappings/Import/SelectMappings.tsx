@@ -81,7 +81,7 @@ const SelectMappings = ({
   return (
     <div className='gmw-select-mapping-container'>
       <Table<IMappingTyped>
-        data={mappings}
+        data={mappings ?? []}
         columns={mappingsColumns}
         className='gmw-select-mapping-table'
         emptyTableContent={`No ${displayStrings.mappings} available.`}

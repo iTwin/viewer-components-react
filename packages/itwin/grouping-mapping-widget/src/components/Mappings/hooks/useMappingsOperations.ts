@@ -23,20 +23,20 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
 
   const {
     data: mappings,
-    isLoading: isLoadingMappings,
+    isFetching: isLoadingMappings,
   } = useFetchMappings(iModelId, getAccessToken, mappingClient);
 
   const {
     data: extractionStatus,
-    isLoading: isLoadingExtractionStatus,
+    isFetching: isLoadingExtractionStatus,
   } = useFetchExtractionStatus({ iModelId, getAccessToken, extractionClient });
 
   const refreshExtractionStatus = useCallback(async () => {
-    await queryClient.invalidateQueries(["extractionStatus"]);
+    await queryClient.invalidateQueries({queryKey: ["extractionStatus"]});
   }, [queryClient]);
 
   const refreshMappings = useCallback(async () => {
-    await queryClient.invalidateQueries(["mappings"]);
+    await queryClient.invalidateQueries({queryKey: ["mappings"]});
   }, [queryClient]);
 
   const { mutateAsync: toggleExtraction, isLoading: isTogglingExtraction } = useMutation({

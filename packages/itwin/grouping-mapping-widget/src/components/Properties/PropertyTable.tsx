@@ -68,12 +68,13 @@ export const PropertyTable = <T extends PropertyTableItem>({
         isSortable
         isLoading={isLoading}
       />
-      <DeleteModal
-        entityName={showDeleteModal?.propertyName}
-        onClose={handleCloseDeleteModal}
-        onDelete={handleDeleteProperty}
-        refresh={refreshProperties}
-      />
+      {showDeleteModal &&
+        <DeleteModal
+          entityName={showDeleteModal?.propertyName}
+          onClose={handleCloseDeleteModal}
+          onDelete={handleDeleteProperty}
+          refresh={refreshProperties}
+        />}
     </div>
   );
 };
