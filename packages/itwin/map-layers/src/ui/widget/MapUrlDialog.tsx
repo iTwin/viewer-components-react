@@ -279,6 +279,12 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
         return;
       }
 
+      // Store custom params mapping
+      if (customParamNames) {
+        const cpmStorage = new CustomParamsMappingStorage();
+        cpmStorage.save(mapUrl.toLowerCase(), {customParamNames});
+      }
+
       // Simply change the source definition in the setting service
       if (props.mapLayerSourceToEdit !== undefined) {
         const vp = props.activeViewport;
@@ -323,9 +329,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           const customParamIdx: { [key: string]: string } = {};
           const secretCustomParamIdx: { [key: string]: string } = {};
           if (customParamNames && customParamNames.length>0) {
-            const cpmStorage = new CustomParamsMappingStorage();
-            cpmStorage.save(mapUrl.toLowerCase(), {customParamNames});
-
             const cpStorage = new CustomParamsStorage();
             customParamNames.forEach((customParamName) => {
               const items = cpStorage.get(customParamName);
@@ -333,7 +336,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
                 const item = items[0];
                 (item.secret ? secretCustomParamIdx : customParamIdx)[item.key] = item.value;
               }
-
             });
           }
 
@@ -435,11 +437,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       && (externalLoginUrl === undefined || (externalLoginUrl !== undefined && oauthProcessSucceeded));
     return ready;
   }, [userName, password, mapUrl, mapName, serverRequireCredentials, layerAttachPending, invalidCredentialsProvided, externalLoginUrl, oauthProcessSucceeded]);
-
-  // const buttonCluster = React.useMemo(() => [
-  //   { type: DialogButtonType.OK, onClick: handleOk, disabled: !readyToSave() },
-  //   { type: DialogButtonType.Cancel, onClick: handleCancel },
-  // ], [readyToSave, handleCancel, handleOk]);
 
   const handleOnKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === SpecialKey.Enter) {
@@ -587,7 +584,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={props.layerRequiringCredentials !== undefined || layerAttachPending || layerAuthPending} />
             <span className="map-layer-source-label">{urlLabel}</span>
             <Input className="map-layer-source-input" placeholder={urlInputPlaceHolder} onKeyPress={handleOnKeyDown} onChange={onUrlChange} disabled={props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending} value={mapUrl} />
-            <span className="map-layer-source-label">Custom Parameters</span>
+            <span className="map-layer-source-label">Custom Query Parameters</span>
             <SelectCustomParam value={customParamNames} onChange={(paramNames) => {setCustomParamNames(paramNames); setCustomParamNamesChanged(true);}}/>
 
             {serverRequireCredentials

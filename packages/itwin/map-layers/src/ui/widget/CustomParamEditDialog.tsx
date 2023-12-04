@@ -6,9 +6,10 @@
 import * as React from "react";
 import { Dialog } from "@itwin/core-react";
 import { UiFramework } from "@itwin/appui-react";
-import { DialogButtonType } from "@itwin/appui-abstract";
-import { LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
+import { Button, LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamItem } from "../Interfaces";
+import { MapLayersUI } from "../../mapLayers";
+import "./CustomParamEditDialog.scss";
 
 interface CustomParamEditDialogProps {
   item?: CustomParamItem;
@@ -39,19 +40,37 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
     UiFramework.dialogs.modal.close();
   }, [item, props]);
 
-  const buttonCluster = React.useMemo(() => [
-    { type: DialogButtonType.OK, onClick: handleOk, disabled: !readyToSave() },
-    { type: DialogButtonType.Cancel, onClick: handleCancel },
-  ], [readyToSave, handleCancel, handleOk]);
+  function renderFooter() {
 
+    return (
+      <div className="custom-param-edit-dialog-footer">
+        <div className="custom-param-edit-dialog-footer-buttons">
+          <Button
+            className="custom-param-edit-dialog-footer-button"
+            styleType='high-visibility'
+            onClick={handleOk}
+            disabled={!readyToSave()}
+          >
+            {props.item ? MapLayersUI.translate("Dialog.Edit") : MapLayersUI.translate("Dialog.Add")}
+          </Button>
+          <Button
+            className="custom-param-edit-dialog-footer-button"
+            styleType='default'
+            onClick={handleCancel}
+          >
+            {MapLayersUI.translate("Dialog.Cancel")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
   return (
     <Dialog
-      title="Edit API key"
+      title={MapLayersUI.translate(props.item ? "CustomParamEditDialog.DialogTitleEdit": "CustomParamEditDialog.DialogTitleAdd")}
       opened={true}
       resizable={true}
       movable={true}
       modal={true}
-      buttonCluster={buttonCluster}
       onClose={handleCancel}
       onEscape={handleCancel}
       minHeight={120}
@@ -59,11 +78,13 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
       trapFocus={false}
     >
       <>
-        <LabeledInput label="Name" value={item.name} onChange={(event)=>setItem({...item, name: event.target.value})} />
-        <LabeledInput label="Key" value={item.key} onChange={(event)=>setItem({...item, key: event.target.value})} />
-        <LabeledInput label="Value" value={item.value} onChange={(event)=>setItem({...item, value: event.target.value})} />
-        <span className="map-manager-settings-label">Private</span>
-        <ToggleSwitch checked={item.secret}  onChange={(event)=>setItem({...item, secret: event.target.checked})} />
+        <LabeledInput className="custom-param-edit-dialog-input" label={MapLayersUI.translate("CustomParamEditDialog.ParamNameLabel")} value={item.name} onChange={(event)=>setItem({...item, name: event.target.value})} />
+        <LabeledInput className="custom-param-edit-dialog-input" label={MapLayersUI.translate("CustomParamEditDialog.ParamKeyLabel")} value={item.key} onChange={(event)=>setItem({...item, key: event.target.value})} />
+        <LabeledInput className="custom-param-edit-dialog-input"label={MapLayersUI.translate("CustomParamEditDialog.ParamValueLabel")} type={item.secret ? "password" : ""} value={item.value} onChange={(event)=>setItem({...item, value: event.target.value})} />
+        <div className="custom-param-edit-dialog-secret custom-param-edit-dialog-input" title={MapLayersUI.translate("CustomParamEditDialog.SecretToggleTooltip")}>
+          <ToggleSwitch checked={item.secret} label={MapLayersUI.translate("CustomParamEditDialog.SecretToggleLabel")} onChange={(event)=>setItem({...item, secret: event.target.checked})} />
+        </div>
+        {renderFooter()}
       </>
     </Dialog>
   );

@@ -23,6 +23,16 @@
     "AllOn": "Select All",
     "AllOff": "Select None"
   },
+  "CustomParamEditDialog":
+  {
+    "DialogTitleAdd": "Add custom query parameter",
+    "DialogTitleEdit": "Edit custom query parameter",
+    "ParamKeyLabel": "Key",
+    "ParamNameLabel": "Name",
+    "ParamValueLabel": "Value",
+    "SecretToggleTooltip": "When a custom query parameter is marked as secret,&#13;it will get excluded from saved view definitions",
+    "SecretToggleLabel": "Keep query parameter secret"
+  },
   "MapLayerActionButtons": {
     "ShowAllLabel": "Show all",
     "HideAllLabel": "Hide all",
@@ -38,6 +48,7 @@
     "AttachCustomLayer": "Add New Layer",
     "AttacheInfo": "Map layer attached from URL:",
     "Custom": "New",
+    "CustomParamsLabel": "Custom Query Parameters",
     "LoadingMapSources": "Loading Map Sources",
     "EditCustomLayer": "Edit Layer",
     "EditLayerDefButtonTitle": "Edit Layer Definition",
