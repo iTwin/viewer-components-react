@@ -6,7 +6,7 @@
 
 import { Select } from "@itwin/itwinui-react";
 import * as React from "react";
-import { ApiKeysStorage } from "../../ApiKeysStorage";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
 import "./MapUrlDialog.scss";
 interface SelectApiKeyProps {
   value?: string;
@@ -20,7 +20,7 @@ export function SelectApiKey(props: SelectApiKeyProps) {
   const [keyValue, setKeyValue] = React.useState<string|undefined>(props.value);
 
   const [apiKeys] = React.useState(() => {
-    const storage = new ApiKeysStorage();
+    const storage = new CustomParamsStorage();
     const keys  = storage.get(undefined);
     if (keys)
       return keys.map((keyItem) => {return {value: keyItem.name, label: keyItem.name};});

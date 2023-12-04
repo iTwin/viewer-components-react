@@ -20,8 +20,9 @@ import { BeEvent, Guid } from "@itwin/core-bentley";
 import { SelectMapFormat } from "./SelectMapFormat";
 import "./MapUrlDialog.scss";
 import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
-import { SelectApiKey } from "./SelectApiKey";
-import { ApiKeyMappingStorage } from "../../ApiKeyMappingStorage";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
+import { SelectCustomParam } from "./SelectCustomParam";
+import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -48,6 +49,9 @@ interface MapUrlDialogProps {
 export interface SourceState {
   source: MapLayerSource;
   validation: MapLayerSourceValidation;
+  customParamIdx?: { [key: string]: string };
+  secretCustomParamIdx?: { [key: string]: string };
+  // accesskey?: MapLayerKey;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -81,12 +85,12 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     return undefined;
   }, [props.layerRequiringCredentials, props.mapLayerSourceToEdit]);
 
-  const getApiKeyMapping = React.useCallback((url: string) => {
-    const apiKeyMappingStorage = new ApiKeyMappingStorage();
-    const apiKeyMapping = apiKeyMappingStorage.get(url.toLowerCase());
-    if (apiKeyMapping && apiKeyMapping.length > 0)
-      return apiKeyMapping[0].apiKeyName;
-    return undefined;
+  const getCustomParamsMapping = React.useCallback((url: string): string [] => {
+    const cpMappingStorage = new CustomParamsMappingStorage();
+    const cpMapping = cpMappingStorage.get(url.toLowerCase());
+    if (cpMapping && cpMapping.length > 0)
+      return cpMapping[0].customParamNames;
+    return [];
   }, []);
 
   const [dialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString(props.layerRequiringCredentials || props.mapLayerSourceToEdit ? "mapLayers:CustomAttach.EditCustomLayer" : "mapLayers:CustomAttach.AttachCustomLayer"));
@@ -127,9 +131,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [shouldAutoAttachSource, setShouldAutoAttachSource] = React.useState(true);
 
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
-  const [apiKeyName, setApiKeyName] = React.useState<string|undefined>(() => {
+  const [customParamNamesChanged, setCustomParamNamesChanged] = React.useState<boolean>(false);
+  const [customParamNames, setCustomParamNames] = React.useState<string[]|undefined>(() => {
     if (mapUrl)
-      return getApiKeyMapping(mapUrl);
+      return getCustomParamsMapping(mapUrl);
     return undefined;
   });
 
@@ -220,7 +225,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   const onNameChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setMapName(event.target.value);
-  }, [setMapName]);
+  }, []);
 
   const onRadioChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSettingsStorageRadio(event.target.value);
@@ -230,10 +235,17 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     const value = event.target.value;
     setMapUrl(value);
 
-    const keyName = getApiKeyMapping(value);
-    if (keyName)
-      setApiKeyName(keyName);
-  }, [getApiKeyMapping]);
+    if (!customParamNamesChanged) {
+      if (value === "") {
+        setCustomParamNames(undefined);
+      } else {
+        const paramNames = getCustomParamsMapping(value);
+        setCustomParamNames(paramNames);
+      }
+
+    }
+
+  }, [getCustomParamsMapping, customParamNamesChanged]);
 
   const createSource = React.useCallback(() => {
     let source: MapLayerSource | undefined;
@@ -308,12 +320,24 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           }
 
           // Link an API key to this map-layer URL
-          if (apiKeyName) {
-            const storage = new ApiKeyMappingStorage();
-            storage.save(mapUrl.toLowerCase(), {apiKeyName});
+          const customParamIdx: { [key: string]: string } = {};
+          const secretCustomParamIdx: { [key: string]: string } = {};
+          if (customParamNames && customParamNames.length>0) {
+            const cpmStorage = new CustomParamsMappingStorage();
+            cpmStorage.save(mapUrl.toLowerCase(), {customParamNames});
+
+            const cpStorage = new CustomParamsStorage();
+            customParamNames.forEach((customParamName) => {
+              const items = cpStorage.get(customParamName);
+              if (items && items.length > 0 ) {
+                const item = items[0];
+                (item.secret ? secretCustomParamIdx : customParamIdx)[item.key] = item.value;
+              }
+
+            });
           }
 
-          onOkResult({source, validation});
+          onOkResult({source, validation, customParamIdx, secretCustomParamIdx});
         } else if (validation.status === MapLayerSourceStatus.InvalidCoordinateSystem) {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
@@ -333,7 +357,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       }
     })();
 
-  }, [createSource, props.mapLayerSourceToEdit, props.activeViewport, props.layerRequiringCredentials, onOkResult, mapName, isSettingsStorageAvailable, apiKeyName, hasImodelContext, settingsStorage, mapUrl, updateAuthState]);
+  }, [createSource, props.mapLayerSourceToEdit, props.activeViewport, props.layerRequiringCredentials, onOkResult, mapName, isSettingsStorageAvailable, customParamNames, hasImodelContext, settingsStorage, mapUrl, updateAuthState]);
 
   React.useEffect(() => {
     const handleOAuthProcessEnd = (success: boolean, _state: any) => {
@@ -463,12 +487,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       setOAuthProcessSucceeded(false);  // indicates there was a failed attempt
   }, [oauthProcessSucceeded]);
 
-  const handleApiKeyNameChange = React.useCallback((value: string) => {
-    if (apiKeyName !== value) {
-      setApiKeyName(value);
-    }
-  }, [apiKeyName]);
-
   // Utility function to get warning message section
   function renderWarningMessage(): React.ReactNode {
     let node: React.ReactNode;
@@ -569,8 +587,8 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={props.layerRequiringCredentials !== undefined || layerAttachPending || layerAuthPending} />
             <span className="map-layer-source-label">{urlLabel}</span>
             <Input className="map-layer-source-input" placeholder={urlInputPlaceHolder} onKeyPress={handleOnKeyDown} onChange={onUrlChange} disabled={props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending} value={mapUrl} />
-            <span className="map-layer-source-label">API Key</span>
-            <SelectApiKey value={apiKeyName} onChange={handleApiKeyNameChange}/>
+            <span className="map-layer-source-label">Custom Parameters</span>
+            <SelectCustomParam value={customParamNames} onChange={(paramNames) => {setCustomParamNames(paramNames); setCustomParamNamesChanged(true);}}/>
 
             {serverRequireCredentials
               && externalLoginUrl === undefined  // external login is handled in popup

@@ -13,7 +13,7 @@ import "./MapManagerSettings.scss";
 import { Select, SelectOption, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
 import { MapLayersUI } from "../../mapLayers";
-import { ApiKeySettingsPanel } from "./ApiKeySettings";
+import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
 
 /* eslint-disable deprecation/deprecation */
 
@@ -203,7 +203,7 @@ export function MapManagerSettings() {
     <Tabs
       labels={[
         <Tab key={"general"} label='General' />,
-        <Tab key={"authentication"} label='Authentication' />,
+        <Tab key={"advanced"} label='Advanced' />,
       ]}
       onTabSelected={setTabIndex}>
       {tabIndex === 0 && <>
@@ -263,7 +263,7 @@ export function MapManagerSettings() {
       </>
       }
       {tabIndex === 1 &&
-        <ApiKeySettingsPanel></ApiKeySettingsPanel>
+        <CustomParamsSettingsPanel></CustomParamsSettingsPanel>
       }
     </Tabs>
   );

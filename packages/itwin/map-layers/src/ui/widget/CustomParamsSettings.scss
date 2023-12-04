@@ -5,51 +5,51 @@
 
 
 
-button.apiKeySettings-button {
+button.customParamsSettings-button {
   font-size: 12px;
   }
 
-.apiKeySettings-header {
+.customParamsSettings-header {
   display: flex;
   align-content: center;
   margin-top: 8px;
   margin-bottom: 8px;
 }
 
-.apiKeySettings-container {
+.customParamsSettings-container {
   margin-top: 1rem;
   border: 1px solid #ccc;
   margin-bottom: 15px;
 
-  .apiKeySettings-header-label {
+  .customParamsSettings-header-label {
     width: auto;
     white-space: nowrap;
     flex: 1 1 auto;
     padding-left: 10px;
   }
 
-  button.apiKeySettings-header-add-button {
+  button.customParamsSettings-header-add-button {
     margin-right: 2px;
   }
 
-.apiKeySettings-content {
+.customParamsSettings-content {
   height: 100px;
   min-height: 60px;
   border-top: 1px solid #ccc;
 
-    .apiKeySettings-content-listbox {
+    .customParamsSettings-content-listbox {
       margin-top: 0;
       border: none;
     }
 
-    .apiKeySettings-content-entry {
+    .customParamsSettings-content-entry {
        margin-left: 4px;
 
-      button.apiKeySettings-content-entry-button {
+      button.customParamsSettings-content-entry-button {
         height: auto;
         padding: 0 4px 0 4px;
       }
-      .apiKeySettings-content-entry-name {
+      .customParamsSettings-content-entry-name {
         flex: 1 1 auto;
         text-overflow: ellipsis;
         white-space: nowrap;

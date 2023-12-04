@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { BrowserStorage } from "./BrowserStorage";
-import { ApiKeyItem } from "./ui/Interfaces";
+import { CustomParamsMappingItem } from "./ui/Interfaces";
 
-export class ApiKeysStorage extends BrowserStorage<ApiKeyItem>  {
+export class CustomParamsMappingStorage extends BrowserStorage<CustomParamsMappingItem>  {
   constructor() {
-    super({itemKeyName: "itwinjs.mapLayers.apiKeys"});
+    super({itemKeyName: "itwinjs.mapLayers.customParamsMapping"});
   }
 }

@@ -14,10 +14,11 @@ import { Button, IconButton, Input } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
-import { MapLayerKey, MapSubLayerProps } from "@itwin/core-common";
+import { MapSubLayerProps } from "@itwin/core-common";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import { ApiKeyMappingStorage } from "../../ApiKeyMappingStorage";
-import { ApiKeysStorage } from "../../ApiKeysStorage";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
+import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
+import { CustomParamItem } from "../Interfaces";
 
 // cSpell:ignore droppable Sublayer
 
@@ -94,7 +95,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         return {layerNameUpdate: layerNameIdx>1, uniqueLayerName};
       };
 
-      const doAttachLayer = (layerName: string, subLayer?: MapSubLayerProps, _accessKey?: MapLayerKey) => {
+      const doAttachLayer = (layerName: string, subLayer?: MapSubLayerProps, customPrams?: CustomParamItem[]) => {
         const generatedName = generateUniqueMapLayerName(layerName);
         let sourceToAdd = source;
         if (generatedName.layerNameUpdate || sourceToAdd.name !== generatedName.uniqueLayerName) {
@@ -108,8 +109,11 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         }
 
         const settings = sourceToAdd.toLayerSettings(subLayer ? [subLayer] : subLayers);
-        // TODO: Set access key here
         if (settings) {
+          // settings.accessKey = accessKey;
+          // TODO: Set custom params here
+          // eslint-disable-next-line no-console
+          console.log(customPrams);
           activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: {index: -1, isOverlay} });
           return generatedName.uniqueLayerName;
         }
@@ -117,20 +121,22 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       };
 
       // Lookup access key by URL, and apply it if found.
-      const apiKeyMappingStorage = new ApiKeyMappingStorage();
-      const keyMapping = apiKeyMappingStorage.get(source.url.toLowerCase());
-      let accessKey: MapLayerKey| undefined;
-      if (keyMapping && keyMapping.length > 0) {
-        const apiKeyStorage = new ApiKeysStorage();
-        const apiKey = apiKeyStorage.get(keyMapping[0].apiKeyName);
-        if (apiKey && apiKey.length > 0)
-          accessKey = apiKey[0].key;
+      const cpMappingStorage = new CustomParamsMappingStorage();
+      const cpMapping = cpMappingStorage.get(source.url.toLowerCase());
+      const items: CustomParamItem[] = [];
+      if (cpMapping && cpMapping.length > 0) {
+        const cpStorage = new CustomParamsStorage();
+        cpMapping[0].customParamNames.forEach((cpItem) => {
+          const customParam = cpStorage.get(cpItem);
+          if (customParam && customParam.length > 0)
+            items.push(customParam[0]);
+        });
       }
 
       if (oneMapLayerPerSubLayer && subLayers) {
         const layerNamesAttached: string[] = [];
         for (const subLayer of subLayers) {
-          const attachedLayerName = doAttachLayer(`${source.name} - ${subLayer.name}`, subLayer, accessKey);
+          const attachedLayerName = doAttachLayer(`${source.name} - ${subLayer.name}`, subLayer, items);
           if (attachedLayerName !== undefined)  {
             layerNamesAttached.push(attachedLayerName);
           }
@@ -141,7 +147,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
         }
       } else {
-        const attachedLayerName = doAttachLayer(source.name, undefined, accessKey);
+        const attachedLayerName = doAttachLayer(source.name, undefined, items);
         if (attachedLayerName !== undefined) {
           const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: attachedLayerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
