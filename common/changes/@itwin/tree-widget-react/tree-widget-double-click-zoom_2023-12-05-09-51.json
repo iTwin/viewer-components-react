@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "ModelsTree - add zoom to element when it is double-clicked.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
