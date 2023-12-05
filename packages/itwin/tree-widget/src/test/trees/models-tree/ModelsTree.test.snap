@@ -17,6 +17,7 @@ Array [
                   "modelId": "0x11",
                 },
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "label": PropertyRecord {
@@ -58,6 +59,7 @@ Array [
           "isModel": true,
         },
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -115,6 +117,7 @@ Array [
                       "modelId": "0x11",
                     },
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "label": PropertyRecord {
@@ -176,6 +179,7 @@ Array [
           "isModel": true,
         },
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -231,6 +235,7 @@ Array [
                   "modelId": "0x11",
                 },
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "label": PropertyRecord {
@@ -272,6 +277,7 @@ Array [
           "isModel": true,
         },
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -343,6 +349,7 @@ Array [
           "isModel": true,
         },
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "label": PropertyRecord {
@@ -390,6 +397,7 @@ Array [
           "isModel": true,
         },
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "label": PropertyRecord {
@@ -550,6 +558,7 @@ Array [
               "isModel": true,
             },
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "label": PropertyRecord {
@@ -618,6 +627,7 @@ Array [
               "isModel": true,
             },
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "label": PropertyRecord {
@@ -658,6 +668,7 @@ Array [
           "isModel": true,
         },
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "label": PropertyRecord {
