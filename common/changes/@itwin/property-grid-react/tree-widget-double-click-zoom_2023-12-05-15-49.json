@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Resolve rush install warnings.",
+      "comment": "",
       "type": "none"
     }
   ],
