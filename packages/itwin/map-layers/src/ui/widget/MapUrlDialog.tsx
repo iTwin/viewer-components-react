@@ -50,8 +50,7 @@ export interface SourceState {
   source: MapLayerSource;
   validation: MapLayerSourceValidation;
   customParamIdx?: { [key: string]: string };
-  secretCustomParamIdx?: { [key: string]: string };
-  // accesskey?: MapLayerKey;
+  privateCustomParamIdx?: { [key: string]: string };
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -327,19 +326,19 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
           // Link an API key to this map-layer URL
           const customParamIdx: { [key: string]: string } = {};
-          const secretCustomParamIdx: { [key: string]: string } = {};
+          const privateCustomParamIdx: { [key: string]: string } = {};
           if (customParamNames && customParamNames.length>0) {
             const cpStorage = new CustomParamsStorage();
             customParamNames.forEach((customParamName) => {
               const items = cpStorage.get(customParamName);
               if (items && items.length > 0 ) {
                 const item = items[0];
-                (item.secret ? secretCustomParamIdx : customParamIdx)[item.key] = item.value;
+                (item.secret ? privateCustomParamIdx : customParamIdx)[item.key] = item.value;
               }
             });
           }
 
-          onOkResult({source, validation, customParamIdx, secretCustomParamIdx});
+          onOkResult({source, validation, customParamIdx, privateCustomParamIdx});
         } else if (validation.status === MapLayerSourceStatus.InvalidCoordinateSystem) {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
