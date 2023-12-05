@@ -147,7 +147,8 @@ describe("ExternalSourcesTree", () => {
     });
 
     it("creates auto-expanded root nodes with correct icons", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         addRootExternalSource(builder, "Test external source");
       });
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
@@ -164,7 +165,8 @@ describe("ExternalSourcesTree", () => {
     });
 
     it("creates external sources as external source group node children", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         const { externalSourceId: rootSourceId } = addRootExternalSource(builder, "Root external source");
         const groupId = addExternalSourceGroup(builder, "External source group");
         addExternalSourceAttachment(builder, rootSourceId, groupId);
@@ -194,7 +196,8 @@ describe("ExternalSourcesTree", () => {
     });
 
     it("creates attached external sources as external source node children", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         const { externalSourceId: rootSourceId } = addRootExternalSource(builder, "Root external source");
         const childSourceId = addExternalSource(builder, "Child external source");
         addExternalSourceAttachment(builder, rootSourceId, childSourceId);
@@ -216,7 +219,8 @@ describe("ExternalSourcesTree", () => {
     });
 
     it("creates elements as external source node children", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         const { externalSourceId } = addRootExternalSource(builder, "Root external source");
         const modelId = addPhysicalModel(builder, "Model", IModel.rootSubjectId);
         const categoryId = addSpatialCategory(builder, "Category");
