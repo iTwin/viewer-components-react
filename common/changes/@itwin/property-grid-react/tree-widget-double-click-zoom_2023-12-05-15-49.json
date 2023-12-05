@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Resolve rush install warnings.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
