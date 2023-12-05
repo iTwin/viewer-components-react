@@ -8,6 +8,7 @@ import { Select } from "@itwin/itwinui-react";
 import * as React from "react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import "./MapUrlDialog.scss";
+import { MapLayersUI } from "../../mapLayers";
 interface SelectCustomParamProps {
   value?: string[];
   disabled?: boolean;
@@ -56,13 +57,12 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
   }, []);
 
   return (
-    <div className="map-layer-custom-param-select">
-
+    <div className="map-layer-custom-param-select" title={customParams.length === 0 ? MapLayersUI.translate("CustomParamSelect.DisabledTitle") : undefined}>
       <Select<string>
         className="map-layer-source-select"
         options={customParams}
         value={paramValues}
-        disabled={props.disabled}
+        disabled={props.disabled || customParams.length === 0 }
         onChange={handleOnChange}
         size="small"
         onKeyDown={handleKeyDown}

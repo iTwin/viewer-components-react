@@ -584,7 +584,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={props.layerRequiringCredentials !== undefined || layerAttachPending || layerAuthPending} />
             <span className="map-layer-source-label">{urlLabel}</span>
             <Input className="map-layer-source-input" placeholder={urlInputPlaceHolder} onKeyPress={handleOnKeyDown} onChange={onUrlChange} disabled={props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending} value={mapUrl} />
-            <span className="map-layer-source-label">Custom Query Parameters</span>
+            <span className="map-layer-source-label">{MapLayersUI.translate("CustomAttach.CustomParamsLabel")}</span>
             <SelectCustomParam value={customParamNames} onChange={(paramNames) => {setCustomParamNames(paramNames); setCustomParamNamesChanged(true);}}/>
 
             {serverRequireCredentials

@@ -12,6 +12,8 @@ import { CustomParamsStorage } from "../../CustomParamsStorage";
 import "./CustomParamsSettings.scss";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
 import { CustomParamEditDialog } from "./CustomParamEditDialog";
+import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
+import { MapLayersUI } from "../../mapLayers";
 interface CustomParamsMap {
   [paramName: string]: CustomParamItem;
 }
@@ -19,7 +21,7 @@ interface CustomParamsMap {
 export function CustomParamsSettingsPanel() {
 
   const [storage] = React.useState(() => new CustomParamsStorage());
-  // const [mappingStorage] = React.useState(() => new CustomParamsMappingStorage());
+  const [mappingStorage] = React.useState(() => new CustomParamsMappingStorage());
 
   const [params, setParams] = React.useState<CustomParamsMap>(() => {
     const paramsMap: CustomParamsMap ={};
@@ -46,9 +48,16 @@ export function CustomParamsSettingsPanel() {
     storage.delete(name);
 
     // Cascade delete to api key mapping
-    // TO DO
-    // mappingStorage.deleteMatchingContent({customParamNames: name});
-  }, [params, storage]);
+    const mappingContent = mappingStorage.getContent();
+    if (mappingContent) {
+      for (const itemKey of Object.keys(mappingContent)) {
+        if (mappingContent[itemKey].customParamNames.includes(name)) {
+          const newParamNames = mappingContent[itemKey].customParamNames.filter((value) => value !== name);
+          newParamNames.length > 0 ?  mappingStorage.save(itemKey, {customParamNames: newParamNames}) : mappingStorage.delete(itemKey);
+        }
+      }
+    }
+  }, [mappingStorage, params, storage]);
 
   const onCancelEdit = React.useCallback(() => {
     UiFramework.dialogs.modal.close();
@@ -88,11 +97,10 @@ export function CustomParamsSettingsPanel() {
   return (
     <div className="customParamsSettings-container">
       <div className="customParamsSettings-header">
-        <span className="customParamsSettings-header-label">Custom parameters</span>
+        <span className="customParamsSettings-header-label">{MapLayersUI.translate("CustomParamSettings.SectionLabel")}</span>
         <IconButton size="small" styleType="borderless" className="customParamsSettings-header-add-button" onClick={handleAddClick}>
           <SvgAdd/>
         </IconButton>
-
       </div>
       <div className="customParamsSettings-content">
         <Listbox
@@ -109,7 +117,6 @@ export function CustomParamsSettingsPanel() {
                 onMouseLeave={() => setListItemUnderCursor(undefined)}
               >
                 <span className="customParamsSettings-content-entry-name" title={keyName}>{keyName}</span>
-
                 { // Display the delete icon only when the mouse over a specific item otherwise list feels cluttered.
                   (listItemUnderCursor && listItemUnderCursor === keyName) &&
                   <>

@@ -27,11 +27,21 @@
   {
     "DialogTitleAdd": "Add custom query parameter",
     "DialogTitleEdit": "Edit custom query parameter",
+    "NameExists": "Name already exists",
     "ParamKeyLabel": "Key",
     "ParamNameLabel": "Name",
     "ParamValueLabel": "Value",
-    "SecretToggleTooltip": "When a custom query parameter is marked as secret,&#13;it will get excluded from saved view definitions",
-    "SecretToggleLabel": "Keep query parameter secret"
+    "ParamValueNonPrivateMessage": "Value should not contain sensitive data",
+    "PrivateToggleTooltip": "Private query parameters won't be saved part of the iTwin",
+    "PrivateToggleLabel": "Keep query parameter private"
+  },
+  "CustomParamSelect":
+  {
+    "DisabledTitle": "Custom query parameter can be configured in the advanced settings"
+  },
+  "CustomParamSettings":
+  {
+    "SectionLabel": "Custom parameters"
   },
   "MapLayerActionButtons": {
     "ShowAllLabel": "Show all",

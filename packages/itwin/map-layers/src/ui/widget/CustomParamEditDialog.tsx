@@ -10,19 +10,19 @@ import { Button, LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamItem } from "../Interfaces";
 import { MapLayersUI } from "../../mapLayers";
 import "./CustomParamEditDialog.scss";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
 
 interface CustomParamEditDialogProps {
   item?: CustomParamItem;
   onOkResult?: (params: CustomParamItem) => void;
-  onCancelResult?: () => void;
+  onCancelResult?: () => void
+  ;
 }
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
-  const [item, setItem] = React.useState<CustomParamItem>(() => props.item ?? {name: "", key: "", value: "", secret: false});
-
-  const readyToSave = React.useCallback(() => {
-    return ((item.name.trim().length > 0) && (item.key.trim().length > 0)  && (item.value.trim().length > 0)  );
-  }, [item]);
+  const [originalItemName] = React.useState<string|undefined>(() => props.item ? props.item.name : undefined);
+  const [item, setItem] = React.useState<CustomParamItem>(() => props.item ?? {name: "", key: "", value: "", secret: true});
+  const [cpStorage] = React.useState(() => new CustomParamsStorage());
 
   const handleCancel = React.useCallback(() => {
     if (props.onCancelResult) {
@@ -39,6 +39,15 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
     }
     UiFramework.dialogs.modal.close();
   }, [item, props]);
+
+  const nameAlreadyExists = React.useMemo<boolean>(() => {
+    const itemExistInStorage = () => item.name ? !!cpStorage.get(item.name) : false;
+    return originalItemName ? originalItemName !== item.name && itemExistInStorage() : itemExistInStorage();
+  }, [cpStorage, item.name, originalItemName]);
+
+  const readyToSave = React.useCallback(() => {
+    return ((item.name.trim().length > 0) && (item.key.trim().length > 0)  && (item.value.trim().length > 0) && !nameAlreadyExists  );
+  }, [item.key, item.name, item.value, nameAlreadyExists]);
 
   function renderFooter() {
 
@@ -78,11 +87,11 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
       trapFocus={false}
     >
       <>
-        <LabeledInput className="custom-param-edit-dialog-input" label={MapLayersUI.translate("CustomParamEditDialog.ParamNameLabel")} value={item.name} onChange={(event)=>setItem({...item, name: event.target.value})} />
-        <LabeledInput className="custom-param-edit-dialog-input" label={MapLayersUI.translate("CustomParamEditDialog.ParamKeyLabel")} value={item.key} onChange={(event)=>setItem({...item, key: event.target.value})} />
-        <LabeledInput className="custom-param-edit-dialog-input"label={MapLayersUI.translate("CustomParamEditDialog.ParamValueLabel")} type={item.secret ? "password" : ""} value={item.value} onChange={(event)=>setItem({...item, value: event.target.value})} />
-        <div className="custom-param-edit-dialog-secret custom-param-edit-dialog-input" title={MapLayersUI.translate("CustomParamEditDialog.SecretToggleTooltip")}>
-          <ToggleSwitch checked={item.secret} label={MapLayersUI.translate("CustomParamEditDialog.SecretToggleLabel")} onChange={(event)=>setItem({...item, secret: event.target.checked})} />
+        <LabeledInput className="custom-param-edit-dialog-input" label={MapLayersUI.translate("CustomParamEditDialog.ParamNameLabel")} value={item.name} onChange={(event)=>setItem({...item, name: event.target.value})} status={nameAlreadyExists ? "warning" : undefined} message={nameAlreadyExists ? MapLayersUI.translate("CustomParamEditDialog.NameExists"): undefined}/>
+        <LabeledInput className="custom-param-edit-dialog-input" label={MapLayersUI.translate("CustomParamEditDialog.ParamKeyLabel")} value={item.key} onChange={(event)=>setItem({...item, key: event.target.value})}  />
+        <LabeledInput className="custom-param-edit-dialog-input"label={MapLayersUI.translate("CustomParamEditDialog.ParamValueLabel")} type={item.secret ? "password" : ""} value={item.value} onChange={(event)=>setItem({...item, value: event.target.value}) } message={!item.secret ? MapLayersUI.translate("CustomParamEditDialog.ParamValueNonPrivateMessage"): undefined}/>
+        <div className="custom-param-edit-dialog-secret custom-param-edit-dialog-input" title={MapLayersUI.translate("CustomParamEditDialog.PrivateToggleTooltip")}>
+          <ToggleSwitch checked={item.secret} label={MapLayersUI.translate("CustomParamEditDialog.PrivateToggleLabel")} onChange={(event)=>setItem({...item, secret: event.target.checked})} />
         </div>
         {renderFooter()}
       </>
