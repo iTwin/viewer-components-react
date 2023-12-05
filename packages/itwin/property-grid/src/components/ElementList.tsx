@@ -63,9 +63,7 @@ export function ElementList({
 
   return (
     <div className={classnames("property-grid-react-element-list", className)}>
-      <Header onBackButtonClick={onBack}>
-        <Text className="property-grid-react-element-list-title" variant="leading">{title}</Text>
-      </Header>
+      <Header onBackButtonClick={onBack} title={<Text className="property-grid-react-element-list-title" variant="leading">{title}</Text>}/>
       <div className="property-grid-react-element-list-container" role="list">
         {data?.map((dataItem, index) => (
           <MenuItem

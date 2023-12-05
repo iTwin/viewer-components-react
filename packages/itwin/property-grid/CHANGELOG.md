@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 29 Aug 2023 13:48:47 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Nov 2023 14:46:30 GMT and should not be manually modified.
+
+## 1.4.0
+Fri, 10 Nov 2023 14:46:30 GMT
+
+### Minor changes
+
+- Add filtering support.
 
 ## 1.3.0
 Tue, 29 Aug 2023 13:48:47 GMT

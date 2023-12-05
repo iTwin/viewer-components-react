@@ -2,6 +2,62 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.21.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.21.1",
+      "date": "Fri, 01 Dec 2023 13:46:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed extraction error message not showing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.21.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.21.0",
+      "date": "Fri, 10 Nov 2023 14:46:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "iTwin.js minimum version bumped to 4.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.20.1",
+      "date": "Tue, 07 Nov 2023 13:43:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Kept extraction status data consistent when navigating through Mapping and Group components."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.20.0",
+      "date": "Thu, 26 Oct 2023 13:09:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "New visualization logic to distinctly highlight elements that overlap across multiple groups"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Removed iModelId and replaced MappingId and GroupId with names in log messages."
+          },
+          {
+            "comment": "Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.19.2",
       "tag": "@itwin/grouping-mapping-widget_v0.19.2",
       "date": "Mon, 02 Oct 2023 20:32:55 GMT",

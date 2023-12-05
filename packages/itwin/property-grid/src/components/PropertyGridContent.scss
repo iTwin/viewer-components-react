@@ -10,7 +10,19 @@
   flex-direction: column;
 
   .property-grid-react-data {
+    overflow: scroll;
     height: calc(100% - calc(var(--iui-size-l) * 2));
+  }
+
+  .property-grid-header-title {
+    width: 100%;
+    overflow: hidden;
+
+    .property-grid-header-title-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    }
   }
 }
 

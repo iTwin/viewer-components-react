@@ -6,7 +6,7 @@ const crossEnv = require("cross-env");
 const path = require("path").resolve(__dirname, "../../../../apps/test-viewer");
 const watch = process.argv[2] && process.argv[2] === "--watch";
 const scriptName = watch ? "start:dev" : "start:dev:no-watch";
-const options = watch ? undefined : { shell: "/bin/sh" };
+const options = process.platform === "win32" ? undefined : { shell: "/bin/sh" };
 
 crossEnv([
   'IMJS_DEMO_CLIENT=true',

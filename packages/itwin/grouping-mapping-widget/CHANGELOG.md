@@ -1,6 +1,39 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 02 Oct 2023 20:32:55 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Dec 2023 13:46:38 GMT and should not be manually modified.
+
+## 0.21.1
+Fri, 01 Dec 2023 13:46:38 GMT
+
+### Patches
+
+- Fixed extraction error message not showing.
+
+## 0.21.0
+Fri, 10 Nov 2023 14:46:30 GMT
+
+### Minor changes
+
+- iTwin.js minimum version bumped to 4.1
+
+## 0.20.1
+Tue, 07 Nov 2023 13:43:31 GMT
+
+### Patches
+
+- Kept extraction status data consistent when navigating through Mapping and Group components.
+
+## 0.20.0
+Thu, 26 Oct 2023 13:09:22 GMT
+
+### Minor changes
+
+- New visualization logic to distinctly highlight elements that overlap across multiple groups
+
+### Patches
+
+- Removed iModelId and replaced MappingId and GroupId with names in log messages.
+- Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log.
 
 ## 0.19.2
 Mon, 02 Oct 2023 20:32:55 GMT

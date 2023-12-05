@@ -142,6 +142,79 @@ describe("<PropertyGridContent />", () => {
     });
   });
 
+  it("filters properties according to search prompt", async () => {
+    const imodel = {} as IModelConnection;
+
+    const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+      <PropertyGridContent
+        dataProvider={provider}
+        imodel={imodel}
+      />
+    );
+
+    await waitFor(() => {
+      expect(queryByText("Test Prop")).to.not.be.null;
+      expect(queryByText("Null Prop")).to.not.be.null;
+    });
+
+    const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+    await user.click(searchButton);
+
+    const searchTextInput =  await waitFor(() => getByRole("searchbox"));
+    // input text that should match
+    await user.type(searchTextInput, "test prop");
+
+    await waitFor(() => {
+      expect(queryByText("Test Prop")).to.not.be.null;
+      expect(queryByText("Null Prop")).to.be.null;
+    });
+
+    // input text that should not match
+    await user.clear(searchTextInput);
+    await user.type(searchTextInput, "null prop");
+    await waitFor(() => {
+      expect(queryByText("Test Prop")).to.be.null;
+      expect(queryByText("Null Prop")).to.not.be.null;
+    });
+  });
+
+  it("successfully clears filter", async () => {
+    const imodel = {} as IModelConnection;
+
+    const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+      <PropertyGridContent
+        dataProvider={provider}
+        imodel={imodel}
+        settingsMenuItems={[
+          (props) => <ShowHideNullValuesSettingsMenuItem {...props} />,
+        ]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(queryByText("Test Category")).to.not.be.null;
+    });
+
+    const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+    await user.click(searchButton);
+
+    // input text that should not match anything, thus rendering nothing
+    const searchTextInput =  await waitFor(() => getByRole("searchbox"));
+    await user.type(searchTextInput, "input text for test");
+
+    await waitFor(() => {
+      expect(queryByText("Test Category")).to.be.null;
+    });
+
+    // press collapse button which should clear the filter
+    const collapseSearchButton =  await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.close")));
+    await user.click(collapseSearchButton);
+
+    await waitFor(() => {
+      expect(queryByText("Test Category")).to.not.be.null;
+    });
+  });
+
   it("allows editing property", async () => {
     const imodel = {} as IModelConnection;
     const stub = sinon.stub<Parameters<Required<PropertyGridContentProps>["onPropertyUpdated"]>, ReturnType<Required<PropertyGridContentProps>["onPropertyUpdated"]>>().resolves(true);

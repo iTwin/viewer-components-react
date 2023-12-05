@@ -112,7 +112,7 @@ export function SettingsDropdownMenu({ settingsMenuItems, dataProvider }: Settin
   const menuItems = (close: () => void) => settingsMenuItems.map((item, index) => <Fragment key={index}>{item({ dataProvider, close })}</Fragment>);
 
   return <DropdownMenu menuItems={menuItems}>
-    <IconButton styleType="borderless" size="small" title={PropertyGridManager.translate("settings.label")}>
+    <IconButton styleType="borderless" title={PropertyGridManager.translate("settings.label")}>
       <SvgMoreVertical />
     </IconButton>
   </DropdownMenu>;

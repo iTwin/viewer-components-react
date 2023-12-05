@@ -1,6 +1,23 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Thu, 05 Oct 2023 18:48:11 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Nov 2023 13:43:31 GMT and should not be manually modified.
+
+## 5.2.4
+Tue, 07 Nov 2023 13:43:31 GMT
+
+### Patches
+
+- Fix UI refresh issues after a saved view is applied.
+
+## 5.2.3
+Thu, 26 Oct 2023 13:09:22 GMT
+
+### Patches
+
+- Fixed base map translation issues
+- Fix warning message after a failed attempt to provide credentials
+- Fix an issue in the 'Add New Layer' dialog where invalid credentials warning would not appear after a first invalid attempt.
+- Make the MapFeatureInfo Widget appear only when results are available.
 
 ## 5.2.2
 Thu, 05 Oct 2023 18:48:11 GMT

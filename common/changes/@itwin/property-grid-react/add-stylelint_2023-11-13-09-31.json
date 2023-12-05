@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "",
+      "comment": "Add lint checks for *.scss files.",
       "type": "none"
     }
   ],

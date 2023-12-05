@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Update to AppUI 4.5.0",
+      "comment": "Fix flaky test.",
       "type": "none"
     }
   ],
