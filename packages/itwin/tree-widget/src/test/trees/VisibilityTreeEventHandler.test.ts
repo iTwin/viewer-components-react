@@ -6,28 +6,29 @@
 import { expect } from "chai";
 import { EMPTY, from, Subject } from "rxjs";
 import sinon from "sinon";
-import { BeEvent, BeUiEvent, using } from "@itwin/core-bentley";
+import { BeEvent, using } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
 import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations } from "../TestUtils";
 import { createCategoryNode, createElementNode, createModelNode, createSimpleTreeModelNode, createSubjectNode } from "./Common";
 
-import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, ITreeNodeLoader } from "@itwin/components-react";
+import { MutableTreeModel , TreeModelSource } from "@itwin/components-react";
+
+import type { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { SelectionHandler } from "@itwin/presentation-frontend";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandlerParams } from "../../components/trees/VisibilityTreeEventHandler";
 import { IModelApp } from "@itwin/core-frontend";
+import { waitFor } from "@testing-library/react";
 
 describe("VisibilityTreeEventHandler", () => {
-  const modelStub = { getNode: () => createSimpleTreeModelNode(), iterateTreeModelNodes: () => {} } as any as TreeModel;
-  const modelSourceStub = {
-    onModelChanged: new BeUiEvent<[TreeModel, TreeModelChanges]>(),
-    getModel: () => modelStub,
-    modifyModel: () => {},
-  } as any as TreeModelSource;
-
-  const nodeLoaderStub = { dataProvider: {} as any as IPresentationTreeDataProvider, modelSource: modelSourceStub } as any as AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
   const selectionHandlerStub = { getSelection: () => {} } as any as SelectionHandler;
+
+  const nodeLoaderStub = {
+    loadNode: sinon.stub<Parameters<ITreeNodeLoader["loadNode"]>, ReturnType<ITreeNodeLoader["loadNode"]>>(),
+    modelSource: {},
+    dataProvider: {} as any as PresentationTreeDataProvider,
+  };
 
   const testVisibilityStatus: VisibilityStatus = {
     state: "visible",
@@ -45,19 +46,38 @@ describe("VisibilityTreeEventHandler", () => {
     dispose: sinon.fake(),
   };
 
+  beforeEach(() => {
+    nodeLoaderStub.loadNode.returns(EMPTY);
+  });
+
   afterEach(() => {
+    nodeLoaderStub.loadNode.reset();
     changeVisibility.reset();
-    modelSourceStub.onModelChanged.clear();
     onVisibilityChange.clear();
+    getVisibilityStatus.resetHistory();
     sinon.restore();
   });
+
+  function setupTreeModel(nodeIds: string[], item?: PresentationTreeNodeItem) {
+    const model = new MutableTreeModel();
+    model.setChildren(
+      undefined,
+      nodeIds.map((nodeId) => {return { ...createSimpleTreeModelNode(nodeId), isLoading: false, item: item ?? createSimpleTreeModelNode("node-item") };}),
+      0,
+    );
+    const modelSource = new TreeModelSource(model);
+    nodeLoaderStub.modelSource = modelSource;
+    modelSource.modifyModel = () => {};
+
+    return { modelSource, nodeLoader: nodeLoaderStub as unknown as AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider> };
+  }
 
   const createHandler = (partialProps?: Partial<VisibilityTreeEventHandlerParams>): VisibilityTreeEventHandler => {
     if (!partialProps)
       partialProps = {};
     const props: VisibilityTreeEventHandlerParams = {
       visibilityHandler: partialProps.visibilityHandler || visibilityHandler,
-      nodeLoader: partialProps.nodeLoader || nodeLoaderStub,
+      nodeLoader: partialProps.nodeLoader || nodeLoaderStub as unknown as AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider>,
       selectionHandler: partialProps.selectionHandler || selectionHandlerStub,
     };
     return new VisibilityTreeEventHandler(props);
@@ -69,27 +89,22 @@ describe("VisibilityTreeEventHandler", () => {
         ["testId2", testVisibilityStatus],
       ]);
 
-      const treeModelNodes = [
-        createSimpleTreeModelNode("testId1"),
-        createSimpleTreeModelNode("testId2"),
-        createSimpleTreeModelNode("testId3"),
-      ];
+      const { nodeLoader } = setupTreeModel(["testId1","testId2","testId3"]);
 
-      modelStub.iterateTreeModelNodes = sinon.stub().returns(treeModelNodes);
-
-      await using(createHandler({ visibilityHandler }), async (_) => {
+      await using(createHandler({ visibilityHandler, nodeLoader }), async (_) => {
         await flushAsyncOperations();
         getVisibilityStatus.resetHistory();
         onVisibilityChange.raiseEvent(undefined, visibilityStatus);
         await flushAsyncOperations();
       });
 
-      modelStub.iterateTreeModelNodes = sinon.stub();
       expect(getVisibilityStatus).to.be.calledTwice;
     });
 
     it("calls 'getVisibilityStatus' for all nodes if visibility status is not provided", async () => {
-      await using(createHandler({ visibilityHandler }), async (_) => {
+      const { nodeLoader } = setupTreeModel(["testId1", "testId2"]);
+      await using(createHandler({ visibilityHandler, nodeLoader }), async (_) => {
+        await waitFor(() => expect(getVisibilityStatus).to.be.calledTwice);
         getVisibilityStatus.resetHistory();
         onVisibilityChange.raiseEvent(["testId1", "testId2"]);
         await flushAsyncOperations();
@@ -102,16 +117,10 @@ describe("VisibilityTreeEventHandler", () => {
         ["testId1", testVisibilityStatus],
       ]);
 
-      const node1 = createSimpleTreeModelNode("testId1");
-      const node2 = createSimpleTreeModelNode("testId2");
+      const { nodeLoader } = setupTreeModel(["testId1", "testId2"]);
 
-      const getNodeCallback = sinon.stub();
-      getNodeCallback.withArgs("testId1").returns(node1);
-      getNodeCallback.withArgs("testId2").returns(node2);
-
-      modelStub.getNode = getNodeCallback;
-
-      await using(createHandler({ visibilityHandler }), async (_) => {
+      await using(createHandler({ visibilityHandler, nodeLoader }), async (_) => {
+        await waitFor(() => expect(getVisibilityStatus).to.be.calledTwice);
         getVisibilityStatus.resetHistory();
         onVisibilityChange.raiseEvent(["testId1", "testId2"], visibilityStatus);
         await flushAsyncOperations();
@@ -120,38 +129,43 @@ describe("VisibilityTreeEventHandler", () => {
     });
 
     it("does not call 'getVisibilityStatus' while changing visibility", async () => {
-      const node1 = createSimpleTreeModelNode("testId1");
+      const { nodeLoader } = setupTreeModel(["testId1"]);
+      const node = nodeLoader.modelSource.getModel().getNode("testId1");
 
-      const eventHandler = createHandler({ visibilityHandler });
-      const changes: CheckboxStateChange[] = [{ nodeItem: node1.item, newState: CheckBoxState.On }];
+      const eventHandler = createHandler({ visibilityHandler, nodeLoader });
+      const changes: CheckboxStateChange[] = [{ nodeItem: node!.item, newState: CheckBoxState.On }];
       const changesSubject = new Subject<CheckboxStateChange[]>();
 
       changeVisibility.returns(EMPTY);
       await using(eventHandler, async (_) => {
+        await waitFor(() => expect(getVisibilityStatus).to.be.calledOnce);
         getVisibilityStatus.resetHistory();
         eventHandler.onCheckboxStateChanged({
           stateChanges: changesSubject,
         });
         changesSubject.next(changes);
         onVisibilityChange.raiseEvent(["testId1"]);
+        // assure that getVisibilityStatus is not called before the changes are complete.
+        await waitFor(() => expect(getVisibilityStatus).to.not.be.called);
         changesSubject.complete();
         onVisibilityChange.raiseEvent(["testId1"]);
         await flushAsyncOperations();
       });
 
-      expect(getVisibilityStatus).to.be.calledOnce;
+      expect(getVisibilityStatus).to.be.calledTwice;
     });
 
     it("handles errors while changing visibility", async () => {
-      const node1 = createSimpleTreeModelNode("testId1");
+      const { nodeLoader } = setupTreeModel(["testId1"]);
+      const node = nodeLoader.modelSource.getModel().getNode("testId1");
 
-      modelStub.getNode = sinon.stub().returns(node1);
       const eventHandler = createHandler({ visibilityHandler });
-      const changes: CheckboxStateChange[] = [{ nodeItem: node1.item, newState: CheckBoxState.Off }];
+      const changes: CheckboxStateChange[] = [{ nodeItem: node!.item, newState: CheckBoxState.Off }];
       const errorSubject = new Subject();
 
       changeVisibility.returns(errorSubject);
       await using(eventHandler, async (_) => {
+        await waitFor(() => expect(getVisibilityStatus).to.be.calledOnce);
         getVisibilityStatus.resetHistory();
         eventHandler.onCheckboxStateChanged({
           // eslint-disable-next-line deprecation/deprecation
@@ -162,7 +176,7 @@ describe("VisibilityTreeEventHandler", () => {
         onVisibilityChange.raiseEvent(["testId1"]);
         await flushAsyncOperations();
       });
-      expect(getVisibilityStatus).to.be.calledOnce;
+      expect(getVisibilityStatus).to.be.calledTwice;
     });
 
   });
@@ -174,9 +188,8 @@ describe("VisibilityTreeEventHandler", () => {
       { nodeItem: createCategoryNode() },
     ].forEach(({ nodeItem }) => {
       it(`does not call zoomToElement when node item is ${nodeItem.id} node.`, async () => {
-        const eventHandler = createHandler({ visibilityHandler });
-        const node = createSimpleTreeModelNode("testId", undefined, { item: nodeItem });
-        modelStub.getNode = sinon.stub().returns(node);
+        const { nodeLoader } = setupTreeModel(["testId"], nodeItem);
+        const eventHandler = createHandler({ visibilityHandler, nodeLoader });
 
         const zoomSpy = sinon.spy();
         sinon.stub(IModelApp, "viewManager").get(() => ({ selectedView: { zoomToElements: zoomSpy } }));
@@ -190,15 +203,14 @@ describe("VisibilityTreeEventHandler", () => {
     });
 
     it(`calls zoomToElement when node is element node.`, async () => {
-      const eventHandler = createHandler({ visibilityHandler });
-      const node = createSimpleTreeModelNode("testId", undefined, { item: createElementNode() });
-
-      modelStub.getNode = sinon.stub().returns(node);
+      const { nodeLoader } = setupTreeModel(["testId"], createElementNode());
+      const eventHandler = createHandler({ visibilityHandler, nodeLoader });
 
       const zoomSpy = sinon.spy();
       sinon.stub(IModelApp, "viewManager").get(() => ({ selectedView: { zoomToElements: zoomSpy } }));
 
       await using(eventHandler, async (_) => {
+        await waitFor(() => expect(getVisibilityStatus).to.be.calledOnce);
         await eventHandler.onNodeDoubleClick({ nodeId: "testId" });
       });
 
