@@ -124,6 +124,35 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
 
         >
           {activeLayer.name}
+          {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth &&
+          <Button
+            disabled={props.disabled}
+            size="small"
+            styleType="borderless"
+            onClick={() => {
+              const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
+              if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
+                const index = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
+                const layer = props.activeViewport.displayStyle.mapLayerAtIndex(index);
+                if (layer instanceof ImageMapLayerSettings) {
+                  UiFramework.dialogs.modal.open(
+                    <MapUrlDialog
+                      activeViewport={props.activeViewport}
+                      isOverlay={props.isOverlay}
+                      signInModeArgs={{layer}}
+                      onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
+                      onCancelResult={() => {UiFramework.dialogs.modal.close();}}
+                      mapTypesOptions={props.mapTypesOptions} />
+                  );
+                }
+              }
+
+            }}
+            title={requireAuthTooltip}
+          >
+            <Icon className="map-layer-source-item-warnMessage-icon" iconSpec="icon-status-warning" />
+          </Button>
+          }
         </span>
 
         {/* SubLayersPopupButton */}
@@ -139,32 +168,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
               } />
           }
         </div>
-        {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth &&
-          <Button
-            disabled={props.disabled}
-            size="small"
-            styleType="borderless"
-            onClick={() => {
-              const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
-              if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-                const index = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
-                const layerSettings = props.activeViewport.displayStyle.mapLayerAtIndex(index);
-                if (layerSettings instanceof ImageMapLayerSettings) {
-                  UiFramework.dialogs.modal.open(<MapUrlDialog activeViewport={props.activeViewport}
-                    isOverlay={props.isOverlay}
-                    layerRequiringCredentials={layerSettings?.toJSON()}
-                    onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
-                    onCancelResult={() => {UiFramework.dialogs.modal.close();}}
-                    mapTypesOptions={props.mapTypesOptions}></MapUrlDialog>);
-                }
-              }
 
-            }}
-            title={requireAuthTooltip}
-          >
-            <Icon className="map-layer-source-item-warnMessage-icon" iconSpec="icon-status-warning" />
-          </Button>
-        }
         <div id="MapLayerSettingsMenuWrapper" style={{visibility: "hidden"}} >
           <MapLayerSettingsMenu activeViewport={props.activeViewport} mapLayerSettings={activeLayer} onMenuItemSelection={props.onMenuItemSelected} disabled={props.disabled} />
         </div>

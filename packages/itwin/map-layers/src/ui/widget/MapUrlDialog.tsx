@@ -6,7 +6,7 @@
 
 import { SpecialKey } from "@itwin/appui-abstract";
 import { Button, Icon, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
-import { ImageMapLayerProps } from "@itwin/core-common";
+import { ImageMapLayerSettings } from "@itwin/core-common";
 import {
   IModelApp, MapLayerAccessClient, MapLayerSource,
   MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority, ScreenViewport,
@@ -18,11 +18,12 @@ import { MapLayersUI } from "../../mapLayers";
 import { MapTypesOptions } from "../Interfaces";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { SelectMapFormat } from "./SelectMapFormat";
-import "./MapUrlDialog.scss";
 import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { SelectCustomParam } from "./SelectCustomParam";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
+import { CustomParamUtils } from "../../CustomParamUtils";
+import "./MapUrlDialog.scss";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -41,7 +42,11 @@ interface MapUrlDialogProps {
   mapTypesOptions?: MapTypesOptions;
 
   // An optional layer definition can be provide to enable the edit mode
-  layerRequiringCredentials?: ImageMapLayerProps;
+  signInModeArgs?: {
+    layer: ImageMapLayerSettings;
+    validation?: MapLayerSourceValidation;
+    source?: MapLayerSource;
+  };
 
   mapLayerSourceToEdit?: MapLayerSource;
 }
@@ -60,29 +65,29 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const getMapUrlFromProps = React.useCallback(() => {
     if (props.mapLayerSourceToEdit) {
       return props.mapLayerSourceToEdit.url;
-    } else if (props.layerRequiringCredentials?.url) {
-      return props.layerRequiringCredentials.url;
+    } else if (props.signInModeArgs) {
+      return props.signInModeArgs.layer.url;
     }
     return "";
-  }, [props.layerRequiringCredentials, props.mapLayerSourceToEdit]);
+  }, [props.mapLayerSourceToEdit, props.signInModeArgs]);
 
   const getMapNameFromProps = React.useCallback(() => {
     if (props.mapLayerSourceToEdit) {
       return props.mapLayerSourceToEdit.name;
-    } else if (props.layerRequiringCredentials?.name) {
-      return props.layerRequiringCredentials.name;
+    } else if (props.signInModeArgs) {
+      return props.signInModeArgs.layer.name;
     }
     return "";
-  }, [props.layerRequiringCredentials, props.mapLayerSourceToEdit]);
+  }, [props.mapLayerSourceToEdit, props.signInModeArgs]);
 
   const getFormatFromProps = React.useCallback(() => {
     if (props.mapLayerSourceToEdit) {
       return props.mapLayerSourceToEdit.formatId;
-    } else if (props.layerRequiringCredentials?.formatId) {
-      return props.layerRequiringCredentials.formatId;
+    } else if (props.signInModeArgs) {
+      return props.signInModeArgs.layer.formatId;
     }
     return undefined;
-  }, [props.layerRequiringCredentials, props.mapLayerSourceToEdit]);
+  }, [props.mapLayerSourceToEdit, props.signInModeArgs]);
 
   const getCustomParamsMapping = React.useCallback((url: string): string [] => {
     const cpMappingStorage = new CustomParamsMappingStorage();
@@ -92,7 +97,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     return [];
   }, []);
 
-  const [dialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString(props.layerRequiringCredentials || props.mapLayerSourceToEdit ? "mapLayers:CustomAttach.EditCustomLayer" : "mapLayers:CustomAttach.AttachCustomLayer"));
+  const [dialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString(props.signInModeArgs || props.mapLayerSourceToEdit ? "mapLayers:CustomAttach.EditCustomLayer" : "mapLayers:CustomAttach.AttachCustomLayer"));
   const [typeLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.Type"));
   const [nameLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.Name"));
   const [nameInputPlaceHolder] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.NameInputPlaceHolder"));
@@ -130,7 +135,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [shouldAutoAttachSource, setShouldAutoAttachSource] = React.useState(true);
 
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
-  const [customParamNamesChanged, setCustomParamNamesChanged] = React.useState<boolean>(false);
+  const [customParamNamesChangedByUser, SetCustomParamNamesChangedByUser] = React.useState<boolean>(false);
   const [customParamNames, setCustomParamNames] = React.useState<string[]|undefined>(() => {
     if (mapUrl)
       return getCustomParamsMapping(mapUrl);
@@ -234,7 +239,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     const value = event.target.value;
     setMapUrl(value);
 
-    if (!customParamNamesChanged) {
+    if (!customParamNamesChangedByUser) {
       if (value === "") {
         setCustomParamNames(undefined);
       } else {
@@ -244,7 +249,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
     }
 
-  }, [getCustomParamsMapping, customParamNamesChanged]);
+  }, [getCustomParamsMapping, customParamNamesChangedByUser]);
 
   const createSource = React.useCallback(() => {
     let source: MapLayerSource | undefined;
@@ -259,11 +264,15 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       if (source) {
         source.userName = userName || undefined;  // When there is no value, empty string is always returned, in this case force it to undefined,
         source.password = password || undefined;
+
+        if (customParamNames) {
+          CustomParamUtils.setSourceCustomParams(source, customParamNames);
+        }
       }
 
     }
     return source;
-  }, [mapName, mapType, mapUrl, password, userName]);
+  }, [customParamNames, mapName, mapType, mapUrl, password, userName]);
 
   const handleOk = React.useCallback(() => {
     const source = createSource();
@@ -286,6 +295,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
       // Simply change the source definition in the setting service
       if (props.mapLayerSourceToEdit !== undefined) {
+        // Apply changes to original source object
+        props.mapLayerSourceToEdit.savedQueryParams = {...source.savedQueryParams};
+        props.mapLayerSourceToEdit.unsavedQueryParams = {...source.unsavedQueryParams};
+
         const vp = props.activeViewport;
         void (async () => {
           if (isSettingsStorageAvailable && vp?.iModel?.iTwinId) {
@@ -315,7 +328,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
         if (validation.status === MapLayerSourceStatus.Valid) {
           // Update service settings if storage is available and we are not prompting user for credentials
-          if (isSettingsStorageAvailable && !props.layerRequiringCredentials) {
+          if (isSettingsStorageAvailable && !props.signInModeArgs) {
             const storeOnIModel = (hasImodelContext ? "Model" === settingsStorage : undefined);
             const vp = props.activeViewport;
             if (vp?.iModel.iTwinId && !(await MapLayerPreferences.storeSource(source, vp.iModel.iTwinId, vp.iModel.iModelId, storeOnIModel))) {
@@ -358,7 +371,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       }
     })();
 
-  }, [createSource, props.mapLayerSourceToEdit, props.activeViewport, props.layerRequiringCredentials, onOkResult, mapName, isSettingsStorageAvailable, customParamNames, hasImodelContext, settingsStorage, mapUrl, updateAuthState]);
+  }, [createSource, props.mapLayerSourceToEdit, props.activeViewport, props.signInModeArgs, onOkResult, customParamNames, mapName, mapUrl, isSettingsStorageAvailable, hasImodelContext, settingsStorage, updateAuthState]);
 
   React.useEffect(() => {
     const handleOAuthProcessEnd = (success: boolean, _state: any) => {
@@ -381,16 +394,18 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     };
   }, [mapType, onOauthProcessEnd, setAccessClient]);
 
-  // After a map type change, make sure the different Oauth states are reset.
-  React.useEffect(() => {
-    // Reset few states
+  const resetSignInState = React.useCallback(() => {
     setServerRequireCredentials(false);
     setInvalidCredentialsProvided(false);
     setShowOauthPopup(false);
     setOAuthProcessSucceeded(undefined);
     setExternalLoginUrl(undefined);
+  }, []);
 
-  }, [mapType]);
+  // After a map type chang(or setting a new custom query Parameter), make sure the different Oauth states are reset.
+  React.useEffect(() => {
+    resetSignInState();
+  }, [mapType, resetSignInState]);
 
   // The first time the dialog is loaded and we already know the layer requires auth. (i.e ImageryProvider already made an attempt)
   // makes a request to discover the authentification types and adjust UI accordingly (i.e. username/password fields, Oauth popup)
@@ -400,30 +415,43 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     void (async () => {
       if (isAccessClientInitialized
         && shouldAutoAttachSource
-        && props.layerRequiringCredentials?.url !== undefined
-        && props.layerRequiringCredentials?.name !== undefined) {
+        && props.signInModeArgs !== undefined) {
         try {
 
-          const source = MapLayerSource.fromJSON({
-            url: props.layerRequiringCredentials.url,
-            name: props.layerRequiringCredentials.name,
-            formatId: props.layerRequiringCredentials.formatId,
-          });
+          let source = props.signInModeArgs.source;
+          let validation = props.signInModeArgs.validation;
+          if (!source || !validation) {
+            // In some cases we don't know why the layer failed to attach, so we need to go through validation process
+            source = MapLayerSource.fromJSON({
+              url: props.signInModeArgs.layer.url,
+              name: props.signInModeArgs.layer.name,
+              formatId: props.signInModeArgs.layer.formatId,
+            });
 
-          if (source !== undefined) {
-            setLayerAttachPending(true);
-            setShouldAutoAttachSource(false);
-            const validation = await source.validateSource(true);
-            if (isMounted.current) {
-              setLayerAttachPending(false);
+            if (source !== undefined) {
+              if (props.signInModeArgs.layer.savedQueryParams)
+                source.savedQueryParams = {...props.signInModeArgs.layer.savedQueryParams};
+              if (props.signInModeArgs.layer.unsavedQueryParams)
+                source.unsavedQueryParams = {...props.signInModeArgs.layer.unsavedQueryParams};
+
+              setLayerAttachPending(true);
+
+              validation = await source.validateSource(true);
+              if (isMounted.current) {
+                setLayerAttachPending(false);
+              }
             }
+          }
+          if (source && validation) {
+            setShouldAutoAttachSource(false);
             await updateAuthState(source, validation);
           }
+
         } catch (_error) { }
       }
     })();
 
-  }, [isAccessClientInitialized, props.layerRequiringCredentials?.formatId, props.layerRequiringCredentials?.name, props.layerRequiringCredentials?.url, shouldAutoAttachSource, updateAuthState]);
+  }, [isAccessClientInitialized, props.signInModeArgs, shouldAutoAttachSource, updateAuthState]);
 
   const dialogContainer = React.useRef<HTMLDivElement>(null);
 
@@ -575,16 +603,16 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <span className="map-layer-source-label">{typeLabel}</span>
             <SelectMapFormat
               value={mapType}
-              disabled={props.layerRequiringCredentials !== undefined || props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending}
+              disabled={props.signInModeArgs !== undefined || props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending}
               onChange={setMapType}
               mapTypesOptions={mapTypesOptions}
             />
             <span className="map-layer-source-label">{nameLabel}</span>
-            <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={props.layerRequiringCredentials !== undefined || layerAttachPending || layerAuthPending} />
+            <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={!!props.signInModeArgs || layerAttachPending || layerAuthPending} />
             <span className="map-layer-source-label">{urlLabel}</span>
-            <Input className="map-layer-source-input" placeholder={urlInputPlaceHolder} onKeyPress={handleOnKeyDown} onChange={onUrlChange} disabled={props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending} value={mapUrl} />
+            <Input className="map-layer-source-input" placeholder={urlInputPlaceHolder} onKeyPress={handleOnKeyDown} onChange={onUrlChange} disabled={!!props.signInModeArgs || props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending} value={mapUrl} />
             <span className="map-layer-source-label">{MapLayersUI.translate("CustomAttach.CustomParamsLabel")}</span>
-            <SelectCustomParam value={customParamNames} onChange={(paramNames) => {setCustomParamNames(paramNames); setCustomParamNamesChanged(true);}}/>
+            <SelectCustomParam value={customParamNames} disabled={layerAttachPending || layerAuthPending} onChange={(paramNames) => {setCustomParamNames(paramNames); SetCustomParamNamesChangedByUser(true); resetSignInState();}}/>
 
             {serverRequireCredentials
               && externalLoginUrl === undefined  // external login is handled in popup
@@ -615,7 +643,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             }
 
             {/* Store settings options, not shown when editing a layer */}
-            {!props.layerRequiringCredentials
+            {!props.signInModeArgs
             && !props.mapLayerSourceToEdit
             && <div title={!isSettingsStorageAvailable ? noSaveSettingsWarning : ""}>
               {hasImodelContext &&
