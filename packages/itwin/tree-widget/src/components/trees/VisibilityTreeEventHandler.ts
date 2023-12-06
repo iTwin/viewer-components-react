@@ -21,7 +21,7 @@ import type {
 import { type BeEvent, type IDisposable } from "@itwin/core-bentley";
 import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
 import { IModelApp } from "@itwin/core-frontend";
-import type { ECInstancesNodeKey } from "@itwin/presentation-common";
+import { NodeKey } from "@itwin/presentation-common";
 import { ModelsTreeNodeType, ModelsVisibilityHandler } from "./models-tree/ModelsVisibilityHandler";
 
 /**
@@ -108,12 +108,14 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     const model = this.modelSource.getModel();
     const node = model.getNode(nodeId);
 
-    if(!node || !isPresentationTreeNodeItem(node.item) || ModelsVisibilityHandler.getNodeType(node.item) !== ModelsTreeNodeType.Element) {
+    if(!node
+      || !isPresentationTreeNodeItem(node.item)
+      || ModelsVisibilityHandler.getNodeType(node.item) !== ModelsTreeNodeType.Element
+      || !NodeKey.isInstancesNodeKey(node.item.key)) {
       return;
     }
 
-    const instancesNodeKey = node.item.key as ECInstancesNodeKey;
-    const instanceIds = instancesNodeKey.instanceKeys.map((instanceKey) => instanceKey.id);
+    const instanceIds = node.item.key.instanceKeys.map((instanceKey) => instanceKey.id);
 
     await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
   }
