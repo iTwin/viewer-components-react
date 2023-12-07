@@ -1,0 +1,28 @@
+parameters:
+  - name: dev
+    type: boolean
+    default: false
+    displayName: "Publish pre-release versions"
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  - group: "Caleb - iTwin GitHub Token"
+  - name: REPO_URL
+    value: github.com/iTwin/lage-starter
+
+steps:
+  - template: templates/build-steps.yaml
+  - script: |
+      git config --global user.email imodeljs-admin@users.noreply.github.com
+      git config --global user.name imodeljs-admin
+      git remote set-url origin "https://$(GITHUBTOKEN)@$(REPO_URL)"
+      pnpm run publish --message "applying package updates" $beachballOptions
+    displayName: "Publish packages"
+    env:
+      ${{ if eq(parameters.dev, true) }}:
+        beachballOptions: "--config beachball.config.dev.js --keep-change-files"

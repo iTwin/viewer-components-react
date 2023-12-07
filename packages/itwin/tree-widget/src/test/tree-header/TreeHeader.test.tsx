@@ -32,6 +32,10 @@ describe("<TreeHeader />", () => {
     TreeWidget.terminate();
   });
 
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it("renders supplied buttons", async () => {
     const { queryByRole } = render(
       <TreeHeader {...defaultProps}>

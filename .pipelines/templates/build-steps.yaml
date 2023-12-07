@@ -1,0 +1,30 @@
+steps:
+  # 1. Configure node
+  - task: NodeTool@0
+    displayName: Use Node 18.x
+    inputs:
+      versionSpec: 18.x
+
+  - task: Npm@1
+    displayName: install pnpm ^8.6.10
+    inputs:
+      command: "custom"
+      customCommand: "install -g pnpm@^8.6.10"
+
+  - task: npmAuthenticate@0
+    inputs:
+      workingFile: .npmrc
+
+  - script: cp .npmrc ~/.npmrc
+
+  - script: pnpm install --frozen-lockfile
+    displayName: pnpm install
+
+  - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
+    displayName: Audit
+
+  # - script: pnpm exec prettier . --check
+  #   displayName: Check formatting
+
+  - script: pnpm exec lage lint cover --grouped
+    displayName: Build, Lint and Cover

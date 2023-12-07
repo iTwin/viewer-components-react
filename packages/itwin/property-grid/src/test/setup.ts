@@ -10,11 +10,15 @@ const commonjsGlobal: { MessageChannel?: any } = typeof globalThis !== "undefine
 if (commonjsGlobal.MessageChannel)
   delete commonjsGlobal.MessageChannel;
 
-import jsdomGlobal from "jsdom-global";
 import * as chai from "chai";
+import globalJsdom from "global-jsdom";
+import * as jsdom from "jsdom";
 import sinonChai from "sinon-chai";
 
-jsdomGlobal();
+// get rid of various xhr errors in the console
+globalJsdom(undefined, {
+  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
+});
 
 // setup chai
 chai.use(sinonChai);
@@ -33,31 +37,3 @@ global.DOMRect = class DOMRect {
     return JSON.stringify(this);
   }
 };
-
-const raf = global.requestAnimationFrame;
-const caf = global.cancelAnimationFrame;
-before(() => {
-  Object.defineProperty(global, "requestAnimationFrame", {
-    writable: true,
-    value: (cb: FrameRequestCallback) => {
-      return setTimeout(cb, 0);
-    },
-  });
-  Object.defineProperty(global, "cancelAnimationFrame", {
-    writable: true,
-    value: (handle: number) => {
-      clearTimeout(handle);
-    },
-  });
-});
-
-after(() => {
-  Object.defineProperty(global, "requestAnimationFrame", {
-    writable: true,
-    value: raf,
-  });
-  Object.defineProperty(global, "cancelAnimationFrame", {
-    writable: true,
-    value: caf,
-  });
-});

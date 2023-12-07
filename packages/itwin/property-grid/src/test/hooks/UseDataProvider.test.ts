@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { useDataProvider } from "../../property-grid-react";
 import { stubFavoriteProperties } from "../TestUtils";
 

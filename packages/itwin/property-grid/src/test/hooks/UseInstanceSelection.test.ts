@@ -6,8 +6,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { KeySet } from "@itwin/presentation-common";
-import { waitFor } from "@testing-library/react";
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useInstanceSelection } from "../../hooks/UseInstanceSelection";
 import { createResolvablePromise, stubSelectionManager } from "../TestUtils";
 

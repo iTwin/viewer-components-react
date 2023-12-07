@@ -1,0 +1,10 @@
+trigger: none
+pr:
+  - main
+  - master
+
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:
+  - template: templates/build-steps.yaml

@@ -6,8 +6,7 @@
 import { expect } from "chai";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
-import { waitFor } from "@testing-library/react";
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useLoadedInstanceInfo } from "../../hooks/UseInstanceInfo";
 import { createFunctionStub } from "../TestUtils";
 
