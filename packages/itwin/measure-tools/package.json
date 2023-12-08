@@ -19,7 +19,7 @@
     "copy:esm": "cpx \"./src/**/*.*css\" ./lib/esm",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "watch": "tsc --w",
-    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",

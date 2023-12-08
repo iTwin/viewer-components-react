@@ -49,23 +49,6 @@ function getPRPrefix(url) {
   if (url.includes("@github.com"))
     // GitHub SSH
     return `https://github.com/${url.split(":")[1].replace(/\.git$/, "")}/pull/`;
-
-  if (url.includes("bentleycs")) {
-    // Azure DevOps
-    if (url.startsWith("https://")) {
-      // HTTPS
-      const parsedUrl = new URL(url);
-      const repoPath = parsedUrl.pathname.replace(/^\/bentleycs/, "");
-      return `https://dev.azure.com/bentleycs${repoPath}/pullrequest/`;
-    } else {
-      // SSH
-      /** @type {string | undefined} */
-      const repoPath = url.split("/bentleycs/")[1]?.split("/");
-      if (repoPath) {
-        return `https://dev.azure.com/bentleycs/${repoPath[0]}/_git/${repoPath[1]}/pullrequest/`;
-      }
-    }
-  }
 }
 
 /** @type {(a?: string) => string | undefined} */

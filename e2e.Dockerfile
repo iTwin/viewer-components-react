@@ -22,13 +22,13 @@ COPY . .
 RUN git config --local user.email imodeljs-admin@users.noreply.github.com
 RUN git config --local user.name imodeljs-admin
 
-# Setup rush
-RUN npm install -g @microsoft/rush
-RUN rush install
-RUN rush build -t test-viewer
+# Setup pnpm
+RUN npm install -g pnpm
+RUN pnpm install
+RUN pnpm build --scope test-viewer
 
 # Switch to the directory where E2E tests will run
 WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
 
 # Run E2E tests
-RUN npm run test:e2e:local
+RUN pnpm run test:e2e:local

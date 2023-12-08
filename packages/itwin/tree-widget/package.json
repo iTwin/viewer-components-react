@@ -43,7 +43,7 @@
     "//test:e2e": "node ../../../common/scripts/run-e2e-with-docker.js tree-widget",
     "test:e2e:local": "node ../../../common/scripts/run-e2e-tests.js",
     "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
-    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build"
   },
   "peerDependencies": {

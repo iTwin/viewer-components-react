@@ -27,7 +27,7 @@ Open your iTwin.js viewer-components-react repo in VS Code, click the green area
 
 The _first time_ you "open" the container, you must clone the source code into the working directory, e.g. in VS Code's Terminal, `git clone URL /workspaces/viewer-components-react`. If you use a custom NPM package source, you must also configure that (e.g. `npm config set ...`).
 
-As with any copy of the code, you must build iTwin.js inside the container. Use VS Code's Terminal to perform normal build commands such as `rush install`, `rush rebuild`, and `rush test`. You should also have access to the same launch profiles in VS Code for debugging.
+As with any copy of the code, you must build iTwin.js inside the container. Use VS Code's Terminal to perform normal build commands such as `pnpm install`, `pnpm build`, and `pnpm test`. You should also have access to the same launch profiles in VS Code for debugging.
 
 When you are done, click the green area in the status bar, and select 'Dev Containers: Reopen Folder Locally' to switch back to a local view on your host.
 
@@ -44,10 +44,3 @@ The first time you "open" a container for a project, it will be built and persis
 - Use VS Code's Terminal window to interact directly with the container.
 - The file system is **case-sensitive** (tab completion is configured to be _not_ case-sensitive)
 - The container is configured with zsh + oh-my-zsh + fzf for some additional niceties (e.g. case-insensitivity, git info at the prompt, and fuzzy history search).
-
-### Common issues
-
-- `rush test` fails with "... reporter blew up with error \\ Error: EINVAL: invalid argument, readlink ..."
-  - Cause: unknown
-  - Workaround: `rm -rf common/temp` and do `rush` install/rebuild/test again
-  - To know earlier if you will have this problem, after a `rush rebuild`, run `find -L common/temp -type l`, and if anything other than common/temp/pnpm-store or common/temp/pnpm-local is reported, repeat the above workaround

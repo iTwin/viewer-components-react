@@ -81,7 +81,7 @@
     "test": "",
     "cover": "",
     "lint": "",
-    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build",
     "link:deps": "node ./scripts/linkWorkspaceDeps.js",
     "link:deps:watch": "node ./scripts/linkWorkspaceDeps.js --watch"
