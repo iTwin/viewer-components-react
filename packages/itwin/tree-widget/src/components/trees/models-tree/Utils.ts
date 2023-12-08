@@ -420,10 +420,10 @@ function createRelatedNonHierarchySubjectSpecification(): ChildNodeSpecification
 }
 
 function createNonContentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
-  const partitionFilter = `parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)`;
+  const partitionFilter = `parent.ECInstanceId = [partition].Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", [partition].ECInstanceId)`;
   const modelHasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
 
-  const hasNoContent = `json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") = NULL AND json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") = NULL`;
+  const hasNoContent = `json_extract([partition].JsonProperties, "$.PhysicalPartition.Model.Content") = NULL AND json_extract([partition].JsonProperties, "$.GraphicalPartition3d.Model.Content") = NULL`;
   const instanceFilter = `(${partitionFilter}) AND NOT this.IsPrivate AND ${hasNoContent}${showEmptyModels ? "" : ` AND ${modelHasElements}`}`;
 
   return {
@@ -460,10 +460,10 @@ function createNonContentModelsSpecification({ elementClassSpecification, showEm
 }
 
 function createContentModelsSpecification({ elementClassSpecification, showEmptyModels }: SpecificationsContext): ChildNodeSpecification {
-  const partitionFilter = `parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)`;
+  const partitionFilter = `parent.ECInstanceId = [partition].Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", [partition].ECInstanceId)`;
   const modelHasElements = `this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`;
 
-  const hasContent = `json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") <> NULL OR json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") <> NULL`;
+  const hasContent = `json_extract([partition].JsonProperties, "$.PhysicalPartition.Model.Content") <> NULL OR json_extract([partition].JsonProperties, "$.GraphicalPartition3d.Model.Content") <> NULL`;
   const instanceFilter = `(${partitionFilter}) AND NOT this.IsPrivate AND (${hasContent})${showEmptyModels ? "" : ` AND ${modelHasElements}`}`;
 
   return {
