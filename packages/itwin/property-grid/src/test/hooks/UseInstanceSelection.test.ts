@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
@@ -34,20 +34,16 @@ describe("useInstanceSelection", () => {
     selectionManager.getSelection.reset();
     selectionManager.replaceSelection.reset();
     selectionManager.scopes.computeSelection.reset();
-    selectionManager.scopes.computeSelection.callsFake(async (_, ids) => {
+    selectionManager.scopes.computeSelection.callsFake(async (_, ids, ) => {
       if (typeof ids !== "string") {
         return new KeySet();
       }
 
       switch (ids) {
-        case parentKey.id:
-          return new KeySet([parentKey]);
-        case childKey.id:
-          return new KeySet([parentKey]);
-        case grandChildKey.id:
-          return new KeySet([childKey]);
-        case noParentKey.id:
-          return new KeySet([noParentKey]);
+        case parentKey.id: return new KeySet([parentKey]);
+        case childKey.id: return new KeySet([parentKey]);
+        case grandChildKey.id: return new KeySet([childKey]);
+        case noParentKey.id: return new KeySet([noParentKey]);
       }
 
       return new KeySet();
@@ -173,11 +169,7 @@ describe("useInstanceSelection", () => {
         expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
       });
 
-      expect(selectionManager.replaceSelection).to.be.calledOnceWith(
-        "Property Grid",
-        imodel,
-        sinon.match((keys: KeySet) => keys.has(parentKey)),
-      );
+      expect(selectionManager.replaceSelection).to.be.calledOnceWith("Property Grid", imodel, sinon.match((keys: KeySet) => keys.has(parentKey)));
     });
 
     it("navigates down initial instance", async () => {
@@ -196,11 +188,7 @@ describe("useInstanceSelection", () => {
         expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.true;
       });
 
-      expect(selectionManager.replaceSelection).to.be.calledOnceWith(
-        "Property Grid",
-        imodel,
-        sinon.match((keys: KeySet) => keys.has(parentKey)),
-      );
+      expect(selectionManager.replaceSelection).to.be.calledOnceWith("Property Grid", imodel, sinon.match((keys: KeySet) => keys.has(parentKey)));
       selectionManager.replaceSelection.resetHistory();
 
       result.current.ancestorsNavigationProps.navigateDown();
