@@ -1,25 +1,25 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react-hooks";
 import { useDataProvider } from "../../property-grid-react";
-import { stubFavoriteProperties } from "../TestUtils";
+import { stubFavoriteProperties, stubPresentation } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("useDataProvider", () => {
   const imodel = {} as IModelConnection;
 
-  class CustomProvider extends PresentationPropertyDataProvider {
-  }
+  class CustomProvider extends PresentationPropertyDataProvider {}
 
   before(() => {
     stubFavoriteProperties();
+    stubPresentation();
   });
 
   after(() => {

@@ -6,6 +6,7 @@
     "cover": "lage cover --grouped",
     "test": "lage test --grouped",
     "lint": "lage lint --grouped",
+    "clean": "lage clean --grouped",
     "change": "beachball change --no-commit",
     "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
     "hello": "pnpm --filter sample-a start",
