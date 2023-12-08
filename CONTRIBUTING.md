@@ -63,25 +63,25 @@ Every change must be described with a change log: Run "pnpm change" on your comm
 
 1. Clone repository (first time) with `git clone` or pull updates to the repository (subsequent times) with `git pull`
 2. Install dependencies: `pnpm install`
-3. Clean: `pnpm clean`
-4. Rebuild source: `pnpm build`
-5. Run tests: `pnpm test`
+3. Clean: `pnpm run clean`
+4. Rebuild source: `pnpm run build`
+5. Run tests: `pnpm run test`
 
 The above commands iterate and perform their action against each package in the monorepo.
 
-For incremental builds, the `pnpm build` command can be used to only build packages that have changes.
+For incremental builds, the `pnpm run build` command can be used to only build packages that have changes.
 
 > Note: It is a good idea to `pnpm install` after each `git pull` as dependencies may have changed.
 
 ### Making and testing changes
 
 1. Make source code changes on a new Git branch
-2. Ensure unit tests pass when run locally: `pnpm test`
+2. Ensure unit tests pass when run locally: `pnpm run test`
 3. Locally commit changes: `git commit` (or use the Visual Studio Code user interface)
 4. Repeat steps 1-3 until ready to push changes
 5. Add changelog entry (which could potentially cover several commits): `pnpm change`
 6. Follow prompts to enter a change description or press ENTER if the change does not warrant a changelog entry. If multiple packages have changed, multiple sets of prompts will be presented.
-7. Completing the `rupnpmsh change` prompts will cause new changelog entry JSON files to be created.
+7. Completing the `pnpm change` prompts will cause new changelog entry JSON files to be created.
 8. Commit the changelog JSON files.
 9. Publish changes on the branch and open a pull request.
 
