@@ -1,6 +1,9 @@
 {
-  "name": "monorepo",
+  "name": "viewer-components-react",
   "private": true,
+  "repository": {
+    "url": "https://github.com/iTwin/viewer-components-react.git"
+  },
   "scripts": {
     "build": "lage build --grouped",
     "cover": "lage cover --grouped",
@@ -9,9 +12,9 @@
     "clean": "lage clean --grouped",
     "change": "beachball change --no-commit",
     "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
-    "hello": "pnpm --filter sample-a start",
     "publish": "beachball publish --new",
-    "prettier": "prettier . --write"
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write ."
   },
   "devDependencies": {
     "lage": "^2.7.8",
