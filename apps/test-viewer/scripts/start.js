@@ -6,7 +6,18 @@ const crossEnv = require("cross-env");
 const dotEnv = require("dotenv");
 const { TestBrowserAuthorizationClient } = require("@itwin/oidc-signin-tool");
 
-dotEnv.config();
+// set default values for auth client
+const env = {
+  IMJS_AUTH_CLIENT_REDIRECT_URI: "http://localhost:3000/signin-callback",
+  IMJS_AUTH_CLIENT_LOGOUT_URI: "http://localhost:3000",
+  IMJS_AUTH_CLIENT_SCOPES: "imodelaccess:read imodels:read realitydata:read",
+};
+// supplement with values in `.env`, override if necessary
+dotEnv.config({ override: true, processEnv: env });
+// place into `process.env`
+Object.entries(env).forEach(([key, value]) => {
+  process.env[key] = value;
+})
 
 // there's no way to auto-login the user using env credentials in the app itself, so we
 // have to do that here and pass access token to the app
