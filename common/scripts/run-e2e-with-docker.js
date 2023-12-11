@@ -5,13 +5,12 @@
 const path = require("path");
 const { spawn } = require("child_process");
 const packageName = process.argv[2];
-const dockerImageName = `${packageName}-e2e-test-image`;
-const dockerContainerName = `${packageName}-e2e-test-container`;
+const dockerImageName = `viewer-components-react/${packageName}-e2e-tests`;
+const dockerContainerName = `${dockerImageName.replace("/", ".")}-container`;
 const srcFolderLocation = `packages/itwin/${packageName}/src`;
 
 const execute = (command, args = []) => new Promise((resolve, reject) => {
   const spawnProcess = spawn(command, args, { stdio: "inherit" });
-
   spawnProcess.on("close", (status) => {
     if (status !== 0) {
       console.error(`Command failed with code ${status}`);
@@ -35,7 +34,9 @@ async function buildAndRunDocker() {
   const envVariableNames = ["CI", "IMJS_AUTH_CLIENT_CLIENT_ID", "IMJS_USER_EMAIL", "IMJS_USER_PASSWORD"];
   const envVariableArgs = envVariableNames.reduce((args, name) => [...args, "--env", name], []);
   try {
-    // Build the Docker image
+    // Build the test-viewer Docker image
+    await execute("docker", ["build", "-t", "viewer-components-react/test-viewer", "-f", "test-viewer.Dockerfile", "."]);
+    // Build the e2e tests Docker image
     await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", dockerImageName, "-f", "e2e.Dockerfile", "."]);
     // Run Docker container
     await execute("docker", ["run", "--name", dockerContainerName, ...envVariableArgs, dockerImageName]);
