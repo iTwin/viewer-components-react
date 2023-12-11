@@ -16,7 +16,9 @@ const env = {
 dotEnv.config({ override: true, processEnv: env });
 // place into `process.env`
 Object.entries(env).forEach(([key, value]) => {
-  process.env[key] = value;
+  if (!(key in process.env)) {
+    process.env[key] = value;
+  }
 })
 
 // there's no way to auto-login the user using env credentials in the app itself, so we
