@@ -18,10 +18,13 @@ if (process.env.IMJS_GLOBAL_PROPS) {
     console.log(`Could not read 'IMJS_GLOBAL_PROPS'`);
   }
 }
+if (process.env.IMJS_URL_PREFIX) {
+  globalThis.IMJS_URL_PREFIX = process.env.IMJS_URL_PREFIX;
+}
 
-if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID && !process.env.IMJS_DEMO_CLIENT) {
+if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID) {
   throw new Error(
-    "Please add a valid OIDC client id (or use demo client) to the .env file and restart the application. See the README for more information."
+    "Please add a valid OIDC client id to the .env file and restart the application. See the README for more information."
   );
 }
 if (!process.env.IMJS_AUTH_CLIENT_SCOPES) {

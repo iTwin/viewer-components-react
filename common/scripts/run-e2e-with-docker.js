@@ -31,11 +31,14 @@ try {
 }
 
 async function buildAndRunDocker() {
+  // A list of environment variables that we want to cary over from the host to the container
+  const envVariableNames = ["CI", "IMJS_AUTH_CLIENT_CLIENT_ID", "IMJS_USER_EMAIL", "IMJS_USER_PASSWORD"];
+  const envVariableArgs = envVariableNames.reduce((args, name) => [...args, "--env", `${name}=${process.env[name]}`], []);
   try {
     // Build the Docker image
-    await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", `${dockerImageName}`, "-f", "e2e.Dockerfile", "."]);
+    await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", dockerImageName, "-f", "e2e.Dockerfile", "."]);
     // Run Docker container
-    await execute("docker", ["run", "--name", `${dockerContainerName}`, "-e", `CI=${process.env.CI}`, `${dockerImageName}`]);
+    await execute("docker", ["run", "--name", dockerContainerName, ...envVariableArgs, dockerImageName]);
     // Copy snapshots from docker container to the local repo
     await execute("docker", ["cp", `${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests`, `./${srcFolderLocation}`]);
   } catch {

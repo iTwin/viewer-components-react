@@ -29,6 +29,7 @@ RUN rush build -t test-viewer
 
 # Switch to the directory where E2E tests will run
 WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
+RUN npx playwright install
 
 # Run E2E tests
 RUN npm run test:e2e:local
