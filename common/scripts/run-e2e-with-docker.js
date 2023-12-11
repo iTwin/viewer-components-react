@@ -33,7 +33,7 @@ try {
 async function buildAndRunDocker() {
   // A list of environment variables that we want to cary over from the host to the container
   const envVariableNames = ["CI", "IMJS_AUTH_CLIENT_CLIENT_ID", "IMJS_USER_EMAIL", "IMJS_USER_PASSWORD"];
-  const envVariableArgs = envVariableNames.reduce((args, name) => [...args, "--env", `${name}=${process.env[name]}`], []);
+  const envVariableArgs = envVariableNames.reduce((args, name) => [...args, "--env", name], []);
   try {
     // Build the Docker image
     await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", dockerImageName, "-f", "e2e.Dockerfile", "."]);

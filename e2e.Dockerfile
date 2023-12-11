@@ -16,14 +16,13 @@ RUN apt-get update \
 # Set the working directory in the container
 WORKDIR /workspaces/viewer-components-react/
 
-# Copy the local files to the container
-COPY . .
+# Install rush
+RUN npm install -g @microsoft/rush
 
+# Copy the local files to the container and install/build
+COPY . .
 RUN git config --local user.email imodeljs-admin@users.noreply.github.com
 RUN git config --local user.name imodeljs-admin
-
-# Setup rush
-RUN npm install -g @microsoft/rush
 RUN rush install
 RUN rush build -t test-viewer
 
@@ -31,5 +30,5 @@ RUN rush build -t test-viewer
 WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
 RUN npx playwright install
 
-# Run E2E tests
-RUN npm run test:e2e:local
+# Set the entry point to run the tests
+CMD ["npm", "run", "test:e2e:local"]
