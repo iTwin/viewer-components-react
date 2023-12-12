@@ -2,6 +2,26 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.1",
+      "tag": "@itwin/tree-widget-react_v1.2.1",
+      "date": "Fri, 01 Dec 2023 13:46:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add lint checks for *.scss files."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix padding for icons when elements are enlarged."
+          },
+          {
+            "comment": "Fix progress indicator sizing in `enlarged` layout"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@itwin/tree-widget-react_v1.2.0",
       "date": "Tue, 19 Sep 2023 14:55:43 GMT",

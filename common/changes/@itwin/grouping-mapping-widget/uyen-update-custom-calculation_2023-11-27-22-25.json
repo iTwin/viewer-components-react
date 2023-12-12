@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed extraction error message not showing.",
+      "comment": "Added new functions for Custom Calculations in FormulaFunctionProvider.ts",
       "type": "patch"
     }
   ],
