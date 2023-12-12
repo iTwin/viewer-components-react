@@ -15,7 +15,7 @@ import { useMappingClient } from "../../context/MappingClientContext";
 import { useMappingsOperations } from "../hooks/useMappingsOperations";
 import type { Mapping } from "@itwin/insights-client";
 import { useQueries } from "@tanstack/react-query";
-import { useMemoizedCollecionPick } from "../../../common/hooks/useMemoizedCollecionPick";
+import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedCollectionPick";
 
 export interface ExtractionMessageData {
   date: string;
@@ -76,7 +76,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   });
 
   // Workaround to get data from useQueries with more stability
-  const pickedResult = useMemoizedCollecionPick(groupQueriesResults, ["data", "error", "isLoading", "isSuccess"]);
+  const pickedResult = useMemoizedCollectionPick(groupQueriesResults, ["data", "error", "isLoading", "isSuccess"]);
 
   useEffect(() => {
     if (pickedResult.every((query) => query.isSuccess) && mappings) {
