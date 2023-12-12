@@ -59,7 +59,7 @@ importers:
       '@itwin/appui-abstract': 4.1.6_@itwin+core-bentley@4.1.6
       '@itwin/appui-layout-react': 4.5.0_21d53978c7db6234eebcfe88e5ee36ee
       '@itwin/appui-react': 4.5.0_8a31bd8c2662b5c6b5e5abfcd912fad1
-      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_fea125308ef174e26de5dea4fef30009
+      '@itwin/breakdown-trees-react': file:../../packages/itwin/breakdown-trees_d8e1681d4c6eb1686c438ad81d9c6288
       '@itwin/browser-authorization': 0.8.0_@itwin+core-bentley@4.1.6
       '@itwin/components-react': 4.5.0_21d53978c7db6234eebcfe88e5ee36ee
       '@itwin/core-bentley': 4.1.6
@@ -512,6 +512,7 @@ importers:
       '@itwin/presentation-components': ^4.1.0
       '@itwin/presentation-frontend': ^4.1.0
       '@itwin/webgl-compatibility': ^4.1.0
+      '@tanstack/react-query': ^4.36.1
       '@testing-library/dom': ^8.12.0
       '@testing-library/jest-dom': ^5.16.3
       '@testing-library/react': ^12.1.4
@@ -519,6 +520,7 @@ importers:
       '@types/chai': 4.2.11
       '@types/i18next': ^8.4.2
       '@types/jest': ^27.4.1
+      '@types/lodash': ^4.14.202
       '@types/node': ^14.14.20
       '@types/react': ^17.0.19
       '@types/react-dom': ^17.0.9
@@ -541,6 +543,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       jest-transform-stub: ^2.0.0
+      lodash: ^4.17.21
       react: ^17.0.2
       react-dom: ^17.0.2
       react-redux: ^7.2.0
@@ -562,10 +565,12 @@ importers:
       '@itwin/itwins-client': 1.1.0
       '@itwin/itwinui-icons-react': 2.4.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
+      '@tanstack/react-query': 4.36.1_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       cross-fetch: 3.1.5
       fast-equals: 4.0.3
       immer: 9.0.12
+      lodash: 4.17.21
       react-split: 2.0.14_react@17.0.2
       simple-react-validator: 1.6.1
     devDependencies:
@@ -599,6 +604,7 @@ importers:
       '@types/chai': 4.2.11
       '@types/i18next': 8.4.6
       '@types/jest': 27.4.1
+      '@types/lodash': 4.14.202
       '@types/node': 14.18.12
       '@types/react': 17.0.44
       '@types/react-dom': 17.0.15
@@ -7832,6 +7838,28 @@ packages:
       - supports-color
     dev: false
 
+  /@tanstack/query-core/4.36.1:
+    resolution: {integrity: sha512-DJSilV5+ytBP1FbFcEJovv4rnnm/CokuVvrBEtW/Va9DvuJ3HksbXUJEpI0aV1KtuL4ZoO9AVE6PyNLzF7tLeA==}
+    dev: false
+
+  /@tanstack/react-query/4.36.1_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-y7ySVHFyyQblPl3J3eQBWpXZkliroki3ARnBKsdJchlgt7yJLRDUcf4B8soufgiYt3pEQIkBWBx1N9/ZPIeUWw==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      '@tanstack/query-core': 4.36.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      use-sync-external-store: 1.2.0_react@17.0.2
+    dev: false
+
   /@testing-library/dom/5.6.1:
     resolution: {integrity: sha512-Y1T2bjtvQMewffn1CJ28kpgnuvPYKsBcZMagEH0ppfEMZPDc8AkkEnTk4smrGZKw0cblNB3lhM2FMnpfLExlHg==}
     engines: {node: '>=8'}
@@ -8281,6 +8309,10 @@ packages:
 
   /@types/json5/0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+
+  /@types/lodash/4.14.202:
+    resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
+    dev: true
 
   /@types/mime/3.0.1:
     resolution: {integrity: sha512-Y4XFY5VJAuw0FgAqPNd6NNoV44jbq9Bz2L7Rh/J6jLTiHBSBJa9fxqQIvkIld4GsoDOcCbvzOUAbLPsSKKg+uA==}
@@ -24447,11 +24479,11 @@ packages:
       react: 17.0.2
       use-sync-external-store: 1.2.0_react@17.0.2
 
-  file:../../packages/itwin/breakdown-trees_fea125308ef174e26de5dea4fef30009:
+  file:../../packages/itwin/breakdown-trees_d8e1681d4c6eb1686c438ad81d9c6288:
     resolution: {directory: ../../packages/itwin/breakdown-trees, type: directory}
     id: file:../../packages/itwin/breakdown-trees
     name: '@itwin/breakdown-trees-react'
-    version: 0.6.9
+    version: 0.6.10
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.3.0
@@ -24466,7 +24498,7 @@ packages:
       '@itwin/presentation-common': ^4.0.0
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
-      '@itwin/tree-widget-react': workspace:^1.2.0
+      '@itwin/tree-widget-react': workspace:^1.2.1
       react: ^17.0.0
       react-dom: ^17.0.0
       react-redux: 7.2.6
@@ -24604,7 +24636,7 @@ packages:
     resolution: {directory: ../../packages/itwin/property-grid, type: directory}
     id: file:../../packages/itwin/property-grid
     name: '@itwin/property-grid-react'
-    version: 1.3.0
+    version: 1.4.0
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0
@@ -24640,7 +24672,7 @@ packages:
     resolution: {directory: ../../packages/itwin/tree-widget, type: directory}
     id: file:../../packages/itwin/tree-widget
     name: '@itwin/tree-widget-react'
-    version: 1.2.0
+    version: 1.2.1
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-react': ^4.3.0

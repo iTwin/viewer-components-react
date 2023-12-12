@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed extraction error message not showing.",
-      "type": "patch"
+      "comment": "Mapping related components have been refactored to use react-query.",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"

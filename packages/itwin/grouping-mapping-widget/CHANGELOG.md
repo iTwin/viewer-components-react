@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 10 Nov 2023 14:46:30 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Dec 2023 13:46:38 GMT and should not be manually modified.
+
+## 0.21.1
+Fri, 01 Dec 2023 13:46:38 GMT
+
+### Patches
+
+- Fixed extraction error message not showing.
 
 ## 0.21.0
 Fri, 10 Nov 2023 14:46:30 GMT
