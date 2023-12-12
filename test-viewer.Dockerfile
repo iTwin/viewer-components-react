@@ -2,12 +2,16 @@
 # Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 # Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 #----------------------------------------------------------------------------------------------
-FROM viewer-components-react/test-viewer
-ARG PACKAGE_NAME=""
+FROM mcr.microsoft.com/playwright:v1.36.2-jammy
 
-# Switch to the directory where E2E tests will run
-WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
-RUN npx playwright install chromium
+# Set the working directory in the container
+WORKDIR /workspaces/viewer-components-react/
 
-# Set the entry point to run the tests
-CMD ["npm", "run", "test:e2e:local"]
+# Install pnpm
+RUN corepack enable
+RUN corepack prepare pnpm@8.11.0 --activate
+
+# Copy the local files to the container and install/build
+COPY . .
+RUN pnpm install
+RUN pnpm build --scope test-viewer

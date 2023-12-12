@@ -13,34 +13,24 @@ export enum AuthorizationState {
   Authorized
 }
 
-const shouldUseDemoClient = !!process.env.IMJS_DEMO_CLIENT;
-
-class DemoAuthClient implements WebViewerAuthorizationClient {
+class AccessTokenAuthClient implements WebViewerAuthorizationClient {
   readonly onAccessTokenChanged: BeEvent<(token: AccessToken) => void> = new BeEvent();
-  private accessToken: Promise<string> | undefined = undefined;
+
+  public constructor(private _accessToken: string) {}
 
   public async getAccessToken(): Promise<string> {
-    this.accessToken ??= (async () => {
-      const response = await fetch(
-        "https://prod-imodeldeveloperservices-eus.azurewebsites.net/api/v0/sampleShowcaseUser/devUser",
-      );
-      const result = await response.json();
-      setTimeout(
-        () => this.accessToken = undefined,
-        new Date(result._expiresAt).getTime() - new Date().getTime() - 5000,
-      );
-      return `Bearer ${result._jwt}`;
-    })();
-    return this.accessToken;
+    return this._accessToken;
   }
 }
 
 class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
   private _client: WebViewerAuthorizationClient;
 
-  constructor(useDemoClient: boolean) {
-    this._client = useDemoClient ? new DemoAuthClient() :
-      new BrowserAuthorizationClient({
+  constructor() {
+    const userAccessToken = process.env.IMJS_USER_ACCESS_TOKEN;
+    this._client = userAccessToken
+      ? new AccessTokenAuthClient(userAccessToken)
+      : new BrowserAuthorizationClient({
         scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
         clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
         redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
@@ -49,6 +39,8 @@ class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
         authority: process.env.IMJS_AUTH_AUTHORITY,
       });
   }
+
+  public get isTokenClient() {return this._client instanceof AccessTokenAuthClient;}
 
   public async getAccessToken(): Promise<string> {
     return this._client.getAccessToken();
@@ -83,20 +75,21 @@ export interface AuthorizationContext {
 }
 
 const authorizationContext = createContext<AuthorizationContext>({
-  client: new ViewerAuthorizationClient(shouldUseDemoClient),
-  state: AuthorizationState.Authorized,
+  client: new ViewerAuthorizationClient(),
+  state: AuthorizationState.Pending,
 });
 
 export function useAuthorizationContext() {
   return useContext(authorizationContext);
 }
 
-const createAuthClient = (): AuthorizationContext => ({
-    client: new ViewerAuthorizationClient(shouldUseDemoClient),
-    state: shouldUseDemoClient
-      ? AuthorizationState.Authorized
-      : AuthorizationState.Pending,
-  });
+const createAuthClient = (): AuthorizationContext => {
+  const client = new ViewerAuthorizationClient();
+  return {
+    client,
+    state: client.isTokenClient ? AuthorizationState.Authorized : AuthorizationState.Pending,
+  }
+}
 
 export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
   const [contextValue, setContextValue] = useState<AuthorizationContext>(() => createAuthClient());
@@ -135,4 +128,3 @@ export function SignInRedirect() {
 
   return <></>
 }
-

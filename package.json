@@ -5,10 +5,11 @@
     "url": "https://github.com/iTwin/viewer-components-react.git"
   },
   "scripts": {
-    "build": "lage build",
-    "cover": "lage cover --continue",
-    "test": "lage test --continue",
-    "lint": "lage lint --continue",
+    "build": "lage build --grouped",
+    "cover": "lage cover --grouped --continue",
+    "test": "lage test --grouped --continue",
+    "test:e2e": "lage test:e2e --grouped --continue",
+    "lint": "lage lint --grouped --continue",
     "clean": "lage clean",
     "change": "beachball change --no-commit",
     "change:dev": "beachball change --config beachball.config.dev.js --no-commit",

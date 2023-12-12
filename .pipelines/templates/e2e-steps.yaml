@@ -1,0 +1,30 @@
+steps:
+  - task: NodeTool@0
+    displayName: Use Node 18.x
+    inputs:
+      versionSpec: 18.x
+
+  - task: Npm@1
+    displayName: install pnpm ^8.6.10
+    inputs:
+      command: "custom"
+      customCommand: "install -g pnpm@^8.6.10"
+
+  - task: npmAuthenticate@0
+    inputs:
+      workingFile: .npmrc
+
+  - script: cp .npmrc ~/.npmrc
+
+  - script: pnpm install --frozen-lockfile
+    displayName: pnpm install
+
+  - script: pnpm build --scope test-viewer
+    displayName: Build test-viewer
+
+  - script: pnpm test:e2e --verbose
+    displayName: "pnpm test:e2e"
+    env:
+      IMJS_AUTH_CLIENT_CLIENT_ID: $(IMJS_AUTH_CLIENT_CLIENT_ID)
+      IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
+      IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
