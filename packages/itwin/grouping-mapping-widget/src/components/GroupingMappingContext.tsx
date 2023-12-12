@@ -23,8 +23,7 @@ import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsConte
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { MutationCache, QueryCache, QueryClient } from "@tanstack/query-core";
+import { QueryClientProvider, MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { toaster } from "@itwin/itwinui-react";
 import { getErrorMessage } from "../common/utils";
 
