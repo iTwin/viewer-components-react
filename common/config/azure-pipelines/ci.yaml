@@ -42,14 +42,15 @@ jobs:
         clean: all
       - template: templates/build.yaml
 
-  - job: "Run_e2e_tests"
+  - job: Run_e2e_tests
     displayName: "Run e2e tests"
     condition: succeeded()
     workspace:
       clean: all
-
     pool:
       vmImage: ubuntu-latest
+    variables:
+      - group: "viewer-components-react e2e tests env"
     steps:
       - checkout: self
         clean: true
@@ -66,3 +67,7 @@ jobs:
         displayName: rush install
       - script: node common/scripts/install-run-rush.js test:e2e --verbose
         displayName: "rush test:e2e"
+        env:
+          IMJS_AUTH_CLIENT_CLIENT_ID: $(IMJS_AUTH_CLIENT_CLIENT_ID)
+          IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
+          IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
