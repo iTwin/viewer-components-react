@@ -512,6 +512,7 @@ importers:
       '@itwin/presentation-components': ^4.1.0
       '@itwin/presentation-frontend': ^4.1.0
       '@itwin/webgl-compatibility': ^4.1.0
+      '@tanstack/query-core': ^4.36.1
       '@tanstack/react-query': ^4.36.1
       '@testing-library/dom': ^8.12.0
       '@testing-library/jest-dom': ^5.16.3
@@ -597,6 +598,7 @@ importers:
       '@itwin/presentation-components': 4.1.0_06aa654b482c09cd186fb3d8950bc540
       '@itwin/presentation-frontend': 4.2.1_7a9af8201db849b6989f4f77d4253e77
       '@itwin/webgl-compatibility': 4.1.6
+      '@tanstack/query-core': 4.36.1
       '@testing-library/dom': 8.13.0
       '@testing-library/jest-dom': 5.16.4
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
@@ -7840,7 +7842,6 @@ packages:
 
   /@tanstack/query-core/4.36.1:
     resolution: {integrity: sha512-DJSilV5+ytBP1FbFcEJovv4rnnm/CokuVvrBEtW/Va9DvuJ3HksbXUJEpI0aV1KtuL4ZoO9AVE6PyNLzF7tLeA==}
-    dev: false
 
   /@tanstack/react-query/4.36.1_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-y7ySVHFyyQblPl3J3eQBWpXZkliroki3ARnBKsdJchlgt7yJLRDUcf4B8soufgiYt3pEQIkBWBx1N9/ZPIeUWw==}
