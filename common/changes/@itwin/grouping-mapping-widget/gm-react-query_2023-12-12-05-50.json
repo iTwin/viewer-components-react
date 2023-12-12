@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Mapping related components have been refactored to use react-query.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}
