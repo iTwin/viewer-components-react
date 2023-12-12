@@ -63,14 +63,15 @@
     "@itwin/itwins-client": "^1.1.0",
     "@itwin/itwinui-icons-react": "^2.2.0",
     "@itwin/itwinui-react": "^2.11.2",
+    "@tanstack/query-core": "^4.36.1",
+    "@tanstack/react-query": "^4.36.1",
     "lodash": "^4.17.21",
     "classnames": "^2.3.1",
     "cross-fetch": "^3.1.4",
     "fast-equals": "^4.0.2",
     "immer": "^9.0.7",
     "react-split": "2.0.14",
-    "simple-react-validator": "^1.6.1",
-    "@tanstack/react-query": "^4.36.1"
+    "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.5.0",
@@ -96,7 +97,6 @@
     "@itwin/presentation-components": "^4.1.0",
     "@itwin/presentation-frontend": "^4.1.0",
     "@itwin/webgl-compatibility": "^4.1.0",
-    "@tanstack/query-core": "^4.36.1",
     "@testing-library/dom": "^8.12.0",
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",
