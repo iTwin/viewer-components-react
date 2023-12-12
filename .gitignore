@@ -23,6 +23,7 @@ package-lock.json
 
 # dotenv environment variables file
 .env
+.env.e2e
 
 # trash
 *.bak

@@ -3,23 +3,28 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 const crossEnv = require("cross-env");
+const dotEnv = require("dotenv");
+
 const path = require("path").resolve(__dirname, "../../../../apps/test-viewer");
 const watch = process.argv[2] && process.argv[2] === "--watch";
 const scriptName = watch ? "start:dev" : "start:dev:no-watch";
 const options = process.platform === "win32" ? undefined : { shell: "/bin/sh" };
 
+const env = {
+  IMJS_ENABLED_WIDGETS: "tree-widget property-grid",
+};
+
+if (process.env.IS_PW) {
+  // We know we're running e2e tests using `IS_PW` env var as it's set through playwright config.
+  // The config also supplies some env variables specific to our e2e tests - QA prefixes, iTwinId,
+  // iModelId. Here, we additionally load secrets required to access the iModel: OIDC client ID
+  // and user credentials.
+  dotEnv.config({ path: "./.env.e2e", processEnv: env });
+}
+
 crossEnv([
-  'IMJS_DEMO_CLIENT=true',
-  'IMJS_AUTH_CLIENT_REDIRECT_URI="http://localhost:3000/signin-callback"',
-  'IMJS_AUTH_CLIENT_LOGOUT_URI="http://localhost:3000"',
-  'IMJS_AUTH_CLIENT_SCOPES="imodelaccess:read imodels:read realitydata:read"',
-  'IMJS_AUTH_AUTHORITY="https://ims.bentley.com"',
-  'IMJS_ITWIN_ID="b27dc251-0e53-4a36-9a38-182fc309be07"',
-  'IMJS_IMODEL_ID="f30566da-8fdf-4cba-b09a-fd39f5397ae6"',
-  'SKIP_PREFLIGHT_CHECK=true',
-  'USE_FAST_SASS=true',
-  'USE_FULL_SOURCEMAP=true',
-  'TRANSPILE_DEPS=false',
-  'IMJS_ENABLED_WIDGETS="tree-widget property-grid"',
+  ...Object.entries(env)
+    .filter(([key]) => !(key in process.env))
+    .map(([ key, value ]) => `${key}=${JSON.stringify(value)}`),
   `npm run ${scriptName} --prefix ${path}`,
 ], options);
