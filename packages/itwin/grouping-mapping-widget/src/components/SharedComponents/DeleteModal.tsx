@@ -15,7 +15,7 @@ import "./DeleteModal.scss";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 export interface DeleteModalProps {
-  entityName?: string;
+  entityName: string;
   onClose: () => void;
   onDelete: () => Promise<void>;
   refresh?: () => Promise<void>;
