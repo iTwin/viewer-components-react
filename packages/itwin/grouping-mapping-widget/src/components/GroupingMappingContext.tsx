@@ -23,8 +23,6 @@ import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsConte
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
-import type { ExtractionMessageData, ExtractionStatusData, IExtractionStatusDataProps } from "./context/ExtractionStatusDataContext";
-import { ExtractionStatusDataContext } from "./context/ExtractionStatusDataContext";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/query-core";
 import { toaster } from "@itwin/itwinui-react";
@@ -70,7 +68,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      staleTime: 20 * 60 * 1000, // 20 minutes
+      // staleTime: 20 * 60 * 1000, // 20 minutes
     },
   },
   queryCache: new QueryCache({
@@ -119,8 +117,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
   const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
   const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
-  const [extractionStatusIcon, setExtractionStatusIcon] = useState<ExtractionStatusData>({ iconStatus: undefined, iconMessage: "Loading..." });
-  const [extractionMessageData, setExtractionMessageData] = useState<ExtractionMessageData[]>([]);
+
   useEffect(() => {
     setApiConfig(() => ({
       prefix: props.prefix,
@@ -186,27 +183,18 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     setCustomUIs,
   }), [customUIs]);
 
-  const extractionStatusDataValue: IExtractionStatusDataProps = useMemo(() => ({
-    extractionStatusIcon,
-    extractionMessageData,
-    setExtractionMessageData,
-    setExtractionStatusIcon,
-  }), [extractionStatusIcon, extractionMessageData]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <GroupingMappingApiConfigContext.Provider value={apiConfig}>
         <MappingClientContext.Provider value={mappingClient}>
           <ExtractionClientContext.Provider value={extractionClient}>
-            <ExtractionStatusDataContext.Provider value={extractionStatusDataValue}>
-              <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
-                <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-                  <PropertiesContext.Provider value={propertiesContextValue}>
-                    {props.children}
-                  </PropertiesContext.Provider>
-                </GroupHilitedElementsContext.Provider>
-              </GroupingMappingCustomUIContext.Provider>
-            </ExtractionStatusDataContext.Provider>
+            <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
+              <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
+                <PropertiesContext.Provider value={propertiesContextValue}>
+                  {props.children}
+                </PropertiesContext.Provider>
+              </GroupHilitedElementsContext.Provider>
+            </GroupingMappingCustomUIContext.Provider>
           </ExtractionClientContext.Provider>
         </MappingClientContext.Provider>
       </GroupingMappingApiConfigContext.Provider>
