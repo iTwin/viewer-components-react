@@ -5,7 +5,6 @@
 import { Button, DefaultCell, Icon, Modal, ModalButtonBar, ModalContent, Table, tableFilters, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../../../common/utils";
-import type { ExtractionMessageData } from "../../context/ExtractionStatusDataContext";
 import "./ExtractionMessageModal.scss";
 import { SvgClock } from "@itwin/itwinui-icons-react";
 import type { CellRendererProps, Column } from "react-table";
@@ -14,7 +13,17 @@ import { ExtractionLogCustomFilter } from "./ExtractionLogCustomFilter";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useMappingsOperations } from "../hooks/useMappingsOperations";
-import type { Group } from "@itwin/insights-client";
+import type { Mapping } from "@itwin/insights-client";
+import { useQueries } from "@tanstack/react-query";
+import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedCollectionPick";
+import { fetchGroups } from "../../Groups/hooks/useFetchGroups";
+
+export interface ExtractionMessageData {
+  date: string;
+  category: string;
+  level: string;
+  message: string;
+}
 
 export interface ExtractionMessageModalProps {
   isOpen: boolean;
@@ -24,58 +33,67 @@ export interface ExtractionMessageModalProps {
 }
 
 export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData, timestamp }: ExtractionMessageModalProps) => {
-  const [formattedExtractionMessage, setFormattedExtractionMessage] = useState<ExtractionMessageData[]>([]);
+  const [formattedExtractionMessage, setFormattedExtractionMessage] = useState<ExtractionMessageData[] | undefined>(undefined);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const { mappings } = useMappingsOperations({...groupingMappingApiConfig, mappingClient});
+  const { mappings, isLoading: isMappingsLoading } = useMappingsOperations({ ...groupingMappingApiConfig, mappingClient });
   const [formattedTimestamp, setFormattedTimestamp] = useState<string>("");
 
-  const getMappingName = useCallback(async (mappingId: string) => {
-    return mappings.find((mapping) => {return mapping.id === mappingId;})?.mappingName ?? "";
-  }, [mappings]);
+  const getMappingName = useCallback((mappingId: string, mappings: Mapping[]) => {
+    return mappings.find((mapping) => mapping.id === mappingId)?.mappingName ?? "";
+  }, []);
 
-  const getGroupNames = useCallback(async (mappingId: string, groupId: string, groupsCache: Map<string, Group[]>) => {
-    const accessToken = await groupingMappingApiConfig.getAccessToken();
-    if(!groupsCache.has(mappingId)){
-      const groups = await mappingClient.getGroups(
-        accessToken,
-        groupingMappingApiConfig.iModelId,
-        mappingId
-      );
-      groupsCache.set(mappingId, groups);
-    }
-    return groupsCache.get(mappingId)?.find((group) => {return group.id === groupId;})?.groupName ?? "";
-  }, [groupingMappingApiConfig, mappingClient]);
+  // Extract groupIds and mappingIds from messages
+  const extractionInfo = useMemo(() => {
+    return extractionMessageData.reduce<{
+      mappingId: string;
+      groupId: string;
+    }[]>((acc, message) => {
+      const splittedMessage = message.message.split(" ");
+      const mappingId = splittedMessage[splittedMessage.indexOf("MappingId:") + 1]?.match(/^([^,]+),$/)?.[1];
+      const groupId = splittedMessage[splittedMessage.indexOf("GroupId:") + 1]?.match(/^([^,]+).$/)?.[1];
+
+      if (mappingId && groupId) {
+        acc.push({ mappingId, groupId });
+      }
+      return acc;
+    }, []);
+  }, [extractionMessageData]);
+
+  // useQueries to fetch all group names
+  const groupQueriesResults = useQueries({
+    queries: extractionInfo.map(({ mappingId }) => ({
+      queryKey: ["groups", mappingId],
+      queryFn: async () => fetchGroups(groupingMappingApiConfig.iModelId, mappingId, groupingMappingApiConfig.getAccessToken, mappingClient),
+    })),
+  });
+
+  // Workaround to get data from useQueries with more stability
+  const pickedResult = useMemoizedCollectionPick(groupQueriesResults, ["data", "error", "isLoading", "isSuccess"]);
 
   useEffect(() => {
-    const formatMessages = async () => {
-      const groupsCache = new Map<string,Group[]>();
-      const extractionMessageDataPromises = extractionMessageData.map(async (extractionMessage) => {
-        {
-          let replacedMessage = extractionMessage.message;
-          const splittedMessage = replacedMessage.split(" ");
-          const mappingId = splittedMessage[splittedMessage.indexOf("MappingId:") + 1].match(/^([^,]+),$/) ?? [];
-          if(extractionMessage.message.includes("iModel")){
-            replacedMessage = replacedMessage.replace(/iModel [\w-]+/, "iModel");
-          }
-          if(replacedMessage.includes("MappingId:")){
-            const mappingName = await getMappingName(mappingId[1]);
-            replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
-          }
-          if(replacedMessage.includes("GroupId:")){
-            const groupId = splittedMessage[splittedMessage.indexOf("GroupId:") + 1].match(/^([^,]+).$/) ?? [];
-            const groupName = await getGroupNames(mappingId[1], groupId[1], groupsCache);
-            replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName}`);
-          }
-          return {...extractionMessage, message: replacedMessage};
+    if (pickedResult.every((query) => query.isSuccess) && mappings) {
+      const formattedMessages = extractionMessageData.map((extractionMessage, index) => {
+        let replacedMessage: string = extractionMessage.message;
+
+        const { mappingId, groupId } = extractionInfo[index];
+        const groupName = pickedResult[index].data!.find((group) => group.id === groupId)?.groupName;
+
+        if (replacedMessage.includes("MappingId:")) {
+          const mappingName = getMappingName(mappingId, mappings);
+          replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
         }
+
+        if (replacedMessage.includes("GroupId:")) {
+          replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName ? groupName : "<Not Found>"}`);
+        }
+
+        return { ...extractionMessage, message: replacedMessage };
       });
 
-      const newMessages = await Promise.all(extractionMessageDataPromises);
-      setFormattedExtractionMessage(newMessages);
-    };
-    void formatMessages();
-  }, [extractionMessageData, groupingMappingApiConfig, mappings, mappingClient, getGroupNames, getMappingName]);
+      setFormattedExtractionMessage(formattedMessages);
+    }
+  }, [extractionMessageData, mappings, extractionInfo, getMappingName, pickedResult]);
 
   useEffect(() => {
     const newDateTime: Date = new Date(timestamp);
@@ -139,6 +157,8 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
     ],
     [translatedLabels]
   );
+  const isLoading = pickedResult.some((query) => query.isLoading) || isMappingsLoading;
+
   return (
     <Modal className="gmw-message-modal-container"
       title="Extraction Logs"
@@ -158,10 +178,11 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
         </div>
         <Table<CreateTypeFromInterface<ExtractionMessageData>>
           columns={columns}
-          data={formattedExtractionMessage}
+          data={formattedExtractionMessage ?? []}
           emptyTableContent={""}
           emptyFilteredTableContent="No results match filters."
           className="gmw-extraction-message-table-container"
+          isLoading={isLoading}
         />
       </ModalContent>
       <ModalButtonBar>
@@ -169,7 +190,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
           onClick={onClose}
           styleType="high-visibility"
         >
-            Close
+          Close
         </Button>
       </ModalButtonBar>
     </Modal>

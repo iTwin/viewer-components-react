@@ -11,36 +11,16 @@ import {
   tableFilters,
   TablePaginator,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { IMappingsClient, Mapping } from "@itwin/insights-client";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMappingClient } from "../../context/MappingClientContext";
 import type { IMappingTyped } from "../Mappings";
 import "./SelectMapping.scss";
-import { handleError } from "../../../common/utils";
-import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
+import { useFetchMappings } from "../hooks/useFetchMappings";
+import type { Column } from "react-table";
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
-};
-
-const fetchMappings = async (
-  setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
-  iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  getAccessToken: GetAccessTokenFn,
-  mappingsClient: IMappingsClient
-) => {
-  try {
-    setIsLoading(true);
-    const accessToken = await getAccessToken();
-    const mappings = await mappingsClient.getMappings(accessToken, iModelId);
-    setMappings(mappings);
-  } catch (error: any) {
-    handleError(error.status);
-  } finally {
-    setIsLoading(false);
-  }
 };
 
 interface SelectMappingsProps {
@@ -60,37 +40,31 @@ const SelectMappings = ({
 }: SelectMappingsProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
-  const [mappings, setMappings] = useState<Mapping[]>([]);
 
-  useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
-  }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
+  const {
+    data: mappings,
+    isFetching: isLoading,
+  } = useFetchMappings(iModelId, getAccessToken, mappingClient);
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
 
-  const mappingsColumns = useMemo(
+  const mappingsColumns = useMemo<Column<IMappingTyped>[]>(
     () => [
       {
-        Header: "Table",
-        columns: [
-          {
-            id: "mappingName",
-            Header: `${displayStrings.mappings}`,
-            accessor: "mappingName",
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "description",
-            Header: "Description",
-            accessor: "description",
-            Filter: tableFilters.TextFilter(),
-          },
-        ],
+        id: "mappingName",
+        Header: `${displayStrings.mappings}`,
+        accessor: "mappingName",
+        Filter: tableFilters.TextFilter(),
+      },
+      {
+        id: "description",
+        Header: "Description",
+        accessor: "description",
+        Filter: tableFilters.TextFilter(),
       },
     ],
     [displayStrings.mappings]
@@ -107,7 +81,7 @@ const SelectMappings = ({
   return (
     <div className='gmw-select-mapping-container'>
       <Table<IMappingTyped>
-        data={mappings}
+        data={mappings ?? []}
         columns={mappingsColumns}
         className='gmw-select-mapping-table'
         emptyTableContent={`No ${displayStrings.mappings} available.`}

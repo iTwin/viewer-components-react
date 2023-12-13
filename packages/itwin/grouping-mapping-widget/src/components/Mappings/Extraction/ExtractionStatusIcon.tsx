@@ -6,8 +6,14 @@ import { IconButton, NotificationMarker, Tooltip } from "@itwin/itwinui-react";
 import React from "react";
 import { SvgProcess } from "@itwin/itwinui-icons-react";
 
+type IconStatus = "negative" | "positive" | "warning" | undefined;
+export interface ExtractionStatusData {
+  iconStatus: IconStatus;
+  iconMessage: string;
+}
+
 export interface ExtractionStatusIconProps {
-  iconStatus: "negative" | "positive" | "warning" | undefined;
+  iconStatus: IconStatus;
   onClick: () => void;
   iconMessage: string;
 }
