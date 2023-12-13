@@ -12,7 +12,7 @@ import ConfirmMappingImport from "./ConfirmMappingsImport";
 import type { IMappingTyped } from "../Mappings";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
-import SelectITwin from "./SelectITwin";
+import SelectITwin, { ITwinType } from "./SelectITwin";
 import SelectMappings from "./SelectMappings";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { createIModelsClient, IModelsClientContext } from "../../context/IModelsClientContext";
@@ -43,7 +43,7 @@ export const MappingImportWizardModal = ({
 }: MappingImportWizardModalProps) => {
   const { prefix } = useGroupingMappingApiConfig();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [iTwinType, setITwinType] = useState<number>(0);
+  const [iTwinType, setITwinType] = useState<ITwinType>(ITwinType.Favorite);
   const [selectedITwinId, setSelectedITwinId] = useState<string>("");
   const [selectedIModelId, setSelectedIModelId] = useState<string>("");
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);

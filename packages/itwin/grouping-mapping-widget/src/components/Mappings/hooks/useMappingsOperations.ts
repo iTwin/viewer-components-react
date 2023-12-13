@@ -32,7 +32,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   } = useFetchExtractionStatus({ iModelId, getAccessToken, extractionClient });
 
   const refreshExtractionStatus = useCallback(async () => {
-    await queryClient.invalidateQueries({queryKey: ["extractionStatus"]});
+    await queryClient.invalidateQueries({queryKey: ["iModelExtractionStatus"]});
   }, [queryClient]);
 
   const refreshMappings = useCallback(async () => {
@@ -61,7 +61,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   });
 
   const isLoading = isLoadingMappings || isLoadingExtractionStatus || isTogglingExtraction || isDeletingMapping;
-  const extractionStatusGated = extractionStatus ??  {extractionStatusIcon: {
+  const extractionStatusGated = extractionStatus ?? {extractionStatusIcon: {
     iconStatus: undefined,
     iconMessage: "Loading...",
   }, extractionMessageData : []};

@@ -84,15 +84,15 @@ const ConfirmMappingImport = ({
       await mappingClient.copyMapping(
         accessToken,
         sourceiModelId,
-        selectedMapping.id ?? "",
+        selectedMapping.id,
         {
-          targetIModelId: iModelId ?? "",
-          mappingName: selectedMapping.mappingName ?? "",
+          targetIModelId: iModelId,
+          mappingName: selectedMapping.mappingName,
         }
       );
     },
     onMutate: async (selectedMapping: IMappingTyped) => {
-      setCurrentlyImporting(selectedMapping.mappingName ?? "");
+      setCurrentlyImporting(selectedMapping.mappingName);
     },
     onSuccess: () => {
       setImportCount((count) => count + 1);

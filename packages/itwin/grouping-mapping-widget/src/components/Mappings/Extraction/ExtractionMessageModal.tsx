@@ -16,6 +16,7 @@ import { useMappingsOperations } from "../hooks/useMappingsOperations";
 import type { Mapping } from "@itwin/insights-client";
 import { useQueries } from "@tanstack/react-query";
 import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedCollectionPick";
+import { fetchGroups } from "../../Groups/hooks/useFetchGroups";
 
 export interface ExtractionMessageData {
   date: string;
@@ -61,17 +62,9 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
 
   // useQueries to fetch all group names
   const groupQueriesResults = useQueries({
-    queries: extractionInfo.map(({ mappingId, groupId }) => ({
-      queryKey: ["groups", mappingId, groupId],
-      queryFn: async () => {
-        const accessToken = await groupingMappingApiConfig.getAccessToken();
-        const groups = await mappingClient.getGroups(
-          accessToken,
-          groupingMappingApiConfig.iModelId,
-          mappingId
-        );
-        return groups.find((group) => group.id === groupId)?.groupName ?? "";
-      },
+    queries: extractionInfo.map(({ mappingId }) => ({
+      queryKey: ["groups", mappingId],
+      queryFn: async () => fetchGroups(groupingMappingApiConfig.iModelId, mappingId, groupingMappingApiConfig.getAccessToken, mappingClient),
     })),
   });
 
@@ -83,8 +76,8 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
       const formattedMessages = extractionMessageData.map((extractionMessage, index) => {
         let replacedMessage: string = extractionMessage.message;
 
-        const { mappingId } = extractionInfo[index];
-        const groupName = pickedResult[index].data;
+        const { mappingId, groupId } = extractionInfo[index];
+        const groupName = pickedResult[index].data!.find((group) => group.id === groupId)?.groupName;
 
         if (replacedMessage.includes("MappingId:")) {
           const mappingName = getMappingName(mappingId, mappings);

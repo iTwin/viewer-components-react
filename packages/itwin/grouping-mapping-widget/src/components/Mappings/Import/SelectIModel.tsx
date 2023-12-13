@@ -13,6 +13,7 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { useIModelsClient } from "../../context/IModelsClientContext";
 import { useQuery } from "@tanstack/react-query";
 import type { Column } from "react-table";
+import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 
 type IIModelTyped = CreateTypeFromInterface<IModel>;
 
@@ -28,11 +29,9 @@ const fetchIModels = async (
   iModelsClient: IModelsClient,
 ) => {
   const accessToken = await getAccessToken();
+  const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
   const iModelIterator = iModelsClient.iModels.getRepresentationList({
-    authorization: async () => ({
-      scheme: accessToken.split(" ")[0],
-      token: accessToken.split(" ")[1],
-    }),
+    authorization,
     urlParams: {
       iTwinId,
     },

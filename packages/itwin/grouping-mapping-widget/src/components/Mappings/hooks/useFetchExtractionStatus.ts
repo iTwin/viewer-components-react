@@ -18,7 +18,7 @@ export const useFetchExtractionStatus = ({
   extractionClient: IExtractionClient;
 }) => {
   return useQuery({
-    queryKey: ["extractionStatus", iModelId],
+    queryKey: ["iModelExtractionStatus", iModelId],
     staleTime: Infinity,
     placeholderData: undefined,
     queryFn: async () => {

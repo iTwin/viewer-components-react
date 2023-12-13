@@ -25,6 +25,12 @@ const defaultDisplayStrings = {
   iTwinStatus: "Status",
 };
 
+export enum ITwinType {
+  Favorite = 0,
+  Recent = 1,
+  All = 2,
+}
+
 const tabsWithIcons = [
   <Tab key="favorite" label="Favorite iTwins" startIcon={<SvgStarHollow />} />,
   <Tab key="recents" label="Recent iTwins" startIcon={<SvgCalendar />} />,
@@ -34,13 +40,13 @@ const tabsWithIcons = [
 const fetchITwins = async (
   getAccessToken: GetAccessTokenFn,
   iTwinsClient: ITwinsAccessClient,
-  iTwinType: number,
+  iTwinType: ITwinType,
 ) => {
   const accessToken = await getAccessToken();
   switch (iTwinType) {
-    case 0:
+    case ITwinType.Favorite:
       return iTwinsClient.queryFavoritesAsync(accessToken, ITwinSubClass.Project);
-    case 1:
+    case ITwinType.Recent:
       return iTwinsClient.queryRecentsAsync(accessToken, ITwinSubClass.Project);
     default:
       return iTwinsClient.queryAsync(accessToken, ITwinSubClass.Project);
@@ -52,7 +58,7 @@ interface SelectITwinProps {
   onCancel: () => void;
   onChangeITwinType: (iTwinType: number) => void;
   displayStrings?: Partial<typeof defaultDisplayStrings>;
-  defaultITwinType?: number;
+  defaultITwinType?: ITwinType;
 }
 
 const SelectITwin = ({
@@ -60,14 +66,14 @@ const SelectITwin = ({
   onCancel,
   onChangeITwinType,
   displayStrings: userDisplayStrings,
-  defaultITwinType = 0,
+  defaultITwinType = ITwinType.Favorite,
 }: SelectITwinProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const iTwinsClient = useITwinsClient();
   const [iTwinType, setITwinType] = useState<number>(defaultITwinType);
 
   const { data: iTwins, isFetching: isLoading } = useQuery({
-    queryKey: ["iTwin", iTwinType],
+    queryKey: ["iTwinsByType", iTwinType],
     queryFn: async () => (await fetchITwins(getAccessToken, iTwinsClient, iTwinType)).data!,
   });
 
