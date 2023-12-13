@@ -1,14 +1,14 @@
 steps:
   - task: NodeTool@0
-    displayName: Use Node 18.x
+    displayName: Use Node 20.x
     inputs:
-      versionSpec: 18.x
+      versionSpec: 20.x
 
   - task: Npm@1
-    displayName: install pnpm ^8.6.10
+    displayName: install pnpm ^8.11.0
     inputs:
       command: "custom"
-      customCommand: "install -g pnpm@^8.6.10"
+      customCommand: "install -g pnpm@^8.11.0"
 
   - task: npmAuthenticate@0
     inputs:
