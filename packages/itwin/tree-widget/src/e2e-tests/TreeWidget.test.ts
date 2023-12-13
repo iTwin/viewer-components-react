@@ -11,7 +11,8 @@ import { expandStagePanel, locateNode, locateWidget, takeScreenshot } from "./ut
 let treeWidget: Locator;
 test.beforeEach(async ({ page, baseURL }) => {
   assert(baseURL);
-  await page.goto(baseURL);
+  await page.goto(baseURL, { waitUntil: "networkidle" });
+  await page.evaluate(async () => document.fonts.ready);
   // expand panel size to ~300px
   await expandStagePanel(page, "right", 100);
   treeWidget = locateWidget(page, "tree");
