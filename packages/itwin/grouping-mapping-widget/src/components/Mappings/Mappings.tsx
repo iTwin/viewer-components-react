@@ -42,7 +42,7 @@ export const Mappings = (props: MappingsProps) => {
 
   return (
     <MappingsView
-      mappings={mappings}
+      mappings={mappings ?? []}
       isLoading={isLoading}
       extractionStatusData={extractionStatus.extractionStatusIcon}
       showExtractionMessageModal={showExtractionMessageModal}

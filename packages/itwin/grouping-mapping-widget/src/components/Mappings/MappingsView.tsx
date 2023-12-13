@@ -41,7 +41,7 @@ export const mappingViewDefaultDisplayStrings = {
 };
 
 export interface MappingsViewProps {
-  mappings: Mapping[] | undefined;
+  mappings: Mapping[];
   isLoading: boolean;
   extractionStatusData: ExtractionStatusData;
   showExtractionMessageModal: boolean;
@@ -142,9 +142,6 @@ export const MappingsView = ({
         <div className='gmw-mappings-border' />
         {isLoading ? (
           <LoadingOverlay />
-        ) : !mappings ? (
-          // Explicitly handle the case where mappings is undefined
-          <EmptyMessage message={`Mappings are loading or unavailable`} />
         ) : mappings.length === 0 ? (
           <EmptyMessage message={`No ${displayStrings.mappings} available.`} />
         ) : (
