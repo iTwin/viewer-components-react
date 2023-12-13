@@ -111,7 +111,7 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "global-jsdom": "^9.1.0",
+    "global-jsdom": "~9.1.0",
     "ignore-styles": "^5.0.1",
     "jsdom": "^22.1.0",
     "mocha": "^10.2.0",
