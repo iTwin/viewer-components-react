@@ -34,3 +34,6 @@ package-lock.json
 /**/test-results
 /**/playwright-report
 /**/playwright/.cache
+
+# api extractor temp files
+/packages/**/api/temp

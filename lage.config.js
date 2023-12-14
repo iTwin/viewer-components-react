@@ -30,6 +30,11 @@ module.exports = {
       outputs: [],
       inputs: ["src/**"],
     },
+    "extract-api": {
+      dependsOn: [],
+      outputs: ["./api/**"],
+      inputs: ["src/**"],
+    },
     clean: {
       cache: false,
     },
