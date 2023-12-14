@@ -7,7 +7,6 @@ const { spawn } = require("child_process");
 const packageName = process.argv[2];
 const dockerImageName = `viewer-components-react/${packageName}-e2e-tests`;
 const dockerContainerName = `${dockerImageName.replace("/", ".")}-container`;
-const srcFolderLocation = `packages/itwin/${packageName}/src`;
 
 const execute = (command, args = []) => new Promise((resolve, reject) => {
   const spawnProcess = spawn(command, args, { stdio: "inherit" });
@@ -40,11 +39,16 @@ async function buildAndRunDocker() {
     await execute("docker", ["build", "--build-arg", `PACKAGE_NAME=${packageName}`, "-t", dockerImageName, "-f", "e2e.Dockerfile", "."]);
     // Run Docker container
     await execute("docker", ["run", "--name", dockerContainerName, ...envVariableArgs, dockerImageName]);
-    // Copy snapshots from docker container to the local repo
-    await execute("docker", ["cp", `${dockerContainerName}:/workspaces/viewer-components-react/${srcFolderLocation}/e2e-tests`, `./${srcFolderLocation}`]);
   } catch {
     process.exitCode = 1;
   } finally {
+    const relativePackageDir = `packages/itwin/${packageName}`;
+    const containerPackageDir = `${dockerContainerName}:/workspaces/viewer-components-react/${relativePackageDir}`;
+    const hostPackageDir = `./${relativePackageDir}`;
+    // Copy snapshots from docker container to the local repo
+    await execute("docker", ["cp", `${containerPackageDir}/src/e2e-tests`, `${hostPackageDir}/src`]);
+    // Also copy the `test-results` folder
+    await execute("docker", ["cp", `${containerPackageDir}/test-results`, `${hostPackageDir}`]);
     // Remove the Docker container
     await execute("docker", ["rm", "-f", `${dockerContainerName}`]);
   };

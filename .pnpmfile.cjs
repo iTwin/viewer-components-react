@@ -16,6 +16,7 @@ function readPackage(pkg, context) {
   }
   if (pkg.name === "simple-react-validator") {
     pkg.peerDependencies["react"] = "*";
+    pkg.peerDependencies["@types/react"] = "*";
   }
 
   // patch peer dependencies of packages from `itwinjs-core` to make sure that they are resolved to same version.
