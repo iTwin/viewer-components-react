@@ -10,13 +10,13 @@ import {
   Text,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
-import type { IMappingTyped } from "./Mappings";
+import type { IMappingTyped } from "../Mappings";
 import "./ConfirmMappingsImport.scss";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
-import useValidator, { NAME_REQUIREMENTS } from "../Properties/hooks/useValidator";
-import { handleError } from "../../common/utils";
-import { useMappingClient } from "../context/MappingClientContext";
-import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
+import useValidator, { NAME_REQUIREMENTS } from "../../Properties/hooks/useValidator";
+import { useMappingClient } from "../../context/MappingClientContext";
+import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
+import { useMutation } from "@tanstack/react-query";
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
@@ -47,7 +47,6 @@ const ConfirmMappingImport = ({
 }: ConfirmMappingImportProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-
   const [importCount, setImportCount] = useState<number>(0);
   const [currentlyImporting, setCurrentlyImporting] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
@@ -79,30 +78,39 @@ const ConfirmMappingImport = ({
     setSelectedMappings(newState);
   };
 
+  const importMutation = useMutation({
+    mutationFn: async (selectedMapping: IMappingTyped) => {
+      const accessToken = await getAccessToken();
+      await mappingClient.copyMapping(
+        accessToken,
+        sourceiModelId,
+        selectedMapping.id,
+        {
+          targetIModelId: iModelId,
+          mappingName: selectedMapping.mappingName,
+        }
+      );
+    },
+    onMutate: async (selectedMapping: IMappingTyped) => {
+      setCurrentlyImporting(selectedMapping.mappingName);
+    },
+    onSuccess: () => {
+      setImportCount((count) => count + 1);
+    },
+    onError: () => {
+      setErrored(true);
+    },
+  });
+
   const onImport = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
       return;
     }
     setImporting(true);
-    try {
-      for (const selectedMapping of selectedMappings) {
-        setCurrentlyImporting(selectedMapping.mappingName ?? "");
-        const accessToken = await getAccessToken();
-        await mappingClient.copyMapping(
-          accessToken,
-          sourceiModelId,
-          selectedMapping.id ?? "",
-          {
-            targetIModelId: iModelId ?? "",
-            mappingName: selectedMapping.mappingName ?? "",
-          },
-        );
-        setImportCount((importCount) => importCount + 1);
-      }
-    } catch (error: any) {
-      handleError(error);
-      setErrored(true);
+    setImportCount(0);
+    for (const mapping of selectedMappings) {
+      await importMutation.mutateAsync(mapping);
     }
   };
 
@@ -150,7 +158,7 @@ const ConfirmMappingImport = ({
           </div>
           <div className='gmw-import-action-panel'>
             <Button
-              disabled={!errored && importCount !== selectedMappings.length}
+              disabled={!errored && importCount === selectedMappings.length}
               onClick={() => {
                 setImporting(false);
                 setImportCount(0);
@@ -163,7 +171,7 @@ const ConfirmMappingImport = ({
             <Button
               styleType='high-visibility'
               disabled={!errored && importCount !== selectedMappings.length}
-              onClick={() => onFinish()}
+              onClick={onFinish}
             >
               Close
             </Button>

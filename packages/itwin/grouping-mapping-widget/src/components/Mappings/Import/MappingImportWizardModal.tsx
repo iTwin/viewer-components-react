@@ -8,11 +8,11 @@ import type { StepProperties } from "@itwin/itwinui-react";
 import { Stepper } from "@itwin/itwinui-react";
 import { Modal } from "@itwin/itwinui-react";
 import React, { useEffect, useRef, useState } from "react";
-import ConfirmMappingImport from "../ConfirmMappingsImport";
+import ConfirmMappingImport from "./ConfirmMappingsImport";
 import type { IMappingTyped } from "../Mappings";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
-import SelectITwin from "./SelectITwin";
+import SelectITwin, { ITwinType } from "./SelectITwin";
 import SelectMappings from "./SelectMappings";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { createIModelsClient, IModelsClientContext } from "../../context/IModelsClientContext";
@@ -43,7 +43,7 @@ export const MappingImportWizardModal = ({
 }: MappingImportWizardModalProps) => {
   const { prefix } = useGroupingMappingApiConfig();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [iTwinType, setITwinType] = useState<number>(0);
+  const [iTwinType, setITwinType] = useState<ITwinType>(ITwinType.Favorite);
   const [selectedITwinId, setSelectedITwinId] = useState<string>("");
   const [selectedIModelId, setSelectedIModelId] = useState<string>("");
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
@@ -173,10 +173,7 @@ export const MappingImportWizardModal = ({
                       setSelectedMappings={setSelectedMappings}
                       backFn={() => setCurrentStep(currentStep - 1)}
                       onCancel={onClose}
-                      onFinish={async () => {
-                        await onClose();
-                        setImporting(false);
-                      }}
+                      onFinish={onClose}
                       displayStrings={displayStrings}
                     />
                   )}
