@@ -308,8 +308,8 @@ importers:
         specifier: ^7.1.9
         version: 7.1.9(@types/react@17.0.38)
       '@types/sinon':
-        specifier: ^7.5.1
-        version: 7.5.1
+        specifier: ^17.0.2
+        version: 17.0.2
       '@wojtekmaj/enzyme-adapter-react-17':
         specifier: ^0.6.3
         version: 0.6.3(@types/react@17.0.38)(enzyme@3.11.0)(react-dom@17.0.2)(react@17.0.2)
@@ -371,11 +371,11 @@ importers:
         specifier: ^3.0.2
         version: 3.0.2
       sinon:
-        specifier: ^7.5.0
-        version: 7.5.0
+        specifier: ^17.0.1
+        version: 17.0.1
       sinon-chai:
         specifier: ^3.2.0
-        version: 3.7.0(chai@4.3.7)(sinon@7.5.0)
+        version: 3.7.0(chai@4.3.7)(sinon@17.0.1)
       typemoq:
         specifier: ^2.1.0
         version: 2.1.0
@@ -634,8 +634,8 @@ importers:
         specifier: ^17.0.9
         version: 17.0.11(@types/react@17.0.38)
       '@types/sinon':
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^17.0.2
+        version: 17.0.2
       '@types/sinon-chai':
         specifier: ^3.2.0
         version: 3.2.12
@@ -703,11 +703,11 @@ importers:
         specifier: ^3.0.2
         version: 3.0.2
       sinon:
-        specifier: ^9.0.2
-        version: 9.0.2
+        specifier: ^17.0.1
+        version: 17.0.1
       sinon-chai:
         specifier: ^3.2.0
-        version: 3.7.0(chai@4.3.7)(sinon@9.0.2)
+        version: 3.7.0(chai@4.3.7)(sinon@17.0.1)
       source-map-support:
         specifier: ^0.5.6
         version: 0.5.6
@@ -893,8 +893,8 @@ importers:
         specifier: ^7.7.0
         version: 7.7.0(@types/react@17.0.38)
       '@types/sinon':
-        specifier: ^7.5.1
-        version: 7.5.1
+        specifier: ^17.0.2
+        version: 17.0.2
       '@types/testing-library__jest-dom':
         specifier: ^5.14.3
         version: 5.14.3
@@ -950,8 +950,8 @@ importers:
         specifier: ^3.0.2
         version: 3.0.2
       sinon:
-        specifier: ^7.5.0
-        version: 7.5.0
+        specifier: ^17.0.1
+        version: 17.0.1
       ts-jest:
         specifier: ^27.1.3
         version: 27.1.3(@babel/core@7.23.6)(@types/jest@27.5.2)(babel-jest@27.5.1)(jest@27.5.1)(typescript@4.6.2)
@@ -5520,7 +5520,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 18.18.10
+      '@types/node': 14.18.9
       chalk: 4.1.2
       jest-message-util: 27.5.1
       jest-util: 27.5.1
@@ -6251,28 +6251,6 @@ packages:
     resolution: {integrity: sha512-OAPJUAtgeINhh/TAlUID4QTs53Njm7xzddaVlEs/SXwgtiD1tW22zAB/W1wdqfrpmikgaWQ9Fw6Ws+hsiRm5Vg==}
     dependencies:
       '@sinonjs/commons': 1.8.6
-
-  /@sinonjs/formatio@3.2.2:
-    resolution: {integrity: sha512-B8SEsgd8gArBLMD6zpRw3juQ2FVSsmdd7qlevyDqzS9WTCtvF55/gAL+h6gue8ZvPYcdiPdvueM/qm//9XzyTQ==}
-    dependencies:
-      '@sinonjs/commons': 1.8.6
-      '@sinonjs/samsam': 3.3.3
-    dev: true
-
-  /@sinonjs/formatio@5.0.1:
-    resolution: {integrity: sha512-KaiQ5pBf1MpS09MuA0kp6KBQt2JUOQycqVG1NZXvzeaXe5LGFqAKueIS0bw4w0P9r7KuBSVdUk5QjXsUdu2CxQ==}
-    dependencies:
-      '@sinonjs/commons': 1.8.6
-      '@sinonjs/samsam': 5.3.1
-    dev: true
-
-  /@sinonjs/samsam@3.3.3:
-    resolution: {integrity: sha512-bKCMKZvWIjYD0BLGnNrxVuw4dkWCYsLqFOUWw8VgKF/+5Y+mE7LfHWPIYoDXowH+3a9LsWDMo0uAP8YDosPvHQ==}
-    dependencies:
-      '@sinonjs/commons': 1.8.6
-      array-from: 2.1.1
-      lodash: 4.17.21
-    dev: true
 
   /@sinonjs/samsam@5.3.1:
     resolution: {integrity: sha512-1Hc0b1TtyfBu8ixF/tpfSHTVWKwCBLY4QJbkgnE7HcwyvT2xArDxb4K7dMgqRm3szI+LJbzmW/s4xxEhv6hwDg==}
@@ -7023,7 +7001,6 @@ packages:
     resolution: {integrity: sha512-k5fggr14DwAytoA/t8rPrIz++lXK7/DqckthCmoZOKNsEbJkId4Z//BqgApXBUGrGddrigYa1oqheo/7YmW4rg==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
 
   /@types/normalize-package-data@2.4.4:
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -7177,21 +7154,11 @@ packages:
     resolution: {integrity: sha512-9y0Gflk3b0+NhQZ/oxGtaAJDvRywCa5sIyaVnounqLvmf93yBF4EgIRspePtkMs3Tr844nCclYMlcCNmLCvjuQ==}
     dependencies:
       '@types/chai': 4.3.5
-      '@types/sinon': 9.0.0
+      '@types/sinon': 17.0.2
     dev: true
 
   /@types/sinon@17.0.2:
     resolution: {integrity: sha512-Zt6heIGsdqERkxctIpvN5Pv3edgBrhoeb3yHyxffd4InN0AX2SVNKSrhdDZKGQICVOxWP/q4DyhpfPNMSrpIiA==}
-    dependencies:
-      '@types/sinonjs__fake-timers': 8.1.5
-    dev: true
-
-  /@types/sinon@7.5.1:
-    resolution: {integrity: sha512-EZQUP3hSZQyTQRfiLqelC9NMWd1kqLcmQE0dMiklxBkgi84T+cHOhnKpgk4NnOWpGX863yE6+IaGnOXUNFqDnQ==}
-    dev: true
-
-  /@types/sinon@9.0.0:
-    resolution: {integrity: sha512-v2TkYHkts4VXshMkcmot/H+ERZ2SevKa10saGaJPGCJ8vh3lKrC4u663zYEeRZxep+VbG6YRDtQ6gVqw9dYzPA==}
     dependencies:
       '@types/sinonjs__fake-timers': 8.1.5
     dev: true
@@ -8939,10 +8906,6 @@ packages:
   /array-flatten@2.1.2:
     resolution: {integrity: sha512-hNfzcOV8W4NdualtqBFPyVO+54DSJuZGY9qT4pRroB6S9e3iiido2ISIC5h9R2sPJ8H3FHCIiEnsv1lPXO3KtQ==}
     dev: false
-
-  /array-from@2.1.1:
-    resolution: {integrity: sha512-GQTc6Uupx1FCavi5mPzBvVT7nEOeWMmUA9P95wpfpW1XwMSKs+KaymD5C2Up7KAUKg/mYwbsUYzdZWcoajlNZg==}
-    dev: true
 
   /array-includes@3.1.7:
     resolution: {integrity: sha512-dlcsNBIiWhPkHdOEEKnehA+RNUWDc4UqFtnIXU4uuYDPtA4LDkr7qip2p0VvFAEXNDr0yWZ9PJyIRiGjRLQzwQ==}
@@ -14506,7 +14469,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 14.18.9
+      '@types/node': 18.19.3
       chalk: 4.1.2
       co: 4.6.0
       dedent: 0.7.0
@@ -14634,7 +14597,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/fake-timers': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 18.18.10
+      '@types/node': 18.19.3
       jest-mock: 27.5.1
       jest-util: 27.5.1
       jsdom: 16.7.0
@@ -14651,7 +14614,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/fake-timers': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 14.18.9
+      '@types/node': 18.19.3
       jest-mock: 27.5.1
       jest-util: 27.5.1
 
@@ -14690,7 +14653,7 @@ packages:
       '@jest/source-map': 27.5.1
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 18.18.10
+      '@types/node': 18.19.3
       chalk: 4.1.2
       co: 4.6.0
       expect: 27.5.1
@@ -15651,16 +15614,6 @@ packages:
       chalk: 4.1.2
       is-unicode-supported: 0.1.0
 
-  /lolex@4.2.0:
-    resolution: {integrity: sha512-gKO5uExCXvSm6zbF562EvM+rd1kQDnB9AZBbiQVzf1ZmdDpxUSvpnAaVOP83N/31mRK8Ml8/VE8DMvsAZQ+7wg==}
-    dev: true
-
-  /lolex@5.1.2:
-    resolution: {integrity: sha512-h4hmjAvHTmd+25JSwrtTIuwbKdwg5NzZVRMLn9saij4SZaepCrTCxPr35H/3bjwfMJtN+t3CX8672UIkglz28A==}
-    dependencies:
-      '@sinonjs/commons': 1.8.6
-    dev: true
-
   /loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
@@ -16211,16 +16164,6 @@ packages:
   /nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
     dev: false
-
-  /nise@1.5.3:
-    resolution: {integrity: sha512-Ymbac/94xeIrMf59REBPOv0thr+CJVFMhrlAkW/gjCIE58BGQdCj0x7KRCb3yz+Ga2Rz3E9XXSvUyyxqqhjQAQ==}
-    dependencies:
-      '@sinonjs/formatio': 3.2.2
-      '@sinonjs/text-encoding': 0.7.2
-      just-extend: 4.2.1
-      lolex: 5.1.2
-      path-to-regexp: 1.8.0
-    dev: true
 
   /nise@4.1.0:
     resolution: {integrity: sha512-eQMEmGN/8arp0xsvGoQ+B1qvSkR73B1nWSCh7nOt5neMCtwcQVYQGdzQMhcNscktTsWB54xnlSQFzOAPJD8nXA==}
@@ -19301,26 +19244,6 @@ packages:
       sinon: 17.0.1
     dev: true
 
-  /sinon-chai@3.7.0(chai@4.3.7)(sinon@7.5.0):
-    resolution: {integrity: sha512-mf5NURdUaSdnatJx3uhoBOrY9dtL19fiOtAdT1Azxg3+lNJFiuN0uzaU3xX1LeAfL17kHQhTAJgpsfhbMJMY2g==}
-    peerDependencies:
-      chai: ^4.0.0
-      sinon: '>=4.0.0'
-    dependencies:
-      chai: 4.3.7
-      sinon: 7.5.0
-    dev: true
-
-  /sinon-chai@3.7.0(chai@4.3.7)(sinon@9.0.2):
-    resolution: {integrity: sha512-mf5NURdUaSdnatJx3uhoBOrY9dtL19fiOtAdT1Azxg3+lNJFiuN0uzaU3xX1LeAfL17kHQhTAJgpsfhbMJMY2g==}
-    peerDependencies:
-      chai: ^4.0.0
-      sinon: '>=4.0.0'
-    dependencies:
-      chai: 4.3.7
-      sinon: 9.0.2
-    dev: true
-
   /sinon@17.0.1:
     resolution: {integrity: sha512-wmwE19Lie0MLT+ZYNpDymasPHUKTaZHUH/pKEubRXIzySv9Atnlw+BUMGCzWgV7b7wO+Hw6f1TEOr0IUnmU8/g==}
     dependencies:
@@ -19329,32 +19252,6 @@ packages:
       '@sinonjs/samsam': 8.0.0
       diff: 5.1.0
       nise: 5.1.5
-      supports-color: 7.2.0
-    dev: true
-
-  /sinon@7.5.0:
-    resolution: {integrity: sha512-AoD0oJWerp0/rY9czP/D6hDTTUYGpObhZjMpd7Cl/A6+j0xBE+ayL/ldfggkBXUs0IkvIiM1ljM8+WkOc5k78Q==}
-    deprecated: 16.1.1
-    dependencies:
-      '@sinonjs/commons': 1.8.6
-      '@sinonjs/formatio': 3.2.2
-      '@sinonjs/samsam': 3.3.3
-      diff: 3.5.0
-      lolex: 4.2.0
-      nise: 1.5.3
-      supports-color: 5.5.0
-    dev: true
-
-  /sinon@9.0.2:
-    resolution: {integrity: sha512-0uF8Q/QHkizNUmbK3LRFqx5cpTttEVXudywY9Uwzy8bTfZUhljZ7ARzSxnRHWYWtVTeh4Cw+tTb3iU21FQVO9A==}
-    deprecated: 16.1.1
-    dependencies:
-      '@sinonjs/commons': 1.8.6
-      '@sinonjs/fake-timers': 6.0.1
-      '@sinonjs/formatio': 5.0.1
-      '@sinonjs/samsam': 5.3.1
-      diff: 4.0.2
-      nise: 4.1.0
       supports-color: 7.2.0
     dev: true
 
