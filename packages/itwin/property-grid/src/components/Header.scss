@@ -28,6 +28,10 @@
     overflow: visible;
   }
 
+  .debounced-search-bar-input {
+    box-sizing: border-box;
+  }
+
   .expandable-search-bar {
     overflow: hidden;
 

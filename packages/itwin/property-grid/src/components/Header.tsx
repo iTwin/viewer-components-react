@@ -64,6 +64,7 @@ function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }
     </SearchBox.CollapsedState>
     <SearchBox.ExpandedState >
       <SearchBox.Input
+        className="debounced-search-bar-input"
         placeholder={PropertyGridManager.translate("search-bar.placeholder")}
         onChange={(e) => setInputValue(e.currentTarget.value)}
       />
