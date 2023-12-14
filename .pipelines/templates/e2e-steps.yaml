@@ -10,10 +10,6 @@ steps:
       command: "custom"
       customCommand: "install -g pnpm@^8.11.0"
 
-  - task: npmAuthenticate@0
-    inputs:
-      workingFile: .npmrc
-
   - script: cp .npmrc ~/.npmrc
 
   - script: pnpm install --frozen-lockfile
