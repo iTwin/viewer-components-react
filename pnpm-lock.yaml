@@ -402,7 +402,7 @@ importers:
         version: 2.3.1
       simple-react-validator:
         specifier: ^1.6.1
-        version: 1.6.1(react@17.0.2)
+        version: 1.6.1(@types/react@17.0.38)(react@17.0.2)
     devDependencies:
       '@faker-js/faker':
         specifier: ^6.3.1
@@ -767,7 +767,7 @@ importers:
         version: 2.0.14(@types/react@17.0.38)(react@17.0.2)
       simple-react-validator:
         specifier: ^1.6.1
-        version: 1.6.1(react@17.0.2)
+        version: 1.6.1(@types/react@17.0.38)(react@17.0.2)
     devDependencies:
       '@faker-js/faker':
         specifier: ^7.5.0
@@ -1745,6 +1745,9 @@ importers:
       typescript:
         specifier: ~5.0.0
         version: 5.0.2
+      xmlhttprequest:
+        specifier: ^1.8.0
+        version: 1.8.0
 
   packages/itwin/reports-config-widget:
     dependencies:
@@ -1771,7 +1774,7 @@ importers:
         version: 2.3.1
       simple-react-validator:
         specifier: ^1.6.1
-        version: 1.6.1(react@17.0.2)
+        version: 1.6.1(@types/react@17.0.38)(react@17.0.2)
     devDependencies:
       '@faker-js/faker':
         specifier: 6.2.0
@@ -19224,11 +19227,13 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
-  /simple-react-validator@1.6.1(react@17.0.2):
+  /simple-react-validator@1.6.1(@types/react@17.0.38)(react@17.0.2):
     resolution: {integrity: sha512-jguG7UlulRRBPZEyRroShUpRpV9cC5VjA4WnVGRzZgjqbQGr/twq4LLjqxt5QiSnJZE415gnbXH4oqWR2Ggmaw==}
     peerDependencies:
+      '@types/react': '*'
       react: '*'
     dependencies:
+      '@types/react': 17.0.38
       react: 17.0.2
     dev: false
 

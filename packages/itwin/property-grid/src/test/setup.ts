@@ -23,6 +23,9 @@ globalJsdom(undefined, {
 // setup chai
 chai.use(sinonChai);
 
+// This is required by I18n module
+global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
+
 // needed for context menu to work in tests
 global.DOMRect = class DOMRect {
   public bottom: number=0;

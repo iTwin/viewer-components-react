@@ -61,7 +61,7 @@ describe("PropertyGridUiItemsProvider", () => {
     expect(propertyGridComponentStub).to.be.called;
   });
 
-  it("renders error message if property grid component throws", () => {
+  it("renders error message if property grid component throws", async () => {
     propertyGridComponentStub.reset();
     propertyGridComponentStub.callsFake(() => { throw new Error("Error"); });
 
@@ -69,8 +69,10 @@ describe("PropertyGridUiItemsProvider", () => {
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
     const { queryByText } = render(<>{widget.content}</>);
 
-    expect(propertyGridComponentStub).to.be.called;
-    expect(queryByText(PropertyGridManager.translate("error"))).to.not.be.null;
+    await waitFor(() => {
+      expect(propertyGridComponentStub).to.be.called;
+      expect(queryByText(PropertyGridManager.translate("error"))).to.not.be.null;
+    });
   });
 
   describe("widget state", () => {
