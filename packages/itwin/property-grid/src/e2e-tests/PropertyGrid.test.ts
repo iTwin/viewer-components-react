@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import assert from "assert";
-import type { Page } from "@playwright/test";
 import { test } from "@playwright/test";
 import { expandStagePanel, locateWidget, takeScreenshot } from "./utils";
 
+import type { Page } from "@playwright/test";
 test.beforeEach(async ({ page, baseURL }) => {
   assert(baseURL);
   await page.goto(baseURL, { waitUntil: "networkidle" });
@@ -68,9 +68,9 @@ test.describe("property grid", () => {
 
     const selectMultipleElements = async (page: Page) => {
       const treeWidget = locateWidget(page, "tree");
-      await treeWidget.getByText("BayTown").click();
-
       const propertyWidget = locateWidget(page, "property-grid");
+
+      await treeWidget.getByText("BayTown").click();
       await treeWidget.getByText("ProcessPhysicalModel").click();
 
       await propertyWidget.getByText("Multiple items").first().waitFor();
