@@ -13,7 +13,7 @@ pool:
 variables:
   - group: "Caleb - iTwin GitHub Token"
   - name: REPO_URL
-    value: github.com/iTwin/lage-starter
+    value: github.com/iTwin/viewer-components-react
 
 steps:
   - template: templates/build-steps.yaml
