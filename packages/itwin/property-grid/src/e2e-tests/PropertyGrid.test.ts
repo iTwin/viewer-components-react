@@ -152,7 +152,8 @@ test.describe("property grid", () => {
       await takeScreenshot(page, propertyWidget);
     });
 
-    test("single element selected - context menu", async ({ page }) => {
+    // flaky: https://github.com/iTwin/appui/issues/635
+    test.skip("single element selected - context menu", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
 
       await propertyWidget.getByTitle("Description").click({ button: "right" });
@@ -161,7 +162,8 @@ test.describe("property grid", () => {
       await takeScreenshot(page, propertyWidget);
     });
 
-    test("single element selected - context menu - add to favorites", async ({ page }) => {
+    // flaky: https://github.com/iTwin/appui/issues/635
+    test.skip("single element selected - context menu - add to favorites", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
 
       await propertyWidget.getByTitle("Description").click({ button: "right" });
