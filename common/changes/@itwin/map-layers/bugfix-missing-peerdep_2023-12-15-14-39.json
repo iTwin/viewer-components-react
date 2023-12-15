@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Add missing peerDependencies that are required at runtime by the map-layers package.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
