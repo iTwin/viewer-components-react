@@ -10,6 +10,9 @@ steps:
       command: "custom"
       customCommand: "install -g pnpm@^8.11.0"
 
+  - script: pnpm install --frozen-lockfile
+    displayName: pnpm install
+
   - script: pnpm test:e2e
     displayName: "pnpm test:e2e"
     env:
