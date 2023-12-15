@@ -16,7 +16,7 @@ module.exports = {
       inputs: ["lib/**"],
     },
     "test:e2e": {
-      dependsOn: ["test-viewer#build"],
+      dependsOn: [],
       outputs: [],
       inputs: [],
     },
