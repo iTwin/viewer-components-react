@@ -90,7 +90,6 @@ export default defineConfig({
       IMJS_ITWIN_ID: "b391ba44-add7-47a0-8375-f2889a3540e8",
       IMJS_IMODEL_ID: "ba504f88-a479-4156-9d81-658ee169588e",
     },
-    stdout: "pipe",
     stderr: "pipe",
   },
 });
