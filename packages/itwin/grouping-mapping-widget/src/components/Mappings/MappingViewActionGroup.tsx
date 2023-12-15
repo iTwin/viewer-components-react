@@ -13,6 +13,7 @@ import {
   SvgEdit,
   SvgMore,
   SvgProcess,
+  SvgSetup,
 } from "@itwin/itwinui-icons-react";
 import type { Mapping } from "@itwin/insights-client";
 
@@ -21,7 +22,9 @@ interface MappingUIActionGroupProps {
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
   onRefresh: () => Promise<void>;
   onClickMappingModify?: (mapping: Mapping) => void;
+  onRefreshExtractionStatus: () => Promise<void>;
   setShowDeleteModal: (mapping?: Mapping) => void;
+  onRunExtraction: (mapping: Mapping) => Promise<void>;
 }
 
 export const MappingUIActionGroup = ({
@@ -30,6 +33,7 @@ export const MappingUIActionGroup = ({
   onRefresh,
   onClickMappingModify,
   setShowDeleteModal,
+  onRunExtraction,
 }: MappingUIActionGroupProps) => {
   return (
     <DropdownMenu
@@ -49,6 +53,15 @@ export const MappingUIActionGroup = ({
         <MenuItem
           key={1}
           onClick={async () => {
+            await onRunExtraction(mapping);
+          }}
+          icon={<SvgSetup />}
+        >
+          Run extraction
+        </MenuItem>,
+        <MenuItem
+          key={2}
+          onClick={async () => {
             close();
             await onToggleExtraction(mapping);
             await onRefresh();
@@ -58,7 +71,7 @@ export const MappingUIActionGroup = ({
           {mapping.extractionEnabled ? "Disable extraction" : "Enable extraction"}
         </MenuItem>,
         <MenuItem
-          key={2}
+          key={3}
           onClick={() => {
             setShowDeleteModal(mapping);
             close();

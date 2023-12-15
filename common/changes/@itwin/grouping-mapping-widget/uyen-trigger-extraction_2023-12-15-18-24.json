@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Added function to trigger extraction for each mapping.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}

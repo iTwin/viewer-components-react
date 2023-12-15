@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useState } from "react";
-import type { IMappingsClient, Mapping } from "@itwin/insights-client";
+import type { ExtractionRunRequest, IMappingsClient, Mapping } from "@itwin/insights-client";
 import type { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useExtractionClient } from "../../context/ExtractionClientContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,11 +32,11 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   } = useFetchExtractionStatus({ iModelId, getAccessToken, extractionClient });
 
   const refreshExtractionStatus = useCallback(async () => {
-    await queryClient.invalidateQueries({queryKey: ["iModelExtractionStatus"]});
+    await queryClient.invalidateQueries({ queryKey: ["iModelExtractionStatus"] });
   }, [queryClient]);
 
   const refreshMappings = useCallback(async () => {
-    await queryClient.invalidateQueries({queryKey: ["mappings"]});
+    await queryClient.invalidateQueries({ queryKey: ["mappings"] });
   }, [queryClient]);
 
   const { mutateAsync: toggleExtraction, isLoading: isTogglingExtraction } = useMutation({
@@ -50,7 +50,24 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     },
   });
 
-  const { mutateAsync: onDelete, isLoading: isDeletingMapping} = useMutation({
+  const { mutateAsync: runExtraction } = useMutation({
+    mutationFn: async (mapping: Mapping) => {
+      const accessToken = await getAccessToken();
+      const extractionRequest: ExtractionRunRequest | undefined = {
+        mappings: mapping === undefined ? undefined : [
+          {
+            id: mapping.id,
+          },
+        ],
+      };
+      await extractionClient.runExtraction(accessToken, iModelId, extractionRequest);
+    },
+    onSuccess: async () => {
+      await refreshExtractionStatus();
+    },
+  });
+
+  const { mutateAsync: onDelete, isLoading: isDeletingMapping } = useMutation({
     mutationFn: async (mapping: Mapping) => {
       const accessToken = await getAccessToken();
       await mappingClient.deleteMapping(accessToken, iModelId, mapping.id);
@@ -61,10 +78,12 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   });
 
   const isLoading = isLoadingMappings || isLoadingExtractionStatus || isTogglingExtraction || isDeletingMapping;
-  const extractionStatusGated = extractionStatus ?? {extractionStatusIcon: {
-    iconStatus: undefined,
-    iconMessage: "Loading...",
-  }, extractionMessageData : []};
+  const extractionStatusGated = extractionStatus ?? {
+    extractionStatusIcon: {
+      iconStatus: undefined,
+      iconMessage: "Loading...",
+    }, extractionMessageData: [],
+  };
 
-  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction};
+  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, runExtraction, isTogglingExtraction };
 };

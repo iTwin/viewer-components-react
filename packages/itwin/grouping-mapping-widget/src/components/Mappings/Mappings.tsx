@@ -37,6 +37,7 @@ export const Mappings = (props: MappingsProps) => {
     showImportModal,
     setShowDeleteModal,
     showDeleteModal,
+    runExtraction,
     isTogglingExtraction,
   } = useMappingsOperations({ ...groupingMappingApiConfig, mappingClient });
 
@@ -56,6 +57,7 @@ export const Mappings = (props: MappingsProps) => {
       setShowImportModal={setShowImportModal}
       showDeleteModal={showDeleteModal}
       setShowDeleteModal={setShowDeleteModal}
+      onRunExtraction={runExtraction}
       isTogglingExtraction={isTogglingExtraction}
       {...props}
     />

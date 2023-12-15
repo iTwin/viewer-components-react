@@ -60,6 +60,7 @@ export interface MappingsViewProps {
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
+  onRunExtraction: (mapping: Mapping) => Promise<void>;
   alert?: React.ReactElement<typeof Alert>;
 }
 
@@ -83,6 +84,7 @@ export const MappingsView = ({
   onClickAddMapping,
   onClickMappingTitle,
   onClickMappingModify,
+  onRunExtraction,
   alert,
 }: MappingsViewProps) => {
   const displayStrings = React.useMemo(
@@ -160,7 +162,9 @@ export const MappingsView = ({
                     onToggleExtraction={onToggleExtraction}
                     onRefresh={onRefreshMappings}
                     onClickMappingModify={onClickMappingModify}
+                    onRefreshExtractionStatus={onRefreshExtractionStatus}
                     setShowDeleteModal={setShowDeleteModal}
+                    onRunExtraction={onRunExtraction}
                   />
                 }
               />
