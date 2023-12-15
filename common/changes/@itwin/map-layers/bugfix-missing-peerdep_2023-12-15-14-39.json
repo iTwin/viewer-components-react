@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/map-layers",
-      "comment": "Add missing peerDependencies that are required at runtime by the map-layers package.",
+      "comment": "Some packages were pulled as devDependency when they really should be direct dependencies",
       "type": "patch"
     }
   ],
