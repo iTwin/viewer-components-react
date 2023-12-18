@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "ensure the isGeolocated runs when active viewport changes even if the onEcefLocationChanged has already fired",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
