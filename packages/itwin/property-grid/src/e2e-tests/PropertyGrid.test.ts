@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import assert from "assert";
 import { test } from "@playwright/test";
@@ -71,6 +71,8 @@ test.describe("property grid", () => {
       const propertyWidget = locateWidget(page, "property-grid");
 
       await treeWidget.getByText("BayTown").click();
+      await propertyWidget.getByText("Selected Item(s)").first().waitFor();
+
       await treeWidget.getByText("ProcessPhysicalModel").click();
 
       await propertyWidget.getByText("Multiple items").first().waitFor();
