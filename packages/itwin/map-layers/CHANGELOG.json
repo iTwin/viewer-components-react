@@ -2,6 +2,18 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "version": "5.2.5",
+      "tag": "@itwin/map-layers_v5.2.5",
+      "date": "Mon, 18 Dec 2023 18:31:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "ensure the isGeolocated runs when active viewport changes even if the onEcefLocationChanged has already fired"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.4",
       "tag": "@itwin/map-layers_v5.2.4",
       "date": "Tue, 07 Nov 2023 13:43:31 GMT",
