@@ -76,16 +76,18 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
       const formattedMessages = extractionMessageData.map((extractionMessage, index) => {
         let replacedMessage: string = extractionMessage.message;
 
-        const { mappingId, groupId } = extractionInfo[index];
-        const groupName = pickedResult[index].data!.find((group) => group.id === groupId)?.groupName;
-
-        if (replacedMessage.includes("MappingId:")) {
-          const mappingName = getMappingName(mappingId, mappings);
-          replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
+        if (replacedMessage.includes("iModel")) {
+          replacedMessage = replacedMessage.replace(/iModel [\w-]+/, "iModel ");
         }
+        if (replacedMessage.includes("MappingId:")) {
+          const { mappingId, groupId } = extractionInfo[index];
+          const groupName = pickedResult[index].data!.find((group) => group.id === groupId)?.groupName;
+          const mappingName = getMappingName(mappingId, mappings);
+          replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName ? mappingName : "<Not Found>"}`);
 
-        if (replacedMessage.includes("GroupId:")) {
-          replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName ? groupName : "<Not Found>"}`);
+          if (replacedMessage.includes("GroupId:")) {
+            replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName ? groupName : "<Not Found>"}`);
+          }
         }
 
         return { ...extractionMessage, message: replacedMessage };
