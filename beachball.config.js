@@ -9,19 +9,8 @@ module.exports = {
   bumpDeps: false,
   access: "public",
   tag: "latest",
-  scope: [
-    "packages/itwin/breakdown-trees",
-    "packages/itwin/ec3-widget",
-    "packages/itwin/geo-tools",
-    "packages/itwin/grouping-mapping-widget",
-    "packages/itwin/imodel-react-hooks",
-    "packages/itwin/map-layers",
-    "packages/itwin/measure-tools",
-    "packages/itwin/one-click-lca-widget",
-    "packages/itwin/property-grid",
-    "packages/itwin/reports-config-widget",
-  ],
-  ignorePatterns: [".nycrc", "eslint.config.js", ".mocharc.json", "tsconfig.*", ".*ignore", ".github/**", ".vscode/**", "**/test/**", "pnpm-lock.yaml"],
+  scope: ["packages/itwin/*", "!packages/itwin/tree-widget"],
+  ignorePatterns: [".nycrc", "eslint.config.js", ".mocharc.json", ".*ignore", ".github/**", ".vscode/**", "**/test/**", "pnpm-lock.yaml"],
   changehint: "Run 'pnpm change' to generate a change file",
   changelog: {
     customRenderers: {
