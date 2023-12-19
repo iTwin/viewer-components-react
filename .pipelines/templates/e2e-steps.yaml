@@ -1,8 +1,8 @@
 steps:
   - task: NodeTool@0
-    displayName: Use Node 20.x
+    displayName: Use Node 18.16.0
     inputs:
-      versionSpec: 20.x
+      versionSpec: 18.16.0
 
   - task: Npm@1
     displayName: install pnpm ^8.11.0

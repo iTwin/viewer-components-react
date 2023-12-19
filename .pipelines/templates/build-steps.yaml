@@ -1,9 +1,9 @@
 steps:
   # 1. Configure node
   - task: NodeTool@0
-    displayName: Use Node 20.x
+    displayName: "Use Node $(NodeVersion)"
     inputs:
-      versionSpec: 20.x
+      versionSpec: "$(NodeVersion)"
 
   - task: Npm@1
     displayName: install pnpm ^8.11.0
