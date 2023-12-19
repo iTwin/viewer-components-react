@@ -162,7 +162,6 @@ export const MappingsView = ({
                     onToggleExtraction={onToggleExtraction}
                     onRefresh={onRefreshMappings}
                     onClickMappingModify={onClickMappingModify}
-                    onRefreshExtractionStatus={onRefreshExtractionStatus}
                     setShowDeleteModal={setShowDeleteModal}
                     onRunExtraction={onRunExtraction}
                   />

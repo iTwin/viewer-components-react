@@ -45,9 +45,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
       const newState = !mapping.extractionEnabled;
       await mappingClient.updateMapping(accessToken, iModelId, mapping.id, { extractionEnabled: newState });
     },
-    onSuccess: async () => {
-      await refreshMappings();
-    },
+    onSuccess: refreshMappings,
   });
 
   const { mutateAsync: runExtraction } = useMutation({
@@ -62,9 +60,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
       };
       await extractionClient.runExtraction(accessToken, iModelId, extractionRequest);
     },
-    onSuccess: async () => {
-      await refreshExtractionStatus();
-    },
+    onSuccess: refreshExtractionStatus,
   });
 
   const { mutateAsync: onDelete, isLoading: isDeletingMapping } = useMutation({
@@ -72,9 +68,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
       const accessToken = await getAccessToken();
       await mappingClient.deleteMapping(accessToken, iModelId, mapping.id);
     },
-    onSuccess: async () => {
-      await refreshMappings();
-    },
+    onSuccess: refreshMappings,
   });
 
   const isLoading = isLoadingMappings || isLoadingExtractionStatus || isTogglingExtraction || isDeletingMapping;

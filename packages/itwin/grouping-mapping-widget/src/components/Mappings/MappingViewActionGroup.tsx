@@ -22,7 +22,6 @@ interface MappingUIActionGroupProps {
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
   onRefresh: () => Promise<void>;
   onClickMappingModify?: (mapping: Mapping) => void;
-  onRefreshExtractionStatus: () => Promise<void>;
   setShowDeleteModal: (mapping?: Mapping) => void;
   onRunExtraction: (mapping: Mapping) => Promise<void>;
 }
