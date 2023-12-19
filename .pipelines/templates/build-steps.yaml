@@ -11,8 +11,6 @@ steps:
       command: "custom"
       customCommand: "install -g pnpm@^8.11.0"
 
-  - script: cp .npmrc ~/.npmrc
-
   - script: pnpm install --frozen-lockfile
     displayName: pnpm install
 
