@@ -76,7 +76,7 @@ describe("useInstanceInfo", () => {
     });
   });
 
-  it("returns the data of the last event raised, even if the one preceding it ends faster", async () => {
+  it("returns the data of the last event raised, even if the one preceding it completes faster", async () => {
     const { result } = renderHook(useLoadedInstanceInfo, { initialProps: { dataProvider: dataProvider as unknown as IPresentationPropertyDataProvider } });
     await waitFor(() => {
       expect(result.current.item?.className).to.be.eq("TestClassName");
