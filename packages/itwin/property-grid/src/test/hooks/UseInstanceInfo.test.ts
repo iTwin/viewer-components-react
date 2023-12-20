@@ -75,4 +75,50 @@ describe("useInstanceInfo", () => {
       expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("New Test Label");
     });
   });
+
+  it("returns the data of the last event raised, even if the one preceding it ends faster", async () => {
+    const { result } = renderHook(useLoadedInstanceInfo, { initialProps: { dataProvider: dataProvider as unknown as IPresentationPropertyDataProvider } });
+    await waitFor(() => {
+      expect(result.current.item?.className).to.be.eq("TestClassName");
+      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("Test Label");
+    });
+
+    dataProvider.getData.reset();
+
+    const delay = async (ms: number) =>{
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve("The sum of all data is 100.");
+        }, ms);
+      });
+    };
+
+    dataProvider.getData.onFirstCall().callsFake(async () => {
+      await delay(1000);
+      return {
+        categories: [],
+        records: {},
+        label: PropertyRecord.fromString("Old Test Label"),
+        description: "OldTestClassName",
+      };
+    });
+
+    dataProvider.getData.onSecondCall().callsFake(async () => {
+      await delay(2000);
+      return {
+        categories: [],
+        records: {},
+        label: PropertyRecord.fromString("New Test Label"),
+        description: "NewTestClassName",
+      };
+    });
+
+    dataProvider.onDataChanged.raiseEvent();
+    dataProvider.onDataChanged.raiseEvent();
+
+    await waitFor(() => {
+      expect(result.current.item?.className).to.be.eq("NewTestClassName");
+      expect((result.current.item?.label.value as PrimitiveValue).value).to.be.eq("New Test Label");
+    }, { timeout: 3000 });
+  });
 });
