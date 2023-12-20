@@ -41,7 +41,7 @@ export function useLoadedInstanceInfo({ dataProvider }: UseLoadedInstanceInfoPro
     void onDataChanged();
 
     return () => { removeListener(); };
-  }, [dataProvider, dataProvider.onDataChanged]);
+  }, [dataProvider]);
 
   return { item };
 }
