@@ -2,6 +2,23 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.22.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.22.0",
+      "date": "Mon, 18 Dec 2023 18:31:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Mapping related components have been refactored to use react-query."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Added new functions for Custom Calculations in FormulaFunctionProvider.ts"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.21.1",
       "tag": "@itwin/grouping-mapping-widget_v0.21.1",
       "date": "Fri, 01 Dec 2023 13:46:38 GMT",

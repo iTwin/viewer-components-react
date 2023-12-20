@@ -1,6 +1,13 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Tue, 07 Nov 2023 13:43:31 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Dec 2023 18:31:01 GMT and should not be manually modified.
+
+## 5.2.5
+Mon, 18 Dec 2023 18:31:01 GMT
+
+### Patches
+
+- ensure the isGeolocated runs when active viewport changes even if the onEcefLocationChanged has already fired
 
 ## 5.2.4
 Tue, 07 Nov 2023 13:43:31 GMT
