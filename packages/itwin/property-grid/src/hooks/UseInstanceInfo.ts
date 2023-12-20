@@ -30,6 +30,7 @@ export function useLoadedInstanceInfo({ dataProvider }: UseLoadedInstanceInfoPro
       const currentId = Guid.createValue();
       inProgressId.current = currentId;
 
+      // we need to make sure that the loaded propertyData is provided by the latest getData() call
       const propertyData = await dataProvider.getData();
       if (inProgressId.current === currentId) {
         setItem({ label: propertyData.label, className: propertyData.description ?? "" });
