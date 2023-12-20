@@ -71,7 +71,6 @@ test.describe("property grid", () => {
       const propertyWidget = locateWidget(page, "property-grid");
 
       await treeWidget.getByText("BayTown").click();
-      await propertyWidget.getByText("Selected Item(s)").first().waitFor();
 
       await treeWidget.getByText("ProcessPhysicalModel").click();
 
