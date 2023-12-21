@@ -1046,10 +1046,10 @@ importers:
   ../../packages/itwin/property-grid:
     specifiers:
       '@itwin/appui-abstract': ^4.0.0
-      '@itwin/appui-layout-react': ^4.5.0
-      '@itwin/appui-react': ^4.5.0
+      '@itwin/appui-layout-react': ^4.8.0
+      '@itwin/appui-react': ^4.8.0
       '@itwin/build-tools': ^4.0.0
-      '@itwin/components-react': ^4.5.0
+      '@itwin/components-react': ^4.8.0
       '@itwin/core-bentley': ^4.0.0
       '@itwin/core-common': ^4.0.0
       '@itwin/core-frontend': ^4.0.0
@@ -1058,11 +1058,11 @@ importers:
       '@itwin/core-markup': ^4.0.0
       '@itwin/core-orbitgt': ^4.0.0
       '@itwin/core-quantity': ^4.0.0
-      '@itwin/core-react': ^4.5.0
+      '@itwin/core-react': ^4.8.0
       '@itwin/core-telemetry': ^4.0.0
       '@itwin/ecschema-metadata': ^4.0.0
       '@itwin/eslint-plugin': ^4.0.0-dev.38
-      '@itwin/imodel-components-react': ^4.5.0
+      '@itwin/imodel-components-react': ^4.8.0
       '@itwin/itwinui-icons-react': ^2.1.0
       '@itwin/itwinui-illustrations-react': ^2.1.0
       '@itwin/itwinui-react': ^2.11.0
@@ -1119,10 +1119,10 @@ importers:
       react-error-boundary: 4.0.10_react@17.0.2
     devDependencies:
       '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
-      '@itwin/appui-layout-react': 4.5.0_70869833ab9fa1bcc68316a8df60f235
-      '@itwin/appui-react': 4.5.0_28b7bec25bd9fd8f6bfaa15e08330e19
+      '@itwin/appui-layout-react': 4.8.0_5d63b36215d29659212874ece0fcb9d2
+      '@itwin/appui-react': 4.8.0_97d4306ac47fea7bc79c464b5435c10a
       '@itwin/build-tools': 4.0.0
-      '@itwin/components-react': 4.5.0_70869833ab9fa1bcc68316a8df60f235
+      '@itwin/components-react': 4.8.0_8202ff7ef9fe91e4fef19897582b5bb4
       '@itwin/core-bentley': 4.0.0
       '@itwin/core-common': 4.0.0_8b973855e889ff8da4ca85bd3eac12bb
       '@itwin/core-frontend': 4.0.0_be273c0b849e02c9a5835927dc181349
@@ -1131,13 +1131,13 @@ importers:
       '@itwin/core-markup': 4.0.0_488586ff0181af7350cd8648f024b3ae
       '@itwin/core-orbitgt': 4.0.0
       '@itwin/core-quantity': 4.0.0_@itwin+core-bentley@4.0.0
-      '@itwin/core-react': 4.5.0_4ad6e8154b3716bdf782b5d5451595ad
+      '@itwin/core-react': 4.8.0_4ad6e8154b3716bdf782b5d5451595ad
       '@itwin/core-telemetry': 4.0.0_@itwin+core-geometry@4.0.0
       '@itwin/ecschema-metadata': 4.0.0_30ffdc5308dd22bc25a719275cab883f
       '@itwin/eslint-plugin': 4.0.0-dev.38_eslint@8.41.0+typescript@5.0.4
-      '@itwin/imodel-components-react': 4.5.0_68bdab48028c551a4b93b3aa7f8d07a4
+      '@itwin/imodel-components-react': 4.8.0_1ef07c062f486a8d3017fe9f83a702f1
       '@itwin/presentation-common': 4.0.0_b65abb2eba6f77a1811421d5706635e7
-      '@itwin/presentation-components': 4.1.0_947b110775f94589f0dc6167b9813783
+      '@itwin/presentation-components': 4.1.0_824e390b2c165b63449ae864404e11ed
       '@itwin/presentation-frontend': 4.0.0_f4ca9731f71cbf5cc67e81c3c0c2cd08
       '@itwin/webgl-compatibility': 4.0.0
       '@playwright/test': 1.36.2
@@ -4078,6 +4078,32 @@ packages:
       zustand: 4.3.6_immer@9.0.6+react@17.0.2
     dev: true
 
+  /@itwin/appui-layout-react/4.8.0_5d63b36215d29659212874ece0fcb9d2:
+    resolution: {integrity: sha512-2qheMjWoZn+OF00YjhdTnkZ4MnjfdAqTFNmy+Yf1l4LojrwhtIkhjlk5ezHpSLPSwN4j6mhdxZg52Du+cNw73Q==}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
+      '@itwin/core-react': ^4.8.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/core-bentley': 4.0.0
+      '@itwin/core-react': 4.8.0_4ad6e8154b3716bdf782b5d5451595ad
+      '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      classnames: 2.3.1
+      immer: 9.0.6
+      lodash: 4.17.21
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
+      ts-key-enum: 2.0.12
+      zustand: 4.4.7_15816f3420f6be20f33cb985154ee4e1
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: true
+
   /@itwin/appui-react/4.0.1_bbfa7def21612277898761006dcf56c6:
     resolution: {integrity: sha512-Y8IVnJ4YiQQe9/BkmY2UdKqD0OCmh8jY49Rjk/AdvceOJqRjvByE0hN+WN+R8rfC6VK4lbR7Qpq7GyALdQfdZw==}
     peerDependencies:
@@ -4541,6 +4567,57 @@ packages:
       rxjs: 7.8.1
     dev: false
 
+  /@itwin/appui-react/4.8.0_97d4306ac47fea7bc79c464b5435c10a:
+    resolution: {integrity: sha512-PCqVYeaeXiiVoB4t/BRhdiKUvD4tjO3rMdgKYCM144oajfkehVmhR83NrJIFcO2gVUy5R4Y2dGmd0fp94S7mWw==}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
+      '@itwin/appui-layout-react': ^4.8.0
+      '@itwin/components-react': ^4.8.0
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
+      '@itwin/core-common': ^3.7.0 || ^4.0.0
+      '@itwin/core-frontend': ^3.7.0 || ^4.0.0
+      '@itwin/core-geometry': ^3.7.0 || ^4.0.0
+      '@itwin/core-quantity': ^3.7.0 || ^4.0.0
+      '@itwin/core-react': ^4.8.0
+      '@itwin/core-telemetry': ^3.7.0 || ^4.0.0
+      '@itwin/imodel-components-react': ^4.8.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+      react-redux: ^7.2.2
+      redux: ^4.1.0
+    dependencies:
+      '@bentley/icons-generic': 1.0.34
+      '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/appui-layout-react': 4.8.0_5d63b36215d29659212874ece0fcb9d2
+      '@itwin/components-react': 4.8.0_8202ff7ef9fe91e4fef19897582b5bb4
+      '@itwin/core-bentley': 4.0.0
+      '@itwin/core-common': 4.0.0_8b973855e889ff8da4ca85bd3eac12bb
+      '@itwin/core-frontend': 4.0.0_be273c0b849e02c9a5835927dc181349
+      '@itwin/core-geometry': 4.0.0
+      '@itwin/core-quantity': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/core-react': 4.8.0_4ad6e8154b3716bdf782b5d5451595ad
+      '@itwin/core-telemetry': 4.0.0_@itwin+core-geometry@4.0.0
+      '@itwin/imodel-components-react': 4.8.0_1ef07c062f486a8d3017fe9f83a702f1
+      '@itwin/itwinui-icons': 1.16.0
+      '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-illustrations-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.12.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      classnames: 2.3.1
+      immer: 9.0.6
+      lodash: 4.17.21
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      react-error-boundary: 4.0.3_react@17.0.2
+      react-redux: 7.2.9_react-dom@17.0.2+react@17.0.2
+      redux: 4.2.1
+      rxjs: 7.8.1
+      ts-key-enum: 2.0.12
+      zustand: 4.4.7_15816f3420f6be20f33cb985154ee4e1
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: true
+
   /@itwin/browser-authorization/0.8.0_@itwin+core-bentley@4.1.6:
     resolution: {integrity: sha512-EXiW0Wqapcq6TkxohgMkrsxM/0Em3TOwvejTQhhi5+BDY0L3q0oBp9wlxsYJqDSTxi/Vdo5T0xcSQnCcZxnKBQ==}
     peerDependencies:
@@ -4965,6 +5042,36 @@ packages:
       react-window: 1.8.6_react-dom@17.0.2+react@17.0.2
       rxjs: 7.8.1
       shortid: 2.2.16
+    dev: true
+
+  /@itwin/components-react/4.8.0_8202ff7ef9fe91e4fef19897582b5bb4:
+    resolution: {integrity: sha512-WWxqRlvDDjEwUuesYWobYaZID2ErMuk2MQpSeIRWegRGoAHxIeZsEMQNadJx62hZzj8R3k0UYWlkXaHo5+Q+vA==}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
+      '@itwin/core-react': ^4.8.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@bentley/icons-generic': 1.0.34
+      '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/core-bentley': 4.0.0
+      '@itwin/core-react': 4.8.0_4ad6e8154b3716bdf782b5d5451595ad
+      '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.12.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      '@types/shortid': 0.0.29
+      classnames: 2.3.1
+      immer: 9.0.6
+      linkify-it: 2.2.0
+      lodash: 4.17.21
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      react-highlight-words: 0.20.0_react@17.0.2
+      react-window: 1.8.10_react-dom@17.0.2+react@17.0.2
+      rxjs: 7.8.1
+      shortid: 2.2.16
+      ts-key-enum: 2.0.12
     dev: true
 
   /@itwin/core-backend/4.0.0_acda798b3eb76717c9a14158b1be73d0:
@@ -5431,6 +5538,30 @@ packages:
       react-autosuggest: 10.1.0_react@17.0.2
       react-dom: 17.0.2_react@17.0.2
       resize-observer-polyfill: 1.5.1
+
+  /@itwin/core-react/4.8.0_4ad6e8154b3716bdf782b5d5451595ad:
+    resolution: {integrity: sha512-fAePypemg8oeErPmfrP5u5dT9AaRnnb8E1Id/czlVAfpShBx3kjNHR5SEvWdDYdNEKARVT247yqIdy6Enur5og==}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@bentley/icons-generic': 1.0.34
+      '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/core-bentley': 4.0.0
+      '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.12.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      classnames: 2.3.1
+      dompurify: 2.3.6
+      lodash: 4.17.21
+      react: 17.0.2
+      react-autosuggest: 10.1.0_react@17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      resize-observer-polyfill: 1.5.1
+      ts-key-enum: 2.0.12
+    dev: true
 
   /@itwin/core-telemetry/4.0.0_@itwin+core-geometry@4.0.0:
     resolution: {integrity: sha512-/a2rgssSxK1YWXECufbjI6HaBXaa8pJWIl2+Eq45DZbkeD7f1dlV15wZ0yjoPaXgAgcjfmwHtIBrK5nRsCN7JA==}
@@ -5906,6 +6037,38 @@ packages:
       classnames: 2.3.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
+    dev: true
+
+  /@itwin/imodel-components-react/4.8.0_1ef07c062f486a8d3017fe9f83a702f1:
+    resolution: {integrity: sha512-IYsqeaP5pIZQSU48Mcl7/rV+A64PRnhhGEcTw+p1nRX+3pQtAg263ufv29q4qw+dikN5gSbJTg5yzQ3KmY3+Qw==}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.7.0 || ^4.0.0
+      '@itwin/components-react': ^4.8.0
+      '@itwin/core-bentley': ^3.7.0 || ^4.0.0
+      '@itwin/core-common': ^3.7.0 || ^4.0.0
+      '@itwin/core-frontend': ^3.7.0 || ^4.0.0
+      '@itwin/core-geometry': ^3.7.0 || ^4.0.0
+      '@itwin/core-quantity': ^3.7.0 || ^4.0.0
+      '@itwin/core-react': ^4.8.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@bentley/icons-generic': 1.0.34
+      '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/components-react': 4.8.0_8202ff7ef9fe91e4fef19897582b5bb4
+      '@itwin/core-bentley': 4.0.0
+      '@itwin/core-common': 4.0.0_8b973855e889ff8da4ca85bd3eac12bb
+      '@itwin/core-frontend': 4.0.0_be273c0b849e02c9a5835927dc181349
+      '@itwin/core-geometry': 4.0.0
+      '@itwin/core-quantity': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/core-react': 4.8.0_4ad6e8154b3716bdf782b5d5451595ad
+      '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.12.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      classnames: 2.3.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      ts-key-enum: 2.0.12
     dev: true
 
   /@itwin/imodels-access-common/4.1.2_8a4dfbb51c56177a1b722b6e7ca35017:
@@ -6439,6 +6602,47 @@ packages:
     transitivePeerDependencies:
       - '@types/react'
     dev: false
+
+  /@itwin/presentation-components/4.1.0_824e390b2c165b63449ae864404e11ed:
+    resolution: {integrity: sha512-+uJswlduwHkOdzLb6dJYqKf1E0Muf1GV6hLI87OwsdrbTLihFYOMbuGYON274Co3MdtXoXP3PesmeOtBYlBvZw==}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.6.3 || ^4.0.0
+      '@itwin/components-react': ^4.0.0
+      '@itwin/core-bentley': ^3.6.3 || ^4.0.0
+      '@itwin/core-common': ^3.6.3 || ^4.0.0
+      '@itwin/core-frontend': ^3.6.3 || ^4.0.0
+      '@itwin/core-react': ^4.0.0
+      '@itwin/imodel-components-react': ^4.0.0
+      '@itwin/presentation-common': ^3.6.3 || ^4.0.0
+      '@itwin/presentation-frontend': ^3.6.3 || ^4.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@itwin/appui-abstract': 4.0.0_@itwin+core-bentley@4.0.0
+      '@itwin/components-react': 4.8.0_8202ff7ef9fe91e4fef19897582b5bb4
+      '@itwin/core-bentley': 4.0.0
+      '@itwin/core-common': 4.0.0_8b973855e889ff8da4ca85bd3eac12bb
+      '@itwin/core-frontend': 4.0.0_be273c0b849e02c9a5835927dc181349
+      '@itwin/core-react': 4.8.0_4ad6e8154b3716bdf782b5d5451595ad
+      '@itwin/imodel-components-react': 4.8.0_1ef07c062f486a8d3017fe9f83a702f1
+      '@itwin/itwinui-css': 1.11.5
+      '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.12.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      '@itwin/presentation-common': 4.0.0_b65abb2eba6f77a1811421d5706635e7
+      '@itwin/presentation-frontend': 4.0.0_f4ca9731f71cbf5cc67e81c3c0c2cd08
+      classnames: 2.3.2
+      fast-deep-equal: 3.1.3
+      fast-sort: 3.4.0
+      micro-memoize: 4.1.2
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      react-select: 5.7.0_b49bddbe4b905ced4713cb857cca91fa
+      react-select-async-paginate: 0.7.2_react-select@5.7.0+react@17.0.2
+      rxjs: 7.8.1
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: true
 
   /@itwin/presentation-components/4.1.0_947b110775f94589f0dc6167b9813783:
     resolution: {integrity: sha512-+uJswlduwHkOdzLb6dJYqKf1E0Muf1GV6hLI87OwsdrbTLihFYOMbuGYON274Co3MdtXoXP3PesmeOtBYlBvZw==}
@@ -21004,6 +21208,17 @@ packages:
       prop-types: 15.8.1
       react: 17.0.2
 
+  /react-highlight-words/0.20.0_react@17.0.2:
+    resolution: {integrity: sha512-asCxy+jCehDVhusNmCBoxDf2mm1AJ//D+EzDx1m5K7EqsMBIHdZ5G4LdwbSEXqZq1Ros0G0UySWmAtntSph7XA==}
+    peerDependencies:
+      react: ^0.14.0 || ^15.0.0 || ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+    dependencies:
+      highlight-words-core: 1.2.2
+      memoize-one: 4.0.3
+      prop-types: 15.8.1
+      react: 17.0.2
+    dev: true
+
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -21207,6 +21422,19 @@ packages:
       prop-types: 15.8.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
+
+  /react-window/1.8.10_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-Y0Cx+dnU6NLa5/EvoHukUD0BklJ8qITCtVEPY1C/nL8wwoZ0b5aEw8Ff1dOVHw7fCzMt55XfJDd8S8W8LCaUCg==}
+    engines: {node: '>8.0.0'}
+    peerDependencies:
+      react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.21.0
+      memoize-one: 5.2.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    dev: true
 
   /react-window/1.8.6_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-8VwEEYyjz6DCnGBsd+MgkD0KJ2/OXFULyDtorIiTz+QzwoP94tBoA7CnbtyXMm+cCeAUER5KJcPtWl9cpKbOBg==}
@@ -23422,6 +23650,10 @@ packages:
       yargs-parser: 20.2.9
     dev: true
 
+  /ts-key-enum/2.0.12:
+    resolution: {integrity: sha512-Ety4IvKMaeG34AyXMp5r11XiVZNDRL+XWxXbVVJjLvq2vxKRttEANBE7Za1bxCAZRdH2/sZT6jFyyTWxXz28hw==}
+    dev: true
+
   /ts-node/7.0.1:
     resolution: {integrity: sha512-BVwVbPJRspzNh2yfslyT1PSbl5uIk03EZlb493RKHN4qej/D06n1cEhjlOJG69oFsE7OT8XjpTUcYf6pKTLMhw==}
     engines: {node: '>=4.2.0'}
@@ -24800,6 +25032,27 @@ packages:
       react: 17.0.2
       use-sync-external-store: 1.2.0_react@17.0.2
 
+  /zustand/4.4.7_15816f3420f6be20f33cb985154ee4e1:
+    resolution: {integrity: sha512-QFJWJMdlETcI69paJwhSMJz7PPWjVP8Sjhclxmxmxv/RYI7ZOvR5BHX+ktH0we9gTWQMxcne8q1OY8xxz604gw==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      '@types/react': '>=16.8'
+      immer: '>=9.0'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      '@types/react': 17.0.44
+      immer: 9.0.6
+      react: 17.0.2
+      use-sync-external-store: 1.2.0_react@17.0.2
+    dev: true
+
   file:../../packages/itwin/breakdown-trees_d8e1681d4c6eb1686c438ad81d9c6288:
     resolution: {directory: ../../packages/itwin/breakdown-trees, type: directory}
     id: file:../../packages/itwin/breakdown-trees
@@ -24885,7 +25138,7 @@ packages:
     resolution: {directory: ../../packages/itwin/map-layers, type: directory}
     id: file:../../packages/itwin/map-layers
     name: '@itwin/map-layers'
-    version: 5.2.4
+    version: 5.2.5
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
       '@itwin/appui-layout-react': ^4.0.0
