@@ -114,15 +114,13 @@ test.describe("property grid", () => {
       return propertyWidget;
     };
 
-    // flaky (https://github.com/iTwin/viewer-components-react/issues/710)
-    test.skip("single element selected from elements list", async ({ page }) => {
+    test("single element selected from elements list", async ({ page }) => {
       const propertyWidget = await selectElementFromElementList(page);
 
       await takeScreenshot(page, propertyWidget);
     });
 
-    // flaky (https://github.com/iTwin/viewer-components-react/issues/710)
-    test.skip("single element selected from elements list - search bar expanded", async ({ page }) => {
+    test("single element selected from elements list - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectElementFromElementList(page);
       const expandSearchbarButtons = await propertyWidget.getByTitle("Open search bar").all();
 
