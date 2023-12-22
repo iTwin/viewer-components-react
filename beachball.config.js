@@ -37,7 +37,7 @@ function getPRPrefix(url) {
     return url.replace(/\.git$/, "") + "/pull/";
   if (url.includes("@github.com"))
     // GitHub SSH
-    return `https://github.com/${url.split(":")[1].replace(/\.git$/, "")}/pull/`;
+    return `https://${url.split("@")[1]}/pull/`;
 }
 
 /** @type {(a?: string) => string | undefined} */
