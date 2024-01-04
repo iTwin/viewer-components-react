@@ -81,7 +81,7 @@ importers:
       '@itwin/imodel-components-react': 4.5.0_4cb4daedc283e534451a7293f7a52801
       '@itwin/imodels-access-frontend': 3.0.0_c0f2c1436abc340cce715d3b75868d69
       '@itwin/itwinui-react': 2.7.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/map-layers': file:../../packages/itwin/map-layers_6d2610fa2da77069feb26d4b4bf429ee
+      '@itwin/map-layers': file:../../packages/itwin/map-layers_81692615a47f7ec68c176a741f113855
       '@itwin/map-layers-auth': 4.1.6_@itwin+core-bentley@4.1.6
       '@itwin/map-layers-formats': 4.1.6_e8ce003abe6692f152b189e6fdf35b83
       '@itwin/measure-tools-react': file:../../packages/itwin/measure-tools_f42fb3ca0dc3b80aae16143effd08275
@@ -771,6 +771,9 @@ importers:
     dependencies:
       '@itwin/itwinui-icons-color-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      '@itwin/map-layers-formats': 4.1.6_e8ce003abe6692f152b189e6fdf35b83
       classnames: 2.3.1
       react-beautiful-dnd: 13.1.1_react-dom@17.0.2+react@17.0.2
     devDependencies:
@@ -789,9 +792,6 @@ importers:
       '@itwin/core-telemetry': 4.1.6_@itwin+core-geometry@4.1.6
       '@itwin/eslint-plugin': 4.0.0-dev.38_eslint@8.50.0+typescript@4.5.5
       '@itwin/imodel-components-react': 4.0.1_663249ebc2a248a127e33f8d09cbc39b
-      '@itwin/itwinui-react': 2.11.2_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-variables': 2.0.0
-      '@itwin/map-layers-formats': 4.1.6_e8ce003abe6692f152b189e6fdf35b83
       '@itwin/webgl-compatibility': 4.1.6
       '@testing-library/dom': 8.13.0
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
@@ -6176,6 +6176,7 @@ packages:
       '@itwin/core-common': 4.1.6_0fb61c652738bb63b1fbe6298cd68e4e
       '@itwin/core-geometry': 4.1.6
       google-protobuf: 3.20.1
+    dev: false
 
   /@itwin/object-storage-azure/1.6.0:
     resolution: {integrity: sha512-b0rxhn0NAFY1alOEGMAUaJtK8WG7xoJPDOVjuA8nC7zFcxxtP2VOsSOauuie2zzL3GDi9OU6vywR3gAcJcTZww==}
@@ -15570,6 +15571,7 @@ packages:
 
   /google-protobuf/3.20.1:
     resolution: {integrity: sha512-XMf1+O32FjYIV3CYu6Tuh5PNbfNEU5Xu22X+Xkdb/DUexFlCzhvv7d5Iirm4AOwn8lv4al1YvIhzGrg2j9Zfzw==}
+    dev: false
 
   /gopd/1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
@@ -24881,7 +24883,7 @@ packages:
       redux: 4.2.1
     dev: false
 
-  file:../../packages/itwin/map-layers_6d2610fa2da77069feb26d4b4bf429ee:
+  file:../../packages/itwin/map-layers_81692615a47f7ec68c176a741f113855:
     resolution: {directory: ../../packages/itwin/map-layers, type: directory}
     id: file:../../packages/itwin/map-layers
     name: '@itwin/map-layers'
@@ -24910,11 +24912,15 @@ packages:
       '@itwin/imodel-components-react': 4.5.0_4cb4daedc283e534451a7293f7a52801
       '@itwin/itwinui-icons-color-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-icons-react': 2.6.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.12.2_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
+      '@itwin/map-layers-formats': 4.1.6_e8ce003abe6692f152b189e6fdf35b83
       classnames: 2.3.2
       react: 17.0.2
       react-beautiful-dnd: 13.1.1_react-dom@17.0.2+react@17.0.2
       react-dom: 17.0.2_react@17.0.2
     transitivePeerDependencies:
+      - '@itwin/core-geometry'
       - react-native
     dev: false
 

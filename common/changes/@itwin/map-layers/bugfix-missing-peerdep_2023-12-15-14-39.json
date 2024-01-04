@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Some packages were pulled as devDependency when they really should be direct dependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
