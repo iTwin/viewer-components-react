@@ -46,3 +46,15 @@ jobs:
 
     steps:
       - template: templates/e2e-steps.yaml
+
+  - job: Check_change_files
+    displayName: "Check change files"
+    condition: succeeded()
+    workspace:
+      clean: all
+
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+      - template: templates/change-files-steps.yaml

@@ -12,6 +12,8 @@
     "lint": "lage lint --grouped --continue",
     "clean": "lage clean --grouped --continue",
     "extract-api": "lage extract-api --grouped --continue",
+    "check": "beachball check",
+    "check:dev": "beachball check --config beachball.config.dev.js",
     "change": "beachball change --no-commit",
     "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
     "publish": "beachball publish --new",
