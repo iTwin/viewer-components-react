@@ -8,12 +8,11 @@ import { createRef } from "react";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework, WidgetState } from "@itwin/appui-react";
 import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
-import { render, waitFor } from "@testing-library/react";
 import * as usePropertyGridTransientStateModule from "../hooks/UsePropertyGridTransientState";
 import * as propertyGridComponent from "../PropertyGridComponent";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridUiItemsProvider, PropertyGridWidgetId } from "../PropertyGridUiItemsProvider";
-import { stubSelectionManager } from "./TestUtils";
+import { render, stubSelectionManager, waitFor  } from "./TestUtils";
 
 import type { WidgetDef } from "@itwin/appui-react";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";

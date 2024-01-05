@@ -8,7 +8,7 @@ import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor } from "./TestUtils";
 import * as multiElementPropertyGrid from "../components/MultiElementPropertyGrid";
 import { PropertyGridComponent } from "../PropertyGridComponent";
 

@@ -6,10 +6,10 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import { ElementList } from "../../components/ElementList";
 import { PropertyGridManager } from "../../PropertyGridManager";
+import { render, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
@@ -50,7 +50,7 @@ describe("<ElementList />", () => {
       await waitFor(() => getByText(expected));
     }
 
-    expect(getLabelsStub).to.be.calledOnce;
+    expect(getLabelsStub).to.be.calledWith(instanceKeys);
   });
 
   it("loads and orders elements by labels", async () => {
@@ -93,7 +93,8 @@ describe("<ElementList />", () => {
 
     // wait for first element to be rendered
     await waitFor(() => getByText(expectedLabels[0]));
-    expect(getLabelsStub).to.be.calledTwice;
+    expect(getLabelsStub).to.be.calledWith(instanceKeys.slice(0, 1000));
+    expect(getLabelsStub).to.be.calledWith(instanceKeys.slice(1000));
   });
 
   it("invokes `onSelect` when item is clicked", async () => {
