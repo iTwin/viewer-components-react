@@ -34,7 +34,7 @@
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "",
     "test": "",
-    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build"
   },
   "dependencies": {

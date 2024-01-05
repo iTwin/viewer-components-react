@@ -12,7 +12,7 @@ import { useInstanceSelection } from "../../hooks/UseInstanceSelection";
 import { createResolvablePromise, stubSelectionManager } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ISelectionProvider , SelectionChangeEventArgs  } from "@itwin/presentation-frontend";
+import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { InstanceSelectionProps } from "../../hooks/UseInstanceSelection";
 

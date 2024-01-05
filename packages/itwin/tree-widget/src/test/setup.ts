@@ -10,14 +10,18 @@ const commonjsGlobal: { MessageChannel?: any } = typeof globalThis !== "undefine
 if (commonjsGlobal.MessageChannel)
   delete commonjsGlobal.MessageChannel;
 
-import jsdomGlobal from "jsdom-global";
-jsdomGlobal();
-
 import chai from "chai";
 import chaiJestSnapshot from "chai-jest-snapshot";
 import chaiSubset from "chai-subset";
-import sinonChai from "sinon-chai";
+import globalJsdom from "global-jsdom";
+import * as jsdom from "jsdom";
 import path from "path";
+import sinonChai from "sinon-chai";
+
+// get rid of various xhr errors in the console
+globalJsdom(undefined, {
+  virtualConsole: new jsdom.VirtualConsole().sendTo(console, { omitJSDOMErrors: true }),
+});
 
 // setup chai
 chai.should();

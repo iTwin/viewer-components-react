@@ -82,10 +82,10 @@ describe("ExternalSourcesTree", () => {
       it("should render hierarchy", async () => {
         setupHierarchy([{
           key: createInvalidNodeKey(),
-          label: LabelDefinition.fromLabelString("test-node-no-icon"), // eslint-disable-line @itwin/no-internal
+          label: LabelDefinition.fromLabelString("test-node-no-icon"),
         }, {
           key: createInvalidNodeKey(),
-          label: LabelDefinition.fromLabelString("test-node-with-icon"), // eslint-disable-line @itwin/no-internal
+          label: LabelDefinition.fromLabelString("test-node-with-icon"),
           extendedData: {
             imageId: "test-icon-id",
           },
@@ -97,16 +97,16 @@ describe("ExternalSourcesTree", () => {
         getByRole("tree");
         const treeItems = getAllByRole("treeitem");
         expect(treeItems).to.have.lengthOf(2);
-        expect(treeItems[0]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-no-icon"]`))
-          .and.to.satisfy((item: HTMLElement) => !item.querySelector(`span.bui-webfont-icon`));
-        expect(treeItems[1]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-with-icon"]`))
-          .and.to.satisfy((item: HTMLElement) => item.querySelector(`span.bui-webfont-icon.test-icon-id`));
+        expect(treeItems[0]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-no-icon"]`)) // eslint-disable-line deprecation/deprecation
+          .and.to.satisfy((item: HTMLElement) => !item.querySelector(`span.bui-webfont-icon`)); // eslint-disable-line deprecation/deprecation
+        expect(treeItems[1]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-with-icon"]`)) // eslint-disable-line deprecation/deprecation
+          .and.to.satisfy((item: HTMLElement) => item.querySelector(`span.bui-webfont-icon.test-icon-id`)); // eslint-disable-line deprecation/deprecation
       });
 
       it("renders context menu", async () => {
         setupHierarchy([{
           key: createInvalidNodeKey(),
-          label: LabelDefinition.fromLabelString("test-node"), // eslint-disable-line @itwin/no-internal
+          label: LabelDefinition.fromLabelString("test-node"),
         }]);
         const { user, getByText, queryByText } = renderWithUser(
           <ExternalSourcesTree

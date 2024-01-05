@@ -105,7 +105,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
         this.props.onFilterStart(this.state.searchText!);
       }
     });
-  }
+  };
 
   private _handleKeyDown = (e: React.KeyboardEvent) => {
     switch (e.key) {
@@ -120,7 +120,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
           this.props.onEnterPressed();
         break;
     }
-  }
+  };
 
   private _handleIconClick = (): void => {
     // istanbul ignore else
@@ -135,14 +135,14 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
     this._trackChange();
     if (this.props.onIconClick)
       this.props.onIconClick();
-  }
+  };
 
   private _unsetTimeout = (): void => {
     if (this._timeoutId) {
       window.clearTimeout(this._timeoutId);
       this._timeoutId = 0;
     }
-  }
+  };
 
   public async componentDidUpdate(prevProps: SearchBoxProps) {
     if (prevProps.searchText !== this.props.searchText) {
@@ -175,14 +175,14 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
       this.props.onSelectedChanged(this.state.selectedIndex - 1);
       this.setState((state) => ({ selectedIndex: state.selectedIndex - 1 }));
     }
-  }
+  };
 
   private _onNextClick = () => {
     if (this.state.selectedIndex < this.props.resultCount) {
       this.props.onSelectedChanged(this.state.selectedIndex + 1);
       this.setState((state) => ({ selectedIndex: state.selectedIndex + 1 }));
     }
-  }
+  };
 
   public render() {
     const { autoFocus, className, style, resultCount, placeholder } = this.props;

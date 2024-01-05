@@ -20,7 +20,7 @@
   "typings": "lib/markup-frontstage-react",
   "scripts": {
     "build": " tsc 1>&2 && npm run copy:assets",
-    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "cover": "",

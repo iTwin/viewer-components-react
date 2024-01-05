@@ -224,7 +224,7 @@ describe("CategoryTree", () => {
           />,
         );
         const node = await waitFor(() => result.getByTestId("tree-node"));
-        const cb = node.querySelector("input");
+        const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
         expect(cb!.checked).to.be.true;
       });
 
@@ -244,7 +244,7 @@ describe("CategoryTree", () => {
             />,
           );
           const node = await waitFor(() => result.getByTestId("tree-node"));
-          const cb = node.querySelector("input");
+          const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
           fireEvent.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(moq.It.isAny(), false), moq.Times.once());
         });
@@ -264,7 +264,7 @@ describe("CategoryTree", () => {
             />,
           );
           const node = await waitFor(() => result.getByTestId("tree-node"));
-          const cb = node.querySelector("input");
+          const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
           fireEvent.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(moq.It.isAny(), true), moq.Times.once());
         });
@@ -307,7 +307,7 @@ describe("CategoryTree", () => {
             />,
           );
           const node = await waitFor(() => getSubCategoryNode(result.getAllByTestId("tree-node")));
-          const cb = node.querySelector("input");
+          const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
           expect(cb!.checked).to.be.true;
         });
 
@@ -325,7 +325,7 @@ describe("CategoryTree", () => {
             />,
           );
           const node = await waitFor(() => getSubCategoryNode(result.getAllByTestId("tree-node")));
-          const cb = node.querySelector("input");
+          const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
           fireEvent.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(subcategoryNode, false), moq.Times.once());
         });
@@ -344,7 +344,7 @@ describe("CategoryTree", () => {
             />,
           );
           const node = await waitFor(() => getSubCategoryNode(result.getAllByTestId("tree-node")));
-          const cb = node.querySelector("input");
+          const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
           fireEvent.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(subcategoryNode, true), moq.Times.once());
         });
