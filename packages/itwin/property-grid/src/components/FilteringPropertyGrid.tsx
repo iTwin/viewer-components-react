@@ -3,12 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useCallback } from "react";
+import { useEffect, useState } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
   FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
-import { useDisposable } from "@itwin/core-react";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IPropertyDataFilterer, IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataFilterResult, VirtualizedPropertyGridWithDataProviderProps } from "@itwin/components-react";
@@ -30,13 +29,19 @@ export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithD
  * @internal
  */
 export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps) {
-  const filteringDataProvider = useDisposable(useCallback(
-    () => {
-      const filteringProvider = new FilteringPropertyDataProvider(dataProvider, filterer);
-      return new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
-    },
-    [filterer, dataProvider, autoExpandChildCategories]
-  ));
+  const [filteringDataProvider, setFilteringDataProvider] = useState<AutoExpandingPropertyFilterDataProvider>();
+  useEffect(() => {
+    const filteringProvider = new FilteringPropertyDataProvider(dataProvider, filterer);
+    const provider = new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
+    setFilteringDataProvider(provider);
+    return () => {
+      provider.dispose();
+    };
+  }, [filterer, dataProvider, autoExpandChildCategories]);
+
+  if (!filteringDataProvider) {
+    return null;
+  }
 
   // in order to allow resize values column fully we need to override default width reserved for action buttons.
   // istanbul ignore next

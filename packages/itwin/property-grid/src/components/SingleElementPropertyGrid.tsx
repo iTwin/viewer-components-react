@@ -11,7 +11,7 @@ import { PropertyGridContent } from "./PropertyGridContent";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { PropertyGridContentProps } from "./PropertyGridContent";
-import type {  DataProviderProps } from "../hooks/UseDataProvider";
+import type { DataProviderProps } from "../hooks/UseDataProvider";
 
 /**
  * Props for data provider used by `SingleElementPropertyGrid`.
@@ -33,20 +33,21 @@ export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dat
  * @public
  */
 export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps) {
-  const dataProvider = useSingleElementDataProvider({ imodel: props.imodel, instanceKey, createDataProvider  });
+  const dataProvider = useSingleElementDataProvider({ imodel: props.imodel, instanceKey, createDataProvider });
+  if (!dataProvider) {
+    return null;
+  }
 
-  return (
-    <PropertyGridContent
-      {...props}
-      dataProvider={dataProvider}
-    />
-  );
+  return <PropertyGridContent {...props} dataProvider={dataProvider} />;
 }
 
 /** Custom hook that creates data provider and setup it to load data for specific instance. */
 function useSingleElementDataProvider({ instanceKey, ...props }: SingleElementDataProviderProps & { imodel: IModelConnection }) {
   const dataProvider = useDataProvider(props);
   useEffect(() => {
+    if (!dataProvider) {
+      return;
+    }
     dataProvider.keys = new KeySet([instanceKey]);
   }, [dataProvider, instanceKey]);
   return dataProvider;
