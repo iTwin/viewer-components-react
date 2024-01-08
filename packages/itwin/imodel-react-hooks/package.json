@@ -37,6 +37,7 @@
     "test": "jest"
   },
   "jest": {
+    "testEnvironment": "jest-environment-jsdom",
     "collectCoverageFrom": [
       "<rootDir>/src/**"
     ],
