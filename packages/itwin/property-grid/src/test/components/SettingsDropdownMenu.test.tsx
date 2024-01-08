@@ -5,13 +5,12 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import { SettingsDropdownMenu, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext, SHOWNULL_KEY } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext";
-import { createFunctionStub } from "../TestUtils";
+import { createFunctionStub, render, waitFor } from "../TestUtils";
 
 import type { ReactElement } from "react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";

@@ -7,12 +7,11 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
-import { waitFor } from "@testing-library/react";
 import { PropertyGridContent } from "../../components/PropertyGridContent";
 import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
-import { createPropertyRecord, renderWithUser, stubSelectionManager } from "../TestUtils";
+import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { ReactElement } from "react";
 import type { PrimitiveValue } from "@itwin/appui-abstract";
@@ -51,7 +50,7 @@ describe("<PropertyGridContent />", () => {
   } as unknown as IPresentationPropertyDataProvider;
 
   function renderWithContext(ui: ReactElement) {
-    return renderWithUser(
+    return render(
       <NullValueSettingContext>
         {ui}
       </NullValueSettingContext>

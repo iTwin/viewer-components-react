@@ -6,10 +6,8 @@
 import { expect } from "chai";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
-import { waitFor } from "@testing-library/react";
-import { renderHook } from "@testing-library/react-hooks";
 import { useLoadedInstanceInfo } from "../../hooks/UseInstanceInfo";
-import { createFunctionStub, createResolvablePromise } from "../TestUtils";
+import { createFunctionStub, createResolvablePromise, renderHook, waitFor } from "../TestUtils";
 
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
