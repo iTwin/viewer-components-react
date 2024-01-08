@@ -8,7 +8,7 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { PropertyGrid, PropertyGridManager } from "../../property-grid-react";
-import { createPropertyRecord, stubFavoriteProperties, render, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils";
+import { createPropertyRecord, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
