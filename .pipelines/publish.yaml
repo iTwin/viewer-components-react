@@ -14,7 +14,8 @@ variables:
   - group: "Caleb - iTwin GitHub Token"
   - name: REPO_URL
     value: github.com/iTwin/viewer-components-react
-  - NodeVersion: 18.16.0
+  - name: NodeVersion
+    value: 18.16.0
 
 steps:
   - template: templates/build-steps.yaml
