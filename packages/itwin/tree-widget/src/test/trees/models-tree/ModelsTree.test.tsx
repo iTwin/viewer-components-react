@@ -39,8 +39,7 @@ describe("ModelsTree", () => {
   const sizeProps = { width: 200, height: 200 };
 
   before(async () => {
-    // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-    await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
+    await NoRenderApp.startup();
     await TestUtils.initialize();
   });
 
@@ -399,8 +398,7 @@ describe("ModelsTree", () => {
         beforeEach(() => {
           const filteredNode: Node = {
             key: createKey("element", "filtered-element"),
-            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
+            label: LabelDefinition.fromLabelString("filtered-node"),
           };
           const filter: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();

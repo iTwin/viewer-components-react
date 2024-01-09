@@ -380,8 +380,7 @@ describe("CategoryTree", () => {
         it("filters nodes", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
+            label: LabelDefinition.fromLabelString("filtered-node"),
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();
@@ -404,8 +403,7 @@ describe("CategoryTree", () => {
         it("invokes onFilterApplied callback", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
+            label: LabelDefinition.fromLabelString("filtered-node"),
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();

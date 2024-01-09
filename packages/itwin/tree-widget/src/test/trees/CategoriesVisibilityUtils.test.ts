@@ -76,8 +76,7 @@ describe("CategoryVisibilityUtils", () => {
     selectedViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
     perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => [][Symbol.iterator]());
     viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
-    // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-    viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+    viewStateMock.setup((x) => x.is3d()).returns(() => true);
   });
 
   afterEach(() => {
@@ -148,8 +147,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("enables category in all viewports", async () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       otherViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
@@ -163,8 +161,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("disables category in all viewports", async () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       otherViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
@@ -178,8 +175,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("does not change category if viewport and selected view has different types", async () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => false); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => false);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       otherViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
@@ -212,8 +208,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("enables subCategory in all viewports", () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       mockViewManagerForEachViewport(otherViewMock.object);
@@ -226,8 +221,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("disables subCategory in all viewports", () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       mockViewManagerForEachViewport(otherViewMock.object);
@@ -240,8 +234,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("does not change subCategory state if viewport and selectedView has different types", () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => false); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => false);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       mockViewManagerForEachViewport(otherViewMock.object);

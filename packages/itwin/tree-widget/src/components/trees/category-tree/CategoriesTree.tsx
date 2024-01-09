@@ -153,8 +153,7 @@ function useCategoryVisibilityHandler(
 
 async function setViewType(activeView: Viewport) {
   const view = activeView.view as SpatialViewState;
-  // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-  const viewType = view.is3d() ? "3d" : "2d"; // eslint-disable-line @itwin/no-internal
+  const viewType = view.is3d() ? "3d" : "2d";
   await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", viewType);
 }
 
