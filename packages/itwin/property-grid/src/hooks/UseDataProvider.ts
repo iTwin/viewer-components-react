@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useCallback } from "react";
-import { useDisposable } from "@itwin/core-react";
+import { useEffect, useState } from "react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -24,11 +23,15 @@ export interface DataProviderProps {
  * @internal
  */
 export function useDataProvider({ imodel, createDataProvider }: DataProviderProps & { imodel: IModelConnection }) {
-  return useDisposable(
-    useCallback(
-      () => createDataProvider ? createDataProvider(imodel) : new PresentationPropertyDataProvider({ imodel }),
-      [imodel, createDataProvider]
-    )
-  );
-}
+  const [state, setState] = useState<IPresentationPropertyDataProvider>();
 
+  useEffect(() => {
+    const provider = createDataProvider ? createDataProvider(imodel) : new PresentationPropertyDataProvider({ imodel });
+    setState(provider);
+    return () => {
+      provider.dispose();
+    };
+  }, [imodel, createDataProvider]);
+
+  return state;
+}

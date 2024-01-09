@@ -2,6 +2,26 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "1.4.1",
+      "tag": "@itwin/property-grid-react_v1.4.1",
+      "date": "Thu, 04 Jan 2024 16:26:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add lint checks for *.scss files."
+          },
+          {
+            "comment": "Fix flaky test."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix incorrect `PropertyGrid` title on concurrent `getData()` calls."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@itwin/property-grid-react_v1.4.0",
       "date": "Fri, 10 Nov 2023 14:46:30 GMT",

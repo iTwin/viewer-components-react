@@ -123,7 +123,7 @@ describe("TreeRenderer", () => {
       />
     );
 
-    await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null);
+    await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null); // eslint-disable-line deprecation/deprecation
   });
 
   it("marks node without expander", async () => {
@@ -136,7 +136,7 @@ describe("TreeRenderer", () => {
       />
     );
 
-    await waitFor(() => expect(container.querySelector(".without-expander")).to.not.be.null);
+    await waitFor(() => expect(container.querySelector(".without-expander")).to.not.be.null); // eslint-disable-line deprecation/deprecation
   });
 
   describe("custom labels", () => {

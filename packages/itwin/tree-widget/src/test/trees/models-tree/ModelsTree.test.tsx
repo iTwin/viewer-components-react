@@ -109,7 +109,7 @@ describe("ModelsTree", () => {
       });
 
       const isNodeChecked = (node: HTMLElement): boolean => {
-        const cb = node.querySelector("input");
+        const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
         return cb!.checked;
       };
 
@@ -203,11 +203,11 @@ describe("ModelsTree", () => {
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
         const renderedNode = await result.findByTestId("tree-node");
-        expect(renderedNode.querySelectorAll("input").length).to.eq(1);
+        expect(renderedNode.querySelectorAll("input").length).to.eq(1); // eslint-disable-line deprecation/deprecation
 
         result.rerender(<ModelsTree {...sizeProps} iModel={imodelMock.object} activeView={mockViewport().object} />);
         const rerenderedNode = await result.findByTestId("tree-node");
-        expect(rerenderedNode.querySelectorAll("input").length).to.eq(1);
+        expect(rerenderedNode.querySelectorAll("input").length).to.eq(1); // eslint-disable-line deprecation/deprecation
       });
 
       it("calls visibility handler's `changeVisibility` on node checkbox state changes to 'checked'", async () => {
@@ -218,7 +218,7 @@ describe("ModelsTree", () => {
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
         await result.findByText("model");
         const renderedNode = result.getByTestId("tree-node");
-        const cb = renderedNode.querySelector("input");
+        const cb = renderedNode.querySelector("input"); // eslint-disable-line deprecation/deprecation
         fireEvent.click(cb!);
 
         expect(visibilityHandlerMock.changeVisibility).to.be.calledOnce;

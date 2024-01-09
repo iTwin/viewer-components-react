@@ -30,22 +30,10 @@ package-lock.json
 *.orig
 .node-xmlhttprequest-sync*
 
-# rush specific
-common/temp/**
-common/autoinstallers/*/.npmrc
-.rush/temp/**
-/**/.rush
-package-deps.json
-*.build.log
-*.build.error.log
-
-# DS store
-.DS_Store
-
-# IDE configuration
-.idea
-
 # e2e tests output
 /**/test-results
 /**/playwright-report
 /**/playwright/.cache
+
+# api extractor temp files
+/packages/**/api/temp

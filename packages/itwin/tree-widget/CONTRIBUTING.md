@@ -6,15 +6,15 @@ The package is part of the [viewer-components-react](https://github.com/iTwin/vi
 
 Set up steps:
 
-1. `rush install` in repository root to install dependencies.
-2. (optional) `rush clean` to clear previous build artifacts.
-3. `rush build -t tree-widget-react` to build the package.
+1. `pnpm install` in repository root to install dependencies.
+2. (optional) `pnpm clean` to clear previous build artifacts.
+3. `pnpm build --scope tree-widget-react` to build the package.
 4. `npm run test` in package root to run its unit tests.
 
 Often, you'll want to see the widget in a running application. For that, we have a test viewer application. To start it in watch mode:
 
 1. Follow steps 1-3 from above.
-2. `rush build -t test-viewer` to build the viewer an all its dependencies.
+2. `pnpm build --scope test-viewer` to build the viewer an all its dependencies.
 3. `npm run start:test-viewer:watch` in package root to run the viewer. The script should open a browser window with the viewer once it starts. Modifying package code should hot-reload the viewer.
 
 ## Testing

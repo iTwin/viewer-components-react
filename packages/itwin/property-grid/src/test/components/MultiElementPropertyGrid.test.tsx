@@ -8,10 +8,9 @@ import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { getByRole as getByRoleRTL, render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import { AncestorsNavigationControls, MultiElementPropertyGrid, PropertyGridManager } from "../../property-grid-react";
-import { createPropertyRecord, stubFavoriteProperties, stubPresentation, stubSelectionManager } from "../TestUtils";
+import { createPropertyRecord, getByRole as getByRoleRTL, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
@@ -166,14 +165,14 @@ describe("<MultiElementPropertGrid />", () => {
     await waitFor(() => getByText("Test-Value-2"));
 
     // navigate back to element list
-    const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid");
+    const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid"); // eslint-disable-line deprecation/deprecation
     expect(singleElementGrid).to.not.be.null;
     const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back"  });
     await userEvents.click(singleElementBackButton);
     await waitFor(() => getByText(expectedLabels[0]));
 
     // navigate back to multi instances properties grid
-    const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list");
+    const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list"); // eslint-disable-line deprecation/deprecation
     expect(element).to.not.be.null;
     const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back"  });
     await userEvents.click(elementListBackButton);
