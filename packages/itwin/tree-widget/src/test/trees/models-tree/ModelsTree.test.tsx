@@ -450,7 +450,7 @@ describe("ModelsTree", () => {
     });
 
     it("does not load private categories", async () => {
-      const iModel: IModelConnection = await buildTestIModel("ModelsTree", (builder) => {
+      const iModel: IModelConnection = await buildTestIModel("ModelsTree", async (builder) => { // eslint-disable-line deprecation/deprecation
         const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
@@ -470,7 +470,7 @@ describe("ModelsTree", () => {
     });
 
     it("groups elements by class", async () => {
-      const iModel: IModelConnection = await buildTestIModel("ModelsTree", (builder) => {
+      const iModel: IModelConnection = await buildTestIModel("ModelsTree", async (builder) => { // eslint-disable-line deprecation/deprecation
         const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
         const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
         const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
@@ -484,7 +484,7 @@ describe("ModelsTree", () => {
     });
 
     it("loads specified type of elements", async () => {
-      const iModel: IModelConnection = await buildTestIModel("ModelsTree", (builder) => {
+      const iModel: IModelConnection = await buildTestIModel("ModelsTree", async (builder) => { // eslint-disable-line deprecation/deprecation
         const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
         const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
         const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
@@ -510,7 +510,7 @@ describe("ModelsTree", () => {
           - Child subject X                // hidden - `Subject.Job.Bridge` json property
             - Model X (with elements)      // visible
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Job: { Bridge: "Test" } } } });
           const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
@@ -528,7 +528,7 @@ describe("ModelsTree", () => {
           - Child subject X                // hidden - `Subject.Model.Type = \"Hierarchy\"` json property
             - Model X (with elements)      // visible
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } } });
           const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
@@ -546,7 +546,7 @@ describe("ModelsTree", () => {
           - Child subject X                // hidden - no child nodes
             - Model X (no elements)        // hidden - no elements
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
           addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
         });
@@ -562,7 +562,7 @@ describe("ModelsTree", () => {
           - Child subject X                // visible
             - Model X (with elements)      // visible
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
           const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
@@ -581,7 +581,7 @@ describe("ModelsTree", () => {
             - Model X                      // visible - related through json property
           - Model X                        // visible - related through direct relationship
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const partitionX = addPartition(builder, "BisCore:PhysicalPartition", "Model X", IModel.rootSubjectId);
           const modelX = addModel(builder, "BisCore:PhysicalModel", partitionX);
@@ -600,7 +600,7 @@ describe("ModelsTree", () => {
           - Child subject X                // visible
             - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
           const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }));
@@ -618,7 +618,7 @@ describe("ModelsTree", () => {
           - Child subject X                // visible
             - Model X (with elements)      // hidden - `PhysicalPartition.Model.Content` json property
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
           const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }));
@@ -635,7 +635,7 @@ describe("ModelsTree", () => {
         - Root subject                  // visible
           - Model X                     // hidden - private
         */
-        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), (builder) => {
+        const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
           const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX), { isPrivate: true });

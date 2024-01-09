@@ -468,7 +468,7 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 3d categories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", (builder) => {
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => { // eslint-disable-line deprecation/deprecation
         const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
@@ -492,7 +492,7 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 3d subCategories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", (builder) => {
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => { // eslint-disable-line deprecation/deprecation
         const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
@@ -514,7 +514,7 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 2d categories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => { // eslint-disable-line deprecation/deprecation
         const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
@@ -536,7 +536,7 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 2d subCategories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => { // eslint-disable-line deprecation/deprecation
         const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
