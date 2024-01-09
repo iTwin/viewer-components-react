@@ -4,11 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as moq from "typemoq";
-import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ModelsTreeComponent, TreeWidget } from "../../../tree-widget-react";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import sinon from "sinon";
-import { mockViewport, TestUtils } from "../../TestUtils";
+import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 import { expect } from "chai";
 import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
@@ -53,24 +52,28 @@ describe("<ModelsTreeComponent />", () => {
     onIModelHierarchyChanged: new BeEvent<() => void>(),
   } as unknown as Viewport;
 
-  it("returns null if iModel is undefined", () => {
+  it("returns null if iModel is undefined", async () => {
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => ({} as Viewport));
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree");
     const result = render(
       <ModelsTreeComponent />
     );
-    expect(result.container.children).to.be.empty;
-    expect(modelsTreeSpy).to.not.be.called;
+    await waitFor(() => {
+      expect(result.container.children).to.be.empty;
+      expect(modelsTreeSpy).to.not.be.called;
+    });
   });
 
-  it("returns null if viewport is undefined", () => {
+  it("returns null if viewport is undefined", async () => {
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree");
     const result = render(
       <ModelsTreeComponent />
     );
-    expect(result.container.children).to.be.empty;
-    expect(modelsTreeSpy).to.not.be.called;
+    await waitFor(() => {
+      expect(result.container.children).to.be.empty;
+      expect(modelsTreeSpy).to.not.be.called;
+    });
   });
 
   it("renders `ModelsTree` when iModel and viewport are defined", async () => {
@@ -80,8 +83,10 @@ describe("<ModelsTreeComponent />", () => {
     const result = render(
       <ModelsTreeComponent />
     );
-    expect(result.container.children).to.not.be.empty;
-    expect(modelsTreeSpy).to.be.called;
+    await waitFor(() => {
+      expect(result.container.children).to.not.be.empty;
+      expect(modelsTreeSpy).to.be.called;
+    });
   });
 
   it("getLabel returns translated label of the component", () => {
@@ -136,16 +141,18 @@ describe("<ModelsTreeComponent />", () => {
 
   describe("header buttons", () => {
 
-    it("renders default tree header buttons", () => {
+    it("renders default tree header buttons", async () => {
       const treewHeaderSpy = sinon.stub(treeHeader, "TreeHeader").returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
       render(<ModelsTreeComponent />);
-      expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 5));
+      await waitFor(() => {
+        expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 5));
+      });
     });
 
-    it("renders user provided tree header buttons", () => {
+    it("renders user provided tree header buttons", async () => {
       const treewHeaderSpy = sinon.stub(treeHeader, "TreeHeader").returns(<></>);
       const spy = sinon.stub().returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
@@ -156,22 +163,24 @@ describe("<ModelsTreeComponent />", () => {
           headerButtons={[spy]}
         />
       );
-      expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 1 ));
-      expect(spy).to.be.called;
+      await waitFor(() => {
+        expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 1 ));
+        expect(spy).to.be.called;
+      });
     });
 
     describe("<ShowAllButton />", () => {
 
       it("click on ShowAllButton calls expected function", async () => {
         const showAllSpy = sinon.stub(modelsVisibilityHandler, "showAllModels");
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.ShowAllButton
             models={models}
             viewport={vpMock.object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         expect(showAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
       });
     });
@@ -180,14 +189,14 @@ describe("<ModelsTreeComponent />", () => {
 
       it("click on HideAllButton calls expected function", async () => {
         const hideAllSpy = sinon.stub(modelsVisibilityHandler, "hideAllModels");
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.HideAllButton
             models={models}
             viewport={vpMock.object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         expect(hideAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
       });
     });
@@ -196,14 +205,14 @@ describe("<ModelsTreeComponent />", () => {
 
       it("click on InvertAllButton calls expected function", async () => {
         const invertAllSpy = sinon.stub(modelsVisibilityHandler, "invertAllModels");
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.InvertButton
             models={models}
             viewport={vpMock.object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         expect(invertAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
       });
     });
@@ -212,54 +221,54 @@ describe("<ModelsTreeComponent />", () => {
 
       it("click on View2DButton calls expected function", async () => {
         const view2DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View2DButton
             models={[{ id:"modelTestId", isPlanProjection: true }]}
             viewport={mockViewport().object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         expect(view2DSpy).to.be.calledOnce;
       });
 
       it("renders disabled button when there are no plan projection models", async () => {
         const view2DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View2DButton
             models={[{ id:"modelTestId", isPlanProjection: false }]}
             viewport={mockViewport().object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         expect(view2DSpy).to.not.be.called;
         expect(button.getAttribute("disabled")).to.not.be.null;
       });
 
       it("on click changes models visibility when models are not visible", async () => {
         vpMock.setup((x) => x.viewsModel("modelTestId")).returns(() => false);
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View2DButton
             models={[{ id:"modelTestId", isPlanProjection: true }]}
             viewport={vpMock.object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         vpMock.verify(async (x) => x.addViewedModels(["modelTestId"]), moq.Times.once());
       });
 
       it("on click changes models visibility when models are visible", async () => {
         vpMock.setup((x) => x.viewsModel("modelTestId")).returns(() => true);
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View2DButton
             models={[{ id:"modelTestId", isPlanProjection: true }]}
             viewport={vpMock.object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once());
       });
 
@@ -276,9 +285,13 @@ describe("<ModelsTreeComponent />", () => {
             viewport={viewportMock.object}
           />
         );
-        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledOnce);
-        onViewedModelsChanged.raiseEvent(viewportMock.object);
-        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledTwice);
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.called);
+        areAllModelsVisibleSpy.resetHistory();
+        act(() => {
+          onViewedModelsChanged.raiseEvent(viewportMock.object);
+        });
+
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.called);
       });
     });
 
@@ -286,54 +299,54 @@ describe("<ModelsTreeComponent />", () => {
 
       it("click on View3DButton calls expected function", async () => {
         const view3DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View3DButton
             models={[{ id:"modelTestId", isPlanProjection: false }]}
             viewport={mockViewport().object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         expect(view3DSpy).to.be.calledOnce;
       });
 
       it("renders disabled button when all models are plan projection models", async () => {
         const view3DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View3DButton
             models={[{ id:"modelTestId", isPlanProjection: true }]}
             viewport={mockViewport().object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         expect(view3DSpy).to.not.be.called;
         expect(button.getAttribute("disabled")).to.not.be.null;
       });
 
       it("on click changes models visibility when models are not visible", async () => {
         vpMock.setup((x) => x.viewsModel("modelTestId")).returns(() => false);
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View3DButton
             models={[{ id:"modelTestId", isPlanProjection: false }]}
             viewport={vpMock.object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         vpMock.verify(async (x) => x.addViewedModels(["modelTestId"]), moq.Times.once());
       });
 
       it("on click changes models visibility when models are visible", async () => {
         vpMock.setup((x) => x.viewsModel("modelTestId")).returns(() => true);
-        const result = render(
+        const { user, getByRole } = render(
           <ModelsTreeComponent.View3DButton
             models={[{ id:"modelTestId", isPlanProjection: false }]}
             viewport={vpMock.object}
           />
         );
-        const button = await waitFor(() => result.getByRole("button"));
-        fireEvent.click(button);
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
         vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once());
       });
 
@@ -350,9 +363,13 @@ describe("<ModelsTreeComponent />", () => {
             viewport={viewportMock.object}
           />
         );
-        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledOnce);
-        onViewedModelsChanged.raiseEvent(viewportMock.object);
-        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledTwice);
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.called);
+        areAllModelsVisibleSpy.resetHistory();
+        act(() => {
+          onViewedModelsChanged.raiseEvent(viewportMock.object);
+        });
+
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.called);
       });
     });
   });

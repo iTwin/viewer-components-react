@@ -15,9 +15,8 @@ import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { render, waitFor } from "@testing-library/react";
 import { ExternalSourcesTree, RULESET_EXTERNAL_SOURCES } from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
-import { mockPresentationManager, renderWithUser, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ElementProps } from "@itwin/core-common";
@@ -108,7 +107,7 @@ describe("ExternalSourcesTree", () => {
           key: createInvalidNodeKey(),
           label: LabelDefinition.fromLabelString("test-node"),
         }]);
-        const { user, getByText, queryByText } = renderWithUser(
+        const { user, getByText, queryByText } = render(
           <ExternalSourcesTree
             {...sizeProps}
             iModel={imodelMock.object}

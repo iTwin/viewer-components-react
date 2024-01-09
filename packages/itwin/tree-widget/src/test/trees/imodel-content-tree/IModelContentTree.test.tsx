@@ -14,12 +14,11 @@ import { Presentation } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { render, waitFor } from "@testing-library/react";
 import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../tree-widget-react";
 import {
   addDocument, addDrawingCategory, addDrawingGraphic, addGroup, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubject,
 } from "../../IModelUtils";
-import { mockPresentationManager, renderWithUser, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -85,7 +84,7 @@ describe("IModelContentTree", () => {
 
       it("renders context menu", async () => {
         setupHierarchy([{ key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("test-node") }]);
-        const { user, getByText, queryByText } = renderWithUser(
+        const { user, getByText, queryByText } = render(
           <IModelContentTree
             {...sizeProps}
             iModel={imodelMock.object}

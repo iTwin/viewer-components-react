@@ -3,15 +3,19 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { createElement, Fragment, StrictMode } from "react";
 import deepEqual from "deep-equal";
 import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
-import { render } from "@testing-library/react";
-import userEvents from "@testing-library/user-event";
+import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
 
+import type { PropsWithChildren, ReactElement } from "react";
+import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 import type { PresentationManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import type { VariableValue } from "@itwin/presentation-common";
@@ -36,11 +40,11 @@ export class TestUtils {
 }
 
 /** typemoq matcher for deep equality */
-export const deepEquals = <T>(expected: T) => {
+export function deepEquals<T>(expected: T) {
   return moq.It.is((actual: T) => deepEqual(actual, expected));
-};
+}
 
-export const mockPresentationManager = () => {
+export function mockPresentationManager() {
   const onRulesetVariableChanged = new BeEvent<(variableId: string, prevValue: VariableValue, currValue: VariableValue) => void>();
   const rulesetVariablesManagerMock = moq.Mock.ofType<RulesetVariablesManager>();
   rulesetVariablesManagerMock.setup((x) => x.onVariableChanged).returns(() => onRulesetVariableChanged);
@@ -52,7 +56,7 @@ export const mockPresentationManager = () => {
     rulesetVariablesManager: rulesetVariablesManagerMock,
     presentationManager: presentationManagerMock,
   };
-};
+}
 
 export async function flushAsyncOperations() {
   return new Promise((resolve) => setTimeout(resolve));
@@ -130,9 +134,37 @@ export function createResolvablePromise<T>() {
   return { promise, resolve };
 }
 
-export function renderWithUser(...args: Parameters<typeof render>): ReturnType<typeof render> & { user: ReturnType<typeof userEvents["setup"]> } {
+function createWrapper(wrapper?: React.JSXElementConstructor<{ children: React.ReactElement }>, disableStrictMode?: boolean) {
+  // if `DISABLE_STRICT_MODE` is set do not wrap components into `StrictMode` component
+  const StrictModeWrapper = process.env.DISABLE_STRICT_MODE || disableStrictMode ? Fragment : StrictMode;
+
+  return wrapper
+    ? ({ children }: PropsWithChildren<unknown>) => <StrictModeWrapper>{createElement(wrapper, undefined, children)}</StrictModeWrapper>
+    : StrictModeWrapper;
+}
+
+/**
+ * Custom render function that wraps around `render` function from `@testing-library/react` and additionally
+ * setup `userEvent` from `@testing-library/user-event`.
+ *
+ * It should be used when test need to do interactions with rendered components.
+ */
+function customRender(ui: ReactElement, options?: RenderOptions & { disableStrictMode?: boolean }): RenderResult & { user: UserEvent } {
+  const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
   return {
-    user: userEvents.setup(),
-    ...render(...args),
+    ...renderRTL(ui, { ...options, wrapper }),
+    user: userEvent.setup(),
   };
 }
+
+function customRenderHook<Result, Props>(
+  render: (initialProps: Props) => Result,
+  options?: RenderHookOptions<Props> & { disableStrictMode?: boolean },
+): RenderHookResult<Result, Props> {
+  const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
+  return renderHookRTL(render, { ...options, wrapper });
+}
+
+export * from "@testing-library/react";
+export { customRender as render };
+export { customRenderHook as renderHook };

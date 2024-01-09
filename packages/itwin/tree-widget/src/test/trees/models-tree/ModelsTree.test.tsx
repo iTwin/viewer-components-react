@@ -19,13 +19,12 @@ import {
   buildTestIModel, createFileNameFromString, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting,
   terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ClassGroupingOption } from "../../../components/trees/common/Types";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
-import { deepEquals, mockPresentationManager, mockViewport, renderWithUser, TestUtils } from "../../TestUtils";
+import { deepEquals, mockPresentationManager, mockViewport,  render, TestUtils, waitFor } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
@@ -133,7 +132,7 @@ describe("ModelsTree", () => {
         setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden", isDisabled: false });
 
-        const { user, getByText, queryByText } = renderWithUser(<ModelsTree
+        const { user, getByText, queryByText } = render(<ModelsTree
           {...sizeProps}
           iModel={imodelMock.object}
           modelsVisibilityHandler={visibilityHandlerMock}
@@ -215,11 +214,11 @@ describe("ModelsTree", () => {
         setupDataProvider([node]);
         visibilityHandlerMock.changeVisibility = sinon.spy();
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
-        await result.findByText("model");
-        const renderedNode = result.getByTestId("tree-node");
+        const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
+        await waitFor(() => expect(queryByText("model")).to.not.be.null);
+        const renderedNode = getByTestId("tree-node");
         const cb = renderedNode.querySelector("input"); // eslint-disable-line deprecation/deprecation
-        fireEvent.click(cb!);
+        await user.click(cb!);
 
         expect(visibilityHandlerMock.changeVisibility).to.be.calledOnce;
       });
@@ -252,13 +251,23 @@ describe("ModelsTree", () => {
         }));
       });
 
-      it("should invoke visibilityHandler factory when it is passed as a function", async () => {
+      it("should create and dispose visibilityHandler when factory function is passed", async () => {
         const node: TreeNodeItem = { id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true };
         setupDataProvider([node]);
-        const visibilityHandlerSpy = sinon.stub().returns(visibilityHandlerMock);
+        const newHandler = {
+          dispose: sinon.stub(),
+          onVisibilityChange: new BeEvent(),
+          setFilteredDataProvider: sinon.stub(),
+        };
+        const visibilityHandlerSpy = sinon.stub().returns(newHandler);
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerSpy} activeView={mockViewport().object} />);
         await waitFor(() => result.getByText("test-node"), { container: result.container });
-        expect(visibilityHandlerSpy).to.be.calledOnce;
+        expect(visibilityHandlerSpy).to.be.called;
+
+        result.unmount();
+        await waitFor(() => {
+          expect(newHandler.dispose).to.be.called;
+        });
       });
 
       it("should dispose of the visibilityHandler when ModelTree component is unmounted", async () => {
@@ -269,7 +278,7 @@ describe("ModelsTree", () => {
         const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerCallback} activeView={mockViewport().object} />);
         await waitFor(() => result.getByText("test-node"), { container: result.container });
         result.unmount();
-        expect(visibilityHandlerMock.dispose).to.be.calledOnce;
+        expect(visibilityHandlerMock.dispose).to.be.called;
       });
 
       describe("selection", () => {
@@ -278,11 +287,11 @@ describe("ModelsTree", () => {
           setupDataProvider([element]);
           visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} activeView={mockViewport().object} />);
-          await result.findByText("element");
+          const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} activeView={mockViewport().object} />);
+          await waitFor(() => expect(queryByText("element")).to.not.be.null);
 
-          const renderedNode = result.getByTestId("tree-node");
-          fireEvent.click(renderedNode);
+          const renderedNode = getByTestId("tree-node");
+          await user.click(renderedNode);
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals((element.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
         });
 
@@ -293,11 +302,11 @@ describe("ModelsTree", () => {
 
           const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => type === ModelsTreeNodeType.Element;
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
-          await result.findByText("element");
+          const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
+          await waitFor(() => expect(queryByText("element")).to.not.be.null);
 
-          const renderedNode = result.getByTestId("tree-node");
-          fireEvent.click(renderedNode);
+          const renderedNode = getByTestId("tree-node");
+          await user.click(renderedNode);
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals((element.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
         });
 
@@ -310,13 +319,14 @@ describe("ModelsTree", () => {
 
           const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => type === ModelsTreeNodeType.Model;
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
-          await result.findAllByText("model");
+          const { user, queryAllByText, getAllByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
+          await waitFor(() => expect(queryAllByText("model").length).to.be.eq(2));
 
-          const renderedNodes = result.queryAllByTestId("tree-node");
+          const renderedNodes = getAllByTestId("tree-node");
           expect(renderedNodes.length).to.be.eq(2);
-          fireEvent.click(renderedNodes[0]);
-          fireEvent.click(renderedNodes[1], { ctrlKey: true });
+          await user.click(renderedNodes[0]);
+          await user.keyboard("[ControlLeft>]");
+          await user.click(renderedNodes[1]);
 
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals((node1.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
           selectionManagerMock.verify((x) => x.addToSelection(moq.It.isAny(), imodelMock.object, deepEquals((node2.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
@@ -329,11 +339,11 @@ describe("ModelsTree", () => {
 
           const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => type === ModelsTreeNodeType.Subject;
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
-          await result.findByText("subject");
+          const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
+          await waitFor(() => expect(queryByText("subject")).to.not.be.null);
 
-          const renderedNode = result.getByTestId("tree-node");
-          fireEvent.click(renderedNode);
+          const renderedNode = getByTestId("tree-node");
+          await user.click(renderedNode);
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals((subject.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
         });
 
@@ -345,11 +355,11 @@ describe("ModelsTree", () => {
 
           const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => type === ModelsTreeNodeType.Unknown;
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
-          await result.findByText("element");
+          const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
+          await waitFor(() => expect(queryByText("element")).to.not.be.null);
 
-          const renderedNode = result.getByTestId("tree-node");
-          fireEvent.click(renderedNode);
+          const renderedNode = getByTestId("tree-node");
+          await user.click(renderedNode);
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals((node.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
         });
 
@@ -360,11 +370,11 @@ describe("ModelsTree", () => {
 
           const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => (type === ModelsTreeNodeType.Grouping);
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
-          await result.findByText("grouping");
+          const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
+          await waitFor(() => expect(queryByText("grouping")).to.not.be.null);
 
-          const renderedNode = result.getByTestId("tree-node");
-          fireEvent.click(renderedNode);
+          const renderedNode = getByTestId("tree-node");
+          await user.click(renderedNode);
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals([node.key]), 0, ""), moq.Times.once());
         });
 
@@ -375,11 +385,11 @@ describe("ModelsTree", () => {
 
           const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => type === ModelsTreeNodeType.Model;
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
-          await result.findByText("category");
+          const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
+          await waitFor(() => expect(queryByText("category")).to.not.be.null);
 
-          const renderedNode = result.getByTestId("tree-node");
-          fireEvent.click(renderedNode);
+          const renderedNode = getByTestId("tree-node");
+          await user.click(renderedNode);
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), moq.It.isAny(), moq.It.isAny(), moq.It.isAny(), moq.It.isAny()), moq.Times.never());
         });
 

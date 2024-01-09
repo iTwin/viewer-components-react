@@ -5,11 +5,10 @@
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { waitFor } from "@testing-library/react";
 import { TreeContextMenuItem } from "../../../components/trees/common/ContextMenu";
 import { TreeRenderer } from "../../../components/trees/common/TreeRenderer";
 import { registerRenderers } from "../../../components/trees/common/Utils";
-import { renderWithUser } from "../../TestUtils";
+import { render, waitFor } from "../../TestUtils";
 import { createSimpleTreeModelNode } from "../Common";
 
 import type { ITreeNodeLoader , TreeActions, TreeModel, VisibleTreeNodes } from "@itwin/components-react";
@@ -17,7 +16,10 @@ import type { TreeRendererProps } from "../../../components/trees/common/TreeRen
 
 describe("TreeRenderer", () => {
   const nodeLoader = {} as ITreeNodeLoader;
-  const treeActions = {} as TreeActions;
+  const treeActions = {
+    onNodeMouseDown: () => {},
+    onNodeMouseMove: () => {},
+  } as unknown as TreeActions;
 
   const node = createSimpleTreeModelNode("test-node", "Test Node");
   const visibleNodes = {
@@ -47,7 +49,7 @@ describe("TreeRenderer", () => {
   });
 
   it("opens context menu", async () => {
-    const { user, getByText } = renderWithUser(
+    const { user, getByText } = render(
       <TreeRenderer
         {...initialProps}
         contextMenuItems={[() => <div>Test Item</div>]}
@@ -61,7 +63,7 @@ describe("TreeRenderer", () => {
   });
 
   it("doesn't open context menu if there are no items", async () => {
-    const { user, getByText, queryByRole } = renderWithUser(
+    const { user, getByText, queryByRole } = render(
       <TreeRenderer
         {...initialProps}
       />
@@ -74,7 +76,7 @@ describe("TreeRenderer", () => {
   });
 
   it("renders context menu without size if item is `null`", async () => {
-    const { user, getByText, getByRole } = renderWithUser(
+    const { user, getByText, getByRole } = render(
       <TreeRenderer
         {...initialProps}
         contextMenuItems={[
@@ -93,7 +95,7 @@ describe("TreeRenderer", () => {
 
   it("closes context menu when item is clicked", async () => {
     const selectStub = sinon.stub();
-    const { user, getByText, queryByText } = renderWithUser(
+    const { user, getByText, queryByText } = render(
       <TreeRenderer
         {...initialProps}
         contextMenuItems={[() => <TreeContextMenuItem id="test-item" onSelect={selectStub}>Test Item</TreeContextMenuItem>]}
@@ -116,7 +118,7 @@ describe("TreeRenderer", () => {
   });
 
   it("renders `enlarged` nodes list", async () => {
-    const { container } = renderWithUser(
+    const { container } = render(
       <TreeRenderer
         {...initialProps}
         density={"enlarged"}
@@ -130,7 +132,7 @@ describe("TreeRenderer", () => {
     const nodeWithoutExpander = createSimpleTreeModelNode("test-node", "Test Node", { numChildren: 0 });
     visibleNodes.getAtIndex.reset();
     visibleNodes.getAtIndex.returns(nodeWithoutExpander);
-    const { container } = renderWithUser(
+    const { container } = render(
       <TreeRenderer
         {...initialProps}
       />
@@ -151,7 +153,7 @@ describe("TreeRenderer", () => {
     });
 
     it("renders using default renderer", async () => {
-      const { queryByText } = renderWithUser(
+      const { queryByText } = render(
         <TreeRenderer
           {...initialProps}
         />
@@ -161,7 +163,7 @@ describe("TreeRenderer", () => {
     });
 
     it("renders using custom renderer", async () => {
-      const { queryByText } = renderWithUser(
+      const { queryByText } = render(
         <TreeRenderer
           {...initialProps}
           nodeLabelRenderer={() => "Custom label"}

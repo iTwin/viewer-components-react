@@ -7,11 +7,10 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { render } from "@testing-library/react";
 import * as externalSourcesTreeModule from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
 import * as autoSizerModule from "../../../components/utils/AutoSizer";
 import { ExternalSourcesTreeComponent, TreeWidget } from "../../../tree-widget-react";
-import { TestUtils } from "../../TestUtils";
+import { render, TestUtils } from "../../TestUtils";
 
 describe("<ExternalSourcesTreeComponent />", () => {
   before(async () => {
@@ -48,7 +47,7 @@ describe("<ExternalSourcesTreeComponent />", () => {
       <ExternalSourcesTreeComponent />,
     );
 
-    expect(treeStub).to.be.calledOnceWith({
+    expect(treeStub).to.be.calledWith({
       width: 123,
       height: 456,
       iModel: imodel,
