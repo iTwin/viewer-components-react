@@ -23,8 +23,9 @@ steps:
       git config --global user.email imodeljs-admin@users.noreply.github.com
       git config --global user.name imodeljs-admin
       git remote set-url origin "https://$(GITHUBTOKEN)@$(REPO_URL)"
-      pnpm run publish --message "applying package updates" $beachballOptions
+      pnpm run publish --message "applying package updates" --token $NPM_AUTH_TOKEN $beachballOptions
     displayName: "Publish packages"
     env:
+      NPM_AUTH_TOKEN: $(npmToken)
       ${{ if eq(parameters.dev, true) }}:
         beachballOptions: "--config beachball.config.dev.js --keep-change-files"
