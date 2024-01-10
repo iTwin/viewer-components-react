@@ -1,0 +1,46 @@
+# repo specific
+.git
+.github
+.pipelines
+.devcontainer
+change
+
+# docker specific
+test-viewer.Dockerfile
+test-viewer.Dockerfile.dockerignore
+e2e.Dockerfile
+
+# Logs
+*.log
+
+# build output
+**/.nyc_output
+**/lib
+**/build
+**/test/output
+**/coverage
+**/full_stack_test_results
+**/integration_test_results
+**/imjs_extensions
+
+# Dependency directories
+**/node_modules
+
+# trash
+*.bak
+*.orig
+**/.node-xmlhttprequest-sync*
+**/.DS_Store
+
+# IDE configuration
+**/.idea
+.vscode
+.editorconfig
+.prettierignore
+.prettierrc
+
+# e2e tests output
+**/test-results
+**/playwright-report
+**/playwright/.cache
+**/e2e-tests/*-snapshots/*
