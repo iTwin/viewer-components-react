@@ -52,8 +52,8 @@
     "@itwin/core-frontend": "^4.0.0",
     "@itwin/core-react": "^4.6.0",
     "@itwin/presentation-components": "^4.4.0",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0"
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
   },
   "dependencies": {
     "@bentley/icons-generic": "^1.0.34",
