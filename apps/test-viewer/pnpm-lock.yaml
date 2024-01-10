@@ -75,8 +75,8 @@ dependencies:
     specifier: ^2.7.0
     version: 2.7.0(react-dom@17.0.2)(react@17.0.2)
   '@itwin/itwinui-react':
-    specifier: ^2.12.0
-    version: 2.12.0(react-dom@17.0.2)(react@17.0.2)
+    specifier: ^2.12.19
+    version: 2.12.19(react-dom@17.0.2)(react@17.0.2)
   '@itwin/map-layers':
     specifier: workspace:*
     version: file:../../packages/itwin/map-layers(@itwin/appui-abstract@4.1.2)(@itwin/appui-layout-react@4.8.0)(@itwin/appui-react@4.8.0)(@itwin/components-react@4.8.0)(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-react@4.8.0)(@itwin/imodel-components-react@4.8.0)(react-dom@17.0.2)(react@17.0.2)
@@ -2181,7 +2181,7 @@ packages:
       '@itwin/itwinui-icons': 1.16.0
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-variables': 2.1.2
       classnames: 2.3.1
       immer: 9.0.6
@@ -2258,7 +2258,7 @@ packages:
       '@itwin/core-bentley': 4.1.2
       '@itwin/core-react': 4.8.0(@itwin/appui-abstract@4.1.2)(@itwin/core-bentley@4.1.2)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-variables': 2.1.2
       '@types/shortid': 0.0.32
       classnames: 2.3.1
@@ -2381,7 +2381,7 @@ packages:
       '@itwin/appui-abstract': 4.1.2(@itwin/core-bentley@4.1.2)
       '@itwin/core-bentley': 4.1.2
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-variables': 2.1.2
       classnames: 2.3.1
       dompurify: 2.4.7
@@ -2472,7 +2472,7 @@ packages:
       '@itwin/core-quantity': 4.1.2(@itwin/core-bentley@4.1.2)
       '@itwin/core-react': 4.8.0(@itwin/appui-abstract@4.1.2)(@itwin/core-bentley@4.1.2)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-variables': 2.1.2
       classnames: 2.3.1
       react: 17.0.2
@@ -2549,8 +2549,8 @@ packages:
       react-dom: 17.0.2(react@17.0.2)
     dev: false
 
-  /@itwin/itwinui-react@2.12.0(react-dom@17.0.2)(react@17.0.2):
-    resolution: {integrity: sha512-owXvQ4qX6fkPFRS46BSMmhM1eHjJ/jfhdAkQTKYK7He+14gcyaBHrSBIiRNKILFHSyBQXE2FjD6wwoAjS/lnDA==}
+  /@itwin/itwinui-react@2.12.19(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-9ulsjB9eAHyvqiTN9qPRMe49wIa4f4XoAkVW3DzqiijLF/Lk2l06haIty/ndjFapWuzJxKbIstRoujR/OjZhBA==}
     peerDependencies:
       react: '>=16.8.6 < 19.0.0'
       react-dom: '>=16.8.6 < 19.0.0'
@@ -2666,7 +2666,7 @@ packages:
       '@itwin/imodel-components-react': 4.8.0(@itwin/appui-abstract@4.1.2)(@itwin/components-react@4.8.0)(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-geometry@4.1.2)(@itwin/core-quantity@4.1.2)(@itwin/core-react@4.8.0)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-css': 1.12.6
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-variables': 2.1.2
       '@itwin/presentation-common': 4.1.2(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-quantity@4.1.2)(@itwin/ecschema-metadata@4.1.2)
       '@itwin/presentation-frontend': 4.1.2(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-quantity@4.1.2)(@itwin/ecschema-metadata@4.1.2)(@itwin/presentation-common@4.1.2)
@@ -2763,7 +2763,7 @@ packages:
       '@itwin/imodels-access-frontend': 4.0.0(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)
       '@itwin/imodels-client-management': 4.2.2
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-common': 4.1.2(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-quantity@4.1.2)(@itwin/ecschema-metadata@4.1.2)
       '@itwin/presentation-components': 4.1.0(@itwin/appui-abstract@4.1.2)(@itwin/components-react@4.8.0)(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-react@4.8.0)(@itwin/imodel-components-react@4.8.0)(@itwin/presentation-common@4.1.2)(@itwin/presentation-frontend@4.1.2)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-frontend': 4.1.2(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-quantity@4.1.2)(@itwin/ecschema-metadata@4.1.2)(@itwin/presentation-common@4.1.2)
@@ -13756,7 +13756,7 @@ packages:
       '@itwin/core-geometry': 4.1.2
       '@itwin/core-react': 4.8.0(@itwin/appui-abstract@4.1.2)(@itwin/core-bentley@4.1.2)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-variables': 2.1.2
       '@itwin/measure-tools-react': file:../../packages/itwin/measure-tools(@itwin/appui-abstract@4.1.2)(@itwin/appui-layout-react@4.8.0)(@itwin/appui-react@4.8.0)(@itwin/components-react@4.8.0)(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-geometry@4.1.2)(@itwin/core-react@4.8.0)(react-dom@17.0.2)(react@17.0.2)(redux@4.2.1)
       '@itwin/presentation-common': 4.1.2(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-quantity@4.1.2)(@itwin/ecschema-metadata@4.1.2)
@@ -13896,7 +13896,7 @@ packages:
       '@itwin/core-react': 4.8.0(@itwin/appui-abstract@4.1.2)(@itwin/core-bentley@4.1.2)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-components': 4.1.0(@itwin/appui-abstract@4.1.2)(@itwin/components-react@4.8.0)(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-react@4.8.0)(@itwin/imodel-components-react@4.8.0)(@itwin/presentation-common@4.1.2)(@itwin/presentation-frontend@4.1.2)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-frontend': 4.1.2(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-quantity@4.1.2)(@itwin/ecschema-metadata@4.1.2)(@itwin/presentation-common@4.1.2)
       classnames: 2.3.2
@@ -13927,7 +13927,7 @@ packages:
       '@itwin/core-react': 4.8.0(@itwin/appui-abstract@4.1.2)(@itwin/core-bentley@4.1.2)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.7.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.0(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-components': 4.1.0(@itwin/appui-abstract@4.1.2)(@itwin/components-react@4.8.0)(@itwin/core-bentley@4.1.2)(@itwin/core-common@4.1.2)(@itwin/core-frontend@4.1.2)(@itwin/core-react@4.8.0)(@itwin/imodel-components-react@4.8.0)(@itwin/presentation-common@4.1.2)(@itwin/presentation-frontend@4.1.2)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
       classnames: 2.3.2
       i18next: 10.6.0
