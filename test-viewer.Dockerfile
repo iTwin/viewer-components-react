@@ -11,7 +11,20 @@ WORKDIR /workspaces/viewer-components-react/
 RUN corepack enable
 RUN corepack prepare pnpm@8.11.0 --activate
 
-# Copy the local files to the container and install/build
+# Copy the local files to the container (see `test-viewer.Dockerfile.dockerignore` for skipped files)
 COPY . .
+
+# Install dependencies
 RUN pnpm install
-RUN pnpm build --scope test-viewer
+
+# This is a workaround for https://github.com/microsoft/lage/issues/689.
+# We don't want to copy the `.git` directory into container (skipped using `.dockerignore`) to avoid changing
+# workspace hash on pull/stage/stash/etc., but that makes this a non-git repository and lage seems to require
+# this to be a git repository. As a workaround, make this a git repository...
+RUN git config --global user.name "iTwin.js admin"
+RUN git config --global user.email "itwinjs-admin@bentley.com"
+RUN git init
+RUN git commit -m"Initial" --allow-empty
+
+# Build test-viewer and its dependencies
+RUN pnpm lage build --to test-viewer --no-cache
