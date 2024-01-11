@@ -76,7 +76,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
-  const state = useModelsTree(props);
+  const state = useModelsTreeState(props);
 
   const treeRenderer = createVisibilityTreeRenderer({
     contextMenuItems: props.contextMenuItems,
@@ -119,7 +119,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   );
 }
 
-function useModelsTree({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {
+function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {
   const rulesets = {
     general: useMemo(() => createRuleset({
       enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
@@ -132,12 +132,12 @@ function useModelsTree({ filterInfo, onFilterApplied, ...props }: ModelsTreeProp
     }), [props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels]),
   };
 
-  const treeState = useTree({
+  const treeState = useTreeState({
     ...props,
     ruleset: rulesets.general,
   });
 
-  const filteredTreeState = useTree({
+  const filteredTreeState = useTreeState({
     ...props,
     ruleset: rulesets.search,
     filterInfo,
@@ -151,7 +151,7 @@ interface UseTreeProps extends ModelsTreeProps {
   ruleset: Ruleset;
 }
 
-function useTree({ modelsVisibilityHandler, activeView, selectionPredicate, hierarchyConfig, iModel, ruleset, enableHierarchyAutoUpdate, filterInfo, onFilterApplied }: UseTreeProps) {
+function useTreeState({ modelsVisibilityHandler, activeView, selectionPredicate, hierarchyConfig, iModel, ruleset, enableHierarchyAutoUpdate, filterInfo, onFilterApplied }: UseTreeProps) {
   const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
   useEffect(() => {
