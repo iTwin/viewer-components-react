@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FitViewTool, IModelApp, ScreenViewport, StandardViewId } from "@itwin/core-frontend";
+import { IModelApp, ScreenViewport } from "@itwin/core-frontend";
+import { FrontendDevTools } from "@itwin/frontend-devtools";
+import { ArcGisAccessClient } from "@itwin/map-layers-auth";
 import { Viewer as WebViewer, ViewerPerformance } from "@itwin/web-viewer-react";
 import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
-import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
-import { FrontendDevTools } from "@itwin/frontend-devtools";
-import { ArcGisAccessClient } from "@itwin/map-layers-auth";
+import { useAuthorizationContext } from "./Authorization";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -91,10 +91,10 @@ function useViewCreatorOptions() {
       });
     };
 
-    tileTreesLoaded().finally(() => {
-      void IModelApp.tools.run(FitViewTool.toolId, viewPort, true, false);
-      viewPort.view.setStandardRotation(StandardViewId.Iso);
-    });
+    // tileTreesLoaded().finally(() => {
+    //   void IModelApp.tools.run(FitViewTool.toolId, viewPort, true, false);
+    //   viewPort.view.setStandardRotation(StandardViewId.Iso);
+    // });
   }, []);
 
   return useMemo(
