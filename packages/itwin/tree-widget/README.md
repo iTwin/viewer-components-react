@@ -71,6 +71,7 @@ While we expect this package to be mostly used with [AppUI](https://github.com/i
   - `createVisibilityTreeRenderer` returns a tree renderer that renders nodes with "eye" checkboxes. Its building blocks:
     - `createVisibilityTreeNodeRenderer`
     - `VisibilityTreeNodeCheckbox`
+  - `useVisibilityTreeState` is used to create and manage tree state.
   - `useVisibilityTreeFiltering` is used to filter the hierarchy.
   - `VisibilityTreeNoFilteredData` is used to render a "no results" when filtering.
   - `VisibilityTreeEventHandler` is an extension of [UnifiedSelectionTreeEventHandler](https://www.itwinjs.org/reference/presentation-components/tree/unifiedselectiontreeeventhandler/), that additionally handles checkbox events and calls provided `IVisibilityHandler` to get/set display of the elements in the hierarchy.
