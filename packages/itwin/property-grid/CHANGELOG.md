@@ -10,7 +10,7 @@ Thu, 11 Jan 2024 14:32:37 GMT
 
 ### Minor changes
 
-- Added React 18 support. ([#729](https://github.com/iTwin/viewer-components-react/pull/729))
+- Added React 18 support. ([#724](https://github.com/iTwin/viewer-components-react/pull/724))
 
 ## 1.4.1
 Thu, 04 Jan 2024 16:26:24 GMT
