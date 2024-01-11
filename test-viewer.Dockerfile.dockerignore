@@ -39,8 +39,12 @@ e2e.Dockerfile
 .prettierignore
 .prettierrc
 
+# e2e tests source will be copied when building e2e tests image - we
+# don't want to invalidate viewer image for all e2e tests just because one
+# package's test changes
+**/e2e-tests
+
 # e2e tests output
 **/test-results
 **/playwright-report
 **/playwright/.cache
-**/e2e-tests/*-snapshots/*
