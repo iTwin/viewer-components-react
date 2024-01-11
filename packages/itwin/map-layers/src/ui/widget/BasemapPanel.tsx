@@ -141,7 +141,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
     }
   }, [activeViewport]);
 
-  // This effect is only to keep a custom base map option when a 'defalt' base map is picked.
+  // This effect is only to keep a custom base map option when a 'default' base map is picked.
   React.useEffect(() => {
     if (selectedBaseMap instanceof BaseMapLayerSettings
        && !selectedBaseMap.provider
