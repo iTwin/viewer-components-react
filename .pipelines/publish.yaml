@@ -22,7 +22,11 @@ variables:
     value: 18.16.0
 
 steps:
+  - checkout: self
+    fetchDepth: 0 # Fetch all history (required by beachball to look at history)
+
   - template: templates/build-steps.yaml
+
   - script: |
       git config --global user.email imodeljs-admin@users.noreply.github.com
       git config --global user.name imodeljs-admin
