@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import assert from "assert";
 import { test } from "@playwright/test";
@@ -79,16 +79,19 @@ test.describe("property grid", () => {
       return propertyWidget;
     };
 
-    test("multiple elements selected", async ({ page }) => {
+    // Fails due to https://github.com/iTwin/imodel-native/issues/586.
+    // Note: this is a backend issue - the test can be unskipped when the fix is consumed in QA GPB
+    test.skip("multiple elements selected", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
       await takeScreenshot(page, propertyWidget);
     });
 
-    test("multiple elements selected - search bar expanded", async ({ page }) => {
+    // Fails due to https://github.com/iTwin/imodel-native/issues/586.
+    // Note: this is a backend issue - the test can be unskipped when the fix is consumed in QA GPB
+    test.skip("multiple elements selected - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
       await propertyWidget.getByTitle("Open search bar").click();
       await propertyWidget.getByTitle("Close search bar").first().waitFor();
-
       await takeScreenshot(page, propertyWidget);
     });
 
