@@ -2,6 +2,29 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 11 Jan 2024 14:32:37 GMT",
+      "version": "1.5.0",
+      "tag": "@itwin/property-grid-react_v1.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "1f877d4a8da706281e0b225cb874c71920980e6e",
+            "comment": "Added React 18 support."
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "1f877d4a8da706281e0b225cb874c71920980e6e",
+            "comment": "Skip tests that are failing due to a backend issue"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.1",
       "tag": "@itwin/property-grid-react_v1.4.1",
       "date": "Thu, 04 Jan 2024 16:26:24 GMT",
