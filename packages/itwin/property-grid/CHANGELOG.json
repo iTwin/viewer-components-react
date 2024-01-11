@@ -10,7 +10,7 @@
           {
             "author": "24278440+saskliutas@users.noreply.github.com",
             "package": "@itwin/property-grid-react",
-            "commit": "1f877d4a8da706281e0b225cb874c71920980e6e",
+            "commit": "11e375d1a819b23bedf832a30bee0aca485e82e1",
             "comment": "Added React 18 support."
           }
         ],
@@ -18,7 +18,7 @@
           {
             "author": "35135765+grigasp@users.noreply.github.com",
             "package": "@itwin/property-grid-react",
-            "commit": "1f877d4a8da706281e0b225cb874c71920980e6e",
+            "commit": "df80b1ea1d3bd64737bddcb46c40ffa6a12d7234",
             "comment": "Skip tests that are failing due to a backend issue"
           }
         ]
