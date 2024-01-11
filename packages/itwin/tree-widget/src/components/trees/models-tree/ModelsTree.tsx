@@ -10,7 +10,7 @@ import { SelectionMode } from "@itwin/components-react";
 import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { ClassGroupingOption } from "../common/Types";
-import { useVisibilityTree } from "../common/UseVisibilityTree";
+import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
@@ -168,7 +168,7 @@ function useTree({ modelsVisibilityHandler, activeView, selectionPredicate, hier
     }
   }, [onFilterApplied, visibilityHandler]);
 
-  return useVisibilityTree({
+  return useVisibilityTreeState({
     imodel: iModel,
     ruleset,
     pagingSize: PAGING_SIZE,

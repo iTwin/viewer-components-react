@@ -11,7 +11,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { PresentationTree } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
-import { useVisibilityTree } from "../common/UseVisibilityTree";
+import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
@@ -73,7 +73,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     },
     [onFilterApplied],
   );
-  const state = useVisibilityTree({
+  const state = useVisibilityTreeState({
     imodel: props.iModel,
     ruleset: RULESET_CATEGORIES,
     pagingSize: PAGING_SIZE,

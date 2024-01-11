@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect } from "react";
-import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { usePresentationTreeState } from "@itwin/presentation-components";
+import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
@@ -14,23 +14,31 @@ import type { IVisibilityHandler, VisibilityTreeSelectionPredicate } from "../Vi
 import type { VisibilityTreeFilterInfo } from "./Types";
 
 /**
- * Props for [[useVisibilityTree]] hook.
+ * Props for [[useVisibilityTreeState]] hook.
  * @beta
  */
-export interface UseVisibilityTreeProps extends Omit<UsePresentationTreeStateProps<VisibilityTreeEventHandler>, "rulesetOrId"> {
+export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeStateProps<VisibilityTreeEventHandler>, "rulesetOrId"> {
+  /** iModel to pull data from. */
   imodel: IModelConnection;
+  /** Presentation rules to use when pulling data from iModel. */
   ruleset: Ruleset;
+  /** Visibility handler that will be used to determine tree node visibility or change it. */
   visibilityHandler?: IVisibilityHandler;
+  /** Info about filter that should be applied on tree. */
   filterInfo?: VisibilityTreeFilterInfo;
+  /** Callback that is invoked when filter is applied, changed or removed. */
   onFilterChange?: (filteredDataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => void;
+  /** Callback that is used to determine if node can be selected. If not provided all nodes are selectable. */
   selectionPredicate?: VisibilityTreeSelectionPredicate;
 }
 
 /**
- * Custom hooks that creates state for visibility tree using [[usePresentationTreeState]] hook.
+ * Custom hook for creating visibility tree component state.
+ *
+ * @returns `undefined` on first render cycle. On all other render cycles state is initialized and valid object is returned.
  * @beta
  */
-export function useVisibilityTree({ imodel, ruleset, filterInfo, onFilterChange, visibilityHandler, selectionPredicate, ...props }: UseVisibilityTreeProps) {
+export function useVisibilityTreeState({ imodel, ruleset, filterInfo, onFilterChange, visibilityHandler, selectionPredicate, ...props }: UseVisibilityTreeStateProps) {
   const eventHandlerFactory = useCallback((params: PresentationTreeEventHandlerProps) => {
     if (!visibilityHandler) {
       return undefined;
