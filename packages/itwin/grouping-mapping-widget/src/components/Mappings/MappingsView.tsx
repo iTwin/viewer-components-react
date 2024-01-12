@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type {
   Alert,
 } from "@itwin/itwinui-react";
@@ -13,6 +13,7 @@ import {
 import {
   SvgAdd,
   SvgImport,
+  SvgPlay,
   SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
@@ -20,14 +21,16 @@ import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
 import "./MappingsView.scss";
 import DeleteModal from "../SharedComponents/DeleteModal";
 import { MappingImportWizardModal } from "./Import/MappingImportWizardModal";
-import { HorizontalTile } from "../SharedComponents/HorizontalTile";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
-import { MappingUIActionGroup } from "./MappingViewActionGroup";
 import type { ExtractionStatusData } from "./Extraction/ExtractionStatusIcon";
 import { ExtractionStatusIcon } from "./Extraction/ExtractionStatusIcon";
+import { MappingHorizontalTile } from "./MappingList";
 import type { ExtractionMessageData } from "./Extraction/ExtractionMessageModal";
 import { ExtractionMessageModal } from "./Extraction/ExtractionMessageModal";
+import { BeEvent } from "@itwin/core-bentley";
+import { useFetchExtractionStates } from "./hooks/useFetchExtractionStates";
+import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 
 export const mappingViewDefaultDisplayStrings = {
   mappings: "Mappings",
@@ -60,6 +63,7 @@ export interface MappingsViewProps {
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
+  onRunExtraction: (mappings: Mapping[]) => Promise<void>;
   alert?: React.ReactElement<typeof Alert>;
 }
 
@@ -83,6 +87,7 @@ export const MappingsView = ({
   onClickAddMapping,
   onClickMappingTitle,
   onClickMappingModify,
+  onRunExtraction,
   alert,
 }: MappingsViewProps) => {
   const displayStrings = React.useMemo(
@@ -90,9 +95,30 @@ export const MappingsView = ({
     [userDisplayStrings]
   );
 
+  const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
+
+  const jobStartEvent = useMemo(
+    () => new BeEvent<(mappingId: string) => void>(),
+    []
+  );
+
   const refreshAll = useCallback(async () => {
     await Promise.all([onRefreshMappings(), onRefreshExtractionStatus()]);
   }, [onRefreshMappings, onRefreshExtractionStatus]);
+
+  const onSelectionChange = (mapping: Mapping) => {
+    setSelectedMappings((mappingIdList) =>
+      mappingIdList.some((eachId) => mapping.id === eachId.id)
+        ? mappingIdList.filter((eachId) => mapping.id !== eachId.id)
+        : [...mappingIdList, mapping]
+    );
+  }
+
+  const runExtraction = useCallback(async () => {
+    await onRunExtraction(selectedMappings);
+    selectedMappings.map((mapping) => { jobStartEvent.raiseEvent(mapping.id) });
+    setSelectedMappings([]);
+  }, [selectedMappings, jobStartEvent]);
 
   return (
     <>
@@ -117,6 +143,13 @@ export const MappingsView = ({
               <SvgImport />
             </IconButton>
             }
+            <IconButton
+              title="Run extraction"
+              onClick={runExtraction}
+              disabled={selectedMappings.length === 0}
+            >
+              <SvgPlay />
+            </IconButton>
           </div>
           <div className="gmw-button-spacing">
             <ExtractionStatusIcon
@@ -147,22 +180,19 @@ export const MappingsView = ({
         ) : (
           <div className="gmw-mappings-list">
             {mappings.map((mapping) => (
-              <HorizontalTile
+              <MappingHorizontalTile
                 key={mapping.id}
-                title={mapping.mappingName ? mapping.mappingName : "Untitled"}
-                subText={mapping.description ?? ""}
-                subtextToolTip={mapping.description ?? ""}
-                titleTooltip={mapping.mappingName}
-                onClickTitle={onClickMappingTitle ? () => onClickMappingTitle(mapping) : undefined}
-                actionGroup={
-                  <MappingUIActionGroup
-                    mapping={mapping}
-                    onToggleExtraction={onToggleExtraction}
-                    onRefresh={onRefreshMappings}
-                    onClickMappingModify={onClickMappingModify}
-                    setShowDeleteModal={setShowDeleteModal}
-                  />
-                }
+                mapping={mapping}
+                jobStartEvent={jobStartEvent}
+                onClickMappingTitle={onClickMappingTitle}
+                onSelectionChange={onSelectionChange}
+                selected={selectedMappings.some(
+                  (eachMapping) => mapping.id === eachMapping.id
+                )}
+                onToggleExtraction={onToggleExtraction}
+                onRefreshMappings={onRefreshMappings}
+                onClickMappingModify={onClickMappingModify}
+                setShowDeleteModal={setShowDeleteModal}
               />
             ))}
           </div>
