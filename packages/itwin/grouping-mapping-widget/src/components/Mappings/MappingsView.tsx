@@ -29,8 +29,6 @@ import { MappingHorizontalTile } from "./MappingList";
 import type { ExtractionMessageData } from "./Extraction/ExtractionMessageModal";
 import { ExtractionMessageModal } from "./Extraction/ExtractionMessageModal";
 import { BeEvent } from "@itwin/core-bentley";
-import { useFetchExtractionStates } from "./hooks/useFetchExtractionStates";
-import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 
 export const mappingViewDefaultDisplayStrings = {
   mappings: "Mappings",
