@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { join } from "path";
@@ -24,8 +24,9 @@ import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
-import { deepEquals, mockPresentationManager, mockViewport,  render, TestUtils, waitFor } from "../../TestUtils";
+import { deepEquals, mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
+
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -35,7 +36,6 @@ import type { SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 
 describe("ModelsTree", () => {
-
   const sizeProps = { width: 200, height: 200 };
 
   before(async () => {
@@ -87,12 +87,7 @@ describe("ModelsTree", () => {
     };
 
     const setupDataProviderForEachNodeType = () => {
-      setupDataProvider([
-        createSubjectNode(),
-        createModelNode(),
-        createCategoryNode(),
-        createElementNode(),
-      ]);
+      setupDataProvider([createSubjectNode(), createModelNode(), createCategoryNode(), createElementNode()]);
     };
 
     describe("<ModelsTree />", () => {
@@ -114,7 +109,9 @@ describe("ModelsTree", () => {
       it("should match snapshot", async () => {
         setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
+        const result = render(
+          <ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />,
+        );
         await waitFor(() => result.getByText("test-node"), { container: result.container });
         expect(result.baseElement).to.matchSnapshot();
       });
@@ -122,7 +119,9 @@ describe("ModelsTree", () => {
       it("renders root node without expansion toggle", async () => {
         setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
-        const { getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
+        const { getByTestId } = render(
+          <ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />,
+        );
         const node = await waitFor(() => getByTestId("tree-node"));
         expect(node.className.includes("disable-expander")).to.be.true;
       });
@@ -151,7 +150,9 @@ describe("ModelsTree", () => {
         setupDataProviderForEachNodeType();
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
 
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
+        const result = render(
+          <ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />,
+        );
         await waitFor(() => result.getByText("model"));
         const nodes = result.getAllByTestId("tree-node");
         expect(nodes.length).to.eq(4);
@@ -162,7 +163,9 @@ describe("ModelsTree", () => {
         setupDataProviderForEachNodeType();
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
 
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
+        const result = render(
+          <ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />,
+        );
         await waitFor(() => result.getByText("model"));
         const nodes = result.getAllByTestId("tree-node");
         expect(nodes.length).to.eq(4);
@@ -174,11 +177,12 @@ describe("ModelsTree", () => {
         setupDataProvider([node]);
 
         visibilityHandlerMock.getVisibilityStatus = sinon.stub().resolves({ state: "hidden", isDisabled: false });
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
+        const result = render(
+          <ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />,
+        );
         await waitFor(() => {
           const renderedNode = result.getByTestId("tree-node");
-          if (isNodeChecked(renderedNode))
-            throw new Error("expecting unchecked node");
+          if (isNodeChecked(renderedNode)) throw new Error("expecting unchecked node");
           return renderedNode;
         });
         expect(visibilityHandlerMock.getVisibilityStatus).to.be.calledTwice;
@@ -187,8 +191,7 @@ describe("ModelsTree", () => {
         visibilityChangeEvent.raiseEvent();
         await waitFor(() => {
           const renderedNode = result.getByTestId("tree-node");
-          if (!isNodeChecked(renderedNode))
-            throw new Error("expecting checked node");
+          if (!isNodeChecked(renderedNode)) throw new Error("expecting checked node");
           return renderedNode;
         });
         expect(visibilityHandlerMock.getVisibilityStatus).to.be.calledTwice;
@@ -199,7 +202,9 @@ describe("ModelsTree", () => {
         setupDataProvider([node]);
 
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />);
+        const result = render(
+          <ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} activeView={mockViewport().object} />,
+        );
         const renderedNode = await result.findByTestId("tree-node");
         expect(renderedNode.querySelectorAll("input").length).to.eq(1); // eslint-disable-line deprecation/deprecation
 
@@ -242,12 +247,14 @@ describe("ModelsTree", () => {
             modelsVisibilityHandler={visibilityHandlerMock}
             activeView={mockViewport().object}
             hierarchyConfig={hierarchyConfig}
-          />
+          />,
         );
-        await waitFor(() => expect(createRulesetSpy).to.be.calledWith({
-          ...hierarchyConfig,
-          enableElementsClassGrouping: true, // `createRuleset` takes a boolean for this prop - counts are handled after the nodes are loaded
-        }));
+        await waitFor(() =>
+          expect(createRulesetSpy).to.be.calledWith({
+            ...hierarchyConfig,
+            enableElementsClassGrouping: true, // `createRuleset` takes a boolean for this prop - counts are handled after the nodes are loaded
+          }),
+        );
       });
 
       it("should create and dispose visibilityHandler when factory function is passed", async () => {
@@ -274,7 +281,9 @@ describe("ModelsTree", () => {
         visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
         visibilityHandlerMock.dispose = sinon.spy();
         const visibilityHandlerCallback = () => visibilityHandlerMock;
-        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerCallback} activeView={mockViewport().object} />);
+        const result = render(
+          <ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerCallback} activeView={mockViewport().object} />,
+        );
         await waitFor(() => result.getByText("test-node"), { container: result.container });
         result.unmount();
         expect(visibilityHandlerMock.dispose).to.be.called;
@@ -327,8 +336,14 @@ describe("ModelsTree", () => {
           await user.keyboard("[ControlLeft>]");
           await user.click(renderedNodes[1]);
 
-          selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals((node1.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
-          selectionManagerMock.verify((x) => x.addToSelection(moq.It.isAny(), imodelMock.object, deepEquals((node2.key as ECInstancesNodeKey).instanceKeys), 0, ""), moq.Times.once());
+          selectionManagerMock.verify(
+            (x) => x.replaceSelection(moq.It.isAny(), imodelMock.object, deepEquals((node1.key as ECInstancesNodeKey).instanceKeys), 0, ""),
+            moq.Times.once(),
+          );
+          selectionManagerMock.verify(
+            (x) => x.addToSelection(moq.It.isAny(), imodelMock.object, deepEquals((node2.key as ECInstancesNodeKey).instanceKeys), 0, ""),
+            moq.Times.once(),
+          );
         });
 
         it("adds subject node to unified selection according to `selectionPredicate`", async () => {
@@ -367,7 +382,7 @@ describe("ModelsTree", () => {
           setupDataProvider([node]);
           visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "hidden" });
 
-          const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => (type === ModelsTreeNodeType.Grouping);
+          const predicate = (_key: NodeKey, type: ModelsTreeNodeType) => type === ModelsTreeNodeType.Grouping;
 
           const { user, queryByText, getByTestId } = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} selectionMode={SelectionMode.Extended} selectionPredicate={predicate} activeView={mockViewport().object} />);
           await waitFor(() => expect(queryByText("grouping")).to.not.be.null);
@@ -391,7 +406,6 @@ describe("ModelsTree", () => {
           await user.click(renderedNode);
           selectionManagerMock.verify((x) => x.replaceSelection(moq.It.isAny(), moq.It.isAny(), moq.It.isAny(), moq.It.isAny(), moq.It.isAny()), moq.Times.never());
         });
-
       });
 
       describe("filtering", () => {
@@ -408,14 +422,31 @@ describe("ModelsTree", () => {
         });
 
         it("filters nodes", async () => {
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }} activeView={mockViewport().object} />);
+          const result = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }}
+              activeView={mockViewport().object}
+            />,
+          );
           await result.findByText("filtered-node");
         });
 
         it("invokes onFilterApplied callback", async () => {
           const spy = sinon.spy();
 
-          const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock} filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }} onFilterApplied={spy} activeView={mockViewport().object} />);
+          const result = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }}
+              onFilterApplied={spy}
+              activeView={mockViewport().object}
+            />,
+          );
           await result.findByText("filtered-node");
 
           expect(spy).to.be.calledOnce;
@@ -491,9 +522,11 @@ describe("ModelsTree", () => {
       });
 
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
-      const hierarchy = await hierarchyBuilder.createHierarchy(createRuleset({
-        elementClassSpecification: { schemaName: "BisCore", className: "SpatialLocationElement" },
-      }));
+      const hierarchy = await hierarchyBuilder.createHierarchy(
+        createRuleset({
+          elementClassSpecification: { schemaName: "BisCore", className: "SpatialLocationElement" },
+        }),
+      );
 
       expect(hierarchy).to.matchSnapshot();
     });
@@ -519,7 +552,7 @@ describe("ModelsTree", () => {
         expect(hierarchy).to.matchSnapshot();
       });
 
-      it("hides subjects with `Subject.Model.Type = \"Hierarchy\"` json property", async function () {
+      it('hides subjects with `Subject.Model.Type = "Hierarchy"` json property', async function () {
         /*
         Create the following hierarchy:
         - Root subject                     // visible
@@ -601,7 +634,11 @@ describe("ModelsTree", () => {
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }));
+          const modelX = addModel(
+            builder,
+            "BisCore:PhysicalModel",
+            addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }),
+          );
           addPhysicalObject(builder, modelX, category);
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
@@ -619,7 +656,11 @@ describe("ModelsTree", () => {
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }));
+          const modelX = addModel(
+            builder,
+            "BisCore:PhysicalModel",
+            addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }),
+          );
           addPhysicalObject(builder, modelX, category);
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
@@ -636,7 +677,9 @@ describe("ModelsTree", () => {
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => { // eslint-disable-line deprecation/deprecation
           const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
           const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX), { isPrivate: true });
+          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX), {
+            isPrivate: true,
+          });
           addPhysicalObject(builder, modelX, category);
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });

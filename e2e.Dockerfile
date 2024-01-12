@@ -9,7 +9,7 @@ ARG PACKAGE_NAME=""
 WORKDIR /workspaces/viewer-components-react/packages/itwin/${PACKAGE_NAME}
 RUN npx playwright install chromium
 
-# Copy test snapshots into container before running the tests
+# Copy tests' source into container before running the tests
 COPY /packages/itwin/${PACKAGE_NAME}/src/e2e-tests src/e2e-tests
 
 # Set the entry point to run the tests
