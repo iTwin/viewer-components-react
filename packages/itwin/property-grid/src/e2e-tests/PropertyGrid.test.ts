@@ -180,10 +180,6 @@ test.describe("property grid", () => {
 
   test.describe("wide", () => {
     test.beforeEach(async ({ page }) => {
-      // we must assure that the widget is mounted before we try to expand it.
-      const treeWidget = locateWidget(page, "tree");
-      await treeWidget.getByText("BayTown").click();
-      await treeWidget.getByText("BayTown").first().click();
       await expandStagePanel(page, "right", 400);
     });
     testCases();
