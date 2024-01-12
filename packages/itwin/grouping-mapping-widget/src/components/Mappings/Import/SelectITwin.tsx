@@ -2,18 +2,19 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { ITwin, ITwinsAccessClient, ITwinsAPIResponse } from "@itwin/itwins-client";
+import type { ITwin, ITwinsAccessClient } from "@itwin/itwins-client";
 import { ITwinSubClass } from "@itwin/itwins-client";
 import { SvgCalendar, SvgList, SvgStarHollow } from "@itwin/itwinui-icons-react";
 import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
 import { Button, Tab, Table, tableFilters, TablePaginator, Tabs } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../../../common/utils";
 import "./SelectITwin.scss";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useITwinsClient } from "../../context/ITwinsClientContext";
-import { handleError } from "../../../common/utils";
+import { useQuery } from "@tanstack/react-query";
+import type { Column } from "react-table";
 
 type IITwinTyped = CreateTypeFromInterface<ITwin>;
 
@@ -24,6 +25,12 @@ const defaultDisplayStrings = {
   iTwinStatus: "Status",
 };
 
+export enum ITwinType {
+  Favorite = 0,
+  Recent = 1,
+  All = 2,
+}
+
 const tabsWithIcons = [
   <Tab key="favorite" label="Favorite iTwins" startIcon={<SvgStarHollow />} />,
   <Tab key="recents" label="Recent iTwins" startIcon={<SvgCalendar />} />,
@@ -31,32 +38,18 @@ const tabsWithIcons = [
 ];
 
 const fetchITwins = async (
-  setITwins: (iTwins: ITwin[]) => void,
-  setIsLoading: (isLoading: boolean) => void,
   getAccessToken: GetAccessTokenFn,
   iTwinsClient: ITwinsAccessClient,
-  iTwinType: number,
+  iTwinType: ITwinType,
 ) => {
-  try {
-    setITwins([]);
-    setIsLoading(true);
-    const accessToken = await getAccessToken();
-    let iTwinsResponse: ITwinsAPIResponse<ITwin[]>;
-    switch (iTwinType) {
-      case 0:
-        iTwinsResponse = await iTwinsClient.queryFavoritesAsync(accessToken, ITwinSubClass.Project);
-        break;
-      case 1:
-        iTwinsResponse = await iTwinsClient.queryRecentsAsync(accessToken, ITwinSubClass.Project);
-        break;
-      default:
-        iTwinsResponse = await iTwinsClient.queryAsync(accessToken, ITwinSubClass.Project);
-    }
-    setITwins(iTwinsResponse.data!);
-  } catch (error: any) {
-    handleError(error.status);
-  } finally {
-    setIsLoading(false);
+  const accessToken = await getAccessToken();
+  switch (iTwinType) {
+    case ITwinType.Favorite:
+      return iTwinsClient.queryFavoritesAsync(accessToken, ITwinSubClass.Project);
+    case ITwinType.Recent:
+      return iTwinsClient.queryRecentsAsync(accessToken, ITwinSubClass.Project);
+    default:
+      return iTwinsClient.queryAsync(accessToken, ITwinSubClass.Project);
   }
 };
 
@@ -65,54 +58,49 @@ interface SelectITwinProps {
   onCancel: () => void;
   onChangeITwinType: (iTwinType: number) => void;
   displayStrings?: Partial<typeof defaultDisplayStrings>;
-  defaultITwinType?: number;
+  defaultITwinType?: ITwinType;
 }
+
 const SelectITwin = ({
   onSelect,
   onCancel,
   onChangeITwinType,
   displayStrings: userDisplayStrings,
-  defaultITwinType = 0,
+  defaultITwinType = ITwinType.Favorite,
 }: SelectITwinProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const iTwinsClient = useITwinsClient();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [iTwins, setITwins] = useState<ITwin[]>([]);
   const [iTwinType, setITwinType] = useState<number>(defaultITwinType);
 
-  useEffect(() => {
-    void fetchITwins(setITwins, setIsLoading, getAccessToken, iTwinsClient, iTwinType);
-  }, [getAccessToken, iTwinsClient, setIsLoading, iTwinType]);
+  const { data: iTwins, isFetching: isLoading } = useQuery({
+    queryKey: ["iTwinsByType", iTwinType],
+    queryFn: async () => (await fetchITwins(getAccessToken, iTwinsClient, iTwinType)).data!,
+  });
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
 
-  const iTwinsColumns = useMemo(
+  const iTwinsColumns = useMemo<Column<IITwinTyped>[]>(
     () => [
       {
-        Header: "Table",
-        columns: [
-          {
-            id: "iTwinNumber",
-            Header: `${displayStrings.iTwinNumber}`,
-            accessor: "number",
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "iTwinName",
-            Header: `${displayStrings.iTwinName}`,
-            accessor: "displayName",
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "iTwinStatus",
-            Header: `${displayStrings.iTwinStatus}`,
-            accessor: "status",
-            Filter: tableFilters.TextFilter(),
-          },
-        ],
+        id: "iTwinNumber",
+        Header: `${displayStrings.iTwinNumber}`,
+        accessor: "number",
+        Filter: tableFilters.TextFilter(),
+      },
+      {
+        id: "iTwinName",
+        Header: `${displayStrings.iTwinName}`,
+        accessor: "displayName",
+        Filter: tableFilters.TextFilter(),
+      },
+      {
+        id: "iTwinStatus",
+        Header: `${displayStrings.iTwinStatus}`,
+        accessor: "status",
+        Filter: tableFilters.TextFilter(),
       },
     ],
     [displayStrings.iTwinNumber, displayStrings.iTwinName, displayStrings.iTwinStatus]
@@ -140,7 +128,7 @@ const SelectITwin = ({
         contentClassName="gmw-table-holding-tab">
       </Tabs>
       <Table<IITwinTyped>
-        data={iTwins}
+        data={iTwins ?? []}
         columns={iTwinsColumns}
         className='gmw-select-itwin-table'
         emptyTableContent={`No ${displayStrings.iTwins} available.`}

@@ -1,0 +1,3 @@
+packages:
+  - packages/itwin/*
+  - apps/test-viewer

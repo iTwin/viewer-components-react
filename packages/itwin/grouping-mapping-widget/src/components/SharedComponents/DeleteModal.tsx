@@ -9,16 +9,16 @@ import {
   ModalButtonBar,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useState } from "react";
-import { handleError } from "../../common/utils";
+import { useMutation } from "@tanstack/react-query";
+import React, { useCallback, useState } from "react";
 import "./DeleteModal.scss";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 export interface DeleteModalProps {
-  entityName?: string;
+  entityName: string;
   onClose: () => void;
   onDelete: () => Promise<void>;
-  refresh: () => Promise<void>;
+  refresh?: () => Promise<void>;
 }
 
 export const DeleteModal = ({
@@ -27,28 +27,27 @@ export const DeleteModal = ({
   onDelete,
   refresh,
 }: DeleteModalProps) => {
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [localEntityName] = useState(entityName);
 
-  const deleteCallback = async () => {
-    try {
-      setIsDeleting(true);
-      await onDelete();
-      await refresh();
+  const deleteMutation = useMutation({
+    mutationFn: onDelete,
+    onSuccess: async () => {
+      refresh && await refresh();
       onClose();
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+    },
+  });
+
+  const deleteCallback = useCallback(() => {
+    deleteMutation.mutate();
+  }, [deleteMutation]);
 
   return (
     <>
       <Modal
         title='Confirm'
         modalRootId='grouping-mapping-widget'
-        isOpen={!!entityName}
-        isDismissible={!isDeleting}
+        isOpen={!!localEntityName}
+        isDismissible={!deleteMutation.isLoading}
         onClose={onClose}
       >
         <div className="gmw-delete-modal-body-text">
@@ -60,17 +59,17 @@ export const DeleteModal = ({
           </strong>
         </div>
         <ModalButtonBar>
-          {isDeleting &&
+          {deleteMutation.isLoading &&
             <div className="gmw-loading-delete">
               <LoadingSpinner />
             </div>}
-          <Button styleType='high-visibility' onClick={deleteCallback} disabled={isDeleting}>
+          <Button styleType='high-visibility' onClick={deleteCallback} disabled={deleteMutation.isLoading}>
             Delete
           </Button>
           <Button
             styleType='default'
             onClick={onClose}
-            disabled={isDeleting}
+            disabled={deleteMutation.isLoading}
           >
             Cancel
           </Button>

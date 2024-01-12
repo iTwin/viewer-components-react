@@ -11,7 +11,6 @@ import { PropertyGridManager } from "../PropertyGridManager";
 import { FilteringPropertyGrid } from "./FilteringPropertyGrid";
 import { PropertyGridContent } from "./PropertyGridContent";
 
-import type { IModelConnection } from "@itwin/core-frontend";
 import type { DataProviderProps } from "../hooks/UseDataProvider";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { PropertyGridContentProps } from "./PropertyGridContent";
@@ -27,7 +26,16 @@ export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | 
  * @public
  */
 export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps) {
-  const { dataProvider, isOverLimit } = useUnifiedSelectionDataProvider({ imodel: props.imodel, createDataProvider });
+  const dataProvider = useDataProvider({ imodel: props.imodel, createDataProvider });
+  if (!dataProvider) {
+    return null;
+  }
+
+  return <UnifiedSelectionPropertyGrid {...props} dataProvider={dataProvider} />;
+}
+
+function UnifiedSelectionPropertyGrid(props: PropertyGridContentProps) {
+  const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider });
 
   const dataRenderer = (dataRendererProps: FilteringPropertyGridProps) => {
     if (isOverLimit) {
@@ -41,19 +49,5 @@ export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps
     return <FilteringPropertyGrid {...dataRendererProps} />;
   };
 
-  return (
-    <PropertyGridContent
-      {...props}
-      dataProvider={dataProvider}
-      dataRenderer={dataRenderer}
-    />
-  );
+  return <PropertyGridContent {...props} dataRenderer={dataRenderer} />;
 }
-
-/** Custom hook that creates data provider and hooks provider into unified selection. */
-function useUnifiedSelectionDataProvider(props: DataProviderProps & { imodel: IModelConnection }) {
-  const dataProvider = useDataProvider(props);
-  const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider });
-  return { dataProvider, isOverLimit };
-}
-

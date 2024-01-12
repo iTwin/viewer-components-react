@@ -8,7 +8,6 @@ import sinon from "sinon";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { Field, PropertyValueFormat as PresentationPropertyValueFormat } from "@itwin/presentation-common";
 import { FavoritePropertiesScope } from "@itwin/presentation-frontend";
-import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import * as webUtilities from "../../api/WebUtilities";
 import {
@@ -17,7 +16,7 @@ import {
   PropertyGridContextMenuItem, RemoveFavoritePropertyContextMenuItem, useContextMenu,
 } from "../../hooks/UseContextMenu";
 import { PropertyGridManager } from "../../PropertyGridManager";
-import { createFunctionStub, createPropertyRecord, stubFavoriteProperties } from "../TestUtils";
+import { createFunctionStub, createPropertyRecord, render, stubFavoriteProperties, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";

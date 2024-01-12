@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React from "react";
+import React, { useCallback } from "react";
 import type {
   Alert,
 } from "@itwin/itwinui-react";
@@ -24,9 +24,9 @@ import { HorizontalTile } from "../SharedComponents/HorizontalTile";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { MappingUIActionGroup } from "./MappingViewActionGroup";
-import type { ExtractionMessageData } from "../context/ExtractionStatusDataContext";
-import type { ExtractionStatusData } from "../context/ExtractionStatusDataContext";
+import type { ExtractionStatusData } from "./Extraction/ExtractionStatusIcon";
 import { ExtractionStatusIcon } from "./Extraction/ExtractionStatusIcon";
+import type { ExtractionMessageData } from "./Extraction/ExtractionMessageModal";
 import { ExtractionMessageModal } from "./Extraction/ExtractionMessageModal";
 
 export const mappingViewDefaultDisplayStrings = {
@@ -48,7 +48,8 @@ export interface MappingsViewProps {
   extractionMessageData: ExtractionMessageData[];
   setShowExtractionMessageModal: (show: boolean) => void;
   isTogglingExtraction: boolean;
-  onRefresh: () => Promise<void>;
+  onRefreshMappings: () => Promise<void>;
+  onRefreshExtractionStatus: () => Promise<void>;
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
   onDelete: (mapping: Mapping) => Promise<void>;
   showDeleteModal: Mapping | undefined;
@@ -70,7 +71,8 @@ export const MappingsView = ({
   extractionMessageData,
   setShowExtractionMessageModal,
   isTogglingExtraction,
-  onRefresh,
+  onRefreshMappings,
+  onRefreshExtractionStatus,
   onToggleExtraction,
   onDelete,
   showDeleteModal,
@@ -87,6 +89,10 @@ export const MappingsView = ({
     () => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
+
+  const refreshAll = useCallback(async () => {
+    await Promise.all([onRefreshMappings(), onRefreshExtractionStatus()]);
+  }, [onRefreshMappings, onRefreshExtractionStatus]);
 
   return (
     <>
@@ -124,7 +130,7 @@ export const MappingsView = ({
             />
             <IconButton
               title="Refresh"
-              onClick={onRefresh}
+              onClick={refreshAll}
               disabled={isLoading}
               styleType='borderless'
             >
@@ -152,7 +158,7 @@ export const MappingsView = ({
                   <MappingUIActionGroup
                     mapping={mapping}
                     onToggleExtraction={onToggleExtraction}
-                    onRefresh={onRefresh}
+                    onRefresh={onRefreshMappings}
                     onClickMappingModify={onClickMappingModify}
                     setShowDeleteModal={setShowDeleteModal}
                   />
@@ -162,12 +168,12 @@ export const MappingsView = ({
           </div>
         )}
       </div>
-      <ExtractionMessageModal
+      {showExtractionMessageModal && <ExtractionMessageModal
         isOpen={showExtractionMessageModal}
         onClose={() => setShowExtractionMessageModal(false)}
         extractionMessageData={extractionMessageData}
         timestamp={extractionMessageData.length === 0 ? "" : extractionMessageData[0].date}
-      />
+      />}
       {showDeleteModal &&
         <DeleteModal
           entityName={showDeleteModal?.mappingName}
@@ -175,13 +181,12 @@ export const MappingsView = ({
           onDelete={async () => {
             await onDelete(showDeleteModal);
           }}
-          refresh={onRefresh}
         />
       }
       {showImportModal && setShowImportModal && <MappingImportWizardModal
         show={showImportModal}
         setShow={setShowImportModal}
-        onFinish={onRefresh}
+        onFinish={onRefreshMappings}
         displayStrings={displayStrings}
       />}
     </>

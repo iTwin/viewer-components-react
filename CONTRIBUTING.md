@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing!  There are several ways you can help.
+Thank you for your interest in contributing! There are several ways you can help.
 
 Please take a read through this document to help streamline the process of getting your contributions added.
 
@@ -55,38 +55,36 @@ We follow the normal [GitHub pull request workflow](https://help.github.com/en/g
 
 Every change must be tested with proper unit tests. Integration tests are highly encouraged in libraries with critical workflows to ensure end-to-end consistency.
 
-Every change must be described with a change log: Run "rush change" on your committed and always choose "patch" as the change type. Commit your change log along with your pull request.
+Every change must be described with a change log: Run "pnpm change" on your committed and always choose "patch" as the change type. Commit your change log along with your pull request.
 
 ## Source Code Edit Workflow
 
 ### Build Instructions
 
 1. Clone repository (first time) with `git clone` or pull updates to the repository (subsequent times) with `git pull`
-2. Install dependencies: `rush install`
-3. Clean: `rush clean`
-4. Rebuild source: `rush rebuild`
-5. Run tests: `rush test`
-
-The `-v` option for `rush` is short for `--verbose` which results in a more verbose command.
+2. Install dependencies: `pnpm install`
+3. Clean: `pnpm run clean`
+4. Rebuild source: `pnpm run build`
+5. Run tests: `pnpm run test`
 
 The above commands iterate and perform their action against each package in the monorepo.
 
-For incremental builds, the `rush build` command can be used to only build packages that have changes versus `rush rebuild` which always rebuilds all packages.
+For incremental builds, the `pnpm run build` command can be used to only build packages that have changes.
 
-> Note: It is a good idea to `rush install` after each `git pull` as dependencies may have changed.
+> Note: It is a good idea to `pnpm install` after each `git pull` as dependencies may have changed.
 
 ### Making and testing changes
 
 1. Make source code changes on a new Git branch
-2. Ensure unit tests pass when run locally: `rush test`
+2. Ensure unit tests pass when run locally: `pnpm run test`
 3. Locally commit changes: `git commit` (or use the Visual Studio Code user interface)
 4. Repeat steps 1-3 until ready to push changes
-5. Add changelog entry (which could potentially cover several commits): `rush change`
+5. Add changelog entry (which could potentially cover several commits): `pnpm change`
 6. Follow prompts to enter a change description or press ENTER if the change does not warrant a changelog entry. If multiple packages have changed, multiple sets of prompts will be presented.
-7. Completing the `rush change` prompts will cause new changelog entry JSON files to be created.
+7. Completing the `pnpm change` prompts will cause new changelog entry JSON files to be created.
 8. Commit the changelog JSON files.
 9. Publish changes on the branch and open a pull request.
 
-> Note: The CI build will break if changes are pushed without running `rush change`. The fix will be to complete steps 5 through 9.
+> Note: The CI build will break if changes are pushed without running `pnpm change`. The fix will be to complete steps 5 through 9.
 
 Here is a sample [changelog](https://github.com/microsoft/rushstack/blob/master/apps/rush/CHANGELOG.md) to demonstrate the level of detail expected.

@@ -466,6 +466,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   }, [userName, password, mapUrl, mapName, serverRequireCredentials, layerAttachPending, invalidCredentialsProvided, externalLoginUrl, oauthProcessSucceeded]);
 
   const handleOnKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    // eslint-disable-next-line deprecation/deprecation
     if (event.key === SpecialKey.Enter) {
       if (readyToSave())
         handleOk();

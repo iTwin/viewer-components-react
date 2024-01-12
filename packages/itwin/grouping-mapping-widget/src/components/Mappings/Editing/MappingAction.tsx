@@ -8,9 +8,10 @@ import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../../Properties/hooks/useValidator";
 import "./MappingAction.scss";
 import { useMappingClient } from "../../context/MappingClientContext";
-import type { Mapping } from "@itwin/insights-client";
+import type { Mapping, MappingCreate } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import { handleError, handleInputChange } from "../../../common/utils";
+import { handleInputChange } from "../../../common/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const defaultDisplayStrings = {
   mappingDetails: "Mapping Details",
@@ -32,43 +33,38 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
     extractionEnabled: mapping?.extractionEnabled ?? true,
   });
   const [validator, showValidationMessage] = useValidator();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
 
-  const onSave = async () => {
-    try {
-      if (!validator.allValid()) {
-        showValidationMessage(true);
-        return;
-      }
-      setIsLoading(true);
-      const accessToken = await getAccessToken();
-      mapping
-        ? await mappingClient.updateMapping(accessToken, iModelId, mapping.id, {
-          mappingName: values.name,
-          description: values.description,
-          extractionEnabled: values.extractionEnabled,
-        })
-        : await mappingClient.createMapping(accessToken, iModelId, {
-          mappingName: values.name,
-          description: values.description,
-          extractionEnabled: values.extractionEnabled,
-        });
-      setValues({
-        name: mapping?.mappingName ?? "",
-        description: mapping?.description ?? "",
-        extractionEnabled: mapping?.extractionEnabled ?? true,
-      });
-      onSaveSuccess();
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsLoading(false);
+  const { mutate: saveMutation, isLoading } = useMutation(
+    {
+      mutationFn: async (newMapping: MappingCreate) => {
+        const accessToken = await getAccessToken();
+        return mapping
+          ? mappingClient.updateMapping(accessToken, iModelId, mapping.id, newMapping)
+          : mappingClient.createMapping(accessToken, iModelId, newMapping);
+      },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ["mappings"] });
+        onSaveSuccess();
+      },
     }
+  );
+
+  const onSave = async () => {
+    if (!validator.allValid()) {
+      showValidationMessage(true);
+      return;
+    }
+    saveMutation({
+      mappingName: values.name,
+      description: values.description,
+      extractionEnabled: values.extractionEnabled,
+    });
   };
 
   return (

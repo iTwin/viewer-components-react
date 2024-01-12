@@ -1,6 +1,17 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 01 Dec 2023 13:46:38 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Dec 2023 18:31:01 GMT and should not be manually modified.
+
+## 0.22.0
+Mon, 18 Dec 2023 18:31:01 GMT
+
+### Minor changes
+
+- Mapping related components have been refactored to use react-query.
+
+### Patches
+
+- Added new functions for Custom Calculations in FormulaFunctionProvider.ts
 
 ## 0.21.1
 Fri, 01 Dec 2023 13:46:38 GMT
