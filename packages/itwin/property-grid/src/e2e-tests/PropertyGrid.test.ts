@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import assert from "assert";
 import { test } from "@playwright/test";
@@ -71,31 +71,31 @@ test.describe("property grid", () => {
       const propertyWidget = locateWidget(page, "property-grid");
 
       await treeWidget.getByText("BayTown").click();
-
       await treeWidget.getByText("ProcessPhysicalModel").click();
 
       await propertyWidget.getByText("Multiple items").first().waitFor();
-
       return propertyWidget;
     };
 
-    test("multiple elements selected", async ({ page }) => {
+    // Fails due to https://github.com/iTwin/imodel-native/issues/586.
+    // Note: this is a backend issue - the test can be unskipped when the fix is consumed in QA GPB
+    test.skip("multiple elements selected", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
       await takeScreenshot(page, propertyWidget);
     });
 
-    test("multiple elements selected - search bar expanded", async ({ page }) => {
+    // Fails due to https://github.com/iTwin/imodel-native/issues/586.
+    // Note: this is a backend issue - the test can be unskipped when the fix is consumed in QA GPB
+    test.skip("multiple elements selected - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
       await propertyWidget.getByTitle("Open search bar").click();
       await propertyWidget.getByTitle("Close search bar").first().waitFor();
-
       await takeScreenshot(page, propertyWidget);
     });
 
     test("elements list", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
       await propertyWidget.getByTitle("Selected Elements").click();
-
       await propertyWidget.getByText("Selected Elements").waitFor();
       await takeScreenshot(page, propertyWidget);
     });
@@ -104,25 +104,24 @@ test.describe("property grid", () => {
       const propertyWidget = await selectMultipleElements(page);
       await propertyWidget.getByTitle("Selected Elements").click();
 
-      await propertyWidget.getByTitle("Back").first().waitFor();
-      await propertyWidget.getByText("BayTown", { exact: false }).first().click();
+      const elementList = propertyWidget.locator(".property-grid-react-element-list").getByRole("list");
+      await elementList.getByText("BayTown", { exact: false }).first().click();
 
       // wait for element's label and values (use text that's not in elements' list)
-      await propertyWidget.getByText("Subject", { exact: false }).first().waitFor();
-      await propertyWidget.getByText("Empty seed file.", { exact: false }).first().waitFor();
+      const singleElementPropertyGrid = propertyWidget.locator(".property-grid-react-single-element-property-grid").first();
+      await singleElementPropertyGrid.getByText("Subject", { exact: false }).first().waitFor();
+      await singleElementPropertyGrid.getByText("Empty seed file.", { exact: false }).first().waitFor();
 
       return propertyWidget;
     };
 
-    // flaky (https://github.com/iTwin/viewer-components-react/issues/710)
-    test.skip("single element selected from elements list", async ({ page }) => {
+    test("single element selected from elements list", async ({ page }) => {
       const propertyWidget = await selectElementFromElementList(page);
 
       await takeScreenshot(page, propertyWidget);
     });
 
-    // flaky (https://github.com/iTwin/viewer-components-react/issues/710)
-    test.skip("single element selected from elements list - search bar expanded", async ({ page }) => {
+    test("single element selected from elements list - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectElementFromElementList(page);
       const expandSearchbarButtons = await propertyWidget.getByTitle("Open search bar").all();
 

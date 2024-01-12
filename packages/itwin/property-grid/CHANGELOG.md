@@ -1,6 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 04 Jan 2024 16:26:24 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Jan 2024 14:32:37 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 1.5.0
+
+Thu, 11 Jan 2024 14:32:37 GMT
+
+### Minor changes
+
+- Added React 18 support. ([#724](https://github.com/iTwin/viewer-components-react/pull/724))
 
 ## 1.4.1
 Thu, 04 Jan 2024 16:26:24 GMT
@@ -261,4 +271,3 @@ Wed, 12 Jan 2022 13:59:35 GMT
 ### Patches
 
 - iTwin.js 3.0 first rc.
-
