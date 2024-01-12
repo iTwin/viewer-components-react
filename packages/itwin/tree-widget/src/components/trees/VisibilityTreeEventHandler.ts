@@ -11,15 +11,18 @@ import { from } from "rxjs/internal/observable/from";
 import { map } from "rxjs/internal/operators/map";
 import { mergeMap } from "rxjs/internal/operators/mergeMap";
 import { CheckBoxState } from "@itwin/core-react";
-import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem, UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
 
 import type {
-  CheckBoxInfo, CheckboxStateChange, TreeCheckboxStateChangeEventArgs, TreeModelNode, TreeNodeItem, TreeSelectionChange,
+  CheckBoxInfo, CheckboxStateChange, TreeCheckboxStateChangeEventArgs, TreeModelNode, TreeNodeEventArgs, TreeNodeItem, TreeSelectionChange,
   TreeSelectionModificationEventArgs, TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
-import type { BeEvent, IDisposable } from "@itwin/core-bentley";
+import { type BeEvent, type IDisposable } from "@itwin/core-bentley";
 import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
+import { IModelApp } from "@itwin/core-frontend";
+import { NodeKey } from "@itwin/presentation-common";
+import { ModelsTreeNodeType, ModelsVisibilityHandler } from "./models-tree/ModelsVisibilityHandler";
 
 /**
  * Data structure that describes instance visibility status.
@@ -99,6 +102,22 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       return items;
 
     return items.filter((item) => this._selectionPredicate!(item));
+  }
+
+  public override async onNodeDoubleClick({ nodeId }: TreeNodeEventArgs) {
+    const model = this.modelSource.getModel();
+    const node = model.getNode(nodeId);
+
+    if(!node
+      || !isPresentationTreeNodeItem(node.item)
+      || ModelsVisibilityHandler.getNodeType(node.item) !== ModelsTreeNodeType.Element
+      || !NodeKey.isInstancesNodeKey(node.item.key)) {
+      return;
+    }
+
+    const instanceIds = node.item.key.instanceKeys.map((instanceKey) => instanceKey.id);
+
+    await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
   }
 
   public override onSelectionModified({ modifications }: TreeSelectionModificationEventArgs) {
