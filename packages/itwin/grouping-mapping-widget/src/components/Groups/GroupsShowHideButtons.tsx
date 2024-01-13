@@ -11,8 +11,8 @@ import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsC
 interface GroupsShowHideButtonsProps {
   group: Group;
   isLoadingQuery: boolean;
-  showGroup: (group: Group) => Promise<void>;
-  hideGroup: (group: Group) => Promise<void>;
+  showGroup: (group: Group) => void;
+  hideGroup: (group: Group) => void;
 }
 
 export const GroupsShowHideButtons = ({
@@ -24,12 +24,12 @@ export const GroupsShowHideButtons = ({
   const { hiddenGroupsIds, setHiddenGroupsIds } = useGroupHilitedElementsContext();
   const isGroupHidden = useMemo(() => group.id && hiddenGroupsIds.has(group.id), [group.id, hiddenGroupsIds]);
 
-  const toggleGroupVisibility = useCallback(async () => {
+  const toggleGroupVisibility = useCallback(() => {
     if (isGroupHidden) {
-      await showGroup(group);
+      showGroup(group);
       setHiddenGroupsIds(new Set([...hiddenGroupsIds].filter((id) => group.id !== id)));
     } else {
-      await hideGroup(group);
+      hideGroup(group);
       if (group.id) {
         setHiddenGroupsIds(new Set([...hiddenGroupsIds, group.id]));
       }

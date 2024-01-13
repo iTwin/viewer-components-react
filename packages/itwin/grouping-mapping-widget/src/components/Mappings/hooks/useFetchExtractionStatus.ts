@@ -44,7 +44,7 @@ export const useFetchExtractionStatus = ({
             date: log.dateTime,
             category: log.category,
             level: log.level,
-            message: log.message ?? "",
+            message: log.message!,
           }));
           extractionStatusIcon = {
             iconStatus: "negative",
