@@ -7,11 +7,10 @@ import type { ToggleSwitchProps } from "@itwin/itwinui-react";
 import { toaster, ToggleSwitch } from "@itwin/itwinui-react";
 import type { Group } from "@itwin/insights-client";
 import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
-import { getHiliteIdsAndKeysetFromGroup } from "../Groups/groupsHelpers";
 import { Presentation } from "@itwin/presentation-frontend";
-import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
-import { usePropertiesContext } from "../context/PropertiesContext";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
+import { useSingleGroupQueryFetchKeySetHiliteIds } from "../Groups/hooks/useQueriesFetchKeySetHiliteIds";
+import { usePropertiesContext } from "../context/PropertiesContext";
 
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
@@ -28,22 +27,21 @@ export const GroupColorToggle = ({
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const { showGroupColor, setShowGroupColor } = usePropertiesContext();
+  const { data: hiliteIdsResult } = useSingleGroupQueryFetchKeySetHiliteIds(group, iModelConnection, showGroupColor);
 
   useEffect(() => {
     const visualize = async () => {
       try {
         setIsLoading(true);
         clearEmphasizedOverriddenElements();
-        if (showGroupColor) {
-          const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+        if (showGroupColor && hiliteIdsResult) {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
             iModelConnection,
           );
-          visualizeElements(result.ids, color);
-          await zoomToElements(result.ids);
+          visualizeElements(hiliteIdsResult.result.ids, color);
+          await zoomToElements(hiliteIdsResult.result.ids);
         }
       } catch (error) {
         toaster.negative("There was an error visualizing group.");
@@ -54,7 +52,7 @@ export const GroupColorToggle = ({
       }
     };
     void visualize();
-  }, [iModelConnection, group.query, group.groupName, group, hilitedElementsQueryCache, showGroupColor, color]);
+  }, [color, hiliteIdsResult, iModelConnection, showGroupColor]);
 
   return (
     <ToggleSwitch

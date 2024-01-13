@@ -18,7 +18,7 @@ import {
 import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IExtractionClient, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import type { OverlappedElementGroupPairs, OverlappedInfo, QueryCacheItem } from "./context/GroupHilitedElementsContext";
+import type { OverlappedElementGroupPairs, OverlappedInfo } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
@@ -102,7 +102,6 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     iModelId: props.iModelId,
     prefix: props.prefix,
   });
-  const hilitedElementsQueryCache = useRef<Map<string, QueryCacheItem>>(new Map());
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<Set<string>>(new Set());
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
   const [propertiesShowGroup, setPropertiesShowGroup] = useState<boolean>(false);
@@ -115,6 +114,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [groupElementsInfo, setGroupElementsInfo] = useState<Map<string, number>>(new Map());
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
   const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
+  const [isVisualizationsEnabled, setIsVisualizationsEnabled] = useState<boolean>(false);
   const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
 
   useEffect(() => {
@@ -144,7 +144,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       setShowGroupColor,
       hiddenGroupsIds,
       setHiddenGroupsIds,
-      hilitedElementsQueryCache,
+      // hilitedElementsQueryCache,
       groups,
       setGroups,
       numberOfVisualizedGroups,
@@ -159,8 +159,10 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       setCurrentHilitedGroups,
       overlappedElementGroupPairs,
       setOverlappedElementGroupPairs,
+      isVisualizationsEnabled,
+      setIsVisualizationsEnabled,
     }),
-    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, overlappedElementsInfo, groupElementsInfo, isOverlappedColored, currentHilitedGroups, overlappedElementGroupPairs]
+    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, overlappedElementsInfo, groupElementsInfo, isOverlappedColored, currentHilitedGroups, overlappedElementGroupPairs, isVisualizationsEnabled]
   );
 
   const propertiesContextValue = useMemo(
