@@ -5,8 +5,10 @@
 import { FeatureOverrideType } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Group } from "@itwin/insights-client";
-import type { OverlappedElementGroupPairs, OverlappedInfo } from "../context/GroupHilitedElementsContext";
-import { clearEmphasizedOverriddenElements, clearHiddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements } from "../../common/viewerUtils";
+import { toaster } from "@itwin/itwinui-react";
+import { KeySet } from "@itwin/presentation-common";
+import type { OverlappedElementGroupPairs, OverlappedInfo, QueryCacheItem } from "../context/GroupHilitedElementsContext";
+import { clearEmphasizedOverriddenElements, clearHiddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements, zoomToElements } from "../../common/viewerUtils";
 
 const GOLDEN_ANGLE_MULTIPLIER = 1.5;  // Multiplier to spread colors more uniformly.
 const BASE_HUE_OFFSET = 60;           // Initial hue offset to avoid certain colors e.g 0 offset would begin with red.
@@ -29,38 +31,49 @@ export const getGroupColor = (index: number) => {
   return generateHSL(hue);
 };
 
-// export const getHiliteIdsFromGroups = async (
-//   iModelConnection: IModelConnection,
-//   groups: Group[],
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
-// ) => {
-//   const distinctQueries = new Set<string>();
-//   const promises: Promise<{ ids: string[] }>[] = [];
-//   for (const group of groups) {
-//     if (!distinctQueries.has(group.query)) {
-//       distinctQueries.add(group.query);
-//       promises.push(getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache));
-//     }
-//   }
-//   const results = await Promise.all(promises);
-//   const allIds = results.flatMap((result) => result.ids);
-//   return allIds;
-// };
-
-export const hideElementIds = (
-  elementIds: string[]
+export const getHiliteIdsFromGroups = async (
+  iModelConnection: IModelConnection,
+  groups: Group[],
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
 ) => {
-  hideElements(elementIds);
+  const distinctQueries = new Set<string>();
+  const promises: Promise<{ ids: string[] }>[] = [];
+  for (const group of groups) {
+    if (!distinctQueries.has(group.query)) {
+      distinctQueries.add(group.query);
+      promises.push(getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache));
+    }
+  }
+  const results = await Promise.all(promises);
+  const allIds = results.flatMap((result) => result.ids);
+  return allIds;
 };
 
-// export const hideGroup = async (
-//   iModelConnection: IModelConnection,
-//   viewGroup: Group,
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
-// ) => {
-//   const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, viewGroup, hilitedElementsQueryCache);
-//   hideElements(result.ids);
-// };
+export const hideGroups = async (
+  iModelConnection: IModelConnection,
+  viewGroups: Group[],
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
+) => {
+  const distinctQueries = new Set<string>();
+  const promises: Promise<void>[] = [];
+
+  for (const viewGroup of viewGroups) {
+    if (!distinctQueries.has(viewGroup.query)) {
+      distinctQueries.add(viewGroup.query);
+      promises.push(hideGroup(iModelConnection, viewGroup, hilitedElementsQueryCache));
+    }
+  }
+  await Promise.all(promises);
+};
+
+export const hideGroup = async (
+  iModelConnection: IModelConnection,
+  viewGroup: Group,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
+) => {
+  const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, viewGroup, hilitedElementsQueryCache);
+  hideElements(result.ids);
+};
 
 const processGroupVisualization = async (
   overlappedElementGroupPairs: OverlappedElementGroupPairs,
@@ -85,18 +98,23 @@ const processGroupVisualization = async (
   return hilitedIds;
 };
 
-export type GroupsElementIds = {
-  groupId: string;
-  elementIds: string[];
-}[];
-
 export const visualizeGroupColors = async (
+  iModelConnection: IModelConnection,
+  groups: Group[],
   hiddenGroupsIds: Set<string>,
-  groupsWithGroupedOverlaps: OverlappedElementGroupPairs[],
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void,
+  setOverlappedElementsInfo: (overlappedElementsInfo: Map<string, OverlappedInfo[]> | ((overlappedElementsInfo: Map<string, OverlappedInfo[]>) => Map<string, OverlappedInfo[]>)) => void,
+  setGroupElementsInfo: (groupElementsInfo: Map<string, number> | ((groupElementsInfo: Map<string, number>) => Map<string, number>)) => void,
+  setOverlappedElementGroupPairs: (overlappedElementGroupPairs: OverlappedElementGroupPairs[]) => void,
   doEmphasizeElements: boolean = true,
 ) => {
   clearEmphasizedOverriddenElements();
+
+  const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = await generateOverlappedGroups(groups, iModelConnection, hilitedElementsQueryCache);
+  setOverlappedElementsInfo(overlappedElementsInfo);
+  setGroupElementsInfo(numberOfElementsInGroups);
+  setOverlappedElementGroupPairs(groupsWithGroupedOverlaps);
 
   const singleGroupPromises = groupsWithGroupedOverlaps
     .filter((group) => group.groupIds.size === 1)
@@ -126,63 +144,54 @@ export const visualizeGroupColors = async (
 
   clearHiddenElements();
 
-  hiddenGroupsIds.forEach((groupId) => {
-    hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupsIds);
+  hiddenGroupsIds.forEach(async (groupId) => {
+    await hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupsIds);
   });
 
   const allPromises = [...singleGroupPromises, ...overlappedGroupPromises];
 
   const allIds = (await Promise.all(allPromises)).flat();
-  return allIds;
+
+  await zoomToElements(allIds);
 };
-
-// export const getHiliteIdsAndKeysetFromGroup = async (
-//   iModelConnection: IModelConnection,
-//   group: Group,
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
-// ) => {
-//   const query = group.query;
-//   if (hilitedElementsQueryCache.current.has(query)) {
-//     return hilitedElementsQueryCache.current.get(query) ?? ({ keySet: new KeySet(), ids: [] });
-//   }
-//   try {
-//     const queryRowCount = await iModelConnection.queryRowCount(query);
-//     if (queryRowCount === 0) {
-//       toaster.warning(
-//         `${group.groupName}'s query is valid but produced no results.`
-//       );
-//     }
-//     const result = await getHiliteIds(query, iModelConnection);
-//     hilitedElementsQueryCache.current.set(query, result);
-//     return result;
-//   } catch {
-//     toaster.negative(
-//       `Query could not be resolved.`
-//     );
-//     return ({ keySet: new KeySet(), ids: [] });
-//   }
-
-// };
 
 export const getHiliteIdsAndKeysetFromGroup = async (
   iModelConnection: IModelConnection,
   group: Group,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
 ) => {
   const query = group.query;
-  const result = await getHiliteIds(query, iModelConnection);
-  return {group, result};
+  if (hilitedElementsQueryCache.current.has(query)) {
+    return hilitedElementsQueryCache.current.get(query) ?? ({ keySet: new KeySet(), ids: [] });
+  }
+  try {
+    const queryRowCount = await iModelConnection.queryRowCount(query);
+    if (queryRowCount === 0) {
+      toaster.warning(
+        `${group.groupName}'s query is valid but produced no results.`
+      );
+    }
+    const result = await getHiliteIds(query, iModelConnection);
+    hilitedElementsQueryCache.current.set(query, result);
+    return result;
+  } catch {
+    toaster.negative(
+      `Query could not be resolved.`
+    );
+    return ({ keySet: new KeySet(), ids: [] });
+  }
 
 };
 
-// export const getHiliteIdsForGroup = async (
-//   iModelConnection: IModelConnection,
-//   group: Group,
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
-// ) => {
-//   const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
-//   const hilitedIds = result.ids;
-//   return hilitedIds;
-// };
+const getHiliteIdsForGroup = async (
+  iModelConnection: IModelConnection,
+  group: Group,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
+) => {
+  const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+  const hilitedIds = result.ids;
+  return hilitedIds;
+};
 
 const getOverlappedElementsInfo = (overlappedElements: OverlappedElementGroupPairs[]) => {
   const overlappedElementsInfo: Map<string, OverlappedInfo[]> = new Map();
@@ -215,17 +224,15 @@ const mergeElementsByGroup = (elems: Map<string, Set<string>>) => {
   return mergedList;
 };
 
-export const generateOverlappedGroups = (
-  groupsElementIds: GroupsElementIds,
-  // iModelConnection: IModelConnection,
-  // hilitedElementsQueryCache: Map<string, QueryCacheItem>,
+const generateOverlappedGroups = async (
+  groups: Group[],
+  iModelConnection: IModelConnection,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
 ) => {
-  // const groupsElementIds: { groupId: string, elementIds: string[] }[] = await Promise.all(groups.map(async (group) => ({
-  //   groupId: group.id,
-  //   elementIds: await getHiliteIdsForGroup(iModelConnection, group, hilitedElementsQueryCache),
-  // })));
-
-  // const groupsElementIds: { groupId: string, elementIds: string[] }[] = groupsQueryResults.map((group) => ({groupId: group.group.id, elementIds: group.result.ids}));
+  const groupsElementIds: { groupId: string, elementIds: string[] }[] = await Promise.all(groups.map(async (group) => ({
+    groupId: group.id,
+    elementIds: await getHiliteIdsForGroup(iModelConnection, group, hilitedElementsQueryCache),
+  })));
 
   const elems: Map<string, Set<string>> = new Map();
   const groupElementCount: Map<string, number> = new Map();
@@ -253,7 +260,7 @@ export const generateOverlappedGroups = (
   return { groupsWithGroupedOverlaps: [...allGroups, ...overlappedGroupsInformation], overlappedElementsInfo: getOverlappedElementsInfo(overlappedGroupsInformation), numberOfElementsInGroups: groupElementCount };
 };
 
-export const hideGroupConsideringOverlaps = (
+export const hideGroupConsideringOverlaps = async (
   overlappedElementGroupPairs: OverlappedElementGroupPairs[],
   groupIdToHide: string,
   hiddenGroupsIds: Set<string>

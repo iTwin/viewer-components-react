@@ -170,6 +170,7 @@ export const GroupsView = ({
           onDelete={async () => {
             await onDeleteGroup(selectedGroupForDeletion);
           }}
+          refresh={onRefresh}
         />
       )}
     </InformationPanelWrapper>

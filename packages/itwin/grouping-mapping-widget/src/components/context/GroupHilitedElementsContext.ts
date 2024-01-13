@@ -3,6 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
+import type { MutableRefObject } from "react";
+import type { Group } from "@itwin/insights-client";
+import type { KeySet } from "@itwin/presentation-common";
+export interface QueryCacheItem {
+  keySet: KeySet;
+  ids: string[];
+}
 export interface OverlappedInfo {
   groupIds: string[];
   elements: string[];
@@ -14,15 +21,16 @@ export interface OverlappedElementGroupPairs {
 }
 
 export interface GroupHilitedElements {
-  // hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;
+  hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;
   hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
+  groups: Group[];
   currentHilitedGroups: number;
   overlappedElementsInfo: Map<string, OverlappedInfo[]>;
   groupElementsInfo: Map<string, number>;
-  isVisualizationsEnabled: boolean;
   isOverlappedColored: boolean;
   overlappedElementGroupPairs: OverlappedElementGroupPairs[];
+  setGroups: (groups: Group[]) => void;
   setHiddenGroupsIds: (hiddenGroupIds: Set<string>) => void;
   setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
   setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void;
@@ -30,19 +38,19 @@ export interface GroupHilitedElements {
   setGroupElementsInfo: (groupElementsInfo: Map<string, number> | ((groupElementsInfo: Map<string, number>) => Map<string, number>)) => void;
   setIsOverlappedColored: (isOverlappedColored: boolean | ((isOverlappedColored: boolean) => boolean)) => void;
   setOverlappedElementGroupPairs: (overlappedElementGroupPairs: OverlappedElementGroupPairs[]) => void;
-  setIsVisualizationsEnabled: (isVisualizationsEnabled: boolean | ((isVisualizationsEnabled: boolean) => boolean)) => void;
 }
 
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
-  // hilitedElementsQueryCache: { current: new Map() },
+  hilitedElementsQueryCache: { current: new Map() },
   hiddenGroupsIds: new Set(),
   showGroupColor: false,
+  groups: [],
   currentHilitedGroups: 0,
   overlappedElementsInfo: new Map(),
-  isVisualizationsEnabled: false,
   groupElementsInfo: new Map(),
   isOverlappedColored: false,
   overlappedElementGroupPairs: [],
+  setGroups: () => { },
   setHiddenGroupsIds: () => { },
   setShowGroupColor: () => { },
   setNumberOfVisualizedGroups: () => { },
@@ -50,7 +58,6 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   setGroupElementsInfo: () => { },
   setIsOverlappedColored: () => { },
   setOverlappedElementGroupPairs: () => { },
-  setIsVisualizationsEnabled: () => { },
 });
 
 export const useGroupHilitedElementsContext = (): GroupHilitedElements => {

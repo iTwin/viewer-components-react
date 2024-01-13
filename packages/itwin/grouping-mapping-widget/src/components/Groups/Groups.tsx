@@ -7,7 +7,7 @@ import type { Group, Mapping } from "@itwin/insights-client";
 import type {
   ContextCustomUI,
 } from "../customUI/GroupingMappingCustomUI";
-import type { ActionButtonRenderer, ProgressConfig } from "./GroupsView";
+import type { ActionButtonRenderer } from "./GroupsView";
 import { GroupsView } from "./GroupsView";
 import { useGroupsOperations } from "./hooks/useGroupsOperations";
 import { Alert } from "@itwin/itwinui-react";
@@ -25,7 +25,6 @@ export interface GroupsProps {
   ) => void;
   disableActions?: boolean;
   isVisualizing?: boolean;
-  progressConfig?: ProgressConfig;
   alert?: React.ReactElement<typeof Alert>;
 }
 
@@ -37,7 +36,7 @@ export const Groups = ({
   onClickGroupModify,
   onClickRenderContextCustomUI,
   disableActions,
-  progressConfig,
+  isVisualizing,
   alert,
 }: GroupsProps) => {
   const {
@@ -54,6 +53,7 @@ export const Groups = ({
     activeOverlapInfoPanelGroup,
     setActiveOverlapInfoPanelGroup,
     overlappedElementsInfo,
+    hilitedGroupsProgress,
   } = useGroupsOperations({ mappingId: mapping.id });
 
   const addGroup = useCallback((type: string) => {
@@ -75,7 +75,7 @@ export const Groups = ({
   return (
     <GroupsView
       mapping={mapping}
-      groups={groups ?? []}
+      groups={groups}
       isLoading={isLoading}
       onRefresh={refresh}
       groupUIs={groupUIs}
@@ -90,7 +90,7 @@ export const Groups = ({
       onDeleteGroup={onDeleteGroup}
       onCloseDeleteModal={() => setShowDeleteModal(undefined)}
       contextUIs={contextUIs}
-      progressConfig={progressConfig}
+      progressConfig={isVisualizing ? { hilitedGroupsProgress } : undefined}
       alert={renderAlert()}
       setActiveOverlapInfoPanelGroup={setActiveOverlapInfoPanelGroup}
       activeOverlapInfoPanelGroup={activeOverlapInfoPanelGroup}
