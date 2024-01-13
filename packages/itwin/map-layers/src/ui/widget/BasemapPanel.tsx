@@ -5,17 +5,19 @@
 /* eslint-disable deprecation/deprecation */
 // cSpell:ignore droppable Sublayer Basemap
 
+import "./BasemapPanel.scss";
+import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { BackgroundMapType, BaseLayerSettings, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings, MapImagerySettings, MapLayerProps } from "@itwin/core-common";
+import {
+  BackgroundMapType, BaseLayerSettings, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings, MapImagerySettings, MapLayerProps,
+} from "@itwin/core-common";
+import { Viewport } from "@itwin/core-frontend";
 import { WebFontIcon } from "@itwin/core-react";
 import { ColorPickerDialog, ColorSwatch } from "@itwin/imodel-components-react";
 import { Button, Select, SelectOption } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
-import * as React from "react";
-import "./BasemapPanel.scss";
-import { Viewport } from "@itwin/core-frontend";
 
 const customBaseMapValue = "customBaseMap";
 const getSelectKeyFromProvider = (base: BaseMapLayerSettings) => `${base.provider ? `${base.provider.name}.${BackgroundMapType[base.provider.type]}` : `${base.name}`}`;
@@ -29,7 +31,9 @@ interface BasemapPanelProps {
 export function BasemapPanel(props: BasemapPanelProps) {
   const [useColorLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.ColorFill"));
   const { activeViewport, bases } = useSourceMapContext();
-  const [selectedBaseMap, setSelectedBaseMap] = React.useState<BaseLayerSettings | undefined>(activeViewport?.displayStyle.settings.mapImagery.backgroundBase);
+  const [selectedBaseMap, setSelectedBaseMap] = React.useState<BaseLayerSettings | undefined>(()=> {
+    return activeViewport?.displayStyle.settings.mapImagery.backgroundBase;
+  });
   const [baseMapTransparencyValue, setBaseMapTransparencyValue] = React.useState(() => {
     if (activeViewport) {
       const mapImagery = activeViewport.displayStyle.settings.mapImagery;
@@ -52,7 +56,41 @@ export function BasemapPanel(props: BasemapPanelProps) {
     return false;
   });
 
+  const getBaseMapOptions = React.useCallback((baseMap: BaseLayerSettings|undefined) => {
+    const baseOptions: SelectOption<string>[] = [];
+
+    baseOptions.push({ value: useColorLabel, label: useColorLabel });
+
+    if (bases) {
+      baseOptions.push(...bases.map((bgProvider) => {
+        const value = getSelectKeyFromProvider(bgProvider);
+        const label = MapLayersUI.translate(`WellKnownBaseMaps.${value}`);
+        return { value, label };
+      } ));
+    }
+
+    // Add new custom base map definition (avoid adding duplicate entry)
+    if (baseMap instanceof BaseMapLayerSettings && !baseMap.provider) {
+      // Add new option only if not created duplicate (Support of base map definition without provider)
+      if (undefined === baseOptions.find((opt)=>opt.label === baseMap.name)) {
+        baseOptions.push({value: customBaseMapValue, label: baseMap.name});
+      }
+    } else if (customBaseMap) {
+      // Add previously defined custom map definition
+      baseOptions.push({value: customBaseMapValue, label: customBaseMap.name});
+    }
+    return  baseOptions;
+
+  }, [bases, customBaseMap, useColorLabel]);
+
+  const [baseMapOptions, setBaseMapOptions] = React.useState<SelectOption<string>[]>(()=>getBaseMapOptions(selectedBaseMap));
+
+  const updateBaseMapOptions = React.useCallback((baseMap: BaseLayerSettings|undefined) => {
+    setBaseMapOptions(getBaseMapOptions(baseMap));
+  }, [getBaseMapOptions]);
+
   const handleMapImageryChanged = React.useCallback((args: Readonly<MapImagerySettings>) => {
+
     const baseMap = args.backgroundBase;
 
     // Optimization:  If serialized 'backgroundBase' objects are identical, skip refresh
@@ -60,6 +98,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       return;
 
     setSelectedBaseMap(baseMap);  // cache current base map objects
+    updateBaseMapOptions(baseMap);
 
     if (baseMap instanceof ImageMapLayerSettings) {
       if (baseMap.transparency !== baseMapTransparencyValue)
@@ -73,7 +112,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
         setBaseMapTransparencyValue(baseMap.getAlpha()/255);
       }
     }
-  }, [baseMapTransparencyValue, baseMapVisible, selectedBaseMap]);
+  }, [baseMapTransparencyValue, baseMapVisible, selectedBaseMap, updateBaseMapOptions]);
 
   React.useEffect(() => {
     const handleDisplayStyleChange = (vp: Viewport) => {
@@ -102,23 +141,14 @@ export function BasemapPanel(props: BasemapPanelProps) {
     }
   }, [activeViewport]);
 
-  const baseMapOptions = React.useMemo<SelectOption<string>[]>(() => {
-    const baseOptions: SelectOption<string>[] = [];
-
-    baseOptions.push({ value: useColorLabel, label: useColorLabel });
-
-    if (bases) {
-      baseOptions.push(...bases.map((bgProvider) => {
-        const value = getSelectKeyFromProvider(bgProvider);
-        const label = MapLayersUI.translate(`WellKnownBaseMaps.${value}`);
-        return { value, label };
-      } ));
+  // This effect is only to keep a custom base map option when a 'default' base map is picked.
+  React.useEffect(() => {
+    if (selectedBaseMap instanceof BaseMapLayerSettings
+       && !selectedBaseMap.provider
+       && undefined === baseMapOptions.find((opt)=>opt.label === selectedBaseMap.name)) {
+      setCustomBaseMap(selectedBaseMap);
     }
-    if (customBaseMap) {
-      baseOptions.push({value: customBaseMapValue, label: customBaseMap.name});
-    }
-    return baseOptions;
-  }, [bases, useColorLabel, customBaseMap]);
+  }, [baseMapOptions, selectedBaseMap]);
 
   const [presetColors] = React.useState([
     ColorDef.create(ColorByName.grey),
@@ -136,24 +166,42 @@ export function BasemapPanel(props: BasemapPanelProps) {
   const bgColor = React.useMemo(() => baseIsColor ? (selectedBaseMap as ColorDef).toJSON(): presetColors[0].toJSON(),
     [baseIsColor, selectedBaseMap, presetColors]);
   const [colorDialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:ColorDialog.Title"));
-  const selectedBaseMapValue = React.useMemo(() => {
+  const [selectedBaseMapValue, setSelectedBaseMapValue] = React.useState<SelectOption<string>>({value: "", label: ""});
+
+  React.useEffect(() => {
     if (baseIsMap) {
       if (selectedBaseMap instanceof BaseMapLayerSettings && selectedBaseMap.provider) {
         const mapName = getSelectKeyFromProvider(selectedBaseMap);
         const foundItem = baseMapOptions.find((value) => value.value === mapName);
-        if (foundItem)
-          return foundItem;
+        if (foundItem) {
+          setSelectedBaseMapValue(foundItem);
+          return;
+        }
       } else if (selectedBaseMap instanceof BaseMapLayerSettings) {
-        // We got a custom base map, create en entry for it.
-        setCustomBaseMap(selectedBaseMap);
-        return {value: customBaseMapValue, label: selectedBaseMap.name};
+        // We got a custom base map
+
+        // First check if the name matches a label of existing base map.
+        // If it matches, we assume it's a legacy base map definition missing the provider information.
+        let foundItem = baseMapOptions.find((opt) => opt.value !== customBaseMapValue && opt.label === selectedBaseMap.name);
+        if (foundItem) {
+          setSelectedBaseMapValue(foundItem);
+          return;
+        }
+
+        // Use custom base map entry
+        foundItem = baseMapOptions.find((opt) => opt.value === customBaseMapValue);
+        if (foundItem) {
+          setSelectedBaseMapValue(foundItem);
+          return;
+        }
+
       }
     } else if (baseIsColor) {
-      return baseMapOptions[0];
+      setSelectedBaseMapValue(baseMapOptions[0]);
+      return;
     }
-    return {value: "", label: ""};     // will display the place holder
-
-  }, [baseIsMap, baseIsColor, selectedBaseMap, baseMapOptions]);
+    setSelectedBaseMapValue({value: "", label: ""});
+  }, [baseIsColor, baseIsMap, baseMapOptions, selectedBaseMap]);
 
   const handleBackgroundColorDialogOk = React.useCallback((bgColorDef: ColorDef) => {
     UiFramework.dialogs.modal.close();
@@ -161,6 +209,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
       // change color and make sure previously set transparency is not lost.
       const curTransparency = activeViewport.displayStyle.backgroundMapBase instanceof ColorDef ? activeViewport.displayStyle.backgroundMapBase.getTransparency() : 0;
       activeViewport.displayStyle.backgroundMapBase = bgColorDef.withTransparency(curTransparency);
+
       setSelectedBaseMap(bgColorDef);
     }
   }, [activeViewport]);
@@ -178,7 +227,6 @@ export function BasemapPanel(props: BasemapPanelProps) {
   const handleBaseMapSelection = React.useCallback((value: string) => {
     if (activeViewport && value) {
       if (value === customBaseMapValue && customBaseMap) {
-        setSelectedBaseMap(customBaseMap);
         activeViewport.displayStyle.backgroundMapBase = customBaseMap;
       } else if (bases) {
         const baseMap = bases.find((provider) => getSelectKeyFromProvider(provider) === value);
@@ -189,16 +237,14 @@ export function BasemapPanel(props: BasemapPanelProps) {
           } else {
             activeViewport.displayStyle.backgroundMapBase = BaseMapLayerSettings.fromJSON({...baseProps, visible: baseMapVisible});
           }
-          setSelectedBaseMap(baseMap);
         } else {
           const bgColorDef = ColorDef.fromJSON(bgColor);
           const curTransparency = activeViewport.displayStyle.backgroundMapBase instanceof ColorDef ? activeViewport.displayStyle.backgroundMapBase.getTransparency() : 0;
           activeViewport.displayStyle.backgroundMapBase = bgColorDef.withTransparency(curTransparency);
-          setSelectedBaseMap(bgColorDef);
         }
       }
     }
-  }, [activeViewport, bases, customBaseMap, baseMapVisible, bgColor]);
+  }, [activeViewport, customBaseMap, bases, baseMapVisible, bgColor]);
 
   const handleVisibilityChange = React.useCallback(() => {
     if (activeViewport) {
