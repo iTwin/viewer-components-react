@@ -1,26 +1,29 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { EMPTY, from, Subject } from "rxjs";
 import sinon from "sinon";
+import { MutableTreeModel, TreeModelSource } from "@itwin/components-react";
 import { BeEvent, using } from "@itwin/core-bentley";
+import { IModelApp } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
+import { waitFor } from "@testing-library/react";
 import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations } from "../TestUtils";
 import { createCategoryNode, createElementNode, createModelNode, createSimpleTreeModelNode, createSubjectNode } from "./Common";
 
 import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, ITreeNodeLoader } from "@itwin/components-react";
-import { MutableTreeModel , TreeModelSource } from "@itwin/components-react";
-
 import type { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { SelectionHandler } from "@itwin/presentation-frontend";
-import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandlerParams } from "../../components/trees/VisibilityTreeEventHandler";
-import { IModelApp } from "@itwin/core-frontend";
-import { waitFor } from "@testing-library/react";
-
+import type {
+  IVisibilityHandler,
+  VisibilityChangeListener,
+  VisibilityStatus,
+  VisibilityTreeEventHandlerParams,
+} from "../../components/trees/VisibilityTreeEventHandler";
 describe("VisibilityTreeEventHandler", () => {
   const selectionHandlerStub = { getSelection: () => {} } as any as SelectionHandler;
 
@@ -62,7 +65,9 @@ describe("VisibilityTreeEventHandler", () => {
     const model = new MutableTreeModel();
     model.setChildren(
       undefined,
-      nodeIds.map((nodeId) => {return { ...createSimpleTreeModelNode(nodeId), isLoading: false, item: item ?? createSimpleTreeModelNode("node-item") };}),
+      nodeIds.map((nodeId) => {
+        return { ...createSimpleTreeModelNode(nodeId), isLoading: false, item: item ?? createSimpleTreeModelNode("node-item") };
+      }),
       0,
     );
     const modelSource = new TreeModelSource(model);
@@ -73,11 +78,10 @@ describe("VisibilityTreeEventHandler", () => {
   }
 
   const createHandler = (partialProps?: Partial<VisibilityTreeEventHandlerParams>): VisibilityTreeEventHandler => {
-    if (!partialProps)
-      partialProps = {};
+    if (!partialProps) partialProps = {};
     const props: VisibilityTreeEventHandlerParams = {
       visibilityHandler: partialProps.visibilityHandler || visibilityHandler,
-      nodeLoader: partialProps.nodeLoader || nodeLoaderStub as unknown as AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider>,
+      nodeLoader: partialProps.nodeLoader || (nodeLoaderStub as unknown as AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider>),
       selectionHandler: partialProps.selectionHandler || selectionHandlerStub,
     };
     return new VisibilityTreeEventHandler(props);
@@ -85,11 +89,9 @@ describe("VisibilityTreeEventHandler", () => {
 
   describe("onVisibilityChange", () => {
     it("calls 'getVisibilityStatus' for nodes whose visibility status is not known when updating all nodes", async () => {
-      const visibilityStatus: Map<string, VisibilityStatus> = new Map([
-        ["testId2", testVisibilityStatus],
-      ]);
+      const visibilityStatus: Map<string, VisibilityStatus> = new Map([["testId2", testVisibilityStatus]]);
 
-      const { nodeLoader } = setupTreeModel(["testId1","testId2","testId3"]);
+      const { nodeLoader } = setupTreeModel(["testId1", "testId2", "testId3"]);
 
       await using(createHandler({ visibilityHandler, nodeLoader }), async (_) => {
         await flushAsyncOperations();
@@ -113,9 +115,7 @@ describe("VisibilityTreeEventHandler", () => {
     });
 
     it("calls 'getVisibilityStatus' for nodes whose visibility status is not known when updating affected nodes", async () => {
-      const visibilityStatus: Map<string, VisibilityStatus> = new Map([
-        ["testId1", testVisibilityStatus],
-      ]);
+      const visibilityStatus: Map<string, VisibilityStatus> = new Map([["testId1", testVisibilityStatus]]);
 
       const { nodeLoader } = setupTreeModel(["testId1", "testId2"]);
 
@@ -178,15 +178,10 @@ describe("VisibilityTreeEventHandler", () => {
       });
       expect(getVisibilityStatus).to.be.calledTwice;
     });
-
   });
 
   describe("onNodeDoubleClick", async () => {
-    [
-      { nodeItem: createSubjectNode() },
-      { nodeItem: createModelNode() },
-      { nodeItem: createCategoryNode() },
-    ].forEach(({ nodeItem }) => {
+    [{ nodeItem: createSubjectNode() }, { nodeItem: createModelNode() }, { nodeItem: createCategoryNode() }].forEach(({ nodeItem }) => {
       it(`does not call zoomToElement when node item is ${nodeItem.id} node.`, async () => {
         const { nodeLoader } = setupTreeModel(["testId"], nodeItem);
         const eventHandler = createHandler({ visibilityHandler, nodeLoader });
