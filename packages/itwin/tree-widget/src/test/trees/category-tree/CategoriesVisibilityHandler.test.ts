@@ -9,13 +9,11 @@ import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent, using } from "@itwin/core-bentley";
 import { StandardNodeTypes } from "@itwin/presentation-common";
-import { waitFor } from "@testing-library/react";
-import { renderHook } from "@testing-library/react-hooks";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
   CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { createResolvablePromise, mockViewport } from "../../TestUtils";
+import { act, createResolvablePromise, mockViewport, renderHook, waitFor } from "../../TestUtils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
@@ -403,9 +401,11 @@ describe("useCategories", () => {
 
     const { result } = renderHook(() => useCategories(viewManagerMock.object, imodelMock.object, viewport));
 
-    expect(result.current).to.deep.eq([]);
+    await waitFor(() => expect(result.current).to.deep.eq([]));
 
-    resolve([{ id: categoryId }]);
+    act(() => {
+      resolve([{ id: categoryId }]);
+    });
 
     await waitFor(() => {
       expect(result.current).to.have.lengthOf(1);
@@ -434,6 +434,6 @@ describe("useCategories", () => {
 
     const { result } = renderHook(() => useCategories(viewManagerMock.object, imodelMock.object));
 
-    expect(result.current).to.deep.eq([]);
+    await waitFor(() => expect(result.current).to.deep.eq([]));
   });
 });
