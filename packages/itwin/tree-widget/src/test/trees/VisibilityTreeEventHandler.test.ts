@@ -27,16 +27,12 @@ import type {
 describe("VisibilityTreeEventHandler", () => {
   const selectionHandlerStub = { getSelection: () => {} } as any as SelectionHandler;
 
-  const nodeLoaderStub = {
-    loadNode: sinon.stub<Parameters<ITreeNodeLoader["loadNode"]>, ReturnType<ITreeNodeLoader["loadNode"]>>(),
-    modelSource: {},
-    dataProvider: {} as any as PresentationTreeDataProvider,
-  };
-
   const testVisibilityStatus: VisibilityStatus = {
     state: "visible",
     isDisabled: false,
   };
+
+  let nodeLoaderStub: AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider>;
 
   const getVisibilityStatus = sinon.stub().returns(testVisibilityStatus);
   const changeVisibility = sinon.stub();
@@ -49,12 +45,7 @@ describe("VisibilityTreeEventHandler", () => {
     dispose: sinon.fake(),
   };
 
-  beforeEach(() => {
-    nodeLoaderStub.loadNode.returns(EMPTY);
-  });
-
   afterEach(() => {
-    nodeLoaderStub.loadNode.reset();
     changeVisibility.reset();
     onVisibilityChange.clear();
     getVisibilityStatus.resetHistory();
@@ -71,7 +62,12 @@ describe("VisibilityTreeEventHandler", () => {
       0,
     );
     const modelSource = new TreeModelSource(model);
-    nodeLoaderStub.modelSource = modelSource;
+
+    nodeLoaderStub = {
+      loadNode: sinon.stub<Parameters<ITreeNodeLoader["loadNode"]>, ReturnType<ITreeNodeLoader["loadNode"]>>(),
+      modelSource,
+      dataProvider: {} as any as PresentationTreeDataProvider,
+    } as any as AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider>;
     modelSource.modifyModel = () => {};
 
     return { modelSource, nodeLoader: nodeLoaderStub as unknown as AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider> };
@@ -129,8 +125,8 @@ describe("VisibilityTreeEventHandler", () => {
     });
 
     it("does not call 'getVisibilityStatus' while changing visibility", async () => {
-      const { nodeLoader } = setupTreeModel(["testId1"]);
-      const node = nodeLoader.modelSource.getModel().getNode("testId1");
+      const { nodeLoader, modelSource } = setupTreeModel(["testId1"]);
+      const node = modelSource.getModel().getNode("testId1");
 
       const eventHandler = createHandler({ visibilityHandler, nodeLoader });
       const changes: CheckboxStateChange[] = [{ nodeItem: node!.item, newState: CheckBoxState.On }];
@@ -156,8 +152,8 @@ describe("VisibilityTreeEventHandler", () => {
     });
 
     it("handles errors while changing visibility", async () => {
-      const { nodeLoader } = setupTreeModel(["testId1"]);
-      const node = nodeLoader.modelSource.getModel().getNode("testId1");
+      const { modelSource } = setupTreeModel(["testId1"]);
+      const node = modelSource.getModel().getNode("testId1");
 
       const eventHandler = createHandler({ visibilityHandler });
       const changes: CheckboxStateChange[] = [{ nodeItem: node!.item, newState: CheckBoxState.Off }];
