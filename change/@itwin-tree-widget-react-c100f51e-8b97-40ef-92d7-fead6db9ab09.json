@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Models Tree: zoom to viewport element on node double-click.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "114080994+ViliusBa@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
