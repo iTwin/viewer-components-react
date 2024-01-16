@@ -6,13 +6,11 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { KeySet } from "@itwin/presentation-common";
-import { waitFor } from "@testing-library/react";
-import { renderHook } from "@testing-library/react-hooks";
 import { useInstanceSelection } from "../../hooks/UseInstanceSelection";
-import { createResolvablePromise, stubSelectionManager } from "../TestUtils";
+import { createResolvablePromise, renderHook, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ISelectionProvider , SelectionChangeEventArgs  } from "@itwin/presentation-frontend";
+import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { InstanceSelectionProps } from "../../hooks/UseInstanceSelection";
 

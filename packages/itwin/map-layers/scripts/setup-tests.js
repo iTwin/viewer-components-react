@@ -118,3 +118,10 @@ afterEach(async () => {
     sinon.restore();
   } catch (e) { }
 });
+
+global.DOMMatrix = class DOMMatrix {
+  constructor() {
+    this.e = 0;
+    this.f = 0;
+  }
+};

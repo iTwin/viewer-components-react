@@ -101,7 +101,7 @@ export class SectioningUtil {
 
   private static _handleSpaceDecorationClicked = (ev: BeButtonEvent, decoration?: SpaceLabelDecoration) => {
     Logger.logInfo("Space Decoration", `Event: ${ev}, Marker: ${decoration}`);
-  }
+  };
 
   private static _handleSectionClearedFromTool = (tool: Tool) => {
     const toolId = tool.toolId;
@@ -115,7 +115,7 @@ export class SectioningUtil {
         SectioningUtil._toolChangedRemover = undefined;
       }
     }
-  }
+  };
 
   // Create a plane representing either the ceiling or floor of a room.
   private static createZPlane(planeSet: ConvexClipPlaneSet, z: number, top: boolean, storyRange: Range3d) {

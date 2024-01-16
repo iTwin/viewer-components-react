@@ -8,10 +8,9 @@ import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { render, waitFor } from "@testing-library/react";
 import { SelectableTree } from "../components/SelectableTree";
 import { TreeWidget } from "../TreeWidget";
-import { createResolvablePromise, stubCancelAnimationFrame, TestUtils } from "./TestUtils";
+import { createResolvablePromise, render, stubCancelAnimationFrame, TestUtils, waitFor } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeDefinition } from "../components/SelectableTree";
@@ -103,7 +102,7 @@ describe("<SelectableTree />", () => {
 
     const { container, queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => {
-      const content = container.querySelector(".components-selectable-content-wrapper");
+      const content = container.querySelector(".components-selectable-content-wrapper"); // eslint-disable-line deprecation/deprecation
       expect(content?.children).to.not.be.empty;
     });
 

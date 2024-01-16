@@ -113,7 +113,9 @@ export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
 /**
  * Filters data provider used in supplied node loader and invokes onFilterApplied when filtering is completed.
  * @public
+ * @deprecated in 2.0.0. Use [[useVisibilityTree]] instead.
  */
+// istanbul ignore next
 export function useVisibilityTreeFiltering(
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>,
   filterInfo?: VisibilityTreeFilterInfo,

@@ -3,10 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { Guid } from "@itwin/core-bentley";
 
 /**
  * Props for `useLoadedInstanceInfo` hook.
@@ -22,11 +23,18 @@ export interface UseLoadedInstanceInfoProps {
  */
 export function useLoadedInstanceInfo({ dataProvider }: UseLoadedInstanceInfoProps) {
   const [item, setItem] = useState<{className: string, label: PropertyRecord}>();
+  const inProgressId = useRef<string>();
 
   useEffect(() => {
     const onDataChanged = async () => {
+      const currentId = Guid.createValue();
+      inProgressId.current = currentId;
+
+      // we need to make sure that the loaded propertyData is provided by the latest getData() call
       const propertyData = await dataProvider.getData();
-      setItem({ label: propertyData.label, className: propertyData.description ?? "" });
+      if (inProgressId.current === currentId) {
+        setItem({ label: propertyData.label, className: propertyData.description ?? "" });
+      }
     };
 
     const removeListener = dataProvider.onDataChanged.addListener(onDataChanged);

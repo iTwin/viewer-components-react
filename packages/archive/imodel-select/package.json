@@ -22,7 +22,7 @@
     "build": " tsc 1>&2 && npm run copy:assets",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "rebuild": "npm run clean && npm run build",
-    "clean": "rimraf lib build .rush/temp/package-deps*.json",
+    "clean": "rimraf lib build",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "cover": "",
     "lint": "",

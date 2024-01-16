@@ -8,12 +8,11 @@ import { createRef } from "react";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework, WidgetState } from "@itwin/appui-react";
 import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
-import { render, waitFor } from "@testing-library/react";
 import * as usePropertyGridTransientStateModule from "../hooks/UsePropertyGridTransientState";
 import * as propertyGridComponent from "../PropertyGridComponent";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridUiItemsProvider, PropertyGridWidgetId } from "../PropertyGridUiItemsProvider";
-import { stubSelectionManager } from "./TestUtils";
+import { render, stubSelectionManager, waitFor  } from "./TestUtils";
 
 import type { WidgetDef } from "@itwin/appui-react";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
@@ -61,7 +60,7 @@ describe("PropertyGridUiItemsProvider", () => {
     expect(propertyGridComponentStub).to.be.called;
   });
 
-  it("renders error message if property grid component throws", () => {
+  it("renders error message if property grid component throws", async () => {
     propertyGridComponentStub.reset();
     propertyGridComponentStub.callsFake(() => { throw new Error("Error"); });
 
@@ -69,8 +68,10 @@ describe("PropertyGridUiItemsProvider", () => {
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
     const { queryByText } = render(<>{widget.content}</>);
 
-    expect(propertyGridComponentStub).to.be.called;
-    expect(queryByText(PropertyGridManager.translate("error"))).to.not.be.null;
+    await waitFor(() => {
+      expect(propertyGridComponentStub).to.be.called;
+      expect(queryByText(PropertyGridManager.translate("error"))).to.not.be.null;
+    });
   });
 
   describe("widget state", () => {

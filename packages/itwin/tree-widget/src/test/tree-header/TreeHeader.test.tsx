@@ -7,11 +7,10 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { Button } from "@itwin/itwinui-react";
-import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import { TreeHeader } from "../../components/tree-header/TreeHeader";
 import { TreeWidget } from "../../TreeWidget";
-import { stubCancelAnimationFrame } from "../TestUtils";
+import { render, stubCancelAnimationFrame, waitFor } from "../TestUtils";
 
 import type { TreeHeaderProps } from "../../components/tree-header/TreeHeader";
 
@@ -30,6 +29,10 @@ describe("<TreeHeader />", () => {
 
   after(() => {
     TreeWidget.terminate();
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   it("renders supplied buttons", async () => {
