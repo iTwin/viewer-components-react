@@ -211,6 +211,9 @@ devDependencies:
   nyc:
     specifier: 15.1.0
     version: 15.1.0
+  postcss:
+    specifier: ^8.4.32
+    version: 8.4.32
   raf:
     specifier: ^3.4.0
     version: 3.4.0
