@@ -21,7 +21,8 @@ export const useGroupsOperations = ({
   mappingId,
 }: GroupsOperationsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const { overlappedElementsInfo } = useGroupHilitedElementsContext();
+  const { overlappedElementsMetadata: {  overlappedElementsInfo } } = useGroupHilitedElementsContext();
+
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] =
     useGroupingMappingCustomUI().customUIs.filter(

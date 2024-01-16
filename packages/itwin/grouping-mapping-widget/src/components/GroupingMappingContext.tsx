@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type {
@@ -18,14 +18,17 @@ import {
 import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IExtractionClient, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import type { OverlappedElementGroupPairs, OverlappedInfo } from "./context/GroupHilitedElementsContext";
+import type { OverlappedElementsMetadata } from "./context/GroupHilitedElementsContext";
+import { OverlappedElementGroupPairs, OverlappedInfo } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
+import type { Query } from "@tanstack/react-query";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { toaster } from "@itwin/itwinui-react";
 import { getErrorMessage } from "../common/utils";
+import { TErrCodes } from "./Constants";
 
 export interface GroupingMappingContextProps {
   /**
@@ -71,11 +74,18 @@ const queryClient = new QueryClient({
     },
   },
   queryCache: new QueryCache({
-    onError: (error: any) => {
-      if (error.status)
-        toaster.negative(getErrorMessage(error.status));
-      else
-        toaster.negative("An error occurred while fetching data.");
+    onError: (error: any, query: Query) => {
+      switch (query.meta?.errorCode) {
+        case TErrCodes.QUERY_FETCH_FAILED:
+          toaster.negative(query.meta?.message as string);
+          break;
+        default: {
+          if (error.status)
+            toaster.negative(getErrorMessage(error.status));
+          else
+            toaster.negative("An error occurred while fetching data.");
+        }
+      }
     },
   }),
   mutationCache: new MutationCache({
@@ -110,12 +120,14 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [calculatedProperties, setCalculatedProperties] = useState<CalculatedProperty[]>([]);
   const [customCalculationProperties, setCustomCalculationProperties] = useState<CustomCalculation[]>([]);
   const [numberOfVisualizedGroups, setNumberOfVisualizedGroups] = useState(0);
-  const [overlappedElementsInfo, setOverlappedElementsInfo] = useState<Map<string, OverlappedInfo[]>>(new Map());
-  const [groupElementsInfo, setGroupElementsInfo] = useState<Map<string, number>>(new Map());
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
   const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
   const [isVisualizationsEnabled, setIsVisualizationsEnabled] = useState<boolean>(false);
-  const [overlappedElementGroupPairs, setOverlappedElementGroupPairs] = useState<OverlappedElementGroupPairs[]>([]);
+  const [overlappedElementsMetadata, setOverlappedElementsMetadata] = useState<OverlappedElementsMetadata>({
+    overlappedElementsInfo: new Map(),
+    groupElementsInfo: new Map(),
+    overlappedElementGroupPairs: [],
+  });
 
   useEffect(() => {
     setApiConfig(() => ({
@@ -144,25 +156,20 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       setShowGroupColor,
       hiddenGroupsIds,
       setHiddenGroupsIds,
-      // hilitedElementsQueryCache,
       groups,
       setGroups,
       numberOfVisualizedGroups,
       setNumberOfVisualizedGroups,
-      overlappedElementsInfo,
-      setOverlappedElementsInfo,
-      groupElementsInfo,
-      setGroupElementsInfo,
       isOverlappedColored,
       setIsOverlappedColored,
       currentHilitedGroups,
       setCurrentHilitedGroups,
-      overlappedElementGroupPairs,
-      setOverlappedElementGroupPairs,
       isVisualizationsEnabled,
       setIsVisualizationsEnabled,
+      overlappedElementsMetadata,
+      setOverlappedElementsMetadata,
     }),
-    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, overlappedElementsInfo, groupElementsInfo, isOverlappedColored, currentHilitedGroups, overlappedElementGroupPairs, isVisualizationsEnabled]
+    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, isOverlappedColored, currentHilitedGroups, isVisualizationsEnabled, overlappedElementsMetadata]
   );
 
   const propertiesContextValue = useMemo(

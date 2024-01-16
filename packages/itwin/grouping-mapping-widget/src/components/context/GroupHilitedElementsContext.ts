@@ -13,43 +13,42 @@ export interface OverlappedElementGroupPairs {
   groupIds: Set<string>;
 }
 
+export interface OverlappedElementsMetadata {
+  overlappedElementsInfo: Map<string, OverlappedInfo[]>;
+  groupElementsInfo: Map<string, number>;
+  overlappedElementGroupPairs: OverlappedElementGroupPairs[];
+}
 export interface GroupHilitedElements {
-  // hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;
   hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
   currentHilitedGroups: number;
-  overlappedElementsInfo: Map<string, OverlappedInfo[]>;
-  groupElementsInfo: Map<string, number>;
+  overlappedElementsMetadata: OverlappedElementsMetadata;
   isVisualizationsEnabled: boolean;
   isOverlappedColored: boolean;
-  overlappedElementGroupPairs: OverlappedElementGroupPairs[];
   setHiddenGroupsIds: (hiddenGroupIds: Set<string>) => void;
   setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
   setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void;
-  setOverlappedElementsInfo: (overlappedElementsInfo: Map<string, OverlappedInfo[]> | ((overlappedElementsInfo: Map<string, OverlappedInfo[]>) => Map<string, OverlappedInfo[]>)) => void;
-  setGroupElementsInfo: (groupElementsInfo: Map<string, number> | ((groupElementsInfo: Map<string, number>) => Map<string, number>)) => void;
+  setOverlappedElementsMetadata: (overlappedElementsMetaData: OverlappedElementsMetadata) => void;
   setIsOverlappedColored: (isOverlappedColored: boolean | ((isOverlappedColored: boolean) => boolean)) => void;
-  setOverlappedElementGroupPairs: (overlappedElementGroupPairs: OverlappedElementGroupPairs[]) => void;
   setIsVisualizationsEnabled: (isVisualizationsEnabled: boolean | ((isVisualizationsEnabled: boolean) => boolean)) => void;
 }
 
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
-  // hilitedElementsQueryCache: { current: new Map() },
   hiddenGroupsIds: new Set(),
   showGroupColor: false,
   currentHilitedGroups: 0,
-  overlappedElementsInfo: new Map(),
+  overlappedElementsMetadata: {
+    overlappedElementsInfo: new Map(),
+    groupElementsInfo: new Map(),
+    overlappedElementGroupPairs: [],
+  },
   isVisualizationsEnabled: false,
-  groupElementsInfo: new Map(),
   isOverlappedColored: false,
-  overlappedElementGroupPairs: [],
   setHiddenGroupsIds: () => { },
   setShowGroupColor: () => { },
   setNumberOfVisualizedGroups: () => { },
-  setOverlappedElementsInfo: () => { },
-  setGroupElementsInfo: () => { },
+  setOverlappedElementsMetadata: () => { },
   setIsOverlappedColored: () => { },
-  setOverlappedElementGroupPairs: () => { },
   setIsVisualizationsEnabled: () => { },
 });
 

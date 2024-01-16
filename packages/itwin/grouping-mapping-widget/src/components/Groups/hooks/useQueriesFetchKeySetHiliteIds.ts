@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedCollectionPick";
+import { TErrCodes } from "../../Constants";
 import { getHiliteIdsAndKeysetFromGroup } from "../groupsHelpers";
 
 export interface QueryResults {
@@ -23,6 +24,7 @@ export const createGroupQuery = (group: Group, iModelConnection: IModelConnectio
   queryFn: async () => getHiliteIdsAndKeysetFromGroup(iModelConnection, group),
   enabled: enableGroupQueries,
   staleTime: Infinity,
+  meta: { errorCode:TErrCodes.QUERY_FETCH_FAILED, message: `Failed to resolve ${group.groupName}.` },
 });
 
 export const useSingleGroupQueryFetchKeySetHiliteIds = (group: Group, iModelConnection: IModelConnection, enableGroupQueries: boolean) => {

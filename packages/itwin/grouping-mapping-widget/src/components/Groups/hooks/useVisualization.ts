@@ -13,7 +13,7 @@ import { clearEmphasizedElements, clearOverriddenElements, transparentOverridden
 
 export const useVisualization = (shouldVisualize: boolean, iModelConnection: IModelConnection, query: string, queryGenerationType: string) => {
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const { showGroupColor, hiddenGroupsIds, overlappedElementGroupPairs, setNumberOfVisualizedGroups} = useGroupHilitedElementsContext();
+  const { showGroupColor, hiddenGroupsIds, overlappedElementsMetadata: { overlappedElementGroupPairs }, setNumberOfVisualizedGroups} = useGroupHilitedElementsContext();
   const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
 
   const resetView = useCallback(async () => {

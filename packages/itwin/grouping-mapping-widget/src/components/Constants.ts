@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.gmw-visual-buttons {
-  justify-content: space-between;
-  flex-wrap: wrap;
+export enum TErrCodes {
+  QUERY_FETCH_FAILED
 }

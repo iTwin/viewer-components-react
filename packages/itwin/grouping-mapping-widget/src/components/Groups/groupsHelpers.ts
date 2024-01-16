@@ -29,39 +29,6 @@ export const getGroupColor = (index: number) => {
   return generateHSL(hue);
 };
 
-// export const getHiliteIdsFromGroups = async (
-//   iModelConnection: IModelConnection,
-//   groups: Group[],
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
-// ) => {
-//   const distinctQueries = new Set<string>();
-//   const promises: Promise<{ ids: string[] }>[] = [];
-//   for (const group of groups) {
-//     if (!distinctQueries.has(group.query)) {
-//       distinctQueries.add(group.query);
-//       promises.push(getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache));
-//     }
-//   }
-//   const results = await Promise.all(promises);
-//   const allIds = results.flatMap((result) => result.ids);
-//   return allIds;
-// };
-
-export const hideElementIds = (
-  elementIds: string[]
-) => {
-  hideElements(elementIds);
-};
-
-// export const hideGroup = async (
-//   iModelConnection: IModelConnection,
-//   viewGroup: Group,
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
-// ) => {
-//   const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, viewGroup, hilitedElementsQueryCache);
-//   hideElements(result.ids);
-// };
-
 const processGroupVisualization = async (
   overlappedElementGroupPairs: OverlappedElementGroupPairs,
   hiddenGroupsIds: Set<string>,
@@ -136,34 +103,6 @@ export const visualizeGroupColors = async (
   return allIds;
 };
 
-// export const getHiliteIdsAndKeysetFromGroup = async (
-//   iModelConnection: IModelConnection,
-//   group: Group,
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
-// ) => {
-//   const query = group.query;
-//   if (hilitedElementsQueryCache.current.has(query)) {
-//     return hilitedElementsQueryCache.current.get(query) ?? ({ keySet: new KeySet(), ids: [] });
-//   }
-//   try {
-//     const queryRowCount = await iModelConnection.queryRowCount(query);
-//     if (queryRowCount === 0) {
-//       toaster.warning(
-//         `${group.groupName}'s query is valid but produced no results.`
-//       );
-//     }
-//     const result = await getHiliteIds(query, iModelConnection);
-//     hilitedElementsQueryCache.current.set(query, result);
-//     return result;
-//   } catch {
-//     toaster.negative(
-//       `Query could not be resolved.`
-//     );
-//     return ({ keySet: new KeySet(), ids: [] });
-//   }
-
-// };
-
 export const getHiliteIdsAndKeysetFromGroup = async (
   iModelConnection: IModelConnection,
   group: Group,
@@ -173,16 +112,6 @@ export const getHiliteIdsAndKeysetFromGroup = async (
   return {group, result};
 
 };
-
-// export const getHiliteIdsForGroup = async (
-//   iModelConnection: IModelConnection,
-//   group: Group,
-//   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
-// ) => {
-//   const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
-//   const hilitedIds = result.ids;
-//   return hilitedIds;
-// };
 
 const getOverlappedElementsInfo = (overlappedElements: OverlappedElementGroupPairs[]) => {
   const overlappedElementsInfo: Map<string, OverlappedInfo[]> = new Map();
@@ -217,16 +146,7 @@ const mergeElementsByGroup = (elems: Map<string, Set<string>>) => {
 
 export const generateOverlappedGroups = (
   groupsElementIds: GroupsElementIds,
-  // iModelConnection: IModelConnection,
-  // hilitedElementsQueryCache: Map<string, QueryCacheItem>,
 ) => {
-  // const groupsElementIds: { groupId: string, elementIds: string[] }[] = await Promise.all(groups.map(async (group) => ({
-  //   groupId: group.id,
-  //   elementIds: await getHiliteIdsForGroup(iModelConnection, group, hilitedElementsQueryCache),
-  // })));
-
-  // const groupsElementIds: { groupId: string, elementIds: string[] }[] = groupsQueryResults.map((group) => ({groupId: group.group.id, elementIds: group.result.ids}));
-
   const elems: Map<string, Set<string>> = new Map();
   const groupElementCount: Map<string, number> = new Map();
 

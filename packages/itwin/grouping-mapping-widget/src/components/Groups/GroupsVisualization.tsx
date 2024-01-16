@@ -10,7 +10,6 @@ import {
   generateOverlappedGroups,
 } from "./groupsHelpers";
 import {
-  hideElementIds,
   hideGroupConsideringOverlaps,
   visualizeGroupColors,
 } from "./groupsHelpers";
@@ -62,13 +61,10 @@ export const GroupsVisualization = ({
     isOverlappedColored,
     setHiddenGroupsIds,
     setNumberOfVisualizedGroups,
-    setOverlappedElementsInfo,
-    setGroupElementsInfo,
-    overlappedElementsInfo,
-    setOverlappedElementGroupPairs,
     isVisualizationsEnabled,
     setIsVisualizationsEnabled,
-    overlappedElementGroupPairs,
+    overlappedElementsMetadata,
+    setOverlappedElementsMetadata,
   } = useGroupHilitedElementsContext();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -101,11 +97,22 @@ export const GroupsVisualization = ({
     },
   });
 
-  const isGroupsQueriesReady = useMemo(() => groupQueries.every((query) => query.isFetched), [groupQueries]);
+  const isGroupsQueriesReady = useMemo(() =>
+    groupQueries.every((query) => query.isFetched && query.data) && groupQueries.length > 0, [groupQueries]
+  );
   const groupQueriesProgressCount = useMemo(() => groupQueries.filter((query) => query.isFetched).length, [groupQueries]);
   const isResolvingGroupQueries = useMemo(() => groupQueries.some((query) => query.isLoading), [groupQueries]);
-  const hiliteIds = useMemo(() => isGroupsQueriesReady ? groupQueries.map((query) => ({ groupId: query.data!.group.id, elementIds: query.data!.result.ids })) : [], [groupQueries, isGroupsQueriesReady]);
 
+  const hiliteIds = useMemo(
+    () =>
+      isGroupsQueriesReady
+        ? groupQueries.map((query) => ({
+          groupId: query.data!.group.id,
+          elementIds: query.data!.result.ids,
+        }))
+        : [],
+    [groupQueries, isGroupsQueriesReady]
+  );
   const getHiliteIdsFromGroupsWrapper = useCallback(
     (groups: Group[]) =>
       hiliteIds.filter((id) => groups.some((group) => group.id === id.groupId)).flatMap((id) => id.elementIds),
@@ -115,16 +122,13 @@ export const GroupsVisualization = ({
   useEffect(() => {
     const results = generateOverlappedGroups(hiliteIds);
     const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
-    // TODO GROUP THESE TOGETHER
-    setOverlappedElementsInfo(overlappedElementsInfo);
-    setGroupElementsInfo(numberOfElementsInGroups);
-    setOverlappedElementGroupPairs(groupsWithGroupedOverlaps);
-  }, [hiliteIds, setGroupElementsInfo, setOverlappedElementGroupPairs, setOverlappedElementsInfo]);
+    setOverlappedElementsMetadata({ overlappedElementsInfo, groupElementsInfo: numberOfElementsInGroups, overlappedElementGroupPairs: groupsWithGroupedOverlaps });
+  }, [hiliteIds, setOverlappedElementsMetadata]);
 
   useEffect(() => {
     if (isOverlappedColored === false) {
       if (groups && groups.length > 0 && showGroupColor) {
-        visualizationMutation.mutate(overlappedElementGroupPairs);
+        visualizationMutation.mutate(overlappedElementsMetadata.overlappedElementGroupPairs);
       } else {
         clearEmphasizedOverriddenElements();
       }
@@ -137,21 +141,21 @@ export const GroupsVisualization = ({
     if (isVisualizationsEnabled) {
       setEnableGroupQueries(true);
     }
-  }, [isVisualizationsEnabled]);
+  }, [isVisualizationsEnabled, setIsVisualizationsEnabled]);
 
   const hideAllGroups = useCallback(
     () => {
       if (!groups) return;
-      hideElementIds(getHiliteIdsFromGroupsWrapper(groups));
+      hideElements(getHiliteIdsFromGroupsWrapper(groups));
     },
     [getHiliteIdsFromGroupsWrapper, groups]
   );
 
   const hideSingleGroupWrapper = useCallback(
     (groupToHide: Group) => {
-      hideGroupConsideringOverlaps(overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
+      hideGroupConsideringOverlaps(overlappedElementsMetadata.overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
     },
-    [hiddenGroupsIds, overlappedElementGroupPairs]
+    [hiddenGroupsIds, overlappedElementsMetadata.overlappedElementGroupPairs]
   );
 
   const showGroup = useCallback(
@@ -219,15 +223,15 @@ export const GroupsVisualization = ({
     (props: ActionButtonRendererProps) => (
       <GroupsShowHideButtons
         {...props}
-        isLoadingQuery={!isGroupsFetched || !isGroupsQueriesReady}
+        isLoadingQuery={!(isVisualizationsEnabled && isGroupsFetched && isGroupsQueriesReady)}
         showGroup={showGroup}
         hideGroup={hideSingleGroupWrapper}
       />
     ),
-  ].flat(), [groups, hideSingleGroupWrapper, isGroupsFetched, isGroupsQueriesReady, showGroup, showGroupColor]);
+  ].flat(), [groups, hideSingleGroupWrapper, isGroupsFetched, isGroupsQueriesReady, isVisualizationsEnabled, showGroup, showGroupColor]);
 
   const overlappedAlert = useMemo(() =>
-    overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor ?
+    overlappedElementsMetadata.overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor ?
       <Alert
         onClose={() => setIsAlertClosed(false)}
         clickableText={isAlertExpanded ? "Less Details" : "More Details"}
@@ -240,7 +244,7 @@ export const GroupsVisualization = ({
             To get overlap info in detail, click the <Icon><SvgMore /></Icon> button then &ldquo;Overlap Info&rdquo;
           </>
         ) : undefined}
-      </Alert> : undefined, [isAlertClosed, isAlertExpanded, overlappedElementsInfo.size, showGroupColor]
+      </Alert> : undefined, [isAlertClosed, isAlertExpanded, overlappedElementsMetadata.overlappedElementsInfo.size, showGroupColor]
   );
 
   const progressConfig = useMemo(() => isVisualizationsEnabled && isResolvingGroupQueries ? { hilitedGroupsProgress: { currentHilitedGroups: groupQueriesProgressCount, totalNumberOfGroups: groups?.length ?? 0 } } : undefined, [groupQueriesProgressCount, groups, isResolvingGroupQueries, isVisualizationsEnabled]);
@@ -248,7 +252,8 @@ export const GroupsVisualization = ({
   return (
     <div className="gmw-groups-vis-container">
       <GroupVisualizationActions
-        disabled={!isGroupsFetched || !isGroupsQueriesReady}
+        disabled={!(isVisualizationsEnabled && isGroupsFetched && isGroupsQueriesReady)}
+        isVisualizationEnabled={isVisualizationsEnabled}
         onClickVisualizationButton={() => setIsVisualizationsEnabled((b) => !b)}
         showAll={showAll}
         hideAll={hideAll}
