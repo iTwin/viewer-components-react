@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./ElementList.scss";
 import classnames from "classnames";
@@ -39,13 +39,7 @@ interface RowElementData {
  * Shows a list of elements to inspect properties for.
  * @internal
  */
-export function ElementList({
-  imodel,
-  instanceKeys,
-  onBack,
-  onSelect,
-  className,
-}: ElementListProps) {
+export function ElementList({ imodel, instanceKeys, onBack, onSelect, className }: ElementListProps) {
   const [data, setData] = React.useState<RowElementData[]>();
 
   const labelsProvider: PresentationLabelsProvider = React.useMemo(() => new PresentationLabelsProvider({ imodel }), [imodel]);
@@ -63,7 +57,14 @@ export function ElementList({
 
   return (
     <div className={classnames("property-grid-react-element-list", className)}>
-      <Header onBackButtonClick={onBack} title={<Text className="property-grid-react-element-list-title" variant="leading">{title}</Text>}/>
+      <Header
+        onBackButtonClick={onBack}
+        title={
+          <Text className="property-grid-react-element-list-title" variant="leading">
+            {title}
+          </Text>
+        }
+      />
       <div className="property-grid-react-element-list-container" role="list">
         {data?.map((dataItem, index) => (
           <MenuItem
@@ -90,9 +91,7 @@ async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabels
     labelKeyPairs.push({ label, instanceKey: instanceKeys[index] });
   });
 
-  return labels
-    .map((label, index) => ({ label, instanceKey: instanceKeys[index] }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  return labels.map((label, index) => ({ label, instanceKey: instanceKeys[index] })).sort((a, b) => a.label.localeCompare(b.label));
 }
 
 /** Gets labels from presentation layer, chunks up requests if necessary */

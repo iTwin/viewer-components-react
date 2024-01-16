@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { NodeKey } from "@itwin/presentation-common";
 
@@ -13,18 +13,19 @@ import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
 /** @internal */
 export class CachingElementIdsContainer {
   private _ids = new Array<Id64String>();
-  constructor(private _generator: AsyncGenerator<Id64String>) {
+  constructor(private _generator: AsyncGenerator<Id64String>) {}
+
+  private async next() {
+    return (await this._generator.next()).value;
   }
 
-  private async next() { return (await this._generator.next()).value; }
-
-  public async* getElementIds() {
+  public async *getElementIds() {
     for (const id of this._ids) {
       yield id;
     }
 
     let nextId;
-    while (nextId = await this.next()) {
+    while ((nextId = await this.next())) {
       this._ids.push(nextId);
       yield nextId;
     }
@@ -55,15 +56,13 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
       {
         ruleType: "RootNodes",
         autoExpand: true,
-        specifications: [
-          createRootSubjectSpecification(),
-        ],
+        specifications: [createRootSubjectSpecification()],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
-              icon: "\"icon-imodel-hollow-2\"",
+              icon: '"icon-imodel-hollow-2"',
             },
           },
         ],
@@ -71,16 +70,13 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
       {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
-        specifications: [
-          createRelatedHierarchySubjectSpecification(),
-          createRelatedNonHierarchySubjectSpecification(),
-        ],
+        specifications: [createRelatedHierarchySubjectSpecification(), createRelatedNonHierarchySubjectSpecification()],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
-              icon: "\"icon-folder\"",
+              icon: '"icon-folder"',
             },
           },
         ],
@@ -88,16 +84,13 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
       {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
-        specifications: [
-          createNonContentModelsSpecification(context),
-          createContentModelsSpecification(context),
-        ],
+        specifications: [createNonContentModelsSpecification(context), createContentModelsSpecification(context)],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
-              icon: "\"icon-model\"",
+              icon: '"icon-model"',
             },
           },
         ],
@@ -105,15 +98,13 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
       {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("ISubModeledElement", "BisCore")`,
-        specifications: [
-          createElementModelSpecification(context),
-        ],
+        specifications: [createElementModelSpecification(context)],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
-              icon: "\"icon-model\"",
+              icon: '"icon-model"',
             },
           },
         ],
@@ -121,16 +112,14 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
       {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("GeometricModel3d", "BisCore")`,
-        specifications: [
-          createModelCategoriesSpecification(context),
-        ],
+        specifications: [createModelCategoriesSpecification(context)],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               isCategory: "true",
               modelId: "ParentNode.InstanceId",
-              icon: "\"icon-layers\"",
+              icon: '"icon-layers"',
             },
           },
         ],
@@ -138,17 +127,15 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
       {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("SpatialCategory", "BisCore")`,
-        specifications: [
-          createCategoryElementsSpecification(context),
-        ],
+        specifications: [createCategoryElementsSpecification(context)],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               modelId: "this.Model.Id",
               categoryId: "this.Category.Id",
-              icon: "\"icon-item\"",
-              groupIcon: "\"icon-ec-class\"",
+              icon: '"icon-item"',
+              groupIcon: '"icon-ec-class"',
             },
           },
         ],
@@ -156,17 +143,15 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
       {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("GeometricElement3d", "BisCore")`,
-        specifications: [
-          createEementElementsSpecification(context),
-        ],
+        specifications: [createEementElementsSpecification(context)],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               modelId: "this.Model.Id",
               categoryId: "this.Category.Id",
-              icon: "\"icon-item\"",
-              groupIcon: "\"icon-ec-class\"",
+              icon: '"icon-item"',
+              groupIcon: '"icon-ec-class"',
             },
           },
         ],
@@ -239,15 +224,13 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
     rules: [
       {
         ruleType: "RootNodes",
-        specifications: [
-          createRootSubjectSpecification(),
-        ],
+        specifications: [createRootSubjectSpecification()],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
-              icon: "\"icon-imodel-hollow-2\"",
+              icon: '"icon-imodel-hollow-2"',
             },
           },
         ],
@@ -268,7 +251,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isSubject: "true",
-              icon: "\"icon-folder\"",
+              icon: '"icon-folder"',
             },
           },
           {
@@ -300,7 +283,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
-              icon: "\"icon-model\"",
+              icon: '"icon-model"',
             },
           },
         ],
@@ -325,7 +308,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
-              icon: "\"icon-model\"",
+              icon: '"icon-model"',
             },
           },
         ],
@@ -333,15 +316,13 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
       {
         ruleType: "ChildNodes",
         condition: `ParentNode.IsOfClass("GeometricModel3d", "BisCore")`,
-        specifications: [
-          createModelSubModelsSpecification(context),
-        ],
+        specifications: [createModelSubModelsSpecification(context)],
         customizationRules: [
           {
             ruleType: "ExtendedData",
             items: {
               isModel: "true",
-              icon: "\"icon-model\"",
+              icon: '"icon-model"',
             },
           },
         ],
@@ -362,9 +343,7 @@ function createRootSubjectSpecification(): ChildNodeSpecification {
     classes: [
       {
         schemaName: "BisCore",
-        classNames: [
-          "Subject",
-        ],
+        classNames: ["Subject"],
       },
     ],
     instanceFilter: `this.Parent = NULL`,
@@ -430,9 +409,7 @@ function createNonContentModelsSpecification({ elementClassSpecification, showEm
     specType: "InstanceNodesOfSpecificClasses",
     classes: {
       schemaName: "BisCore",
-      classNames: [
-        "GeometricModel3d",
-      ],
+      classNames: ["GeometricModel3d"],
       arePolymorphic: true,
     },
     relatedInstances: [
@@ -614,7 +591,5 @@ function createModelSubModelsSpecification({ elementClassSpecification, showEmpt
 
 /** @internal */
 export function addModelsTreeNodeItemIcons(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) {
-  item.icon = node.key && NodeKey.isClassGroupingNodeKey(node.key)
-    ? node.extendedData?.groupIcon
-    : node.extendedData?.icon;
+  item.icon = node.key && NodeKey.isClassGroupingNodeKey(node.key) ? node.extendedData?.groupIcon : node.extendedData?.icon;
 }

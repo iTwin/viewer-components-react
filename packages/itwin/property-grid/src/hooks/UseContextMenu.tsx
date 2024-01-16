@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { Fragment, useState } from "react";
 import { ContextMenuItem as CoreContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
@@ -58,13 +58,11 @@ export interface PropertyGridContextMenuItemProps {
  * @public
  */
 export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>) {
-  return <CoreContextMenuItem
-    key={id}
-    onSelect={onSelect}
-    title={title}
-  >
-    {children}
-  </CoreContextMenuItem>;
+  return (
+    <CoreContextMenuItem key={id} onSelect={onSelect} title={title}>
+      {children}
+    </CoreContextMenuItem>
+  );
 }
 
 /**
@@ -185,7 +183,7 @@ export interface UseContentMenuProps extends ContextMenuProps {
 }
 
 interface ContextMenuDefinition {
-  position: { x: number, y: number };
+  position: { x: number; y: number };
   menuItems: ReactNode[];
 }
 

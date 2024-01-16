@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { createRef } from "react";
@@ -12,14 +12,17 @@ import * as usePropertyGridTransientStateModule from "../hooks/UsePropertyGridTr
 import * as propertyGridComponent from "../PropertyGridComponent";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridUiItemsProvider, PropertyGridWidgetId } from "../PropertyGridUiItemsProvider";
-import { render, stubSelectionManager, waitFor  } from "./TestUtils";
+import { render, stubSelectionManager, waitFor } from "./TestUtils";
 
 import type { WidgetDef } from "@itwin/appui-react";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 
 describe("PropertyGridUiItemsProvider", () => {
-  let propertyGridComponentStub: sinon.SinonStub<Parameters<typeof propertyGridComponent["PropertyGridComponent"]>, ReturnType<typeof propertyGridComponent["PropertyGridComponent"]>>;
+  let propertyGridComponentStub: sinon.SinonStub<
+    Parameters<(typeof propertyGridComponent)["PropertyGridComponent"]>,
+    ReturnType<(typeof propertyGridComponent)["PropertyGridComponent"]>
+  >;
 
   before(() => {
     sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
@@ -62,7 +65,9 @@ describe("PropertyGridUiItemsProvider", () => {
 
   it("renders error message if property grid component throws", async () => {
     propertyGridComponentStub.reset();
-    propertyGridComponentStub.callsFake(() => { throw new Error("Error"); });
+    propertyGridComponentStub.callsFake(() => {
+      throw new Error("Error");
+    });
 
     const provider = new PropertyGridUiItemsProvider();
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
@@ -80,7 +85,7 @@ describe("PropertyGridUiItemsProvider", () => {
       setWidgetState: sinon.stub<Parameters<WidgetDef["setWidgetState"]>, ReturnType<WidgetDef["setWidgetState"]>>(),
     };
     const frontstageDef = {
-      findWidgetDef: (id: string) => id === widgetDef.id ? widgetDef : undefined,
+      findWidgetDef: (id: string) => (id === widgetDef.id ? widgetDef : undefined),
     };
 
     let selectionManager: ReturnType<typeof stubSelectionManager>;

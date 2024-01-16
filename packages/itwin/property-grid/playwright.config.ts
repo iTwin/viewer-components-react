@@ -29,10 +29,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ["list"],
-    ["html", { open: "never" }],
-  ],
+  reporter: [["list"], ["html", { open: "never" }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -47,12 +44,7 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         launchOptions: {
-          args: [
-            "--font-render-hinting=none",
-            "--disable-skia-runtime-opts",
-            "--disable-font-subpixel-positioning",
-            "--disable-lcd-text",
-          ],
+          args: ["--font-render-hinting=none", "--disable-skia-runtime-opts", "--disable-font-subpixel-positioning", "--disable-lcd-text"],
           ignoreDefaultArgs: ["--hide-scrollbars"],
         },
       },

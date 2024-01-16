@@ -1,14 +1,13 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-import { createElement, Fragment, StrictMode } from "react";
 import deepEqual from "deep-equal";
+import { createElement, Fragment, StrictMode } from "react";
 import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { EmptyLocalization } from "@itwin/core-common";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
@@ -24,12 +23,9 @@ export class TestUtils {
   private static _initialized = false;
 
   public static async initialize() {
-    if (TestUtils._initialized)
+    if (TestUtils._initialized) {
       return;
-
-    await UiFramework.initialize(undefined);
-    await TreeWidget.initialize(new EmptyLocalization());
-    TestUtils._initialized = true;
+    }
   }
 
   public static terminate() {
@@ -75,26 +71,36 @@ interface ViewportMockProps {
 }
 
 export function mockViewport(props?: ViewportMockProps) {
-  if (!props)
+  if (!props) {
     props = {};
-  if (!props.viewState)
+  }
+  if (!props.viewState) {
     props.viewState = moq.Mock.ofType<ViewState>().object;
-  if (!props.perModelCategoryVisibility)
+  }
+  if (!props.perModelCategoryVisibility) {
     props.perModelCategoryVisibility = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>().object;
-  if (!props.onViewedCategoriesPerModelChanged)
+  }
+  if (!props.onViewedCategoriesPerModelChanged) {
     props.onViewedCategoriesPerModelChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onDisplayStyleChanged)
+  }
+  if (!props.onDisplayStyleChanged) {
     props.onDisplayStyleChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onViewedCategoriesChanged)
+  }
+  if (!props.onViewedCategoriesChanged) {
     props.onViewedCategoriesChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onViewedModelsChanged)
+  }
+  if (!props.onViewedModelsChanged) {
     props.onViewedModelsChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onAlwaysDrawnChanged)
+  }
+  if (!props.onAlwaysDrawnChanged) {
     props.onAlwaysDrawnChanged = new BeEvent<() => void>();
-  if (!props.onNeverDrawnChanged)
+  }
+  if (!props.onNeverDrawnChanged) {
     props.onNeverDrawnChanged = new BeEvent<() => void>();
-  if (!props.imodel)
+  }
+  if (!props.imodel) {
     props.imodel = moq.Mock.ofType<IModelConnection>().object;
+  }
   const vpMock = moq.Mock.ofType<Viewport>();
   vpMock.setup((x) => x.iModel).returns(() => props!.imodel!);
   vpMock.setup((x) => x.view).returns(() => props!.viewState!);
@@ -109,7 +115,7 @@ export function mockViewport(props?: ViewportMockProps) {
 }
 
 export function stubCancelAnimationFrame() {
-  const originalCaf= global.cancelAnimationFrame;
+  const originalCaf = global.cancelAnimationFrame;
 
   before(() => {
     Object.defineProperty(global, "cancelAnimationFrame", {
@@ -130,7 +136,9 @@ export function stubCancelAnimationFrame() {
 
 export function createResolvablePromise<T>() {
   let resolve: (value: T) => void = () => {};
-  const promise = new Promise<T>((resolvePromise) => {resolve = resolvePromise;});
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
   return { promise, resolve };
 }
 

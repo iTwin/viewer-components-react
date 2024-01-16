@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
@@ -43,14 +43,7 @@ export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
  * Props for [[ModelsTreeComponent]].
  * @public
  */
-export interface ModelTreeComponentProps extends Omit<ModelsTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
-> {
+export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -75,12 +68,11 @@ export const ModelsTreeComponent = (props: ModelTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
-  if (!iModel || !viewport)
+  if (!iModel || !viewport) {
     return null;
+  }
 
-  return (
-    <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-  );
+  return <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
 };
 
 /**
@@ -125,7 +117,7 @@ ModelsTreeComponent.id = "models-tree";
  */
 ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
 
-function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
+function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
 
   const { viewport, iModel } = props;
@@ -138,9 +130,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
       wantPrivate: false,
     };
     const modelProps = await iModel.models.queryProps(queryParams);
-    return modelProps
-      .map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection }))
-      .filter(({ id }) => id) as ModelInfo[];
+    return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
   }, [iModel]);
 
   useEffect(() => {
@@ -153,7 +143,10 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
       });
   }, [queryModels]);
 
-  const filterInfo = useMemo(() => ({ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }), [filterString, searchOptions.activeMatchIndex]);
+  const filterInfo = useMemo(
+    () => ({ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }),
+    [filterString, searchOptions.activeMatchIndex],
+  );
 
   return (
     <div className="tree-widget-tree-with-header">
@@ -165,20 +158,14 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
         selectedIndex={searchOptions.activeMatchIndex}
       >
         {props.headerButtons
-          ? props.headerButtons.map(
-            (btn, index) =>
-              <Fragment key={index}>
-                {btn({ viewport, models: availableModels })}
-              </Fragment>
-          )
+          ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels })}</Fragment>)
           : [
-            <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" />,
-            <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" />,
-            <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" />,
-            <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" />,
-            <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" />,
-          ]
-        }
+              <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" />,
+              <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" />,
+              <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" />,
+              <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" />,
+              <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" />,
+            ]}
       </TreeHeader>
       <div className="tree-widget-tree-content">
         <AutoSizer>
@@ -205,7 +192,12 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={() => void showAllModels(props.models.map((model) => model.id), props.viewport)}
+      onClick={() =>
+        void showAllModels(
+          props.models.map((model) => model.id),
+          props.viewport,
+        )
+      }
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -218,7 +210,12 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={() => void hideAllModels(props.models.map((model) => model.id), props.viewport)}
+      onClick={() =>
+        void hideAllModels(
+          props.models.map((model) => model.id),
+          props.viewport,
+        )
+      }
     >
       <SvgVisibilityHide />
     </IconButton>
@@ -231,7 +228,12 @@ function InvertButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("invert")}
-      onClick={() => void invertAllModels(props.models.map((model) => model.id), props.viewport)}
+      onClick={() =>
+        void invertAllModels(
+          props.models.map((model) => model.id),
+          props.viewport,
+        )
+      }
     >
       <SvgVisibilityHalf />
     </IconButton>

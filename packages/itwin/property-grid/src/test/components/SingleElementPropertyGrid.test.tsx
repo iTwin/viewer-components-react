@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
@@ -25,7 +25,10 @@ describe("<SingleElementPropertyGrid />", () => {
         label: PropertyRecord.fromString("Test Instance"),
         records: {
           ["test-category"]: [
-            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" }, { name: "test-prop", displayLabel: "Test Prop" }),
+            createPropertyRecord(
+              { valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" },
+              { name: "test-prop", displayLabel: "Test Prop" },
+            ),
           ],
         },
       };
@@ -40,12 +43,7 @@ describe("<SingleElementPropertyGrid />", () => {
     const imodel = {} as IModelConnection;
     const instanceKey: InstanceKey = { id: "0x10", className: "TestClass" };
 
-    const { getByText } = render(
-      <SingleElementPropertyGrid
-        imodel={imodel}
-        instanceKey={instanceKey}
-      />
-    );
+    const { getByText } = render(<SingleElementPropertyGrid imodel={imodel} instanceKey={instanceKey} />);
 
     await waitFor(() => getByText("Test Prop"));
   });

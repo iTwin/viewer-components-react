@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
@@ -34,17 +34,12 @@ describe("<ElementList />", () => {
   });
 
   it("loads and renders instance labels", async () => {
-    const instanceKeys = Array(5).fill(0).map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
+    const instanceKeys = Array(5)
+      .fill(0)
+      .map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
     const expectedLabels = instanceKeys.map(buildLabel);
 
-    const { getByText } = render(
-      <ElementList
-        imodel={imodel}
-        instanceKeys={instanceKeys}
-        onBack={() => {}}
-        onSelect={() => {}}
-      />
-    );
+    const { getByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />);
 
     for (const expected of expectedLabels) {
       await waitFor(() => getByText(expected));
@@ -54,23 +49,15 @@ describe("<ElementList />", () => {
   });
 
   it("loads and orders elements by labels", async () => {
-    const instanceKeys =
-      [
-        { id: "0x0", className: "B_Second" },
-        { id: "0x0", className: "A_First" },
-        { id: "0x0", className: "C_Last" },
-      ];
+    const instanceKeys = [
+      { id: "0x0", className: "B_Second" },
+      { id: "0x0", className: "A_First" },
+      { id: "0x0", className: "C_Last" },
+    ];
 
     const expectedLabels = instanceKeys.map(buildLabel).sort();
 
-    const { findAllByRole } = render(
-      <ElementList
-        imodel={imodel}
-        instanceKeys={instanceKeys}
-        onBack={() => {}}
-        onSelect={() => {}}
-      />
-    );
+    const { findAllByRole } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />);
 
     const listItems = await findAllByRole("listitem");
     listItems.forEach((item, index) => {
@@ -79,17 +66,12 @@ describe("<ElementList />", () => {
   });
 
   it("loads instance labels in chunks", async () => {
-    const instanceKeys = Array(1500).fill(0).map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
+    const instanceKeys = Array(1500)
+      .fill(0)
+      .map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
     const expectedLabels = instanceKeys.map(buildLabel);
 
-    const { getByText } = render(
-      <ElementList
-        imodel={imodel}
-        instanceKeys={instanceKeys}
-        onBack={() => {}}
-        onSelect={() => {}}
-      />
-    );
+    const { getByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />);
 
     // wait for first element to be rendered
     await waitFor(() => getByText(expectedLabels[0]));
@@ -98,18 +80,13 @@ describe("<ElementList />", () => {
   });
 
   it("invokes `onSelect` when item is clicked", async () => {
-    const instanceKeys = Array(5).fill(0).map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
+    const instanceKeys = Array(5)
+      .fill(0)
+      .map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
     const expectedLabels = instanceKeys.map(buildLabel);
     const onSelectSpy = sinon.spy();
 
-    const { getByText } = render(
-      <ElementList
-        imodel={imodel}
-        instanceKeys={instanceKeys}
-        onBack={() => {}}
-        onSelect={onSelectSpy}
-      />
-    );
+    const { getByText } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={onSelectSpy} />);
 
     // wait for element to be rendered
     const item = await waitFor(() => getByText(expectedLabels[2]));
@@ -119,18 +96,13 @@ describe("<ElementList />", () => {
   });
 
   it("invokes `onBack` when 'Back' button is clicked", async () => {
-    const instanceKeys = Array(5).fill(0).map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
+    const instanceKeys = Array(5)
+      .fill(0)
+      .map((_, i) => ({ id: `0x${i + 1}`, className: "TestClass" }));
     const expectedLabels = instanceKeys.map(buildLabel);
     const onBackSpy = sinon.spy();
 
-    const { getByText, getByRole } = render(
-      <ElementList
-        imodel={imodel}
-        instanceKeys={instanceKeys}
-        onBack={onBackSpy}
-        onSelect={() => {}}
-      />
-    );
+    const { getByText, getByRole } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={onBackSpy} onSelect={() => {}} />);
 
     // wait for element to be rendered
     await waitFor(() => getByText(expectedLabels[2]));
