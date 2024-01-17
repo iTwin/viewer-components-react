@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { PropertyValueRendererManager } from "@itwin/components-react";
 import { CheckBoxState } from "@itwin/core-react";
@@ -35,10 +35,12 @@ export function addTreeNodeItemCheckbox(item: Partial<DelayLoadedTreeNodeItem>) 
 
 /** @internal */
 export function registerRenderers() {
-  const renderers: Array<{ name: string, renderer: IPropertyValueRenderer }> = [{
-    name: TREE_NODE_LABEL_RENDERER,
-    renderer:  new TreeNodeLabelRenderer(),
-  }];
+  const renderers: Array<{ name: string; renderer: IPropertyValueRenderer }> = [
+    {
+      name: TREE_NODE_LABEL_RENDERER,
+      renderer: new TreeNodeLabelRenderer(),
+    },
+  ];
 
   for (const { name, renderer } of renderers) {
     PropertyValueRendererManager.defaultManager.registerRenderer(name, renderer);

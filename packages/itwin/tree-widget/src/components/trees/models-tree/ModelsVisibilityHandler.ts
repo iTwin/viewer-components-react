@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { BeEvent } from "@itwin/core-bentley";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
@@ -73,7 +73,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._listeners.push(this._props.viewport.onAlwaysDrawnChanged.addListener(this.onElementAlwaysDrawnChanged));
     this._listeners.push(this._props.viewport.onNeverDrawnChanged.addListener(this.onElementNeverDrawnChanged));
     if (this._props.hierarchyAutoUpdateEnabled) {
-      this._listeners.push(Presentation.presentation.onIModelHierarchyChanged.addListener(/* istanbul ignore next */() => this._elementIdsCache.clear())); // eslint-disable-line @itwin/no-internal
+      this._listeners.push(Presentation.presentation.onIModelHierarchyChanged.addListener(/* istanbul ignore next */ () => this._elementIdsCache.clear())); // eslint-disable-line @itwin/no-internal
     }
   }
 
@@ -85,24 +85,32 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
   /** Sets data provider that is used to get filtered tree hierarchy. */
-  public setFilteredDataProvider(provider: IFilteredPresentationTreeDataProvider | undefined) { this._filteredDataProvider = provider; }
+  public setFilteredDataProvider(provider: IFilteredPresentationTreeDataProvider | undefined) {
+    this._filteredDataProvider = provider;
+  }
 
   public static getNodeType(item: TreeNodeItem) {
-    if (!isPresentationTreeNodeItem(item))
+    if (!isPresentationTreeNodeItem(item)) {
       return ModelsTreeNodeType.Unknown;
+    }
 
-    if (NodeKey.isClassGroupingNodeKey(item.key))
+    if (NodeKey.isClassGroupingNodeKey(item.key)) {
       return ModelsTreeNodeType.Grouping;
+    }
 
-    if (!item.extendedData)
+    if (!item.extendedData) {
       return ModelsTreeNodeType.Unknown;
+    }
 
-    if (this.isSubjectNode(item))
+    if (this.isSubjectNode(item)) {
       return ModelsTreeNodeType.Subject;
-    if (this.isModelNode(item))
+    }
+    if (this.isModelNode(item)) {
       return ModelsTreeNodeType.Model;
-    if (this.isCategoryNode(item))
+    }
+    if (this.isCategoryNode(item)) {
       return ModelsTreeNodeType.Category;
+    }
     return ModelsTreeNodeType.Element;
   }
 
@@ -121,42 +129,56 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   /** Returns visibility status of the tree node. */
   public getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus> {
     const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
-    if (!nodeKey)
+    if (!nodeKey) {
       return { state: "hidden", isDisabled: true };
+    }
 
-    if (NodeKey.isClassGroupingNodeKey(nodeKey))
+    if (NodeKey.isClassGroupingNodeKey(nodeKey)) {
       return this.getElementGroupingNodeDisplayStatus(node.id, nodeKey);
+    }
 
-    if (!NodeKey.isInstancesNodeKey(nodeKey))
+    if (!NodeKey.isInstancesNodeKey(nodeKey)) {
       return { state: "hidden", isDisabled: true };
+    }
 
     if (ModelsVisibilityHandler.isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
-      return this.getSubjectNodeVisibility(nodeKey.instanceKeys.map((key) => key.id), node);
+      return this.getSubjectNodeVisibility(
+        nodeKey.instanceKeys.map((key) => key.id),
+        node,
+      );
     }
-    if (ModelsVisibilityHandler.isModelNode(node))
+    if (ModelsVisibilityHandler.isModelNode(node)) {
       return this.getModelDisplayStatus(nodeKey.instanceKeys[0].id);
-    if (ModelsVisibilityHandler.isCategoryNode(node))
+    }
+    if (ModelsVisibilityHandler.isCategoryNode(node)) {
       return this.getCategoryDisplayStatus(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node));
+    }
     return this.getElementDisplayStatus(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node));
   }
 
   /** Changes visibility of the items represented by the tree node. */
   public async changeVisibility(node: TreeNodeItem, on: boolean) {
     const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
-    if (!nodeKey)
+    if (!nodeKey) {
       return;
+    }
 
     if (NodeKey.isClassGroupingNodeKey(nodeKey)) {
       await this.changeElementGroupingNodeState(nodeKey, on);
       return;
     }
 
-    if (!NodeKey.isInstancesNodeKey(nodeKey))
+    if (!NodeKey.isInstancesNodeKey(nodeKey)) {
       return;
+    }
 
     if (ModelsVisibilityHandler.isSubjectNode(node)) {
-      await this.changeSubjectNodeState(nodeKey.instanceKeys.map((key) => key.id), node, on);
+      await this.changeSubjectNodeState(
+        nodeKey.instanceKeys.map((key) => key.id),
+        node,
+        on,
+      );
     } else if (ModelsVisibilityHandler.isModelNode(node)) {
       await this.changeModelState(nodeKey.instanceKeys[0].id, on);
     } else if (ModelsVisibilityHandler.isCategoryNode(node)) {
@@ -167,11 +189,13 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   protected async getSubjectNodeVisibility(ids: Id64String[], node: TreeNodeItem): Promise<VisibilityStatus> {
-    if (!this._props.viewport.view.isSpatialView())
+    if (!this._props.viewport.view.isSpatialView()) {
       return { isDisabled: true, state: "hidden", tooltip: createTooltip("disabled", "subject.nonSpatialView") };
+    }
 
-    if (this._filteredDataProvider)
+    if (this._filteredDataProvider) {
       return this.getFilteredSubjectDisplayStatus(this._filteredDataProvider, ids, node);
+    }
 
     return this.getSubjectDisplayStatus(ids);
   }
@@ -179,33 +203,42 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   private async getSubjectDisplayStatus(ids: Id64String[]): Promise<VisibilityStatus> {
     const modelIds = await this.getSubjectModelIds(ids);
     const isDisplayed = modelIds.some((modelId) => this.getModelDisplayStatus(modelId).state === "visible");
-    if (isDisplayed)
+    if (isDisplayed) {
       return { state: "visible", tooltip: createTooltip("visible", "subject.atLeastOneModelVisible") };
+    }
     return { state: "hidden", tooltip: createTooltip("hidden", "subject.allModelsHidden") };
   }
 
-  private async getFilteredSubjectDisplayStatus(provider: IFilteredPresentationTreeDataProvider, ids: Id64String[], node: TreeNodeItem): Promise<VisibilityStatus> {
-    if (provider.nodeMatchesFilter(node))
+  private async getFilteredSubjectDisplayStatus(
+    provider: IFilteredPresentationTreeDataProvider,
+    ids: Id64String[],
+    node: TreeNodeItem,
+  ): Promise<VisibilityStatus> {
+    if (provider.nodeMatchesFilter(node)) {
       return this.getSubjectDisplayStatus(ids);
+    }
 
     const children = await provider.getNodes(node);
     const childrenDisplayStatuses = await Promise.all(children.map(async (childNode) => this.getVisibilityStatus(childNode)));
-    if (childrenDisplayStatuses.some((status) => status.state === "visible"))
+    if (childrenDisplayStatuses.some((status) => status.state === "visible")) {
       return { state: "visible", tooltip: createTooltip("visible", "subject.atLeastOneModelVisible") };
+    }
     return { state: "hidden", tooltip: createTooltip("hidden", "subject.allModelsHidden") };
   }
 
   protected getModelDisplayStatus(id: Id64String): VisibilityStatus {
-    if (!this._props.viewport.view.isSpatialView())
+    if (!this._props.viewport.view.isSpatialView()) {
       return { isDisabled: true, state: "hidden", tooltip: createTooltip("disabled", "model.nonSpatialView") };
+    }
     const isDisplayed = this._props.viewport.view.viewsModel(id);
     return { state: isDisplayed ? "visible" : "hidden", tooltip: createTooltip(isDisplayed ? "visible" : "hidden", undefined) };
   }
 
   protected getCategoryDisplayStatus(id: Id64String, parentModelId: Id64String | undefined): VisibilityStatus {
     if (parentModelId) {
-      if (this.getModelDisplayStatus(parentModelId).state === "hidden")
+      if (this.getModelDisplayStatus(parentModelId).state === "hidden") {
         return { state: "hidden", isDisabled: true, tooltip: createTooltip("disabled", "category.modelNotDisplayed") };
+      }
 
       const override = this._props.viewport.perModelCategoryVisibility.getOverride(parentModelId, id);
       switch (override) {
@@ -227,8 +260,9 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   protected async getElementGroupingNodeDisplayStatus(_id: string, key: ECClassGroupingNodeKey): Promise<VisibilityStatus> {
     const { modelId, categoryId, elementIds } = await this.getGroupedElementIds(key);
 
-    if (!modelId || !this._props.viewport.view.viewsModel(modelId))
+    if (!modelId || !this._props.viewport.view.viewsModel(modelId)) {
       return { isDisabled: true, state: "hidden", tooltip: createTooltip("disabled", "element.modelNotDisplayed") };
+    }
 
     if (this._props.viewport.alwaysDrawn !== undefined && this._props.viewport.alwaysDrawn.size > 0) {
       let atLeastOneElementForceDisplayed = false;
@@ -238,12 +272,14 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
           break;
         }
       }
-      if (atLeastOneElementForceDisplayed)
+      if (atLeastOneElementForceDisplayed) {
         return { state: "visible", tooltip: createTooltip("visible", "element.displayedThroughAlwaysDrawnList") };
+      }
     }
 
-    if (this._props.viewport.alwaysDrawn !== undefined && this._props.viewport.alwaysDrawn.size !== 0 && this._props.viewport.isAlwaysDrawnExclusive)
+    if (this._props.viewport.alwaysDrawn !== undefined && this._props.viewport.alwaysDrawn.size !== 0 && this._props.viewport.isAlwaysDrawnExclusive) {
       return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn") };
+    }
 
     // istanbul ignore else
     if (this._props.viewport.neverDrawn !== undefined && this._props.viewport.neverDrawn.size > 0) {
@@ -254,45 +290,55 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
           break;
         }
       }
-      if (allElementsForceHidden)
+      if (allElementsForceHidden) {
         return { state: "hidden", tooltip: createTooltip("visible", "element.hiddenThroughNeverDrawnList") };
+      }
     }
 
-    if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible")
+    if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible") {
       return { state: "visible", tooltip: createTooltip("visible", undefined) };
+    }
 
     return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenThroughCategory") };
   }
 
   protected getElementDisplayStatus(elementId: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined): VisibilityStatus {
-    if (!modelId || !this._props.viewport.view.viewsModel(modelId))
+    if (!modelId || !this._props.viewport.view.viewsModel(modelId)) {
       return { isDisabled: true, state: "hidden", tooltip: createTooltip("disabled", "element.modelNotDisplayed") };
-    if (this._props.viewport.neverDrawn !== undefined && this._props.viewport.neverDrawn.has(elementId))
-      return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenThroughNeverDrawnList") };
-    if (this._props.viewport.alwaysDrawn !== undefined) {
-      if (this._props.viewport.alwaysDrawn.has(elementId))
-        return { state: "visible", tooltip: createTooltip("visible", "element.displayedThroughAlwaysDrawnList") };
-      if (this._props.viewport.alwaysDrawn.size !== 0 && this._props.viewport.isAlwaysDrawnExclusive)
-        return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn") };
     }
-    if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible")
+    if (this._props.viewport.neverDrawn !== undefined && this._props.viewport.neverDrawn.has(elementId)) {
+      return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenThroughNeverDrawnList") };
+    }
+    if (this._props.viewport.alwaysDrawn !== undefined) {
+      if (this._props.viewport.alwaysDrawn.has(elementId)) {
+        return { state: "visible", tooltip: createTooltip("visible", "element.displayedThroughAlwaysDrawnList") };
+      }
+      if (this._props.viewport.alwaysDrawn.size !== 0 && this._props.viewport.isAlwaysDrawnExclusive) {
+        return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn") };
+      }
+    }
+    if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible") {
       return { state: "visible", tooltip: createTooltip("visible", undefined) };
+    }
     return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenThroughCategory") };
   }
 
   protected async changeSubjectNodeState(ids: Id64String[], node: TreeNodeItem, on: boolean) {
-    if (!this._props.viewport.view.isSpatialView())
+    if (!this._props.viewport.view.isSpatialView()) {
       return;
+    }
 
-    if (this._filteredDataProvider)
+    if (this._filteredDataProvider) {
       return this.changeFilteredSubjectState(this._filteredDataProvider, ids, node, on);
+    }
 
     return this.changeSubjectState(ids, on);
   }
 
   private async changeFilteredSubjectState(provider: IFilteredPresentationTreeDataProvider, ids: Id64String[], node: TreeNodeItem, on: boolean) {
-    if (provider.nodeMatchesFilter(node))
+    if (provider.nodeMatchesFilter(node)) {
       return this.changeSubjectState(ids, on);
+    }
 
     const children = await provider.getNodes(node);
     return Promise.all(children.map(async (childNode) => this.changeVisibility(childNode, on)));
@@ -304,24 +350,30 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   protected async changeModelState(id: Id64String, on: boolean) {
-    if (!this._props.viewport.view.isSpatialView())
+    if (!this._props.viewport.view.isSpatialView()) {
       return;
+    }
 
     return this.changeModelsVisibility([id], on);
   }
 
   protected async changeModelsVisibility(ids: Id64String[], visible: boolean) {
-    if (visible)
+    if (visible) {
       return this._props.viewport.addViewedModels(ids);
-    else
+    } else {
       this._props.viewport.changeModelDisplay(ids, false);
+    }
   }
 
   protected changeCategoryState(categoryId: Id64String, parentModelId: Id64String | undefined, on: boolean) {
     if (parentModelId) {
       const isDisplayedInSelector = this._props.viewport.view.viewsCategory(categoryId);
-      const ovr = (on === isDisplayedInSelector) ? PerModelCategoryVisibility.Override.None
-        : on ? PerModelCategoryVisibility.Override.Show : PerModelCategoryVisibility.Override.Hide;
+      const ovr =
+        on === isDisplayedInSelector
+          ? PerModelCategoryVisibility.Override.None
+          : on
+          ? PerModelCategoryVisibility.Override.Show
+          : PerModelCategoryVisibility.Override.Hide;
       this._props.viewport.perModelCategoryVisibility.setOverride(parentModelId, categoryId, ovr);
       if (ovr === PerModelCategoryVisibility.Override.None && on) {
         // we took off the override which means the category is displayed in selector, but
@@ -342,29 +394,39 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     const childIdsContainer = this.getAssemblyElementIds(id);
     async function* elementIds() {
       yield id;
-      for await (const childId of childIdsContainer.getElementIds())
+      for await (const childId of childIdsContainer.getElementIds()) {
         yield childId;
+      }
     }
     await this.changeElementsState(modelId, categoryId, elementIds(), on);
   }
 
-  protected async changeElementsState(modelId: Id64String | undefined, categoryId: Id64String | undefined, elementIds: AsyncGenerator<Id64String>, on: boolean) {
-    const isDisplayedByDefault = modelId && this.getModelDisplayStatus(modelId).state === "visible"
-      && categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible";
-    const isHiddenDueToExclusiveAlwaysDrawnElements = this._props.viewport.isAlwaysDrawnExclusive && this._props.viewport.alwaysDrawn && 0 !== this._props.viewport.alwaysDrawn.size;
+  protected async changeElementsState(
+    modelId: Id64String | undefined,
+    categoryId: Id64String | undefined,
+    elementIds: AsyncGenerator<Id64String>,
+    on: boolean,
+  ) {
+    const isDisplayedByDefault =
+      modelId &&
+      this.getModelDisplayStatus(modelId).state === "visible" &&
+      categoryId &&
+      this.getCategoryDisplayStatus(categoryId, modelId).state === "visible";
+    const isHiddenDueToExclusiveAlwaysDrawnElements =
+      this._props.viewport.isAlwaysDrawnExclusive && this._props.viewport.alwaysDrawn && 0 !== this._props.viewport.alwaysDrawn.size;
     const currNeverDrawn = new Set(this._props.viewport.neverDrawn ? this._props.viewport.neverDrawn : []);
-    const currAlwaysDrawn = new Set(this._props.viewport.alwaysDrawn ?
-      this._props.viewport.alwaysDrawn : /* istanbul ignore next */[],
-    );
+    const currAlwaysDrawn = new Set(this._props.viewport.alwaysDrawn ? this._props.viewport.alwaysDrawn : /* istanbul ignore next */ []);
     for await (const elementId of elementIds) {
       if (on) {
         currNeverDrawn.delete(elementId);
-        if (!isDisplayedByDefault || isHiddenDueToExclusiveAlwaysDrawnElements)
+        if (!isDisplayedByDefault || isHiddenDueToExclusiveAlwaysDrawnElements) {
           currAlwaysDrawn.add(elementId);
+        }
       } else {
         currAlwaysDrawn.delete(elementId);
-        if (isDisplayedByDefault && !isHiddenDueToExclusiveAlwaysDrawnElements)
+        if (isDisplayedByDefault && !isHiddenDueToExclusiveAlwaysDrawnElements) {
           currNeverDrawn.add(elementId);
+        }
       }
     }
     this._props.viewport.setNeverDrawn(currNeverDrawn);
@@ -372,8 +434,9 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   private onVisibilityChangeInternal() {
-    if (this._pendingVisibilityChange)
+    if (this._pendingVisibilityChange) {
       return;
+    }
 
     this._pendingVisibilityChange = setTimeout(() => {
       this.onVisibilityChange.raiseEvent();
@@ -409,8 +472,10 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   private async getSubjectModelIds(subjectIds: Id64String[]) {
-    return (await Promise.all(subjectIds.map(async (id) => this._subjectModelIdsCache.getSubjectModelIds(id))))
-      .reduce((allModelIds: Id64String[], curr: Id64String[]) => [...allModelIds, ...curr], []);
+    return (await Promise.all(subjectIds.map(async (id) => this._subjectModelIdsCache.getSubjectModelIds(id)))).reduce(
+      (allModelIds: Id64String[], curr: Id64String[]) => [...allModelIds, ...curr],
+      [],
+    );
   }
 
   // istanbul ignore next
@@ -436,14 +501,14 @@ export class SubjectModelIdsCache {
   }
 
   private async initSubjectModels() {
-    const querySubjects = async (): Promise<Array<{ id: Id64String, parentId?: Id64String, targetPartitionId?: Id64String }>> => {
+    const querySubjects = async (): Promise<Array<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>> => {
       const subjectsQuery = `
         SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
         FROM bis.Subject
       `;
       return this._imodel.createQueryReader(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
     };
-    const queryModels = async (): Promise<Array<{ id: Id64String, parentId: Id64String }>> => {
+    const queryModels = async (): Promise<Array<{ id: Id64String; parentId: Id64String }>> => {
       const modelsQuery = `
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM bis.InformationPartitionElement p
@@ -466,11 +531,13 @@ export class SubjectModelIdsCache {
     const targetPartitionSubjects = new Map<Id64String, Id64String[]>();
     for (const subject of await querySubjects()) {
       // istanbul ignore else
-      if (subject.parentId)
+      if (subject.parentId) {
         pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
+      }
       // istanbul ignore if
-      if (subject.targetPartitionId)
+      if (subject.targetPartitionId) {
         pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
+      }
     }
 
     this._subjectModels = new Map();
@@ -478,8 +545,9 @@ export class SubjectModelIdsCache {
       // istanbul ignore next
       const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
       // istanbul ignore else
-      if (!subjectIds.includes(model.parentId))
+      if (!subjectIds.includes(model.parentId)) {
         subjectIds.push(model.parentId);
+      }
 
       subjectIds.forEach((subjectId) => {
         pushToMap(this._subjectModels!, subjectId, model.id);
@@ -489,19 +557,21 @@ export class SubjectModelIdsCache {
 
   private async initCache() {
     if (!this._init) {
-      this._init = this.initSubjectModels().then(() => { });
+      this._init = this.initSubjectModels().then(() => {});
     }
     return this._init;
   }
 
   private appendSubjectModelsRecursively(modelIds: Id64String[], subjectId: Id64String) {
     const subjectModelIds = this._subjectModels!.get(subjectId);
-    if (subjectModelIds)
+    if (subjectModelIds) {
       modelIds.push(...subjectModelIds);
+    }
 
     const childSubjectIds = this._subjectsHierarchy!.get(subjectId);
-    if (childSubjectIds)
+    if (childSubjectIds) {
       childSubjectIds.forEach((cs) => this.appendSubjectModelsRecursively(modelIds, cs));
+    }
   }
 
   public async getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]> {
@@ -523,8 +593,10 @@ class ElementIdsCache {
   private _assemblyElementIdsCache = new Map<string, CachingElementIdsContainer>();
   private _groupedElementIdsCache = new Map<string, GroupedElementIds>();
 
-  constructor(private _imodel: IModelConnection, private _rulesetId: string) {
-  }
+  constructor(
+    private _imodel: IModelConnection,
+    private _rulesetId: string,
+  ) {}
 
   public clear() {
     this._assemblyElementIdsCache.clear();
@@ -533,8 +605,9 @@ class ElementIdsCache {
 
   public getAssemblyElementIds(assemblyId: Id64String) {
     const ids = this._assemblyElementIdsCache.get(assemblyId);
-    if (ids)
+    if (ids) {
       return ids;
+    }
 
     const container = createAssemblyElementIdsContainer(this._imodel, this._rulesetId, assemblyId);
     this._assemblyElementIdsCache.set(assemblyId, container);
@@ -544,8 +617,9 @@ class ElementIdsCache {
   public async getGroupedElementIds(groupingNodeKey: GroupingNodeKey): Promise<GroupedElementIds> {
     const keyString = JSON.stringify(groupingNodeKey);
     const ids = this._groupedElementIdsCache.get(keyString);
-    if (ids)
+    if (ids) {
       return ids;
+    }
     const info = await createGroupedElementsInfo(this._imodel, this._rulesetId, groupingNodeKey);
     this._groupedElementIdsCache.set(keyString, info);
     return info;
@@ -567,15 +641,20 @@ async function* createInstanceIdsGenerator(imodel: IModelConnection, rulesetId: 
 
 // istanbul ignore next
 function createAssemblyElementIdsContainer(imodel: IModelConnection, rulesetId: string, assemblyId: Id64String) {
-  return new CachingElementIdsContainer(createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [{ className: "BisCore:Element", id: assemblyId }]));
+  return new CachingElementIdsContainer(
+    createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [{ className: "BisCore:Element", id: assemblyId }]),
+  );
 }
 
 // istanbul ignore next
 async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: string, groupingNodeKey: GroupingNodeKey) {
-  const groupedElementIdsContainer = new CachingElementIdsContainer(createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [groupingNodeKey]));
+  const groupedElementIdsContainer = new CachingElementIdsContainer(
+    createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [groupingNodeKey]),
+  );
   const elementId = await groupedElementIdsContainer.getElementIds().next();
-  if (elementId.done)
+  if (elementId.done) {
     throw new Error("Invalid grouping node key");
+  }
 
   let modelId, categoryId;
   const query = `SELECT Model.Id AS modelId, Category.Id AS categoryId FROM bis.GeometricElement3d WHERE ECInstanceId = ? LIMIT 1`;
@@ -590,8 +669,9 @@ async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: st
 const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringId: string | undefined): string => {
   const statusStringId = `modelTree.status.${status}`;
   const statusString = TreeWidget.translate(statusStringId);
-  if (!tooltipStringId)
+  if (!tooltipStringId) {
     return statusString;
+  }
 
   tooltipStringId = `modelTree.tooltips.${tooltipStringId}`;
   const tooltipString = TreeWidget.translate(tooltipStringId);
@@ -607,13 +687,7 @@ export async function showAllModels(models: string[], viewport: Viewport) {
   await viewport.addViewedModels(models);
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
-  await toggleAllCategories(
-    IModelApp.viewManager,
-    viewport.iModel,
-    true,
-    viewport,
-    false,
-  );
+  await toggleAllCategories(IModelApp.viewManager, viewport.iModel, true, viewport, false);
 }
 
 /**
@@ -621,10 +695,7 @@ export async function showAllModels(models: string[], viewport: Viewport) {
  * @public
  */
 export async function hideAllModels(models: string[], viewport: Viewport) {
-  viewport.changeModelDisplay(
-    models,
-    false
-  );
+  viewport.changeModelDisplay(models, false);
 }
 
 /**
@@ -635,8 +706,11 @@ export async function invertAllModels(models: string[], viewport: Viewport) {
   const notViewedModels: string[] = [];
   const viewedModels: string[] = [];
   models.forEach((modelId) => {
-    if (viewport.viewsModel(modelId)) viewedModels.push(modelId);
-    else notViewedModels.push(modelId);
+    if (viewport.viewsModel(modelId)) {
+      viewedModels.push(modelId);
+    } else {
+      notViewedModels.push(modelId);
+    }
   });
   await viewport.addViewedModels(notViewedModels);
   viewport.changeModelDisplay(viewedModels, false);
@@ -648,12 +722,14 @@ export async function invertAllModels(models: string[], viewport: Viewport) {
  */
 export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
   // istanbul ignore if
-  if (!models)
+  if (!models) {
     return;
-  if (enable)
+  }
+  if (enable) {
     viewport.changeModelDisplay(models, false);
-  else
+  } else {
     await viewport.addViewedModels(models);
+  }
 }
 
 /**

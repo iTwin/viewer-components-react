@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { UiError } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
@@ -24,7 +24,9 @@ export class TreeWidget {
    * @param i18n - The internationalization service created by the IModelApp.
    */
   public static async initialize(i18n?: Localization): Promise<void> {
-    if (this._initialized) return;
+    if (this._initialized) {
+      return;
+    }
 
     TreeWidget._initialized = true;
     TreeWidget._i18n = i18n ?? IModelApp.localization;
@@ -49,11 +51,9 @@ export class TreeWidget {
 
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): Localization {
-    if (!TreeWidget._i18n)
-      throw new UiError(
-        TreeWidget.packageName,
-        "TreeWidget not initialized"
-      );
+    if (!TreeWidget._i18n) {
+      throw new UiError(TreeWidget.packageName, "TreeWidget not initialized");
+    }
     return TreeWidget._i18n;
   }
 
@@ -68,14 +68,8 @@ export class TreeWidget {
 
   /** Calls i18n.translateWithNamespace with the "TreeWidget" namespace. Do NOT include the namespace in the key.
    */
-  public static translate(
-    key: string | string[],
-    options?: LocalizationOptions
-  ): string {
+  public static translate(key: string | string[], options?: LocalizationOptions): string {
     const stringKey = `${TreeWidget.i18nNamespace}:${key}`;
-    return TreeWidget.i18n.getLocalizedString(
-      stringKey,
-      options
-    );
+    return TreeWidget.i18n.getLocalizedString(stringKey, options);
   }
 }

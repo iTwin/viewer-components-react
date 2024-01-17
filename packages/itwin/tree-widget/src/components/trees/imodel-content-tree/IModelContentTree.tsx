@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { SelectionMode } from "@itwin/components-react";
 import { PresentationTree, usePresentationTreeState } from "@itwin/presentation-components";
@@ -50,19 +50,12 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         height={height}
         state={state}
         selectionMode={selectionMode ?? SelectionMode.None}
-        treeRenderer={(treeProps) =>
-          <TreeRenderer
-            {...treeProps}
-            contextMenuItems={contextMenuItems}
-            nodeLabelRenderer={props.nodeLabelRenderer}
-            density={props.density}
-          />
-        }
+        treeRenderer={(treeProps) => (
+          <TreeRenderer {...treeProps} contextMenuItems={contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} density={props.density} />
+        )}
       />
     </div>
   );
 };
 
-const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
-  addCustomTreeNodeItemLabelRenderer,
-]);
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([addCustomTreeNodeItemLabelRenderer]);

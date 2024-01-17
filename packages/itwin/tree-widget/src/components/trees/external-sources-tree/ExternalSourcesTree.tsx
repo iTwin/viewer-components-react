@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
 import { SelectionMode } from "@itwin/components-react";
@@ -52,14 +52,9 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.Extended}
         iconsEnabled={true}
-        treeRenderer={(treeProps) =>
-          <TreeRenderer
-            {...treeProps}
-            contextMenuItems={props.contextMenuItems}
-            nodeLabelRenderer={props.nodeLabelRenderer}
-            density={props.density}
-          />
-        }
+        treeRenderer={(treeProps) => (
+          <TreeRenderer {...treeProps} contextMenuItems={props.contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} density={props.density} />
+        )}
       />
     </div>
   );

@@ -1,16 +1,27 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
-  FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
+  FilteredType,
+  FilteringPropertyDataProvider,
+  PropertyDataChangeEvent,
+  PropertyRecordDataFiltererBase,
+  VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { IPropertyDataFilterer, IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataFilterResult, VirtualizedPropertyGridWithDataProviderProps } from "@itwin/components-react";
+import type {
+  IPropertyDataFilterer,
+  IPropertyDataProvider,
+  PropertyCategory,
+  PropertyData,
+  PropertyDataFilterResult,
+  VirtualizedPropertyGridWithDataProviderProps,
+} from "@itwin/components-react";
 import type { IDisposable } from "@itwin/core-bentley";
 
 /**
@@ -45,11 +56,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
 
   // in order to allow resize values column fully we need to override default width reserved for action buttons.
   // istanbul ignore next
-  const actionButtonWidth = props.actionButtonWidth !== undefined
-    ? props.actionButtonWidth
-    : props.actionButtonRenderers !== undefined
-      ? undefined
-      : 0;
+  const actionButtonWidth = props.actionButtonWidth !== undefined ? props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
 
   return (
     <>
@@ -86,9 +93,7 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
   public get isActive() {
     return true;
   }
-  public async recordMatchesFilter(
-    node: PropertyRecord
-  ): Promise<PropertyDataFilterResult> {
+  public async recordMatchesFilter(node: PropertyRecord): Promise<PropertyDataFilterResult> {
     if (node.value.valueFormat !== PropertyValueFormat.Primitive) {
       return {
         matchesFilter: false,
