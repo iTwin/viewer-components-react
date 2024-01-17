@@ -9,14 +9,13 @@ import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { render, waitFor } from "@testing-library/react";
 import * as selectableTreeModule from "../components/SelectableTree";
 import * as categoriesTreeComponents from "../components/trees/category-tree/CategoriesTreeComponent";
 import * as modelsTreeComponents from "../components/trees/models-tree/ModelsTreeComponent";
 import { TreeWidgetUiItemsProvider } from "../components/TreeWidgetUiItemsProvider";
 import * as useTreeTransientStateModule from "../components/utils/UseTreeTransientState";
 import { TreeWidget } from "../TreeWidget";
-import { TestUtils } from "./TestUtils";
+import { render, TestUtils, waitFor } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 

@@ -8,10 +8,9 @@ import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { render, waitFor } from "@testing-library/react";
 import { SelectableTree } from "../components/SelectableTree";
 import { TreeWidget } from "../TreeWidget";
-import { createResolvablePromise, stubCancelAnimationFrame, TestUtils } from "./TestUtils";
+import { createResolvablePromise, render, stubCancelAnimationFrame, TestUtils, waitFor } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeDefinition } from "../components/SelectableTree";
