@@ -8,6 +8,7 @@ import { createElement, Fragment, StrictMode } from "react";
 import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
+import { EmptyLocalization } from "@itwin/core-common";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
@@ -26,6 +27,10 @@ export class TestUtils {
     if (TestUtils._initialized) {
       return;
     }
+
+    await UiFramework.initialize(undefined);
+    await TreeWidget.initialize(new EmptyLocalization());
+    TestUtils._initialized = true;
   }
 
   public static terminate() {
