@@ -8,7 +8,7 @@ import React from "react";
 export interface GroupDetailsActionPanelProps {
   isSaveDisabled: boolean;
   onClickBack: () => void;
-  onClickSave: () => Promise<void>;
+  onClickSave: () => void;
 }
 
 export const GroupDetailsActionPanel = ({
