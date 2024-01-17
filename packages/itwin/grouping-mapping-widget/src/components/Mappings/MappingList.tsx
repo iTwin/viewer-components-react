@@ -14,7 +14,7 @@ import { ExtractionStatus } from "./Extraction/ExtractionStatus";
 import { useFetchExtractionStates } from "./hooks/useFetchExtractionStates";
 import "./MappingList.scss";
 
-export interface MappingHorizontalTileProps {
+export interface MappingListProps {
   selected: boolean;
   onSelectionChange: (mapping: Mapping) => void;
   mapping: Mapping;
@@ -26,7 +26,7 @@ export interface MappingHorizontalTileProps {
   setShowDeleteModal: (mapping?: Mapping) => void;
 }
 
-export const MappingHorizontalTile = (props: MappingHorizontalTileProps) => {
+export const MappingList = (props: MappingListProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates | undefined>(ExtractionStates.None);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const { extractionStateData, isJobStarted, isJobDone, setIsJobDone, setIsJobStarted } = useFetchExtractionStates(groupingMappingApiConfig);

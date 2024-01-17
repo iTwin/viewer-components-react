@@ -25,7 +25,7 @@ import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import type { ExtractionStatusData } from "./Extraction/ExtractionStatusIcon";
 import { ExtractionStatusIcon } from "./Extraction/ExtractionStatusIcon";
-import { MappingHorizontalTile } from "./MappingList";
+import { MappingList } from "./MappingList";
 import type { ExtractionMessageData } from "./Extraction/ExtractionMessageModal";
 import { ExtractionMessageModal } from "./Extraction/ExtractionMessageModal";
 import { BeEvent } from "@itwin/core-bentley";
@@ -178,7 +178,7 @@ export const MappingsView = ({
         ) : (
           <div className="gmw-mappings-list">
             {mappings.map((mapping) => (
-              <MappingHorizontalTile
+              <MappingList
                 key={mapping.id}
                 mapping={mapping}
                 jobStartEvent={jobStartEvent}

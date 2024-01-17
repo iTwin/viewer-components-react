@@ -66,6 +66,6 @@ export const ExtractionStatus = ({
         onAnimationEnd={onAnimationEnd}
       />);
     default:
-      return <></>;
+      return null;
   }
 };
