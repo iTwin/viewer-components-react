@@ -73,19 +73,6 @@ export const CalculatedPropertyActionWithVisuals = ({
     };
   }, []);
 
-  // useEffect(() => {
-  //   const initialize = async () => {
-  //     if (!iModelConnection) return;
-  //     clearEmphasizedOverriddenElements();
-  //     if (!colorProperty) return;
-  //     setIsLoading(true);
-  //     const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
-  //     setResolvedHiliteIds(result.ids);
-  //     setIsLoading(false);
-  //   };
-  //   void initialize();
-  // }, [iModelConnection, hilitedElementsQueryCache, group, colorProperty]);
-
   useEffect(() => {
     if (!colorProperty || resolvedHiliteIds.length === 0) {
       return;
