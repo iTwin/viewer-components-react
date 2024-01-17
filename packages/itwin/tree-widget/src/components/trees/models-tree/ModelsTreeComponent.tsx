@@ -153,6 +153,8 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
       });
   }, [queryModels]);
 
+  const filterInfo = useMemo(() => ({ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }), [filterString, searchOptions.activeMatchIndex]);
+
   return (
     <div className="tree-widget-tree-with-header">
       <TreeHeader
@@ -187,7 +189,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
               activeView={viewport}
               width={width}
               height={height}
-              filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
+              filterInfo={filterInfo}
               onFilterApplied={onFilterApplied}
             />
           )}

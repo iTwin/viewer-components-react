@@ -4,6 +4,7 @@ exports[`CategoryTree #integration does not show private 2d categories with RULE
 Array [
   Object {
     "filtering": Object {
+      "ancestorFilters": Array [],
       "descriptor": [Function],
     },
     "label": PropertyRecord {
@@ -28,6 +29,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "label": PropertyRecord {
@@ -45,6 +47,7 @@ Array [
       },
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "label": PropertyRecord {
@@ -62,6 +65,7 @@ Array [
       },
     ],
     "filtering": Object {
+      "ancestorFilters": Array [],
       "descriptor": [Function],
     },
     "hasChildren": true,
@@ -85,6 +89,7 @@ exports[`CategoryTree #integration does not show private 3d categories with RULE
 Array [
   Object {
     "filtering": Object {
+      "ancestorFilters": Array [],
       "descriptor": [Function],
     },
     "label": PropertyRecord {
@@ -109,6 +114,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "label": PropertyRecord {
@@ -126,6 +132,7 @@ Array [
       },
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "label": PropertyRecord {
@@ -143,6 +150,7 @@ Array [
       },
     ],
     "filtering": Object {
+      "ancestorFilters": Array [],
       "descriptor": [Function],
     },
     "hasChildren": true,

@@ -30,13 +30,14 @@
     "build:esm": "tsc 1>&2 --module ES2020 --outDir lib/esm",
     "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build",
-    "cover": "",
+    "cover": "npm test -- --coverage",
     "lint": "",
     "lint:fix": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2 --fix",
     "start": "",
     "test": "jest"
   },
   "jest": {
+    "testEnvironment": "jest-environment-jsdom",
     "collectCoverageFrom": [
       "<rootDir>/src/**"
     ],
