@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGridUiItemsProvider.scss";
 import { useEffect } from "react";
@@ -49,7 +49,7 @@ export interface PropertyGridUiItemsProviderProps {
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 
-  constructor(private _props: PropertyGridUiItemsProviderProps = {}) { }
+  constructor(private _props: PropertyGridUiItemsProviderProps = {}) {}
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
     const { defaultPanelLocation, defaultPanelSection, defaultPanelWidgetPriority, propertyGridProps } = this._props;
@@ -60,14 +60,16 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       return [];
     }
 
-    return [{
-      id: PropertyGridWidgetId,
-      label: PropertyGridManager.translate("widget-label"),
-      content: <PropertyGridWidget {...propertyGridProps} />,
-      defaultState: WidgetState.Hidden,
-      icon: <SvgInfoCircular />,
-      priority: defaultPanelWidgetPriority,
-    }];
+    return [
+      {
+        id: PropertyGridWidgetId,
+        label: PropertyGridManager.translate("widget-label"),
+        content: <PropertyGridWidget {...propertyGridProps} />,
+        defaultState: WidgetState.Hidden,
+        icon: <SvgInfoCircular />,
+        priority: defaultPanelWidgetPriority,
+      },
+    ];
   }
 }
 
@@ -89,11 +91,13 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
     });
   }, [widgetDef]);
 
-  return <div ref={ref} className="property-grid-widget">
-    <ErrorBoundary FallbackComponent={ErrorState}>
-      <PropertyGridComponent {...props} />
-    </ErrorBoundary>
-  </div>;
+  return (
+    <div ref={ref} className="property-grid-widget">
+      <ErrorBoundary FallbackComponent={ErrorState}>
+        <PropertyGridComponent {...props} />
+      </ErrorBoundary>
+    </div>
+  );
 }
 
 function ErrorState({ resetErrorBoundary }: FallbackProps) {
@@ -103,7 +107,9 @@ function ErrorState({ resetErrorBoundary }: FallbackProps) {
       heading={PropertyGridManager.translate("error")}
       description={PropertyGridManager.translate("generic-error-description")}
       actions={
-        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>{PropertyGridManager.translate("retry")}</Button>
+        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>
+          {PropertyGridManager.translate("retry")}
+        </Button>
       }
     />
   );

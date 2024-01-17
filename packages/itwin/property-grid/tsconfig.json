@@ -8,5 +8,5 @@
     "resolveJsonModule": true,
     "lib": ["DOM", "ES2019"]
   },
-  "include": ["src"],
+  "include": ["src"]
 }

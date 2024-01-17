@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { join } from "path";
@@ -14,13 +14,15 @@ import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyBuilder,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import {
-  addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory,
-} from "../../IModelUtils";
+import { addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory } from "../../IModelUtils";
 import { mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -33,7 +35,6 @@ import type { VisibilityChangeListener } from "../../../components/trees/Visibil
 import type { CategoryInfo } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 describe("CategoryTree", () => {
-
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };
 
@@ -163,9 +164,7 @@ describe("CategoryTree", () => {
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
             activeView={viewportMock.object}
-            contextMenuItems={[
-              () => <div>Test Menu Item</div>,
-            ]}
+            contextMenuItems={[() => <div>Test Menu Item</div>]}
           />,
         );
         const node = await waitFor(() => getByText("test-node"));
@@ -288,7 +287,6 @@ describe("CategoryTree", () => {
           await user.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(moq.It.isAny(), true), moq.Times.once());
         });
-
       });
 
       describe("subcategories", () => {
@@ -297,15 +295,20 @@ describe("CategoryTree", () => {
 
         beforeEach(() => {
           categoryNode = { key: createKey("categoryId"), id: "categoryId", label: PropertyRecord.fromString("category-node"), autoExpand: true };
-          subcategoryNode = { key: createKey("subcategoryId"), id: "subcategoryId", label: PropertyRecord.fromString("subcategory-node"), parentId: "categoryId" };
+          subcategoryNode = {
+            key: createKey("subcategoryId"),
+            id: "subcategoryId",
+            label: PropertyRecord.fromString("subcategory-node"),
+            parentId: "categoryId",
+          };
 
           (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
           sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(1);
 
           (PresentationTreeDataProvider.prototype.getNodes as any).restore();
-          sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").callsFake(
-            async (parent) => parent === categoryNode ? [subcategoryNode] : [categoryNode],
-          );
+          sinon
+            .stub(PresentationTreeDataProvider.prototype, "getNodes")
+            .callsFake(async (parent) => (parent === categoryNode ? [subcategoryNode] : [categoryNode]));
         });
 
         const getSubCategoryNode = (elements: HTMLElement[]) => {
@@ -368,7 +371,6 @@ describe("CategoryTree", () => {
           await user.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(subcategoryNode, true), moq.Times.once());
         });
-
       });
 
       describe("filtering", () => {
@@ -428,15 +430,17 @@ describe("CategoryTree", () => {
         });
 
         it("renders VisibilityTreeNoFilteredData", async () => {
-          const result = render(<CategoryTree
-            {...sizeProps}
-            categories={categories}
-            viewManager={viewManagerMock.object}
-            iModel={imodelMock.object}
-            categoryVisibilityHandler={visibilityHandler.object}
-            filterInfo={{ filter: "filtered-node1", activeMatchIndex: 0 }}
-            activeView={mockViewport().object}
-          />);
+          const result = render(
+            <CategoryTree
+              {...sizeProps}
+              categories={categories}
+              viewManager={viewManagerMock.object}
+              iModel={imodelMock.object}
+              categoryVisibilityHandler={visibilityHandler.object}
+              filterInfo={{ filter: "filtered-node1", activeMatchIndex: 0 }}
+              activeView={mockViewport().object}
+            />,
+          );
 
           await waitFor(() => result.getByText("categoriesTree.noCategoryFound"));
         });
@@ -466,7 +470,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 3d categories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => { // eslint-disable-line deprecation/deprecation
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => {
         const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
@@ -490,7 +495,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 3d subCategories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => { // eslint-disable-line deprecation/deprecation
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => {
         const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
@@ -512,7 +518,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 2d categories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => { // eslint-disable-line deprecation/deprecation
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => {
         const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
@@ -534,7 +541,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 2d subCategories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => { // eslint-disable-line deprecation/deprecation
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => {
         const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);

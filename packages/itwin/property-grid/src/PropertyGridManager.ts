@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { UiError } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
@@ -21,7 +21,7 @@ export class PropertyGridManager {
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n?: Localization, ): Promise<void> {
+  public static async initialize(i18n?: Localization): Promise<void> {
     if (PropertyGridManager._initialized) {
       return;
     }

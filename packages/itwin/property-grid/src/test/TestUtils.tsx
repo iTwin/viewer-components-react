@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { createElement, Fragment, StrictMode } from "react";
 import sinon from "sinon";
@@ -9,18 +9,16 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
-import {  renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
+import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import type { PropsWithChildren, ReactElement } from "react";
-import type {
-  RenderHookOptions, RenderHookResult, RenderOptions, RenderResult,
-} from "@testing-library/react";
+import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import type { FavoritePropertiesManager, SelectionManager, SelectionScopesManager  } from "@itwin/presentation-frontend";
+import type { FavoritePropertiesManager, SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
 
-export function createPropertyRecord(value: PropertyValue, description: Partial<PropertyDescription>, ) {
+export function createPropertyRecord(value: PropertyValue, description: Partial<PropertyDescription>) {
   const propertyDescription: PropertyDescription = {
     displayLabel: "Test Property",
     name: "test-prop",
@@ -79,7 +77,9 @@ export function createFunctionStub<TFunc extends (...args: any) => any>() {
 
 export function createResolvablePromise<T>() {
   let resolveFn: (value: T) => void = () => {};
-  const promise = new Promise<T>((resolve) => {resolveFn = resolve;});
+  const promise = new Promise<T>((resolve) => {
+    resolveFn = resolve;
+  });
   return {
     promise,
     resolve: async (value: T) => {

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
@@ -32,7 +32,9 @@ export function PropertyGridComponent({ preferencesStorage, ...props }: Property
     return null;
   }
 
-  return <PreferencesContextProvider storage={preferencesStorage}>
-    <MultiElementPropertyGrid {...props} imodel={imodel} />
-  </PreferencesContextProvider>;
+  return (
+    <PreferencesContextProvider storage={preferencesStorage}>
+      <MultiElementPropertyGrid {...props} imodel={imodel} />
+    </PreferencesContextProvider>
+  );
 }
