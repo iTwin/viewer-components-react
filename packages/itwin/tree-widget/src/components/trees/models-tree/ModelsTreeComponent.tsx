@@ -127,8 +127,8 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
   const queryModels = useCallback(async (): Promise<ModelInfo[]> => {
     const queryParams: ModelQueryParams = {
       from: "BisCore.GeometricModel3d",
-      where: `GeometricModel3d.ModeledElement.Id IN (select ECInstanceId from BisCore.GeometricElement3d)
-      or GeometricModel3d.ModeledElement.Id IN (select ECInstanceId from BisCore.InformationPartitionElement)`,
+      where: `GeometricModel3d.ModeledElement.Id IN (select ECInstanceId FROM BisCore.GeometricElement3d)
+      OR GeometricModel3d.ModeledElement.Id IN (select ECInstanceId FROM BisORe.InformationPartitionElement)`,
       wantPrivate: false,
     };
 

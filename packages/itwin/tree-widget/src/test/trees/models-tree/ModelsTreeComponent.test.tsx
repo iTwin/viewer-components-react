@@ -117,7 +117,7 @@ describe("<ModelsTreeComponent />", () => {
 
       it("calls header buttons with no available models when modeledElement is not GeometricElement3d or InformationPartitionElement", async () => {
         // eslint-disable-next-line deprecation/deprecation
-        const iModel2 = await buildTestIModel("test", async (builder) => {
+        const iModel = await buildTestIModel("test", async (builder) => {
           const repoLinkId = builder.insertElement({
             model: IModel.repositoryModelId,
             classFullName: "BisCore:RepositoryLink",
@@ -131,21 +131,21 @@ describe("<ModelsTreeComponent />", () => {
         const spy = sinon.stub().returns(<></>);
         sinon.stub(modelsTree, "ModelsTree").returns(<></>);
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-        sinon.stub(UiFramework, "getIModelConnection").returns(iModel2);
+        sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
         render(<ModelsTreeComponent headerButtons={[spy]} />);
         await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 0)));
       });
 
       it("calls header button with available model when modeled element is GeometricElement3d or InformationPartitionElement", async () => {
         // eslint-disable-next-line deprecation/deprecation
-        const iModel2 = await buildTestIModel("test", async (builder) => {
+        const iModel = await buildTestIModel("test", async (builder) => {
           const partition = addPartition(builder, "BisCore:PhysicalPartition", "partition");
           addModel(builder, "BisCore:PhysicalModel", partition);
         });
         const spy = sinon.stub().returns(<></>);
         sinon.stub(modelsTree, "ModelsTree").returns(<></>);
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-        sinon.stub(UiFramework, "getIModelConnection").returns(iModel2);
+        sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
         render(<ModelsTreeComponent headerButtons={[spy]} />);
         await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1)));
       });
