@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Models Tree: reduce scope of models that are queried as available.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "114080994+ViliusBa@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
