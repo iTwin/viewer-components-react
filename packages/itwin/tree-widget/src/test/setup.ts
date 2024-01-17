@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import chai from "chai";
 import chaiJestSnapshot from "chai-jest-snapshot";
@@ -46,11 +46,16 @@ global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disa
 
 // needed for context menu to work in tests
 global.DOMRect = class DOMRect {
-  public bottom: number=0;
-  public left: number=0;
-  public right: number=0;
-  public top: number=0;
-  constructor(public x=0, public y=0, public width=0, public height=0) {}
+  public bottom: number = 0;
+  public left: number = 0;
+  public right: number = 0;
+  public top: number = 0;
+  constructor(
+    public x = 0,
+    public y = 0,
+    public width = 0,
+    public height = 0,
+  ) {}
   public static fromRect(other?: DOMRectInit): DOMRect {
     return new DOMRect(other?.x, other?.y, other?.width, other?.height);
   }

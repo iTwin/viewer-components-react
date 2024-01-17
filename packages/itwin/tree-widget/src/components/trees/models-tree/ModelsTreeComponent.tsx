@@ -68,7 +68,9 @@ export const ModelsTreeComponent = (props: ModelTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
-  if (!iModel || !viewport) return null;
+  if (!iModel || !viewport) {
+    return null;
+  }
 
   return <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
 };
@@ -131,7 +133,6 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
     };
 
     const modelProps = await iModel.models.queryProps(queryParams);
-
     return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
   }, [iModel]);
 

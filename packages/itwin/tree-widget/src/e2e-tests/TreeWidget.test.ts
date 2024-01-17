@@ -20,7 +20,6 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 test.describe("should match image snapshot", () => {
-
   test("initial tree", async ({ page }) => {
     // wait for element to be visible in the tree
     await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible", exact: true }).waitFor();
@@ -52,5 +51,4 @@ test.describe("should match image snapshot", () => {
     await treeWidget.locator(".components-activehighlight").waitFor();
     await takeScreenshot(page, treeWidget);
   });
-
 });

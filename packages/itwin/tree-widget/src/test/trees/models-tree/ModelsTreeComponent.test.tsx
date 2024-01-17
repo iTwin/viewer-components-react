@@ -13,10 +13,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import {
-  buildTestIModel,
-  HierarchyCacheMode,
-  initialize as initializePresentationTesting,
-  terminate as terminatePresentationTesting,
+  buildTestIModel, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";

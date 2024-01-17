@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import classNames from "classnames";
 import { useEffect } from "react";
@@ -74,7 +74,12 @@ const imageLoader = new TreeImageLoader();
  * Creates node renderer which renders node with eye checkbox.
  * @public
  */
-export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps) {
+export function createVisibilityTreeNodeRenderer({
+  levelOffset = 20,
+  disableRootNodeCollapse = false,
+  descriptionEnabled,
+  iconsEnabled,
+}: VisibilityTreeNodeRendererProps) {
   return function VisibilityTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
     const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? EXPANSION_TOGGLE_WIDTH : 0);
     return (
@@ -88,7 +93,11 @@ export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRoot
         )}
         descriptionEnabled={descriptionEnabled}
         imageLoader={iconsEnabled ? imageLoader : undefined}
-        className={classNames("with-checkbox", (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander", treeNodeProps.className)}
+        className={classNames(
+          "with-checkbox",
+          (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander",
+          treeNodeProps.className,
+        )}
       />
     );
   };
@@ -99,15 +108,17 @@ export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRoot
  * @public
  */
 export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
-  return <Checkbox
-    className="visibility-tree-checkbox"
-    variant="eyeball"
-    checked={props.checked}
-    onChange={(e) => props.onChange(e.currentTarget.checked)}
-    onClick={props.onClick}
-    disabled={props.disabled}
-    title={props.title}
-  />;
+  return (
+    <Checkbox
+      className="visibility-tree-checkbox"
+      variant="eyeball"
+      checked={props.checked}
+      onChange={(e) => props.onChange(e.currentTarget.checked)}
+      onClick={props.onClick}
+      disabled={props.disabled}
+      title={props.title}
+    />
+  );
 }
 
 /**
@@ -122,20 +133,17 @@ export function useVisibilityTreeFiltering(
   onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void,
 ) {
   const { filter, activeMatchIndex } = filterInfo ?? { filter: undefined, activeMatchIndex: undefined };
-  const {
-    filteredNodeLoader,
-    isFiltering,
-    matchesCount,
-    nodeHighlightingProps,
-  } = useControlledPresentationTreeFiltering({ nodeLoader, filter, activeMatchIndex });
+  const { filteredNodeLoader, isFiltering, matchesCount, nodeHighlightingProps } = useControlledPresentationTreeFiltering({
+    nodeLoader,
+    filter,
+    activeMatchIndex,
+  });
 
-  useEffect(
-    () => {
-      if (filter && matchesCount !== undefined && filteredNodeLoader !== nodeLoader)
-        onFilterApplied && onFilterApplied(filteredNodeLoader.dataProvider, matchesCount);
-    },
-    [filter, matchesCount, nodeLoader, filteredNodeLoader, onFilterApplied],
-  );
+  useEffect(() => {
+    if (filter && matchesCount !== undefined && filteredNodeLoader !== nodeLoader) {
+      onFilterApplied && onFilterApplied(filteredNodeLoader.dataProvider, matchesCount);
+    }
+  }, [filter, matchesCount, nodeLoader, filteredNodeLoader, onFilterApplied]);
 
   return { filteredNodeLoader, isFiltering, nodeHighlightingProps };
 }

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
@@ -46,16 +46,14 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   it("renders properties for a single instance", async () => {
-    setupMultiInstanceData([{
-      key: { id: "0x1", className: "TestClass" },
-      value: "Test-Value",
-    }]);
+    setupMultiInstanceData([
+      {
+        key: { id: "0x1", className: "TestClass" },
+        value: "Test-Value",
+      },
+    ]);
 
-    const { getByText, queryByRole } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText, queryByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("Test-Value"));
     // verify button for opening element list is not rendered
@@ -63,19 +61,18 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   it("renders properties for multiple instances", async () => {
-    setupMultiInstanceData([{
-      key: { id: "0x1", className: "TestClass" },
-      value: "Test-Value-1",
-    }, {
-      key: { id: "0x2", className: "TestClass" },
-      value: "Test-Value-2",
-    }]);
+    setupMultiInstanceData([
+      {
+        key: { id: "0x1", className: "TestClass" },
+        value: "Test-Value-1",
+      },
+      {
+        key: { id: "0x2", className: "TestClass" },
+        value: "Test-Value-2",
+      },
+    ]);
 
-    const { getByText, queryByRole } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText, queryByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     // verify button for opening element list is rendered
@@ -83,17 +80,16 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   it("renders element list", async () => {
-    const instancekeys = [{ id: "0x1", className: "TestClass" }, { id: "0x2", className: "TestClass" }];
+    const instancekeys = [
+      { id: "0x1", className: "TestClass" },
+      { id: "0x2", className: "TestClass" },
+    ];
     const expectedLabels = instancekeys.map(buildLabel);
 
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText, getByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const button = getByRole("button", { name: "element-list.title" });
@@ -106,17 +102,16 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   it("renders specific element props", async () => {
-    const instancekeys = [{ id: "0x1", className: "TestClass" }, { id: "0x2", className: "TestClass" }];
+    const instancekeys = [
+      { id: "0x1", className: "TestClass" },
+      { id: "0x2", className: "TestClass" },
+    ];
     const expectedLabels = instancekeys.map(buildLabel);
 
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText, getByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const button = getByRole("button", { name: "element-list.title" });
@@ -136,17 +131,16 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   it("navigates from single element to multi element grid using 'Back' button", async () => {
-    const instancekeys = [{ id: "0x1", className: "TestClass" }, { id: "0x2", className: "TestClass" }];
+    const instancekeys = [
+      { id: "0x1", className: "TestClass" },
+      { id: "0x2", className: "TestClass" },
+    ];
     const expectedLabels = instancekeys.map(buildLabel);
 
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole, container } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText, getByRole, container } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const listButton = getByRole("button", { name: "element-list.title" });
@@ -167,30 +161,29 @@ describe("<MultiElementPropertGrid />", () => {
     // navigate back to element list
     const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid"); // eslint-disable-line deprecation/deprecation
     expect(singleElementGrid).to.not.be.null;
-    const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back"  });
+    const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back" });
     await userEvents.click(singleElementBackButton);
     await waitFor(() => getByText(expectedLabels[0]));
 
     // navigate back to multi instances properties grid
     const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list"); // eslint-disable-line deprecation/deprecation
     expect(element).to.not.be.null;
-    const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back"  });
+    const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back" });
     await userEvents.click(elementListBackButton);
     await waitFor(() => getByText("MultiInstances"));
   });
 
   it("goes back to multi element property grid after selection changes", async () => {
-    const instancekeys = [{ id: "0x1", className: "TestClass" }, { id: "0x2", className: "TestClass" }];
+    const instancekeys = [
+      { id: "0x1", className: "TestClass" },
+      { id: "0x2", className: "TestClass" },
+    ];
     const expectedLabels = instancekeys.map(buildLabel);
 
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText, getByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const listButton = getByRole("button", { name: "element-list.title" });
@@ -211,10 +204,7 @@ describe("<MultiElementPropertGrid />", () => {
     selectionManager.scopes.computeSelection.resolves(new KeySet([{ id: "0x2", className: "ParentClass" }]));
 
     const { getByText, queryByRole } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-        ancestorsNavigationControls={(props) => <AncestorsNavigationControls {...props} />}
-      />
+      <MultiElementPropertyGrid imodel={imodel} ancestorsNavigationControls={(props) => <AncestorsNavigationControls {...props} />} />,
     );
 
     await waitFor(() => getByText("Test-Value-1"));
@@ -260,4 +250,3 @@ describe("<MultiElementPropertGrid />", () => {
     }));
   };
 });
-

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect } from "react";
 import { usePresentationTreeState } from "@itwin/presentation-components";
@@ -38,36 +38,46 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
  * @returns `undefined` on first render cycle. On all other render cycles state is initialized and valid object is returned.
  * @beta
  */
-export function useVisibilityTreeState({ imodel, ruleset, filterInfo, onFilterChange, visibilityHandler, selectionPredicate, ...props }: UseVisibilityTreeStateProps) {
-  const eventHandlerFactory = useCallback((params: PresentationTreeEventHandlerProps) => {
-    if (!visibilityHandler) {
-      return undefined;
-    }
+export function useVisibilityTreeState({
+  imodel,
+  ruleset,
+  filterInfo,
+  onFilterChange,
+  visibilityHandler,
+  selectionPredicate,
+  ...props
+}: UseVisibilityTreeStateProps) {
+  const eventHandlerFactory = useCallback(
+    (params: PresentationTreeEventHandlerProps) => {
+      if (!visibilityHandler) {
+        return undefined;
+      }
 
-    return new VisibilityTreeEventHandler({
-      nodeLoader: params.nodeLoader,
-      visibilityHandler,
-      selectionPredicate,
-    });
-  }, [visibilityHandler, selectionPredicate]);
+      return new VisibilityTreeEventHandler({
+        nodeLoader: params.nodeLoader,
+        visibilityHandler,
+        selectionPredicate,
+      });
+    },
+    [visibilityHandler, selectionPredicate],
+  );
 
   const treeState = usePresentationTreeState({
     ...props,
     imodel,
     ruleset,
     eventHandlerFactory,
-    filteringParams: filterInfo?.filter ? {
-      filter: filterInfo.filter,
-      activeMatchIndex: filterInfo?.activeMatchIndex,
-    } : undefined,
+    filteringParams: filterInfo?.filter
+      ? {
+          filter: filterInfo.filter,
+          activeMatchIndex: filterInfo?.activeMatchIndex,
+        }
+      : undefined,
   });
 
-  useEffect(
-    () => {
-      onFilterChange && onFilterChange(treeState?.filteringResult?.filteredProvider, treeState?.filteringResult?.matchesCount);
-    },
-    [treeState?.filteringResult?.matchesCount, treeState?.filteringResult?.filteredProvider, onFilterChange],
-  );
+  useEffect(() => {
+    onFilterChange && onFilterChange(treeState?.filteringResult?.filteredProvider, treeState?.filteringResult?.matchesCount);
+  }, [treeState?.filteringResult?.matchesCount, treeState?.filteringResult?.filteredProvider, onFilterChange]);
 
   return treeState;
 }

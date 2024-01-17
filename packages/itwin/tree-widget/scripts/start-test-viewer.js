@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 const crossEnv = require("cross-env");
 const dotEnv = require("dotenv");
 
@@ -22,9 +22,12 @@ if (process.env.IS_PW) {
   dotEnv.config({ path: "./.env.e2e", processEnv: env });
 }
 
-crossEnv([
-  ...Object.entries(env)
-    .filter(([key]) => !(key in process.env))
-    .map(([ key, value ]) => `${key}=${JSON.stringify(value)}`),
-  `npm run ${scriptName} --prefix ${path}`,
-], options);
+crossEnv(
+  [
+    ...Object.entries(env)
+      .filter(([key]) => !(key in process.env))
+      .map(([key, value]) => `${key}=${JSON.stringify(value)}`),
+    `npm run ${scriptName} --prefix ${path}`,
+  ],
+  options,
+);

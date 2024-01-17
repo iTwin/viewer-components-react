@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
@@ -33,15 +33,20 @@ describe("<PropertyGridContent />", () => {
     onDataChanged: new PropertyDataChangeEvent(),
     getData: async () => {
       return {
-        categories: [{
-          expand: true,
-          label: "Test Category",
-          name: "test-category",
-        }],
+        categories: [
+          {
+            expand: true,
+            label: "Test Category",
+            name: "test-category",
+          },
+        ],
         label: PropertyRecord.fromString("Test Instance"),
         records: {
           ["test-category"]: [
-            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" }, { name: "test-prop", displayLabel: "Test Prop" }),
+            createPropertyRecord(
+              { valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" },
+              { name: "test-prop", displayLabel: "Test Prop" },
+            ),
             createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: undefined }, { name: "null-prop", displayLabel: "Null Prop" }),
           ],
         },
@@ -50,21 +55,12 @@ describe("<PropertyGridContent />", () => {
   } as unknown as IPresentationPropertyDataProvider;
 
   function renderWithContext(ui: ReactElement) {
-    return render(
-      <NullValueSettingContext>
-        {ui}
-      </NullValueSettingContext>
-    );
+    return render(<NullValueSettingContext>{ui}</NullValueSettingContext>);
   }
 
   it("renders header with instance label", async () => {
     const imodel = {} as IModelConnection;
-    const { getByText, queryByText } = renderWithContext(
-      <PropertyGridContent
-        dataProvider={provider}
-        imodel={imodel}
-      />
-    );
+    const { getByText, queryByText } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => getByText("Test Prop"));
     expect(queryByText("Test Instance")).to.not.be.null;
@@ -74,13 +70,7 @@ describe("<PropertyGridContent />", () => {
     const imodel = {} as IModelConnection;
     const onBackClickSpy = sinon.spy();
 
-    const { getByText, getByRole, user } = renderWithContext(
-      <PropertyGridContent
-        dataProvider={provider}
-        imodel={imodel}
-        onBackButton={onBackClickSpy}
-      />
-    );
+    const { getByText, getByRole, user } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} onBackButton={onBackClickSpy} />);
 
     await waitFor(() => getByText("Test Prop"));
     const backButton = getByRole("button", { name: "header.back" });
@@ -97,9 +87,13 @@ describe("<PropertyGridContent />", () => {
         dataProvider={provider}
         imodel={imodel}
         settingsMenuItems={[
-          () => <PropertyGridSettingsMenuItem id="testSetting" onClick={spy}>Test Setting</PropertyGridSettingsMenuItem>,
+          () => (
+            <PropertyGridSettingsMenuItem id="testSetting" onClick={spy}>
+              Test Setting
+            </PropertyGridSettingsMenuItem>
+          ),
         ]}
-      />
+      />,
     );
 
     const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
@@ -115,13 +109,7 @@ describe("<PropertyGridContent />", () => {
     const imodel = {} as IModelConnection;
 
     const { getByText, getByRole, queryByText, user } = renderWithContext(
-      <PropertyGridContent
-        dataProvider={provider}
-        imodel={imodel}
-        settingsMenuItems={[
-          (props) => <ShowHideNullValuesSettingsMenuItem {...props} />,
-        ]}
-      />
+      <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />,
     );
 
     await waitFor(() => {
@@ -144,12 +132,7 @@ describe("<PropertyGridContent />", () => {
   it("filters properties according to search prompt", async () => {
     const imodel = {} as IModelConnection;
 
-    const { queryByText, user, getByRole, getByTitle } = renderWithContext(
-      <PropertyGridContent
-        dataProvider={provider}
-        imodel={imodel}
-      />
-    );
+    const { queryByText, user, getByRole, getByTitle } = renderWithContext(<PropertyGridContent dataProvider={provider} imodel={imodel} />);
 
     await waitFor(() => {
       expect(queryByText("Test Prop")).to.not.be.null;
@@ -159,7 +142,7 @@ describe("<PropertyGridContent />", () => {
     const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
     await user.click(searchButton);
 
-    const searchTextInput =  await waitFor(() => getByRole("searchbox"));
+    const searchTextInput = await waitFor(() => getByRole("searchbox"));
     // input text that should match
     await user.type(searchTextInput, "test prop");
 
@@ -181,13 +164,7 @@ describe("<PropertyGridContent />", () => {
     const imodel = {} as IModelConnection;
 
     const { queryByText, user, getByRole, getByTitle } = renderWithContext(
-      <PropertyGridContent
-        dataProvider={provider}
-        imodel={imodel}
-        settingsMenuItems={[
-          (props) => <ShowHideNullValuesSettingsMenuItem {...props} />,
-        ]}
-      />
+      <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />,
     );
 
     await waitFor(() => {
@@ -198,7 +175,7 @@ describe("<PropertyGridContent />", () => {
     await user.click(searchButton);
 
     // input text that should not match anything, thus rendering nothing
-    const searchTextInput =  await waitFor(() => getByRole("searchbox"));
+    const searchTextInput = await waitFor(() => getByRole("searchbox"));
     await user.type(searchTextInput, "input text for test");
 
     await waitFor(() => {
@@ -206,7 +183,7 @@ describe("<PropertyGridContent />", () => {
     });
 
     // press collapse button which should clear the filter
-    const collapseSearchButton =  await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.close")));
+    const collapseSearchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.close")));
     await user.click(collapseSearchButton);
 
     await waitFor(() => {
@@ -216,15 +193,12 @@ describe("<PropertyGridContent />", () => {
 
   it("allows editing property", async () => {
     const imodel = {} as IModelConnection;
-    const stub = sinon.stub<Parameters<Required<PropertyGridContentProps>["onPropertyUpdated"]>, ReturnType<Required<PropertyGridContentProps>["onPropertyUpdated"]>>().resolves(true);
+    const stub = sinon
+      .stub<Parameters<Required<PropertyGridContentProps>["onPropertyUpdated"]>, ReturnType<Required<PropertyGridContentProps>["onPropertyUpdated"]>>()
+      .resolves(true);
 
     const { findByText, findByDisplayValue, user } = renderWithContext(
-      <PropertyGridContent
-        dataProvider={provider}
-        imodel={imodel}
-        isPropertyEditingEnabled={true}
-        onPropertyUpdated={stub}
-      />
+      <PropertyGridContent dataProvider={provider} imodel={imodel} isPropertyEditingEnabled={true} onPropertyUpdated={stub} />,
     );
 
     const propertyValue = await findByText("Prop Value");
