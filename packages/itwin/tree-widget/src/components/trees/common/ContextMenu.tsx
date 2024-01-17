@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { Fragment, useState } from "react";
 import { ContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
@@ -43,18 +43,16 @@ export interface TreeContextMenuItemProps {
  * @public
  */
 export function TreeContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<TreeContextMenuItemProps>) {
-  return <ContextMenuItem
-    key={id}
-    onSelect={onSelect}
-    title={title}
-  >
-    {children}
-  </ContextMenuItem>;
+  return (
+    <ContextMenuItem key={id} onSelect={onSelect} title={title}>
+      {children}
+    </ContextMenuItem>
+  );
 }
 
 interface ContextMenu {
   items: ReactNode[];
-  position: {x: number, y: number};
+  position: { x: number; y: number };
 }
 
 /** @internal */

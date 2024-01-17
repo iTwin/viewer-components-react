@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
 import { UiFramework } from "@itwin/appui-react";
@@ -28,7 +28,7 @@ interface InstanceSelectionInfo {
   /**
    * Instance keys path that represents path from some instance to current selected instance that was reached
    * while navigating through ancestors upwards.
-  */
+   */
   previousKeys: InstanceKey[];
   /** Specifies if it is possible to navigate from currently selected instance upwards */
   canNavigateUp: boolean;
@@ -65,7 +65,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
           const selectionSet = Presentation.selection.getSelection(imodel);
           const selectedInstanceKeys = getInstanceKeys(selectionSet);
           // if only single instance is selected and navigation through ancestors is enabled determine if selected instance has single parent and we can navigate up
-          const hasAncestor = selectedInstanceKeys.length === 1 && await hasParent(imodel, selectedInstanceKeys[0]);
+          const hasAncestor = selectedInstanceKeys.length === 1 && (await hasParent(imodel, selectedInstanceKeys[0]));
           return {
             selectedInstanceKeys,
             hasAncestor,
@@ -78,7 +78,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
             canNavigateUp: hasAncestor,
             focusedInstanceKey: undefined,
           };
-        }
+        },
       );
     };
 
@@ -105,20 +105,12 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
 
     await updateStateAsync(
       async () => {
-        const parentKeys = await Presentation.selection.scopes.computeSelection(
-          imodel,
-          selectedKey.id,
-          { id: "element", ancestorLevel: 1 }
-        );
+        const parentKeys = await Presentation.selection.scopes.computeSelection(imodel, selectedKey.id, { id: "element", ancestorLevel: 1 });
 
         const parentInstanceKeys = getInstanceKeys(parentKeys);
-        const hasGrandParent = parentInstanceKeys.length === 1 && await hasParent(imodel, parentInstanceKeys[0]);
+        const hasGrandParent = parentInstanceKeys.length === 1 && (await hasParent(imodel, parentInstanceKeys[0]));
 
-        Presentation.selection.replaceSelection(
-          PropertyGridSelectionScope,
-          imodel,
-          parentKeys
-        );
+        Presentation.selection.replaceSelection(PropertyGridSelectionScope, imodel, parentKeys);
         return {
           parentInstanceKeys,
           hasGrandParent,
@@ -129,7 +121,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
         previousKeys: [...prevState.previousKeys, prevState.selectedKeys[0]],
         canNavigateUp: hasGrandParent,
         focusedInstanceKey: undefined,
-      })
+      }),
     );
   };
 
@@ -141,11 +133,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
     const newPreviousKeys = [...previousKeys];
     const currentKey = newPreviousKeys.pop() as InstanceKey;
     // select the current instance key
-    Presentation.selection.replaceSelection(
-      PropertyGridSelectionScope,
-      imodel,
-      [currentKey]
-    );
+    Presentation.selection.replaceSelection(PropertyGridSelectionScope, imodel, [currentKey]);
 
     updateStateImmediate(() => ({
       selectedKeys: [currentKey],
@@ -178,11 +166,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
 }
 
 async function hasParent(imodel: IModelConnection, key: InstanceKey) {
-  const parentKeys = await Presentation.selection.scopes.computeSelection(
-    imodel,
-    key.id,
-    { id: "element", ancestorLevel: 1 }
-  );
+  const parentKeys = await Presentation.selection.scopes.computeSelection(imodel, key.id, { id: "element", ancestorLevel: 1 });
 
   // current instance key is returned from `computeSelection` if it does not have parent. Need to filter it out.
   const instanceKeys = getInstanceKeys(parentKeys).filter((parentKey) => parentKey.className !== key.className || parentKey.id !== key.id);
@@ -191,18 +175,16 @@ async function hasParent(imodel: IModelConnection, key: InstanceKey) {
 
 function getInstanceKeys(keys: Readonly<KeySet>) {
   const selectedInstanceKeys: InstanceKey[] = [];
-  keys.instanceKeys.forEach(
-    (ids: Set<string>, className: string) => {
-      ids.forEach((id: string) => {
-        if (!Id64.isTransient(id)) {
-          selectedInstanceKeys.push({
-            id,
-            className,
-          });
-        }
-      });
-    }
-  );
+  keys.instanceKeys.forEach((ids: Set<string>, className: string) => {
+    ids.forEach((id: string) => {
+      if (!Id64.isTransient(id)) {
+        selectedInstanceKeys.push({
+          id,
+          className,
+        });
+      }
+    });
+  });
 
   return selectedInstanceKeys;
 }

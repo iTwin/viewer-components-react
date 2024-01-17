@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -15,14 +15,21 @@ const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
  * Toggles visibility of categories to show or hide.
  * @internal
  */
-export async function toggleAllCategories(viewManager: ViewManager, imodel: IModelConnection, display: boolean, viewport?: Viewport, forAllViewports?: boolean) {
+export async function toggleAllCategories(
+  viewManager: ViewManager,
+  imodel: IModelConnection,
+  display: boolean,
+  viewport?: Viewport,
+  forAllViewports?: boolean,
+) {
   // istanbul ignore next
   const activeView = viewport ?? viewManager.getFirstOpenView();
   const ids = await getCategories(imodel, activeView);
 
   // istanbul ignore if
-  if (ids.length === 0)
+  if (ids.length === 0) {
     return;
+  }
 
   await enableCategory(viewManager, imodel, ids, display, forAllViewports ?? false);
 }
@@ -40,9 +47,17 @@ export async function getCategories(imodel: IModelConnection, viewport?: Viewpor
  * Changes category display in the viewport.
  * @internal
  */
-export async function enableCategory(viewManager: ViewManager, imodel: IModelConnection, ids: string[], enabled: boolean, forAllViewports: boolean, enableAllSubCategories = true) {
-  if (!viewManager.selectedView)
+export async function enableCategory(
+  viewManager: ViewManager,
+  imodel: IModelConnection,
+  ids: string[],
+  enabled: boolean,
+  forAllViewports: boolean,
+  enableAllSubCategories = true,
+) {
+  if (!viewManager.selectedView) {
     return;
+  }
 
   const updateViewport = async (vp: Viewport) => {
     // Only act on viewports that are both 3D or both 2D. Important if we have multiple viewports opened and we
@@ -54,8 +69,9 @@ export async function enableCategory(viewManager: ViewManager, imodel: IModelCon
       const modelsContainingOverrides: string[] = [];
       for (const ovr of vp.perModelCategoryVisibility) {
         // istanbul ignore else
-        if (ids.findIndex((id) => id === ovr.categoryId) !== -1)
+        if (ids.findIndex((id) => id === ovr.categoryId) !== -1) {
           modelsContainingOverrides.push(ovr.modelId);
+        }
       }
       vp.perModelCategoryVisibility.setOverride(modelsContainingOverrides, ids, PerModelCategoryVisibility.Override.None);
 
@@ -83,8 +99,9 @@ export async function enableCategory(viewManager: ViewManager, imodel: IModelCon
  * @internal
  */
 export function enableSubCategory(viewManager: ViewManager, key: string, enabled: boolean, forAllViewports?: boolean) {
-  if (!viewManager.selectedView)
+  if (!viewManager.selectedView) {
     return;
+  }
 
   const updateViewport = (vp: Viewport) => {
     // Only act on viewports that are both 3D or both 2D. Important if we have multiple viewports opened and we
@@ -106,12 +123,15 @@ export function enableSubCategory(viewManager: ViewManager, key: string, enabled
 
 /** @internal */
 export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?: Viewport) {
-  if (!vp)
+  if (!vp) {
     return EMPTY_CATEGORIES_ARRAY;
+  }
 
   // Query categories and add them to state
-  const selectUsedSpatialCategoryIds = "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement3d WHERE Category.Id IN (SELECT ECInstanceId from BisCore.SpatialCategory)";
-  const selectUsedDrawingCategoryIds = "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement2d WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from BisCore.DrawingCategory)";
+  const selectUsedSpatialCategoryIds =
+    "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement3d WHERE Category.Id IN (SELECT ECInstanceId from BisCore.SpatialCategory)";
+  const selectUsedDrawingCategoryIds =
+    "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement2d WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from BisCore.DrawingCategory)";
   const ecsql = vp.view.is3d() ? selectUsedSpatialCategoryIds : selectUsedDrawingCategoryIds;
   const ecsql2 = `SELECT ECInstanceId as id FROM ${vp.view.is3d() ? "BisCore.SpatialCategory" : "BisCore.DrawingCategory"} WHERE ECInstanceId IN (${ecsql})`;
 

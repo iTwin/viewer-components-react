@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import * as sinon from "sinon";
@@ -42,9 +42,7 @@ describe("<ExternalSourcesTreeComponent />", () => {
     sinon.stub(autoSizerModule, "AutoSizer").callsFake((props) => <>{props.children({ width: 123, height: 456 })}</>);
     const treeStub = sinon.stub(externalSourcesTreeModule, "ExternalSourcesTree").returns(<>test result</>);
 
-    const { getByText } = render(
-      <ExternalSourcesTreeComponent />,
-    );
+    const { getByText } = render(<ExternalSourcesTreeComponent />);
 
     expect(treeStub).to.be.calledWith({
       width: 123,
@@ -59,9 +57,7 @@ describe("<ExternalSourcesTreeComponent />", () => {
     const autosizerStub = sinon.stub(autoSizerModule, "AutoSizer").callsFake((props) => <>{props.children({ width: 123, height: 456 })}</>);
     const treeStub = sinon.stub(externalSourcesTreeModule, "ExternalSourcesTree").returns(<></>);
 
-    const { container } = render(
-      <ExternalSourcesTreeComponent />,
-    );
+    const { container } = render(<ExternalSourcesTreeComponent />);
 
     expect(autosizerStub).to.not.be.called;
     expect(treeStub).to.not.be.called;
