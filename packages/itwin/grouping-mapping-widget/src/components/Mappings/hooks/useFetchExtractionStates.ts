@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import { useExtractionClient } from "../../context/ExtractionClientContext";
 import { ExtractorState } from "@itwin/insights-client";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { ExtractionRequestMapping, ExtractionRunRequest, Mapping } from "@itwin/insights-client";
 import { useState } from "react";
 import { ExtractionStates } from "../Extraction/ExtractionStatus";
@@ -13,7 +13,7 @@ import { STATUS_CHECK_INTERVAL } from "../../Constants";
 
 export const useFetchExtractionStates = ({
   iModelId,
-  getAccessToken
+  getAccessToken,
 }: GroupingMappingApiConfig) => {
 
   const extractionClient = useExtractionClient();
@@ -24,7 +24,7 @@ export const useFetchExtractionStates = ({
     mutationKey: ["runExtraction"],
     mutationFn: async (mappings: Mapping[]) => {
       const accessToken = await getAccessToken();
-      const mappingIds: ExtractionRequestMapping[] = mappings.length > 0 ? mappings.map((mapping) => { return { id: mapping.id } }) : [];
+      const mappingIds: ExtractionRequestMapping[] = mappings.length > 0 ? mappings.map((mapping) => { return { id: mapping.id }; }) : [];
       const extractionRequest: ExtractionRunRequest | undefined = {
         mappings: mappingIds,
       };
@@ -47,7 +47,7 @@ export const useFetchExtractionStates = ({
         setIsJobStarted(false);
         setIsJobDone(true);
       }
-      return await finalExtractionState(extractionStatusResponse.state);
+      return finalExtractionState(extractionStatusResponse.state);
     },
     enabled: isJobStarted,
     refetchInterval: STATUS_CHECK_INTERVAL,

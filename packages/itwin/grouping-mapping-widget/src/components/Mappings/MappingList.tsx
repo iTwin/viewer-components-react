@@ -6,7 +6,7 @@ import type { Mapping } from "@itwin/insights-client";
 import React, { useEffect } from "react";
 import type { BeEvent } from "@itwin/core-bentley";
 import { MappingUIActionGroup } from "./MappingViewActionGroup";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import { Anchor, ListItem, Text } from "@itwin/itwinui-react";
 import { ExtractionStates } from "./Extraction/ExtractionStatus";
@@ -47,13 +47,13 @@ export const MappingList = (props: MappingListProps) => {
     return () => {
       props.jobStartEvent.removeListener(listener);
     };
-  }, [props.jobStartEvent, props.mapping.id]);
+  }, [props.jobStartEvent, props.mapping.id, setIsJobStarted]);
 
   useEffect(() => {
     if (isJobStarted === true || isJobDone === true) {
       setExtractionState(extractionStateData);
     }
-  }, [extractionStateData]);
+  }, [extractionStateData, isJobDone, isJobStarted]);
 
   return (
     <ListItem actionable
@@ -70,7 +70,7 @@ export const MappingList = (props: MappingListProps) => {
         state={extractionState}
         clearExtractionState={() => {
           setIsJobDone(false);
-          setExtractionState(ExtractionStates.None)
+          setExtractionState(ExtractionStates.None);
         }}
       ></ExtractionStatus >
       <MappingUIActionGroup
@@ -82,4 +82,4 @@ export const MappingList = (props: MappingListProps) => {
       />
     </ListItem>
   );
-}
+};

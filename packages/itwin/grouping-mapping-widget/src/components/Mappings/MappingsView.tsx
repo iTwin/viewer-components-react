@@ -110,13 +110,13 @@ export const MappingsView = ({
         ? mappingIdList.filter((eachId) => mapping.id !== eachId.id)
         : [...mappingIdList, mapping]
     );
-  }
+  };
 
   const runExtraction = useCallback(async () => {
     await onRunExtraction(selectedMappings);
-    selectedMappings.map((mapping) => { jobStartEvent.raiseEvent(mapping.id) });
+    selectedMappings.map((mapping) => { jobStartEvent.raiseEvent(mapping.id); });
     setSelectedMappings([]);
-  }, [selectedMappings, jobStartEvent]);
+  }, [selectedMappings, jobStartEvent, onRunExtraction]);
 
   return (
     <>
