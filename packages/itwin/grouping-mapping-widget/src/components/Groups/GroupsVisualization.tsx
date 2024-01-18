@@ -34,7 +34,7 @@ import { useMappingClient } from "../context/MappingClientContext";
 import { useMutation } from "@tanstack/react-query";
 import { useIsMounted } from "../../common/hooks/useIsMounted";
 import { useFetchGroups } from "./hooks/useFetchGroups";
-import { useQueriesFetchKeySetHiliteIds } from "./hooks/useQueriesFetchKeySetHiliteIds";
+import { useKeySetHiliteQueries } from "./hooks/useQueriesFetchKeySetHiliteIds";
 
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
@@ -71,7 +71,7 @@ export const GroupsVisualization = ({
   const { data: groups, isFetched: isGroupsFetched } = useFetchGroups(iModelId, mapping.id, getAccessToken, mappingClient);
   const isMounted = useIsMounted();
   const [enableGroupQueries, setEnableGroupQueries] = useState<boolean>(false);
-  const { groupQueries } = useQueriesFetchKeySetHiliteIds(groups ?? [], enableGroupQueries, iModelConnection);
+  const { groupQueries } = useKeySetHiliteQueries(groups ?? [], enableGroupQueries, iModelConnection);
 
   const triggerVisualization = useCallback(async (groupsWithGroupedOverlaps: OverlappedElementGroupPairs[]) =>
     visualizeGroupColors(

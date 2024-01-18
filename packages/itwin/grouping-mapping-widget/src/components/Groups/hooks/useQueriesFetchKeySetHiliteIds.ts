@@ -19,23 +19,23 @@ export interface QueryResults {
 
 type TQueries = UseQueryOptions<QueryResults>[];
 
-export const createGroupQuery = (group: Group, iModelConnection: IModelConnection, enableGroupQueries: boolean) => ({
+export const createQueryForHiliteIdsAndKeyset = (group: Group, iModelConnection: IModelConnection, enabled: boolean) => ({
   queryKey: ["group", "hiliteids", group.query],
   queryFn: async () => getHiliteIdsAndKeysetFromGroup(iModelConnection, group),
-  enabled: enableGroupQueries,
+  enabled,
   staleTime: Infinity,
   meta: { errorCode:TErrCodes.QUERY_FETCH_FAILED, message: `Failed to resolve ${group.groupName}.` },
 });
 
-export const useSingleGroupQueryFetchKeySetHiliteIds = (group: Group, iModelConnection: IModelConnection, enableGroupQueries: boolean) => {
-  const query = useMemo(() => createGroupQuery(group, iModelConnection, enableGroupQueries), [enableGroupQueries, group, iModelConnection]);
+export const useGroupKeySetQuery = (group: Group, iModelConnection: IModelConnection, enabled: boolean) => {
+  const query = useMemo(() => createQueryForHiliteIdsAndKeyset(group, iModelConnection, enabled), [enabled, group, iModelConnection]);
 
   return useQuery<QueryResults>(query);
 };
 
-export const useQueriesFetchKeySetHiliteIds = (groups: Group[], enableGroupQueries: boolean, iModelConnection: IModelConnection) => {
-  const queries = useMemo(() => groups.map((group) => createGroupQuery(group, iModelConnection, enableGroupQueries)),
-    [groups, iModelConnection, enableGroupQueries]);
+export const useKeySetHiliteQueries = (groups: Group[], enabled: boolean, iModelConnection: IModelConnection) => {
+  const queries = useMemo(() => groups.map((group) => createQueryForHiliteIdsAndKeyset(group, iModelConnection, enabled)),
+    [groups, iModelConnection, enabled]);
 
   const useQueriesHook = useQueries<TQueries>({ queries });
 

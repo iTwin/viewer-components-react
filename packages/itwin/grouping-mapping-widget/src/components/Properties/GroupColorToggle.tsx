@@ -9,7 +9,7 @@ import type { Group } from "@itwin/insights-client";
 import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
-import { useSingleGroupQueryFetchKeySetHiliteIds } from "../Groups/hooks/useQueriesFetchKeySetHiliteIds";
+import { useGroupKeySetQuery } from "../Groups/hooks/useQueriesFetchKeySetHiliteIds";
 import { usePropertiesContext } from "../context/PropertiesContext";
 
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
@@ -28,7 +28,7 @@ export const GroupColorToggle = ({
     throw new Error("This component requires an active iModelConnection.");
   }
   const { showGroupColor, setShowGroupColor } = usePropertiesContext();
-  const { data: hiliteIdsResult } = useSingleGroupQueryFetchKeySetHiliteIds(group, iModelConnection, showGroupColor);
+  const { data: hiliteIdsResult } = useGroupKeySetQuery(group, iModelConnection, showGroupColor);
 
   useEffect(() => {
     const visualize = async () => {

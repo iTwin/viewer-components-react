@@ -26,7 +26,7 @@ import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { CalculatedProperty, CalculatedPropertyType, Group } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
-import { useSingleGroupQueryFetchKeySetHiliteIds } from "../../Groups/hooks/useQueriesFetchKeySetHiliteIds";
+import { useGroupKeySetQuery } from "../../Groups/hooks/useQueriesFetchKeySetHiliteIds";
 
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
@@ -57,7 +57,7 @@ export const CalculatedPropertyActionWithVisuals = ({
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
   const [validator, showValidationMessage] = useValidator();
   const [colorProperty, setColorProperty] = useState<boolean>(false);
-  const { data } = useSingleGroupQueryFetchKeySetHiliteIds(group, iModelConnection, true);
+  const { data } = useGroupKeySetQuery(group, iModelConnection, true);
 
   const resolvedHiliteIds = useMemo(() => {
     // Extract ids from resolvedHiliteIds, default to an empty array if not available
