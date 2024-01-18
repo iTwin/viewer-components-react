@@ -9,7 +9,7 @@ import type { Group } from "@itwin/insights-client";
 import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
-import { useGroupKeySetQuery } from "../Groups/hooks/useQueriesFetchKeySetHiliteIds";
+import { useGroupKeySetQuery } from "../Groups/hooks/useKeySetHiliteQueries";
 import { usePropertiesContext } from "../context/PropertiesContext";
 
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {

@@ -34,7 +34,7 @@ import { useMappingClient } from "../context/MappingClientContext";
 import { useMutation } from "@tanstack/react-query";
 import { useIsMounted } from "../../common/hooks/useIsMounted";
 import { useFetchGroups } from "./hooks/useFetchGroups";
-import { useKeySetHiliteQueries } from "./hooks/useQueriesFetchKeySetHiliteIds";
+import { useKeySetHiliteQueries } from "./hooks/useKeySetHiliteQueries";
 
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;

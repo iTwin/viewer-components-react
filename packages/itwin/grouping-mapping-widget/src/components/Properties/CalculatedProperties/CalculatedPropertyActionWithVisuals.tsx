@@ -26,7 +26,7 @@ import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { CalculatedProperty, CalculatedPropertyType, Group } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
-import { useGroupKeySetQuery } from "../../Groups/hooks/useQueriesFetchKeySetHiliteIds";
+import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
