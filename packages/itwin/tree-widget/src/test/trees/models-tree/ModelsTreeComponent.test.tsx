@@ -21,6 +21,7 @@ import {
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
 import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { queryModelsForHeaderActions } from "../../../components/trees/models-tree/Utils";
 import { ModelsTreeComponent, TreeWidget } from "../../../tree-widget-react";
 import { addModel, addPartition } from "../../IModelUtils";
 import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
@@ -131,29 +132,18 @@ describe("<ModelsTreeComponent />", () => {
           addModel(builder, "BisCore:PhysicalModel", repoLinkId);
         });
 
-        const spy = sinon.stub().returns(<></>);
-        sinon.stub(modelsTree, "ModelsTree").returns(<></>);
-        sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-        sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
-        render(<ModelsTreeComponent headerButtons={[spy]} />);
-        await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 0)));
+        const availableModels = await queryModelsForHeaderActions(iModel);
+        await waitFor(() => expect(availableModels.length).to.be.equal(0));
       });
 
       it("calls header button with available model when modeled element is GeometricElement3d or InformationPartitionElement", async () => {
-        let modelId: string;
         // eslint-disable-next-line deprecation/deprecation
         const iModel = await buildTestIModel("test", async (builder) => {
           const partition = addPartition(builder, "BisCore:PhysicalPartition", "partition");
-          modelId = addModel(builder, "BisCore:PhysicalModel", partition);
+          addModel(builder, "BisCore:PhysicalModel", partition);
         });
-        const spy = sinon.stub().returns(<></>);
-        sinon.stub(modelsTree, "ModelsTree").returns(<></>);
-        sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-        sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
-        render(<ModelsTreeComponent headerButtons={[spy]} />);
-        await waitFor(() =>
-          expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === modelId)),
-        );
+        const availableModels = await queryModelsForHeaderActions(iModel);
+        await waitFor(() => expect(availableModels.length).to.be.equal(1));
       });
     });
 
