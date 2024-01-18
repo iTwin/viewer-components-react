@@ -13,7 +13,10 @@ import { BeEvent } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import {
-  buildTestIModel, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
@@ -137,17 +140,20 @@ describe("<ModelsTreeComponent />", () => {
       });
 
       it("calls header button with available model when modeled element is GeometricElement3d or InformationPartitionElement", async () => {
+        let modelId: string;
         // eslint-disable-next-line deprecation/deprecation
         const iModel = await buildTestIModel("test", async (builder) => {
           const partition = addPartition(builder, "BisCore:PhysicalPartition", "partition");
-          addModel(builder, "BisCore:PhysicalModel", partition);
+          modelId = addModel(builder, "BisCore:PhysicalModel", partition);
         });
         const spy = sinon.stub().returns(<></>);
         sinon.stub(modelsTree, "ModelsTree").returns(<></>);
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
         render(<ModelsTreeComponent headerButtons={[spy]} />);
-        await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1)));
+        await waitFor(() =>
+          expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === modelId)),
+        );
       });
     });
 

@@ -15,8 +15,8 @@ import { AutoSizer } from "../../utils/AutoSizer";
 import { ModelsTree } from "./ModelsTree";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
 
-import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
+import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { ModelsTreeProps } from "./ModelsTree";
 
@@ -124,17 +124,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 
   const { searchOptions, filterString, onFilterApplied } = useTreeFilteringState();
 
-  const queryModels = useCallback(async (): Promise<ModelInfo[]> => {
-    const queryParams: ModelQueryParams = {
-      from: "BisCore.GeometricModel3d",
-      where: `GeometricModel3d.ModeledElement.Id IN (select ECInstanceId FROM BisCore.GeometricElement3d)
-      OR GeometricModel3d.ModeledElement.Id IN (select ECInstanceId FROM BisORe.InformationPartitionElement)`,
-      wantPrivate: false,
-    };
-
-    const modelProps = await iModel.models.queryProps(queryParams);
-    return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
-  }, [iModel]);
+  const queryModels = GetQueryModelsCallback(iModel);
 
   useEffect(() => {
     queryModels()
@@ -187,6 +177,26 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
       </div>
     </div>
   );
+}
+
+function GetQueryModelsCallback(iModel: IModelConnection) {
+  return useCallback(async (): Promise<ModelInfo[]> => {
+    const queryParams: ModelQueryParams = {
+      from: "BisCore.GeometricModel3d",
+      where: `
+        EXISTS (
+          SELECT 1
+          FROM BisCore.Element e
+          WHERE e.ECClassId IS (BisCore.GeometricElement3d, BisCore.InformationPartitionElement)
+            AND e.ECInstanceId = GeometricModel3d.ModeledElement.Id
+        )
+      `,
+      wantPrivate: false,
+    };
+
+    const modelProps = await iModel.models.queryProps(queryParams);
+    return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
+  }, [iModel]);
 }
 
 function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
