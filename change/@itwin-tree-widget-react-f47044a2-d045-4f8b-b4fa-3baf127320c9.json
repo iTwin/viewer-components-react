@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": " - Move `onNodeDoubleClick` event handling to newly added `ModelsTreeEventHandler`.\n - Expand `UseVisibilityTreeState` hook to support custom extensions of `VisibilityTreeEventHandler`.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "114080994+ViliusBa@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
