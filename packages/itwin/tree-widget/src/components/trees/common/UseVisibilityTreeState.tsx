@@ -10,7 +10,7 @@ import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeEventHandlerProps, UsePresentationTreeStateProps } from "@itwin/presentation-components";
-import type { IVisibilityHandler, VisibilityTreeSelectionPredicate } from "../VisibilityTreeEventHandler";
+import type { IVisibilityHandler, VisibilityTreeEventHandlerParams, VisibilityTreeSelectionPredicate } from "../VisibilityTreeEventHandler";
 import type { VisibilityTreeFilterInfo } from "./Types";
 
 /**
@@ -30,6 +30,8 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
   onFilterChange?: (filteredDataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => void;
   /** Callback that is used to determine if node can be selected. If not provided all nodes are selectable. */
   selectionPredicate?: VisibilityTreeSelectionPredicate;
+  /** Callback that can be used for passing a custom extension of VisibilityTreeEventHandler. Default is VisibilityTreeEventHandler. */
+  eventHandler?: (props: VisibilityTreeEventHandlerParams) => VisibilityTreeEventHandler;
 }
 
 /**
@@ -45,6 +47,7 @@ export function useVisibilityTreeState({
   onFilterChange,
   visibilityHandler,
   selectionPredicate,
+  eventHandler,
   ...props
 }: UseVisibilityTreeStateProps) {
   const eventHandlerFactory = useCallback(
@@ -53,13 +56,21 @@ export function useVisibilityTreeState({
         return undefined;
       }
 
-      return new VisibilityTreeEventHandler({
-        nodeLoader: params.nodeLoader,
-        visibilityHandler,
-        selectionPredicate,
-      });
+      return (
+        (eventHandler &&
+          eventHandler({
+            nodeLoader: params.nodeLoader,
+            visibilityHandler,
+            selectionPredicate,
+          })) ??
+        new VisibilityTreeEventHandler({
+          nodeLoader: params.nodeLoader,
+          visibilityHandler,
+          selectionPredicate,
+        })
+      );
     },
-    [visibilityHandler, selectionPredicate],
+    [visibilityHandler, selectionPredicate, eventHandler],
   );
 
   const treeState = usePresentationTreeState({

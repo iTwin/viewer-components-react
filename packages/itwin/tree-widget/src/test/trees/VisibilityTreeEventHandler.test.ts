@@ -13,7 +13,7 @@ import { CheckBoxState } from "@itwin/core-react";
 import { waitFor } from "@testing-library/react";
 import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations, TestUtils } from "../TestUtils";
-import { createCategoryNode, createElementNode, createModelNode, createSimpleTreeModelNode, createSubjectNode } from "./Common";
+import { createSimpleTreeModelNode } from "./Common";
 
 import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange } from "@itwin/components-react";
 import type { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
@@ -174,41 +174,6 @@ describe("VisibilityTreeEventHandler", () => {
         await flushAsyncOperations();
       });
       expect(getVisibilityStatus).to.be.calledTwice;
-    });
-  });
-
-  describe("onNodeDoubleClick", () => {
-    [{ nodeItem: createSubjectNode() }, { nodeItem: createModelNode() }, { nodeItem: createCategoryNode() }].forEach(({ nodeItem }) => {
-      it(`does not call zoomToElement when node item is ${nodeItem.id} node.`, async () => {
-        const { nodeLoader, modelSource } = setupTreeModel(["testId"], nodeItem);
-        modelSource.modifyModel = () => {};
-        const eventHandler = createHandler(nodeLoader);
-
-        const zoomSpy = sinon.spy();
-        sinon.stub(IModelApp, "viewManager").get(() => ({ selectedView: { zoomToElements: zoomSpy } }));
-
-        await using(eventHandler, async (_) => {
-          await eventHandler.onNodeDoubleClick({ nodeId: "testId" });
-        });
-
-        expect(zoomSpy).to.not.be.called;
-      });
-    });
-
-    it(`calls zoomToElement when node is element node.`, async () => {
-      const { nodeLoader, modelSource } = setupTreeModel(["testId"], createElementNode());
-      modelSource.modifyModel = () => {};
-      const eventHandler = createHandler(nodeLoader);
-
-      const zoomSpy = sinon.spy();
-      sinon.stub(IModelApp, "viewManager").get(() => ({ selectedView: { zoomToElements: zoomSpy } }));
-
-      await using(eventHandler, async (_) => {
-        await waitFor(() => expect(getVisibilityStatus).to.be.calledOnce);
-        await eventHandler.onNodeDoubleClick({ nodeId: "testId" });
-      });
-
-      expect(zoomSpy).to.be.called;
     });
   });
 });

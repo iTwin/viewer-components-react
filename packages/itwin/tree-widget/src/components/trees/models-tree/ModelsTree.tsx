@@ -13,16 +13,17 @@ import { ClassGroupingOption } from "../common/Types";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
+import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
-
 const PAGING_SIZE = 20;
 
 /**
@@ -205,6 +206,7 @@ function useTreeState({
           : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
       [],
     ),
+    eventHandler: useCallback((props: VisibilityTreeEventHandlerParams) => new ModelsTreeEventHandler(props), []),
   });
 }
 

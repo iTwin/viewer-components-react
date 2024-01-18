@@ -10,12 +10,9 @@ import { Observable } from "rxjs";
 import { from } from "rxjs/internal/observable/from";
 import { map } from "rxjs/internal/operators/map";
 import { mergeMap } from "rxjs/internal/operators/mergeMap";
-import { IModelApp } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
-import { NodeKey } from "@itwin/presentation-common";
-import { isPresentationTreeNodeItem, UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
+import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
-import { ModelsTreeNodeType, ModelsVisibilityHandler } from "./models-tree/ModelsVisibilityHandler";
 
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import type {
@@ -23,7 +20,6 @@ import type {
   CheckboxStateChange,
   TreeCheckboxStateChangeEventArgs,
   TreeModelNode,
-  TreeNodeEventArgs,
   TreeNodeItem,
   TreeSelectionChange,
   TreeSelectionModificationEventArgs,
@@ -114,24 +110,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     }
 
     return items.filter((item) => this._selectionPredicate!(item));
-  }
-
-  public override async onNodeDoubleClick({ nodeId }: TreeNodeEventArgs) {
-    const model = this.modelSource.getModel();
-    const node = model.getNode(nodeId);
-
-    if (
-      !node ||
-      !isPresentationTreeNodeItem(node.item) ||
-      ModelsVisibilityHandler.getNodeType(node.item) !== ModelsTreeNodeType.Element ||
-      !NodeKey.isInstancesNodeKey(node.item.key)
-    ) {
-      return;
-    }
-
-    const instanceIds = node.item.key.instanceKeys.map((instanceKey) => instanceKey.id);
-
-    await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
   }
 
   public override onSelectionModified({ modifications }: TreeSelectionModificationEventArgs) {
