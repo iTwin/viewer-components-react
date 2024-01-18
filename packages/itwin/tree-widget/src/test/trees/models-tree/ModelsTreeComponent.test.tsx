@@ -4,29 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { join } from "path";
 import { Children } from "react";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import {
-  buildTestIModel,
-  HierarchyCacheMode,
-  initialize as initializePresentationTesting,
-  terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
 import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import { queryModelsForHeaderActions } from "../../../components/trees/models-tree/Utils";
 import { ModelsTreeComponent, TreeWidget } from "../../../tree-widget-react";
-import { addModel, addPartition } from "../../IModelUtils";
 import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
-import type { RepositoryLinkProps } from "@itwin/core-common";
 import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
@@ -98,53 +87,30 @@ describe("<ModelsTreeComponent />", () => {
   });
 
   describe("available models", () => {
-    describe("query", () => {
-      beforeEach(async () => {
-        await initializePresentationTesting({
-          backendProps: {
-            caching: {
-              hierarchies: {
-                mode: HierarchyCacheMode.Memory,
+    it("renders button with available models", async () => {
+      const iModel = {
+        models: {
+          queryProps: async () => [
+            {
+              id: "testIdFromQueryModels",
+              modeledElement: {
+                id: "id",
               },
+              classFullName: "className",
             },
-          },
-          testOutputDir: join(__dirname, "output"),
-          backendHostProps: {
-            cacheDir: join(__dirname, "cache"),
-          },
-        });
-      });
-
-      afterEach(async () => {
-        await terminatePresentationTesting();
-      });
-
-      it("calls header buttons with no available models when modeledElement is not GeometricElement3d or InformationPartitionElement", async () => {
-        // eslint-disable-next-line deprecation/deprecation
-        const iModel = await buildTestIModel("test", async (builder) => {
-          const repoLinkId = builder.insertElement({
-            model: IModel.repositoryModelId,
-            classFullName: "BisCore:RepositoryLink",
-            url: "url",
-            userLabel: "furl",
-          } as RepositoryLinkProps);
-
-          addModel(builder, "BisCore:PhysicalModel", repoLinkId);
-        });
-
-        const availableModels = await queryModelsForHeaderActions(iModel);
-        await waitFor(() => expect(availableModels.length).to.be.equal(0));
-      });
-
-      it("calls header button with available model when modeled element is GeometricElement3d or InformationPartitionElement", async () => {
-        // eslint-disable-next-line deprecation/deprecation
-        const iModel = await buildTestIModel("test", async (builder) => {
-          const partition = addPartition(builder, "BisCore:PhysicalPartition", "partition");
-          addModel(builder, "BisCore:PhysicalModel", partition);
-        });
-        const availableModels = await queryModelsForHeaderActions(iModel);
-        await waitFor(() => expect(availableModels.length).to.be.equal(1));
-      });
+          ],
+        },
+      } as unknown as IModelConnection;
+      const spy = sinon.stub().returns(<></>);
+      sinon.stub(modelsTree, "ModelsTree").returns(<></>);
+      sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
+      sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
+      render(<ModelsTreeComponent headerButtons={[spy]} />);
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels"),
+        ),
+      );
     });
 
     it("renders button with empty available models list if error if thrown while querying available models", async () => {
