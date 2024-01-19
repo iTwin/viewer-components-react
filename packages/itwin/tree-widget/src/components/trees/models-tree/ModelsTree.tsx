@@ -206,8 +206,12 @@ function useTreeState({
           : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
       [],
     ),
-    eventHandler: useCallback((props: VisibilityTreeEventHandlerParams) => new ModelsTreeEventHandler(props), []),
+    eventHandler: eventHandlerFactory,
   });
+}
+
+function eventHandlerFactory(props: VisibilityTreeEventHandlerParams) {
+  return new ModelsTreeEventHandler(props);
 }
 
 function useVisibilityHandler(

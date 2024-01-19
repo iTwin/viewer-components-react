@@ -30,7 +30,7 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
   onFilterChange?: (filteredDataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => void;
   /** Callback that is used to determine if node can be selected. If not provided all nodes are selectable. */
   selectionPredicate?: VisibilityTreeSelectionPredicate;
-  /** Callback that can be used for passing a custom extension of VisibilityTreeEventHandler. Default is VisibilityTreeEventHandler. */
+  /** Factory for custom `VisibilityTreeEventHandler`. Defaults to `VisibilityTreeEventHandler`. */
   eventHandler?: (props: VisibilityTreeEventHandlerParams) => VisibilityTreeEventHandler;
 }
 
@@ -56,19 +56,13 @@ export function useVisibilityTreeState({
         return undefined;
       }
 
-      return (
-        (eventHandler &&
-          eventHandler({
-            nodeLoader: params.nodeLoader,
-            visibilityHandler,
-            selectionPredicate,
-          })) ??
-        new VisibilityTreeEventHandler({
-          nodeLoader: params.nodeLoader,
-          visibilityHandler,
-          selectionPredicate,
-        })
-      );
+      const eventHandlerProps: VisibilityTreeEventHandlerParams = {
+        nodeLoader: params.nodeLoader,
+        visibilityHandler,
+        selectionPredicate,
+      };
+
+      return eventHandler ? eventHandler(eventHandlerProps) : new VisibilityTreeEventHandler(eventHandlerProps);
     },
     [visibilityHandler, selectionPredicate, eventHandler],
   );
