@@ -60,7 +60,7 @@ export const CalculatedPropertyActionWithVisuals = ({
   const { data } = useGroupKeySetQuery(group, iModelConnection, true);
 
   const resolvedHiliteIds = useMemo(() => {
-    // Extract ids from resolvedHiliteIds, default to an empty array if not available
+    // Resolved ids, default to an empty array if not available
     return data?.result?.ids ?? [];
   }, [data?.result?.ids]);
 

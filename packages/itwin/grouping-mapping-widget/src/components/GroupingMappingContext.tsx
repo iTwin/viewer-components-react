@@ -19,7 +19,6 @@ import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IExtr
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import type { OverlappedElementsMetadata } from "./context/GroupHilitedElementsContext";
-import { OverlappedElementGroupPairs, OverlappedInfo } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
