@@ -8,8 +8,6 @@ import type { OverlappedElementGroupPairs } from "../context/GroupHilitedElement
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 import {
   generateOverlappedGroups,
-} from "./groupsHelpers";
-import {
   hideGroupConsideringOverlaps,
   visualizeGroupColors,
 } from "./groupsHelpers";
@@ -84,7 +82,9 @@ export const GroupsVisualization = ({
   const zoomToElementsMutation = useMutation({
     mutationFn: zoomToElements,
     onSuccess: () => {
-      isNonEmphasizedSelectable && clearEmphasizedElements();
+      if (isMounted()) {
+        isNonEmphasizedSelectable && clearEmphasizedElements();
+      }
     },
   });
 
@@ -247,7 +247,18 @@ export const GroupsVisualization = ({
       </Alert> : undefined, [isAlertClosed, isAlertExpanded, overlappedElementsMetadata.overlappedElementsInfo.size, showGroupColor]
   );
 
-  const progressConfig = useMemo(() => isVisualizationsEnabled && isResolvingGroupQueries ? { hilitedGroupsProgress: { currentHilitedGroups: groupQueriesProgressCount, totalNumberOfGroups: groups?.length ?? 0 } } : undefined, [groupQueriesProgressCount, groups, isResolvingGroupQueries, isVisualizationsEnabled]);
+  const progressConfig = useMemo(
+    () =>
+      isVisualizationsEnabled && isResolvingGroupQueries
+        ? {
+          hilitedGroupsProgress: {
+            currentHilitedGroups: groupQueriesProgressCount,
+            totalNumberOfGroups: groups?.length ?? 0,
+          },
+        }
+        : undefined,
+    [groupQueriesProgressCount, groups, isResolvingGroupQueries, isVisualizationsEnabled],
+  );
 
   return (
     <div className="gmw-groups-vis-container">

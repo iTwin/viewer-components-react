@@ -75,7 +75,7 @@ const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error: any, query: Query) => {
       switch (query.meta?.errorCode) {
-        case TErrCodes.QUERY_FETCH_FAILED:
+        case TErrCodes.QUERY_HILITE_FETCH_FAILED:
           toaster.negative(query.meta?.message as string);
           break;
         default: {

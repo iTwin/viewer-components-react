@@ -28,7 +28,7 @@ export const createQueryForHiliteIdsAndKeyset = (group: Group, iModelConnection:
   queryFn: async () => getHiliteIdsAndKeysetFromGroup(iModelConnection, group),
   enabled,
   staleTime: Infinity,
-  meta: { errorCode:TErrCodes.QUERY_FETCH_FAILED, message: `Failed to resolve ${group.groupName}.` },
+  meta: { errorCode:TErrCodes.QUERY_HILITE_FETCH_FAILED, message: `Failed to resolve ${group.groupName}.` },
 });
 
 export const useGroupKeySetQuery = (group: Group, iModelConnection: IModelConnection, enabled: boolean) => {

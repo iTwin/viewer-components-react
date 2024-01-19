@@ -137,7 +137,7 @@ export const GroupAction = (props: GroupActionProps) => {
         accessToken,
         iModelId,
         props.mappingId,
-        props.group.id ?? "",
+        props.group.id,
         { ...details, query: currentQuery }
       )
       : mappingClient.createGroup(
@@ -167,14 +167,9 @@ export const GroupAction = (props: GroupActionProps) => {
 
   const isLoading = isSaveLoading || isQueryLoading;
 
-  const isUpdating = isSaveLoading || isRendering;
+  const isUpdating = isLoading || isRendering;
 
-  const isBlockingActions = !(
-    details.groupName &&
-    (query || simpleSelectionQuery) &&
-    !isRendering &&
-    !isLoading
-  );
+  const isBlockingActions = !(details.groupName && (query || simpleSelectionQuery)) || isRendering || isLoading;
 
   const onClickSave = useCallback(() => {
     onSaveMutate();
