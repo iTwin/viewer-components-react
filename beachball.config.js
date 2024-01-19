@@ -9,17 +9,17 @@ module.exports = {
   bumpDeps: false,
   access: "public",
   tag: "latest",
-  scope: ["packages/itwin/*", "!packages/itwin/tree-widget"],
+  scope: [
+    "packages/itwin/*",
+    "!packages/itwin/tree-widget", // tree-widget is in pre-release mode and should be ignore when publishing using this config. Check `beachball.config.dev.js`
+    "!packages/itwin/breakdown-trees", // disable breakdown-trees publishing. It has peer dep on tree-widget that requires to publish new major versions when tree-widget is published.
+  ],
   ignorePatterns: [".nycrc", "eslint.config.js", ".mocharc.json", ".*ignore", ".github/**", ".vscode/**", "**/test/**", "pnpm-lock.yaml"],
   changehint: "Run 'pnpm change' to generate a change file",
   changelog: {
     customRenderers: {
       renderEntry: (entry) => {
-        // %s = subject
-        const commitMessage = execSync(`git log -1 --pretty=format:%s ${entry.commit}`, { encoding: "utf-8" });
-        // match PR links
-        const match = commitMessage.match(prRegex);
-        return `- ${entry.comment}${getPRLink(match?.[1])}`;
+        return `- ${entry.comment}${getPRLink(entry.commit)}`;
       },
     },
   },
@@ -40,8 +40,25 @@ function getPRPrefix(url) {
     return `https://${url.split("@")[1]}/pull/`;
 }
 
-/** @type {(a?: string) => string | undefined} */
-function getPRLink(pr) {
-  if (prPrefix && pr) return ` ([#${pr}](${prPrefix}${pr}))`;
+/** @type {(a: string) => string | undefined} */
+function getPRNumber(commitHash) {
+  // beachball might not find commit and uses `not available` string as commit hash. Do not try to look up PR number if there is no valid commit hash.
+  if (commitHash === "not available") {
+    return undefined;
+  }
+
+  // %s = subject
+  const commitMessage = execSync(`git log -1 --pretty=format:%s ${commitHash}`, { encoding: "utf-8" });
+  // match PR links
+  const match = commitMessage.match(prRegex);
+  return match?.[1];
+}
+
+/** @type {(a: string) => string | undefined} */
+function getPRLink(commitHash) {
+  const pr = getPRNumber(commitHash);
+  if (prPrefix && pr) {
+    return ` ([#${pr}](${prPrefix}${pr}))`;
+  }
   return "";
 }
