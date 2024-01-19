@@ -59,13 +59,17 @@ export interface GroupingMappingContextProps {
    * A custom iModelConnection to use instead of the active iModelConnection from UiFramework.
    */
   iModelConnection?: IModelConnection;
+  /**
+   * A custom QueryClient. If not provided, a default QueryClient will be used.
+   */
+  queryClient?: QueryClient;
   children?: React.ReactNode;
 }
 
 const authorizationClientGetAccessToken = async () =>
   (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
-const queryClient = new QueryClient({
+const defaultQueryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
@@ -127,6 +131,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     groupElementsInfo: new Map(),
     overlappedElementGroupPairs: [],
   });
+  const queryClient = props.queryClient ?? defaultQueryClient;
 
   useEffect(() => {
     setApiConfig(() => ({
