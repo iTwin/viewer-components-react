@@ -10,6 +10,7 @@ import type { GroupingMappingCustomUI } from "../grouping-mapping-widget";
 import * as moq from "typemoq";
 import type { GroupingMappingContextProps } from "../components/GroupingMappingContext";
 import { GroupingMappingContext } from "../components/GroupingMappingContext";
+import { QueryClient } from "@tanstack/react-query";
 
 export const mockAccessToken = async () => "Bearer eyJhbGci";
 export const mockMappingClient = moq.Mock.ofType<IMappingsClient>();
@@ -23,6 +24,13 @@ function render(ui: React.ReactElement, mockUIs: GroupingMappingCustomUI[] = [],
     getAccessToken: mockAccessToken,
     iModelId: "mock",
     customUIs: mockUIs,
+    queryClient: new QueryClient({
+      defaultOptions: {
+        queries: {
+          refetchOnWindowFocus: false,
+        },
+      },
+    }),
   };
   const Wrapper = ({ children }: WrapperProps) => (
     <GroupingMappingContext {...contextProps}>
