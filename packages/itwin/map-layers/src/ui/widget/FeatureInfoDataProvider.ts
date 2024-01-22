@@ -5,8 +5,8 @@
 
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataChangeEvent } from "@itwin/components-react";
-import {  IModelApp, MapFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
-import { MapFeatureInfoTool, MapFeatureInfoToolData  } from "@itwin/map-layers-formats";
+import { IModelApp, MapFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
+import { MapFeatureInfoTool, MapFeatureInfoToolData } from "@itwin/map-layers-formats";
 
 /**
  * Implementation of [IPropertyDataProvider] that uses an associative array.
@@ -54,6 +54,14 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
 
   };
 
+  private generateLayerCategoryName(subLayerName: string) {
+    return `_layer_${subLayerName}`;
+  }
+
+  private generateSubLayerCategoryName(subLayerName: string) {
+    return `_subLayer_${subLayerName}`;
+  }
+
   public onUnload() {
     this._detachToolAdminListener();
     if (this._detachActiveToolListener) {
@@ -71,12 +79,13 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
 
     if(mapInfo?.layerInfos) {
       for (const curLayerInfo of mapInfo.layerInfos) {
-        const layerCatIdx = this.findCategoryIndexByName(curLayerInfo.layerName);
+        const categoryName = this.generateLayerCategoryName(curLayerInfo.layerName);
+        const layerCatIdx = this.findCategoryIndexByName(categoryName);
         let nbRecords = 0;
 
         const layerCategory = (
           layerCatIdx === -1 ?
-            { name: curLayerInfo.layerName, label: curLayerInfo.layerName, expand: true, childCategories: [] }
+            { name: categoryName, label: curLayerInfo.layerName, expand: true, childCategories: [] }
             : this._data.categories[layerCatIdx]);
 
         if (curLayerInfo.subLayerInfos) {
@@ -88,7 +97,7 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
               nbRecords++;
               for (const attribute of feature.attributes) {
                 // Always use the string value for now
-                this.addProperty(MapLayerFeatureRecord.createRecordFromAttribute(attribute), subLayerInfo.subLayerName);
+                this.addProperty(MapLayerFeatureRecord.createRecordFromAttribute(attribute), this.generateSubLayerCategoryName(subLayerInfo.subLayerName));
               }
             }
           }
@@ -102,14 +111,16 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   public addSubLayerCategory(subLayerInfo: MapSubLayerFeatureInfo, layerCategory: PropertyCategory) {
+
+    const subLayerName = `_subLayer_${subLayerInfo.subLayerName}`;
     const subCatIdx = layerCategory.childCategories?.findIndex((testCategory: PropertyCategory) => {
-      return testCategory.name === subLayerInfo.subLayerName;
+      return testCategory.name === subLayerName;
     });
 
     let subLayerCategory;
     if (subCatIdx === -1) {
-      subLayerCategory = { name: subLayerInfo.subLayerName, label: subLayerInfo.subLayerName, expand: true };
-      this.addSubCategory(subLayerCategory.name);
+      subLayerCategory = { name: subLayerName, label: subLayerInfo.subLayerName, expand: true };
+      this.addSubCategory(subLayerName);
       layerCategory.childCategories?.push(subLayerCategory);
     }
   }
