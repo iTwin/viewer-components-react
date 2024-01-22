@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataChangeEvent } from "@itwin/components-react";
@@ -24,18 +24,17 @@ class SimplePropertyData implements PropertyData {
  * @internal
  */
 export class FeatureInfoDataProvider implements IPropertyDataProvider {
-  private _detachActiveToolListener: VoidFunction|undefined;
+  private _detachActiveToolListener: VoidFunction | undefined;
   private readonly _detachToolAdminListener: VoidFunction;
 
   public onDataChanged = new PropertyDataChangeEvent();
   private _data = new SimplePropertyData();
 
-  constructor( ){
-    this._detachToolAdminListener = (IModelApp.toolAdmin.activeToolChanged.addListener(this.handleActiveToolChanged));
+  constructor() {
+    this._detachToolAdminListener = IModelApp.toolAdmin.activeToolChanged.addListener(this.handleActiveToolChanged);
   }
 
   private handleActiveToolChanged = (tool: Tool, _start: StartOrResume) => {
-
     if (this._detachActiveToolListener) {
       this._detachActiveToolListener();
       this._detachActiveToolListener = undefined;
@@ -43,15 +42,14 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
 
     if (tool.toolId === MapFeatureInfoTool.toolId) {
       const mapInfoTool = tool as MapFeatureInfoTool;
-      this._detachActiveToolListener =  mapInfoTool.onInfoReady.addListener(this.handleOnInfoReadyChanged);
+      this._detachActiveToolListener = mapInfoTool.onInfoReady.addListener(this.handleOnInfoReadyChanged);
       this._data = new SimplePropertyData();
       this.onDataChanged.raiseEvent();
     }
   };
 
   private handleOnInfoReadyChanged = (data: MapFeatureInfoToolData) => {
-    void this.setInfo(data.mapInfo).then();    // No need to wait for data parsing.
-
+    void this.setInfo(data.mapInfo).then(); // No need to wait for data parsing.
   };
 
   private generateLayerCategoryName(subLayerName: string) {
@@ -77,16 +75,14 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   private async setInfo(mapInfo?: MapFeatureInfo) {
     this._data = new SimplePropertyData();
 
-    if(mapInfo?.layerInfos) {
+    if (mapInfo?.layerInfos) {
       for (const curLayerInfo of mapInfo.layerInfos) {
         const categoryName = this.generateLayerCategoryName(curLayerInfo.layerName);
         const layerCatIdx = this.findCategoryIndexByName(categoryName);
         let nbRecords = 0;
 
-        const layerCategory = (
-          layerCatIdx === -1 ?
-            { name: categoryName, label: curLayerInfo.layerName, expand: true, childCategories: [] }
-            : this._data.categories[layerCatIdx]);
+        const layerCategory =
+          layerCatIdx === -1 ? { name: categoryName, label: curLayerInfo.layerName, expand: true, childCategories: [] } : this._data.categories[layerCatIdx];
 
         if (curLayerInfo.subLayerInfos) {
           for (const subLayerInfo of curLayerInfo.subLayerInfos) {
@@ -101,8 +97,7 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
               }
             }
           }
-          if (layerCatIdx === -1 && nbRecords > 0)
-            this.addCategory(layerCategory);
+          if (layerCatIdx === -1 && nbRecords > 0) this.addCategory(layerCategory);
         }
       }
     }
@@ -111,8 +106,7 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   public addSubLayerCategory(subLayerInfo: MapSubLayerFeatureInfo, layerCategory: PropertyCategory) {
-
-    const subLayerName = `_subLayer_${subLayerInfo.subLayerName}`;
+    const subLayerName = this.generateSubLayerCategoryName(subLayerInfo.subLayerName);
     const subCatIdx = layerCategory.childCategories?.findIndex((testCategory: PropertyCategory) => {
       return testCategory.name === subLayerName;
     });
@@ -129,7 +123,6 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   public addCategory(category: PropertyCategory): number {
-
     const categoryIdx = this._data.categories.push(category) - 1;
     this._data.records[this._data.categories[categoryIdx].name] = [];
     return categoryIdx;
