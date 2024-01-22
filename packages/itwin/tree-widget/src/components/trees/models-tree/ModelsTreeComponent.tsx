@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
@@ -14,12 +14,11 @@ import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { ModelsTree } from "./ModelsTree";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
+import { queryModelsForHeaderActions } from "./Utils";
 
-import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { ModelsTreeProps } from "./ModelsTree";
-
 /**
  * Information about a single Model.
  * @public
@@ -124,24 +123,15 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 
   const { searchOptions, filterString, onFilterApplied } = useTreeFilteringState();
 
-  const queryModels = useCallback(async (): Promise<ModelInfo[]> => {
-    const queryParams: ModelQueryParams = {
-      from: "BisCore.GeometricModel3d",
-      wantPrivate: false,
-    };
-    const modelProps = await iModel.models.queryProps(queryParams);
-    return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
-  }, [iModel]);
-
   useEffect(() => {
-    queryModels()
+    queryModelsForHeaderActions(iModel)
       .then((modelInfos: ModelInfo[]) => {
         setAvailableModels(modelInfos);
       })
       .catch((_e) => {
         setAvailableModels([]);
       });
-  }, [queryModels]);
+  }, [iModel]);
 
   const filterInfo = useMemo(
     () => ({ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }),

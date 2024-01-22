@@ -3,13 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
+
+import type { ModelInfo } from "./ModelsTreeComponent";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ChildNodeSpecification, Node, Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
-
 /** @internal */
 export class CachingElementIdsContainer {
   private _ids = new Array<Id64String>();
@@ -592,4 +595,23 @@ function createModelSubModelsSpecification({ elementClassSpecification, showEmpt
 /** @internal */
 export function addModelsTreeNodeItemIcons(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) {
   item.icon = node.key && NodeKey.isClassGroupingNodeKey(node.key) ? node.extendedData?.groupIcon : node.extendedData?.icon;
+}
+
+/** @internal */
+export async function queryModelsForHeaderActions(iModel: IModelConnection) {
+  const queryParams: ModelQueryParams = {
+    from: "BisCore.GeometricModel3d",
+    where: `
+        EXISTS (
+          SELECT 1
+          FROM BisCore.Element e
+          WHERE e.ECClassId IS (BisCore.GeometricElement3d, BisCore.InformationPartitionElement)
+            AND e.ECInstanceId = GeometricModel3d.ModeledElement.Id
+        )
+      `,
+    wantPrivate: false,
+  };
+
+  const modelProps = await iModel.models.queryProps(queryParams);
+  return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
 }
