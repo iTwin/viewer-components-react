@@ -1,6 +1,6 @@
 # Test Viewer App
 
-This application provides test environment for developers working on widgets for ITwin applications .
+This application provides test environment for developers working on widgets for ITwin applications.
 
 ## Development
 
