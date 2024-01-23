@@ -9,7 +9,7 @@ import { IModelApp, MapFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInf
 import { MapFeatureInfoTool, MapFeatureInfoToolData } from "@itwin/map-layers-formats";
 
 /**
- * Implementation of [IPropertyDataProvider] that uses an associative array.
+ * Implementation of [IPropertyDataProvider] that uses an associative  array.
  * @internal
  */
 
