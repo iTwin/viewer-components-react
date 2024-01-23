@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect } from "react";
 import { usePresentationTreeState } from "@itwin/presentation-components";
@@ -10,7 +10,7 @@ import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeEventHandlerProps, UsePresentationTreeStateProps } from "@itwin/presentation-components";
-import type { IVisibilityHandler, VisibilityTreeSelectionPredicate } from "../VisibilityTreeEventHandler";
+import type { IVisibilityHandler, VisibilityTreeEventHandlerParams, VisibilityTreeSelectionPredicate } from "../VisibilityTreeEventHandler";
 import type { VisibilityTreeFilterInfo } from "./Types";
 
 /**
@@ -30,6 +30,8 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
   onFilterChange?: (filteredDataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => void;
   /** Callback that is used to determine if node can be selected. If not provided all nodes are selectable. */
   selectionPredicate?: VisibilityTreeSelectionPredicate;
+  /** Factory for custom `VisibilityTreeEventHandler`. Defaults to `VisibilityTreeEventHandler`. */
+  eventHandler?: (props: VisibilityTreeEventHandlerParams) => VisibilityTreeEventHandler;
 }
 
 /**
@@ -38,36 +40,49 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
  * @returns `undefined` on first render cycle. On all other render cycles state is initialized and valid object is returned.
  * @beta
  */
-export function useVisibilityTreeState({ imodel, ruleset, filterInfo, onFilterChange, visibilityHandler, selectionPredicate, ...props }: UseVisibilityTreeStateProps) {
-  const eventHandlerFactory = useCallback((params: PresentationTreeEventHandlerProps) => {
-    if (!visibilityHandler) {
-      return undefined;
-    }
+export function useVisibilityTreeState({
+  imodel,
+  ruleset,
+  filterInfo,
+  onFilterChange,
+  visibilityHandler,
+  selectionPredicate,
+  eventHandler,
+  ...props
+}: UseVisibilityTreeStateProps) {
+  const eventHandlerFactory = useCallback(
+    (params: PresentationTreeEventHandlerProps) => {
+      if (!visibilityHandler) {
+        return undefined;
+      }
 
-    return new VisibilityTreeEventHandler({
-      nodeLoader: params.nodeLoader,
-      visibilityHandler,
-      selectionPredicate,
-    });
-  }, [visibilityHandler, selectionPredicate]);
+      const eventHandlerProps: VisibilityTreeEventHandlerParams = {
+        nodeLoader: params.nodeLoader,
+        visibilityHandler,
+        selectionPredicate,
+      };
+
+      return eventHandler ? eventHandler(eventHandlerProps) : new VisibilityTreeEventHandler(eventHandlerProps);
+    },
+    [visibilityHandler, selectionPredicate, eventHandler],
+  );
 
   const treeState = usePresentationTreeState({
     ...props,
     imodel,
     ruleset,
     eventHandlerFactory,
-    filteringParams: filterInfo?.filter ? {
-      filter: filterInfo.filter,
-      activeMatchIndex: filterInfo?.activeMatchIndex,
-    } : undefined,
+    filteringParams: filterInfo?.filter
+      ? {
+          filter: filterInfo.filter,
+          activeMatchIndex: filterInfo?.activeMatchIndex,
+        }
+      : undefined,
   });
 
-  useEffect(
-    () => {
-      onFilterChange && onFilterChange(treeState?.filteringResult?.filteredProvider, treeState?.filteringResult?.matchesCount);
-    },
-    [treeState?.filteringResult?.matchesCount, treeState?.filteringResult?.filteredProvider, onFilterChange],
-  );
+  useEffect(() => {
+    onFilterChange && onFilterChange(treeState?.filteringResult?.filteredProvider, treeState?.filteringResult?.matchesCount);
+  }, [treeState?.filteringResult?.matchesCount, treeState?.filteringResult?.filteredProvider, onFilterChange]);
 
   return treeState;
 }

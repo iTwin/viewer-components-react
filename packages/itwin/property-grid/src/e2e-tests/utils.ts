@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import assert from "assert";
 import { expect } from "@playwright/test";
@@ -16,10 +16,7 @@ export const locatePanel = (page: Page, side: PanelSide) => page.locator(`.nz-wi
 
 export const expandStagePanel = async (page: Page, side: PanelSide, px: number) => {
   const widgetPanel = locatePanel(page, side);
-  const handlePos = await widgetPanel
-    .locator(".nz-grip-container")
-    .locator(".nz-handle")
-    .boundingBox();
+  const handlePos = await widgetPanel.locator(".nz-grip-container").locator(".nz-handle").boundingBox();
   assert(handlePos);
 
   await page.mouse.move(handlePos.x, handlePos.y);

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { Id64 } from "@itwin/core-bentley";
@@ -94,14 +94,22 @@ export const createElementNode = (modelId?: Id64String, categoryId?: Id64String)
 export const createKey = (type: "subject" | "model" | "category" | "element", ids: Id64String | Id64String[]): ECInstancesNodeKey => {
   let className: string;
   switch (type) {
-    case "subject": className = "MyDomain:Subject"; break;
-    case "model": className = "MyDomain:PhysicalModel"; break;
-    case "category": className = "MyDomain:SpatialCategory"; break;
-    default: className = "MyDomain:SomeElementType";
+    case "subject":
+      className = "MyDomain:Subject";
+      break;
+    case "model":
+      className = "MyDomain:PhysicalModel";
+      break;
+    case "category":
+      className = "MyDomain:SpatialCategory";
+      break;
+    default:
+      className = "MyDomain:SomeElementType";
   }
   const instanceKeys = new Array<InstanceKey>();
-  for (const id of Id64.iterable(ids))
+  for (const id of Id64.iterable(ids)) {
     instanceKeys.push({ className, id });
+  }
 
   return {
     type: StandardNodeTypes.ECInstancesNode,

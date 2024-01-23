@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 import { BrowserAuthorizationClient, isBrowserAuthorizationClient } from "@itwin/browser-authorization";
@@ -10,7 +10,7 @@ import { ViewerAuthorizationClient as WebViewerAuthorizationClient } from "@itwi
 
 export enum AuthorizationState {
   Pending,
-  Authorized
+  Authorized,
 }
 
 class AccessTokenAuthClient implements WebViewerAuthorizationClient {
@@ -31,16 +31,18 @@ class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
     this._client = userAccessToken
       ? new AccessTokenAuthClient(userAccessToken)
       : new BrowserAuthorizationClient({
-        scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
-        clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
-        redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
-        postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
-        responseType: "code",
-        authority: process.env.IMJS_AUTH_AUTHORITY,
-      });
+          scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
+          clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
+          redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
+          postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
+          responseType: "code",
+          authority: process.env.IMJS_AUTH_AUTHORITY,
+        });
   }
 
-  public get isTokenClient() {return this._client instanceof AccessTokenAuthClient;}
+  public get isTokenClient() {
+    return this._client instanceof AccessTokenAuthClient;
+  }
 
   public async getAccessToken(): Promise<string> {
     return this._client.getAccessToken();
@@ -88,8 +90,8 @@ const createAuthClient = (): AuthorizationContext => {
   return {
     client,
     state: client.isTokenClient ? AuthorizationState.Authorized : AuthorizationState.Pending,
-  }
-}
+  };
+};
 
 export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
   const [contextValue, setContextValue] = useState<AuthorizationContext>(() => createAuthClient());
@@ -103,18 +105,15 @@ export function AuthorizationProvider(props: PropsWithChildren<unknown>) {
     const signIn = async () => {
       try {
         await authClient.signInSilent();
-      }
-      catch {
+      } catch {
         await authClient.signInRedirect();
       }
-    }
+    };
 
     void signIn();
   }, [authClient]);
 
-  return <authorizationContext.Provider value={contextValue}>
-    {props.children}
-  </authorizationContext.Provider>
+  return <authorizationContext.Provider value={contextValue}>{props.children}</authorizationContext.Provider>;
 }
 
 export function SignInRedirect() {
@@ -126,5 +125,5 @@ export function SignInRedirect() {
     })();
   }, [client]);
 
-  return <></>
+  return <></>;
 }

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
@@ -98,10 +98,12 @@ export function CategoryTree(props: CategoryTreeProps) {
     },
   });
   const noFilteredDataRenderer = useCallback(() => {
-    return <VisibilityTreeNoFilteredData
-      title={TreeWidget.translate("categoriesTree.noCategoryFound")}
-      message={TreeWidget.translate("categoriesTree.noMatchingCategoryNames")}
-    />;
+    return (
+      <VisibilityTreeNoFilteredData
+        title={TreeWidget.translate("categoriesTree.noCategoryFound")}
+        message={TreeWidget.translate("categoriesTree.noMatchingCategoryNames")}
+      />
+    );
   }, []);
 
   if (!state) {

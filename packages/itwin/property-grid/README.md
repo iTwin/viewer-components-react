@@ -131,7 +131,7 @@ When the user right clicks on a specific property, a context menu is displayed i
 
 ### Favorite properties
 
-The package delivers two context menu item components for adding  properties to and removing them from favorite properties list: `AddFavoritePropertyContextMenuItem` and `RemoveFavoritePropertyContextMenuItem`. When selected element contains at least one favorite property, a new "Favorite" category is rendered at the top:
+The package delivers two context menu item components for adding properties to and removing them from favorite properties list: `AddFavoritePropertyContextMenuItem` and `RemoveFavoritePropertyContextMenuItem`. When selected element contains at least one favorite property, a new "Favorite" category is rendered at the top:
 
 ![Favorite properties](./media/favorite-properties.png)
 
@@ -156,7 +156,7 @@ function ExampleContextMenuItem(props: ContextMenuItemProps) {
     <PropertyGridContextMenuItem
       id="example"
       onSelect={async () => {
-        console.log(`Selected property: ${props.record.property.displayLabel}`)
+        console.log(`Selected property: ${props.record.property.displayLabel}`);
       }}
     >
       Click me!
@@ -170,11 +170,9 @@ Provide it to the widget:
 ```ts
 new PropertyGridUiItemsProvider({
   propertyGridProps: {
-    contextMenuItems: [
-      (props) => <ExampleContextMenuItem {...props} />,
-    ],
+    contextMenuItems: [(props) => <ExampleContextMenuItem {...props} />],
   },
-})
+});
 ```
 
 Result:
@@ -224,11 +222,9 @@ Provide it to the widget:
 ```ts
 new PropertyGridUiItemsProvider({
   propertyGridProps: {
-    settingsMenuItems: [
-      (props) => <ExampleSettingsMenuItem />,
-    ],
+    settingsMenuItems: [(props) => <ExampleSettingsMenuItem />],
   },
-})
+});
 ```
 
 Result:
@@ -241,9 +237,9 @@ Property grid allows its users to filter out properties of an element based on t
 
 When an item is selected, click the magnifying glass button and notice the search bar expand.
 
-| Search bar closed                                                 | Search bar opened                                             |
-| ----------------------------------------------------------------- | ------------------------------------------------------------- |
-| ![Search bar closed](./media/widget.png)                          | ![Search bar opened](./media/search-bar-expanded.png)         |
+| Search bar closed                        | Search bar opened                                     |
+| ---------------------------------------- | ----------------------------------------------------- |
+| ![Search bar closed](./media/widget.png) | ![Search bar opened](./media/search-bar-expanded.png) |
 
 One can type into the search bar and notice how properties are automatically filtered based on the search bar input:
 

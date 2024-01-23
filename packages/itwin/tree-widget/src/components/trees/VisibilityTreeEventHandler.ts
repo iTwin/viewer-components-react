@@ -10,12 +10,9 @@ import { Observable } from "rxjs";
 import { from } from "rxjs/internal/observable/from";
 import { map } from "rxjs/internal/operators/map";
 import { mergeMap } from "rxjs/internal/operators/mergeMap";
-import { IModelApp } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
-import { NodeKey } from "@itwin/presentation-common";
-import { isPresentationTreeNodeItem, UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
+import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
-import { ModelsTreeNodeType, ModelsVisibilityHandler } from "./models-tree/ModelsVisibilityHandler";
 
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import type {
@@ -23,7 +20,6 @@ import type {
   CheckboxStateChange,
   TreeCheckboxStateChangeEventArgs,
   TreeModelNode,
-  TreeNodeEventArgs,
   TreeNodeItem,
   TreeSelectionChange,
   TreeSelectionModificationEventArgs,
@@ -88,7 +84,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     this._isChangingVisibility = false;
     this._listeners.push(
       this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => {
-        if (this._isChangingVisibility) return;
+        if (this._isChangingVisibility) {
+          return;
+        }
         void this.updateCheckboxes(nodeIds, visibilityStatus);
       }),
     );
@@ -107,27 +105,11 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
 
   private filterSelectionItems(items: TreeNodeItem[]) {
     // istanbul ignore if
-    if (!this._selectionPredicate) return items;
-
-    return items.filter((item) => this._selectionPredicate!(item));
-  }
-
-  public override async onNodeDoubleClick({ nodeId }: TreeNodeEventArgs) {
-    const model = this.modelSource.getModel();
-    const node = model.getNode(nodeId);
-
-    if (
-      !node ||
-      !isPresentationTreeNodeItem(node.item) ||
-      ModelsVisibilityHandler.getNodeType(node.item) !== ModelsTreeNodeType.Element ||
-      !NodeKey.isInstancesNodeKey(node.item.key)
-    ) {
-      return;
+    if (!this._selectionPredicate) {
+      return items;
     }
 
-    const instanceIds = node.item.key.instanceKeys.map((instanceKey) => instanceKey.id);
-
-    await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
+    return items.filter((item) => this._selectionPredicate!(item));
   }
 
   public override onSelectionModified({ modifications }: TreeSelectionModificationEventArgs) {
@@ -197,7 +179,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       for (const [nodeId, checkboxInfo] of changes) {
         const node = model.getNode(nodeId);
         // istanbul ignore if
-        if (!node) continue;
+        if (!node) {
+          continue;
+        }
 
         node.checkbox.isDisabled = checkboxInfo.isDisabled;
         node.checkbox.isVisible = checkboxInfo.isVisible;
@@ -209,13 +193,17 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
 
   private async collectAffectedNodesCheckboxInfos(affectedNodes: string[], visibilityStatus?: Map<string, VisibilityStatus>) {
     const nodeStates = new Map<string, CheckBoxInfo>();
-    if (affectedNodes.length === 0) return nodeStates;
+    if (affectedNodes.length === 0) {
+      return nodeStates;
+    }
 
     await Promise.all(
       affectedNodes.map(async (nodeId) => {
         const node = this.modelSource.getModel().getNode(nodeId);
         // istanbul ignore else
-        if (node) nodeStates.set(nodeId, await this.getNodeCheckBoxInfo(node, visibilityStatus));
+        if (node) {
+          nodeStates.set(nodeId, await this.getNodeCheckBoxInfo(node, visibilityStatus));
+        }
       }),
     );
     return nodeStates;
@@ -232,7 +220,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   private async getNodeCheckBoxInfo(node: TreeModelNode, visibilityStatus?: Map<string, VisibilityStatus>): Promise<CheckBoxInfo> {
     const result = visibilityStatus?.get(node.id) ?? this._visibilityHandler.getVisibilityStatus(node.item);
 
-    if (isPromiseLike(result)) return this.createCheckboxInfo(await result);
+    if (isPromiseLike(result)) {
+      return this.createCheckboxInfo(await result);
+    }
     return this.createCheckboxInfo(result);
   }
 

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
@@ -47,24 +47,24 @@ describe("CategoryVisibilityUtils", () => {
 
   const categoryId = "CategoryId";
   const subCategoryId = "SubCategoryId";
-  const categoriesInfo = new Map(
-    [[
+  const categoriesInfo = new Map([
+    [
       categoryId,
       {
         id: categoryId,
-        subCategories: new Map(
-          [[
+        subCategories: new Map([
+          [
             subCategoryId,
             {
               id: subCategoryId,
               categoryId,
               appearance: new SubCategoryAppearance(),
             },
-          ]]
-        ),
+          ],
+        ]),
       },
-    ]]
-  );
+    ],
+  ]);
 
   beforeEach(() => {
     imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReaderMock.object);
@@ -105,7 +105,11 @@ describe("CategoryVisibilityUtils", () => {
 
     it("calls enableCategory with false when forAllViewports is undefined", async () => {
       const selectedViewMock1 = moq.Mock.ofType<ScreenViewport>();
-      viewManagerMock.setup((x) => x[Symbol.iterator]()).returns(function*() { yield selectedViewMock1.object; });
+      viewManagerMock
+        .setup((x) => x[Symbol.iterator]())
+        .returns(function* () {
+          yield selectedViewMock1.object;
+        });
       await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object);
       selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.once());
       selectedViewMock1.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.never());
@@ -248,15 +252,15 @@ describe("CategoryVisibilityUtils", () => {
 
   describe("loadCategoriesFromViewport", () => {
     it("loadCategoriesFromViewport sets subCategories as undefined when subCategories size is 0", async () => {
-      const categoryInfoWithoutSubcategories: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map(
-        [[
+      const categoryInfoWithoutSubcategories: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map([
+        [
           categoryId,
           {
             id: categoryId,
             subCategories: new Map(),
           },
-        ]]
-      );
+        ],
+      ]);
       queryReaderMock.reset();
       categoriesMock.reset();
       queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: "CategoryWithoutSubcategories" }]);

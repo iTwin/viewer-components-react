@@ -1,12 +1,21 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { CategoryProps, GeometricElement3dProps, InformationPartitionElementProps, ModelProps, PhysicalElementProps , RelatedElementProps, SubCategoryProps, SubjectProps } from "@itwin/core-common";
+import type {
+  CategoryProps,
+  GeometricElement3dProps,
+  InformationPartitionElementProps,
+  ModelProps,
+  PhysicalElementProps,
+  RelatedElementProps,
+  SubCategoryProps,
+  SubjectProps,
+} from "@itwin/core-common";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 export function addSubject<TSubjectProps extends SubjectProps>(

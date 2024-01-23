@@ -2,6 +2,21 @@
   "name": "@itwin/imodel-react-hooks",
   "entries": [
     {
+      "date": "Thu, 18 Jan 2024 15:05:39 GMT",
+      "version": "0.2.0",
+      "tag": "@itwin/imodel-react-hooks_v0.2.0",
+      "comments": {
+        "none": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/imodel-react-hooks",
+            "commit": "b155f38ae63caacf60740c47770f94b5a3e04fba",
+            "comment": "Revive tests"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@itwin/imodel-react-hooks_v0.2.0",
       "date": "Fri, 29 Sep 2023 20:08:20 GMT",

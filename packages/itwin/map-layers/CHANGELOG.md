@@ -1,6 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Mon, 18 Dec 2023 18:31:01 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2024 15:05:39 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 5.2.6
+
+Thu, 18 Jan 2024 15:05:39 GMT
+
+### Patches
+
+- Fix issue where two instances of 'Aerial Imagery with labels' are visible in map layers widget ([#731](https://github.com/iTwin/viewer-components-react/pull/731))
 
 ## 5.2.5
 Mon, 18 Dec 2023 18:31:01 GMT
@@ -822,4 +832,3 @@ _Version update only_
 Tue, 28 Jul 2020 16:26:24 GMT
 
 _Initial release_
-

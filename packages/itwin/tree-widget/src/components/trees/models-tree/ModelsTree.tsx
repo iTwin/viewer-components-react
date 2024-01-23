@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
@@ -13,16 +13,17 @@ import { ClassGroupingOption } from "../common/Types";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
+import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
-
 const PAGING_SIZE = 20;
 
 /**
@@ -92,10 +93,9 @@ export function ModelsTree(props: ModelsTreeProps) {
 
   // istanbul ignore next
   const noFilteredDataRenderer = useCallback(() => {
-    return <VisibilityTreeNoFilteredData
-      title={TreeWidget.translate("modelTree.noModelFound")}
-      message={TreeWidget.translate("modelTree.noMatchingModelNames")}
-    />;
+    return (
+      <VisibilityTreeNoFilteredData title={TreeWidget.translate("modelTree.noModelFound")} message={TreeWidget.translate("modelTree.noMatchingModelNames")} />
+    );
   }, []);
 
   if (!state) {
@@ -121,15 +121,23 @@ export function ModelsTree(props: ModelsTreeProps) {
 
 function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {
   const rulesets = {
-    general: useMemo(() => createRuleset({
-      enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
-      elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-      showEmptyModels: props.hierarchyConfig?.showEmptyModels,
-    }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels]),
-    search: useMemo(() => createSearchRuleset({
-      elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-      showEmptyModels: props.hierarchyConfig?.showEmptyModels,
-    }), [props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels]),
+    general: useMemo(
+      () =>
+        createRuleset({
+          enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
+          elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
+          showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+        }),
+      [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels],
+    ),
+    search: useMemo(
+      () =>
+        createSearchRuleset({
+          elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
+          showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+        }),
+      [props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels],
+    ),
   };
 
   const treeState = useTreeState({
@@ -151,35 +159,59 @@ interface UseTreeProps extends ModelsTreeProps {
   ruleset: Ruleset;
 }
 
-function useTreeState({ modelsVisibilityHandler, activeView, selectionPredicate, hierarchyConfig, iModel, ruleset, enableHierarchyAutoUpdate, filterInfo, onFilterApplied }: UseTreeProps) {
+function useTreeState({
+  modelsVisibilityHandler,
+  activeView,
+  selectionPredicate,
+  hierarchyConfig,
+  iModel,
+  ruleset,
+  enableHierarchyAutoUpdate,
+  filterInfo,
+  onFilterApplied,
+}: UseTreeProps) {
   const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
   useEffect(() => {
     selectionPredicateRef.current = selectionPredicate;
   }, [selectionPredicate]);
 
-  const onFilterChange = useCallback((dataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => {
-    if (onFilterApplied && dataProvider && matchesCount !== undefined) {
-      onFilterApplied(dataProvider, matchesCount);
-    }
+  const onFilterChange = useCallback(
+    (dataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => {
+      if (onFilterApplied && dataProvider && matchesCount !== undefined) {
+        onFilterApplied(dataProvider, matchesCount);
+      }
 
-    if (visibilityHandler) {
-      visibilityHandler.setFilteredDataProvider(dataProvider);
-    }
-  }, [onFilterApplied, visibilityHandler]);
+      if (visibilityHandler) {
+        visibilityHandler.setFilteredDataProvider(dataProvider);
+      }
+    },
+    [onFilterApplied, visibilityHandler],
+  );
 
   return useVisibilityTreeState({
     imodel: iModel,
     ruleset,
     pagingSize: PAGING_SIZE,
-    appendChildrenCountForGroupingNodes: (hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
+    appendChildrenCountForGroupingNodes: hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts,
     enableHierarchyAutoUpdate,
     customizeTreeNodeItem,
     visibilityHandler,
     filterInfo,
     onFilterChange,
-    selectionPredicate: useCallback((node: TreeNodeItem) => !selectionPredicateRef.current || !isPresentationTreeNodeItem(node) ? true : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)), []),
+    selectionPredicate: useCallback(
+      (node: TreeNodeItem) =>
+        !selectionPredicateRef.current || !isPresentationTreeNodeItem(node)
+          ? true
+          : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
+      [],
+    ),
+    eventHandler: eventHandlerFactory,
   });
+}
+
+function eventHandlerFactory(props: VisibilityTreeEventHandlerParams) {
+  return new ModelsTreeEventHandler(props);
 }
 
 function useVisibilityHandler(
@@ -214,8 +246,4 @@ function useVisibilityHandler(
   return visibilityHandler && typeof visibilityHandler !== "function" ? visibilityHandler : state;
 }
 
-const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
-  addCustomTreeNodeItemLabelRenderer,
-  addTreeNodeItemCheckbox,
-  addModelsTreeNodeItemIcons,
-]);
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, addModelsTreeNodeItemIcons]);
