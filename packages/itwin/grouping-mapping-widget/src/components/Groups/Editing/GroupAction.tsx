@@ -150,6 +150,7 @@ export const GroupAction = (props: GroupActionProps) => {
 
   const { mutate: onSaveMutate, isLoading: isSaveLoading } = useMutation(saveGroup, {
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["groups"] });
       clearPresentationSelection();
       setDetails({
         groupName: props.group?.groupName ?? "",
@@ -158,7 +159,7 @@ export const GroupAction = (props: GroupActionProps) => {
       setCurrentStep(GroupActionStep.QueryBuilder);
       setShowValidationMessage(false);
       props.onSaveSuccess();
-      await queryClient.invalidateQueries({ queryKey: ["groups"] });
+
     },
   });
 

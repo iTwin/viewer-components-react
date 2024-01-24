@@ -56,6 +56,7 @@ export const GroupsVisualization = ({
   const {
     hiddenGroupsIds,
     showGroupColor,
+    setShowGroupColor,
     isOverlappedColored,
     setHiddenGroupsIds,
     setNumberOfVisualizedGroups,
@@ -66,7 +67,7 @@ export const GroupsVisualization = ({
   } = useGroupHilitedElementsContext();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const { data: groups, isFetched: isGroupsFetched } = useFetchGroups(iModelId, mapping.id, getAccessToken, mappingClient);
+  const { data: groups, isFetched: isGroupsFetched, isFetching: isGroupsFetching } = useFetchGroups(iModelId, mapping.id, getAccessToken, mappingClient);
   const isMounted = useIsMounted();
   const [enableGroupQueries, setEnableGroupQueries] = useState<boolean>(false);
   const { groupQueries } = useKeySetHiliteQueries(groups ?? [], enableGroupQueries, iModelConnection);
@@ -120,28 +121,27 @@ export const GroupsVisualization = ({
   );
 
   useEffect(() => {
-    const results = generateOverlappedGroups(hiliteIds);
-    const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
-    setOverlappedElementsMetadata({ overlappedElementsInfo, groupElementsInfo: numberOfElementsInGroups, overlappedElementGroupPairs: groupsWithGroupedOverlaps });
-  }, [hiliteIds, setOverlappedElementsMetadata]);
-
-  useEffect(() => {
     if (isOverlappedColored === false) {
-      if (groups && groups.length > 0 && showGroupColor) {
-        visualizationMutation.mutate(overlappedElementsMetadata.overlappedElementGroupPairs);
+      if (hiliteIds.length > 0 && showGroupColor && !isGroupsFetching) {
+        const results = generateOverlappedGroups(hiliteIds);
+        const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
+        setOverlappedElementsMetadata({ overlappedElementsInfo, groupElementsInfo: numberOfElementsInGroups, overlappedElementGroupPairs: groupsWithGroupedOverlaps });
+        visualizationMutation.mutate(results.groupsWithGroupedOverlaps);
       } else {
         clearEmphasizedOverriddenElements();
       }
     }
     // We don't want to trigger full visualization when toggling individual groups.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groups, showGroupColor, isOverlappedColored]);
+  }, [showGroupColor, isOverlappedColored, hiliteIds]);
 
   useEffect(() => {
     if (isVisualizationsEnabled) {
       setEnableGroupQueries(true);
+    } else {
+      setShowGroupColor(false);
     }
-  }, [isVisualizationsEnabled, setIsVisualizationsEnabled]);
+  }, [isVisualizationsEnabled, setIsVisualizationsEnabled, setShowGroupColor]);
 
   const hideAllGroups = useCallback(
     () => {
@@ -217,7 +217,7 @@ export const GroupsVisualization = ({
     [onClickAddGroup]
   );
 
-  const groupActionButtonRenderers: ActionButtonRenderer[] = useMemo(() => [
+  const groupActionButtonRenderers: ActionButtonRenderer[] = useMemo(() => isVisualizationsEnabled ? [
     (props: ActionButtonRendererProps) =>
       showGroupColor ? <GroupColorLegend {...props} groups={groups ?? []} /> : [],
     (props: ActionButtonRendererProps) => (
@@ -228,7 +228,7 @@ export const GroupsVisualization = ({
         hideGroup={hideSingleGroupWrapper}
       />
     ),
-  ].flat(), [groups, hideSingleGroupWrapper, isGroupsFetched, isGroupsQueriesReady, isVisualizationsEnabled, showGroup, showGroupColor]);
+  ].flat() : [], [groups, hideSingleGroupWrapper, isGroupsFetched, isGroupsQueriesReady, isVisualizationsEnabled, showGroup, showGroupColor]);
 
   const overlappedAlert = useMemo(() =>
     overlappedElementsMetadata.overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor ?
