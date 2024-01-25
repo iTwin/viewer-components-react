@@ -43,7 +43,7 @@ export const useKeySetHiliteQueries = (groups: Group[], enabled: boolean, iModel
 
   const useQueriesHook = useQueries<TQueries>({ queries });
 
-  const groupQueries = useMemoizedCollectionPick(useQueriesHook, ["data", "isLoading", "isFetched", "refetch"]);
+  const groupQueries = useMemoizedCollectionPick(useQueriesHook, ["data", "isFetching", "isFetched", "refetch"]);
 
   return { groupQueries };
 };
