@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import type { ToggleSwitchProps } from "@itwin/itwinui-react";
 import { toaster, ToggleSwitch } from "@itwin/itwinui-react";
 import type { Group } from "@itwin/insights-client";
-import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
+import { clearEmphasizedOverriddenElements, clearHiddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import { useGroupKeySetQuery } from "../Groups/hooks/useKeySetHiliteQueries";
@@ -35,6 +35,7 @@ export const GroupColorToggle = ({
       try {
         setIsLoading(true);
         clearEmphasizedOverriddenElements();
+        clearHiddenElements();
         if (showGroupColor && hiliteIdsResult) {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",

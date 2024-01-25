@@ -102,7 +102,7 @@ export const GroupsVisualization = ({
     groupQueries.every((query) => query.isFetched && query.data) && groupQueries.length > 0, [groupQueries]
   );
   const groupQueriesProgressCount = useMemo(() => groupQueries.filter((query) => query.isFetched).length, [groupQueries]);
-  const isResolvingGroupQueries = useMemo(() => groupQueries.some((query) => query.isLoading), [groupQueries]);
+  const isResolvingGroupQueries = useMemo(() => groupQueries.some((query) => query.isFetching), [groupQueries]);
 
   const hiliteIds = useMemo(
     () =>
@@ -140,6 +140,8 @@ export const GroupsVisualization = ({
       setEnableGroupQueries(true);
     } else {
       setShowGroupColor(false);
+      clearHiddenElements();
+      setHiddenGroupsIds(new Set());
     }
   }, [isVisualizationsEnabled, setIsVisualizationsEnabled, setShowGroupColor]);
 
