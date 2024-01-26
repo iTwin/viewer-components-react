@@ -280,7 +280,7 @@ export const GroupPropertyAction = ({
     }
   }, [searchInput, setSearched, clearSearch]);
 
-  const localizePresentation = useCallback((input: string): string => {
+  const getLocalizedStringPresentation = useCallback((input: string): string => {
     // https://www.itwinjs.org/presentation/advanced/localization/
     // Check if the string starts and ends with "@"
     if (input.startsWith("@") && input.endsWith("@")) {
@@ -388,7 +388,7 @@ export const GroupPropertyAction = ({
                   key={property.key}
                   title={`${property.displayLabel} (${property.propertyType})`}
                   titleTooltip={`${property.actualECClassName}`}
-                  subText={localizePresentation(property.categoryLabel)}
+                  subText={getLocalizedStringPresentation(property.categoryLabel)}
                   actionGroup={null}
                 />
               ))}
@@ -475,7 +475,7 @@ export const GroupPropertyAction = ({
                       key={property.key}
                       title={`${property.displayLabel} (${property.propertyType})`}
                       titleTooltip={`${property.actualECClassName}`}
-                      subText={localizePresentation(property.categoryLabel)}
+                      subText={getLocalizedStringPresentation(property.categoryLabel)}
                       actionGroup={null}
                       selected={selectedProperties.some((p) => property.key === p.key)}
                       onClick={() =>
