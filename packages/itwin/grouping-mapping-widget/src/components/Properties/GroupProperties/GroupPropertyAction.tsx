@@ -22,7 +22,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError } from "../../../common/utils";
+import { getLocalizedStringPresentation, handleError } from "../../../common/utils";
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { HorizontalTile } from "../../SharedComponents/HorizontalTile";
@@ -67,7 +67,6 @@ import {
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
-import { IModelApp } from "@itwin/core-frontend";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -279,19 +278,6 @@ export const GroupPropertyAction = ({
       clearSearch();
     }
   }, [searchInput, setSearched, clearSearch]);
-
-  const getLocalizedStringPresentation = useCallback((input: string): string => {
-    // https://www.itwinjs.org/presentation/advanced/localization/
-    // Check if the string starts and ends with "@"
-    if (input.startsWith("@") && input.endsWith("@")) {
-      // Remove the leading and trailing "@" from the string
-      const trimmedString = input.substring(1, input.length - 1);
-
-      return IModelApp.localization.getLocalizedString(trimmedString);
-    }
-
-    return input;
-  }, []);
 
   return (
     <DndContext

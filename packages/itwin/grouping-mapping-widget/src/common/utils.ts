@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { QueryRowFormat } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { toaster } from "@itwin/itwinui-react";
 
 export type CreateTypeFromInterface<Interface> = {
@@ -94,4 +95,17 @@ export const handleInputChange = <T,>(
 export const enableExperimentalFeatures = async (iModelConnection: IModelConnection) => {
   const reader = iModelConnection.createQueryReader("PRAGMA experimental_features_enabled=true");
   await reader.step();
+};
+
+export const getLocalizedStringPresentation = (input: string): string => {
+  // https://www.itwinjs.org/presentation/advanced/localization/
+  // Check if the string starts and ends with "@"
+  if (input.startsWith("@") && input.endsWith("@")) {
+    // Remove the leading and trailing "@" from the string
+    const trimmedString = input.substring(1, input.length - 1);
+
+    return IModelApp.localization.getLocalizedString(trimmedString);
+  }
+
+  return input;
 };
