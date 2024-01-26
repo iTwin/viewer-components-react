@@ -67,6 +67,7 @@ import {
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
+import { IModelApp } from "@itwin/core-frontend";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -279,6 +280,18 @@ export const GroupPropertyAction = ({
     }
   }, [searchInput, setSearched, clearSearch]);
 
+  const localizePresentation = useCallback((input: string): string => {
+    // Check if the string starts and ends with "@"
+    if (input.startsWith("@") && input.endsWith("@")) {
+      // Remove the leading and trailing "@" from the string
+      const trimmedString = input.substring(1, input.length - 1);
+
+      return IModelApp.localization.getLocalizedString(trimmedString);
+    }
+
+    return input;
+  }, []);
+
   return (
     <DndContext
       sensors={sensors}
@@ -374,7 +387,7 @@ export const GroupPropertyAction = ({
                   key={property.key}
                   title={`${property.displayLabel} (${property.propertyType})`}
                   titleTooltip={`${property.actualECClassName}`}
-                  subText={property.categoryLabel}
+                  subText={localizePresentation(property.categoryLabel)}
                   actionGroup={null}
                 />
               ))}
@@ -461,7 +474,7 @@ export const GroupPropertyAction = ({
                       key={property.key}
                       title={`${property.displayLabel} (${property.propertyType})`}
                       titleTooltip={`${property.actualECClassName}`}
-                      subText={property.categoryLabel}
+                      subText={localizePresentation(property.categoryLabel)}
                       actionGroup={null}
                       selected={selectedProperties.some((p) => property.key === p.key)}
                       onClick={() =>
@@ -554,4 +567,3 @@ export const GroupPropertyAction = ({
     </DndContext>
   );
 };
-
