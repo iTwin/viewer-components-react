@@ -136,6 +136,7 @@ const mockMappingsFactory = (
 };
 
 jest.mock("../widget/components/Constants.ts", () => ({
+  ...jest.requireActual("../widget/components/Constants.ts"),
   STATUS_CHECK_INTERVAL: 10,
 }));
 
