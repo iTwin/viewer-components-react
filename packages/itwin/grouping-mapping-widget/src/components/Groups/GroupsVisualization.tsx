@@ -143,7 +143,7 @@ export const GroupsVisualization = ({
       clearHiddenElements();
       setHiddenGroupsIds(new Set());
     }
-  }, [isVisualizationsEnabled, setIsVisualizationsEnabled, setShowGroupColor]);
+  }, [isVisualizationsEnabled, setHiddenGroupsIds, setIsVisualizationsEnabled, setShowGroupColor]);
 
   const hideAllGroups = useCallback(
     () => {
