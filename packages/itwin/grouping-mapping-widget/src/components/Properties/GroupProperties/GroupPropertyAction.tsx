@@ -281,6 +281,7 @@ export const GroupPropertyAction = ({
   }, [searchInput, setSearched, clearSearch]);
 
   const localizePresentation = useCallback((input: string): string => {
+    // https://www.itwinjs.org/presentation/advanced/localization/
     // Check if the string starts and ends with "@"
     if (input.startsWith("@") && input.endsWith("@")) {
       // Remove the leading and trailing "@" from the string
