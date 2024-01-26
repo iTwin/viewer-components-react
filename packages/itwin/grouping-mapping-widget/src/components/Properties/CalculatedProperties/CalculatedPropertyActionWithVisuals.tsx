@@ -12,7 +12,7 @@ import {
   Text,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import {
   BboxDimension,
@@ -20,14 +20,13 @@ import {
 } from "../../../decorators/BboxDimensionsDecorator";
 import useValidator from "../hooks/useValidator";
 import { handleError } from "../../../common/utils";
-import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } from "../../../common/viewerUtils";
+import { visualizeElements, zoomToElements } from "../../../common/viewerUtils";
 import "./CalculatedPropertyActionWithVisuals.scss";
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { CalculatedProperty, CalculatedPropertyType, Group } from "@itwin/insights-client";
-import { useGroupHilitedElementsContext } from "../../context/GroupHilitedElementsContext";
-import { getHiliteIdsAndKeysetFromGroup } from "../../Groups/groupsHelpers";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
+import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
@@ -45,6 +44,9 @@ export const CalculatedPropertyActionWithVisuals = ({
   onClickCancel,
 }: CalculatedPropertyActionWithVisualsProps) => {
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
+  if (!iModelConnection) {
+    throw new Error("This component requires an active iModelConnection.");
+  }
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     calculatedProperty?.propertyName ?? "",
@@ -52,11 +54,15 @@ export const CalculatedPropertyActionWithVisuals = ({
   const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
   const [validator, showValidationMessage] = useValidator();
-  const [resolvedHiliteIds, setResolvedHiliteIds] = useState<string[]>([]);
   const [colorProperty, setColorProperty] = useState<boolean>(false);
+  const { data } = useGroupKeySetQuery(group, iModelConnection, true);
+
+  const resolvedHiliteIds = useMemo(() => {
+    // Resolved ids, default to an empty array if not available
+    return data?.result?.ids ?? [];
+  }, [data?.result?.ids]);
 
   useEffect(() => {
     const decorator = new BboxDimensionsDecorator();
@@ -68,24 +74,11 @@ export const CalculatedPropertyActionWithVisuals = ({
   }, []);
 
   useEffect(() => {
-    const initialize = async () => {
-      if (!iModelConnection) return;
-      clearEmphasizedOverriddenElements();
-      if (!colorProperty) return;
-      setIsLoading(true);
-      const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
-      setResolvedHiliteIds(result.ids);
-      setIsLoading(false);
-    };
-    void initialize();
-  }, [iModelConnection, hilitedElementsQueryCache, group, colorProperty]);
-
-  useEffect(() => {
     if (!colorProperty || resolvedHiliteIds.length === 0) {
       return;
     }
-    visualizeElements([resolvedHiliteIds[0]], "red");
-    void zoomToElements([resolvedHiliteIds[0]]);
+    visualizeElements(resolvedHiliteIds, "red");
+    void zoomToElements(resolvedHiliteIds);
   }, [colorProperty, resolvedHiliteIds]);
 
   useEffect(() => {
