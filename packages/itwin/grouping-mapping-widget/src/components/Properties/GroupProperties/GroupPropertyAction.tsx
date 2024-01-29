@@ -22,7 +22,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError } from "../../../common/utils";
+import { getLocalizedStringPresentation, handleError } from "../../../common/utils";
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { HorizontalTile } from "../../SharedComponents/HorizontalTile";
@@ -374,7 +374,7 @@ export const GroupPropertyAction = ({
                   key={property.key}
                   title={`${property.displayLabel} (${property.propertyType})`}
                   titleTooltip={`${property.actualECClassName}`}
-                  subText={property.categoryLabel}
+                  subText={getLocalizedStringPresentation(property.categoryLabel)}
                   actionGroup={null}
                 />
               ))}
@@ -461,7 +461,7 @@ export const GroupPropertyAction = ({
                       key={property.key}
                       title={`${property.displayLabel} (${property.propertyType})`}
                       titleTooltip={`${property.actualECClassName}`}
-                      subText={property.categoryLabel}
+                      subText={getLocalizedStringPresentation(property.categoryLabel)}
                       actionGroup={null}
                       selected={selectedProperties.some((p) => property.key === p.key)}
                       onClick={() =>
@@ -554,4 +554,3 @@ export const GroupPropertyAction = ({
     </DndContext>
   );
 };
-
