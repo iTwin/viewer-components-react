@@ -1,8 +1,17 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Thu, 18 Jan 2024 15:05:39 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Jan 2024 21:37:20 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.2.7
+
+Mon, 29 Jan 2024 21:37:20 GMT
+
+### Patches
+
+- Make sure the Feature Info Widget is reopened every time selection change occurs. ([#746](https://github.com/iTwin/viewer-components-react/pull/746))
+- Fixed an issue that would prevent the display of Feature Info properties. ([#742](https://github.com/iTwin/viewer-components-react/pull/742))
 
 ## 5.2.6
 

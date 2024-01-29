@@ -1,6 +1,16 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Thu, 17 Aug 2023 14:42:37 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Jan 2024 21:37:20 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 0.5.0
+
+Mon, 29 Jan 2024 21:37:20 GMT
+
+### Minor changes
+
+- Updated iModels client ([#747](https://github.com/iTwin/viewer-components-react/pull/747))
 
 ## 0.4.0
 Thu, 17 Aug 2023 14:42:37 GMT
@@ -106,4 +116,3 @@ Tue, 14 Jun 2022 16:01:06 GMT
 ### Patches
 
 - Initial release of the reports config widget for Reporting Platform
-

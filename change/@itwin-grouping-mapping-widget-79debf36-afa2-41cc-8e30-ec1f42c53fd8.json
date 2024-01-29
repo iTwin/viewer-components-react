@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Groups related components have been refactored to use react-query.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
