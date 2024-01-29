@@ -2,6 +2,29 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Mon, 29 Jan 2024 21:37:20 GMT",
+      "version": "0.23.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.23.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "d1bff484dd03f5ec61f85fcb52893e4d0755912c",
+            "comment": "Presentation is now correctly localized."
+          }
+        ],
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "2d1cd72ecbc3c9b3919e46fb49541b287d5a4c1e",
+            "comment": "Groups related components have been refactored to use react-query."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.0",
       "tag": "@itwin/grouping-mapping-widget_v0.22.0",
       "date": "Mon, 18 Dec 2023 18:31:01 GMT",

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Make sure the Feature Info Widget is reopened every time selection change occurs.",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
