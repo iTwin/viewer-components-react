@@ -20,3 +20,8 @@
 .signin-content {
   width: 400px;
 }
+
+// Used by the 'useBeforeRender' hook
+.hide-resize-observer {
+  display: none !important;
+}
