@@ -1,5 +1,5 @@
 {
-  "type": "patch",
+  "type": "minor",
   "comment": "Updated iModels client",
   "packageName": "@itwin/reports-config-widget-react",
   "email": "Guillar1@users.noreply.github.com",
