@@ -29,8 +29,8 @@
 
   .core-tree-node {
     &.without-expander {
-      >.contents {
-        >.core-tree-node-icon {
+      > .contents {
+        > .core-tree-node-icon {
           margin-left: 5px;
         }
       }

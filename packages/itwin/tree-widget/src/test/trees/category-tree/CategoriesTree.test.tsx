@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { join } from "path";
@@ -14,14 +14,16 @@ import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyBuilder,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { fireEvent, render, waitFor } from "@testing-library/react";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
-import {
-  addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory,
-} from "../../IModelUtils";
-import { mockPresentationManager, mockViewport, renderWithUser, TestUtils } from "../../TestUtils";
+import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory } from "../../IModelUtils";
+import { mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
@@ -29,17 +31,15 @@ import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "
 import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
-import type { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
+import type { CategoryInfo } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 describe("CategoryTree", () => {
-
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };
 
     before(async () => {
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
+      await NoRenderApp.startup();
       await TestUtils.initialize();
     });
 
@@ -73,8 +73,7 @@ describe("CategoryTree", () => {
       sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
 
       viewportMock = mockViewport();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
     });
 
     afterEach(() => {
@@ -92,6 +91,7 @@ describe("CategoryTree", () => {
 
     describe("<CategoryTree />", () => {
       const visibilityHandler = moq.Mock.ofType<CategoryVisibilityHandler>();
+      const categories: CategoryInfo[] = [];
 
       beforeEach(() => {
         sinon.stub(PresentationTreeDataProvider.prototype, "imodel").get(() => imodelMock.object);
@@ -123,7 +123,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
-            categories={[]}
+            categories={categories}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -144,7 +144,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
-            categories={[]}
+            categories={categories}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
@@ -156,17 +156,15 @@ describe("CategoryTree", () => {
 
       it("renders context menu", async () => {
         setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
-        const { user, getByText, queryByText } = renderWithUser(
+        const { user, getByText, queryByText } = render(
           <CategoryTree
             {...sizeProps}
-            categories={[]}
+            categories={categories}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
             activeView={viewportMock.object}
-            contextMenuItems={[
-              () => <div>Test Menu Item</div>,
-            ]}
+            contextMenuItems={[() => <div>Test Menu Item</div>]}
           />,
         );
         const node = await waitFor(() => getByText("test-node"));
@@ -177,36 +175,40 @@ describe("CategoryTree", () => {
 
       it("sets ruleset variable 'ViewType' to '3d'", async () => {
         viewStateMock.reset();
-        // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-        viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+        viewStateMock.setup((x) => x.is3d()).returns(() => true);
         render(
           <CategoryTree
             {...sizeProps}
-            categories={[]}
+            categories={categories}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={mockViewport({ viewState: viewStateMock.object }).object}
             categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
-        rulesetVariablesMock.verify(async (x) => x.setString("ViewType", "3d"), moq.Times.once());
+
+        await waitFor(() => {
+          rulesetVariablesMock.verify(async (x) => x.setString("ViewType", "3d"), moq.Times.atLeastOnce());
+        });
       });
 
       it("sets ruleset variable 'ViewType' to '2d'", async () => {
         viewStateMock.reset();
-        // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-        viewStateMock.setup((x) => x.is3d()).returns(() => false); // eslint-disable-line @itwin/no-internal
+        viewStateMock.setup((x) => x.is3d()).returns(() => false);
         render(
           <CategoryTree
             {...sizeProps}
-            categories={[]}
+            categories={categories}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
-        rulesetVariablesMock.verify(async (x) => x.setString("ViewType", "2d"), moq.Times.once());
+
+        await waitFor(() => {
+          rulesetVariablesMock.verify(async (x) => x.setString("ViewType", "2d"), moq.Times.atLeastOnce());
+        });
       });
 
       it("renders checked checkbox if category is visible", async () => {
@@ -216,7 +218,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
-            categories={[]}
+            categories={categories}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -228,24 +230,41 @@ describe("CategoryTree", () => {
         expect(cb!.checked).to.be.true;
       });
 
+      it("disposes default visibility handler on unmount", async () => {
+        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
+        const disposeSpy = sinon.spy(CategoryVisibilityHandler.prototype, "dispose");
+        const result = render(
+          <CategoryTree
+            {...sizeProps}
+            categories={categories}
+            viewManager={viewManagerMock.object}
+            iModel={imodelMock.object}
+            activeView={viewportMock.object}
+          />,
+        );
+        await waitFor(() => expect(result.queryByTestId("tree-node")).to.not.be.null);
+        result.unmount();
+        await waitFor(() => expect(disposeSpy).to.be.called);
+      });
+
       describe("categories", () => {
         it("disables category when enabled category checkbox is unchecked", async () => {
           setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
           resetVisibilityHandlerMock();
           visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "visible", isDisabled: false }));
-          const result = render(
+          const { user, getByTestId } = render(
             <CategoryTree
               {...sizeProps}
-              categories={[]}
+              categories={categories}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
-          const node = await waitFor(() => result.getByTestId("tree-node"));
+          const node = await waitFor(() => getByTestId("tree-node"));
           const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
-          fireEvent.click(cb!);
+          await user.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(moq.It.isAny(), false), moq.Times.once());
         });
 
@@ -253,22 +272,21 @@ describe("CategoryTree", () => {
           setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
           resetVisibilityHandlerMock();
           visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "hidden", isDisabled: false }));
-          const result = render(
+          const { user, getByTestId } = render(
             <CategoryTree
               {...sizeProps}
-              categories={[]}
+              categories={categories}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
-          const node = await waitFor(() => result.getByTestId("tree-node"));
+          const node = await waitFor(() => getByTestId("tree-node"));
           const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
-          fireEvent.click(cb!);
+          await user.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(moq.It.isAny(), true), moq.Times.once());
         });
-
       });
 
       describe("subcategories", () => {
@@ -277,15 +295,20 @@ describe("CategoryTree", () => {
 
         beforeEach(() => {
           categoryNode = { key: createKey("categoryId"), id: "categoryId", label: PropertyRecord.fromString("category-node"), autoExpand: true };
-          subcategoryNode = { key: createKey("subcategoryId"), id: "subcategoryId", label: PropertyRecord.fromString("subcategory-node"), parentId: "categoryId" };
+          subcategoryNode = {
+            key: createKey("subcategoryId"),
+            id: "subcategoryId",
+            label: PropertyRecord.fromString("subcategory-node"),
+            parentId: "categoryId",
+          };
 
           (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
           sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(1);
 
           (PresentationTreeDataProvider.prototype.getNodes as any).restore();
-          sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").callsFake(
-            async (parent) => parent === categoryNode ? [subcategoryNode] : [categoryNode],
-          );
+          sinon
+            .stub(PresentationTreeDataProvider.prototype, "getNodes")
+            .callsFake(async (parent) => (parent === categoryNode ? [subcategoryNode] : [categoryNode]));
         });
 
         const getSubCategoryNode = (elements: HTMLElement[]) => {
@@ -299,7 +322,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
-              categories={[]}
+              categories={categories}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -314,41 +337,40 @@ describe("CategoryTree", () => {
         it("disables subCategory when enabled subCategory checkbox is unchecked", async () => {
           resetVisibilityHandlerMock();
           visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "visible", isDisabled: false }));
-          const result = render(
+          const { user, getAllByTestId } = render(
             <CategoryTree
               {...sizeProps}
-              categories={[]}
+              categories={categories}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
-          const node = await waitFor(() => getSubCategoryNode(result.getAllByTestId("tree-node")));
+          const node = await waitFor(() => getSubCategoryNode(getAllByTestId("tree-node")));
           const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
-          fireEvent.click(cb!);
+          await user.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(subcategoryNode, false), moq.Times.once());
         });
 
         it("enabled subCategory when disabled subCategory checkbox is checked", async () => {
           resetVisibilityHandlerMock();
           visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "hidden", isDisabled: false }));
-          const result = render(
+          const { user, getAllByTestId } = render(
             <CategoryTree
               {...sizeProps}
-              categories={[]}
+              categories={categories}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
-          const node = await waitFor(() => getSubCategoryNode(result.getAllByTestId("tree-node")));
+          const node = await waitFor(() => getSubCategoryNode(getAllByTestId("tree-node")));
           const cb = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
-          fireEvent.click(cb!);
+          await user.click(cb!);
           visibilityHandler.verify(async (x) => x.changeVisibility(subcategoryNode, true), moq.Times.once());
         });
-
       });
 
       describe("filtering", () => {
@@ -360,8 +382,7 @@ describe("CategoryTree", () => {
         it("filters nodes", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
+            label: LabelDefinition.fromLabelString("filtered-node"),
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();
@@ -370,7 +391,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
-              categories={[]}
+              categories={categories}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
@@ -384,8 +405,7 @@ describe("CategoryTree", () => {
         it("invokes onFilterApplied callback", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
+            label: LabelDefinition.fromLabelString("filtered-node"),
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();
@@ -395,7 +415,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
-              categories={[]}
+              categories={categories}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
@@ -410,15 +430,17 @@ describe("CategoryTree", () => {
         });
 
         it("renders VisibilityTreeNoFilteredData", async () => {
-          const result = render(<CategoryTree
-            {...sizeProps}
-            categories={[]}
-            viewManager={viewManagerMock.object}
-            iModel={imodelMock.object}
-            categoryVisibilityHandler={visibilityHandler.object}
-            filterInfo={{ filter: "filtered-node1", activeMatchIndex: 0 }}
-            activeView={mockViewport().object}
-          />);
+          const result = render(
+            <CategoryTree
+              {...sizeProps}
+              categories={categories}
+              viewManager={viewManagerMock.object}
+              iModel={imodelMock.object}
+              categoryVisibilityHandler={visibilityHandler.object}
+              filterInfo={{ filter: "filtered-node1", activeMatchIndex: 0 }}
+              activeView={mockViewport().object}
+            />,
+          );
 
           await waitFor(() => result.getByText("categoriesTree.noCategoryFound"));
         });
@@ -448,7 +470,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 3d categories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => {
         const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
@@ -472,7 +495,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 3d subCategories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => {
         const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
@@ -494,7 +518,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 2d categories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => {
         const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
@@ -516,7 +541,8 @@ describe("CategoryTree", () => {
     });
 
     it("does not show private 2d subCategories with RULESET_CATEGORIES", async () => {
-      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => {
         const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);

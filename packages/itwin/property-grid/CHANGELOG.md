@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 11 Jan 2024 14:32:37 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2024 15:05:39 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.5.1
+
+Thu, 18 Jan 2024 15:05:39 GMT
+
+### Patches
+
+- Update `@itwin/itwinui-react` version to `2.12.19`. ([#720](https://github.com/iTwin/viewer-components-react/pull/720))
 
 ## 1.5.0
 

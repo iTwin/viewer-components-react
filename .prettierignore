@@ -16,3 +16,6 @@ pnpm-workspace.yaml
 # Ignore configs and pipelines
 .pipelines
 .github
+
+# Ignore extracted api definitions
+api

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./TreeHeader.scss";
 import classnames from "classnames";
@@ -40,14 +40,12 @@ export function TreeHeader(props: TreeHeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   return (
     <div className={classnames("tree-widget-tree-header", className)}>
-      <HeaderButtons contracted={isSearchOpen}>
-        {children}
-      </HeaderButtons>
+      <HeaderButtons contracted={isSearchOpen}>{children}</HeaderButtons>
       <DebouncedSearchBox
         isOpened={isSearchOpen}
         onOpen={() => setIsSearchOpen(true)}
         onClose={() => setIsSearchOpen(false)}
-        onChange={(value) => value ? onFilterStart(value) : onFilterClear()}
+        onChange={(value) => (value ? onFilterStart(value) : onFilterClear())}
         delay={500}
         selectedResultIndex={selectedIndex}
         resultCount={resultCount}
@@ -68,7 +66,16 @@ interface DebouncedSearchBoxProps {
   onSelectedResultChanged: (index: number) => void;
 }
 
-function DebouncedSearchBox({ isOpened, selectedResultIndex, resultCount, onSelectedResultChanged, onChange, onOpen, onClose, delay }: DebouncedSearchBoxProps) {
+function DebouncedSearchBox({
+  isOpened,
+  selectedResultIndex,
+  resultCount,
+  onSelectedResultChanged,
+  onChange,
+  onOpen,
+  onClose,
+  delay,
+}: DebouncedSearchBoxProps) {
   const [inputValue, setInputValue] = useState<string>("");
   const onChangeRef = useRef(onChange);
   // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
@@ -89,40 +96,29 @@ function DebouncedSearchBox({ isOpened, selectedResultIndex, resultCount, onSele
     };
   }, [inputValue, delay]);
 
-  return <SearchBox
-    expandable
-    onExpand={onOpen}
-    onCollapse={onClose}
-    className={classnames("tree-widget-search-box", !isOpened && "contracted")}
-  >
-    <SearchBox.CollapsedState>
-      <SearchBox.ExpandButton
-        title={TreeWidget.translate("searchBox.searchForSomething")}
-        aria-label={TreeWidget.translate("searchBox.open")}
-        size="small"
-      />
-    </SearchBox.CollapsedState>
-    <SearchBox.ExpandedState >
-      <SearchBox.Input
-        placeholder={TreeWidget.translate("searchBox.search")}
-        onChange={(e) => setInputValue(e.currentTarget.value)}
-        className="search-input"
-      />
-      <SearchResultStepper
-        selectedIndex={selectedResultIndex}
-        total={resultCount}
-        onStep={onSelectedResultChanged}
-      />
-      <SearchBox.CollapseButton
-        onClick={() => {
-          setInputValue("");
-          onClose();
-        }}
-        size="small"
-        aria-label={TreeWidget.translate("searchBox.close")}
-      />
-    </SearchBox.ExpandedState>
-  </SearchBox>;
+  return (
+    <SearchBox expandable onExpand={onOpen} onCollapse={onClose} className={classnames("tree-widget-search-box", !isOpened && "contracted")}>
+      <SearchBox.CollapsedState>
+        <SearchBox.ExpandButton title={TreeWidget.translate("searchBox.searchForSomething")} aria-label={TreeWidget.translate("searchBox.open")} size="small" />
+      </SearchBox.CollapsedState>
+      <SearchBox.ExpandedState>
+        <SearchBox.Input
+          placeholder={TreeWidget.translate("searchBox.search")}
+          onChange={(e) => setInputValue(e.currentTarget.value)}
+          className="search-input"
+        />
+        <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} />
+        <SearchBox.CollapseButton
+          onClick={() => {
+            setInputValue("");
+            onClose();
+          }}
+          size="small"
+          aria-label={TreeWidget.translate("searchBox.close")}
+        />
+      </SearchBox.ExpandedState>
+    </SearchBox>
+  );
 }
 
 interface HeaderButtonsProps {
@@ -131,10 +127,7 @@ interface HeaderButtonsProps {
 }
 
 function HeaderButtons(props: HeaderButtonsProps) {
-  const className = classnames(
-    "button-container",
-    props.contracted && "contracted",
-  );
+  const className = classnames("button-container", props.contracted && "contracted");
 
   return (
     <ButtonGroup
@@ -144,7 +137,11 @@ function HeaderButtons(props: HeaderButtonsProps) {
           menuItems={() =>
             Children.toArray(props.children)
               .slice(overflowStart - 1)
-              .map((btn, index) => <li key={index} className="dropdown-item" role="menuitem">{btn}</li>)
+              .map((btn, index) => (
+                <li key={index} className="dropdown-item" role="menuitem">
+                  {btn}
+                </li>
+              ))
           }
           className="tree-header-button-dropdown-container"
         >
@@ -167,8 +164,9 @@ interface SearchResultStepperProps {
 
 function SearchResultStepper(props: SearchResultStepperProps) {
   const { selectedIndex = 1, total, onStep } = props;
-  if (!total)
+  if (!total) {
     return null;
+  }
 
   return (
     <>
@@ -178,8 +176,9 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         title={TreeWidget.translate("searchBox.previous")}
         size="small"
         onClick={() => {
-          if (selectedIndex > 1)
+          if (selectedIndex > 1) {
             onStep(selectedIndex - 1);
+          }
         }}
       >
         <SvgCaretUpSmall />
@@ -188,8 +187,9 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         title={TreeWidget.translate("searchBox.next")}
         size="small"
         onClick={() => {
-          if (selectedIndex < total)
+          if (selectedIndex < total) {
             onStep(selectedIndex + 1);
+          }
         }}
       >
         <SvgCaretDownSmall />

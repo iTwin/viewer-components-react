@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetUiItemsProvider.scss";
 import { ErrorBoundary } from "react-error-boundary";
@@ -47,14 +47,9 @@ export const TreeWidgetId = "tree-widget-react:trees";
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   public readonly id = "TreeWidgetUiItemsProvider";
 
-  constructor(private _treeWidgetOptions?: TreeWidgetOptions) { }
+  constructor(private _treeWidgetOptions?: TreeWidgetOptions) {}
 
-  public provideWidgets(
-    _stageId: string,
-    stageUsage: string,
-    location: StagePanelLocation,
-    section?: StagePanelSection
-  ): ReadonlyArray<Widget> {
+  public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
     const preferredLocation = this._treeWidgetOptions?.defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = this._treeWidgetOptions?.defaultPanelSection ?? StagePanelSection.Start;
 
@@ -75,24 +70,28 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       },
     ];
 
-    return [{
-      id: TreeWidgetId,
-      label: TreeWidget.translate("treeview"),
-      content: <SelectableTreeWidget trees={trees} />,
-      icon: <SvgHierarchyTree />,
-      priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
-    }];
+    return [
+      {
+        id: TreeWidgetId,
+        label: TreeWidget.translate("treeview"),
+        content: <SelectableTreeWidget trees={trees} />,
+        icon: <SvgHierarchyTree />,
+        priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
+      },
+    ];
   }
 }
 
 function SelectableTreeWidget(props: SelectableTreeProps) {
   const ref = useTreeTransientState<HTMLDivElement>();
 
-  return (<div ref={ref} className="tree-widget">
-    <ErrorBoundary FallbackComponent={ErrorState}>
-      <SelectableTree {...props} />
-    </ErrorBoundary>
-  </div>);
+  return (
+    <div ref={ref} className="tree-widget">
+      <ErrorBoundary FallbackComponent={ErrorState}>
+        <SelectableTree {...props} />
+      </ErrorBoundary>
+    </div>
+  );
 }
 
 function ErrorState({ resetErrorBoundary }: FallbackProps) {
@@ -102,7 +101,9 @@ function ErrorState({ resetErrorBoundary }: FallbackProps) {
       heading={TreeWidget.translate("error")}
       description={TreeWidget.translate("generic-error-description")}
       actions={
-        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>{TreeWidget.translate("retry")}</Button>
+        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>
+          {TreeWidget.translate("retry")}
+        </Button>
       }
     />
   );

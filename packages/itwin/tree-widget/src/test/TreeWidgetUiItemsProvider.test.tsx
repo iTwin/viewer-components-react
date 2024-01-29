@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { createRef } from "react";
@@ -9,14 +9,13 @@ import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { render, waitFor } from "@testing-library/react";
 import * as selectableTreeModule from "../components/SelectableTree";
 import * as categoriesTreeComponents from "../components/trees/category-tree/CategoriesTreeComponent";
 import * as modelsTreeComponents from "../components/trees/models-tree/ModelsTreeComponent";
 import { TreeWidgetUiItemsProvider } from "../components/TreeWidgetUiItemsProvider";
 import * as useTreeTransientStateModule from "../components/utils/UseTreeTransientState";
 import { TreeWidget } from "../TreeWidget";
-import { TestUtils } from "./TestUtils";
+import { render, TestUtils, waitFor } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -75,11 +74,13 @@ describe("TreeWidgetUiItemsProvider", () => {
 
   it("renders supplied trees", () => {
     const widgetComponentStub = sinon.stub(selectableTreeModule, "SelectableTree").returns(null);
-    const trees: selectableTreeModule.TreeDefinition[] = [{
-      id: "tree",
-      getLabel: () => "Tree Label",
-      render: () => <div>Tree Content</div>,
-    }];
+    const trees: selectableTreeModule.TreeDefinition[] = [
+      {
+        id: "tree",
+        getLabel: () => "Tree Label",
+        render: () => <div>Tree Content</div>,
+      },
+    ];
     const provider = new TreeWidgetUiItemsProvider({ trees });
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.Start);
     render(<>{widget.content}</>);
@@ -102,11 +103,13 @@ describe("TreeWidgetUiItemsProvider", () => {
       throw new Error("Error");
     }
 
-    const trees: selectableTreeModule.TreeDefinition[] = [{
-      id: "tree",
-      getLabel: () => "Tree Label",
-      render: () => <TestTree />,
-    }];
+    const trees: selectableTreeModule.TreeDefinition[] = [
+      {
+        id: "tree",
+        getLabel: () => "Tree Label",
+        render: () => <TestTree />,
+      },
+    ];
     const provider = new TreeWidgetUiItemsProvider({ trees });
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.Start);
     const { queryByText } = render(<>{widget.content}</>);

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./TreeRenderer.scss";
 import classNames from "classnames";
@@ -48,13 +48,14 @@ export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer
           const nodeClassName = nodeProps.node.numChildren === 0 ? "without-expander" : undefined;
           return (
             <TreeNodeRendererContextProvider node={nodeProps.node} nodeLabelRenderer={nodeLabelRenderer}>
-              {nodeRenderer
-                ? nodeRenderer({ ...nodeProps, onContextMenu, className: nodeClassName })
-                : <TreeNodeRenderer {...nodeProps} onContextMenu={onContextMenu} className={nodeClassName} />}
+              {nodeRenderer ? (
+                nodeRenderer({ ...nodeProps, onContextMenu, className: nodeClassName })
+              ) : (
+                <TreeNodeRenderer {...nodeProps} onContextMenu={onContextMenu} className={nodeClassName} />
+              )}
             </TreeNodeRendererContextProvider>
           );
-        }
-        }
+        }}
         nodeHeight={nodeHeight}
       />
       {renderContextMenu()}

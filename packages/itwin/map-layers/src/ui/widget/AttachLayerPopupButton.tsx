@@ -3,19 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { IModelApp, MapLayerSource, MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { RelativePosition } from "@itwin/appui-abstract";
-import * as UiCore from "@itwin/core-react";
 import { UiFramework } from "@itwin/appui-react";
-import { useSourceMapContext } from "./MapLayerManager";
-import { MapUrlDialog, SourceState } from "./MapUrlDialog";
-import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
+import { MapSubLayerProps } from "@itwin/core-common";
+import {
+  IModelApp, MapLayerSource, MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority,
+} from "@itwin/core-frontend";
+import * as UiCore from "@itwin/core-react";
+import { SvgAdd } from "@itwin/itwinui-icons-react";
 import { Button, IconButton, Input } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
+import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
+import { useSourceMapContext } from "./MapLayerManager";
 import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
-import { MapSubLayerProps } from "@itwin/core-common";
-import { SvgAdd } from "@itwin/itwinui-icons-react";
+import { MapUrlDialog, SourceState } from "./MapUrlDialog";
 
 // cSpell:ignore droppable Sublayer
 
@@ -140,8 +142,11 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         setLoading(false);
       }
     }
-    onLayerAttached();
-    resumeOutsideClick();
+    if (isMounted.current) {
+      onLayerAttached();
+      resumeOutsideClick();
+    }
+
   }, [activeViewport, backgroundLayers, isOverlay, onLayerAttached, overlayLayers, resumeOutsideClick]);
 
   const handleSelectFeaturesCancel = React.useCallback( () => {

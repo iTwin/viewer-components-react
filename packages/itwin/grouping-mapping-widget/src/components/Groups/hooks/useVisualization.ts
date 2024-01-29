@@ -13,18 +13,18 @@ import { clearEmphasizedElements, clearOverriddenElements, transparentOverridden
 
 export const useVisualization = (shouldVisualize: boolean, iModelConnection: IModelConnection, query: string, queryGenerationType: string) => {
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const { showGroupColor, groups, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs } = useGroupHilitedElementsContext();
+  const { showGroupColor, hiddenGroupsIds, overlappedElementsMetadata: { overlappedElementGroupPairs }, setNumberOfVisualizedGroups} = useGroupHilitedElementsContext();
   const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
 
   const resetView = useCallback(async () => {
     if (!shouldVisualize) return;
     if (showGroupColor) {
-      await visualizeGroupColors(iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs);
+      await visualizeGroupColors(hiddenGroupsIds, overlappedElementGroupPairs, setNumberOfVisualizedGroups);
     } else {
       clearOverriddenElements();
     }
     clearEmphasizedElements();
-  }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor, shouldVisualize, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs]);
+  }, [hiddenGroupsIds, overlappedElementGroupPairs, setNumberOfVisualizedGroups, shouldVisualize, showGroupColor]);
 
   useEffect(() => {
     if (!shouldVisualize) return;
@@ -64,7 +64,7 @@ export const useVisualization = (shouldVisualize: boolean, iModelConnection: IMo
         );
         await zoomToElements(resolvedHiliteIds);
       } catch {
-        toaster.negative("Sorry, we have failed to generate a valid query. 😔");
+        toaster.negative("Sorry, we have failed to generate a valid query.");
       } finally {
         setIsRendering(false);
       }

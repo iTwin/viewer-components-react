@@ -1,17 +1,21 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import deepEqual from "deep-equal";
+import { createElement, Fragment, StrictMode } from "react";
 import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
-import { render } from "@testing-library/react";
-import userEvents from "@testing-library/user-event";
+import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
 
+import type { PropsWithChildren, ReactElement } from "react";
+import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 import type { PresentationManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import type { VariableValue } from "@itwin/presentation-common";
@@ -20,8 +24,9 @@ export class TestUtils {
   private static _initialized = false;
 
   public static async initialize() {
-    if (TestUtils._initialized)
+    if (TestUtils._initialized) {
       return;
+    }
 
     await UiFramework.initialize(undefined);
     await TreeWidget.initialize(new EmptyLocalization());
@@ -36,11 +41,11 @@ export class TestUtils {
 }
 
 /** typemoq matcher for deep equality */
-export const deepEquals = <T>(expected: T) => {
+export function deepEquals<T>(expected: T) {
   return moq.It.is((actual: T) => deepEqual(actual, expected));
-};
+}
 
-export const mockPresentationManager = () => {
+export function mockPresentationManager() {
   const onRulesetVariableChanged = new BeEvent<(variableId: string, prevValue: VariableValue, currValue: VariableValue) => void>();
   const rulesetVariablesManagerMock = moq.Mock.ofType<RulesetVariablesManager>();
   rulesetVariablesManagerMock.setup((x) => x.onVariableChanged).returns(() => onRulesetVariableChanged);
@@ -52,7 +57,7 @@ export const mockPresentationManager = () => {
     rulesetVariablesManager: rulesetVariablesManagerMock,
     presentationManager: presentationManagerMock,
   };
-};
+}
 
 export async function flushAsyncOperations() {
   return new Promise((resolve) => setTimeout(resolve));
@@ -71,26 +76,36 @@ interface ViewportMockProps {
 }
 
 export function mockViewport(props?: ViewportMockProps) {
-  if (!props)
+  if (!props) {
     props = {};
-  if (!props.viewState)
+  }
+  if (!props.viewState) {
     props.viewState = moq.Mock.ofType<ViewState>().object;
-  if (!props.perModelCategoryVisibility)
+  }
+  if (!props.perModelCategoryVisibility) {
     props.perModelCategoryVisibility = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>().object;
-  if (!props.onViewedCategoriesPerModelChanged)
+  }
+  if (!props.onViewedCategoriesPerModelChanged) {
     props.onViewedCategoriesPerModelChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onDisplayStyleChanged)
+  }
+  if (!props.onDisplayStyleChanged) {
     props.onDisplayStyleChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onViewedCategoriesChanged)
+  }
+  if (!props.onViewedCategoriesChanged) {
     props.onViewedCategoriesChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onViewedModelsChanged)
+  }
+  if (!props.onViewedModelsChanged) {
     props.onViewedModelsChanged = new BeEvent<(vp: Viewport) => void>();
-  if (!props.onAlwaysDrawnChanged)
+  }
+  if (!props.onAlwaysDrawnChanged) {
     props.onAlwaysDrawnChanged = new BeEvent<() => void>();
-  if (!props.onNeverDrawnChanged)
+  }
+  if (!props.onNeverDrawnChanged) {
     props.onNeverDrawnChanged = new BeEvent<() => void>();
-  if (!props.imodel)
+  }
+  if (!props.imodel) {
     props.imodel = moq.Mock.ofType<IModelConnection>().object;
+  }
   const vpMock = moq.Mock.ofType<Viewport>();
   vpMock.setup((x) => x.iModel).returns(() => props!.imodel!);
   vpMock.setup((x) => x.view).returns(() => props!.viewState!);
@@ -105,7 +120,7 @@ export function mockViewport(props?: ViewportMockProps) {
 }
 
 export function stubCancelAnimationFrame() {
-  const originalCaf= global.cancelAnimationFrame;
+  const originalCaf = global.cancelAnimationFrame;
 
   before(() => {
     Object.defineProperty(global, "cancelAnimationFrame", {
@@ -126,13 +141,43 @@ export function stubCancelAnimationFrame() {
 
 export function createResolvablePromise<T>() {
   let resolve: (value: T) => void = () => {};
-  const promise = new Promise<T>((resolvePromise) => {resolve = resolvePromise;});
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
   return { promise, resolve };
 }
 
-export function renderWithUser(...args: Parameters<typeof render>): ReturnType<typeof render> & { user: ReturnType<typeof userEvents["setup"]> } {
+function createWrapper(wrapper?: React.JSXElementConstructor<{ children: React.ReactElement }>, disableStrictMode?: boolean) {
+  // if `DISABLE_STRICT_MODE` is set do not wrap components into `StrictMode` component
+  const StrictModeWrapper = process.env.DISABLE_STRICT_MODE || disableStrictMode ? Fragment : StrictMode;
+
+  return wrapper
+    ? ({ children }: PropsWithChildren<unknown>) => <StrictModeWrapper>{createElement(wrapper, undefined, children)}</StrictModeWrapper>
+    : StrictModeWrapper;
+}
+
+/**
+ * Custom render function that wraps around `render` function from `@testing-library/react` and additionally
+ * setup `userEvent` from `@testing-library/user-event`.
+ *
+ * It should be used when test need to do interactions with rendered components.
+ */
+function customRender(ui: ReactElement, options?: RenderOptions & { disableStrictMode?: boolean }): RenderResult & { user: UserEvent } {
+  const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
   return {
-    user: userEvents.setup(),
-    ...render(...args),
+    ...renderRTL(ui, { ...options, wrapper }),
+    user: userEvent.setup(),
   };
 }
+
+function customRenderHook<Result, Props>(
+  render: (initialProps: Props) => Result,
+  options?: RenderHookOptions<Props> & { disableStrictMode?: boolean },
+): RenderHookResult<Result, Props> {
+  const wrapper = createWrapper(options?.wrapper, options?.disableStrictMode);
+  return renderHookRTL(render, { ...options, wrapper });
+}
+
+export * from "@testing-library/react";
+export { customRender as render };
+export { customRenderHook as renderHook };

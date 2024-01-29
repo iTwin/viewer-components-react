@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./MultiElementPropertyGrid.scss";
 import classnames from "classnames";
@@ -43,16 +43,9 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
  * @public
  */
 export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps) {
-  const {
-    selectedKeys,
-    focusedInstanceKey,
-    focusInstance,
-    ancestorsNavigationProps,
-  } = useInstanceSelection({ imodel: props.imodel });
+  const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({ imodel: props.imodel });
 
-  const [content, setContent] = useState<MultiElementPropertyContent>(
-    MultiElementPropertyContent.PropertyGrid
-  );
+  const [content, setContent] = useState<MultiElementPropertyContent>(MultiElementPropertyContent.PropertyGrid);
 
   useEffect(() => {
     // show standard property grid when selection changes
@@ -109,11 +102,14 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
       <div className="property-grid-react-transition-container-inner">
         <NullValueSettingContext>
           {items.map((component, idx) => (
-            <div key={component.key} className={classnames({
-              "property-grid-react-animated-tab": true,
-              "property-grid-react-animated-tab-animate-right": idx > content,
-              "property-grid-react-animated-tab-animate-left": idx < content,
-            })} >
+            <div
+              key={component.key}
+              className={classnames({
+                "property-grid-react-animated-tab": true,
+                "property-grid-react-animated-tab-animate-right": idx > content,
+                "property-grid-react-animated-tab-animate-left": idx < content,
+              })}
+            >
               {component}
             </div>
           ))}
@@ -148,24 +144,16 @@ export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavig
     return null;
   }
 
-  return <>
-    <IconButton
-      styleType="borderless"
-      title={PropertyGridManager.translate("header.navigateUp")}
-      onClick={navigateUp}
-      disabled={!canNavigateUp}
-    >
-      <SvgArrowUp />
-    </IconButton>
-    <IconButton
-      styleType="borderless"
-      title={PropertyGridManager.translate("header.navigateDown")}
-      onClick={navigateDown}
-      disabled={!canNavigateDown}
-    >
-      <SvgArrowDown />
-    </IconButton>
-  </>;
+  return (
+    <>
+      <IconButton styleType="borderless" title={PropertyGridManager.translate("header.navigateUp")} onClick={navigateUp} disabled={!canNavigateUp}>
+        <SvgArrowUp />
+      </IconButton>
+      <IconButton styleType="borderless" title={PropertyGridManager.translate("header.navigateDown")} onClick={navigateDown} disabled={!canNavigateDown}>
+        <SvgArrowDown />
+      </IconButton>
+    </>
+  );
 }
 
 interface HeaderControlsProps {
@@ -175,27 +163,24 @@ interface HeaderControlsProps {
   ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
 }
 
-function HeaderControls({
-  multipleElementsSelected,
-  ancestorsNavigationProps,
-  ancestorsNavigationControls,
-  onElementListButtonClick,
-}: HeaderControlsProps) {
+function HeaderControls({ multipleElementsSelected, ancestorsNavigationProps, ancestorsNavigationControls, onElementListButtonClick }: HeaderControlsProps) {
   if (!multipleElementsSelected) {
     return ancestorsNavigationControls ? <>{ancestorsNavigationControls(ancestorsNavigationProps)}</> : null;
   }
 
-  return <IconButton
-    className="property-grid-react-multi-select-icon"
-    styleType="borderless"
-    onClick={onElementListButtonClick}
-    title={PropertyGridManager.translate("element-list.title")}
-  >
-    <SvgPropertiesList />
-  </IconButton>;
+  return (
+    <IconButton
+      className="property-grid-react-multi-select-icon"
+      styleType="borderless"
+      onClick={onElementListButtonClick}
+      title={PropertyGridManager.translate("element-list.title")}
+    >
+      <SvgPropertiesList />
+    </IconButton>
+  );
 }
 
-function SingleElementGrid({ instanceKey, ...props }: Omit<SingleElementPropertyGridProps, "instanceKey"> & {instanceKey: InstanceKey | undefined}) {
+function SingleElementGrid({ instanceKey, ...props }: Omit<SingleElementPropertyGridProps, "instanceKey"> & { instanceKey: InstanceKey | undefined }) {
   if (!instanceKey) {
     return null;
   }
