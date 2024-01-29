@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@itwin/imodels-access-common':
+    specifier: ^4.1.4
+    version: 4.1.4(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)
   '@itwin/imodels-access-frontend':
     specifier: ^4.1.4
     version: 4.1.4(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-frontend@4.0.0)
