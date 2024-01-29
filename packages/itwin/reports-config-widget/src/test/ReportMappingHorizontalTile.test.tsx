@@ -8,6 +8,9 @@ import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
   fireEvent,
+  mockIModelId1,
+  mockIModelsResponse,
+  mockReportId,
   render,
   screen,
   waitFor,
@@ -19,69 +22,13 @@ import type {
   ReportMappingCollection,
 } from "@itwin/insights-client";
 import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
-import type { GetSingleIModelParams, IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
-import { IModelState } from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams } from "@itwin/imodels-client-management";
 import { BeEvent } from "@itwin/core-bentley";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { ReportMappingHorizontalTile } from "../widget/components/ReportMappingHorizontalTile";
 import { EmptyLocalization } from "@itwin/core-common";
 import type { BulkExtractor } from "../widget/components/BulkExtractor";
-
-const mockITwinId = faker.datatype.uuid();
-// Lets work with two iModels for now.
-const mockIModelId1 = faker.datatype.uuid();
-const mockIModelId2 = faker.datatype.uuid();
-
-const mockReportId = faker.datatype.uuid();
-
-const mockIModelsResponse = [
-  {
-    iModel: {
-      id: mockIModelId1,
-      displayName: "rAnDoMdIsPlAynAmE1",
-      name: "rAnDomName1",
-      description: "rAnDoMDeScRiPtIoN1",
-      createdDateTime: "2021-10-04T22:13:50.397Z",
-      state: IModelState.Initialized,
-      projectId: mockITwinId,
-      extent: null,
-      _links: {
-        creator: {
-          href: "",
-        },
-        namedVersions: {
-          href: "",
-        },
-        changesets: {
-          href: "",
-        },
-      },
-    },
-  },
-  {
-    iModel: {
-      id: mockIModelId2,
-      displayName: "rAnDoMdIsPlAynAmE2",
-      name: "rAnDomName2",
-      description: "rAnDoMDeScRiPtIoN2",
-      createdDateTime: "2021-10-04T22:13:50.397Z",
-      state: IModelState.Initialized,
-      projectId: mockITwinId,
-      extent: null,
-      _links: {
-        creator: {
-          href: "",
-        },
-        namedVersions: {
-          href: "",
-        },
-        changesets: {
-          href: "",
-        },
-      },
-    },
-  },
-];
+import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management/lib/operations";
 
 const mockProjectIModels = {
   iModels: mockIModelsResponse.map((iModel) => ({
@@ -191,6 +138,7 @@ const mockBulkExtractor = moq.Mock.ofType<BulkExtractor>();
 const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
 
 jest.mock("../widget/components/Constants.ts", () => ({
+  ...jest.requireActual("../widget/components/Constants.ts"),
   STATUS_CHECK_INTERVAL: 10,
 }));
 

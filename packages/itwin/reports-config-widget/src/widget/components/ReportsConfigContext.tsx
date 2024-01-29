@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import type { IModelsClientOptions } from "@itwin/imodels-client-management";
-import { Constants, IModelsClient } from "@itwin/imodels-client-management";
+import { IModelsClient } from "@itwin/imodels-client-management";
 import { ExtractionClient, MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,6 +16,7 @@ import type {
 import { ReportsConfigApiContext } from "../context/ReportsConfigApiContext";
 import { REPORTS_CONFIG_BASE_URL } from "../ReportsConfigUiProvider";
 import { BulkExtractor } from "./BulkExtractor";
+import { IMODELS_BASE_URL } from "./Constants";
 import { FailedExtractionToast, SuccessfulExtractionToast } from "./ExtractionToast";
 import { generateUrl } from "./utils";
 
@@ -40,7 +41,7 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     props.baseUrl || REPORTS_CONFIG_BASE_URL
   ), [props.baseUrl]);
   const iModelClientOptions: IModelsClientOptions = useMemo(() => ({
-    api: { baseUrl: generateUrl(Constants.api.baseUrl, props.baseUrl ?? REPORTS_CONFIG_BASE_URL) },
+    api: { baseUrl: generateUrl(IMODELS_BASE_URL, props.baseUrl ?? REPORTS_CONFIG_BASE_URL) },
   }), [props.baseUrl]);
   const [extractionClient, setExtractionClient] = useState<ExtractionClient>(
     props.extractionClient ?? new ExtractionClient(reportsBaseUrl())

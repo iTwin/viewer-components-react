@@ -5,12 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@itwin/imodels-access-common':
+    specifier: ^4.1.4
+    version: 4.1.4(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)
   '@itwin/imodels-access-frontend':
-    specifier: ~4.0.5
-    version: 4.0.5(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-frontend@4.0.0)
+    specifier: ^4.1.4
+    version: 4.1.4(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-frontend@4.0.0)
   '@itwin/imodels-client-management':
-    specifier: ^1.0.1
-    version: 1.0.1
+    specifier: ^4.2.3
+    version: 4.2.3
   '@itwin/insights-client':
     specifier: ^0.4.0
     version: 0.4.0
@@ -1031,8 +1034,21 @@ packages:
       react-dom: 17.0.2(react@17.0.2)
     dev: true
 
-  /@itwin/imodels-access-frontend@4.0.5(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-frontend@4.0.0):
-    resolution: {integrity: sha512-8m7fQ6PDUV4Gn3YHi1HNHSK9CoAP7ifB42RPoQ02JiQRkim/pwVZniB3CznlWfFuTkmbOVn4sPMAdIcq1SUUOQ==}
+  /@itwin/imodels-access-common@4.1.4(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0):
+    resolution: {integrity: sha512-1+4mVeAYuMl/hUHV6e+ntvm9DsQGw1uLukchoCLTeg/x06K/VMnr3ouDaRSZy5sg51I0JD/wZNCh5J3SyJMG+w==}
+    peerDependencies:
+      '@itwin/core-bentley': ^4.0.0
+      '@itwin/core-common': ^4.0.0
+    dependencies:
+      '@itwin/core-bentley': 4.0.0
+      '@itwin/core-common': 4.0.0(@itwin/core-bentley@4.0.0)(@itwin/core-geometry@4.0.0)
+      '@itwin/imodels-client-management': 4.2.3
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /@itwin/imodels-access-frontend@4.1.4(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-frontend@4.0.0):
+    resolution: {integrity: sha512-4LzW7T+CAEjb6j/ysbW5VUJJ9NN2Xh7CFlJoKTFfNRtuzwLtesoE+Tgs6kc5YuRmIN9/82fCLjmzb2+P3y2EjQ==}
     peerDependencies:
       '@itwin/core-bentley': ^4.0.0
       '@itwin/core-common': ^4.0.0
@@ -1041,23 +1057,16 @@ packages:
       '@itwin/core-bentley': 4.0.0
       '@itwin/core-common': 4.0.0(@itwin/core-bentley@4.0.0)(@itwin/core-geometry@4.0.0)
       '@itwin/core-frontend': 4.0.0(@itwin/appui-abstract@4.0.0)(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-geometry@4.0.0)(@itwin/core-orbitgt@4.0.0)(@itwin/core-quantity@4.0.0)
-      '@itwin/imodels-client-management': 4.1.2
+      '@itwin/imodels-access-common': 4.1.4(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)
+      '@itwin/imodels-client-management': 4.2.3
     transitivePeerDependencies:
       - debug
     dev: false
 
-  /@itwin/imodels-client-management@1.0.1:
-    resolution: {integrity: sha512-HzwegaR7krCXY1I2UPGGjxp4tttcU4RD5kZoHFpA+Nit3jrsvoXR0CieH7H0GUSKmgoV0Go5KN1YvbBUgqruRg==}
+  /@itwin/imodels-client-management@4.2.3:
+    resolution: {integrity: sha512-1ijl+/OTKQ7qbtKdGXgqmDs+lg30Grp+YQx4RAJxWsg03L9K1vAqp/fBh3DnVFz9kOsBv0ZI1KRGsWcjfEkUPg==}
     dependencies:
-      axios: 0.21.4
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
-  /@itwin/imodels-client-management@4.1.2:
-    resolution: {integrity: sha512-YO3ahZxgabGUnOHS0WXhNhWDfMifxwS2Jf+W/rKZTG/L8A/Cgv0oP52AQKQ4I3Cb1O9bg5mP6KtNi/uK/sGNMQ==}
-    dependencies:
-      axios: 1.6.2
+      axios: 1.6.7
     transitivePeerDependencies:
       - debug
     dev: false
@@ -2375,14 +2384,6 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /axios@0.21.4:
-    resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
-    dependencies:
-      follow-redirects: 1.15.3
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
   /axios@0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
@@ -2391,10 +2392,10 @@ packages:
     transitivePeerDependencies:
       - debug
 
-  /axios@1.6.2:
-    resolution: {integrity: sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==}
+  /axios@1.6.7:
+    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
     dependencies:
-      follow-redirects: 1.15.3
+      follow-redirects: 1.15.5
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -3669,6 +3670,16 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects@1.15.5:
+    resolution: {integrity: sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
 
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
