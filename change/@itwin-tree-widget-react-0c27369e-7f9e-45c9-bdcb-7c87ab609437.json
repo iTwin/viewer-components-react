@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed `onCheckboxStateChanged` event handling when multiple `rxjs` versions are present.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
