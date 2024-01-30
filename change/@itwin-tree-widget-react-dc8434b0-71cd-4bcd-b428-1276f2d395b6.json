@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "ModelsTree: allow opt-in to hierarchy level filtering using `isHierarchyLevelFilteringEnabled` flag",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "114080994+ViliusBa@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

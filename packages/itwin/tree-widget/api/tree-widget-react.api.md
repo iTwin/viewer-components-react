@@ -93,7 +93,7 @@ export interface CategoryInfo {
 }
 
 // @public
-export function CategoryTree(props: CategoryTreeProps): JSX.Element;
+export function CategoryTree(props: CategoryTreeProps): JSX.Element | null;
 
 // @public
 export interface CategoryTreeProps extends BaseFilterableTreeProps {
@@ -159,7 +159,7 @@ export interface ContextMenuItemProps {
 }
 
 // @public
-export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
+export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
 
 // @public
 export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps_2) => JSX.Element;
@@ -174,7 +174,7 @@ export interface DefaultLabelRendererProps {
 }
 
 // @alpha
-export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
+export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element | null;
 
 // @alpha
 export const ExternalSourcesTreeComponent: {
@@ -196,7 +196,7 @@ export function hideAllCategories(categories: string[], viewport: Viewport): Pro
 export function hideAllModels(models: string[], viewport: Viewport): Promise<void>;
 
 // @public
-export const IModelContentTree: (props: IModelContentTreeProps) => JSX.Element;
+export const IModelContentTree: (props: IModelContentTreeProps) => JSX.Element | null;
 
 // @public
 export const IModelContentTreeComponent: {
@@ -242,7 +242,7 @@ export interface ModelInfo {
 }
 
 // @public
-export function ModelsTree(props: ModelsTreeProps): JSX.Element;
+export function ModelsTree(props: ModelsTreeProps): JSX.Element | null;
 
 // @public
 export const ModelsTreeComponent: {
@@ -290,6 +290,8 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     // @alpha
     enableHierarchyAutoUpdate?: boolean;
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+    // @beta
+    isHierarchyFilteringEnabled?: boolean;
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
@@ -503,7 +505,7 @@ export function useContextMenu({ contextMenuItems }: TreeContextMenuProps): {
 // @public
 export function useTreeTransientState<T extends Element>(): Ref<T>;
 
-// @public
+// @public @deprecated
 export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void): {
     filteredNodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
     isFiltering: boolean;

@@ -7,23 +7,23 @@ public;CategoriesTreeComponent:
 public;CategoriesTreeComponentProps 
 public;CategoriesTreeHeaderButtonProps 
 public;CategoryInfo
-public;CategoryTree(props: CategoryTreeProps): JSX.Element
+public;CategoryTree(props: CategoryTreeProps): JSX.Element | null
 public;CategoryTreeProps 
 public;CategoryVisibilityHandler 
 public;CategoryVisibilityHandlerParams
 public;ClassGroupingOption
 public;ContextMenuItemProps
-public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element
+public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element
 public;createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps_2) => JSX.Element
 public;DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): JSX.Element
 public;DefaultLabelRendererProps
-alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element
+alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element | null
 alpha;ExternalSourcesTreeComponent:
 alpha;ExternalSourcesTreeComponentProps = Omit
 alpha;ExternalSourcesTreeProps = BaseTreeProps
 public;hideAllCategories(categories: string[], viewport: Viewport): Promise
 public;hideAllModels(models: string[], viewport: Viewport): Promise
-public;IModelContentTree: (props: IModelContentTreeProps) => JSX.Element
+public;IModelContentTree: (props: IModelContentTreeProps) => JSX.Element | null
 public;IModelContentTreeComponent:
 public;IModelContentTreeComponentProps = Omit
 public;IModelContentTreeProps = BaseTreeProps
@@ -32,7 +32,7 @@ public;invertAllModels(models: string[], viewport: Viewport): Promise
 public;IVisibilityHandler 
 public;LabelRendererContext
 public;ModelInfo
-public;ModelsTree(props: ModelsTreeProps): JSX.Element
+public;ModelsTree(props: ModelsTreeProps): JSX.Element | null
 public;ModelsTreeComponent:
 public;ModelsTreeHeaderButtonProps 
 public;ModelsTreeHierarchyConfiguration
@@ -72,6 +72,7 @@ internal;useCategories(viewManager: ViewManager, imodel: IModelConnection, view?
 internal;useContextMenu({ contextMenuItems }: TreeContextMenuProps):
 public;useTreeTransientState
 public;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
+deprecated;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
 public;VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map
 public;VisibilityStatus
 public;VisibilityTreeEventHandler 

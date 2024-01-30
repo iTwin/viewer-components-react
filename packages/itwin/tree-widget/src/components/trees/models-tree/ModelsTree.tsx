@@ -179,7 +179,7 @@ interface ModelsTreeNodeActions {
   onContextMenu: (e: React.MouseEvent, node: TreeModelNode) => void;
 }
 
-export interface ModelsTreeNodeRendererProps {
+interface ModelsTreeNodeRendererProps {
   iconsEnabled: boolean;
 
   descriptionEnabled: boolean;
