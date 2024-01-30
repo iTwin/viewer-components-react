@@ -21,7 +21,6 @@ export const useRunExtraction = ({
 
   const extractionClient = useExtractionClient();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
-  const [isJobDone, setIsJobDone] = useState<boolean>(false);
   const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
   const queryClient = useQueryClient();
 
@@ -51,5 +50,5 @@ export const useRunExtraction = ({
     },
   });
 
-  return { isRunExtractionLoading, isJobStarted, isJobDone, setIsJobDone, setIsJobStarted, runExtraction };
+  return { isRunExtractionLoading, isJobStarted, setIsJobStarted, runExtraction };
 };
