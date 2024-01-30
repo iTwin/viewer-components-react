@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { useMemo } from "react";
 import { useAsyncValue } from "@itwin/components-react";
@@ -80,10 +80,11 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
-  public getVisibilityStatus(node: TreeNodeItem,): VisibilityStatus {
+  public getVisibilityStatus(node: TreeNodeItem): VisibilityStatus {
     const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
-    if (!nodeKey)
+    if (!nodeKey) {
       return { state: "hidden", isDisabled: true };
+    }
 
     const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
     return { state: node.parentId ? this.getSubCategoryVisibility(instanceId) : this.getCategoryVisibility(instanceId) };
@@ -91,8 +92,9 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
   public async changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void> {
     const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
-    if (!nodeKey)
+    if (!nodeKey) {
       return;
+    }
 
     // handle subcategory visibility change
     if (node.parentId) {
@@ -101,8 +103,9 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
       const parentId = this.getParent(childId)?.categoryId;
 
       // make sure parent category is enabled
-      if (shouldDisplay && parentId)
+      if (shouldDisplay && parentId) {
         await this.enableCategory([parentId], true, false);
+      }
 
       this.enableSubCategory(childId, shouldDisplay);
       return;
@@ -114,8 +117,9 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
   public getSubCategoryVisibility(id: string) {
     const parentItem = this.getParent(id);
-    if (!parentItem)
+    if (!parentItem) {
       return "hidden";
+    }
 
     const isVisible = this._activeView.view.viewsCategory(parentItem.categoryId) && this._activeView.isSubCategoryVisible(id);
     return isVisible ? "visible" : "hidden";
@@ -128,9 +132,8 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   public getParent(key: string): CategoryInfo | undefined {
     for (const category of this._categories) {
       // istanbul ignore else
-      if (category.subCategoryIds) {
-        if (category.subCategoryIds.indexOf(key) !== -1)
-          return category;
+      if (category.subCategoryIds && category.subCategoryIds.indexOf(key) !== -1) {
+        return category;
       }
     }
 
@@ -148,8 +151,9 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   };
 
   private onVisibilityChangeInternal() {
-    if (this._pendingVisibilityChange)
+    if (this._pendingVisibilityChange) {
       return;
+    }
 
     this._pendingVisibilityChange = setTimeout(() => {
       this.onVisibilityChange.raiseEvent();
@@ -158,7 +162,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   }
 
   public static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey) {
-    return (NodeKey.isInstancesNodeKey(nodeKey) && nodeKey.instanceKeys.length > 0) ? nodeKey.instanceKeys[0].id : /* istanbul ignore next */ "";
+    return NodeKey.isInstancesNodeKey(nodeKey) && nodeKey.instanceKeys.length > 0 ? nodeKey.instanceKeys[0].id : /* istanbul ignore next */ "";
   }
 
   public async enableCategory(ids: string[], enabled: boolean, enableAllSubCategories = true) {
@@ -175,13 +179,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
  * @public
  */
 export async function showAllCategories(categories: string[], viewport: Viewport) {
-  await enableCategory(
-    IModelApp.viewManager,
-    viewport.iModel,
-    categories,
-    true,
-    true
-  );
+  await enableCategory(IModelApp.viewManager, viewport.iModel, categories, true, true);
 }
 
 /**
@@ -189,13 +187,7 @@ export async function showAllCategories(categories: string[], viewport: Viewport
  * @public
  */
 export async function hideAllCategories(categories: string[], viewport: Viewport) {
-  await enableCategory(
-    IModelApp.viewManager,
-    viewport.iModel,
-    categories,
-    false,
-    true
-  );
+  await enableCategory(IModelApp.viewManager, viewport.iModel, categories, false, true);
 }
 
 /**
@@ -215,42 +207,21 @@ export async function invertAllCategories(categories: CategoryInfo[], viewport: 
     }
     // First, we need to check if at least one subcategory is disabled. If it is true, then only subcategories should change display, not categories.
     if (category.subCategoryIds?.some((subCategory) => !viewport.isSubCategoryVisible(subCategory))) {
-      for (const subCategory of category.subCategoryIds)
+      for (const subCategory of category.subCategoryIds) {
         viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
+      }
     } else {
       enabled.push(category.categoryId);
     }
   }
 
   // Disable enabled
-  enabledSubCategories.forEach((subCategory) => enableSubCategory(
-    IModelApp.viewManager,
-    subCategory,
-    false,
-    true
-  ));
+  enabledSubCategories.forEach((subCategory) => enableSubCategory(IModelApp.viewManager, subCategory, false, true));
 
-  await enableCategory(
-    IModelApp.viewManager,
-    viewport.iModel,
-    enabled,
-    false,
-    true
-  );
+  await enableCategory(IModelApp.viewManager, viewport.iModel, enabled, false, true);
 
   // Enable disabled
-  disabledSubCategories.forEach((subCategory) => enableSubCategory(
-    IModelApp.viewManager,
-    subCategory,
-    true,
-    true
-  ));
+  disabledSubCategories.forEach((subCategory) => enableSubCategory(IModelApp.viewManager, subCategory, true, true));
 
-  await enableCategory(
-    IModelApp.viewManager,
-    viewport.iModel,
-    disabled,
-    true,
-    true
-  );
+  await enableCategory(IModelApp.viewManager, viewport.iModel, disabled, true, true);
 }

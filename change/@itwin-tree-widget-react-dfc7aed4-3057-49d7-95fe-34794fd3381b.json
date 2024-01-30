@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Update `@itwin/itwinui-react` version to `2.12.19`.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

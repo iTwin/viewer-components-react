@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useContext, useState } from "react";
 import { IModelAppUserPreferencesStorage } from "./api/PreferencesStorage";
@@ -27,9 +27,7 @@ export function PreferencesContextProvider({ storage, children }: PropsWithChild
     storage: storage ?? new IModelAppUserPreferencesStorage(),
   }));
 
-  return <preferencesContext.Provider value={contextValue}>
-    {children}
-  </preferencesContext.Provider>;
+  return <preferencesContext.Provider value={contextValue}>{children}</preferencesContext.Provider>;
 }
 
 /** @internal */

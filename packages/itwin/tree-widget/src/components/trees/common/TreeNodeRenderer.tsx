@@ -1,16 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useContext } from "react";
 import { PrimitivePropertyValueRenderer } from "@itwin/components-react";
 
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type {
-  IPropertyValueRenderer, PropertyValueRendererContext, TreeModelNode,
-} from "@itwin/components-react";
+import type { IPropertyValueRenderer, PropertyValueRendererContext, TreeModelNode } from "@itwin/components-react";
 
 /**
  * Context for rendering label value.
@@ -71,11 +69,7 @@ export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererPr
 
 /** @internal */
 export function TreeNodeRendererContextProvider({ nodeLabelRenderer, node, children }: TreeNodeRendererContextProviderProps) {
-  return (
-    <treeNodeLabelRendererContext.Provider value={{ renderer: nodeLabelRenderer, node }}>
-      {children}
-    </treeNodeLabelRendererContext.Provider>
-  );
+  return <treeNodeLabelRendererContext.Provider value={{ renderer: nodeLabelRenderer, node }}>{children}</treeNodeLabelRendererContext.Provider>;
 }
 
 /** @internal */

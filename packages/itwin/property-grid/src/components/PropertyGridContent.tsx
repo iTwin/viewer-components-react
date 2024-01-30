@@ -1,12 +1,20 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
 import { useCallback, useMemo, useState } from "react";
-import { CompositeFilterType, CompositePropertyDataFilterer, DisplayValuePropertyDataFilterer, FilteredType, LabelPropertyDataFilterer, PropertyCategoryLabelFilterer, PropertyValueRendererManager } from "@itwin/components-react";
+import {
+  CompositeFilterType,
+  CompositePropertyDataFilterer,
+  DisplayValuePropertyDataFilterer,
+  FilteredType,
+  LabelPropertyDataFilterer,
+  PropertyCategoryLabelFilterer,
+  PropertyValueRendererManager,
+} from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
 import { Text } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
@@ -20,7 +28,7 @@ import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDro
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { PropertyCategory , PropertyUpdatedArgs } from "@itwin/components-react";
+import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
@@ -38,7 +46,11 @@ export interface PropertyGridPropertyUpdatedArgs extends PropertyUpdatedArgs {
  * Base props for rendering `PropertyGridContent` component.
  * @public
  */
-export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"> {
+export interface PropertyGridContentBaseProps
+  extends Omit<
+    FilteringPropertyGridProps,
+    "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"
+  > {
   imodel: IModelConnection;
   className?: string;
   onBackButton?: () => void;
@@ -103,9 +115,7 @@ export function PropertyGridContent({
     onPropertyContextMenu,
     width,
     height,
-    onPropertyUpdated: onPropertyUpdated
-      ? async (args, category) => onPropertyUpdated({ ...args, dataProvider }, category)
-      : undefined,
+    onPropertyUpdated: onPropertyUpdated ? async (args, category) => onPropertyUpdated({ ...args, dataProvider }, category) : undefined,
   };
 
   return (
@@ -121,11 +131,7 @@ export function PropertyGridContent({
       />
       <div className="property-grid-react-data">
         <ResizableContainerObserver onResize={handleResize}>
-          {
-            dataRenderer
-              ? dataRenderer(dataRendererProps)
-              : <FilteringPropertyGrid {...dataRendererProps} />
-          }
+          {dataRenderer ? dataRenderer(dataRendererProps) : <FilteringPropertyGrid {...dataRendererProps} />}
         </ResizableContainerObserver>
       </div>
       {renderContextMenu()}
@@ -135,7 +141,7 @@ export function PropertyGridContent({
 
 interface PropertyGridHeaderProps {
   controls?: ReactNode;
-  item?: { className: string, label: PropertyRecord };
+  item?: { className: string; label: PropertyRecord };
   onBackButtonClick?: () => void;
   settingsProps: SettingsDropdownMenuProps;
   onSearchTextChange: (searchText: string) => void;
@@ -146,28 +152,23 @@ function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick, 
     return null;
   }
 
-  const headerTools = (<>
-    {controls}
-    {<SettingsDropdownMenu {...settingsProps}/>}
-  </>);
+  const headerTools = (
+    <>
+      {controls}
+      {<SettingsDropdownMenu {...settingsProps} />}
+    </>
+  );
 
   const title = (
     <div className="property-grid-header-title">
       <Text variant="leading" className="property-grid-header-title-text">
         {PropertyValueRendererManager.defaultManager.render(item.label)}
       </Text>
-      <Text className="property-grid-header-title-text">
-        {item.className}
-      </Text>
-    </div>);
-
-  return (
-    <Header onBackButtonClick={onBackButtonClick}
-      onSearchStringChange={onSearchTextChange}
-      title={title}
-      headerTools={headerTools}
-    />
+      <Text className="property-grid-header-title-text">{item.className}</Text>
+    </div>
   );
+
+  return <Header onBackButtonClick={onBackButtonClick} onSearchStringChange={onSearchTextChange} title={title} headerTools={headerTools} />;
 }
 
 interface UseFiltererProps {
@@ -187,7 +188,7 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
     const valueAndRecordFilterer = new CompositePropertyDataFilterer(valueFilterer, CompositeFilterType.Or, labelFilterer);
     const textFilterer = new CompositePropertyDataFilterer(valueAndRecordFilterer, CompositeFilterType.Or, categoryFilterer);
 
-    if(!showNullValues){
+    if (!showNullValues) {
       return new CompositePropertyDataFilterer(textFilterer, CompositeFilterType.And, defaultFilterers.nonEmpty);
     }
 

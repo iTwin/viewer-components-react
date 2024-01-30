@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import type { Group } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type { OverlappedElementGroupPairs } from "../context/GroupHilitedElementsContext";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 import {
-  getHiliteIdsFromGroups,
+  generateOverlappedGroups,
   hideGroupConsideringOverlaps,
-  hideGroups,
   visualizeGroupColors,
 } from "./groupsHelpers";
 import {
@@ -16,6 +16,7 @@ import {
   clearEmphasizedOverriddenElements,
   clearHiddenElements,
   hideElements,
+  zoomToElements,
 } from "../../common/viewerUtils";
 import type { GroupsProps } from "./Groups";
 import { Groups } from "./Groups";
@@ -27,6 +28,11 @@ import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext
 import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupsView";
 import { Alert, Icon, Text } from "@itwin/itwinui-react";
 import { SvgMore } from "@itwin/itwinui-icons-react";
+import { useMappingClient } from "../context/MappingClientContext";
+import { useMutation } from "@tanstack/react-query";
+import { useIsMounted } from "../../common/hooks/useIsMounted";
+import { useFetchGroups } from "./hooks/useFetchGroups";
+import { useKeySetHiliteQueries } from "./hooks/useKeySetHiliteQueries";
 
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
@@ -38,107 +44,125 @@ export const GroupsVisualization = ({
   isNonEmphasizedSelectable = false,
   onClickGroupModify,
   onClickAddGroup,
+  mapping,
   ...rest
 }: GroupsVisualizationProps) => {
   const { iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
-  const [isVisualizing, setIsVisualizing] = useState<boolean>(false);
   const [isAlertClosed, setIsAlertClosed] = useState<boolean>(true);
   const [isAlertExpanded, setIsAlertExpanded] = useState<boolean>(false);
   const {
-    hilitedElementsQueryCache,
-    groups,
     hiddenGroupsIds,
     showGroupColor,
+    setShowGroupColor,
     isOverlappedColored,
     setHiddenGroupsIds,
     setNumberOfVisualizedGroups,
-    setOverlappedElementsInfo,
-    setGroupElementsInfo,
-    overlappedElementsInfo,
-    overlappedElementGroupPairs,
-    setOverlappedElementGroupPairs,
+    isVisualizationsEnabled,
+    setIsVisualizationsEnabled,
+    overlappedElementsMetadata,
+    setOverlappedElementsMetadata,
   } = useGroupHilitedElementsContext();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const mappingClient = useMappingClient();
+  const { data: groups, isFetched: isGroupsFetched, isFetching: isGroupsFetching } = useFetchGroups(iModelId, mapping.id, getAccessToken, mappingClient);
+  const isMounted = useIsMounted();
+  const [enableGroupQueries, setEnableGroupQueries] = useState<boolean>(false);
+  const { groupQueries } = useKeySetHiliteQueries(groups ?? [], enableGroupQueries, iModelConnection);
 
-  const getHiliteIdsFromGroupsWrapper = useCallback(
-    async (groups: Group[]): Promise<string[]> =>
-      iModelConnection
-        ? getHiliteIdsFromGroups(
-          iModelConnection,
-          groups,
-          hilitedElementsQueryCache
-        )
+  const triggerVisualization = useCallback(async (groupsWithGroupedOverlaps: OverlappedElementGroupPairs[]) =>
+    visualizeGroupColors(
+      hiddenGroupsIds,
+      groupsWithGroupedOverlaps,
+      setNumberOfVisualizedGroups,
+      emphasizeElements,
+    ), [emphasizeElements, hiddenGroupsIds, setNumberOfVisualizedGroups]);
+
+  const zoomToElementsMutation = useMutation({
+    mutationFn: zoomToElements,
+    onSuccess: () => {
+      if (isMounted()) {
+        isNonEmphasizedSelectable && clearEmphasizedElements();
+      }
+    },
+  });
+
+  const visualizationMutation = useMutation({
+    mutationFn: triggerVisualization,
+    onSuccess: (allIds) => {
+      if (isMounted()) {
+        zoomToElementsMutation.mutate(allIds);
+      }
+    },
+  });
+
+  const isGroupsQueriesReady = useMemo(() =>
+    groupQueries.every((query) => query.isFetched && query.data) && groupQueries.length > 0, [groupQueries]
+  );
+  const groupQueriesProgressCount = useMemo(() => groupQueries.filter((query) => query.isFetched).length, [groupQueries]);
+  const isResolvingGroupQueries = useMemo(() => groupQueries.some((query) => query.isFetching), [groupQueries]);
+
+  const hiliteIds = useMemo(
+    () =>
+      isGroupsQueriesReady
+        ? groupQueries.map((query) => ({
+          groupId: query.data!.group.id,
+          elementIds: query.data!.result.ids,
+        }))
         : [],
-    [iModelConnection, hilitedElementsQueryCache]
+    [groupQueries, isGroupsQueriesReady]
+  );
+  const getHiliteIdsFromGroupsWrapper = useCallback(
+    (groups: Group[]) =>
+      hiliteIds.filter((id) => groups.some((group) => group.id === id.groupId)).flatMap((id) => id.elementIds),
+    [hiliteIds]
   );
 
-  const handleVisualizationStates = useCallback((start: boolean = true) => {
-    setIsVisualizing(start);
-    setLoadingQuery(start);
-    if (!start) {
-      setNumberOfVisualizedGroups(0);
-    }
-  }, [setNumberOfVisualizedGroups]);
-
-  const triggerVisualization = useCallback(async () => {
-    handleVisualizationStates(true);
-    const groupsCopy = [...groups];
-    await visualizeGroupColors(
-      iModelConnection,
-      groupsCopy,
-      hiddenGroupsIds,
-      hilitedElementsQueryCache,
-      setNumberOfVisualizedGroups,
-      setOverlappedElementsInfo,
-      setGroupElementsInfo,
-      setOverlappedElementGroupPairs,
-      emphasizeElements,
-    );
-    isNonEmphasizedSelectable && clearEmphasizedElements();
-    handleVisualizationStates(false);
-  }, [handleVisualizationStates, groups, iModelConnection, hiddenGroupsIds, hilitedElementsQueryCache, setNumberOfVisualizedGroups, setOverlappedElementsInfo, setGroupElementsInfo, setOverlappedElementGroupPairs, emphasizeElements, isNonEmphasizedSelectable]);
-
   useEffect(() => {
-    const visualize = async () => {
-      if (isOverlappedColored === false) {
-        if (groups.length > 0 && showGroupColor) {
-          await triggerVisualization();
-        } else {
-          clearEmphasizedOverriddenElements();
-        }
+    if (isOverlappedColored === false) {
+      if (hiliteIds.length > 0 && showGroupColor && !isGroupsFetching) {
+        const results = generateOverlappedGroups(hiliteIds);
+        const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
+        setOverlappedElementsMetadata({ overlappedElementsInfo, groupElementsInfo: numberOfElementsInGroups, overlappedElementGroupPairs: groupsWithGroupedOverlaps });
+        visualizationMutation.mutate(results.groupsWithGroupedOverlaps);
+      } else {
+        clearEmphasizedOverriddenElements();
       }
-    };
-    void visualize();
+    }
     // We don't want to trigger full visualization when toggling individual groups.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groups, showGroupColor, isOverlappedColored]);
+  }, [showGroupColor, isOverlappedColored, hiliteIds]);
+
+  useEffect(() => {
+    if (isVisualizationsEnabled) {
+      setEnableGroupQueries(true);
+    } else {
+      setShowGroupColor(false);
+      clearHiddenElements();
+      setHiddenGroupsIds(new Set());
+    }
+  }, [isVisualizationsEnabled, setHiddenGroupsIds, setIsVisualizationsEnabled, setShowGroupColor]);
 
   const hideAllGroups = useCallback(
-    async () => {
-      setLoadingQuery(true);
-      await hideGroups(iModelConnection, groups, hilitedElementsQueryCache);
-      setLoadingQuery(false);
+    () => {
+      if (!groups) return;
+      hideElements(getHiliteIdsFromGroupsWrapper(groups));
     },
-    [groups, hilitedElementsQueryCache, iModelConnection]
+    [getHiliteIdsFromGroupsWrapper, groups]
   );
 
   const hideSingleGroupWrapper = useCallback(
-    async (groupToHide: Group) => {
-      setLoadingQuery(true);
-
-      await hideGroupConsideringOverlaps(overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
-
-      setLoadingQuery(false);
+    (groupToHide: Group) => {
+      hideGroupConsideringOverlaps(overlappedElementsMetadata.overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
     },
-    [overlappedElementGroupPairs, hiddenGroupsIds]
+    [hiddenGroupsIds, overlappedElementsMetadata.overlappedElementGroupPairs]
   );
 
   const showGroup = useCallback(
-    async (viewGroup: Group) => {
-      setLoadingQuery(true);
+    (viewGroup: Group) => {
+      if (!groups) return;
       clearHiddenElements();
 
       // hide group Ids filter
@@ -146,44 +170,38 @@ export const GroupsVisualization = ({
 
       // view group Ids filter
       const viewGroups = groups.filter((g) => !hiddenGroupsIds.has(g.id) || g.id === viewGroup.id);
-      const viewIds = await getHiliteIdsFromGroupsWrapper(viewGroups);
+      const viewIds = getHiliteIdsFromGroupsWrapper(viewGroups);
 
-      let hiddenIds = await getHiliteIdsFromGroupsWrapper(newHiddenGroups);
+      let hiddenIds = getHiliteIdsFromGroupsWrapper(newHiddenGroups);
       hiddenIds = hiddenIds.filter((id) => !viewIds.includes(id));
       hideElements(hiddenIds);
-      setLoadingQuery(false);
     },
     [groups, hiddenGroupsIds, getHiliteIdsFromGroupsWrapper]
   );
 
-  const showAll = useCallback(async () => {
-    setLoadingQuery(true);
-
+  const showAll = useCallback(() => {
     clearHiddenElements();
     setHiddenGroupsIds(new Set());
-    await getHiliteIdsFromGroupsWrapper(groups);
+  }, [setHiddenGroupsIds]);
 
-    setLoadingQuery(false);
-  }, [getHiliteIdsFromGroupsWrapper, groups, setHiddenGroupsIds]);
-
-  const hideAll = useCallback(async () => {
-    await hideAllGroups();
+  const hideAll = useCallback(() => {
+    if (!groups) return;
+    hideAllGroups();
     setHiddenGroupsIds(
       new Set(groups.map((g) => g.id))
     );
-    await getHiliteIdsFromGroupsWrapper(groups);
+
   }, [
     setHiddenGroupsIds,
     groups,
     hideAllGroups,
-    getHiliteIdsFromGroupsWrapper,
   ]);
 
   const onModify = useCallback(
-    async (group: Group, type: string) => {
+    (group: Group, type: string) => {
       if (!onClickGroupModify) return;
       if (group.id && hiddenGroupsIds.has(group.id)) {
-        await showGroup(group);
+        showGroup(group);
         setHiddenGroupsIds(new Set([...hiddenGroupsIds].filter((id) => id !== group.id)));
       }
       clearEmphasizedElements();
@@ -201,21 +219,21 @@ export const GroupsVisualization = ({
     [onClickAddGroup]
   );
 
-  const groupActionButtonRenderers: ActionButtonRenderer[] = useMemo(() => [
+  const groupActionButtonRenderers: ActionButtonRenderer[] = useMemo(() => isVisualizationsEnabled ? [
     (props: ActionButtonRendererProps) =>
-      showGroupColor ? <GroupColorLegend {...props} groups={groups} /> : [],
+      showGroupColor ? <GroupColorLegend {...props} groups={groups ?? []} /> : [],
     (props: ActionButtonRendererProps) => (
       <GroupsShowHideButtons
         {...props}
-        isLoadingQuery={isLoadingQuery}
+        isLoadingQuery={!(isVisualizationsEnabled && isGroupsFetched && isGroupsQueriesReady)}
         showGroup={showGroup}
         hideGroup={hideSingleGroupWrapper}
       />
     ),
-  ].flat(), [groups, hideSingleGroupWrapper, isLoadingQuery, showGroup, showGroupColor]);
+  ].flat() : [], [groups, hideSingleGroupWrapper, isGroupsFetched, isGroupsQueriesReady, isVisualizationsEnabled, showGroup, showGroupColor]);
 
   const overlappedAlert = useMemo(() =>
-    overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor && !isVisualizing ?
+    overlappedElementsMetadata.overlappedElementsInfo.size > 0 && isAlertClosed && showGroupColor ?
       <Alert
         onClose={() => setIsAlertClosed(false)}
         clickableText={isAlertExpanded ? "Less Details" : "More Details"}
@@ -225,17 +243,31 @@ export const GroupsVisualization = ({
         {isAlertExpanded ? (
           <>
             <br />
-            To get overlap info in detail, click the <Icon><SvgMore/></Icon> button then &ldquo;Overlap Info&rdquo;
+            To get overlap info in detail, click the <Icon><SvgMore /></Icon> button then &ldquo;Overlap Info&rdquo;
           </>
         ) : undefined}
-      </Alert> : undefined,
-  [isAlertClosed, isAlertExpanded, isVisualizing, overlappedElementsInfo.size, showGroupColor]
+      </Alert> : undefined, [isAlertClosed, isAlertExpanded, overlappedElementsMetadata.overlappedElementsInfo.size, showGroupColor]
+  );
+
+  const progressConfig = useMemo(
+    () =>
+      isVisualizationsEnabled && isResolvingGroupQueries
+        ? {
+          hilitedGroupsProgress: {
+            currentHilitedGroups: groupQueriesProgressCount,
+            totalNumberOfGroups: groups?.length ?? 0,
+          },
+        }
+        : undefined,
+    [groupQueriesProgressCount, groups, isResolvingGroupQueries, isVisualizationsEnabled],
   );
 
   return (
     <div className="gmw-groups-vis-container">
       <GroupVisualizationActions
-        isLoadingQuery={isLoadingQuery}
+        disabled={!(isVisualizationsEnabled && isGroupsFetched && isGroupsQueriesReady)}
+        isVisualizationEnabled={isVisualizationsEnabled}
+        onClickVisualizationButton={() => setIsVisualizationsEnabled((b) => !b)}
         showAll={showAll}
         hideAll={hideAll}
       />
@@ -243,9 +275,9 @@ export const GroupsVisualization = ({
         onClickGroupModify={onModify}
         onClickAddGroup={onAddGroup}
         actionButtonRenderers={groupActionButtonRenderers}
+        mapping={mapping}
         {...rest}
-        disableActions={isLoadingQuery}
-        isVisualizing={isVisualizing}
+        progressConfig={progressConfig}
         alert={overlappedAlert}
       />
     </div>

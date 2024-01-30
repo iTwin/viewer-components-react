@@ -15,6 +15,7 @@ Array [
                     "children": Array [
                       Object {
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "icon": "icon-item",
@@ -34,6 +35,7 @@ Array [
                     ],
                     "description": "A bis:SubCategory is a subdivision of a bis:Category. SubCategories allow GeometricElements to have multiple pieces of Geometry that can be independently visible and styled (color, linesStyle, transparency, etc.). It is important to understand that a bis:SubCategory is not a bis:Category (i.e. Categories do not nest). bis:GeometricElements are always related to a bis:Category, not a bis:SubCategory.",
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -53,6 +55,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -73,6 +76,7 @@ Array [
             ],
             "description": "A bis:SpatialCategory is used for classifying bis:GeometricElement3d elements via the bis:GeometricElement3dIsInCategory (concrete and sealed) relationship.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -92,6 +96,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -121,6 +126,7 @@ Array [
                         "children": Array [
                           Object {
                             "filtering": Object {
+                              "ancestorFilters": Array [],
                               "descriptor": [Function],
                             },
                             "icon": "icon-item",
@@ -140,6 +146,7 @@ Array [
                         ],
                         "description": "The generic:PhysicalObject class is used for bis:PhysicalElements which cannot be further classified. More-specific bis:PhysicalElement subclasses should be used wherever possible.",
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "hasChildren": true,
@@ -159,6 +166,7 @@ Array [
                       },
                     ],
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -211,6 +219,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -262,6 +271,7 @@ Array [
                     "children": Array [
                       Object {
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "icon": "icon-item",
@@ -281,6 +291,7 @@ Array [
                     ],
                     "description": "A bis:SubCategory is a subdivision of a bis:Category. SubCategories allow GeometricElements to have multiple pieces of Geometry that can be independently visible and styled (color, linesStyle, transparency, etc.). It is important to understand that a bis:SubCategory is not a bis:Category (i.e. Categories do not nest). bis:GeometricElements are always related to a bis:Category, not a bis:SubCategory.",
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -300,6 +311,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -320,6 +332,7 @@ Array [
             ],
             "description": "A bis:SpatialCategory is used for classifying bis:GeometricElement3d elements via the bis:GeometricElement3dIsInCategory (concrete and sealed) relationship.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -339,6 +352,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -364,6 +378,7 @@ Array [
                 "children": Array [
                   Object {
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "icon": "icon-item",
@@ -415,6 +430,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -458,6 +474,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",
@@ -484,6 +501,7 @@ Array [
                     "children": Array [
                       Object {
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "icon": "icon-item",
@@ -503,6 +521,7 @@ Array [
                     ],
                     "description": "A bis:Drawing is a bis:Document of a 2D drawing.",
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -522,6 +541,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -542,6 +562,7 @@ Array [
             ],
             "description": "A bis:Drawing is a bis:Document of a 2D drawing.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -561,6 +582,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -604,6 +626,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",
@@ -632,6 +655,7 @@ Array [
                         "children": Array [
                           Object {
                             "filtering": Object {
+                              "ancestorFilters": Array [],
                               "descriptor": [Function],
                             },
                             "icon": "icon-item",
@@ -650,6 +674,7 @@ Array [
                           },
                         ],
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "hasChildren": true,
@@ -669,6 +694,7 @@ Array [
                       },
                     ],
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -688,6 +714,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -707,6 +734,7 @@ Array [
               },
             ],
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -726,6 +754,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -769,6 +798,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",
@@ -791,6 +821,7 @@ Array [
             "children": Array [
               Object {
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "icon": "icon-item",
@@ -809,6 +840,7 @@ Array [
               },
             ],
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -828,6 +860,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -871,6 +904,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",
@@ -893,6 +927,7 @@ Array [
             "children": Array [
               Object {
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "icon": "icon-item",
@@ -912,6 +947,7 @@ Array [
             ],
             "description": "A bis:Drawing is a bis:Document of a 2D drawing.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -931,6 +967,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -960,6 +997,7 @@ Array [
                         "children": Array [
                           Object {
                             "filtering": Object {
+                              "ancestorFilters": Array [],
                               "descriptor": [Function],
                             },
                             "icon": "icon-item",
@@ -979,6 +1017,7 @@ Array [
                         ],
                         "description": "A bis:Drawing is a bis:Document of a 2D drawing.",
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "hasChildren": true,
@@ -998,6 +1037,7 @@ Array [
                       },
                     ],
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -1017,6 +1057,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -1036,6 +1077,7 @@ Array [
               },
             ],
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -1055,6 +1097,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -1106,6 +1149,7 @@ Array [
                     "children": Array [
                       Object {
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "icon": "icon-item",
@@ -1125,6 +1169,7 @@ Array [
                     ],
                     "description": "A bis:SubCategory is a subdivision of a bis:Category. SubCategories allow GeometricElements to have multiple pieces of Geometry that can be independently visible and styled (color, linesStyle, transparency, etc.). It is important to understand that a bis:SubCategory is not a bis:Category (i.e. Categories do not nest). bis:GeometricElements are always related to a bis:Category, not a bis:SubCategory.",
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -1144,6 +1189,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -1164,6 +1210,7 @@ Array [
             ],
             "description": "A bis:DrawingCategory is used for classifying bis:GeometricElement2d elements via the bis:GeometricElement2dIsInCategory (concrete and sealed) relationship.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -1183,6 +1230,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -1212,6 +1260,7 @@ Array [
                         "children": Array [
                           Object {
                             "filtering": Object {
+                              "ancestorFilters": Array [],
                               "descriptor": [Function],
                             },
                             "icon": "icon-item",
@@ -1263,6 +1312,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -1283,6 +1333,7 @@ Array [
             ],
             "description": "A bis:Drawing is a bis:Document of a 2D drawing.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -1302,6 +1353,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -1345,6 +1397,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",
@@ -1367,6 +1420,7 @@ Array [
             "children": Array [
               Object {
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "icon": "icon-item",
@@ -1386,6 +1440,7 @@ Array [
             ],
             "description": "A bis:Drawing is a bis:Document of a 2D drawing.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -1405,6 +1460,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -1456,6 +1512,7 @@ Array [
                     "children": Array [
                       Object {
                         "filtering": Object {
+                          "ancestorFilters": Array [],
                           "descriptor": [Function],
                         },
                         "icon": "icon-item",
@@ -1475,6 +1532,7 @@ Array [
                     ],
                     "description": "A bis:SubCategory is a subdivision of a bis:Category. SubCategories allow GeometricElements to have multiple pieces of Geometry that can be independently visible and styled (color, linesStyle, transparency, etc.). It is important to understand that a bis:SubCategory is not a bis:Category (i.e. Categories do not nest). bis:GeometricElements are always related to a bis:Category, not a bis:SubCategory.",
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "hasChildren": true,
@@ -1494,6 +1552,7 @@ Array [
                   },
                 ],
                 "filtering": Object {
+                  "ancestorFilters": Array [],
                   "descriptor": [Function],
                 },
                 "hasChildren": true,
@@ -1514,6 +1573,7 @@ Array [
             ],
             "description": "A bis:SpatialCategory is used for classifying bis:GeometricElement3d elements via the bis:GeometricElement3dIsInCategory (concrete and sealed) relationship.",
             "filtering": Object {
+              "ancestorFilters": Array [],
               "descriptor": [Function],
             },
             "hasChildren": true,
@@ -1533,6 +1593,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -1558,6 +1619,7 @@ Array [
                 "children": Array [
                   Object {
                     "filtering": Object {
+                      "ancestorFilters": Array [],
                       "descriptor": [Function],
                     },
                     "icon": "icon-item",
@@ -1609,6 +1671,7 @@ Array [
           },
         ],
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "hasChildren": true,
@@ -1652,6 +1715,7 @@ Array [
     "children": Array [
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",
@@ -1670,6 +1734,7 @@ Array [
       },
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",
@@ -1760,6 +1825,7 @@ Array [
       },
       Object {
         "filtering": Object {
+          "ancestorFilters": Array [],
           "descriptor": [Function],
         },
         "icon": "icon-model",

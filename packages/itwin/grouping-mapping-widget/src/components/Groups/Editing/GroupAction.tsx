@@ -7,11 +7,9 @@ import type {
 } from "@itwin/itwinui-react";
 import {
   Button,
-  toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { LoadingSpinner } from "../../SharedComponents/LoadingSpinner";
-import { handleError } from "../../../common/utils";
 import "./GroupAction.scss";
 import useValidator from "../../Properties/hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
@@ -25,6 +23,7 @@ import { GroupDetailsStep } from "./GroupDetailsStep";
 import { QueryBuilderActionPanel } from "../QueryBuilder/QueryBuilderActionPanel";
 import { GroupDetailsActionPanel } from "./GroupDetailsActionPanel";
 import { useVisualization } from "../hooks/useVisualization";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const defaultDisplayStrings = {
   groupDetails: "Group Details",
@@ -62,14 +61,13 @@ export const GroupAction = (props: GroupActionProps) => {
   const [queryRowCount, setQueryRowCount] = useState<number>(0);
 
   const [validator, setShowValidationMessage] = useValidator();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   const [queryGenerationType, setQueryGenerationType] = useState(
     props.queryGenerationType,
   );
   const {
     isRendering,
-    setIsRendering,
     simpleSelectionQuery,
     setSimpleSelectionQuery,
     clearPresentationSelection,
@@ -80,7 +78,7 @@ export const GroupAction = (props: GroupActionProps) => {
     query,
     queryGenerationType
   );
-  const isUpdating = isLoading || isRendering;
+
   const [currentStep, setCurrentStep] = React.useState(GroupActionStep.QueryBuilder);
 
   const displayStrings = React.useMemo(
@@ -90,32 +88,24 @@ export const GroupAction = (props: GroupActionProps) => {
 
   useEffect(() => setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
 
+  const fetchQueryRowCount = async (query: string) => {
+    const rowCount = (await iModelConnection.createQueryReader(`SELECT count(*) FROM (${query})`).next()).value[0];
+    return rowCount as number;
+  };
+
+  const { mutate, isLoading: isQueryLoading } = useMutation(fetchQueryRowCount, {
+    onSuccess: (result) => {
+      setQueryRowCount(result);
+    },
+  });
+
   useEffect(() => {
-    const fetchQueryRowCount = async () => {
-      try {
-        if (!query || query === "") {
-          setQueryRowCount(0);
-          return;
-        }
-        setIsLoading(true);
-        const result = await iModelConnection.queryRowCount(query);
-        setQueryRowCount(result);
-      } catch {
-        toaster.negative("Query failed to resolve.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void fetchQueryRowCount();
-  }, [iModelConnection, query, setIsRendering]);
-
-  const isBlockingActions = !(
-    details.groupName &&
-    (query || simpleSelectionQuery) &&
-    !isRendering &&
-    !isLoading
-  );
+    if (query) {
+      mutate(query);
+    } else {
+      setQueryRowCount(0);
+    }
+  }, [iModelConnection, query, mutate]);
 
   const getOptions = useMemo(
     (): SelectOption<string>[] =>
@@ -138,34 +128,29 @@ export const GroupAction = (props: GroupActionProps) => {
     [clearPresentationSelection, resetView, setSimpleSelectionQuery]
   );
 
-  const save = useCallback(async () => {
-    if (!validator.allValid()) {
-      setShowValidationMessage(true);
-      return;
-    }
-    try {
-      setIsLoading(true);
-      const currentQuery = query || simpleSelectionQuery;
+  const saveGroup = async () => {
+    const accessToken = await getAccessToken();
+    const currentQuery = query || simpleSelectionQuery;
 
-      const accessToken = await getAccessToken();
+    return props.group
+      ? mappingClient.updateGroup(
+        accessToken,
+        iModelId,
+        props.mappingId,
+        props.group.id,
+        { ...details, query: currentQuery }
+      )
+      : mappingClient.createGroup(
+        accessToken,
+        iModelId,
+        props.mappingId,
+        { ...details, query: currentQuery }
+      );
+  };
 
-      props.group
-        ? await mappingClient.updateGroup(
-          accessToken,
-          iModelId,
-          props.mappingId,
-          props.group.id ?? "",
-          { ...details, query: currentQuery },
-        )
-        : await mappingClient.createGroup(
-          accessToken,
-          iModelId,
-          props.mappingId,
-          {
-            ...details,
-            query: currentQuery,
-          },
-        );
+  const { mutate: onSaveMutate, isLoading: isSaveLoading } = useMutation(saveGroup, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["groups"] });
       clearPresentationSelection();
       setDetails({
         groupName: props.group?.groupName ?? "",
@@ -174,15 +159,42 @@ export const GroupAction = (props: GroupActionProps) => {
       setCurrentStep(GroupActionStep.QueryBuilder);
       setShowValidationMessage(false);
       props.onSaveSuccess();
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [validator, setShowValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, clearPresentationSelection]);
+
+    },
+  });
 
   const isQueryBuilderStep = currentStep === GroupActionStep.QueryBuilder;
   const isGroupDetailsStep = currentStep === GroupActionStep.GroupDetails;
+
+  const isLoading = isSaveLoading || isQueryLoading;
+
+  const isUpdating = isLoading || isRendering;
+
+  const isBlockingActions = !(details.groupName && (query || simpleSelectionQuery)) || isRendering || isLoading;
+
+  const onClickSave = useCallback(() => {
+    if (!validator.allValid()) {
+      setShowValidationMessage(true);
+      return;
+    }
+    onSaveMutate();
+  }, [onSaveMutate, setShowValidationMessage, validator]);
+
+  const onClickBack = useCallback(() => {
+    setCurrentStep(GroupActionStep.QueryBuilder);
+  }, []);
+
+  const onClickCancel = useCallback(() => {
+    clearPresentationSelection();
+    if (props.onClickCancel) {
+      props.onClickCancel();
+    }
+  }, [clearPresentationSelection, props]);
+
+  const onClickNext = useCallback(() => {
+    setCurrentStep(GroupActionStep.GroupDetails);
+  }, []);
+
   return (
     <>
       <div className="gmw-group-add-modify-container">
@@ -211,22 +223,19 @@ export const GroupAction = (props: GroupActionProps) => {
           <LoadingSpinner />
         }
         {isQueryBuilderStep && (
-          <QueryBuilderActionPanel onClickNext={() => setCurrentStep(GroupActionStep.GroupDetails)} />
+          <QueryBuilderActionPanel onClickNext={onClickNext} />
         )}
         {isGroupDetailsStep && (
           <GroupDetailsActionPanel
             isSaveDisabled={isBlockingActions}
-            onClickSave={save}
-            onClickBack={() => setCurrentStep(GroupActionStep.QueryBuilder)}
+            onClickSave={onClickSave}
+            onClickBack={onClickBack}
           />
         )}
         {props.onClickCancel && <Button
           type='button'
           id='cancel'
-          onClick={() => {
-            clearPresentationSelection();
-            props.onClickCancel && props.onClickCancel();
-          }}
+          onClick={onClickCancel}
         >
           Cancel
         </Button>}

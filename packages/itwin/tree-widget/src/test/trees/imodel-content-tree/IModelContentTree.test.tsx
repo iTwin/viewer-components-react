@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { join } from "path";
@@ -12,27 +12,36 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { LabelDefinition } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyBuilder,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { render, waitFor } from "@testing-library/react";
 import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../tree-widget-react";
 import {
-  addDocument, addDrawingCategory, addDrawingGraphic, addGroup, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubject,
+  addDocument,
+  addDrawingCategory,
+  addDrawingGraphic,
+  addGroup,
+  addModel,
+  addPartition,
+  addPhysicalObject,
+  addSpatialCategory,
+  addSubject,
 } from "../../IModelUtils";
-import { mockPresentationManager, renderWithUser, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Node, NodeKey } from "@itwin/presentation-common";
 
 describe("IModelContentTree", () => {
-
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };
 
     before(async () => {
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
+      await NoRenderApp.startup();
       await TestUtils.initialize();
     });
 
@@ -62,20 +71,17 @@ describe("IModelContentTree", () => {
       };
 
       function setupHierarchy(nodes: Node[]) {
-        presentationManagerMock.setup(async (x) => x.getNodesAndCount(moq.It.isAny())).returns(async () => ({
-          count: nodes.length,
-          nodes,
-        }));
+        presentationManagerMock
+          .setup(async (x) => x.getNodesAndCount(moq.It.isAny()))
+          .returns(async () => ({
+            count: nodes.length,
+            nodes,
+          }));
       }
 
       it("should render hierarchy", async () => {
         setupHierarchy([{ key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("test-node") }]);
-        const result = render(
-          <IModelContentTree
-            {...sizeProps}
-            iModel={imodelMock.object}
-          />,
-        );
+        const result = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} />);
         const node = await waitFor(() => result.getByText("test-node"));
         const tree = result.getByRole("tree");
         const item = result.getByRole("treeitem");
@@ -85,14 +91,8 @@ describe("IModelContentTree", () => {
 
       it("renders context menu", async () => {
         setupHierarchy([{ key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("test-node") }]);
-        const { user, getByText, queryByText } = renderWithUser(
-          <IModelContentTree
-            {...sizeProps}
-            iModel={imodelMock.object}
-            contextMenuItems={[
-              () => <div>Test Menu Item</div>,
-            ]}
-          />,
+        const { user, getByText, queryByText } = render(
+          <IModelContentTree {...sizeProps} iModel={imodelMock.object} contextMenuItems={[() => <div>Test Menu Item</div>]} />,
         );
         const node = await waitFor(() => getByText("test-node"));
         await user.pointer({ keys: "[MouseRight>]", target: node });
@@ -125,7 +125,8 @@ describe("IModelContentTree", () => {
 
     describe("subjects' children", () => {
       it("creates subjects hierarchy", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           addSubject(builder, "A", IModel.rootSubjectId);
           const b = addSubject(builder, "B", IModel.rootSubjectId);
           addSubject(builder, "C", b);
@@ -136,7 +137,8 @@ describe("IModelContentTree", () => {
       });
 
       it("creates 3d model nodes child nodes", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
           addModel(builder, "BisCore:PhysicalModel", partitionId);
         });
@@ -148,8 +150,13 @@ describe("IModelContentTree", () => {
 
     describe("models' children", () => {
       it("creates drawing category child nodes for 2d models", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
-          const documentModelId = addModel(builder, "BisCore:DocumentListModel", addPartition(builder, "BisCore:DocumentPartition", "test partition", IModel.rootSubjectId));
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
+          const documentModelId = addModel(
+            builder,
+            "BisCore:DocumentListModel",
+            addPartition(builder, "BisCore:DocumentPartition", "test partition", IModel.rootSubjectId),
+          );
           const modeledElementId = addDocument(builder, documentModelId, builder.createCode(documentModelId, BisCodeSpec.nullCodeSpec, "test document"));
           const drawingModelId = addModel(builder, "BisCore:DrawingModel", modeledElementId);
           const drawingCategoryId = addDrawingCategory(builder, IModel.dictionaryId, "drawing category");
@@ -161,7 +168,8 @@ describe("IModelContentTree", () => {
       });
 
       it("creates spatial category child nodes for 3d models", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
           const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
           const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "test category");
@@ -173,7 +181,8 @@ describe("IModelContentTree", () => {
       });
 
       it("creates element child nodes for non-graphical models", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:DocumentPartition", "test partition", IModel.rootSubjectId);
           const modelId = addModel(builder, "BisCore:DocumentListModel", partitionId);
           addDocument(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "test document"));
@@ -186,7 +195,8 @@ describe("IModelContentTree", () => {
 
     describe("groups' children", () => {
       it("creates childless node when group has no child or grouped elements", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:GroupInformationPartition", "test partition", IModel.rootSubjectId);
           const modelId = addModel(builder, "Generic:GroupModel", partitionId);
           addGroup(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "test group"));
@@ -197,7 +207,8 @@ describe("IModelContentTree", () => {
       });
 
       it("creates child elements as child nodes", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:GroupInformationPartition", "test partition", IModel.rootSubjectId);
           const modelId = addModel(builder, "Generic:GroupModel", partitionId);
           const parentGroupId = addGroup(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "parent group"));
@@ -209,7 +220,8 @@ describe("IModelContentTree", () => {
       });
 
       it("creates grouped elements as child nodes", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const groupPartitionId = addPartition(builder, "BisCore:GroupInformationPartition", "group partition", IModel.rootSubjectId);
           const groupModelId = addModel(builder, "Generic:GroupModel", groupPartitionId);
           const groupId = addGroup(builder, groupModelId, builder.createCode(groupPartitionId, BisCodeSpec.nullCodeSpec, "group"));
@@ -232,7 +244,8 @@ describe("IModelContentTree", () => {
 
     describe("elements' children", () => {
       it("creates childless node when element has no child or modeling elements", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
           const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
           const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "test category");
@@ -244,7 +257,8 @@ describe("IModelContentTree", () => {
       });
 
       it("creates child elements as child nodes", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
           const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
           const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "test category");
@@ -257,7 +271,8 @@ describe("IModelContentTree", () => {
       });
 
       it("creates modeling elements as child nodes", async function () {
-        const imodel = await buildTestIModel(this, (builder) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const imodel = await buildTestIModel(this, async (builder) => {
           const partitionId = addPartition(builder, "BisCore:DocumentPartition", "test partition", IModel.rootSubjectId);
           const modelId = addModel(builder, "BisCore:DocumentListModel", partitionId);
           const parentElementId = addDocument(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "parent document"));

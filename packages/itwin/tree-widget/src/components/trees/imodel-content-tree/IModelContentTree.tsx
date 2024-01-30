@@ -1,11 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-import { useMemo } from "react";
-import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
-import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import { SelectionMode } from "@itwin/components-react";
+import { PresentationTree, usePresentationTreeState } from "@itwin/presentation-components";
 import { TreeRenderer } from "../common/TreeRenderer";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 
@@ -32,39 +31,31 @@ export type IModelContentTreeProps = BaseTreeProps;
 export const IModelContentTree = (props: IModelContentTreeProps) => {
   const { iModel, width, height, selectionMode, contextMenuItems } = props;
 
-  const { nodeLoader } = usePresentationTreeNodeLoader({
+  const state = usePresentationTreeState({
     imodel: iModel,
     ruleset: RULESET_IMODEL_CONTENT,
     pagingSize: 20,
     appendChildrenCountForGroupingNodes: true,
     customizeTreeNodeItem,
   });
-  const eventHandler = useTreeEventsHandler(useMemo(() => ({ nodeLoader, modelSource: nodeLoader.modelSource }), [nodeLoader]));
 
-  const treeModel = useTreeModel(nodeLoader.modelSource);
+  if (!state) {
+    return null;
+  }
 
   return (
     <div className="tree-widget-tree-container">
-      <ControlledTree
+      <PresentationTree
         width={width}
         height={height}
-        nodeLoader={nodeLoader}
+        state={state}
         selectionMode={selectionMode ?? SelectionMode.None}
-        eventsHandler={eventHandler}
-        model={treeModel}
-        treeRenderer={(treeProps) =>
-          <TreeRenderer
-            {...treeProps}
-            contextMenuItems={contextMenuItems}
-            nodeLabelRenderer={props.nodeLabelRenderer}
-            density={props.density}
-          />
-        }
+        treeRenderer={(treeProps) => (
+          <TreeRenderer {...treeProps} contextMenuItems={contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} density={props.density} />
+        )}
       />
     </div>
   );
 };
 
-const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
-  addCustomTreeNodeItemLabelRenderer,
-]);
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([addCustomTreeNodeItemLabelRenderer]);

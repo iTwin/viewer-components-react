@@ -16,10 +16,7 @@ export const locatePanel = (page: Page, side: PanelSide) => page.locator(`.nz-wi
 
 export const expandStagePanel = async (page: Page, side: PanelSide, px: number) => {
   const widgetPanel = locatePanel(page, side);
-  const handlePos = await widgetPanel
-    .locator(".nz-grip-container")
-    .locator(".nz-handle")
-    .boundingBox();
+  const handlePos = await widgetPanel.locator(".nz-grip-container").locator(".nz-handle").boundingBox();
   assert(handlePos);
 
   await page.mouse.move(handlePos.x, handlePos.y);

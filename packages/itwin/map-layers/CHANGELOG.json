@@ -2,6 +2,42 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Mon, 29 Jan 2024 21:37:20 GMT",
+      "version": "5.2.7",
+      "tag": "@itwin/map-layers_v5.2.7",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "2d199e72efdd7836dc148b4c6933f67702fcc8ab",
+            "comment": "Make sure the Feature Info Widget is reopened every time selection change occurs."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "05de91bf6d34cfe29f1df5b640a114346d9b5eee",
+            "comment": "Fixed an issue that would prevent the display of Feature Info properties."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 18 Jan 2024 15:05:39 GMT",
+      "version": "5.2.6",
+      "tag": "@itwin/map-layers_v5.2.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "828c75e8f6bab9b78278ea27c9d0a8bac9fd3d8e",
+            "comment": "Fix issue where two instances of 'Aerial Imagery with labels' are visible in map layers widget"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.5",
       "tag": "@itwin/map-layers_v5.2.5",
       "date": "Mon, 18 Dec 2023 18:31:01 GMT",

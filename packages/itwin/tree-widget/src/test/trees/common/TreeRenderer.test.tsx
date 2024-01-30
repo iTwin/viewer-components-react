@@ -1,23 +1,25 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { waitFor } from "@testing-library/react";
 import { TreeContextMenuItem } from "../../../components/trees/common/ContextMenu";
 import { TreeRenderer } from "../../../components/trees/common/TreeRenderer";
 import { registerRenderers } from "../../../components/trees/common/Utils";
-import { renderWithUser } from "../../TestUtils";
+import { render, waitFor } from "../../TestUtils";
 import { createSimpleTreeModelNode } from "../Common";
 
-import type { ITreeNodeLoader , TreeActions, TreeModel, VisibleTreeNodes } from "@itwin/components-react";
+import type { ITreeNodeLoader, TreeActions, TreeModel, VisibleTreeNodes } from "@itwin/components-react";
 import type { TreeRendererProps } from "../../../components/trees/common/TreeRenderer";
 
 describe("TreeRenderer", () => {
   const nodeLoader = {} as ITreeNodeLoader;
-  const treeActions = {} as TreeActions;
+  const treeActions = {
+    onNodeMouseDown: () => {},
+    onNodeMouseMove: () => {},
+  } as unknown as TreeActions;
 
   const node = createSimpleTreeModelNode("test-node", "Test Node");
   const visibleNodes = {
@@ -25,8 +27,10 @@ describe("TreeRenderer", () => {
     getAtIndex: sinon.stub<Parameters<VisibleTreeNodes["getAtIndex"]>, ReturnType<VisibleTreeNodes["getAtIndex"]>>(),
     getIndexOfNode: () => 0,
     getNumRootNodes: () => 1,
-    getModel: () => ({} as TreeModel),
-    *[Symbol.iterator]() { return; },
+    getModel: () => ({}) as TreeModel,
+    *[Symbol.iterator]() {
+      return;
+    },
   };
 
   const initialProps: TreeRendererProps = {
@@ -47,12 +51,7 @@ describe("TreeRenderer", () => {
   });
 
   it("opens context menu", async () => {
-    const { user, getByText } = renderWithUser(
-      <TreeRenderer
-        {...initialProps}
-        contextMenuItems={[() => <div>Test Item</div>]}
-      />
-    );
+    const { user, getByText } = render(<TreeRenderer {...initialProps} contextMenuItems={[() => <div>Test Item</div>]} />);
 
     const nodeElement = await waitFor(() => getByText("Test Node"));
     await user.pointer({ keys: "[MouseRight>]", target: nodeElement });
@@ -61,11 +60,7 @@ describe("TreeRenderer", () => {
   });
 
   it("doesn't open context menu if there are no items", async () => {
-    const { user, getByText, queryByRole } = renderWithUser(
-      <TreeRenderer
-        {...initialProps}
-      />
-    );
+    const { user, getByText, queryByRole } = render(<TreeRenderer {...initialProps} />);
 
     const nodeElement = await waitFor(() => getByText("Test Node"));
     await user.pointer({ keys: "[MouseRight>]", target: nodeElement });
@@ -74,14 +69,7 @@ describe("TreeRenderer", () => {
   });
 
   it("renders context menu without size if item is `null`", async () => {
-    const { user, getByText, getByRole } = renderWithUser(
-      <TreeRenderer
-        {...initialProps}
-        contextMenuItems={[
-          () => null,
-        ]}
-      />
-    );
+    const { user, getByText, getByRole } = render(<TreeRenderer {...initialProps} contextMenuItems={[() => null]} />);
 
     const nodeElement = await waitFor(() => getByText("Test Node"));
     await user.pointer({ keys: "[MouseRight>]", target: nodeElement });
@@ -93,11 +81,17 @@ describe("TreeRenderer", () => {
 
   it("closes context menu when item is clicked", async () => {
     const selectStub = sinon.stub();
-    const { user, getByText, queryByText } = renderWithUser(
+    const { user, getByText, queryByText } = render(
       <TreeRenderer
         {...initialProps}
-        contextMenuItems={[() => <TreeContextMenuItem id="test-item" onSelect={selectStub}>Test Item</TreeContextMenuItem>]}
-      />
+        contextMenuItems={[
+          () => (
+            <TreeContextMenuItem id="test-item" onSelect={selectStub}>
+              Test Item
+            </TreeContextMenuItem>
+          ),
+        ]}
+      />,
     );
 
     // open menu
@@ -116,12 +110,7 @@ describe("TreeRenderer", () => {
   });
 
   it("renders `enlarged` nodes list", async () => {
-    const { container } = renderWithUser(
-      <TreeRenderer
-        {...initialProps}
-        density={"enlarged"}
-      />
-    );
+    const { container } = render(<TreeRenderer {...initialProps} density={"enlarged"} />);
 
     await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null); // eslint-disable-line deprecation/deprecation
   });
@@ -130,11 +119,7 @@ describe("TreeRenderer", () => {
     const nodeWithoutExpander = createSimpleTreeModelNode("test-node", "Test Node", { numChildren: 0 });
     visibleNodes.getAtIndex.reset();
     visibleNodes.getAtIndex.returns(nodeWithoutExpander);
-    const { container } = renderWithUser(
-      <TreeRenderer
-        {...initialProps}
-      />
-    );
+    const { container } = render(<TreeRenderer {...initialProps} />);
 
     await waitFor(() => expect(container.querySelector(".without-expander")).to.not.be.null); // eslint-disable-line deprecation/deprecation
   });
@@ -151,22 +136,13 @@ describe("TreeRenderer", () => {
     });
 
     it("renders using default renderer", async () => {
-      const { queryByText } = renderWithUser(
-        <TreeRenderer
-          {...initialProps}
-        />
-      );
+      const { queryByText } = render(<TreeRenderer {...initialProps} />);
 
       await waitFor(() => expect(queryByText("Test Node")).to.not.be.null);
     });
 
     it("renders using custom renderer", async () => {
-      const { queryByText } = renderWithUser(
-        <TreeRenderer
-          {...initialProps}
-          nodeLabelRenderer={() => "Custom label"}
-        />
-      );
+      const { queryByText } = render(<TreeRenderer {...initialProps} nodeLabelRenderer={() => "Custom label"} />);
 
       await waitFor(() => expect(queryByText("Custom label")).to.not.be.null);
     });

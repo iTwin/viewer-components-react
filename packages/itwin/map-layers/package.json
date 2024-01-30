@@ -1,6 +1,6 @@
 {
   "name": "@itwin/map-layers",
-  "version": "5.2.5",
+  "version": "5.2.7",
   "description": "Extension that adds a Map Layers Widget",
   "main": "lib/cjs/map-layers.js",
   "module": "lib/esm/map-layers.js",

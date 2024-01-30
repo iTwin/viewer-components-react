@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /** @packageDocumentation
  * @module IModelComponents
  */
@@ -11,13 +11,18 @@ import { CheckBoxState } from "@itwin/core-react";
 import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
 
-import type {
-  CheckBoxInfo, CheckboxStateChange, TreeCheckboxStateChangeEventArgs, TreeModelNode, TreeNodeItem, TreeSelectionChange,
-  TreeSelectionModificationEventArgs, TreeSelectionReplacementEventArgs,
-} from "@itwin/components-react";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
+import type {
+  CheckBoxInfo,
+  CheckboxStateChange,
+  TreeCheckboxStateChangeEventArgs,
+  TreeModelNode,
+  TreeNodeItem,
+  TreeSelectionChange,
+  TreeSelectionModificationEventArgs,
+  TreeSelectionReplacementEventArgs,
+} from "@itwin/components-react";
 import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
-
 /**
  * Data structure that describes instance visibility status.
  * @public
@@ -74,14 +79,19 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     this._visibilityHandler = params.visibilityHandler;
     this._selectionPredicate = params.selectionPredicate;
     this._isChangingVisibility = false;
-    this._listeners.push(this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => {
-      if (this._isChangingVisibility)
-        return;
-      void this.updateCheckboxes(nodeIds, visibilityStatus);
-    }));
-    this._listeners.push(this.modelSource.onModelChanged.addListener(async ([_, changes]) => {
-      void this.updateCheckboxes([...changes.addedNodeIds, ...changes.modifiedNodeIds]);
-    }));
+    this._listeners.push(
+      this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => {
+        if (this._isChangingVisibility) {
+          return;
+        }
+        void this.updateCheckboxes(nodeIds, visibilityStatus);
+      }),
+    );
+    this._listeners.push(
+      this.modelSource.onModelChanged.addListener(async ([_, changes]) => {
+        void this.updateCheckboxes([...changes.addedNodeIds, ...changes.modifiedNodeIds]);
+      }),
+    );
     this.updateCheckboxes(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -92,8 +102,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
 
   private filterSelectionItems(items: TreeNodeItem[]) {
     // istanbul ignore if
-    if (!this._selectionPredicate)
+    if (!this._selectionPredicate) {
       return items;
+    }
 
     return items.filter((item) => this._selectionPredicate!(item));
   }
@@ -149,7 +160,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   private async updateCheckboxes(affectedNodes?: string[], visibilityStatus?: Map<string, VisibilityStatus>) {
-    const changes = await (affectedNodes ? this.collectAffectedNodesCheckboxInfos(affectedNodes, visibilityStatus) : this.collectAllNodesCheckboxInfos(visibilityStatus));
+    const changes = await (affectedNodes
+      ? this.collectAffectedNodesCheckboxInfos(affectedNodes, visibilityStatus)
+      : this.collectAllNodesCheckboxInfos(visibilityStatus));
     this.updateModel(changes);
   }
 
@@ -158,8 +171,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       for (const [nodeId, checkboxInfo] of changes) {
         const node = model.getNode(nodeId);
         // istanbul ignore if
-        if (!node)
+        if (!node) {
           continue;
+        }
 
         node.checkbox.isDisabled = checkboxInfo.isDisabled;
         node.checkbox.isVisible = checkboxInfo.isVisible;
@@ -171,15 +185,19 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
 
   private async collectAffectedNodesCheckboxInfos(affectedNodes: string[], visibilityStatus?: Map<string, VisibilityStatus>) {
     const nodeStates = new Map<string, CheckBoxInfo>();
-    if (affectedNodes.length === 0)
+    if (affectedNodes.length === 0) {
       return nodeStates;
+    }
 
-    await Promise.all(affectedNodes.map(async (nodeId) => {
-      const node = this.modelSource.getModel().getNode(nodeId);
-      // istanbul ignore else
-      if (node)
-        nodeStates.set(nodeId, await this.getNodeCheckBoxInfo(node, visibilityStatus));
-    }));
+    await Promise.all(
+      affectedNodes.map(async (nodeId) => {
+        const node = this.modelSource.getModel().getNode(nodeId);
+        // istanbul ignore else
+        if (node) {
+          nodeStates.set(nodeId, await this.getNodeCheckBoxInfo(node, visibilityStatus));
+        }
+      }),
+    );
     return nodeStates;
   }
 
@@ -194,8 +212,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   private async getNodeCheckBoxInfo(node: TreeModelNode, visibilityStatus?: Map<string, VisibilityStatus>): Promise<CheckBoxInfo> {
     const result = visibilityStatus?.get(node.id) ?? this._visibilityHandler.getVisibilityStatus(node.item);
 
-    if (isPromiseLike(result))
+    if (isPromiseLike(result)) {
       return this.createCheckboxInfo(await result);
+    }
     return this.createCheckboxInfo(result);
   }
 

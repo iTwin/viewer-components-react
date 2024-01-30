@@ -1,6 +1,25 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Mon, 18 Dec 2023 18:31:01 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Jan 2024 21:37:20 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 5.2.7
+
+Mon, 29 Jan 2024 21:37:20 GMT
+
+### Patches
+
+- Make sure the Feature Info Widget is reopened every time selection change occurs. ([#746](https://github.com/iTwin/viewer-components-react/pull/746))
+- Fixed an issue that would prevent the display of Feature Info properties. ([#742](https://github.com/iTwin/viewer-components-react/pull/742))
+
+## 5.2.6
+
+Thu, 18 Jan 2024 15:05:39 GMT
+
+### Patches
+
+- Fix issue where two instances of 'Aerial Imagery with labels' are visible in map layers widget ([#731](https://github.com/iTwin/viewer-components-react/pull/731))
 
 ## 5.2.5
 Mon, 18 Dec 2023 18:31:01 GMT
@@ -822,4 +841,3 @@ _Version update only_
 Tue, 28 Jul 2020 16:26:24 GMT
 
 _Initial release_
-

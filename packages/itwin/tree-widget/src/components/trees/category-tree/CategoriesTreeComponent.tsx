@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
 import { Fragment, useEffect, useState } from "react";
@@ -39,17 +39,11 @@ export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
  * Props for [[CategoriesTreeComponent]].
  * @public
  */
-export interface CategoriesTreeComponentProps extends Omit<CategoryTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
-| "categories"
-| "categoryVisibilityHandler"
-| "viewManager"
-> {
+export interface CategoriesTreeComponentProps
+  extends Omit<
+    CategoryTreeProps,
+    "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied" | "categories" | "categoryVisibilityHandler" | "viewManager"
+  > {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -76,9 +70,7 @@ export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => 
     return null;
   }
 
-  return (
-    <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-  );
+  return <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
 };
 
 /**
@@ -111,22 +103,18 @@ CategoriesTreeComponent.id = "categories-tree";
  */
 CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categories");
 
-function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
+function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const categories = useCategories(IModelApp.viewManager, props.iModel, props.viewport);
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[]>();
-  const {
-    searchOptions,
-    filterString,
-    onFilterApplied,
-    filteredProvider,
-  } = useTreeFilteringState();
+  const { searchOptions, filterString, onFilterApplied, filteredProvider } = useTreeFilteringState();
 
   useEffect(() => {
-    (async () => {
-      if (filteredProvider)
-        setFilteredCategories((await getFilteredCategories(filteredProvider)));
-      else
+    void (async () => {
+      if (filteredProvider) {
+        setFilteredCategories(await getFilteredCategories(filteredProvider));
+      } else {
         setFilteredCategories(undefined);
+      }
     })();
   }, [filteredProvider]);
 
@@ -140,18 +128,12 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
         selectedIndex={searchOptions.activeMatchIndex}
       >
         {props.headerButtons
-          ? props.headerButtons.map(
-            (btn, index) =>
-              <Fragment key={index}>
-                {btn({ viewport: props.viewport, categories, filteredCategories })}
-              </Fragment>
-          )
+          ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport: props.viewport, categories, filteredCategories })}</Fragment>)
           : [
-            <ShowAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="show-all-btn" />,
-            <HideAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="hide-all-btn" />,
-            <InvertAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="invert-all-btn" />,
-          ]
-        }
+              <ShowAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="show-all-btn" />,
+              <HideAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="hide-all-btn" />,
+              <InvertAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="invert-all-btn" />,
+            ]}
       </TreeHeader>
       <div className="tree-widget-tree-content">
         <AutoSizer>
@@ -181,7 +163,9 @@ async function getFilteredCategories(filteredProvider: IPresentationTreeDataProv
     }
     const filteredCategoryId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(node.key);
     const filteredSubCategoriesIds = node.hasChildren
-      ? (await filteredProvider.getNodes(node)).filter(isPresentationTreeNodeItem).map((child) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(child.key))
+      ? (await filteredProvider.getNodes(node))
+          .filter(isPresentationTreeNodeItem)
+          .map((child) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(child.key))
       : [];
     filteredCategories.push({ categoryId: filteredCategoryId, subCategoryIds: filteredSubCategoriesIds });
   }
@@ -194,7 +178,12 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={() => void showAllCategories((props.filteredCategories ?? props.categories).map((category) => category.categoryId), props.viewport)}
+      onClick={() =>
+        void showAllCategories(
+          (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+          props.viewport,
+        )
+      }
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -207,7 +196,12 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={() => void hideAllCategories((props.filteredCategories ?? props.categories).map((category) => category.categoryId), props.viewport)}
+      onClick={() =>
+        void hideAllCategories(
+          (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+          props.viewport,
+        )
+      }
     >
       <SvgVisibilityHide />
     </IconButton>

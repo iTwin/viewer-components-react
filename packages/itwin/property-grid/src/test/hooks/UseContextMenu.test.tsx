@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
@@ -13,7 +13,9 @@ import * as webUtilities from "../../api/WebUtilities";
 import {
   AddFavoritePropertyContextMenuItem,
   CopyPropertyTextContextMenuItem,
-  PropertyGridContextMenuItem, RemoveFavoritePropertyContextMenuItem, useContextMenu,
+  PropertyGridContextMenuItem,
+  RemoveFavoritePropertyContextMenuItem,
+  useContextMenu,
 } from "../../hooks/UseContextMenu";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { createFunctionStub, createPropertyRecord, render, stubFavoriteProperties, waitFor } from "../TestUtils";
@@ -32,11 +34,19 @@ describe("useContextMenu", () => {
 
   function TestComponent(props: UseContentMenuProps) {
     const { renderContextMenu, onPropertyContextMenu } = useContextMenu(props);
-    return <>
-      <div>Outside</div>
-      <button onClick={async () => onPropertyContextMenu({ event: { clientX: 10, clientY: 10, persist: () => {} } as unknown as MouseEvent, propertyRecord: record })}>Open Menu</button>
-      {renderContextMenu()}
-    </>;
+    return (
+      <>
+        <div>Outside</div>
+        <button
+          onClick={async () =>
+            onPropertyContextMenu({ event: { clientX: 10, clientY: 10, persist: () => {} } as unknown as MouseEvent, propertyRecord: record })
+          }
+        >
+          Open Menu
+        </button>
+        {renderContextMenu()}
+      </>
+    );
   }
 
   it("opens context menu", async () => {
@@ -45,7 +55,7 @@ describe("useContextMenu", () => {
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
         contextMenuItems={[() => <div>Test Item</div>]}
-      />
+      />,
     );
 
     const openButton = await waitFor(() => getByText("Open Menu"));
@@ -55,12 +65,7 @@ describe("useContextMenu", () => {
   });
 
   it("doesn't open context menu if there are no items", async () => {
-    const { getByText, queryByRole } = render(
-      <TestComponent
-        imodel={imodel}
-        dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-      />
-    );
+    const { getByText, queryByRole } = render(<TestComponent imodel={imodel} dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider} />);
 
     const openButton = await waitFor(() => getByText("Open Menu"));
     await userEvents.click(openButton);
@@ -74,8 +79,14 @@ describe("useContextMenu", () => {
       <TestComponent
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-        contextMenuItems={[() => <PropertyGridContextMenuItem id="test-item" onSelect={selectStub}>Test Item</PropertyGridContextMenuItem>]}
-      />
+        contextMenuItems={[
+          () => (
+            <PropertyGridContextMenuItem id="test-item" onSelect={selectStub}>
+              Test Item
+            </PropertyGridContextMenuItem>
+          ),
+        ]}
+      />,
     );
 
     // open menu
@@ -99,7 +110,7 @@ describe("useContextMenu", () => {
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
         contextMenuItems={[() => <div>Test Item</div>]}
-      />
+      />,
     );
 
     // open menu
@@ -122,7 +133,7 @@ describe("useContextMenu", () => {
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
         contextMenuItems={[() => <div>Test Item</div>]}
-      />
+      />,
     );
 
     // open menu
@@ -173,38 +184,38 @@ describe("Default context menu items", () => {
   describe("AddFavoritePropertyContextMenuItem", () => {
     it("renders item with non-favorite property", () => {
       favoritesManager.has.returns(false);
-      const { queryByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { queryByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       expect(queryByText("context-menu.add-favorite.label"));
     });
 
     it("renders nothing if property is favorite", () => {
       favoritesManager.has.returns(true);
-      const { container } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { container } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       expect(container.children).to.have.lengthOf(0);
     });
 
     it("calls `Presentation.favorites.add` with default scope", async () => {
       favoritesManager.has.returns(false);
-      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       const item = getByText("context-menu.add-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
+      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.IModel));
     });
 
     it("calls `Presentation.favorites.add` with specified scope", async () => {
       favoritesManager.has.returns(false);
-      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin} />);
       const item = getByText("context-menu.add-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
+      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.ITwin));
     });
 
     it("calls custom `onSelect` handler", async () => {
       favoritesManager.has.returns(false);
       const spy = sinon.spy();
-      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} onSelect={spy}/>);
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} onSelect={spy} />);
       const item = getByText("context-menu.add-favorite.label");
       await userEvents.click(item);
 
@@ -215,38 +226,38 @@ describe("Default context menu items", () => {
   describe("RemoveFavoritePropertyContextMenuItem", () => {
     it("renders item with favorite property", () => {
       favoritesManager.has.returns(true);
-      const { queryByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { queryByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
       expect(queryByText("context-menu.remove-favorite.label"));
     });
 
     it("renders nothing if property is not favorite", () => {
       favoritesManager.has.returns(false);
-      const { container } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { container } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
       expect(container.children).to.have.lengthOf(0);
     });
 
     it("calls `Presentation.favorites.remove` with default scope", async () => {
       favoritesManager.has.returns(true);
-      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
       const item = getByText("context-menu.remove-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
+      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.IModel));
     });
 
     it("calls `Presentation.favorites.remove` with specified scope", async () => {
       favoritesManager.has.returns(true);
-      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin} />);
       const item = getByText("context-menu.remove-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
+      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.ITwin));
     });
 
     it("calls custom `onSelect` handler", async () => {
       favoritesManager.has.returns(true);
       const spy = sinon.spy();
-      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} onSelect={spy}/>);
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} onSelect={spy} />);
       const item = getByText("context-menu.remove-favorite.label");
       await userEvents.click(item);
 
@@ -272,7 +283,7 @@ describe("Default context menu items", () => {
 
     it("calls custom `onSelect` handler", async () => {
       const spy = sinon.stub();
-      const { getByText } = render(<CopyPropertyTextContextMenuItem {...itemProps} onSelect={spy}/>);
+      const { getByText } = render(<CopyPropertyTextContextMenuItem {...itemProps} onSelect={spy} />);
       const item = getByText("context-menu.copy-text.label");
 
       await userEvents.click(item);
@@ -298,7 +309,7 @@ function createField() {
       valueFormat: PresentationPropertyValueFormat.Primitive,
     },
     false,
-    0
+    0,
   );
 }
 

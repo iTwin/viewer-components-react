@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./SelectableTree.scss";
 import { useEffect, useState } from "react";
@@ -48,8 +48,9 @@ export interface SelectableTreeProps {
 export function SelectableTree(props: SelectableTreeProps) {
   const imodel = useActiveIModelConnection();
 
-  if (!imodel)
+  if (!imodel) {
     return null;
+  }
 
   return <SelectableTreeContent {...props} imodel={imodel} />;
 }
@@ -70,7 +71,7 @@ function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnect
 
   useEffect(() => {
     let disposed = false;
-    (async () => {
+    void (async () => {
       const visibleTrees = await getActiveTrees(treeDefinitions, imodel);
       // istanbul ignore else
       if (!disposed) {
@@ -78,7 +79,9 @@ function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnect
       }
     })();
 
-    return () => { disposed = true; };
+    return () => {
+      disposed = true;
+    };
   }, [treeDefinitions, imodel]);
 
   return trees;
@@ -103,30 +106,30 @@ function getSelectableContentProps(trees?: SelectableContentDefinition[]): Selec
   if (trees === undefined) {
     return {
       defaultSelectedContentId: "loading",
-      children: [{
-        id: "loading",
-        label: "",
-        render: () => (
-          <Delayed>
-            <ProgressLinear indeterminate={true} />
-          </Delayed>
-        ),
-      }],
+      children: [
+        {
+          id: "loading",
+          label: "",
+          render: () => (
+            <Delayed>
+              <ProgressLinear indeterminate={true} />
+            </Delayed>
+          ),
+        },
+      ],
     };
   }
 
   if (trees.length === 0) {
     return {
       defaultSelectedContentId: "no-trees",
-      children: [{
-        id: "no-trees",
-        label: "",
-        render: () => (
-          <FillCentered>
-            {TreeWidget.translate("noTrees")}
-          </FillCentered>
-        ),
-      }],
+      children: [
+        {
+          id: "no-trees",
+          label: "",
+          render: () => <FillCentered>{TreeWidget.translate("noTrees")}</FillCentered>,
+        },
+      ],
     };
   }
 
@@ -140,8 +143,12 @@ function Delayed({ delay = 200, children }: PropsWithChildren<{ delay?: number }
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const id = setTimeout(() => { setShow(true); }, delay);
-    return () => { clearTimeout(id); };
+    const id = setTimeout(() => {
+      setShow(true);
+    }, delay);
+    return () => {
+      clearTimeout(id);
+    };
   }, [delay]);
 
   if (!show) {

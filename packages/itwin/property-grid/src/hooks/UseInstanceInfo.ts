@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
 
@@ -22,7 +22,7 @@ export interface UseLoadedInstanceInfoProps {
  * @internal
  */
 export function useLoadedInstanceInfo({ dataProvider }: UseLoadedInstanceInfoProps) {
-  const [item, setItem] = useState<{className: string, label: PropertyRecord}>();
+  const [item, setItem] = useState<{ className: string; label: PropertyRecord }>();
   const inProgressId = useRef<string>();
 
   useEffect(() => {
@@ -40,7 +40,9 @@ export function useLoadedInstanceInfo({ dataProvider }: UseLoadedInstanceInfoPro
     const removeListener = dataProvider.onDataChanged.addListener(onDataChanged);
     void onDataChanged();
 
-    return () => { removeListener(); };
+    return () => {
+      removeListener();
+    };
   }, [dataProvider]);
 
   return { item };

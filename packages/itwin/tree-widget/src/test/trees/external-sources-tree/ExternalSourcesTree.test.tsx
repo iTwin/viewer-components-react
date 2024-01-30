@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { join } from "path";
@@ -13,11 +13,14 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition } from "@itwin/presentation-common";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyBuilder,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { render, waitFor } from "@testing-library/react";
 import { ExternalSourcesTree, RULESET_EXTERNAL_SOURCES } from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
-import { mockPresentationManager, renderWithUser, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ElementProps } from "@itwin/core-common";
@@ -27,13 +30,11 @@ import type { PresentationManager, SelectionManager } from "@itwin/presentation-
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 describe("ExternalSourcesTree", () => {
-
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };
 
     before(async () => {
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
+      await NoRenderApp.startup();
       await TestUtils.initialize();
     });
 
@@ -71,51 +72,51 @@ describe("ExternalSourcesTree", () => {
     };
 
     describe("<ExternalSourcesTree />", () => {
-
       function setupHierarchy(nodes: Node[]) {
-        presentationManagerMock.setup(async (x) => x.getNodesAndCount(moq.It.isAny())).returns(async () => ({
-          count: nodes.length,
-          nodes,
-        }));
+        presentationManagerMock
+          .setup(async (x) => x.getNodesAndCount(moq.It.isAny()))
+          .returns(async () => ({
+            count: nodes.length,
+            nodes,
+          }));
       }
 
       it("should render hierarchy", async () => {
-        setupHierarchy([{
-          key: createInvalidNodeKey(),
-          label: LabelDefinition.fromLabelString("test-node-no-icon"),
-        }, {
-          key: createInvalidNodeKey(),
-          label: LabelDefinition.fromLabelString("test-node-with-icon"),
-          extendedData: {
-            imageId: "test-icon-id",
+        setupHierarchy([
+          {
+            key: createInvalidNodeKey(),
+            label: LabelDefinition.fromLabelString("test-node-no-icon"),
           },
-        }]);
-        const { getByRole, getAllByRole, getByText } = render(
-          <ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} />,
-        );
+          {
+            key: createInvalidNodeKey(),
+            label: LabelDefinition.fromLabelString("test-node-with-icon"),
+            extendedData: {
+              imageId: "test-icon-id",
+            },
+          },
+        ]);
+        const { getByRole, getAllByRole, getByText } = render(<ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} />);
         await waitFor(() => getByText("test-node-no-icon"));
         getByRole("tree");
         const treeItems = getAllByRole("treeitem");
         expect(treeItems).to.have.lengthOf(2);
-        expect(treeItems[0]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-no-icon"]`)) // eslint-disable-line deprecation/deprecation
+        expect(treeItems[0])
+          .to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-no-icon"]`)) // eslint-disable-line deprecation/deprecation
           .and.to.satisfy((item: HTMLElement) => !item.querySelector(`span.bui-webfont-icon`)); // eslint-disable-line deprecation/deprecation
-        expect(treeItems[1]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-with-icon"]`)) // eslint-disable-line deprecation/deprecation
+        expect(treeItems[1])
+          .to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-with-icon"]`)) // eslint-disable-line deprecation/deprecation
           .and.to.satisfy((item: HTMLElement) => item.querySelector(`span.bui-webfont-icon.test-icon-id`)); // eslint-disable-line deprecation/deprecation
       });
 
       it("renders context menu", async () => {
-        setupHierarchy([{
-          key: createInvalidNodeKey(),
-          label: LabelDefinition.fromLabelString("test-node"),
-        }]);
-        const { user, getByText, queryByText } = renderWithUser(
-          <ExternalSourcesTree
-            {...sizeProps}
-            iModel={imodelMock.object}
-            contextMenuItems={[
-              () => <div>Test Menu Item</div>,
-            ]}
-          />,
+        setupHierarchy([
+          {
+            key: createInvalidNodeKey(),
+            label: LabelDefinition.fromLabelString("test-node"),
+          },
+        ]);
+        const { user, getByText, queryByText } = render(
+          <ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} contextMenuItems={[() => <div>Test Menu Item</div>]} />,
         );
         const node = await waitFor(() => getByText("test-node"));
         await user.pointer({ keys: "[MouseRight>]", target: node });
@@ -147,24 +148,30 @@ describe("ExternalSourcesTree", () => {
     });
 
     it("creates auto-expanded root nodes with correct icons", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         addRootExternalSource(builder, "Test external source");
       });
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
       const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_EXTERNAL_SOURCES);
-      expect(hierarchy).to.have.lengthOf(1).and.to.containSubset([{
-        label: { value: { displayValue: "Root repo link - Test external source" } },
-        autoExpand: true,
-        extendedData: {
-          // note: would be better to test this through `TreeNodeItem.icon`, but `HierarchyBuilder` doesn't
-          // allow us to pass the node customization function used by the external sources tree
-          imageId: "icon-document",
-        },
-      }]);
+      expect(hierarchy)
+        .to.have.lengthOf(1)
+        .and.to.containSubset([
+          {
+            label: { value: { displayValue: "Root repo link - Test external source" } },
+            autoExpand: true,
+            extendedData: {
+              // note: would be better to test this through `TreeNodeItem.icon`, but `HierarchyBuilder` doesn't
+              // allow us to pass the node customization function used by the external sources tree
+              imageId: "icon-document",
+            },
+          },
+        ]);
     });
 
     it("creates external sources as external source group node children", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         const { externalSourceId: rootSourceId } = addRootExternalSource(builder, "Root external source");
         const groupId = addExternalSourceGroup(builder, "External source group");
         addExternalSourceAttachment(builder, rootSourceId, groupId);
@@ -173,50 +180,66 @@ describe("ExternalSourcesTree", () => {
       });
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
       const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_EXTERNAL_SOURCES);
-      expect(hierarchy).to.have.lengthOf(1).and.to.containSubset([{
-        label: { value: { displayValue: "Root repo link - Root external source" } },
-        extendedData: {
-          imageId: "icon-document",
-        },
-        children: [{
-          label: { value: { displayValue: "External source group" } },
-          extendedData: {
-            imageId: "icon-document",
-          },
-          children: [{
-            label: { value: { displayValue: "Child external source" } },
+      expect(hierarchy)
+        .to.have.lengthOf(1)
+        .and.to.containSubset([
+          {
+            label: { value: { displayValue: "Root repo link - Root external source" } },
             extendedData: {
               imageId: "icon-document",
             },
-          }],
-        }],
-      }]);
+            children: [
+              {
+                label: { value: { displayValue: "External source group" } },
+                extendedData: {
+                  imageId: "icon-document",
+                },
+                children: [
+                  {
+                    label: { value: { displayValue: "Child external source" } },
+                    extendedData: {
+                      imageId: "icon-document",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ]);
     });
 
     it("creates attached external sources as external source node children", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         const { externalSourceId: rootSourceId } = addRootExternalSource(builder, "Root external source");
         const childSourceId = addExternalSource(builder, "Child external source");
         addExternalSourceAttachment(builder, rootSourceId, childSourceId);
       });
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
       const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_EXTERNAL_SOURCES);
-      expect(hierarchy).to.have.lengthOf(1).and.to.containSubset([{
-        label: { value: { displayValue: "Root repo link - Root external source" } },
-        extendedData: {
-          imageId: "icon-document",
-        },
-        children: [{
-          label: { value: { displayValue: "Child external source" } },
-          extendedData: {
-            imageId: "icon-document",
+      expect(hierarchy)
+        .to.have.lengthOf(1)
+        .and.to.containSubset([
+          {
+            label: { value: { displayValue: "Root repo link - Root external source" } },
+            extendedData: {
+              imageId: "icon-document",
+            },
+            children: [
+              {
+                label: { value: { displayValue: "Child external source" } },
+                extendedData: {
+                  imageId: "icon-document",
+                },
+              },
+            ],
           },
-        }],
-      }]);
+        ]);
     });
 
     it("creates elements as external source node children", async function () {
-      const iModel: IModelConnection = await buildTestIModel(this, (builder) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const iModel: IModelConnection = await buildTestIModel(this, async (builder) => {
         const { externalSourceId } = addRootExternalSource(builder, "Root external source");
         const modelId = addPhysicalModel(builder, "Model", IModel.rootSubjectId);
         const categoryId = addSpatialCategory(builder, "Category");
@@ -225,35 +248,46 @@ describe("ExternalSourcesTree", () => {
       });
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
       const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_EXTERNAL_SOURCES);
-      expect(hierarchy).to.have.lengthOf(1).and.to.containSubset([{
-        label: { value: { displayValue: "Root repo link - Root external source" } },
-        extendedData: {
-          imageId: "icon-document",
-        },
-        children: [{
-          label: { value: { displayValue: "Elements" } },
-          extendedData: {
-            imageId: "icon-ec-schema",
-          },
-          children: [{
-            label: { value: { displayValue: "Physical Object" } },
+      expect(hierarchy)
+        .to.have.lengthOf(1)
+        .and.to.containSubset([
+          {
+            label: { value: { displayValue: "Root repo link - Root external source" } },
             extendedData: {
-              imageId: "icon-ec-class",
+              imageId: "icon-document",
             },
-            children: [{
-              label: { value: { displayValue: "Code:Element 1" } },
-              extendedData: {
-                imageId: "icon-item",
+            children: [
+              {
+                label: { value: { displayValue: "Elements" } },
+                extendedData: {
+                  imageId: "icon-ec-schema",
+                },
+                children: [
+                  {
+                    label: { value: { displayValue: "Physical Object" } },
+                    extendedData: {
+                      imageId: "icon-ec-class",
+                    },
+                    children: [
+                      {
+                        label: { value: { displayValue: "Code:Element 1" } },
+                        extendedData: {
+                          imageId: "icon-item",
+                        },
+                      },
+                      {
+                        label: { value: { displayValue: "Code:Element 2" } },
+                        extendedData: {
+                          imageId: "icon-item",
+                        },
+                      },
+                    ],
+                  },
+                ],
               },
-            }, {
-              label: { value: { displayValue: "Code:Element 2" } },
-              extendedData: {
-                imageId: "icon-item",
-              },
-            }],
-          }],
-        }],
-      }]);
+            ],
+          },
+        ]);
     });
 
     function addSynchronizationConfigLink(builder: TestIModelBuilder, label: string) {

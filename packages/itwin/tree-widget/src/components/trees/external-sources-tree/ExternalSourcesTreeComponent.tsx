@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
 import { useActiveIModelConnection } from "@itwin/appui-react";
@@ -27,18 +27,7 @@ export const ExternalSourcesTreeComponent = (props: ExternalSourcesTreeComponent
     return null;
   }
 
-  return (
-    <AutoSizer>
-      {({ width, height }) => (
-        <ExternalSourcesTree
-          {...props}
-          iModel={iModel}
-          width={width}
-          height={height}
-        />
-      )}
-    </AutoSizer>
-  );
+  return <AutoSizer>{({ width, height }) => <ExternalSourcesTree {...props} iModel={iModel} width={width} height={height} />}</AutoSizer>;
 };
 
 /**

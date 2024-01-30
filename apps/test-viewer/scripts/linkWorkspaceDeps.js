@@ -1,31 +1,37 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 const fs = require("fs");
 const path = require("path");
 const watch = process.argv[2] && process.argv[2] === "--watch";
 
-const packages = [{
-  name: "@itwin/tree-widget-react",
-  dir: "tree-widget"
-}, {
-  name: "@itwin/property-grid-react",
-  dir: "property-grid"
-}, {
-  name: "@itwin/measure-tools-react",
-  dir: "measure-tools"
-}, {
-  name: "@itwin/breakdown-trees-react",
-  dir: "breakdown-trees"
-}, {
-  name: "@itwin/map-layers",
-  dir: "map-layers"
-}, {
-  name: "@itwin/geo-tools-react",
-  dir: "geo-tools"
-}
-]
+const packages = [
+  {
+    name: "@itwin/tree-widget-react",
+    dir: "tree-widget",
+  },
+  {
+    name: "@itwin/property-grid-react",
+    dir: "property-grid",
+  },
+  {
+    name: "@itwin/measure-tools-react",
+    dir: "measure-tools",
+  },
+  {
+    name: "@itwin/breakdown-trees-react",
+    dir: "breakdown-trees",
+  },
+  {
+    name: "@itwin/map-layers",
+    dir: "map-layers",
+  },
+  {
+    name: "@itwin/geo-tools-react",
+    dir: "geo-tools",
+  },
+];
 
 linkPackages();
 

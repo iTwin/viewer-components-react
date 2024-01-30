@@ -31,8 +31,7 @@ export const GroupItem = ({
   isVisualizing,
   ...rest
 }: GroupItemProps) => {
-  const { groupElementsInfo, overlappedElementsInfo, showGroupColor } =
-    useGroupHilitedElementsContext();
+  const { overlappedElementsMetadata: { groupElementsInfo, overlappedElementsInfo }, showGroupColor } = useGroupHilitedElementsContext();
 
   const onTitleClick = () => {
     if (onClickGroupTitle) {
