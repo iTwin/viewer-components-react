@@ -6,25 +6,30 @@
 import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SelectionMode } from "@itwin/components-react";
-import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
+import { SelectionMode, TreeImageLoader, TreeRenderer } from "@itwin/components-react";
+import { isPresentationTreeNodeItem, PresentationTree, PresentationTreeNodeRenderer, useFilterablePresentationTree } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
+import { useContextMenu } from "../common/ContextMenu";
 import { ClassGroupingOption } from "../common/Types";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
-import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, VisibilityTreeNodeCheckbox, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
+import type { NodeCheckboxRenderProps } from "@itwin/core-react";
+import type { TreeRendererBaseProps } from "../common/TreeRenderer";
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { AbstractTreeNodeLoaderWithProvider, TreeModelNode, TreeNodeItem, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
+import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
+const EXPANSION_TOGGLE_WIDTH = 24;
+const imageLoader = new TreeImageLoader();
 
 /**
  * Props for configuring the hierarchy in [[ModelsTree]].
@@ -68,18 +73,24 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * Custom visibility handler.
    */
   modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
+  /**
+   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * @beta
+   */
+  isHierarchyFilteringEnabled?: boolean;
 }
 
 /**
  * A tree component that shows a subject - model - category - element
  * hierarchy along with checkboxes that represent and allow changing
  * the display of those instances.
+ * This tree can have hierarchy level filtering capabilities enabled with the isHierarchyLevelFilteringEnabled flag.
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
   const state = useModelsTreeState(props);
 
-  const treeRenderer = createVisibilityTreeRenderer({
+  const baseRendererProps = {
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
     density: props.density,
@@ -89,7 +100,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       levelOffset: 10,
       disableRootNodeCollapse: true,
     },
-  });
+  };
 
   // istanbul ignore next
   const noFilteredDataRenderer = useCallback(() => {
@@ -109,7 +120,9 @@ export function ModelsTree(props: ModelsTreeProps) {
       <PresentationTree
         state={state}
         selectionMode={props.selectionMode || SelectionMode.None}
-        treeRenderer={treeRenderer}
+        treeRenderer={
+          props.isHierarchyFilteringEnabled ? createModelsTreeRenderer(baseRendererProps, state?.nodeLoader) : createVisibilityTreeRenderer(baseRendererProps)
+        }
         noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
         width={props.width}
         height={props.height}
@@ -117,6 +130,100 @@ export function ModelsTree(props: ModelsTreeProps) {
       {overlay}
     </div>
   );
+}
+
+interface ModelsTreeRendererProps extends TreeRendererBaseProps {
+  nodeRendererProps: ModelsTreeNodeRendererProps;
+}
+
+function createModelsTreeRenderer(
+  { nodeRendererProps, ...restProps }: ModelsTreeRendererProps,
+  nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>,
+) {
+  return function ModelsTreeRenderer(treeProps: TreeRendererProps) {
+    const { onContextMenu, renderContextMenu } = useContextMenu({ contextMenuItems: restProps.contextMenuItems });
+    const { onClearFilterClick, onFilterClick, filterDialog, containerRef } = useFilterablePresentationTree<HTMLDivElement>({ nodeLoader });
+    const isEnlarged = restProps.density === "enlarged";
+    const className = classNames("tree-widget-tree-nodes-list", { ["enlarge"]: isEnlarged });
+
+    if (isEnlarged) {
+      treeProps.nodeHeight = () => 43;
+    }
+
+    return (
+      <div className={className} ref={containerRef}>
+        <TreeRenderer
+          {...restProps}
+          {...treeProps}
+          nodeRenderer={createModelsTreeNodeRenderer(
+            { ...nodeRendererProps, isEnlarged },
+            {
+              onClearFilterClick,
+              onFilterClick,
+              onContextMenu,
+            },
+          )}
+        />
+        {renderContextMenu()}
+        {filterDialog}
+      </div>
+    );
+  };
+}
+
+interface ModelsTreeNodeActions {
+  onClearFilterClick: (nodeId: string) => void;
+
+  onFilterClick: (nodeId: string) => void;
+
+  onContextMenu: (e: React.MouseEvent, node: TreeModelNode) => void;
+}
+
+export interface ModelsTreeNodeRendererProps {
+  iconsEnabled: boolean;
+
+  descriptionEnabled: boolean;
+
+  levelOffset: number;
+
+  disableRootNodeCollapse: boolean;
+
+  isEnlarged?: boolean;
+}
+
+/**
+ * Creates node renderer which renders node with eye checkbox.
+ * @public
+ */
+function createModelsTreeNodeRenderer(
+  { levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged }: ModelsTreeNodeRendererProps,
+  { onClearFilterClick, onFilterClick, onContextMenu }: ModelsTreeNodeActions,
+) {
+  return function ModelsTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
+    const expansionToggleWidth = isEnlarged ? EXPANSION_TOGGLE_WIDTH * 2 : EXPANSION_TOGGLE_WIDTH;
+    const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? expansionToggleWidth : 0);
+
+    return (
+      <PresentationTreeNodeRenderer
+        {...treeNodeProps}
+        onContextMenu={onContextMenu}
+        onFilterClick={onFilterClick}
+        onClearFilterClick={onClearFilterClick}
+        checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
+          <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
+            <VisibilityTreeNodeCheckbox {...checkboxProps} />
+          </div>
+        )}
+        descriptionEnabled={descriptionEnabled}
+        imageLoader={imageLoader}
+        className={classNames(
+          "with-checkbox",
+          (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander",
+        )}
+        node={{ ...treeNodeProps.node, depth: 0 }}
+      />
+    );
+  };
 }
 
 function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {

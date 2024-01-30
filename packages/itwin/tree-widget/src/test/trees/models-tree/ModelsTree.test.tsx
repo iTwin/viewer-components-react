@@ -5,10 +5,11 @@
 
 import { expect } from "chai";
 import { join } from "path";
+import sanitize from "sanitize-filename";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { SelectionMode } from "@itwin/components-react";
+import { PropertyFilterRuleOperator, SelectionMode } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
@@ -17,7 +18,6 @@ import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
   buildTestIModel,
-  createFileNameFromString,
   HierarchyBuilder,
   HierarchyCacheMode,
   initialize as initializePresentationTesting,
@@ -29,8 +29,21 @@ import { ModelsTreeNodeType } from "../../../components/trees/models-tree/Models
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
-import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
+import {
+  createCategoryNode,
+  createElementClassGroupingNode,
+  createElementNode,
+  createKey,
+  createModelNode,
+  createPresentationTreeNodeItem,
+  createSimpleTreeModelNode,
+  createSubjectNode,
+  createTestContentDescriptor,
+  createTestPropertiesContentField,
+  createTestPropertyInfo,
+} from "../Common";
 
+import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -38,7 +51,6 @@ import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-
 describe("ModelsTree", () => {
   const sizeProps = { width: 200, height: 200 };
 
@@ -299,6 +311,107 @@ describe("ModelsTree", () => {
         await waitFor(() => result.getByText("test-node"), { container: result.container });
         result.unmount();
         expect(visibilityHandlerMock.dispose).to.be.called;
+      });
+
+      describe("Hierarchy level filtering", () => {
+        before(async () => {
+          await Presentation.initialize();
+        });
+
+        after(async () => {
+          Presentation.terminate();
+        });
+
+        it("renders enlarged tree node", async () => {
+          setupDataProvider([createSimpleTreeModelNode()]);
+
+          const { getByText, container } = render(
+            <ModelsTree
+              {...sizeProps}
+              density={"enlarged"}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              activeView={mockViewport().object}
+              isHierarchyFilteringEnabled={true}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+
+          const node = container.querySelector(".node-wrapper") as HTMLDivElement;
+          expect(node.style.height).to.be.equal("43px");
+        });
+
+        it("renders non-filterable node", async () => {
+          setupDataProvider([createSimpleTreeModelNode()]);
+
+          const { queryByTitle, getByText } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              activeView={mockViewport().object}
+              isHierarchyFilteringEnabled={true}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+          expect(queryByTitle("tree.filter-hierarchy-level")).to.be.null;
+        });
+
+        it("renders filterable node", async () => {
+          const nodeItem = createPresentationTreeNodeItem({
+            hasChildren: true,
+            filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [] },
+          });
+
+          const huh2 = createSimpleTreeModelNode(undefined, "son", { parentId: nodeItem.id });
+
+          setupDataProvider([nodeItem, huh2]);
+
+          const { queryByTitle } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              activeView={mockViewport().object}
+              isHierarchyFilteringEnabled={true}
+            />,
+          );
+
+          await waitFor(() => expect(queryByTitle("tree.filter-hierarchy-level")).to.not.be.null);
+        });
+
+        it("renders node with active filtering", async () => {
+          const property = createTestPropertyInfo();
+          const field = createTestPropertiesContentField({ properties: [{ property }] });
+          const filterInfo: PresentationInstanceFilterInfo = {
+            filter: {
+              field,
+              operator: PropertyFilterRuleOperator.IsNull,
+            },
+            usedClasses: [],
+          };
+
+          const nodeItem = createPresentationTreeNodeItem({
+            hasChildren: true,
+            filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [], active: filterInfo },
+          });
+
+          setupDataProvider([nodeItem]);
+
+          const { queryByTitle } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              activeView={mockViewport().object}
+              isHierarchyFilteringEnabled={true}
+            />,
+          );
+
+          await waitFor(() => expect(queryByTitle("tree.clear-hierarchy-level-filter")).to.not.be.null);
+        });
       });
 
       describe("selection", () => {
@@ -790,7 +903,7 @@ describe("ModelsTree", () => {
       function createIModelName(m: Mocha.Context) {
         const MAX_FILENAME_LENGTH = 40;
         // eslint-disable-next-line @itwin/no-internal
-        const name = createFileNameFromString(m.test!.fullTitle());
+        const name = sanitize(m.test!.fullTitle().replace(/[ ]+/g, "-")).toLocaleLowerCase();
         if (name.length <= MAX_FILENAME_LENGTH) {
           return name;
         }

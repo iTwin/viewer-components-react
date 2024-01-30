@@ -87,9 +87,9 @@
     "@itwin/imodel-components-react": "^4.8.1",
     "@itwin/presentation-backend": "^4.1.2",
     "@itwin/presentation-common": "^4.1.2",
-    "@itwin/presentation-components": "^4.4.0",
+    "@itwin/presentation-components": "5.0.0-dev.2",
     "@itwin/presentation-frontend": "^4.1.2",
-    "@itwin/presentation-testing": "^4.1.2",
+    "@itwin/presentation-testing": "5.0.0-dev.2",
     "@itwin/webgl-compatibility": "^4.1.2",
     "@playwright/test": "^1.36.2",
     "@testing-library/dom": "^9.3.3",
@@ -140,7 +140,8 @@
     "stylelint-config-standard-scss": "^11.1.0",
     "typemoq": "^2.1.0",
     "typescript": "~5.0.0",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "sanitize-filename": "^1.6.3"
   },
   "eslintConfig": {
     "extends": [

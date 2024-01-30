@@ -3,14 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { UiItemsProvider } from "@itwin/appui-react";
-import {
-  CategoriesTreeComponent,
-  ExternalSourcesTreeComponent,
-  IModelContentTreeComponent,
-  ModelsTreeComponent,
-  TreeWidget,
-  TreeWidgetUiItemsProvider,
-} from "@itwin/tree-widget-react";
+import { BreakdownTrees } from "@itwin/breakdown-trees-react";
+import { SelectionMode } from "@itwin/components-react";
+import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
+import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import { MapLayersFormats } from "@itwin/map-layers-formats";
+import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import {
   AddFavoritePropertyContextMenuItem,
   AncestorsNavigationControls,
@@ -20,13 +18,15 @@ import {
   RemoveFavoritePropertyContextMenuItem,
   ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
-import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
-import { BreakdownTrees } from "@itwin/breakdown-trees-react";
+import {
+  CategoriesTreeComponent,
+  ExternalSourcesTreeComponent,
+  IModelContentTreeComponent,
+  ModelsTreeComponent,
+  TreeWidget,
+  TreeWidgetUiItemsProvider,
+} from "@itwin/tree-widget-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
-import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { MapLayersFormats } from "@itwin/map-layers-formats";
-import { SelectionMode } from "@itwin/components-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -81,7 +81,7 @@ const configuredUiItems = new Map<string, UiItem>([
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: () => <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} />,
+              render: () => <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} isHierarchyFilteringEnabled={true} />,
             },
             {
               id: CategoriesTreeComponent.id,
