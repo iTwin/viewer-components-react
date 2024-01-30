@@ -7,7 +7,9 @@ import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SelectionMode, TreeImageLoader, TreeRenderer } from "@itwin/components-react";
-import { isPresentationTreeNodeItem, PresentationTree, PresentationTreeNodeRenderer, useFilterablePresentationTree } from "@itwin/presentation-components";
+import {
+  isPresentationTreeNodeItem, PresentationTree, PresentationTreeNodeRenderer, useFilterablePresentationTree,
+} from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { useContextMenu } from "../common/ContextMenu";
 import { ClassGroupingOption } from "../common/Types";
@@ -84,7 +86,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * A tree component that shows a subject - model - category - element
  * hierarchy along with checkboxes that represent and allow changing
  * the display of those instances.
- * This tree can have hierarchy level filtering capabilities enabled with the isHierarchyLevelFilteringEnabled flag.
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
