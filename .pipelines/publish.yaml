@@ -35,7 +35,7 @@ steps:
     displayName: "Publish packages"
     env:
       NPM_AUTH_TOKEN: $(npmToken)
-      branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', 'origin/') ]
+      branchName: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', 'origin/') }}
       ${{ if eq(parameters.dev, true) }}:
         beachballConfig: "--config beachball.config.dev.js --keep-change-files"
       ${{ if eq(parameters.noPublish, true) }}:
