@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed an issue that would prevent the display of Feature Info properties.",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

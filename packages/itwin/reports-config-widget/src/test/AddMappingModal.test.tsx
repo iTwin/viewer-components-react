@@ -7,6 +7,11 @@ import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
+  mockIModelId1,
+  mockIModelId2,
+  mockIModelsResponse,
+  mockITwinId,
+  mockReportId,
   render,
   screen,
   waitFor,
@@ -20,65 +25,10 @@ import type {
   ReportsClient,
 } from "@itwin/insights-client";
 import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
-import type { GetSingleIModelParams, IModelOperations, IModelsClient, OperationOptions } from "@itwin/imodels-client-management";
-import { IModelState } from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
 import { AddMappingsModal } from "../widget/components/AddMappingsModal";
 import { EmptyLocalization } from "@itwin/core-common";
-
-const mockITwinId = faker.datatype.uuid();
-const mockIModelId1 = faker.datatype.uuid();
-const mockIModelId2 = faker.datatype.uuid();
-
-const mockReportId = faker.datatype.uuid();
-
-const mockIModelsResponse = [
-  {
-    iModel: {
-      id: mockIModelId1,
-      displayName: "rAnDoMdIsPlAynAmE1",
-      name: "rAnDomName1",
-      description: "rAnDoMDeScRiPtIoN1",
-      createdDateTime: "2021-10-04T22:13:50.397Z",
-      state: IModelState.Initialized,
-      projectId: mockITwinId,
-      extent: null,
-      _links: {
-        creator: {
-          href: "",
-        },
-        namedVersions: {
-          href: "",
-        },
-        changesets: {
-          href: "",
-        },
-      },
-    },
-  },
-  {
-    iModel: {
-      id: mockIModelId2,
-      displayName: "rAnDoMdIsPlAynAmE2",
-      name: "rAnDomName2",
-      description: "rAnDoMDeScRiPtIoN2",
-      createdDateTime: "2021-10-04T22:13:50.397Z",
-      state: IModelState.Initialized,
-      projectId: mockITwinId,
-      extent: null,
-      _links: {
-        creator: {
-          href: "",
-        },
-        namedVersions: {
-          href: "",
-        },
-        changesets: {
-          href: "",
-        },
-      },
-    },
-  },
-];
+import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management/lib/operations";
 
 const mockProjectIModels = {
   iModels: mockIModelsResponse.map((iModel) => ({

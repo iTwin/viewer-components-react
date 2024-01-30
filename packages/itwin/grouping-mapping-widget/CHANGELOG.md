@@ -1,6 +1,20 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 18 Dec 2023 18:31:01 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Jan 2024 21:37:20 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 0.23.0
+
+Mon, 29 Jan 2024 21:37:20 GMT
+
+### Minor changes
+
+- Groups related components have been refactored to use react-query. ([#739](https://github.com/iTwin/viewer-components-react/pull/739))
+
+### Patches
+
+- Presentation is now correctly localized. ([#745](https://github.com/iTwin/viewer-components-react/pull/745))
 
 ## 0.22.0
 Mon, 18 Dec 2023 18:31:01 GMT
@@ -501,4 +515,3 @@ Fri, 04 Feb 2022 00:43:35 GMT
 ### Minor changes
 
 - ADDED: Grouping and Mapping Widget first commit to the VCR repository. This is a UI Provider that interfaces with the iTwin Reporting Platform APIs.
-

@@ -1,6 +1,6 @@
 {
-  "type": "minor",
-  "comment": "Groups related components have been refactored to use react-query.",
+  "type": "patch",
+  "comment": "Fixed form validation not running when creating a group.",
   "packageName": "@itwin/grouping-mapping-widget",
   "email": "Guillar1@users.noreply.github.com",
   "dependentChangeType": "patch"
