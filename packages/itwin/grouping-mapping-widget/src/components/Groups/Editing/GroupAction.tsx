@@ -173,8 +173,12 @@ export const GroupAction = (props: GroupActionProps) => {
   const isBlockingActions = !(details.groupName && (query || simpleSelectionQuery)) || isRendering || isLoading;
 
   const onClickSave = useCallback(() => {
+    if (!validator.allValid()) {
+      setShowValidationMessage(true);
+      return;
+    }
     onSaveMutate();
-  }, [onSaveMutate]);
+  }, [onSaveMutate, setShowValidationMessage, validator]);
 
   const onClickBack = useCallback(() => {
     setCurrentStep(GroupActionStep.QueryBuilder);
