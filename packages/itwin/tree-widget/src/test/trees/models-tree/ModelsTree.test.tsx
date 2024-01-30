@@ -365,9 +365,8 @@ describe("ModelsTree", () => {
             filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [] },
           });
 
-          const huh2 = createSimpleTreeModelNode(undefined, "son", { parentId: nodeItem.id });
-
-          setupDataProvider([nodeItem, huh2]);
+          const simpleNode = createSimpleTreeModelNode(undefined, undefined, { parentId: nodeItem.id });
+          setupDataProvider([nodeItem, simpleNode]);
 
           const { queryByTitle } = render(
             <ModelsTree
