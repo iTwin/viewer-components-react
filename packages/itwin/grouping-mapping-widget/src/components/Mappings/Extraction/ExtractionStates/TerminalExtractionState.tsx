@@ -3,17 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
+import { SvgStatusError, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
 import { ANIMATION_DELAY, ANIMATION_DURATION } from "../../../Constants";
 
 interface ExtractionStateProps {
+  status: string;
   animation: boolean;
   onAnimationEnd: () => void;
 }
 
-export const SucceededExtractionState = ({ animation, onAnimationEnd }: ExtractionStateProps) => (
+export const TerminalExtractionState = ({ status, animation, onAnimationEnd }: ExtractionStateProps) => (
   <div
-    title="Succeeded"
+    title={status}
     className="gmw-extraction-status">
     <div
       className={`gmw-status-icon`}
@@ -24,7 +25,7 @@ export const SucceededExtractionState = ({ animation, onAnimationEnd }: Extracti
       }}
       onAnimationEnd={onAnimationEnd}
     >
-      <SvgStatusSuccess />
+      {status === "Succeeded" ? <SvgStatusSuccess /> : <SvgStatusError />}
     </div>
   </div>
 );

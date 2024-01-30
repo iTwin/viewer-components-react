@@ -6,9 +6,8 @@ import { useEffect, useState } from "react";
 import * as React from "react";
 import { STATUS_CHECK_INTERVAL } from "../../Constants";
 import { StartingExtractionState } from "./ExtractionStates/StartingExtractionState";
-import { FailedExtractionState } from "./ExtractionStates/FailedExtractionState";
 import { QueuedExtractionState } from "./ExtractionStates/QueuedExtractionState";
-import { SucceededExtractionState } from "./ExtractionStates/SucceededExtractionState";
+import { TerminalExtractionState } from "./ExtractionStates/TerminalExtractionState";
 import { RunningExtractionState } from "./ExtractionStates/RunningExtractionState";
 import "./ExtractionStatus.scss";
 
@@ -30,7 +29,6 @@ export const ExtractionStatus = ({
   state,
   clearExtractionState,
 }: ExtractionStatusProps) => {
-
   const [fadeOut, setFadeOut] = useState<boolean>(false);
 
   const onAnimationEnd = () => {
@@ -56,12 +54,14 @@ export const ExtractionStatus = ({
     case ExtractionStates.Running:
       return (<RunningExtractionState />);
     case ExtractionStates.Succeeded:
-      return (<SucceededExtractionState
+      return (<TerminalExtractionState
+        status="Succeeded"
         animation={fadeOut}
         onAnimationEnd={onAnimationEnd}
       />);
     case ExtractionStates.Failed:
-      return (<FailedExtractionState
+      return (<TerminalExtractionState
+        status="Failed"
         animation={fadeOut}
         onAnimationEnd={onAnimationEnd}
       />);

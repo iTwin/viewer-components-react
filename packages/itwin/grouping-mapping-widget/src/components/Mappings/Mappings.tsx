@@ -10,7 +10,6 @@ import type { CreateTypeFromInterface } from "../../common/utils";
 import type { mappingViewDefaultDisplayStrings } from "./MappingsView";
 import { MappingsView } from "./MappingsView";
 import { useMappingsOperations } from "./hooks/useMappingsOperations";
-import { useFetchExtractionStates } from "./hooks/useFetchExtractionStates";
 
 export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
@@ -24,7 +23,6 @@ export interface MappingsProps {
 export const Mappings = (props: MappingsProps) => {
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const { runExtraction } = useFetchExtractionStates(groupingMappingApiConfig);
   const {
     mappings,
     isLoading,
@@ -57,7 +55,6 @@ export const Mappings = (props: MappingsProps) => {
       showImportModal={showImportModal}
       setShowImportModal={setShowImportModal}
       showDeleteModal={showDeleteModal}
-      onRunExtraction={runExtraction}
       setShowDeleteModal={setShowDeleteModal}
       isTogglingExtraction={isTogglingExtraction}
       {...props}

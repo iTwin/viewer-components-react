@@ -25,10 +25,13 @@ import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import type { ExtractionStatusData } from "./Extraction/ExtractionStatusIcon";
 import { ExtractionStatusIcon } from "./Extraction/ExtractionStatusIcon";
-import { MappingList } from "./MappingList";
+import { MappingListItem } from "./MappingListItem";
 import type { ExtractionMessageData } from "./Extraction/ExtractionMessageModal";
 import { ExtractionMessageModal } from "./Extraction/ExtractionMessageModal";
 import { BeEvent } from "@itwin/core-bentley";
+import { useExtractionStateJobContext } from "../context/ExtractionStateJobContext";
+import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
+import { useRunExtraction } from "./hooks/useRunExtraction";
 
 export const mappingViewDefaultDisplayStrings = {
   mappings: "Mappings",
@@ -61,7 +64,6 @@ export interface MappingsViewProps {
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
-  onRunExtraction: (mappings: Mapping[]) => Promise<void>;
   alert?: React.ReactElement<typeof Alert>;
 }
 
@@ -85,7 +87,6 @@ export const MappingsView = ({
   onClickAddMapping,
   onClickMappingTitle,
   onClickMappingModify,
-  onRunExtraction,
   alert,
 }: MappingsViewProps) => {
   const displayStrings = React.useMemo(
@@ -94,6 +95,10 @@ export const MappingsView = ({
   );
 
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
+  const groupingMappingApiConfig = useGroupingMappingApiConfig();
+  const { mappingIdJobInfo } = useExtractionStateJobContext();
+  const {runExtraction, isRunExtractionLoading} = useRunExtraction(groupingMappingApiConfig);
+  // const queryClient = useQueryClient();
 
   const jobStartEvent = useMemo(
     () => new BeEvent<(mappingId: string) => void>(),
@@ -112,11 +117,13 @@ export const MappingsView = ({
     );
   };
 
-  const runExtraction = useCallback(async () => {
-    await onRunExtraction(selectedMappings);
-    selectedMappings.map((mapping) => { jobStartEvent.raiseEvent(mapping.id); });
+  const onRunExtraction = useCallback(async () => {
+    await runExtraction(selectedMappings);
+    selectedMappings.map((mapping) => {
+      jobStartEvent.raiseEvent(mapping.id);
+    });
     setSelectedMappings([]);
-  }, [selectedMappings, jobStartEvent, onRunExtraction]);
+  }, [selectedMappings, jobStartEvent, runExtraction]);
 
   return (
     <>
@@ -143,7 +150,7 @@ export const MappingsView = ({
             }
             <IconButton
               title="Run extraction"
-              onClick={runExtraction}
+              onClick={onRunExtraction}
               disabled={selectedMappings.length === 0}
             >
               <SvgPlay />
@@ -178,9 +185,10 @@ export const MappingsView = ({
         ) : (
           <div className="gmw-mappings-list">
             {mappings.map((mapping) => (
-              <MappingList
+              <MappingListItem
                 key={mapping.id}
                 mapping={mapping}
+                jobId={mappingIdJobInfo?.get(mapping.id)}
                 jobStartEvent={jobStartEvent}
                 onClickMappingTitle={onClickMappingTitle}
                 onSelectionChange={onSelectionChange}
@@ -191,6 +199,7 @@ export const MappingsView = ({
                 onRefreshMappings={onRefreshMappings}
                 onClickMappingModify={onClickMappingModify}
                 setShowDeleteModal={setShowDeleteModal}
+                isRunExtractionLoading={isRunExtractionLoading}
               />
             ))}
           </div>
