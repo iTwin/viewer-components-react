@@ -97,8 +97,7 @@ export const MappingsView = ({
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
-  const {runExtraction, isRunExtractionLoading} = useRunExtraction(groupingMappingApiConfig);
-  // const queryClient = useQueryClient();
+  const { runExtraction } = useRunExtraction(groupingMappingApiConfig);
 
   const jobStartEvent = useMemo(
     () => new BeEvent<(mappingId: string) => void>(),
@@ -199,7 +198,6 @@ export const MappingsView = ({
                 onRefreshMappings={onRefreshMappings}
                 onClickMappingModify={onClickMappingModify}
                 setShowDeleteModal={setShowDeleteModal}
-                isRunExtractionLoading={isRunExtractionLoading}
               />
             ))}
           </div>

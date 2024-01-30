@@ -26,7 +26,6 @@ export interface MappingListItemProps {
   onRefreshMappings: () => Promise<void>;
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
   setShowDeleteModal: (mapping?: Mapping) => void;
-  isRunExtractionLoading: boolean;
 }
 
 export const MappingListItem = (props: MappingListItemProps) => {
