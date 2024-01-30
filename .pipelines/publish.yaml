@@ -31,10 +31,11 @@ steps:
       git config --global user.email imodeljs-admin@users.noreply.github.com
       git config --global user.name imodeljs-admin
       git remote set-url origin "https://$(GITHUBTOKEN)@$(REPO_URL)"
-      pnpm run publish --message "applying package updates" --token $NPM_AUTH_TOKEN $beachballConfig $publishOptions
+      pnpm run publish --message "applying package updates" --token $NPM_AUTH_TOKEN --branch $branchName $beachballConfig $publishOptions
     displayName: "Publish packages"
     env:
       NPM_AUTH_TOKEN: $(npmToken)
+      branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', 'origin/') ]
       ${{ if eq(parameters.dev, true) }}:
         beachballConfig: "--config beachball.config.dev.js --keep-change-files"
       ${{ if eq(parameters.noPublish, true) }}:
