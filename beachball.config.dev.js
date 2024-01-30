@@ -7,7 +7,7 @@ const base = require("./beachball.config.js");
 /** @type {import("beachball").BeachballConfig } */
 module.exports = {
   ...base,
-  scope: ["packages/itwin/tree-widget"],
+  scope: [],
   tag: "nightly",
   prereleasePrefix: "dev",
   generateChangelog: false,
