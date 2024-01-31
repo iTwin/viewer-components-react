@@ -1,6 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 01 Dec 2023 13:46:38 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Jan 2024 13:20:38 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 1.2.2
+
+Tue, 30 Jan 2024 13:20:38 GMT
+
+### Patches
+
+- Fixed `onCheckboxStateChanged` event handling when multiple `rxjs` versions are present. ([#750](https://github.com/iTwin/viewer-components-react/pull/750))
 
 ## 1.2.1
 Fri, 01 Dec 2023 13:46:38 GMT
@@ -261,4 +271,3 @@ Wed, 12 Jan 2022 13:59:35 GMT
 ### Patches
 
 - iTwin.js 3.0 first rc.
-

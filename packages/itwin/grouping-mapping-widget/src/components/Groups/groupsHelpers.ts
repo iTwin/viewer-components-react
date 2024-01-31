@@ -57,6 +57,12 @@ export type GroupsElementIds = {
   elementIds: string[];
 }[];
 
+export const hideGroupIds = (hiddenGroupIds: Set<string>, groupsWithGroupedOverlaps: OverlappedElementGroupPairs[]  ) => {
+  hiddenGroupIds.forEach((groupId) => {
+    hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupIds);
+  });
+};
+
 export const visualizeGroupColors = async (
   hiddenGroupsIds: Set<string>,
   groupsWithGroupedOverlaps: OverlappedElementGroupPairs[],
@@ -92,10 +98,6 @@ export const visualizeGroupColors = async (
     );
 
   clearHiddenElements();
-
-  hiddenGroupsIds.forEach((groupId) => {
-    hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupsIds);
-  });
 
   const allPromises = [...singleGroupPromises, ...overlappedGroupPromises];
 

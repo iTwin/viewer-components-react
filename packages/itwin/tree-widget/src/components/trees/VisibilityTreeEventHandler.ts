@@ -6,10 +6,7 @@
  * @module IModelComponents
  */
 
-import { Observable } from "rxjs";
-import { from } from "rxjs/internal/observable/from";
-import { map } from "rxjs/internal/operators/map";
-import { mergeMap } from "rxjs/internal/operators/mergeMap";
+import { from, map, mergeMap, Observable } from "rxjs";
 import { CheckBoxState } from "@itwin/core-react";
 import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
@@ -141,13 +138,10 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       void this.updateCheckboxes();
     };
 
-    // eslint-disable-next-line deprecation/deprecation
-    from(event.stateChanges)
+    new Observable<CheckboxStateChange[]>((subscriber) => event.stateChanges.subscribe(subscriber))
       .pipe(
-        // eslint-disable-next-line deprecation/deprecation
         mergeMap((changes) => this.changeVisibility(changes)),
       )
-      // eslint-disable-next-line deprecation/deprecation
       .subscribe({
         complete: handleStateChanged,
         error: handleStateChanged,
@@ -156,15 +150,13 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   private changeVisibility(changes: CheckboxStateChange[]) {
-    // eslint-disable-next-line deprecation/deprecation
-    return from(changes).pipe(
-      // eslint-disable-next-line deprecation/deprecation
-      mergeMap(({ nodeItem, newState }) => {
-        this._isChangingVisibility = true;
-        // eslint-disable-next-line deprecation/deprecation
-        return from(this._visibilityHandler.changeVisibility(nodeItem, newState === CheckBoxState.On));
-      }, 1),
-    );
+    return from(changes)
+      .pipe(
+        mergeMap(({ nodeItem, newState }) => {
+          this._isChangingVisibility = true;
+          return from(this._visibilityHandler.changeVisibility(nodeItem, newState === CheckBoxState.On));
+        }, 1),
+      );
   }
 
   private async updateCheckboxes(affectedNodes?: string[], visibilityStatus?: Map<string, VisibilityStatus>) {

@@ -9,6 +9,7 @@ import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsC
 import {
   generateOverlappedGroups,
   hideGroupConsideringOverlaps,
+  hideGroupIds,
   visualizeGroupColors,
 } from "./groupsHelpers";
 import {
@@ -121,15 +122,30 @@ export const GroupsVisualization = ({
   );
 
   useEffect(() => {
-    if (isOverlappedColored === false) {
-      if (hiliteIds.length > 0 && showGroupColor && !isGroupsFetching) {
-        const results = generateOverlappedGroups(hiliteIds);
-        const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
-        setOverlappedElementsMetadata({ overlappedElementsInfo, groupElementsInfo: numberOfElementsInGroups, overlappedElementGroupPairs: groupsWithGroupedOverlaps });
-        visualizationMutation.mutate(results.groupsWithGroupedOverlaps);
+    const processOverlappedGroups = () => {
+      const results = generateOverlappedGroups(hiliteIds);
+      const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
+
+      setOverlappedElementsMetadata({
+        overlappedElementsInfo,
+        groupElementsInfo: numberOfElementsInGroups,
+        overlappedElementGroupPairs: groupsWithGroupedOverlaps,
+      });
+
+      if (showGroupColor) {
+        visualizationMutation.mutate(groupsWithGroupedOverlaps);
       } else {
         clearEmphasizedOverriddenElements();
       }
+
+      clearHiddenElements();
+      hideGroupIds(hiddenGroupsIds, groupsWithGroupedOverlaps);
+    };
+
+    const shouldProcessOverlappedGroups = () => !isOverlappedColored && hiliteIds.length > 0 && !isGroupsFetching;
+
+    if (shouldProcessOverlappedGroups()) {
+      processOverlappedGroups();
     }
     // We don't want to trigger full visualization when toggling individual groups.
     // eslint-disable-next-line react-hooks/exhaustive-deps
