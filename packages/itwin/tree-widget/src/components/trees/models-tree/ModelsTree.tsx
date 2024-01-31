@@ -123,7 +123,7 @@ export function ModelsTree(props: ModelsTreeProps) {
         selectionMode={props.selectionMode || SelectionMode.None}
         treeRenderer={
           props.isHierarchyFilteringEnabled
-            ? (rendererProps) => ModelsTreeRenderer({ ...rendererProps, ...baseRendererProps }, state?.nodeLoader)
+            ? (rendererProps) => <ModelsTreeRenderer {...rendererProps} {...baseRendererProps} nodeLoader={state.nodeLoader} />
             : createVisibilityTreeRenderer(baseRendererProps)
         }
         noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
@@ -135,7 +135,8 @@ export function ModelsTree(props: ModelsTreeProps) {
   );
 }
 
-interface ModelsTreeRendererProps extends TreeRendererProps {
+interface ModelsTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader"> {
+  nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>
   nodeRendererProps: ModelsTreeNodeRendererStylingProps;
 }
 
@@ -156,7 +157,16 @@ function ModelsTreeRenderer(
     <div className={className} ref={containerRef}>
       <TreeRenderer
         {...restProps}
-        nodeRenderer={(props) => <ModelsTreeNodeRenderer  {...nodeRendererProps} {...props} onClearFilterClick={onClearFilterClick} onFilterClick={onFilterClick} onContextMenu={onContextMenu}/>}
+        nodeRenderer={(props) => (
+          <ModelsTreeNodeRenderer
+            {...nodeRendererProps}
+            {...props}
+            onClearFilterClick={onClearFilterClick}
+            onFilterClick={onFilterClick}
+            onContextMenu={onContextMenu}
+            isEnlarged={isEnlarged}
+          />
+        )}
       />
       {renderContextMenu()}
       {filterDialog}
@@ -176,30 +186,29 @@ interface ModelsTreeNodeRendererStylingProps {
   isEnlarged?: boolean;
 }
 
-interface ModelsTreeNodeRendererProps extends Omit<PresentationTreeNodeRendererProps, "descriptionEnabled">, ModelsTreeNodeRendererStylingProps {}
+type ModelsTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & ModelsTreeNodeRendererStylingProps;
 
 function ModelsTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, ...restProps }: ModelsTreeNodeRendererProps) {
-    const expansionToggleWidth = isEnlarged ? EXPANSION_TOGGLE_WIDTH * 2 : EXPANSION_TOGGLE_WIDTH;
-    const nodeOffset = restProps.node.depth * levelOffset + (restProps.node.numChildren === 0 ? expansionToggleWidth : 0);
+  const expansionToggleWidth = isEnlarged ? EXPANSION_TOGGLE_WIDTH * 2 : EXPANSION_TOGGLE_WIDTH;
+  const nodeOffset = restProps.node.depth * levelOffset + (restProps.node.numChildren === 0 ? expansionToggleWidth : 0);
 
-    return (
-      <PresentationTreeNodeRenderer
-        {...restProps}
-        checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
-          <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
-            <VisibilityTreeNodeCheckbox {...checkboxProps} />
-          </div>
-        )}
-        descriptionEnabled={descriptionEnabled}
-        imageLoader={imageLoader}
-        className={classNames(
-          "with-checkbox",
-          (restProps.node.numChildren === 0 || (disableRootNodeCollapse && restProps.node.parentId === undefined)) && "disable-expander",
-        )}
-        node={{ ...restProps.node, depth: 0 }}
-      />
-    );
-  };
+  return (
+    <PresentationTreeNodeRenderer
+      {...restProps}
+      checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
+        <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
+          <VisibilityTreeNodeCheckbox {...checkboxProps} />
+        </div>
+      )}
+      descriptionEnabled={descriptionEnabled}
+      imageLoader={imageLoader}
+      className={classNames(
+        "with-checkbox",
+        (restProps.node.numChildren === 0 || (disableRootNodeCollapse && restProps.node.parentId === undefined)) && "disable-expander",
+      )}
+    />
+  );
+};
 
 function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {
   const rulesets = {

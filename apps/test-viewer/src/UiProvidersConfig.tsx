@@ -10,21 +10,11 @@ import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, M
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import {
-  AddFavoritePropertyContextMenuItem,
-  AncestorsNavigationControls,
-  CopyPropertyTextContextMenuItem,
-  PropertyGridManager,
-  PropertyGridUiItemsProvider,
-  RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
+  AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
+  RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import {
-  CategoriesTreeComponent,
-  ExternalSourcesTreeComponent,
-  IModelContentTreeComponent,
-  ModelsTreeComponent,
-  TreeWidget,
-  TreeWidgetUiItemsProvider,
+  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetUiItemsProvider,
 } from "@itwin/tree-widget-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
 
@@ -81,7 +71,13 @@ const configuredUiItems = new Map<string, UiItem>([
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: () => <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} isHierarchyFilteringEnabled={true} />,
+              render: () => (
+                <ModelsTreeComponent
+                  selectionPredicate={() => true}
+                  selectionMode={SelectionMode.Multiple}
+                  isHierarchyFilteringEnabled={true}
+                />
+              ),
             },
             {
               id: CategoriesTreeComponent.id,
