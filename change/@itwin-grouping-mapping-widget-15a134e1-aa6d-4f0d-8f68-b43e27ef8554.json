@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed an issue where hidden elements would not reappear when the group for those elements was deleted.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Guillar1@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
