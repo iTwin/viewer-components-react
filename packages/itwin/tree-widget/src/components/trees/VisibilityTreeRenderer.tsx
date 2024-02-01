@@ -57,6 +57,11 @@ export interface VisibilityTreeNodeRendererProps {
    * Defaults to `false`.
    */
   disableRootNodeCollapse?: boolean;
+  /**
+   * Specifies whether the nodes should be enlarged (less dense and larger content).
+   * Is `false` by default
+   */
+  isEnlarged?: boolean;
 }
 
 /**
@@ -120,28 +125,27 @@ export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
   );
 }
 
-export interface FilterableVisibilityTreeNodeRendererStylingProps {
-  iconsEnabled: boolean;
-
-  descriptionEnabled: boolean;
-
-  levelOffset: number;
-
-  disableRootNodeCollapse?: boolean;
-
-  isEnlarged?: boolean;
-}
-
+/**
+ * Props for [[FilterableVisibilityTreeRenderer]].
+ * @public
+ */
 export interface FilterableVisibilityTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader"> {
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
-  nodeRendererProps: FilterableVisibilityTreeNodeRendererStylingProps;
+  nodeRendererProps: VisibilityTreeNodeRendererProps;
 }
 
-export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> &
-  FilterableVisibilityTreeNodeRendererStylingProps;
+/**
+ * Props for [[FilterableVisibilityTreeNodeRenderer]].
+ * @public
+ */
+export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & VisibilityTreeNodeRendererProps;
 
+/**
+ * Creates node renderer which renders node with eye checkbox and hierarchy level filtering actions.
+ * @public
+ */
 export function FilterableVisibilityTreeNodeRenderer({
-  levelOffset,
+  levelOffset = 20,
   disableRootNodeCollapse,
   descriptionEnabled,
   isEnlarged,
@@ -169,7 +173,12 @@ export function FilterableVisibilityTreeNodeRenderer({
 }
 
 export function FilterableVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: FilterableVisibilityTreeRendererProps) {
-  return <FilterableTreeRenderer {...restProps} nodeRenderer={(props) => <FilterableVisibilityTreeNodeRenderer {...nodeRendererProps} {...props} />} />;
+  return (
+    <FilterableTreeRenderer
+      {...restProps}
+      nodeRenderer={(props) => <FilterableVisibilityTreeNodeRenderer {...nodeRendererProps} {...props} isEnlarged={restProps.density === "enlarged"} />}
+    />
+  );
 }
 
 /**

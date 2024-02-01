@@ -11,6 +11,7 @@ import { PropertyFilterRuleOperator } from "@itwin/components-react";
 import { BisCodeSpec, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { LabelDefinition } from "@itwin/presentation-common";
+import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
   buildTestIModel,
@@ -40,6 +41,7 @@ import {
   createTestPropertyInfo,
 } from "../Common";
 
+import type { TreeNodeItem } from "@itwin/components-react";
 import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -78,14 +80,6 @@ describe("IModelContentTree", () => {
         return { type: "invalid", version: 0, pathFromRoot: [`${++nodeKeysCounter}`] };
       };
 
-      // const setupDataProvider = (nodes: TreeNodeItem[]) => {
-      //   (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
-      //   sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
-
-      //   (PresentationTreeDataProvider.prototype.getNodes as any).restore();
-      //   sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
-      // };
-
       function setupHierarchy(nodes: Node[]) {
         presentationManagerMock
           .setup(async (x) => x.getNodesAndCount(moq.It.isAny()))
@@ -121,12 +115,30 @@ describe("IModelContentTree", () => {
           await Presentation.initialize();
         });
 
+        beforeEach(() => {
+          imodelMock.reset();
+          sinon.stub(PresentationTreeDataProvider.prototype, "imodel").get(() => imodelMock.object);
+          sinon.stub(PresentationTreeDataProvider.prototype, "rulesetId").get(() => "");
+          sinon.stub(PresentationTreeDataProvider.prototype, "dispose");
+          sinon.stub(PresentationTreeDataProvider.prototype, "getFilteredNodePaths").resolves([]);
+          sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(0);
+          sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves([]);
+        });
+
         after(async () => {
           Presentation.terminate();
         });
 
+        const setupDataProvider = (nodes: TreeNodeItem[]) => {
+          (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
+          sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
+
+          (PresentationTreeDataProvider.prototype.getNodes as any).restore();
+          sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
+        };
+
         it("renders enlarged tree node", async () => {
-          setupHierarchy([{ ...createSimpleTreeModelNode(), key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("Node Label") }]);
+          setupDataProvider([createSimpleTreeModelNode()]);
 
           const { getByText, container } = render(
             <IModelContentTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />,
@@ -138,28 +150,28 @@ describe("IModelContentTree", () => {
           expect(node.style.height).to.be.equal("43px");
         });
 
-        // it("renders non-filterable node", async () => {
-        //   setupDataProvider([createSimpleTreeModelNode()]);
+        it("renders non-filterable node", async () => {
+          setupDataProvider([createSimpleTreeModelNode()]);
 
-        //   const { queryByTitle, getByText } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+          const { queryByTitle, getByText } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
 
-        //   await waitFor(() => getByText("Node Label"));
-        //   expect(queryByTitle("tree.filter-hierarchy-level")).to.be.null;
-        // });
+          await waitFor(() => getByText("Node Label"));
+          expect(queryByTitle("tree.filter-hierarchy-level")).to.be.null;
+        });
 
-        // it("renders filterable node", async () => {
-        //   const nodeItem = createPresentationTreeNodeItem({
-        //     hasChildren: true,
-        //     filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [] },
-        //   });
+        it("renders filterable node", async () => {
+          const nodeItem = createPresentationTreeNodeItem({
+            hasChildren: true,
+            filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [] },
+          });
 
-        //   const simpleNode = createSimpleTreeModelNode(undefined, undefined, { parentId: nodeItem.id });
-        //   setupDataProvider([nodeItem, simpleNode]);
+          const simpleNode = createSimpleTreeModelNode(undefined, undefined, { parentId: nodeItem.id });
+          setupDataProvider([nodeItem, simpleNode]);
 
-        //   const { queryByTitle } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+          const { queryByTitle } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
 
-        //   await waitFor(() => expect(queryByTitle("tree.filter-hierarchy-level")).to.not.be.null);
-        // });
+          await waitFor(() => expect(queryByTitle("tree.filter-hierarchy-level")).to.not.be.null);
+        });
 
         it("renders node with active filtering", async () => {
           const property = createTestPropertyInfo();
@@ -177,7 +189,7 @@ describe("IModelContentTree", () => {
             filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [], active: filterInfo },
           });
 
-          setupHierarchy([{ ...nodeItem, label: LabelDefinition.fromLabelString("test-node") }]);
+          setupDataProvider([nodeItem]);
 
           const { queryByTitle } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
 
