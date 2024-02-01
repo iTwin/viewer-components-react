@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed iModel selection not populating in Import Mappings.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Guillar1@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
