@@ -570,14 +570,14 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             {!props.layerRequiringCredentials
             && !props.mapLayerSourceToEdit
             && <div title={!isSettingsStorageAvailable ? noSaveSettingsWarning : ""}>
-                {hasImodelContext && mapLayerOptions?.showUserPreferencesStorageOptions && (
-                  <UserPreferencesStorageOptions
-                    disabled={!isSettingsStorageAvailable}
-                    itwinChecked={settingsStorage === "iTwin"}
-                    modelChecked={settingsStorage === "Model"}
-                    onChange={onRadioChange}
-                  />
-                )}
+              {hasImodelContext && mapLayerOptions?.showUserPreferencesStorageOptions && (
+                <UserPreferencesStorageOptions
+                  disabled={!isSettingsStorageAvailable}
+                  itwinChecked={settingsStorage === "iTwin"}
+                  modelChecked={settingsStorage === "Model"}
+                  onChange={onRadioChange}
+                />
+              )}
             </div>}
           </div>
         </div>

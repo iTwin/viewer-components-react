@@ -235,7 +235,6 @@ describe("MapUrlDialog", () => {
     allRadios.forEach((radio) => {expect(radio.props().disabled).to.be.true;});
   });
 
-
   it("should not display user preferences options if iTwinConfig is defined bot the option is OFF ", () => {
     sandbox.stub(MapLayersUI, "iTwinConfig").get(() => ({
       get: undefined,
