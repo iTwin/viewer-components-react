@@ -71,23 +71,17 @@ const configuredUiItems = new Map<string, UiItem>([
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: () => (
-                <ModelsTreeComponent
-                  selectionPredicate={() => true}
-                  selectionMode={SelectionMode.Multiple}
-                  isHierarchyFilteringEnabled={true}
-                />
-              ),
+              render: () => <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} isHierarchyFilteringEnabled={true} />,
             },
             {
               id: CategoriesTreeComponent.id,
               getLabel: CategoriesTreeComponent.getLabel,
-              render: () => <CategoriesTreeComponent />,
+              render: () => <CategoriesTreeComponent isHierarchyFilteringEnabled={true} />,
             },
             {
               id: IModelContentTreeComponent.id,
               getLabel: IModelContentTreeComponent.getLabel,
-              render: () => <IModelContentTreeComponent />,
+              render: () => <IModelContentTreeComponent isHierarchyLevelFilteringEnabled={true} />,
             },
             {
               id: ExternalSourcesTreeComponent.id,

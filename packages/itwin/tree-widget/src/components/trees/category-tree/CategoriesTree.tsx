@@ -13,7 +13,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
-import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, FilterableVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
@@ -53,6 +53,11 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
    * @internal
    */
   viewManager?: ViewManager;
+  /**
+   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * @beta
+   */
+  isHierarchyLevelFilteringEnabled?: boolean;
 }
 
 /**
@@ -87,7 +92,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     setViewType(activeView); // eslint-disable-line @typescript-eslint/no-floating-promises
   }, [activeView]);
 
-  const treeRenderer = createVisibilityTreeRenderer({
+  const baseRendererProps = {
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
     density: props.density,
@@ -96,7 +101,8 @@ export function CategoryTree(props: CategoryTreeProps) {
       descriptionEnabled: true,
       levelOffset: 10,
     },
-  });
+  };
+
   const noFilteredDataRenderer = useCallback(() => {
     return (
       <VisibilityTreeNoFilteredData
@@ -106,7 +112,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     );
   }, []);
 
-  if (!state) {
+  if (!state || !state.nodeLoader || !state.nodeLoader.modelSource) {
     return null;
   }
 
@@ -119,7 +125,11 @@ export function CategoryTree(props: CategoryTreeProps) {
         height={props.height}
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.None}
-        treeRenderer={treeRenderer}
+        treeRenderer={
+          props.isHierarchyLevelFilteringEnabled
+            ? (rendererProps) => <FilterableVisibilityTreeRenderer {...rendererProps} {...baseRendererProps} nodeLoader={state.nodeLoader} />
+            : createVisibilityTreeRenderer(baseRendererProps)
+        }
         descriptionsEnabled={true}
         noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
       />

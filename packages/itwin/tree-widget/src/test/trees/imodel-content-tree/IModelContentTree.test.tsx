@@ -7,6 +7,7 @@ import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
 import * as moq from "typemoq";
+import { PropertyFilterRuleOperator } from "@itwin/components-react";
 import { BisCodeSpec, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { LabelDefinition } from "@itwin/presentation-common";
@@ -31,11 +32,18 @@ import {
   addSubject,
 } from "../../IModelUtils";
 import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
+import {
+  createPresentationTreeNodeItem,
+  createSimpleTreeModelNode,
+  createTestContentDescriptor,
+  createTestPropertiesContentField,
+  createTestPropertyInfo,
+} from "../Common";
 
+import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Node, NodeKey } from "@itwin/presentation-common";
-
 describe("IModelContentTree", () => {
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };
@@ -70,6 +78,14 @@ describe("IModelContentTree", () => {
         return { type: "invalid", version: 0, pathFromRoot: [`${++nodeKeysCounter}`] };
       };
 
+      // const setupDataProvider = (nodes: TreeNodeItem[]) => {
+      //   (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
+      //   sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
+
+      //   (PresentationTreeDataProvider.prototype.getNodes as any).restore();
+      //   sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
+      // };
+
       function setupHierarchy(nodes: Node[]) {
         presentationManagerMock
           .setup(async (x) => x.getNodesAndCount(moq.It.isAny()))
@@ -98,6 +114,75 @@ describe("IModelContentTree", () => {
         await user.pointer({ keys: "[MouseRight>]", target: node });
 
         await waitFor(() => expect(queryByText("Test Menu Item")).to.not.be.null);
+      });
+
+      describe("Hierarchy level filtering", () => {
+        before(async () => {
+          await Presentation.initialize();
+        });
+
+        after(async () => {
+          Presentation.terminate();
+        });
+
+        it("renders enlarged tree node", async () => {
+          setupHierarchy([{ ...createSimpleTreeModelNode(), key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("Node Label") }]);
+
+          const { getByText, container } = render(
+            <IModelContentTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+
+          const node = container.querySelector(".node-wrapper") as HTMLDivElement;
+          expect(node.style.height).to.be.equal("43px");
+        });
+
+        // it("renders non-filterable node", async () => {
+        //   setupDataProvider([createSimpleTreeModelNode()]);
+
+        //   const { queryByTitle, getByText } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+
+        //   await waitFor(() => getByText("Node Label"));
+        //   expect(queryByTitle("tree.filter-hierarchy-level")).to.be.null;
+        // });
+
+        // it("renders filterable node", async () => {
+        //   const nodeItem = createPresentationTreeNodeItem({
+        //     hasChildren: true,
+        //     filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [] },
+        //   });
+
+        //   const simpleNode = createSimpleTreeModelNode(undefined, undefined, { parentId: nodeItem.id });
+        //   setupDataProvider([nodeItem, simpleNode]);
+
+        //   const { queryByTitle } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+
+        //   await waitFor(() => expect(queryByTitle("tree.filter-hierarchy-level")).to.not.be.null);
+        // });
+
+        it("renders node with active filtering", async () => {
+          const property = createTestPropertyInfo();
+          const field = createTestPropertiesContentField({ properties: [{ property }] });
+          const filterInfo: PresentationInstanceFilterInfo = {
+            filter: {
+              field,
+              operator: PropertyFilterRuleOperator.IsNull,
+            },
+            usedClasses: [],
+          };
+
+          const nodeItem = createPresentationTreeNodeItem({
+            hasChildren: true,
+            filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [], active: filterInfo },
+          });
+
+          setupHierarchy([{ ...nodeItem, label: LabelDefinition.fromLabelString("test-node") }]);
+
+          const { queryByTitle } = render(<IModelContentTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+
+          await waitFor(() => expect(queryByTitle("tree.clear-hierarchy-level-filter")).to.not.be.null);
+        });
       });
     });
   });

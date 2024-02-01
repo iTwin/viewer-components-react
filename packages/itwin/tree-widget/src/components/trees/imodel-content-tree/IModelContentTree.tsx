@@ -4,13 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SelectionMode } from "@itwin/components-react";
-import { PresentationTree, usePresentationTreeState } from "@itwin/presentation-components";
-import { TreeRenderer } from "../common/TreeRenderer";
+import { PresentationTree, PresentationTreeNodeRenderer, usePresentationTreeState } from "@itwin/presentation-components";
+import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseTreeProps } from "../common/Types";
-
 /**
  * Presentation rules used by IModelContentTree
  * @internal
@@ -21,7 +20,9 @@ export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); 
  * Props for [[IModelContentTree]].
  * @public
  */
-export type IModelContentTreeProps = BaseTreeProps;
+export type IModelContentTreeProps = BaseTreeProps & {
+  isHierarchyLevelFilteringEnabled?: boolean;
+};
 
 /**
  * A tree that shows all iModel content starting from the root Subject, then the hierarchy of child
@@ -29,7 +30,7 @@ export type IModelContentTreeProps = BaseTreeProps;
  * @public
  */
 export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, width, height, selectionMode, contextMenuItems } = props;
+  const { iModel, width, height, selectionMode, isHierarchyLevelFilteringEnabled } = props;
 
   const state = usePresentationTreeState({
     imodel: iModel,
@@ -50,9 +51,18 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         height={height}
         state={state}
         selectionMode={selectionMode ?? SelectionMode.None}
-        treeRenderer={(treeProps) => (
-          <TreeRenderer {...treeProps} contextMenuItems={contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} density={props.density} />
-        )}
+        treeRenderer={(treeProps) =>
+          isHierarchyLevelFilteringEnabled ? (
+            <FilterableTreeRenderer
+              {...treeProps}
+              {...props}
+              nodeLoader={state.nodeLoader}
+              nodeRenderer={(nodeRendererProps) => <PresentationTreeNodeRenderer {...nodeRendererProps} />}
+            />
+          ) : (
+            <TreeRenderer {...props} {...treeProps} />
+          )
+        }
       />
     </div>
   );

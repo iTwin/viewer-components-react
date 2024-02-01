@@ -332,7 +332,7 @@ describe("ModelsTree", () => {
               iModel={imodelMock.object}
               modelsVisibilityHandler={visibilityHandlerMock}
               activeView={mockViewport().object}
-              isHierarchyFilteringEnabled={true}
+              isHierarchyLevelFilteringEnabled={true}
             />,
           );
 
@@ -351,7 +351,7 @@ describe("ModelsTree", () => {
               iModel={imodelMock.object}
               modelsVisibilityHandler={visibilityHandlerMock}
               activeView={mockViewport().object}
-              isHierarchyFilteringEnabled={true}
+              isHierarchyLevelFilteringEnabled={true}
             />,
           );
 
@@ -374,7 +374,7 @@ describe("ModelsTree", () => {
               iModel={imodelMock.object}
               modelsVisibilityHandler={visibilityHandlerMock}
               activeView={mockViewport().object}
-              isHierarchyFilteringEnabled={true}
+              isHierarchyLevelFilteringEnabled={true}
             />,
           );
 
@@ -405,7 +405,7 @@ describe("ModelsTree", () => {
               iModel={imodelMock.object}
               modelsVisibilityHandler={visibilityHandlerMock}
               activeView={mockViewport().object}
-              isHierarchyFilteringEnabled={true}
+              isHierarchyLevelFilteringEnabled={true}
             />,
           );
 

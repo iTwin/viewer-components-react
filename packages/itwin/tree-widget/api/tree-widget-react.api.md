@@ -291,7 +291,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     enableHierarchyAutoUpdate?: boolean;
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     // @beta
-    isHierarchyFilteringEnabled?: boolean;
+    isHierarchyLevelFilteringEnabled?: boolean;
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }

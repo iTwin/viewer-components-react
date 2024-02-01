@@ -6,13 +6,14 @@
 import "./TreeRenderer.scss";
 import classNames from "classnames";
 import { TreeRenderer as ComponentsTreeRenderer, TreeNodeRenderer } from "@itwin/components-react";
+import type { IPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
+import { useFilterablePresentationTree } from "@itwin/presentation-components";
 import { useContextMenu } from "./ContextMenu";
 import { TreeNodeRendererContextProvider } from "./TreeNodeRenderer";
 
-import type { TreeRendererProps as ComponentsTreeRendererProps } from "@itwin/components-react";
+import type { AbstractTreeNodeLoaderWithProvider, TreeRendererProps as ComponentsTreeRendererProps } from "@itwin/components-react";
 import type { TreeNodeRendererProps } from "./TreeNodeRenderer";
 import type { TreeContextMenuProps } from "./ContextMenu";
-
 /**
  * Base props for [[TreeRenderer]] component.
  * @public
@@ -59,6 +60,28 @@ export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer
         nodeHeight={nodeHeight}
       />
       {renderContextMenu()}
+    </div>
+  );
+}
+
+export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
+  nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
+  nodeRenderer: (props: PresentationTreeNodeRendererProps) => React.ReactNode;
+}
+
+export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps) {
+  const { onClearFilterClick, onFilterClick, filterDialog, containerRef } = useFilterablePresentationTree<HTMLDivElement>({ nodeLoader });
+
+  return (
+    <div ref={containerRef}>
+      <TreeRenderer
+        {...restProps}
+        nodeLoader={nodeLoader}
+        nodeRenderer={(props) => {
+          return nodeRenderer({ ...props, onClearFilterClick, onFilterClick });
+        }}
+      />
+      {filterDialog}
     </div>
   );
 }
