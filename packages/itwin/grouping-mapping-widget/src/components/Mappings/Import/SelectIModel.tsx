@@ -64,7 +64,6 @@ const SelectIModel = ({
   const { data: iModels, isFetching: isLoading } = useQuery({
     queryKey: ["iModels", iTwinId],
     queryFn: async () => fetchIModels(getAccessToken, iTwinId, iModelsClient),
-    initialData: [],
   });
 
   const displayStrings = React.useMemo(
@@ -101,7 +100,7 @@ const SelectIModel = ({
   return (
     <div className='gmw-select-imodel-table-container'>
       <Table<IIModelTyped>
-        data={iModels}
+        data={iModels ?? []}
         columns={iModelsColumns}
         className='gmw-select-imodel-table'
         emptyTableContent={`No ${displayStrings.iModels} available.`}
