@@ -77,7 +77,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
   }, []);
 
   const { loadingSources, sources, activeViewport, backgroundLayers, overlayLayers, mapLayerOptions } = useSourceMapContext();
-  const mapTypesOptions = mapLayerOptions?.mapTypeOptions;
   const iTwinId = activeViewport?.iModel?.iTwinId;
   const iModelId = activeViewport?.iModel?.iModelId;
 
@@ -245,7 +244,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                   layerRequiringCredentials={mapLayerSettings.toJSON()}
                   onOkResult={(sourceState?: SourceState) => handleModalUrlDialogOk(LayerAction.New, sourceState)}
                   onCancelResult={handleModalUrlDialogCancel}
-                  mapTypesOptions={mapTypesOptions} />
+                  {...mapLayerOptions} />
               );
               if (onHandleOutsideClick) {
                 onHandleOutsideClick(false);
@@ -275,9 +274,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     if (isMounted.current) {
       setLayerNameToAdd(undefined);
     }
-  }, [attachLayer, needsFeatureSelection, setLayerNameToAdd, layerNameToAdd, activeViewport, sources, backgroundLayers, isOverlay, overlayLayers,
-    onLayerAttached, handleModalUrlDialogOk, handleSelectFeaturesCancel, handleSelectFeaturesOk, mapTypesOptions,
-    handleModalUrlDialogCancel, onHandleOutsideClick, openFeatureSelectionDialog]);
+  }, [attachLayer, needsFeatureSelection, setLayerNameToAdd, layerNameToAdd, activeViewport, sources, backgroundLayers, isOverlay, overlayLayers, onLayerAttached, handleModalUrlDialogOk, handleSelectFeaturesCancel, handleSelectFeaturesOk, handleModalUrlDialogCancel, onHandleOutsideClick, openFeatureSelectionDialog, mapLayerOptions]);
 
   const options = React.useMemo(() => sources, [sources]);
 
@@ -295,12 +292,12 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       isOverlay={isOverlay}
       onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.New, result)}
       onCancelResult={handleModalUrlDialogCancel}
-      mapTypesOptions={mapTypesOptions} />);
+      {...mapLayerOptions} />);
     if (onHandleOutsideClick) {
       onHandleOutsideClick(false);
     }
     return;
-  }, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, isOverlay, mapTypesOptions, onHandleOutsideClick]);
+  }, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, isOverlay, mapLayerOptions, onHandleOutsideClick]);
 
   const handleAttach = React.useCallback((mapName: string) => {
     setLayerNameToAdd(mapName);
@@ -388,12 +385,12 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       mapLayerSourceToEdit={matchingSource}
       onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.Edit, result)}
       onCancelResult={handleModalUrlDialogCancel}
-      mapTypesOptions={mapTypesOptions} />);
+      {...mapLayerOptions} />);
 
     if (onHandleOutsideClick) {
       onHandleOutsideClick(false);
     }
-  }, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, isOverlay, mapTypesOptions, onHandleOutsideClick, sources]);
+  }, [activeViewport, handleModalUrlDialogCancel, handleModalUrlDialogOk, isOverlay, mapLayerOptions, onHandleOutsideClick, sources]);
 
   return (
     <div className="map-manager-header">

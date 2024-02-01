@@ -22,7 +22,7 @@ describe("MapUrlDialog", () => {
   const viewMock = moq.Mock.ofType<ViewState3d>();
   const displayStyleMock = moq.Mock.ofType<DisplayStyle3dState>();
   const imodelMock = moq.Mock.ofType<IModelConnection>();
-  const defaultNumberOfInput = 4;
+  const defaultNumberOfInput = 2;
 
   const getSampleLayerSettings = (formatId: string, fakeCredentials: boolean) => {
     const sampleWmsSubLayers: MapSubLayerProps[] = [{ name: "subLayer1" }, { name: "subLayer2" }];
@@ -191,7 +191,7 @@ describe("MapUrlDialog", () => {
     await (layerTypeSelect.props() as any).onChange("WMS");
 
     const allInputs = component.find("input");
-    expect(allInputs.length).to.be.greaterThan(2);
+    expect(allInputs.length).to.equals(defaultNumberOfInput);
     allInputs.at(0).simulate("change", { target: { value: sampleWmsLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleWmsLayerSettings?.url } });
 
@@ -231,17 +231,30 @@ describe("MapUrlDialog", () => {
   it("should not display user preferences options if iTwinConfig is undefined ", () => {
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
     const allRadios = component.find('input[type="radio"]');
-    expect(allRadios.length).greaterThan(0);
+    expect(allRadios.length).equals(0);
     allRadios.forEach((radio) => {expect(radio.props().disabled).to.be.true;});
   });
 
-  it("should display user preferences options if iTwinConfig is defined ", () => {
+
+  it("should not display user preferences options if iTwinConfig is defined bot the option is OFF ", () => {
     sandbox.stub(MapLayersUI, "iTwinConfig").get(() => ({
       get: undefined,
       save: undefined,
       delete: undefined,
     }));
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
+    const allRadios = component.find('input[type="radio"]');
+    expect(allRadios.length).equals(0);
+    allRadios.forEach((radio) => {expect(radio.props().disabled).to.be.true;});
+  });
+
+  it("should display user preferences options if iTwinConfig is defined AND option is ON", () => {
+    sandbox.stub(MapLayersUI, "iTwinConfig").get(() => ({
+      get: undefined,
+      save: undefined,
+      delete: undefined,
+    }));
+    const component = enzyme.mount(<MapUrlDialog mapLayerOptions={{showUserPreferencesStorageOptions: true}} activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
     const allRadios= component.find('input[type="radio"]');
     expect(allRadios.length).to.equals(2);
   });
