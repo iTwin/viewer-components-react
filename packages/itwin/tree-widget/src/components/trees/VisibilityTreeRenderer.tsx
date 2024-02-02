@@ -16,12 +16,13 @@ import type { NodeCheckboxRenderProps } from "@itwin/core-react";
 import type { IPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
 import type { VisibilityTreeFilterInfo } from "./common/Types";
 /**
- * This constant is taken from `@itwin/core-react`.
+ * These constants are taken from `@itwin/core-react`.
  * Defines the size in pixels of the expansion toggle.
  * It is used to keep same hierarchy nodes with children and nodes without children in the same line.
  * @note This value applies only to the leaf nodes.
  */
 const EXPANSION_TOGGLE_WIDTH = 24;
+const EXPANDED_EXPANSION_TOGGLE_WIDTH = 42;
 
 const imageLoader = new TreeImageLoader();
 
@@ -142,7 +143,7 @@ export function FilterableVisibilityTreeNodeRenderer({
   isEnlarged,
   ...restProps
 }: FilterableVisibilityTreeNodeRendererProps) {
-  const expansionToggleWidth = isEnlarged ? EXPANSION_TOGGLE_WIDTH + 18 : EXPANSION_TOGGLE_WIDTH;
+  const expansionToggleWidth = isEnlarged ? EXPANDED_EXPANSION_TOGGLE_WIDTH : EXPANSION_TOGGLE_WIDTH;
   const nodeOffset = restProps.node.depth * levelOffset + (restProps.node.numChildren === 0 ? expansionToggleWidth : 0);
 
   return (
