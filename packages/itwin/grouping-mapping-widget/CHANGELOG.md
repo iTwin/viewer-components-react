@@ -1,8 +1,18 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 29 Jan 2024 21:37:20 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Feb 2024 00:04:15 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.23.1
+
+Fri, 02 Feb 2024 00:04:15 GMT
+
+### Patches
+
+- Fixed an issue where hidden elements would not reappear when the group for those elements was deleted and group color was disabled. ([#753](https://github.com/iTwin/viewer-components-react/pull/753))
+- Fixed iModel selection not populating in Import Mappings. ([#755](https://github.com/iTwin/viewer-components-react/pull/755))
+- Fixed form validation not running when creating a group. ([#748](https://github.com/iTwin/viewer-components-react/pull/748))
 
 ## 0.23.0
 
