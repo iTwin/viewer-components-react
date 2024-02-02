@@ -138,14 +138,16 @@ export function ModelsTree(props: ModelsTreeProps) {
 }
 
 function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
-  const nodeRendererProps = {
-    iconsEnabled: true,
-    descriptionEnabled: false,
-    levelOffset: 10,
-    disableRootNodeCollapse: true,
-  };
-
-  return <FilterableVisibilityTreeNodeRenderer {...nodeRendererProps} {...props} isEnlarged={props.density === "enlarged"} />;
+  return (
+    <FilterableVisibilityTreeNodeRenderer
+      {...props}
+      iconsEnabled={true}
+      descriptionEnabled={false}
+      levelOffset={10}
+      disableRootNodeCollapse={true}
+      isEnlarged={props.density === "enlarged"}
+    />
+  );
 }
 
 function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {

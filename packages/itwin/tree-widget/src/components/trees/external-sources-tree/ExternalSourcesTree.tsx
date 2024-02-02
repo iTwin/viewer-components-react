@@ -28,7 +28,6 @@ const PAGING_SIZE = 20;
 export interface ExternalSourcesTreeProps extends BaseTreeProps {
   /**
    * Flag that determines if hierarchy level filtering will be enabled for this tree.
-   * @beta
    */
   isHierarchyLevelFilteringEnabled?: boolean;
 }

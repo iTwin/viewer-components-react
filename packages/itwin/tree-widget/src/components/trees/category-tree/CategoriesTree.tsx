@@ -146,13 +146,16 @@ export function CategoryTree(props: CategoryTreeProps) {
 }
 
 function CategoriesTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
-  const nodeRendererProps = {
-    iconsEnabled: false,
-    descriptionEnabled: true,
-    levelOffset: 10,
-  };
+  return (
+    <FilterableVisibilityTreeNodeRenderer
+      {...props}
+      iconsEnabled={false}
+      descriptionEnabled={true}
+      levelOffset={10}
+      isEnlarged={props.density === "enlarged"}
+    />
+  );
 
-  return <FilterableVisibilityTreeNodeRenderer {...nodeRendererProps} {...props} isEnlarged={props.density === "enlarged"} />;
 }
 
 function useCategoryVisibilityHandler(

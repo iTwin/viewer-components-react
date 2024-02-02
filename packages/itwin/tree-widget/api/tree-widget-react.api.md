@@ -191,7 +191,6 @@ export type ExternalSourcesTreeComponentProps = Omit<ExternalSourcesTreeProps, "
 
 // @alpha
 export interface ExternalSourcesTreeProps extends BaseTreeProps {
-    // @beta
     isHierarchyLevelFilteringEnabled?: boolean;
 }
 

@@ -142,7 +142,7 @@ export function FilterableVisibilityTreeNodeRenderer({
   isEnlarged,
   ...restProps
 }: FilterableVisibilityTreeNodeRendererProps) {
-  const expansionToggleWidth = isEnlarged ? EXPANSION_TOGGLE_WIDTH * 2 : EXPANSION_TOGGLE_WIDTH;
+  const expansionToggleWidth = isEnlarged ? EXPANSION_TOGGLE_WIDTH + 18 : EXPANSION_TOGGLE_WIDTH;
   const nodeOffset = restProps.node.depth * levelOffset + (restProps.node.numChildren === 0 ? expansionToggleWidth : 0);
 
   return (
