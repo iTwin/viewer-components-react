@@ -19,7 +19,7 @@ import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
-import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
 const PAGING_SIZE = 20;
@@ -67,7 +67,7 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
 export function CategoryTree(props: CategoryTreeProps) {
   // istanbul ignore next
   const viewManager = props.viewManager ?? IModelApp.viewManager;
-  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied } = props;
+  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density } = props;
 
   const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, activeView, allViewports, categoryVisibilityHandler);
   const onFilterChange = useCallback(
@@ -132,9 +132,7 @@ export function CategoryTree(props: CategoryTreeProps) {
                   {...rendererProps}
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
-                  nodeRenderer={(nodeProps) => (
-                    <FilterableVisibilityTreeNodeRenderer {...baseRendererProps.nodeRendererProps} {...nodeProps} isEnlarged={props.density === "enlarged"} />
-                  )}
+                  nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} />}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)
@@ -145,6 +143,16 @@ export function CategoryTree(props: CategoryTreeProps) {
       {overlay}
     </div>
   );
+}
+
+function CategoriesTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
+  const nodeRendererProps = {
+    iconsEnabled: false,
+    descriptionEnabled: true,
+    levelOffset: 10,
+  };
+
+  return <FilterableVisibilityTreeNodeRenderer {...nodeRendererProps} {...props} isEnlarged={props.density === "enlarged"} />;
 }
 
 function useCategoryVisibilityHandler(

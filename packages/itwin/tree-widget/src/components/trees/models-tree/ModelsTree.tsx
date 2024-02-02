@@ -22,7 +22,7 @@ import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHan
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
@@ -83,6 +83,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
+  const { isHierarchyLevelFilteringEnabled, density, height, width, selectionMode } = props;
   const state = useModelsTreeState(props);
 
   const baseRendererProps = {
@@ -114,28 +115,37 @@ export function ModelsTree(props: ModelsTreeProps) {
     <div className={classNames("tree-widget-visibility-tree-base", "tree-widget-tree-container")}>
       <PresentationTree
         state={state}
-        selectionMode={props.selectionMode || SelectionMode.None}
+        selectionMode={selectionMode || SelectionMode.None}
         treeRenderer={
-          props.isHierarchyLevelFilteringEnabled
+          isHierarchyLevelFilteringEnabled
             ? (rendererProps) => (
                 <FilterableTreeRenderer
                   {...rendererProps}
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
-                  nodeRenderer={(nodeProps) => (
-                    <FilterableVisibilityTreeNodeRenderer {...baseRendererProps.nodeRendererProps} {...nodeProps} isEnlarged={props.density === "enlarged"} />
-                  )}
+                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)
         }
         noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
-        width={props.width}
-        height={props.height}
+        width={width}
+        height={height}
       />
       {overlay}
     </div>
   );
+}
+
+function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
+  const nodeRendererProps = {
+    iconsEnabled: true,
+    descriptionEnabled: false,
+    levelOffset: 10,
+    disableRootNodeCollapse: true,
+  };
+
+  return <FilterableVisibilityTreeNodeRenderer {...nodeRendererProps} {...props} isEnlarged={props.density === "enlarged"} />;
 }
 
 function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {
