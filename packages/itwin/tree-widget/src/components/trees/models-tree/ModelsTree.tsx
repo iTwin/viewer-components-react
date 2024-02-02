@@ -26,8 +26,6 @@ import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
-// const EXPANSION_TOGGLE_WIDTH = 24;
-// const imageLoader = new TreeImageLoader();
 
 /**
  * Props for configuring the hierarchy in [[ModelsTree]].

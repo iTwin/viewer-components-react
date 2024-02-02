@@ -44,6 +44,12 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
     customizeTreeNodeItem,
   });
 
+  const treeRendererProps = {
+    contextMenuItems: props.contextMenuItems,
+    nodeLabelRenderer: props.nodeLabelRenderer,
+    density: props.density,
+  };
+
   if (!state) {
     return null;
   }
@@ -59,12 +65,12 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
           isHierarchyLevelFilteringEnabled ? (
             <FilterableTreeRenderer
               {...treeProps}
-              {...props}
+              {...treeRendererProps}
               nodeLoader={state.nodeLoader}
               nodeRenderer={(nodeRendererProps) => <PresentationTreeNodeRenderer {...nodeRendererProps} />}
             />
           ) : (
-            <TreeRenderer {...props} {...treeProps} />
+            <TreeRenderer {...treeProps} {...treeRendererProps} />
           )
         }
       />

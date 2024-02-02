@@ -31,15 +31,13 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
    * @beta
    */
   isHierarchyLevelFilteringEnabled?: boolean;
-};
+}
 
 /**
  * Tree which displays a hierarchy of ExternalSources and their elements.
  * @alpha
  */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
-  const { isHierarchyLevelFilteringEnabled } = props;
-
   const state = usePresentationTreeState({
     imodel: props.iModel,
     ruleset: RULESET_EXTERNAL_SOURCES,
@@ -47,6 +45,12 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
     eventHandlerFactory: unifiedSelectionTreeEventHandlerFactory,
     customizeTreeNodeItem,
   });
+
+  const treeRendererProps = {
+    contextMenuItems: props.contextMenuItems,
+    nodeLabelRenderer: props.nodeLabelRenderer,
+    density: props.density,
+  };
 
   if (!state) {
     return null;
@@ -61,15 +65,15 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         selectionMode={props.selectionMode ?? SelectionMode.Extended}
         iconsEnabled={true}
         treeRenderer={(treeProps) =>
-          isHierarchyLevelFilteringEnabled ? (
+          props.isHierarchyLevelFilteringEnabled ? (
             <FilterableTreeRenderer
               {...treeProps}
-              {...props}
+              {...treeRendererProps}
               nodeLoader={state.nodeLoader}
               nodeRenderer={(nodeRendererProps) => <PresentationTreeNodeRenderer {...nodeRendererProps} />}
             />
           ) : (
-            <TreeRenderer {...treeProps} {...props} />
+            <TreeRenderer {...treeProps} {...treeRendererProps} />
           )
         }
       />

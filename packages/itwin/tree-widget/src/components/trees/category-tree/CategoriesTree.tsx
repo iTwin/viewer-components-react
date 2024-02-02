@@ -112,7 +112,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     );
   }, []);
 
-  if (!state || !state.nodeLoader || !state.nodeLoader.modelSource) {
+  if (!state) {
     return null;
   }
 
