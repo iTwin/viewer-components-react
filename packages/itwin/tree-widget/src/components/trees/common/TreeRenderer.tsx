@@ -74,7 +74,7 @@ export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "no
 }
 /**
  * Base tree renderer for trees with enabled hierarchy level filtering.
- * @public
+ * @beta
  */
 export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps) {
   const { onClearFilterClick, onFilterClick, filterDialog, containerRef } = useFilterablePresentationTree<HTMLDivElement>({ nodeLoader });

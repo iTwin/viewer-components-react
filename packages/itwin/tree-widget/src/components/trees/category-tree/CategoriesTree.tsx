@@ -11,9 +11,10 @@ import { IModelApp } from "@itwin/core-frontend";
 import { PresentationTree } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
+import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
-import { createVisibilityTreeRenderer, FilterableVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
@@ -21,7 +22,6 @@ import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps } from "../common/Types";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
-
 const PAGING_SIZE = 20;
 
 /**
@@ -127,7 +127,16 @@ export function CategoryTree(props: CategoryTreeProps) {
         selectionMode={props.selectionMode ?? SelectionMode.None}
         treeRenderer={
           props.isHierarchyLevelFilteringEnabled
-            ? (rendererProps) => <FilterableVisibilityTreeRenderer {...rendererProps} {...baseRendererProps} nodeLoader={state.nodeLoader} />
+            ? (rendererProps) => (
+                <FilterableTreeRenderer
+                  {...rendererProps}
+                  {...baseRendererProps}
+                  nodeLoader={state.nodeLoader}
+                  nodeRenderer={(nodeProps) => (
+                    <FilterableVisibilityTreeNodeRenderer {...baseRendererProps.nodeRendererProps} {...nodeProps} isEnlarged={props.density === "enlarged"} />
+                  )}
+                />
+              )
             : createVisibilityTreeRenderer(baseRendererProps)
         }
         descriptionsEnabled={true}

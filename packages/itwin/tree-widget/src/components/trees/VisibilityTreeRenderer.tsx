@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { TreeImageLoader, TreeNodeRenderer } from "@itwin/components-react";
 import { Checkbox } from "@itwin/itwinui-react";
 import { PresentationTreeNodeRenderer, useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
-import { FilterableTreeRenderer, TreeRenderer } from "./common/TreeRenderer";
+import { TreeRenderer } from "./common/TreeRenderer";
 
 import type { TreeRendererBaseProps, TreeRendererProps } from "./common/TreeRenderer";
 import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps } from "@itwin/components-react";
@@ -126,23 +126,14 @@ export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
 }
 
 /**
- * Props for [[FilterableVisibilityTreeRenderer]].
- * @public
- */
-export interface FilterableVisibilityTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader"> {
-  nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
-  nodeRendererProps: VisibilityTreeNodeRendererProps;
-}
-
-/**
  * Props for [[FilterableVisibilityTreeNodeRenderer]].
- * @public
+ * @beta
  */
 export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & VisibilityTreeNodeRendererProps;
 
 /**
  * Creates node renderer which renders node with eye checkbox and hierarchy level filtering actions.
- * @public
+ * @beta
  */
 export function FilterableVisibilityTreeNodeRenderer({
   levelOffset = 20,
@@ -168,15 +159,6 @@ export function FilterableVisibilityTreeNodeRenderer({
         "with-checkbox",
         (restProps.node.numChildren === 0 || (disableRootNodeCollapse && restProps.node.parentId === undefined)) && "disable-expander",
       )}
-    />
-  );
-}
-
-export function FilterableVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: FilterableVisibilityTreeRendererProps) {
-  return (
-    <FilterableTreeRenderer
-      {...restProps}
-      nodeRenderer={(props) => <FilterableVisibilityTreeNodeRenderer {...nodeRendererProps} {...props} isEnlarged={restProps.density === "enlarged"} />}
     />
   );
 }

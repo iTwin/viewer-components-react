@@ -20,7 +20,11 @@ export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); 
  * Props for [[IModelContentTree]].
  * @public
  */
-export type IModelContentTreeProps = BaseTreeProps & {
+export interface IModelContentTreeProps extends BaseTreeProps {
+  /**
+   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * @beta
+   */
   isHierarchyLevelFilteringEnabled?: boolean;
 };
 

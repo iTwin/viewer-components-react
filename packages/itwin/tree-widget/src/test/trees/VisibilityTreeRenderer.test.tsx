@@ -8,7 +8,7 @@ import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { CheckBoxState } from "@itwin/core-react";
 import userEvent from "@testing-library/user-event";
-import { createVisibilityTreeNodeRenderer } from "../../components/trees/VisibilityTreeRenderer";
+import { createVisibilityTreeNodeRenderer, FilterableVisibilityTreeNodeRenderer } from "../../components/trees/VisibilityTreeRenderer";
 import { render, waitFor } from "../TestUtils";
 
 import type { TreeActions, TreeModelNode } from "@itwin/components-react";
@@ -141,6 +141,51 @@ describe("VisibilityTreeRenderer", () => {
         expect(checkboxChangeSpy).to.be.calledOnce;
         expect(nodeClickSpy).to.not.be.called;
       });
+    });
+  });
+
+  describe("<FilterableVisibilityTreeNodeRenderer/>", () => {
+    it("renders nodes with default values", async () => {
+      const filteringActions = {
+        onFilterClick: () => {},
+        onClearFilterClick: () => {},
+      };
+
+      const { getByTestId, rerender } = render(
+        <FilterableVisibilityTreeNodeRenderer
+          iconsEnabled={false}
+          descriptionEnabled={false}
+          node={rootNode}
+          treeActions={treeActions}
+          {...filteringActions}
+        />,
+      );
+      const renderedRootNode = await waitFor(() => getByTestId("tree-node-contents"));
+      expect((renderedRootNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("0px");
+
+      rerender(
+        <FilterableVisibilityTreeNodeRenderer
+          iconsEnabled={false}
+          descriptionEnabled={false}
+          node={middleNode}
+          treeActions={treeActions}
+          {...filteringActions}
+        />,
+      );
+      const renderedMiddleNode = await waitFor(() => getByTestId("tree-node-contents"));
+      expect((renderedMiddleNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("20px");
+
+      rerender(
+        <FilterableVisibilityTreeNodeRenderer
+          iconsEnabled={false}
+          descriptionEnabled={false}
+          node={leafNode}
+          treeActions={treeActions}
+          {...filteringActions}
+        />,
+      );
+      const renderedLeafNode = await waitFor(() => getByTestId("tree-node-contents"));
+      expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("44px");
     });
   });
 });

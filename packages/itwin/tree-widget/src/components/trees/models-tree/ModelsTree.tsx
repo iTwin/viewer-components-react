@@ -9,10 +9,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SelectionMode } from "@itwin/components-react";
 import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
+import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
-import { createVisibilityTreeRenderer, FilterableVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
@@ -118,7 +119,16 @@ export function ModelsTree(props: ModelsTreeProps) {
         selectionMode={props.selectionMode || SelectionMode.None}
         treeRenderer={
           props.isHierarchyLevelFilteringEnabled
-            ? (rendererProps) => <FilterableVisibilityTreeRenderer {...rendererProps} {...baseRendererProps} nodeLoader={state.nodeLoader} />
+            ? (rendererProps) => (
+                <FilterableTreeRenderer
+                  {...rendererProps}
+                  {...baseRendererProps}
+                  nodeLoader={state.nodeLoader}
+                  nodeRenderer={(nodeProps) => (
+                    <FilterableVisibilityTreeNodeRenderer {...baseRendererProps.nodeRendererProps} {...nodeProps} isEnlarged={props.density === "enlarged"} />
+                  )}
+                />
+              )
             : createVisibilityTreeRenderer(baseRendererProps)
         }
         noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
