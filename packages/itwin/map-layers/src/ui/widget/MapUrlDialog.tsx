@@ -4,26 +4,26 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
+import "./MapUrlDialog.scss";
+import * as React from "react";
 import { SpecialKey } from "@itwin/appui-abstract";
-import { Button, Icon, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
+import { BeEvent, Guid } from "@itwin/core-bentley";
 import { ImageMapLayerSettings } from "@itwin/core-common";
 import {
-  IModelApp, MapLayerAccessClient, MapLayerSource,
-  MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority, ScreenViewport,
+  IModelApp, MapLayerAccessClient, MapLayerSource, MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority,
+  ScreenViewport,
 } from "@itwin/core-frontend";
 import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
-import * as React from "react";
+import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
+import { Button, Icon, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
+import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
+import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { MapTypesOptions } from "../Interfaces";
-import { BeEvent, Guid } from "@itwin/core-bentley";
-import { SelectMapFormat } from "./SelectMapFormat";
-import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
-import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { SelectCustomParam } from "./SelectCustomParam";
-import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
-import { CustomParamUtils } from "../../CustomParamUtils";
-import "./MapUrlDialog.scss";
+import { SelectMapFormat } from "./SelectMapFormat";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -341,6 +341,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           const customParamIdx: { [key: string]: string } = {};
           const privateCustomParamIdx: { [key: string]: string } = {};
           if (customParamNames && customParamNames.length>0) {
+            // Link the map-layers URL custom params.
+            const cpmStorage = new CustomParamsMappingStorage();
+            cpmStorage.save(mapUrl.toLowerCase(), {customParamNames});
+
             const cpStorage = new CustomParamsStorage();
             customParamNames.forEach((customParamName) => {
               const items = cpStorage.get(customParamName);
@@ -548,7 +552,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     } else {
       return (<span className="map-layer-source-placeholder">&nbsp;</span>);
     }
-    return node;
   }
 
   // Use a hook to display the popup.
