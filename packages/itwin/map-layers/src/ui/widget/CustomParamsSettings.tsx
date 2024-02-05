@@ -144,10 +144,20 @@ export function CustomParamsSettingsPanel() {
                     <Button
                       size="small"
                       styleType="borderless"
+                      className="map-source-list-entry-button"
+                      title={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}
+                      onClick={(_event) => {}}>
+                      <Icon iconSpec="icon-edit" />
+                    </Button>
+                    <Button
+                      size="small"
+                      styleType="borderless"
                       className="customParamsSettings-content-entry-button"
+                      title={MapLayersUI.translate("CustomParamSettings.DeleteButtonTitle")}
                       onClick={(event) => {onItemRemoveButtonClicked(keyName, event);}}>
                       <Icon iconSpec="icon-delete" />
                     </Button>
+
                   </>}
               </ListboxItem>
             )
