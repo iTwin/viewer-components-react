@@ -56,4 +56,5 @@ export interface MapFeatureInfoOptions {
   disableDefaultFeatureInfoTool?: boolean;
   showLoadProgressAnimation?: boolean;
   propertyGridOptions?: MapFeatureInfoPropertyGridOptions;
+  showTechPreviewBadge?: boolean;
 }
