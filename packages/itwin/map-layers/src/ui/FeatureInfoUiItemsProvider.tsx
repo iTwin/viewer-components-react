@@ -22,7 +22,7 @@ export const getMapFeatureInfoToolItemDef = (
     label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
     description: () => MapFeatureInfoTool.description,
     execute: async () => { await IModelApp.tools.run(MapFeatureInfoTool.toolId); },
-    badgeType: showTechPreviewBadge ? BadgeType.TechnicalPreview : BadgeType.None
+    badgeType: showTechPreviewBadge ? BadgeType.TechnicalPreview : BadgeType.None,
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-disable-line deprecation/deprecation
@@ -62,7 +62,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
         icon: <SvgMapInfo/>,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
         defaultState: WidgetState.Hidden,
-        badgeType: this._featureInfoOpts?.showTechPreviewBadge ? BadgeType.TechnicalPreview : BadgeType.None
+        badgeType: this._featureInfoOpts?.showTechPreviewBadge ? BadgeType.TechnicalPreview : BadgeType.None,
       });
     }
 
