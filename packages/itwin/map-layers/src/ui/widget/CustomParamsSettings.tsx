@@ -3,17 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import { Icon, Listbox, ListboxItem, ListboxValue } from "@itwin/core-react";
-import { UiFramework } from "@itwin/appui-react";
-import { Button, IconButton } from "@itwin/itwinui-react";
-import { CustomParamItem } from "../Interfaces";
-import { CustomParamsStorage } from "../../CustomParamsStorage";
 import "./CustomParamsSettings.scss";
+import * as React from "react";
+import { UiFramework } from "@itwin/appui-react";
+import { Icon, Listbox, ListboxItem, ListboxValue } from "@itwin/core-react";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import { CustomParamEditDialog } from "./CustomParamEditDialog";
+import { Button, IconButton } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
+import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
+import { CustomParamItem } from "../Interfaces";
+import { CustomParamEditDialog } from "./CustomParamEditDialog";
+
 interface CustomParamsMap {
   [paramName: string]: CustomParamItem;
 }
@@ -36,12 +37,7 @@ export function CustomParamsSettingsPanel() {
   const [listItemUnderCursor, setListItemUnderCursor] = React.useState<string | undefined>();
   const [selectedValue, setSelectedValue] = React.useState<string | undefined>();
 
-  /*
-   Handle Remove layer button clicked
-   */
-  const onItemRemoveButtonClicked = React.useCallback((name: string, event) => {
-    event.stopPropagation();  // We don't want the owning ListBox to react on mouse click.
-
+  const deleteMapping = React.useCallback((name: string) => {
     const tmpParams = {...params};
     delete tmpParams[name];
     setParams(tmpParams);
@@ -59,22 +55,47 @@ export function CustomParamsSettingsPanel() {
     }
   }, [mappingStorage, params, storage]);
 
+  /*
+   Handle Remove layer button clicked
+   */
+  const onItemRemoveButtonClicked = React.useCallback((name: string, event) => {
+    event.stopPropagation();  // We don't want the owning ListBox to react on mouse click.
+    deleteMapping(name);
+  }, [deleteMapping]);
+
   const onCancelEdit = React.useCallback(() => {
     UiFramework.dialogs.modal.close();
     setSelectedValue(undefined); // clear listbox focus
   }, []);
 
-  const onOkEdit = React.useCallback((param: CustomParamItem) => {
+  const onOkEdit = React.useCallback((newItem: CustomParamItem, oldItem?: CustomParamItem) => {
 
     UiFramework.dialogs.modal.close();
 
-    storage.save(param.name, param);
-
+    // If the edited item has a new name, delete the entry first.
     const tmpParams = {...params};
-    tmpParams[param.name] = param;
+    if (oldItem && oldItem.name !== newItem.name) {
+      delete tmpParams[oldItem.name];
+      setParams(tmpParams);
+      storage.delete(oldItem.name);
+
+      const mappingContent = mappingStorage.getContent();
+      if (mappingContent) {
+        for (const itemKey of Object.keys(mappingContent)) {
+          if (mappingContent[itemKey].customParamNames.includes(oldItem.name )) {
+            const newParamNames = mappingContent[itemKey].customParamNames.filter((value) => value !== oldItem.name);
+            newParamNames.push(newItem.name);
+            mappingStorage.save(itemKey, {customParamNames: newParamNames});
+          }
+        }
+      }
+    }
+    storage.save(newItem.name, newItem);
+
+    tmpParams[newItem.name] = newItem;
     setParams(tmpParams);
     setSelectedValue(undefined); // clear listbox focus
-  }, [params, storage]);
+  }, [deleteMapping, params, storage]);
 
   const handleAddClick = React.useCallback(() => {
     UiFramework.dialogs.modal.open(

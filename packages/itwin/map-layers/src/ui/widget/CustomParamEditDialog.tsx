@@ -3,18 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import { Dialog } from "@itwin/core-react";
-import { UiFramework } from "@itwin/appui-react";
-import { Button, LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
-import { CustomParamItem } from "../Interfaces";
-import { MapLayersUI } from "../../mapLayers";
 import "./CustomParamEditDialog.scss";
+import * as React from "react";
+import { UiFramework } from "@itwin/appui-react";
+import { Dialog } from "@itwin/core-react";
+import { Button, LabeledInput, ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
+import { MapLayersUI } from "../../mapLayers";
+import { CustomParamItem } from "../Interfaces";
 
 interface CustomParamEditDialogProps {
   item?: CustomParamItem;
-  onOkResult?: (params: CustomParamItem) => void;
+  onOkResult?: (newItem: CustomParamItem, oldIem?: CustomParamItem) => void;
   onCancelResult?: () => void
   ;
 }
@@ -34,7 +34,7 @@ export function CustomParamEditDialog(props: CustomParamEditDialogProps) {
 
   const handleOk = React.useCallback(() => {
     if (props.onOkResult) {
-      props.onOkResult(item);
+      props.onOkResult(item, props.item);
       return;
     }
     UiFramework.dialogs.modal.close();
