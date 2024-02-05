@@ -13,16 +13,14 @@ import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { BadgeType } from "@itwin/appui-abstract";
 
-export const getMapFeatureInfoToolItemDef = (
-  showTechPreviewBadge: boolean = false
-): ToolItemDef =>
+export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({
     toolId: MapFeatureInfoTool.toolId,
     iconSpec: <SvgMapInfo/>,
     label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
     description: () => MapFeatureInfoTool.description,
     execute: async () => { await IModelApp.tools.run(MapFeatureInfoTool.toolId); },
-    badgeType: showTechPreviewBadge ? BadgeType.TechnicalPreview : BadgeType.None,
+    badgeType: BadgeType.TechnicalPreview,
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-disable-line deprecation/deprecation
@@ -44,7 +42,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
       toolbarOrientation === ToolbarOrientation.Vertical
     ) {
       return [
-        ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef(this._featureInfoOpts?.showTechPreviewBadge)),
+        ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef()),
       ];
     }
 
@@ -62,7 +60,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
         icon: <SvgMapInfo/>,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
         defaultState: WidgetState.Hidden,
-        badgeType: this._featureInfoOpts?.showTechPreviewBadge ? BadgeType.TechnicalPreview : BadgeType.None,
+        badgeType: BadgeType.TechnicalPreview,
       });
     }
 
