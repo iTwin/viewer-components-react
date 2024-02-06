@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { UiError } from "@itwin/appui-abstract";
+import type { Localization } from "@itwin/core-common";
+import { BentleyError, BentleyStatus } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { registerRenderers } from "./components/trees/common/Utils";
 
-import type { Localization } from "@itwin/core-common";
 import type { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
@@ -52,7 +52,7 @@ export class TreeWidget {
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): Localization {
     if (!TreeWidget._i18n) {
-      throw new UiError(TreeWidget.packageName, "TreeWidget not initialized");
+      throw new BentleyError(BentleyStatus.ERROR, "TreeWidget not initialized");
     }
     return TreeWidget._i18n;
   }
