@@ -11,7 +11,7 @@ import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyFilterRuleOperator, SelectionMode } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModel } from "@itwin/core-common";
+import { EmptyLocalization, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
@@ -313,33 +313,29 @@ describe("ModelsTree", () => {
         expect(visibilityHandlerMock.dispose).to.be.called;
       });
 
-      describe("Hierarchy level filtering", () => {
-        before(async () => {
-          await Presentation.initialize();
-        });
+      it("renders enlarged tree node", async () => {
+        setupDataProvider([createSimpleTreeModelNode()]);
 
-        after(async () => {
-          Presentation.terminate();
-        });
+        const { getByText, container } = render(
+          <ModelsTree
+            {...sizeProps}
+            density={"enlarged"}
+            iModel={imodelMock.object}
+            modelsVisibilityHandler={visibilityHandlerMock}
+            activeView={mockViewport().object}
+          />,
+        );
 
-        it("renders enlarged tree node", async () => {
-          setupDataProvider([createSimpleTreeModelNode()]);
+        await waitFor(() => getByText("Node Label"));
 
-          const { getByText, container } = render(
-            <ModelsTree
-              {...sizeProps}
-              density={"enlarged"}
-              iModel={imodelMock.object}
-              modelsVisibilityHandler={visibilityHandlerMock}
-              activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
-            />,
-          );
+        const node = container.querySelector(".node-wrapper") as HTMLDivElement;
+        expect(node.style.height).to.be.equal("43px");
+      });
 
-          await waitFor(() => getByText("Node Label"));
-
-          const node = container.querySelector(".node-wrapper") as HTMLDivElement;
-          expect(node.style.height).to.be.equal("43px");
+      describe("hierarchy level filtering", () => {
+        beforeEach(() => {
+          const localization = new EmptyLocalization();
+          sinon.stub(Presentation, "localization").get(() => localization);
         });
 
         it("renders non-filterable node", async () => {

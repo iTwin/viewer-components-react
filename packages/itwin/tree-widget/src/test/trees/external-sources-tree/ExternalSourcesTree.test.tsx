@@ -7,13 +7,11 @@ import { expect } from "chai";
 import { join } from "path";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
-import type { TreeNodeItem } from "@itwin/components-react";
 import { PropertyFilterRuleOperator } from "@itwin/components-react";
 import { Guid } from "@itwin/core-bentley";
-import { BisCodeSpec, IModel } from "@itwin/core-common";
+import { BisCodeSpec, EmptyLocalization, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition } from "@itwin/presentation-common";
-import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
@@ -33,6 +31,8 @@ import {
   createTestPropertyInfo,
 } from "../Common";
 
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ElementProps } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -82,6 +82,14 @@ describe("ExternalSourcesTree", () => {
     };
 
     describe("<ExternalSourcesTree />", () => {
+      const setupDataProvider = (nodes: TreeNodeItem[]) => {
+        (PresentationTreeDataProvider.prototype.getNodesCount as any).restore && (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
+        sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
+
+        (PresentationTreeDataProvider.prototype.getNodes as any).restore && (PresentationTreeDataProvider.prototype.getNodes as any).restore();
+        sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
+      };
+
       function setupHierarchy(nodes: Node[]) {
         presentationManagerMock
           .setup(async (x) => x.getNodesAndCount(moq.It.isAny()))
@@ -134,44 +142,30 @@ describe("ExternalSourcesTree", () => {
         await waitFor(() => expect(queryByText("Test Menu Item")).to.not.be.null);
       });
 
-      describe("Hierarchy level filtering", () => {
-        before(async () => {
-          await Presentation.initialize();
-        });
+      it("renders enlarged tree node", async () => {
+        setupDataProvider([createSimpleTreeModelNode()]);
 
+        const { getByText, container } = render(
+          <ExternalSourcesTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />,
+        );
+
+        await waitFor(() => getByText("Node Label"));
+
+        const node = container.querySelector(".node-wrapper") as HTMLDivElement;
+        expect(node.style.height).to.be.equal("43px");
+      });
+
+      describe("hierarchy level filtering", () => {
         beforeEach(() => {
           imodelMock.reset();
+          const localization = new EmptyLocalization();
+          sinon.stub(Presentation, "localization").get(() => localization);
           sinon.stub(PresentationTreeDataProvider.prototype, "imodel").get(() => imodelMock.object);
           sinon.stub(PresentationTreeDataProvider.prototype, "rulesetId").get(() => "");
           sinon.stub(PresentationTreeDataProvider.prototype, "dispose");
           sinon.stub(PresentationTreeDataProvider.prototype, "getFilteredNodePaths").resolves([]);
           sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(0);
           sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves([]);
-        });
-
-        after(async () => {
-          Presentation.terminate();
-        });
-
-        const setupDataProvider = (nodes: TreeNodeItem[]) => {
-          (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
-          sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
-
-          (PresentationTreeDataProvider.prototype.getNodes as any).restore();
-          sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
-        };
-
-        it("renders enlarged tree node", async () => {
-          setupDataProvider([createSimpleTreeModelNode()]);
-
-          const { getByText, container } = render(
-            <ExternalSourcesTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />,
-          );
-
-          await waitFor(() => getByText("Node Label"));
-
-          const node = container.querySelector(".node-wrapper") as HTMLDivElement;
-          expect(node.style.height).to.be.equal("43px");
         });
 
         it("renders non-filterable node", async () => {

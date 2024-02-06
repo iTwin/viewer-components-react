@@ -8,7 +8,7 @@ import { join } from "path";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyFilterRuleOperator } from "@itwin/components-react";
-import { BisCodeSpec, IModel } from "@itwin/core-common";
+import { BisCodeSpec, EmptyLocalization, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { LabelDefinition } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
@@ -80,6 +80,14 @@ describe("IModelContentTree", () => {
         return { type: "invalid", version: 0, pathFromRoot: [`${++nodeKeysCounter}`] };
       };
 
+      const setupDataProvider = (nodes: TreeNodeItem[]) => {
+        (PresentationTreeDataProvider.prototype.getNodesCount as any).restore && (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
+        sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
+
+        (PresentationTreeDataProvider.prototype.getNodes as any).restore && (PresentationTreeDataProvider.prototype.getNodes as any).restore();
+        sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
+      };
+
       function setupHierarchy(nodes: Node[]) {
         presentationManagerMock
           .setup(async (x) => x.getNodesAndCount(moq.It.isAny()))
@@ -110,13 +118,24 @@ describe("IModelContentTree", () => {
         await waitFor(() => expect(queryByText("Test Menu Item")).to.not.be.null);
       });
 
-      describe("Hierarchy level filtering", () => {
-        before(async () => {
-          await Presentation.initialize();
-        });
+      it("renders enlarged tree node", async () => {
+        setupDataProvider([createSimpleTreeModelNode()]);
 
+        const { getByText, container } = render(
+          <IModelContentTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />,
+        );
+
+        await waitFor(() => getByText("Node Label"));
+
+        const node = container.querySelector(".node-wrapper") as HTMLDivElement;
+        expect(node.style.height).to.be.equal("43px");
+      });
+
+      describe("hierarchy level filtering", () => {
         beforeEach(() => {
+          const localization = new EmptyLocalization();
           imodelMock.reset();
+          sinon.stub(Presentation, "localization").get(() => localization);
           sinon.stub(PresentationTreeDataProvider.prototype, "imodel").get(() => imodelMock.object);
           sinon.stub(PresentationTreeDataProvider.prototype, "rulesetId").get(() => "");
           sinon.stub(PresentationTreeDataProvider.prototype, "dispose");
@@ -127,27 +146,6 @@ describe("IModelContentTree", () => {
 
         after(async () => {
           Presentation.terminate();
-        });
-
-        const setupDataProvider = (nodes: TreeNodeItem[]) => {
-          (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
-          sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
-
-          (PresentationTreeDataProvider.prototype.getNodes as any).restore();
-          sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
-        };
-
-        it("renders enlarged tree node", async () => {
-          setupDataProvider([createSimpleTreeModelNode()]);
-
-          const { getByText, container } = render(
-            <IModelContentTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />,
-          );
-
-          await waitFor(() => getByText("Node Label"));
-
-          const node = container.querySelector(".node-wrapper") as HTMLDivElement;
-          expect(node.style.height).to.be.equal("43px");
         });
 
         it("renders non-filterable node", async () => {

@@ -10,6 +10,7 @@ import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyFilterRuleOperator } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
+import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
@@ -296,33 +297,23 @@ describe("CategoryTree", () => {
         });
       });
 
-      describe("Hierarchy level filtering", () => {
-        before(async () => {
-          await Presentation.initialize();
-        });
+      it("renders enlarged tree node", async () => {
+        setupDataProvider([createSimpleTreeModelNode()]);
 
-        after(async () => {
-          Presentation.terminate();
-        });
+        const { getByText, container } = render(
+          <CategoryTree {...sizeProps} categories={categories} density={"enlarged"} iModel={imodelMock.object} activeView={mockViewport().object} />,
+        );
 
-        it("renders enlarged tree node", async () => {
-          setupDataProvider([createSimpleTreeModelNode()]);
+        await waitFor(() => getByText("Node Label"));
 
-          const { getByText, container } = render(
-            <CategoryTree
-              {...sizeProps}
-              categories={categories}
-              density={"enlarged"}
-              iModel={imodelMock.object}
-              activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
-            />,
-          );
+        const node = container.querySelector(".node-wrapper") as HTMLDivElement;
+        expect(node.style.height).to.be.equal("43px");
+      });
 
-          await waitFor(() => getByText("Node Label"));
-
-          const node = container.querySelector(".node-wrapper") as HTMLDivElement;
-          expect(node.style.height).to.be.equal("43px");
+      describe("hierarchy level filtering", () => {
+        beforeEach(() => {
+          const localization = new EmptyLocalization();
+          sinon.stub(Presentation, "localization").get(() => localization);
         });
 
         it("renders non-filterable node", async () => {
