@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent } from "@itwin/core-bentley";
 import { useLoadedInstanceInfo } from "../../hooks/UseInstanceInfo";
-import { createFunctionStub, createResolvablePromise, renderHook, waitFor } from "../TestUtils";
+import { act, createFunctionStub, createResolvablePromise, renderHook, waitFor } from "../TestUtils";
 
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
@@ -90,22 +90,26 @@ describe("useInstanceInfo", () => {
     dataProvider.getData.onFirstCall().returns(firstGetDataPromise.promise);
     dataProvider.getData.onSecondCall().returns(secondGetDataPromise.promise);
 
-    dataProvider.onDataChanged.raiseEvent();
-    dataProvider.onDataChanged.raiseEvent();
+    act(() => dataProvider.onDataChanged.raiseEvent());
+    act(() => dataProvider.onDataChanged.raiseEvent());
 
-    await secondGetDataPromise.resolve({
-      categories: [],
-      records: {},
-      label: PropertyRecord.fromString("New Test Label"),
-      description: "NewTestClassName",
-    });
+    await act(async () =>
+      secondGetDataPromise.resolve({
+        categories: [],
+        records: {},
+        label: PropertyRecord.fromString("New Test Label"),
+        description: "NewTestClassName",
+      }),
+    );
 
-    await firstGetDataPromise.resolve({
-      categories: [],
-      records: {},
-      label: PropertyRecord.fromString("Old Test Label"),
-      description: "OldTestClassName",
-    });
+    await act(async () =>
+      firstGetDataPromise.resolve({
+        categories: [],
+        records: {},
+        label: PropertyRecord.fromString("Old Test Label"),
+        description: "OldTestClassName",
+      }),
+    );
 
     await waitFor(() => {
       expect(result.current.item?.className).to.be.eq("NewTestClassName");
