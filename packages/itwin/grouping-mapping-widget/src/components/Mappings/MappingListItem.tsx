@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetchMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
 import "./MappingListItem.scss";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
+import { useIsMounted } from "../../common/hooks/useIsMounted";
 
 export interface MappingListItemProps {
   selected: boolean;
@@ -31,15 +32,33 @@ export interface MappingListItemProps {
 
 export const MappingListItem = (props: MappingListItemProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates | undefined>(ExtractionStates.None);
-  const { setMappingIdJobInfo } = useExtractionStateJobContext();
+  const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
-  const { statusQuery } = useFetchMappingExtractionStatus({getAccessToken: groupingMappingApiConfig.getAccessToken, mapping: props.mapping, enabled: isJobStarted});
+  const [isListItemMounted, setIsListItemMounted] = useState<boolean>(false);
+  const isMounted = useIsMounted();
+  const { statusQuery } = useFetchMappingExtractionStatus({isMounted: isListItemMounted, ...groupingMappingApiConfig, mapping: props.mapping, enabled: isJobStarted});
   const queryClient = useQueryClient();
 
   const onClickTile = () => {
     props.onSelectionChange(props.mapping);
   };
+
+  useEffect(() => {
+    if(isMounted()){
+      setIsListItemMounted(true);
+      setIsJobStarted(true);
+    }
+  }, [isMounted]);
+
+  // Check whether the job is still running when users refresh the mapping list
+  // or modify any mappings
+  useEffect(() => {
+    if(mappingIdJobInfo.get(props.mapping.id)){
+      setIsJobStarted(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mappingIdJobInfo]);
 
   const resolveTerminalExtractionStatus = useCallback(async () => {
     if(statusQuery.data!.finalExtractionStateValue === ExtractionStates.Failed || statusQuery.data!.finalExtractionStateValue === ExtractionStates.Succeeded){
