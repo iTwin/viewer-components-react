@@ -144,10 +144,6 @@ describe("IModelContentTree", () => {
           sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves([]);
         });
 
-        after(async () => {
-          Presentation.terminate();
-        });
-
         it("renders non-filterable node", async () => {
           setupDataProvider([createSimpleTreeModelNode()]);
 
