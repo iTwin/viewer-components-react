@@ -77,16 +77,12 @@ test.describe("property grid", () => {
       return propertyWidget;
     };
 
-    // Fails due to https://github.com/iTwin/imodel-native/issues/586.
-    // Note: this is a backend issue - the test can be unskipped when the fix is consumed in QA GPB
-    test.skip("multiple elements selected", async ({ page }) => {
+    test("multiple elements selected", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
       await takeScreenshot(page, propertyWidget);
     });
 
-    // Fails due to https://github.com/iTwin/imodel-native/issues/586.
-    // Note: this is a backend issue - the test can be unskipped when the fix is consumed in QA GPB
-    test.skip("multiple elements selected - search bar expanded", async ({ page }) => {
+    test("multiple elements selected - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
       await propertyWidget.getByTitle("Open search bar").click();
       await propertyWidget.getByTitle("Close search bar").first().waitFor();
