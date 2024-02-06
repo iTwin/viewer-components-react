@@ -54,11 +54,10 @@ export const fetchMappingStatus = async (
   }
 };
 
-export const createQueryForEachJobId = (mappingId: string, jobId: string, getAccessToken: GetAccessTokenFn, extractionClient: IExtractionClient, enabled: boolean) => ({
+export const createQueryExtractionStatus = (mappingId: string, jobId: string, getAccessToken: GetAccessTokenFn, extractionClient: IExtractionClient, enabled: boolean) => ({
   queryKey: ["extractionState", mappingId],
   staleTime: Infinity,
   initialData: undefined,
-  refetchOnWindowFocus: false,
   queryFn: async () => fetchMappingStatus(mappingId, jobId, getAccessToken, extractionClient),
   enabled,
   refetchInterval: STATUS_CHECK_INTERVAL,
@@ -74,14 +73,15 @@ export const useFetchMappingExtractionStatus = ({
   enabled,
 }: MappingExtractionStatusProps) => {
   const extractionClient = useExtractionClient();
-  // const queryClient = useQueryClient();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
   const jobId = mappingIdJobInfo.get(mapping.id) ?? "";
 
-  const query = useMemo(() => createQueryForEachJobId(mapping.id, jobId, getAccessToken, extractionClient, enabled),
-    [mapping.id, jobId, getAccessToken, extractionClient, enabled]);
+  const mappingQuery = useMemo(() => createQueryExtractionStatus(mapping.id, jobId, getAccessToken, extractionClient, enabled)
+    // Not trigger hook everytime user (de)selects a mapping.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    , [getAccessToken, enabled, extractionClient, mappingIdJobInfo]);
 
-  const statusQuery = useQuery<MappingQueryResults>(query);
+  const statusQuery = useQuery<MappingQueryResults>(mappingQuery);
 
   return { statusQuery };
 };

@@ -3,23 +3,24 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Mapping } from "@itwin/insights-client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { BeEvent } from "@itwin/core-bentley";
 import { MappingUIActionGroup } from "./MappingViewActionGroup";
-import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import { Anchor, ListItem, Text } from "@itwin/itwinui-react";
 import { ExtractionStates } from "./Extraction/ExtractionStatus";
 import { ExtractionStatus } from "./Extraction/ExtractionStatus";
-import { useRunExtraction } from "./hooks/useRunExtraction";
-import { useFetchMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
 import { useExtractionStateJobContext } from "../context/ExtractionStateJobContext";
+import { resetMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFetchMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
 import "./MappingListItem.scss";
+import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 
 export interface MappingListItemProps {
   selected: boolean;
   onSelectionChange: (mapping: Mapping) => void;
   mapping: Mapping;
-  jobId?: string;
+  jobId: string;
   jobStartEvent: BeEvent<(mappingId: string) => void>;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
@@ -30,18 +31,33 @@ export interface MappingListItemProps {
 
 export const MappingListItem = (props: MappingListItemProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates | undefined>(ExtractionStates.None);
+  const { setMappingIdJobInfo } = useExtractionStateJobContext();
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
-  const { isJobStarted, setIsJobStarted } = useRunExtraction({...groupingMappingApiConfig, jobId: props.jobId});
-  const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
+  const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
   const { statusQuery } = useFetchMappingExtractionStatus({getAccessToken: groupingMappingApiConfig.getAccessToken, mapping: props.mapping, enabled: isJobStarted});
+  const queryClient = useQueryClient();
 
   const onClickTile = () => {
     props.onSelectionChange(props.mapping);
   };
 
+  const resolveTerminalExtractionStatus = useCallback(async () => {
+    if(statusQuery.data!.finalExtractionStateValue === ExtractionStates.Failed || statusQuery.data!.finalExtractionStateValue === ExtractionStates.Succeeded){
+      setIsJobStarted(false);
+      setMappingIdJobInfo((prevMap: Map<string, string>) => {
+        const newMap = new Map(prevMap);
+        newMap.delete(props.mapping.id);
+        return newMap;
+      });
+      await resetMappingExtractionStatus(props.mapping.id, queryClient);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusQuery, props.mapping.id]);
+
   useEffect(() => {
     const listener = (startedMappingId: string) => {
       if (startedMappingId === props.mapping.id) {
+        setExtractionState(ExtractionStates.Starting);
         setIsJobStarted(true);
       }
     };
@@ -50,23 +66,23 @@ export const MappingListItem = (props: MappingListItemProps) => {
     return () => {
       props.jobStartEvent.removeListener(listener);
     };
-  }, [props.jobStartEvent, props.mapping.id, setIsJobStarted]);
+  }, [props.jobStartEvent, props.mapping.id, props.jobId, props]);
+
+  const onResolveStatusData = useMutation({
+    mutationKey: ["onResolveStatusData", isJobStarted],
+    mutationFn: async () => {
+      setExtractionState(statusQuery.data!.finalExtractionStateValue);
+      await resolveTerminalExtractionStatus();
+    },
+  });
 
   useEffect(() => {
-    if(isJobStarted){
-      if(!statusQuery.data){
-        setExtractionState(ExtractionStates.None);
-      } else {
-        setExtractionState(statusQuery.data.finalExtractionStateValue);
-
-        if(statusQuery.data.finalExtractionStateValue === ExtractionStates.Succeeded || statusQuery.data.finalExtractionStateValue === ExtractionStates.Failed){
-          setIsJobStarted(false);
-          mappingIdJobInfo.delete(props.mapping.id);
-          setMappingIdJobInfo(mappingIdJobInfo);
-        }
-      }
+    const isStatusReady = statusQuery.data && statusQuery.isFetched && !statusQuery.isStale;
+    if(isJobStarted && isStatusReady){
+      onResolveStatusData.mutate();
     }
-  },[isJobStarted, statusQuery, setIsJobStarted, mappingIdJobInfo, setMappingIdJobInfo, props.mapping.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[isJobStarted, statusQuery]);
 
   return (
     <ListItem actionable

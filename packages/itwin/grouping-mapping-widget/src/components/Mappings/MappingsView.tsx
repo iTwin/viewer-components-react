@@ -93,7 +93,6 @@ export const MappingsView = ({
     () => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }),
     [userDisplayStrings]
   );
-
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
@@ -109,10 +108,11 @@ export const MappingsView = ({
   }, [onRefreshMappings, onRefreshExtractionStatus]);
 
   const onSelectionChange = (mapping: Mapping) => {
-    setSelectedMappings((mappingIdList) =>
-      mappingIdList.some((eachId) => mapping.id === eachId.id)
+    setSelectedMappings((mappingIdList) => {
+      return mappingIdList.some((eachId) => mapping.id === eachId.id)
         ? mappingIdList.filter((eachId) => mapping.id !== eachId.id)
-        : [...mappingIdList, mapping]
+        : [...mappingIdList, mapping];
+    }
     );
   };
 
@@ -187,7 +187,7 @@ export const MappingsView = ({
               <MappingListItem
                 key={mapping.id}
                 mapping={mapping}
-                jobId={mappingIdJobInfo?.get(mapping.id)}
+                jobId={mappingIdJobInfo?.get(mapping.id) ?? ""}
                 jobStartEvent={jobStartEvent}
                 onClickMappingTitle={onClickMappingTitle}
                 onSelectionChange={onSelectionChange}

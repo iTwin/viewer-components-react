@@ -5,7 +5,7 @@
 import * as React from "react";
 
 export interface ExtractionStatusJob {
-  mappingIdJobInfo: Map<string, string>;
+  mappingIdJobInfo: Map<string, string>; // key: mappingId, value: jobId
   setMappingIdJobInfo: (mappingIdJobInfo: Map<string, string> | ((mappingIdJobInfo: Map<string, string>) => Map<string, string>)) => void;
 }
 

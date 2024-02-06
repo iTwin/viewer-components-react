@@ -3,12 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useExtractionClient } from "../../context/ExtractionClientContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import type { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { ExtractionRequestMapping, ExtractionRunRequest, Mapping } from "@itwin/insights-client";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useExtractionStateJobContext } from "../../context/ExtractionStateJobContext";
-import { ExtractionStates } from "../Extraction/ExtractionStatus";
 
 export interface FetchExtractionStatesProps extends GroupingMappingApiConfig {
   jobId?: string;
@@ -18,17 +17,11 @@ export const useRunExtraction = ({
   iModelId,
   getAccessToken,
 }: FetchExtractionStatesProps) => {
-
   const extractionClient = useExtractionClient();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
   const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
-  const queryClient = useQueryClient();
 
-  const setInitialMappingExtractionQueryData = useCallback((mapping: Mapping) => {
-    queryClient.setQueryData(["extractionState", mapping.id], {mappingId: mapping.id, finalExtractionStateValue: ExtractionStates.Starting});
-  }, [queryClient]);
-
-  const { mutateAsync: runExtraction, isLoading: isRunExtractionLoading } = useMutation({
+  const { mutateAsync: runExtraction, isLoading: isRunExtractionLoading, isSuccess: isRunExtractionSuccess } = useMutation({
     mutationKey: ["runExtraction"],
     mutationFn: async (mappings: Mapping[]) => {
       const accessToken = await getAccessToken();
@@ -36,10 +29,13 @@ export const useRunExtraction = ({
       const extractionRequest: ExtractionRunRequest | undefined = {
         mappings: mappingIds,
       };
+
       const runExtractionResponse = await extractionClient.runExtraction(accessToken, iModelId, extractionRequest);
+      return runExtractionResponse;
+    },
+    onSuccess: async (runExtractionResponse, mappings) => {
       for (const mapping of mappings){
         if(mappingIdJobInfo?.get(mapping.id) === undefined){
-          setInitialMappingExtractionQueryData(mapping);
           setMappingIdJobInfo((prevMap: Map<string, string>) => {
             const newMap = new Map(prevMap);
             newMap.set(mapping.id, runExtractionResponse.id);
@@ -50,5 +46,5 @@ export const useRunExtraction = ({
     },
   });
 
-  return { isRunExtractionLoading, isJobStarted, setIsJobStarted, runExtraction };
+  return { isRunExtractionLoading, isRunExtractionSuccess, isJobStarted, setIsJobStarted, runExtraction };
 };
