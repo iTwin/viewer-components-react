@@ -62,10 +62,6 @@ export class TreeWidget {
     return "TreeWidget";
   }
 
-  public static get packageName(): string {
-    return "tree-widget-react";
-  }
-
   /** Calls i18n.translateWithNamespace with the "TreeWidget" namespace. Do NOT include the namespace in the key.
    */
   public static translate(key: string | string[], options?: LocalizationOptions): string {
