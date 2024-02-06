@@ -7,7 +7,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { KeySet } from "@itwin/presentation-common";
 import { useInstanceSelection } from "../../hooks/UseInstanceSelection";
-import { createResolvablePromise, renderHook, stubSelectionManager, waitFor } from "../TestUtils";
+import { act, createResolvablePromise, renderHook, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
@@ -101,7 +101,8 @@ describe("useInstanceSelection", () => {
       expect(result.current.focusedInstanceKey).to.be.undefined;
     });
 
-    result.current.focusInstance(otherKey);
+    act(() => result.current.focusInstance(otherKey));
+
     await waitFor(() => {
       expect(result.current.focusedInstanceKey).to.be.eq(otherKey);
     });
@@ -117,13 +118,14 @@ describe("useInstanceSelection", () => {
       expect(result.current.focusedInstanceKey).to.be.undefined;
     });
 
-    result.current.focusInstance(otherKey);
+    act(() => result.current.focusInstance(otherKey));
+
     await waitFor(() => {
       expect(result.current.focusedInstanceKey).to.be.eq(otherKey);
     });
 
     selectionManager.getSelection.returns(new KeySet([otherKey]));
-    selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider);
+    act(() => selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider));
 
     await waitFor(() => {
       expect(result.current.selectedKeys).to.have.lengthOf(1);
@@ -165,7 +167,7 @@ describe("useInstanceSelection", () => {
         expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
       });
 
-      await result.current.ancestorsNavigationProps.navigateUp();
+      await act(async () => result.current.ancestorsNavigationProps.navigateUp());
 
       await waitFor(() => {
         expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
@@ -187,7 +189,7 @@ describe("useInstanceSelection", () => {
         expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
       });
 
-      await result.current.ancestorsNavigationProps.navigateUp();
+      await act(async () => result.current.ancestorsNavigationProps.navigateUp());
 
       await waitFor(() => {
         expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
@@ -201,7 +203,8 @@ describe("useInstanceSelection", () => {
       );
       selectionManager.replaceSelection.resetHistory();
 
-      result.current.ancestorsNavigationProps.navigateDown();
+      act(() => result.current.ancestorsNavigationProps.navigateDown());
+
       await waitFor(() => {
         expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
         expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.false;
@@ -228,10 +231,10 @@ describe("useInstanceSelection", () => {
         expect(result.current.selectedKeys).to.have.lengthOf(2);
       });
 
-      await result.current.ancestorsNavigationProps.navigateUp();
+      await act(async () => result.current.ancestorsNavigationProps.navigateUp());
       expect(selectionManager.replaceSelection).to.not.be.called;
 
-      result.current.ancestorsNavigationProps.navigateDown();
+      act(() => result.current.ancestorsNavigationProps.navigateDown());
       expect(selectionManager.replaceSelection).to.not.be.called;
     });
 
@@ -249,7 +252,7 @@ describe("useInstanceSelection", () => {
       });
 
       // initiate navigation up
-      void result.current.ancestorsNavigationProps.navigateUp();
+      act(() => void result.current.ancestorsNavigationProps.navigateUp());
 
       // expect navigating up again to be not possible
       await waitFor(() => {
@@ -257,7 +260,7 @@ describe("useInstanceSelection", () => {
       });
 
       // finish navigating up
-      await computeSelection.resolve(new KeySet([childKey]));
+      void computeSelection.resolve(new KeySet([childKey]));
 
       // expect navigating up to be possible again
       await waitFor(() => {
@@ -282,15 +285,15 @@ describe("useInstanceSelection", () => {
     // simulate first selection change
     selectionManager.getSelection.returns(new KeySet([noParentKey]));
     selectionManager.scopes.computeSelection.returns(firstComputeSelection.promise);
-    selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider);
+    act(() => selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider));
 
     // simulate second selection change
     selectionManager.getSelection.returns(new KeySet([childKey]));
     selectionManager.scopes.computeSelection.returns(secondComputeSelection.promise);
-    selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider);
+    act(() => selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider));
 
     // resolve promise for second selection change
-    await secondComputeSelection.resolve(new KeySet([parentKey]));
+    void secondComputeSelection.resolve(new KeySet([parentKey]));
 
     // make sure state matches result of second selection change
     await waitFor(() => {
@@ -300,7 +303,7 @@ describe("useInstanceSelection", () => {
     });
 
     // resolve promise for first selection change
-    await firstComputeSelection.resolve(new KeySet());
+    void firstComputeSelection.resolve(new KeySet());
 
     // make sure state still matches result of second selection change
     await waitFor(() => {

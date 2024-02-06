@@ -10,12 +10,20 @@ import { KeySet } from "@itwin/presentation-common";
 import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import userEvents from "@testing-library/user-event";
 import { AncestorsNavigationControls, MultiElementPropertyGrid, PropertyGridManager } from "../../property-grid-react";
-import { createPropertyRecord, getByRole as getByRoleRTL, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils";
+import {
+  act,
+  createPropertyRecord,
+  getByRole as getByRoleRTL,
+  render,
+  stubFavoriteProperties,
+  stubPresentation,
+  stubSelectionManager,
+  waitFor,
+} from "../TestUtils";
 
+import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
-
 describe("<MultiElementPropertGrid />", () => {
   const imodel = {} as IModelConnection;
 
@@ -183,18 +191,21 @@ describe("<MultiElementPropertGrid />", () => {
     setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
     getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
 
-    const { getByText, getByRole } = render(<MultiElementPropertyGrid imodel={imodel} />);
+    const { getByText, getByRole, user, unmount } = render(<MultiElementPropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("MultiInstances"));
     const listButton = getByRole("button", { name: "element-list.title" });
 
     // navigate to element list
-    await userEvents.click(listButton);
+    await user.click(listButton);
     await waitFor(() => getByText(expectedLabels[1]));
 
-    selectionManager.selectionChange.raiseEvent({ source: "TestSource" } as SelectionChangeEventArgs, {} as ISelectionProvider);
-
+    act(() => selectionManager.selectionChange.raiseEvent({ source: "TestSource" } as SelectionChangeEventArgs, {} as ISelectionProvider));
     await waitFor(() => getByText("MultiInstances"));
+
+    // Selection change causes multiple pieces of the component to asynchronously update and we only care about one piece of
+    // that - showing the default view. Unmount the component to avoid testing library warning about state changes in non `act` environment.
+    unmount();
   });
 
   it("renders buttons for ancestor navigation", async () => {
