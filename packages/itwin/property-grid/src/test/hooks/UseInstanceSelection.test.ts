@@ -260,7 +260,7 @@ describe("useInstanceSelection", () => {
       });
 
       // finish navigating up
-      void computeSelection.resolve(new KeySet([childKey]));
+      await act(async () => computeSelection.resolve(new KeySet([childKey])));
 
       // expect navigating up to be possible again
       await waitFor(() => {
@@ -293,7 +293,7 @@ describe("useInstanceSelection", () => {
     act(() => selectionManager.selectionChange.raiseEvent({ source: "OtherSource" } as unknown as SelectionChangeEventArgs, {} as ISelectionProvider));
 
     // resolve promise for second selection change
-    void secondComputeSelection.resolve(new KeySet([parentKey]));
+    await act(async () => secondComputeSelection.resolve(new KeySet([parentKey])));
 
     // make sure state matches result of second selection change
     await waitFor(() => {
@@ -303,7 +303,7 @@ describe("useInstanceSelection", () => {
     });
 
     // resolve promise for first selection change
-    void firstComputeSelection.resolve(new KeySet());
+    await act(async () => firstComputeSelection.resolve(new KeySet()));
 
     // make sure state still matches result of second selection change
     await waitFor(() => {

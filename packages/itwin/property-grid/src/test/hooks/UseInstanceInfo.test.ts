@@ -93,19 +93,23 @@ describe("useInstanceInfo", () => {
     act(() => dataProvider.onDataChanged.raiseEvent());
     act(() => dataProvider.onDataChanged.raiseEvent());
 
-    void secondGetDataPromise.resolve({
-      categories: [],
-      records: {},
-      label: PropertyRecord.fromString("New Test Label"),
-      description: "NewTestClassName",
-    });
+    await act(async () =>
+      secondGetDataPromise.resolve({
+        categories: [],
+        records: {},
+        label: PropertyRecord.fromString("New Test Label"),
+        description: "NewTestClassName",
+      }),
+    );
 
-    void firstGetDataPromise.resolve({
-      categories: [],
-      records: {},
-      label: PropertyRecord.fromString("Old Test Label"),
-      description: "OldTestClassName",
-    });
+    await act(async () =>
+      firstGetDataPromise.resolve({
+        categories: [],
+        records: {},
+        label: PropertyRecord.fromString("Old Test Label"),
+        description: "OldTestClassName",
+      }),
+    );
 
     await waitFor(() => {
       expect(result.current.item?.className).to.be.eq("NewTestClassName");
