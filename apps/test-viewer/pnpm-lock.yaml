@@ -66,7 +66,7 @@ dependencies:
     specifier: workspace:*
     version: file:../../packages/itwin/geo-tools(@itwin/appui-abstract@4.4.0-dev.32)(@itwin/appui-react@4.8.2)(@itwin/components-react@4.8.2)(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-common@4.4.0-dev.32)(@itwin/core-frontend@4.4.0-dev.32)(@itwin/core-geometry@4.4.0-dev.32)(@itwin/core-react@4.8.2)(react-dom@17.0.2)(react@17.0.2)(redux@4.2.1)
   '@itwin/imodel-components-react':
-    specifier: ^4.8.2
+    specifier: ^4.8.1
     version: 4.8.2(@itwin/appui-abstract@4.4.0-dev.32)(@itwin/components-react@4.8.2)(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-common@4.4.0-dev.32)(@itwin/core-frontend@4.4.0-dev.32)(@itwin/core-geometry@4.4.0-dev.32)(@itwin/core-quantity@4.4.0-dev.32)(@itwin/core-react@4.8.2)(react-dom@17.0.2)(react@17.0.2)
   '@itwin/imodels-access-frontend':
     specifier: ^4.0.0

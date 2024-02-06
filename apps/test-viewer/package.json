@@ -24,7 +24,7 @@
     "@itwin/frontend-devtools": "^4.4.0-dev.32",
     "@itwin/geo-tools-react": "workspace:*",
     "@itwin/imodels-access-frontend": "^4.0.0",
-    "@itwin/imodel-components-react": "^4.8.2",
+    "@itwin/imodel-components-react": "^4.8.1",
     "@itwin/itwinui-react": "^2.12.19",
     "@itwin/itwinui-icons-react": "^2.7.0",
     "@itwin/map-layers-formats": "^4.4.0-dev.32",
