@@ -187,5 +187,28 @@ describe("VisibilityTreeRenderer", () => {
       const renderedLeafNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("44px");
     });
+
+    it("renders nodes with default values", async () => {
+      const filteringActions = {
+        onFilterClick: () => {},
+        onClearFilterClick: () => {},
+      };
+
+      const { getByTestId } = render(
+        <FilterableVisibilityTreeNodeRenderer
+          iconsEnabled={false}
+          isEnlarged={true}
+          descriptionEnabled={false}
+          node={leafNode}
+          treeActions={treeActions}
+          {...filteringActions}
+        />,
+      );
+
+      const renderedLeafNode = await waitFor(() => getByTestId("tree-node-contents"));
+
+      // leaf node should have enlarged margin for missing enlarged expander.
+      expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("62px");
+    });
   });
 });
