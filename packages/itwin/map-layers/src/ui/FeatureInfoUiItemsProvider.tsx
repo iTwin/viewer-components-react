@@ -60,7 +60,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
         icon: <SvgMapInfo/>,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
         defaultState: WidgetState.Hidden,
-        badgeType: BadgeType.TechnicalPreview,
+        badge: BadgeType.TechnicalPreview,
       });
     }
 
