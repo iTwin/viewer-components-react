@@ -483,6 +483,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     } else {
       return (<span className="map-layer-source-placeholder">&nbsp;</span>);
     }
+    return node;
   }
 
   // Use a hook to display the popup.
