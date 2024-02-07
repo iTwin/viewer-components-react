@@ -5,8 +5,8 @@
 
 import "../VisibilityTreeBase.scss";
 import { SelectionMode } from "@itwin/components-react";
-import { PresentationTree, UnifiedSelectionTreeEventHandler, usePresentationTreeState } from "@itwin/presentation-components";
-import { TreeRenderer } from "../common/TreeRenderer";
+import { PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState } from "@itwin/presentation-components";
+import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
@@ -25,7 +25,12 @@ const PAGING_SIZE = 20;
  * Props for the [[ExternalSourcesTree]] component
  * @alpha
  */
-export type ExternalSourcesTreeProps = BaseTreeProps;
+export interface ExternalSourcesTreeProps extends BaseTreeProps {
+  /**
+   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   */
+  isHierarchyLevelFilteringEnabled?: boolean;
+}
 
 /**
  * Tree which displays a hierarchy of ExternalSources and their elements.
@@ -40,6 +45,12 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
     customizeTreeNodeItem,
   });
 
+  const treeRendererProps = {
+    contextMenuItems: props.contextMenuItems,
+    nodeLabelRenderer: props.nodeLabelRenderer,
+    density: props.density,
+  };
+
   if (!state) {
     return null;
   }
@@ -52,9 +63,18 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.Extended}
         iconsEnabled={true}
-        treeRenderer={(treeProps) => (
-          <TreeRenderer {...treeProps} contextMenuItems={props.contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} density={props.density} />
-        )}
+        treeRenderer={(treeProps) =>
+          props.isHierarchyLevelFilteringEnabled ? (
+            <FilterableTreeRenderer
+              {...treeProps}
+              {...treeRendererProps}
+              nodeLoader={state.nodeLoader}
+              nodeRenderer={(nodeRendererProps) => <PresentationTreeNodeRenderer {...nodeRendererProps} />}
+            />
+          ) : (
+            <TreeRenderer {...treeProps} {...treeRendererProps} />
+          )
+        }
       />
     </div>
   );

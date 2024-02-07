@@ -21,6 +21,7 @@ import type { LocalizationOptions } from '@itwin/core-i18n';
 import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
+import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyValueRendererContext } from '@itwin/components-react';
 import type { PropsWithChildren } from 'react';
@@ -93,7 +94,7 @@ export interface CategoryInfo {
 }
 
 // @public
-export function CategoryTree(props: CategoryTreeProps): JSX.Element;
+export function CategoryTree(props: CategoryTreeProps): JSX.Element | null;
 
 // @public
 export interface CategoryTreeProps extends BaseFilterableTreeProps {
@@ -102,6 +103,8 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
     categories: CategoryInfo[];
     // @internal
     categoryVisibilityHandler?: CategoryVisibilityHandler;
+    // @beta
+    isHierarchyLevelFilteringEnabled?: boolean;
     // @internal
     viewManager?: ViewManager;
 }
@@ -118,13 +121,13 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     // (undocumented)
     enableSubCategory(key: string, enabled: boolean): void;
     // (undocumented)
-    getCategoryVisibility(id: string): "hidden" | "visible";
+    getCategoryVisibility(id: string): "visible" | "hidden";
     // (undocumented)
     static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey): string;
     // (undocumented)
     getParent(key: string): CategoryInfo | undefined;
     // (undocumented)
-    getSubCategoryVisibility(id: string): "hidden" | "visible";
+    getSubCategoryVisibility(id: string): "visible" | "hidden";
     // (undocumented)
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus;
     // (undocumented)
@@ -159,10 +162,10 @@ export interface ContextMenuItemProps {
 }
 
 // @public
-export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
+export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
 
 // @public
-export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps_2) => JSX.Element;
+export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element;
 
 // @public
 export function DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): JSX.Element;
@@ -174,7 +177,7 @@ export interface DefaultLabelRendererProps {
 }
 
 // @alpha
-export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
+export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element | null;
 
 // @alpha
 export const ExternalSourcesTreeComponent: {
@@ -187,7 +190,26 @@ export const ExternalSourcesTreeComponent: {
 export type ExternalSourcesTreeComponentProps = Omit<ExternalSourcesTreeProps, "iModel" | "width" | "height">;
 
 // @alpha
-export type ExternalSourcesTreeProps = BaseTreeProps;
+export interface ExternalSourcesTreeProps extends BaseTreeProps {
+    isHierarchyLevelFilteringEnabled?: boolean;
+}
+
+// @beta
+export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps): JSX.Element;
+
+// @beta
+export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
+    // (undocumented)
+    nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
+    // (undocumented)
+    nodeRenderer: (props: PresentationTreeNodeRendererProps) => React.ReactNode;
+}
+
+// @beta
+export function FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element;
+
+// @beta
+export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & VisibilityTreeNodeRendererProps;
 
 // @public
 export function hideAllCategories(categories: string[], viewport: Viewport): Promise<void>;
@@ -196,7 +218,7 @@ export function hideAllCategories(categories: string[], viewport: Viewport): Pro
 export function hideAllModels(models: string[], viewport: Viewport): Promise<void>;
 
 // @public
-export const IModelContentTree: (props: IModelContentTreeProps) => JSX.Element;
+export const IModelContentTree: (props: IModelContentTreeProps) => JSX.Element | null;
 
 // @public
 export const IModelContentTreeComponent: {
@@ -209,7 +231,10 @@ export const IModelContentTreeComponent: {
 export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
 
 // @public
-export type IModelContentTreeProps = BaseTreeProps;
+export interface IModelContentTreeProps extends BaseTreeProps {
+    // @beta
+    isHierarchyLevelFilteringEnabled?: boolean;
+}
 
 // @public
 export function invertAllCategories(categories: CategoryInfo[], viewport: Viewport): Promise<void>;
@@ -242,7 +267,7 @@ export interface ModelInfo {
 }
 
 // @public
-export function ModelsTree(props: ModelsTreeProps): JSX.Element;
+export function ModelsTree(props: ModelsTreeProps): JSX.Element | null;
 
 // @public
 export const ModelsTreeComponent: {
@@ -290,6 +315,8 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     // @alpha
     enableHierarchyAutoUpdate?: boolean;
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
+    // @beta
+    isHierarchyLevelFilteringEnabled?: boolean;
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
@@ -503,7 +530,7 @@ export function useContextMenu({ contextMenuItems }: TreeContextMenuProps): {
 // @public
 export function useTreeTransientState<T extends Element>(): Ref<T>;
 
-// @public
+// @public @deprecated
 export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void): {
     filteredNodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
     isFiltering: boolean;
@@ -560,6 +587,7 @@ export interface VisibilityTreeNodeRendererProps {
     descriptionEnabled: boolean;
     disableRootNodeCollapse?: boolean;
     iconsEnabled: boolean;
+    isEnlarged?: boolean;
     levelOffset?: number;
 }
 
