@@ -40,10 +40,15 @@
   &.enlarge {
     --enlarged-node-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
     --enlarged-node-icon-size: var(--iui-size-m);
+    --enlarged-node-without-expander-margin: var(--iui-size-m);
     --enlarged-node-icon-padding: calc(var(--enlarged-node-height) - var(--enlarged-node-icon-size));
     --enlarged-node-expander-additional-padding: calc(var(--iui-size-l) - var(--iui-size-3xs) / 2);
 
     .core-tree-node {
+      &.without-expander {
+        margin-left:  var(--enlarged-node-without-expander-margin);
+      }
+
       > .contents {
         height: var(--enlarged-node-height);
         font-size: var(--iui-font-size-2);
