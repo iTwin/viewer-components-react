@@ -27,66 +27,79 @@ export interface MappingListItemProps {
   onRefreshMappings: () => Promise<void>;
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
   setShowDeleteModal: (mapping?: Mapping) => void;
-  isMappingPageRefreshed?: boolean;
-  setIsMappingPageRefreshed?: (isMappingPageRefreshed: boolean) => void;
+  isMappingPageReloaded?: boolean;
+  setIsMappingPageReloaded?: (isMappingPageReloaded?: boolean) => void;
 }
 
-export const MappingListItem = (props: MappingListItemProps) => {
+export const MappingListItem = ({
+  selected,
+  onSelectionChange,
+  mapping,
+  jobId,
+  jobStartEvent,
+  onClickMappingModify,
+  onClickMappingTitle,
+  onRefreshMappings,
+  onToggleExtraction,
+  setShowDeleteModal,
+  isMappingPageReloaded,
+  setIsMappingPageReloaded,
+}: MappingListItemProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates | undefined>(ExtractionStates.None);
   const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
   const [isListItemMounted, setIsListItemMounted] = useState<boolean>(false);
-  const { statusQuery } = useFetchMappingExtractionStatus({isMounted: isListItemMounted, ...groupingMappingApiConfig, mapping: props.mapping, enabled: isJobStarted});
+  const { statusQuery } = useFetchMappingExtractionStatus({isMounted: isListItemMounted, ...groupingMappingApiConfig, mapping, enabled: isJobStarted});
   const queryClient = useQueryClient();
 
   const onClickTile = () => {
-    props.onSelectionChange(props.mapping);
+    onSelectionChange(mapping);
   };
 
   useEffect(() => {
     // Only apply to all mappings when the page is reloaded, not the list component
     // or when users modify mappings
-    if(props.isMappingPageRefreshed && props.setIsMappingPageRefreshed){
+    if(isMappingPageReloaded && setIsMappingPageReloaded){
       setIsListItemMounted(true);
       setIsJobStarted(true);
-      props.setIsMappingPageRefreshed(false);
+      setIsMappingPageReloaded(false);
     }
-  }, [props]);
+  }, [isMappingPageReloaded, setIsMappingPageReloaded]);
 
   // Check whether the job is still running when users refresh the mapping list
-  // or modify any mappings
+  // or modify any mappingsA
   useEffect(() => {
-    if(mappingIdJobInfo.get(props.mapping.id)){
+    if(mappingIdJobInfo.get(mapping.id)){
       setIsJobStarted(true);
     }
-  }, [mappingIdJobInfo, props.mapping.id]);
+  }, [mappingIdJobInfo, mapping.id]);
 
   const resolveTerminalExtractionStatus = useCallback(async () => {
     if(statusQuery.data!.finalExtractionStateValue === ExtractionStates.Failed || statusQuery.data!.finalExtractionStateValue === ExtractionStates.Succeeded){
       setIsJobStarted(false);
       setMappingIdJobInfo((prevMap: Map<string, string>) => {
         const newMap = new Map(prevMap);
-        newMap.delete(props.mapping.id);
+        newMap.delete(mapping.id);
         return newMap;
       });
-      await resetMappingExtractionStatus(props.mapping.id, queryClient);
+      await resetMappingExtractionStatus(mapping.id, queryClient);
     }
-  }, [statusQuery, props.mapping.id, queryClient, setMappingIdJobInfo]);
+  }, [statusQuery, mapping.id, queryClient, setMappingIdJobInfo]);
 
   useEffect(() => {
     const listener = (startedMappingId: string) => {
-      if (startedMappingId === props.mapping.id) {
+      if (startedMappingId === mapping.id) {
         setExtractionState(ExtractionStates.Starting);
         setIsJobStarted(true);
       }
     };
-    props.jobStartEvent.addListener(listener);
+    jobStartEvent.addListener(listener);
 
     return () => {
-      props.jobStartEvent.removeListener(listener);
+      jobStartEvent.removeListener(listener);
     };
-  }, [props.jobStartEvent, props.mapping.id, props.jobId, props]);
+  }, [jobStartEvent, mapping.id, jobId]);
 
   const onResolveStatusData = useMutation({
     mutationKey: ["onResolveStatusData", isJobStarted],
@@ -107,13 +120,13 @@ export const MappingListItem = (props: MappingListItemProps) => {
   return (
     <ListItem actionable
       className="gmw-list-item-container"
-      active={props.selected}
-      key={props.mapping.id}
+      active={selected}
+      key={mapping.id}
       onClick={onClickTile}
-      title={props.mapping.mappingName}>
+      title={mapping.mappingName}>
       <ListItem.Content>
-        <Anchor onClick={props.onClickMappingTitle ? () => props.onClickMappingTitle?.(props.mapping) : undefined}>{props.mapping.mappingName ? props.mapping.mappingName : "Untitled"}</Anchor>
-        {props.mapping.description && <Text className="gmw-body-text" isMuted={true} title={props.mapping.description} variant="small">{props.mapping.description}</Text>}
+        <Anchor onClick={onClickMappingTitle ? () => onClickMappingTitle?.(mapping) : undefined}>{mapping.mappingName ? mapping.mappingName : "Untitled"}</Anchor>
+        {mapping.description && <Text className="gmw-body-text" isMuted={true} title={mapping.description} variant="small">{mapping.description}</Text>}
       </ListItem.Content>
       <ExtractionStatus
         state={extractionState}
@@ -122,11 +135,11 @@ export const MappingListItem = (props: MappingListItemProps) => {
         }}
       ></ExtractionStatus >
       <MappingUIActionGroup
-        mapping={props.mapping}
-        onToggleExtraction={props.onToggleExtraction}
-        onRefresh={props.onRefreshMappings}
-        onClickMappingModify={props.onClickMappingModify}
-        setShowDeleteModal={props.setShowDeleteModal}
+        mapping={mapping}
+        onToggleExtraction={onToggleExtraction}
+        onRefresh={onRefreshMappings}
+        onClickMappingModify={onClickMappingModify}
+        setShowDeleteModal={setShowDeleteModal}
       />
     </ListItem>
   );

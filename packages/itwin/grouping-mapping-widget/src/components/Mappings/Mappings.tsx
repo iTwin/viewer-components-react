@@ -38,7 +38,7 @@ export const Mappings = (props: MappingsProps) => {
     setShowDeleteModal,
     showDeleteModal,
     isTogglingExtraction,
-    isMappingPageRefreshed,
+    isMappingPageReloaded,
     setIsMappingPageReloaded,
   } = useMappingsOperations({ ...groupingMappingApiConfig, mappingClient });
 
@@ -59,8 +59,8 @@ export const Mappings = (props: MappingsProps) => {
       showDeleteModal={showDeleteModal}
       setShowDeleteModal={setShowDeleteModal}
       isTogglingExtraction={isTogglingExtraction}
-      isMappingPageRefreshed={isMappingPageRefreshed}
-      setIsMappingPageRefreshed={setIsMappingPageReloaded}
+      isMappingPageReloaded={isMappingPageReloaded}
+      setIsMappingPageReloaded={setIsMappingPageReloaded}
       {...props}
     />
   );

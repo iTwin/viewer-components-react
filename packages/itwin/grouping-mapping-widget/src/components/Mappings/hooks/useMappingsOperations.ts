@@ -22,7 +22,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const [showExtractionMessageModal, setShowExtractionMessageModal] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const isMounted = useIsMounted();
-  const [isMappingPageRefreshed, setIsMappingPageReloaded] = useState<boolean | undefined>(false);
+  const [isMappingPageReloaded, setIsMappingPageReloaded] = useState<boolean | undefined>(false);
 
   const {
     data: mappings,
@@ -75,5 +75,5 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     iconMessage: "Loading...",
   }, extractionMessageData : []};
 
-  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, isMappingPageRefreshed, setIsMappingPageReloaded};
+  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, isMappingPageReloaded, setIsMappingPageReloaded};
 };
