@@ -4,22 +4,22 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
+import "./MapUrlDialog.scss";
+import * as React from "react";
 import { SpecialKey } from "@itwin/appui-abstract";
-import { Button, Icon, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
+import { BeEvent, Guid } from "@itwin/core-bentley";
 import { ImageMapLayerProps } from "@itwin/core-common";
 import {
-  IModelApp, MapLayerAccessClient, MapLayerSource,
-  MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority, ScreenViewport,
+  IModelApp, MapLayerAccessClient, MapLayerSource, MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority,
+  ScreenViewport,
 } from "@itwin/core-frontend";
 import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
-import * as React from "react";
+import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
+import { Button, Icon, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { MapTypesOptions } from "../Interfaces";
-import { BeEvent, Guid } from "@itwin/core-bentley";
 import { SelectMapFormat } from "./SelectMapFormat";
-import "./MapUrlDialog.scss";
-import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -449,7 +449,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   // Utility function to get warning message section
   function renderWarningMessage(): React.ReactNode {
-    let node: React.ReactNode;
     let warningMessage: string | undefined;
 
     // Get the proper warning message
@@ -483,7 +482,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     } else {
       return (<span className="map-layer-source-placeholder">&nbsp;</span>);
     }
-    return node;
   }
 
   // Use a hook to display the popup.
