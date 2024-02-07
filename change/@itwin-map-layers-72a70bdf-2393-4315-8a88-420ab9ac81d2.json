@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix map feature info widget tech preview badge",
-  "packageName": "@itwin/map-layers",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}
