@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add option to show tech preview badge on MapFeatureInfoTool/Widget",
-  "packageName": "@itwin/map-layers",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}
