@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Improved warning message when an incomptaible map-layer type is provided.",
+  "comment": "Improved warning message when an incompatible map-layer type is provided.",
   "packageName": "@itwin/map-layers",
   "email": "mdastous-bentley@users.noreply.github.com",
   "dependentChangeType": "patch"
