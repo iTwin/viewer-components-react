@@ -65,6 +65,8 @@ export interface MappingsViewProps {
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
   alert?: React.ReactElement<typeof Alert>;
+  isMappingPageRefreshed?: boolean;
+  setIsMappingPageRefreshed?: (isMappingPageRefreshed: boolean) => void;
 }
 
 export const MappingsView = ({
@@ -88,6 +90,8 @@ export const MappingsView = ({
   onClickMappingTitle,
   onClickMappingModify,
   alert,
+  isMappingPageRefreshed,
+  setIsMappingPageRefreshed,
 }: MappingsViewProps) => {
   const displayStrings = React.useMemo(
     () => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }),
@@ -198,6 +202,8 @@ export const MappingsView = ({
                 onRefreshMappings={onRefreshMappings}
                 onClickMappingModify={onClickMappingModify}
                 setShowDeleteModal={setShowDeleteModal}
+                isMappingPageRefreshed={isMappingPageRefreshed}
+                setIsMappingPageRefreshed={setIsMappingPageRefreshed}
               />
             ))}
           </div>

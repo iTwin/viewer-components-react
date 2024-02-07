@@ -15,7 +15,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetchMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
 import "./MappingListItem.scss";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
-import { useIsMounted } from "../../common/hooks/useIsMounted";
 
 export interface MappingListItemProps {
   selected: boolean;
@@ -28,6 +27,8 @@ export interface MappingListItemProps {
   onRefreshMappings: () => Promise<void>;
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
   setShowDeleteModal: (mapping?: Mapping) => void;
+  isMappingPageRefreshed?: boolean;
+  setIsMappingPageRefreshed?: (isMappingPageRefreshed: boolean) => void;
 }
 
 export const MappingListItem = (props: MappingListItemProps) => {
@@ -36,7 +37,6 @@ export const MappingListItem = (props: MappingListItemProps) => {
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
   const [isListItemMounted, setIsListItemMounted] = useState<boolean>(false);
-  const isMounted = useIsMounted();
   const { statusQuery } = useFetchMappingExtractionStatus({isMounted: isListItemMounted, ...groupingMappingApiConfig, mapping: props.mapping, enabled: isJobStarted});
   const queryClient = useQueryClient();
 
@@ -45,11 +45,14 @@ export const MappingListItem = (props: MappingListItemProps) => {
   };
 
   useEffect(() => {
-    if(isMounted()){
+    // Only apply to all mappings when the page is reloaded, not the list component
+    // or when users modify mappings
+    if(props.isMappingPageRefreshed && props.setIsMappingPageRefreshed){
       setIsListItemMounted(true);
       setIsJobStarted(true);
+      props.setIsMappingPageRefreshed(false);
     }
-  }, [isMounted]);
+  }, [props]);
 
   // Check whether the job is still running when users refresh the mapping list
   // or modify any mappings
@@ -57,8 +60,7 @@ export const MappingListItem = (props: MappingListItemProps) => {
     if(mappingIdJobInfo.get(props.mapping.id)){
       setIsJobStarted(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappingIdJobInfo]);
+  }, [mappingIdJobInfo, props.mapping.id]);
 
   const resolveTerminalExtractionStatus = useCallback(async () => {
     if(statusQuery.data!.finalExtractionStateValue === ExtractionStates.Failed || statusQuery.data!.finalExtractionStateValue === ExtractionStates.Succeeded){
@@ -70,8 +72,7 @@ export const MappingListItem = (props: MappingListItemProps) => {
       });
       await resetMappingExtractionStatus(props.mapping.id, queryClient);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusQuery, props.mapping.id]);
+  }, [statusQuery, props.mapping.id, queryClient, setMappingIdJobInfo]);
 
   useEffect(() => {
     const listener = (startedMappingId: string) => {

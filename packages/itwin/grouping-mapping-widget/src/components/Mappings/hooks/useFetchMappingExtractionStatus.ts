@@ -20,10 +20,10 @@ export interface MappingExtractionStatusProps extends GroupingMappingApiConfig {
   enabled: boolean;
 }
 
-export interface MappingQueryResults {
+export interface MappingQueryResult {
   mappingId: string;
   finalExtractionStateValue: ExtractionStates;
-}[];
+}
 
 export const fetchMappingStatus = async (
   isMounted: boolean,
@@ -96,7 +96,7 @@ export const useFetchMappingExtractionStatus = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     , [iModelId, getAccessToken, enabled, extractionClient, mappingIdJobInfo]);
 
-  const statusQuery = useQuery<MappingQueryResults>(mappingQuery);
+  const statusQuery = useQuery<MappingQueryResult>(mappingQuery);
 
   return { statusQuery };
 };
