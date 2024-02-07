@@ -257,27 +257,18 @@ export const GroupPropertyAction = ({
       handleError(error.status);
     } finally {
       setIsLoading(false);
+    if (oldPropertyName !== propertyName && oldPropertyName !== "") {
+      setShowSaveModal(true);
+    } else {
+      onSave();
     }
   };
 
-  const startSearch = useCallback(() => {
-    if (!searchInput) return;
-    setActiveSearchInput(searchInput);
-    setSearched(true);
-  }, [searchInput]);
+  const handleCloseSaveModal = () => {
+    setShowSaveModal(false);
+  };
 
-  const clearSearch = useCallback(() => {
-    setSearchInput("");
-    setActiveSearchInput("");
-    setSearched(false);
-  }, []);
-
-  useEffect(() => {
-    if (searchInput.length === 0) {
-      setSearched(false);
-      clearSearch();
-    }
-  }, [searchInput, setSearched, clearSearch]);
+  const isLoading = isLoadingProperties || isSaving;
 
   return (
     <DndContext
@@ -389,168 +380,19 @@ export const GroupPropertyAction = ({
           selectedProperties.length === 0 || !propertyName || dataType === DataType.Undefined
         }
       />
-      <Modal
-        title="Properties Selection"
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          clearSearch();
-        }}
-        closeOnExternalClick={false}
-      >
-        <Split
-          expandToMin={false}
-          className="gmw-property-selection-container"
-          gutterAlign="center"
-          gutterSize={2}
-          gutter={() => {
-            // Expects HTMLElement
-            const dragHangle = renderToStaticMarkup(
-              <Icon className="gmw-gutter-drag-icon" size="large">
-                <SvgMoreVerticalSmall />
-              </Icon>
-            );
-            const gutter = document.createElement("div");
-            gutter.className = `gmw-gutter`;
-            gutter.innerHTML = dragHangle;
-            return gutter;
-          }}
-          direction="horizontal">
-          <Surface className="gmw-available-properties" elevation={1}>
-            <div className="gmw-available-properties-header">
-              <Label as="span">Available Properties</Label>
-              <LabeledInput
-                displayStyle="inline"
-                iconDisplayStyle="inline"
-                className="gmw-available-prop-search"
-                value={searchInput}
-                size="small"
-                placeholder="Search...."
-                onChange={(event) => {
-                  const {
-                    target: { value },
-                  } = event;
-                  setSearchInput(value);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    startSearch();
-                  }
-                }}
-                svgIcon={
-                  searched ? (
-                    <IconButton onClick={clearSearch} styleType="borderless" title='Clear Search'>
-                      <SvgClose />
-                    </IconButton>
-                  ) : (
-                    <IconButton onClick={startSearch} styleType="borderless" title='Search'>
-                      <SvgSearch />
-                    </IconButton>
-                  )
-                }
-              />
-            </div>
-            {filteredProperties.length === 0 ?
-              <div className="gmw-empty-selection">
-                <Text>No properties available. </Text>
-              </div> :
-              <div className="gmw-properties-list">
-                {
-                  filteredProperties.map((property) => (
-                    <HorizontalTile
-                      key={property.key}
-                      title={`${property.displayLabel} (${property.propertyType})`}
-                      titleTooltip={`${property.actualECClassName}`}
-                      subText={getLocalizedStringPresentation(property.categoryLabel)}
-                      actionGroup={null}
-                      selected={selectedProperties.some((p) => property.key === p.key)}
-                      onClick={() =>
-                        setSelectedProperties((sp) =>
-                          sp.some((p) => property.key === p.key)
-                            ? sp.filter(
-                              (p) => property.key !== p.key
-                            )
-                            : [...sp, property]
-                        )
-                      }
-                    />
-                  ))}
-              </div>}
-          </Surface>
-          <Surface className="gmw-selected-properties" elevation={1}>
-            <Label as="span">Selected Properties</Label>
-            {selectedProperties.length === 0 ?
-              <div className="gmw-empty-selection">
-                <Text>No properties selected.</Text>
-                <Text>Add some by clicking on the properties shown left.</Text>
-              </div> :
-              <div className="gmw-properties-list" >
-                <SortableContext
-                  items={selectedProperties.map((p) => p.key)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {selectedProperties.map((property) =>
-                    <SortableHorizontalTile
-                      key={property.key}
-                      id={property.key}
-                      title={`${property.displayLabel} (${property.propertyType})`}
-                      titleTooltip={`${property.actualECClassName}`}
-                      subText={property.categoryLabel}
-                      actionGroup={
-                        <div>
-                          <IconButton
-                            styleType="borderless"
-                            title="Remove"
-                            onClick={() => {
-                              setSelectedProperties((sp) => sp.filter(
-                                (p) => property.key !== p.key
-                              ));
-                            }
-                            }>
-                            <SvgRemove />
-                          </IconButton>
-                        </div>
-                      }
-                    />)}
-                </SortableContext>
-              </div>}
-          </Surface>
-        </Split>
-        <ModalButtonBar>
-          <Button
-            onClick={() => {
-              setShowModal(false);
-              clearSearch();
-            }}
-            styleType="high-visibility"
-          >
-            Close
-          </Button>
-        </ModalButtonBar>
-      </Modal>
       <SaveModal
         onSave={onSave}
         onClose={handleCloseSaveModal}
         showSaveModal={showSaveModal}
       />
-      <DragOverlay zIndex={9999}>
-        {activeDragProperty ?
-          <HorizontalTile
-            title={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
-            titleTooltip={`${activeDragProperty.actualECClassName}`}
-            subText={activeDragProperty.categoryLabel}
-            actionGroup={
-              <IconButton
-                styleType="borderless">
-                <SvgRemove />
-              </IconButton>}
-            dragHandle={
-              <Icon className="gmw-drag-icon" size="large">
-                <SvgDragHandleVertical />
-              </Icon>
-            }
-          /> : null}
-      </DragOverlay>
+      <GroupsPropertiesSelectionModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        selectedProperties={selectedProperties}
+        setSelectedProperties={setSelectedProperties}
+        propertiesMetaData={propertiesMetaData}
+        activeDragProperty={activeDragProperty}
+      />
     </DndContext>
   );
 };
