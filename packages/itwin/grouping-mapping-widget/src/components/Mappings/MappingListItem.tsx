@@ -68,7 +68,7 @@ export const MappingListItem = ({
   }, [isMappingPageReloaded, setIsMappingPageReloaded]);
 
   // Check whether the job is still running when users refresh the mapping list
-  // or modify any mappingsA
+  // or modify any mappings
   useEffect(() => {
     if(mappingIdJobInfo.get(mapping.id)){
       setIsJobStarted(true);
