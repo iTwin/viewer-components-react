@@ -10,9 +10,9 @@ import { Checkbox } from "@itwin/itwinui-react";
 import { PresentationTreeNodeRenderer, useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
 import { TreeRenderer } from "./common/TreeRenderer";
 
+import type { NodeCheckboxRenderProps } from "@itwin/core-react";
 import type { TreeRendererBaseProps, TreeRendererProps } from "./common/TreeRenderer";
 import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps } from "@itwin/components-react";
-import type { NodeCheckboxRenderProps } from "@itwin/core-react";
 import type { IPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
 import type { VisibilityTreeFilterInfo } from "./common/Types";
 /**

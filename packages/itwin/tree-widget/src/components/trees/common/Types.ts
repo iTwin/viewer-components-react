@@ -30,8 +30,12 @@ export interface VisibilityTreeFilterInfo {
   activeMatchIndex?: number;
 }
 
-export interface HierarchyLevelFilteringProps {
-  enabled: true;
+/**
+ * Configuration for hierarchy levels. Setting it implies that hierarchy level filtering will be enabled.
+ * @beta
+ */
+export interface HierarchyLevelConfig {
+  isFilteringEnabled: true;
   sizeLimit?: number;
 }
 

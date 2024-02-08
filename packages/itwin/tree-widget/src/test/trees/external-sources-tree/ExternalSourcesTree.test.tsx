@@ -12,7 +12,7 @@ import { Guid } from "@itwin/core-bentley";
 import { BisCodeSpec, EmptyLocalization, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition } from "@itwin/presentation-common";
-import { PresentationTreeDataProvider } from "@itwin/presentation-components";
+import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
   buildTestIModel,
@@ -24,6 +24,7 @@ import {
 import { ExternalSourcesTree, RULESET_EXTERNAL_SOURCES } from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
 import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 import {
+  createInfoNode,
   createPresentationTreeNodeItem,
   createSimpleTreeModelNode,
   createTestContentDescriptor,
@@ -146,7 +147,7 @@ describe("ExternalSourcesTree", () => {
         setupDataProvider([createSimpleTreeModelNode()]);
 
         const { getByText, container } = render(
-          <ExternalSourcesTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />,
+          <ExternalSourcesTree {...sizeProps} density={"enlarged"} iModel={imodelMock.object} hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
         );
 
         await waitFor(() => getByText("Node Label"));
@@ -171,10 +172,23 @@ describe("ExternalSourcesTree", () => {
         it("renders non-filterable node", async () => {
           setupDataProvider([createSimpleTreeModelNode()]);
 
-          const { queryByTitle, getByText } = render(<ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+          const { queryByTitle, getByText } = render(
+            <ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+          );
 
           await waitFor(() => getByText("Node Label"));
           expect(queryByTitle("tree.filter-hierarchy-level")).to.be.null;
+        });
+
+        it("renders information message when node item is of `ResultSetTooLarge` type", async () => {
+          const nodeItem = createInfoNode(undefined, "filtering message", InfoTreeNodeItemType.ResultSetTooLarge);
+          setupDataProvider([nodeItem]);
+
+          const { queryByText } = render(
+            <ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} hierarchyLevelConfig={{ isFilteringEnabled: true, sizeLimit: 0 }} />,
+          );
+
+          await waitFor(() => expect(queryByText("filtering message")).to.not.be.null);
         });
 
         it("renders filterable node", async () => {
@@ -186,7 +200,9 @@ describe("ExternalSourcesTree", () => {
           const simpleNode = createSimpleTreeModelNode(undefined, undefined, { parentId: nodeItem.id });
           setupDataProvider([nodeItem, simpleNode]);
 
-          const { queryByTitle } = render(<ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+          const { queryByTitle } = render(
+            <ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+          );
 
           await waitFor(() => expect(queryByTitle("tree.filter-hierarchy-level")).to.not.be.null);
         });
@@ -209,7 +225,9 @@ describe("ExternalSourcesTree", () => {
 
           setupDataProvider([nodeItem]);
 
-          const { queryByTitle } = render(<ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} isHierarchyLevelFilteringEnabled={true} />);
+          const { queryByTitle } = render(
+            <ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+          );
 
           await waitFor(() => expect(queryByTitle("tree.clear-hierarchy-level-filter")).to.not.be.null);
         });

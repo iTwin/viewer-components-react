@@ -20,7 +20,7 @@ import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps, HierarchyLevelFilteringProps } from "../common/Types";
+import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
 const PAGING_SIZE = 20;
 
@@ -54,10 +54,10 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
    */
   viewManager?: ViewManager;
   /**
-   * Props for configuring hierarchy level filtering.
+   * Props for configuring hierarchy level.
    * @beta
    */
-  hierarchyLevelFilteringProps?: HierarchyLevelFilteringProps;
+  hierarchyLevelConfig?: HierarchyLevelConfig;
 }
 
 /**
@@ -86,7 +86,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     customizeTreeNodeItem,
     filterInfo: props.filterInfo,
     onFilterChange,
-    hierarchyLevelSizeLimit: props.hierarchyLevelFilteringProps?.sizeLimit,
+    hierarchyLevelSizeLimit: props.hierarchyLevelConfig?.sizeLimit,
   });
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export function CategoryTree(props: CategoryTreeProps) {
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.None}
         treeRenderer={
-          props.hierarchyLevelFilteringProps
+          props.hierarchyLevelConfig
             ? (rendererProps) => (
                 <FilterableTreeRenderer
                   {...rendererProps}
