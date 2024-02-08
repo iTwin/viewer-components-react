@@ -30,6 +30,11 @@ export interface VisibilityTreeFilterInfo {
   activeMatchIndex?: number;
 }
 
+export interface HierarchyLevelFilteringProps {
+  enabled: true;
+  sizeLimit?: number;
+}
+
 /**
  * Base props for tree components.
  * @public

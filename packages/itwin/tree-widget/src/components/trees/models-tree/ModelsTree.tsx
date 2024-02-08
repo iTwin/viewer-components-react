@@ -23,7 +23,7 @@ import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentatio
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps } from "../common/Types";
+import type { BaseFilterableTreeProps, HierarchyLevelFilteringProps } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
 
@@ -70,10 +70,10 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    */
   modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
   /**
-   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * Props for configuring hierarchy level filtering.
    * @beta
    */
-  isHierarchyLevelFilteringEnabled?: boolean;
+  hierarchyLevelFilteringProps?: HierarchyLevelFilteringProps;
 }
 
 /**
@@ -83,7 +83,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
-  const { isHierarchyLevelFilteringEnabled, density, height, width, selectionMode } = props;
+  const { hierarchyLevelFilteringProps, density, height, width, selectionMode } = props;
   const state = useModelsTreeState(props);
 
   const baseRendererProps = {
@@ -117,7 +117,7 @@ export function ModelsTree(props: ModelsTreeProps) {
         state={state}
         selectionMode={selectionMode || SelectionMode.None}
         treeRenderer={
-          isHierarchyLevelFilteringEnabled
+          hierarchyLevelFilteringProps
             ? (rendererProps) => (
                 <FilterableTreeRenderer
                   {...rendererProps}
@@ -200,6 +200,7 @@ function useTreeState({
   enableHierarchyAutoUpdate,
   filterInfo,
   onFilterApplied,
+  hierarchyLevelFilteringProps,
 }: UseTreeProps) {
   const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
@@ -238,6 +239,7 @@ function useTreeState({
       [],
     ),
     eventHandler: eventHandlerFactory,
+    hierarchyLevelSizeLimit: hierarchyLevelFilteringProps?.sizeLimit,
   });
 }
 

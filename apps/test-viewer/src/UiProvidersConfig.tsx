@@ -72,7 +72,11 @@ const configuredUiItems = new Map<string, UiItem>([
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
               render: () => (
-                <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} isHierarchyLevelFilteringEnabled={true} />
+                <ModelsTreeComponent
+                  selectionPredicate={() => true}
+                  selectionMode={SelectionMode.Multiple}
+                  hierarchyLevelFilteringProps={{ enabled: true, sizeLimit: 3 }}
+                />
               ),
             },
             {

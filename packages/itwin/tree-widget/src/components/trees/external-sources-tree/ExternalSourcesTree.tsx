@@ -12,7 +12,7 @@ import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
-import type { BaseTreeProps } from "../common/Types";
+import type { BaseTreeProps, HierarchyLevelFilteringProps } from "../common/Types";
 /**
  * Presentation rules used by ControlledCategoriesTree
  * @internal
@@ -27,9 +27,10 @@ const PAGING_SIZE = 20;
  */
 export interface ExternalSourcesTreeProps extends BaseTreeProps {
   /**
-   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * Props for configuring hierarchy level filtering.
+   * @beta
    */
-  isHierarchyLevelFilteringEnabled?: boolean;
+  hierarchyLevelFilteringProps?: HierarchyLevelFilteringProps;
 }
 
 /**
@@ -43,6 +44,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
     pagingSize: PAGING_SIZE,
     eventHandlerFactory: unifiedSelectionTreeEventHandlerFactory,
     customizeTreeNodeItem,
+    hierarchyLevelSizeLimit: props.hierarchyLevelFilteringProps?.sizeLimit,
   });
 
   const treeRendererProps = {
@@ -64,7 +66,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         selectionMode={props.selectionMode ?? SelectionMode.Extended}
         iconsEnabled={true}
         treeRenderer={(treeProps) =>
-          props.isHierarchyLevelFilteringEnabled ? (
+          props.hierarchyLevelFilteringProps ? (
             <FilterableTreeRenderer
               {...treeProps}
               {...treeRendererProps}

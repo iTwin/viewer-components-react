@@ -9,7 +9,7 @@ import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 
 import type { Ruleset } from "@itwin/presentation-common";
-import type { BaseTreeProps } from "../common/Types";
+import type { BaseTreeProps, HierarchyLevelFilteringProps } from "../common/Types";
 /**
  * Presentation rules used by IModelContentTree
  * @internal
@@ -22,11 +22,11 @@ export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); 
  */
 export interface IModelContentTreeProps extends BaseTreeProps {
   /**
-   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * Props for configuring hierarchy level filtering.
    * @beta
    */
-  isHierarchyLevelFilteringEnabled?: boolean;
-};
+  hierarchyLevelFilteringProps?: HierarchyLevelFilteringProps;
+}
 
 /**
  * A tree that shows all iModel content starting from the root Subject, then the hierarchy of child
@@ -34,7 +34,7 @@ export interface IModelContentTreeProps extends BaseTreeProps {
  * @public
  */
 export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, width, height, selectionMode, isHierarchyLevelFilteringEnabled } = props;
+  const { iModel, width, height, selectionMode, hierarchyLevelFilteringProps } = props;
 
   const state = usePresentationTreeState({
     imodel: iModel,
@@ -42,6 +42,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
     pagingSize: 20,
     appendChildrenCountForGroupingNodes: true,
     customizeTreeNodeItem,
+    hierarchyLevelSizeLimit: hierarchyLevelFilteringProps?.sizeLimit,
   });
 
   const treeRendererProps = {
@@ -62,7 +63,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         state={state}
         selectionMode={selectionMode ?? SelectionMode.None}
         treeRenderer={(treeProps) =>
-          isHierarchyLevelFilteringEnabled ? (
+          hierarchyLevelFilteringProps ? (
             <FilterableTreeRenderer
               {...treeProps}
               {...treeRendererProps}
