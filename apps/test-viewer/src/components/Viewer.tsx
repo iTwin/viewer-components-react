@@ -6,12 +6,15 @@
 import { useEffect, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
+import { FeatureOverrideReactProvider } from "@itwin/imodel-react-hooks";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
 import { Viewer as WebViewer } from "@itwin/web-viewer-react";
 import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
+import { DummyMarkerProvider } from "./DummyMarker";
+import { RandomColorOverrides } from "./DummyOverrides";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -43,7 +46,7 @@ export function Viewer() {
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
-      uiProviders={uiConfig.uiItemsProviders}
+      uiProviders={[...uiConfig.uiItemsProviders, DummyMarkerProvider]}
       defaultUiConfig={{
         hideNavigationAid: true,
         hideStatusBar: false,
@@ -52,11 +55,20 @@ export function Viewer() {
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
       theme="os"
+      viewportOptions={{
+        supplyViewOverlay: (vp) => (
+          <FeatureOverrideReactProvider viewFilter={(v) => v.viewportId === vp.viewportId}>
+            <RandomColorOverrides className="IdahoDataSet:IdahoPipe" />
+            <RandomColorOverrides className="IdahoDataSet:CustomerNode" />
+            <RandomColorOverrides className="HydraulicAnalytical:LateralLink" />
+          </FeatureOverrideReactProvider>
+        ),
+      }}
     />
   );
 }
 
-function useIModelInfo() {
+export function useIModelInfo() {
   const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID);
   const [iTwinId, setITwinId] = useState(process.env.IMJS_ITWIN_ID);
 

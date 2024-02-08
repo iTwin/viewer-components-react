@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./App.scss";
+import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
+import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
 import { Viewer } from "./Viewer";
-import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 
 export function App() {
   return (
@@ -26,7 +27,7 @@ export function App() {
 function Main() {
   const { state } = useAuthorizationContext();
 
-  return <div className="viewer-container">{state === AuthorizationState.Pending ? <Loader /> : <Viewer />}</div>;
+  return <div className="viewer-container">{state === AuthorizationState.Pending ? <Loader /> : <ViewSwitcher />}</div>;
 }
 
 function Loader() {
@@ -36,5 +37,16 @@ function Loader() {
         <ProgressLinear indeterminate={true} labels={["Signing in..."]} />
       </div>
     </FillCentered>
+  );
+}
+
+function ViewSwitcher() {
+  const [show, setShow] = React.useState(true);
+
+  return (
+    <>
+      <button onClick={() => setShow((prev) => !prev)}>Toggle View</button>
+      {show && <Viewer key={Math.random() * 255} />}
+    </>
   );
 }
