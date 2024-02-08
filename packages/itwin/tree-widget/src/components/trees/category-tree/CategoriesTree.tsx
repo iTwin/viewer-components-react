@@ -67,7 +67,7 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
 export function CategoryTree(props: CategoryTreeProps) {
   // istanbul ignore next
   const viewManager = props.viewManager ?? IModelApp.viewManager;
-  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density } = props;
+  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density, hierarchyLevelConfig } = props;
 
   const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, activeView, allViewports, categoryVisibilityHandler);
   const onFilterChange = useCallback(
@@ -86,7 +86,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     customizeTreeNodeItem,
     filterInfo: props.filterInfo,
     onFilterChange,
-    hierarchyLevelSizeLimit: props.hierarchyLevelConfig?.sizeLimit,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
   });
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export function CategoryTree(props: CategoryTreeProps) {
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.None}
         treeRenderer={
-          props.hierarchyLevelConfig
+          hierarchyLevelConfig?.isFilteringEnabled
             ? (rendererProps) => (
                 <FilterableTreeRenderer
                   {...rendererProps}

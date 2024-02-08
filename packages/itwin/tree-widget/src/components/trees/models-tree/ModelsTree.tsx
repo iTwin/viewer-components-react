@@ -117,7 +117,7 @@ export function ModelsTree(props: ModelsTreeProps) {
         state={state}
         selectionMode={selectionMode || SelectionMode.None}
         treeRenderer={
-          hierarchyLevelConfig
+          hierarchyLevelConfig?.isFilteringEnabled
             ? (rendererProps) => (
                 <FilterableTreeRenderer
                   {...rendererProps}

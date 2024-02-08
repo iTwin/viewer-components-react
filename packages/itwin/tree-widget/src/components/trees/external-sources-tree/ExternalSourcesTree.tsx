@@ -38,19 +38,21 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
  * @alpha
  */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
+  const { hierarchyLevelConfig, contextMenuItems, nodeLabelRenderer, density } = props;
+
   const state = usePresentationTreeState({
     imodel: props.iModel,
     ruleset: RULESET_EXTERNAL_SOURCES,
     pagingSize: PAGING_SIZE,
     eventHandlerFactory: unifiedSelectionTreeEventHandlerFactory,
     customizeTreeNodeItem,
-    hierarchyLevelSizeLimit: props.hierarchyLevelConfig?.sizeLimit,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
   });
 
   const treeRendererProps = {
-    contextMenuItems: props.contextMenuItems,
-    nodeLabelRenderer: props.nodeLabelRenderer,
-    density: props.density,
+    contextMenuItems,
+    nodeLabelRenderer,
+    density,
   };
 
   if (!state) {
@@ -66,7 +68,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         selectionMode={props.selectionMode ?? SelectionMode.Extended}
         iconsEnabled={true}
         treeRenderer={(treeProps) =>
-          props.hierarchyLevelConfig ? (
+          hierarchyLevelConfig?.isFilteringEnabled ? (
             <FilterableTreeRenderer
               {...treeProps}
               {...treeRendererProps}

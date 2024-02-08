@@ -63,7 +63,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
         state={state}
         selectionMode={selectionMode ?? SelectionMode.None}
         treeRenderer={(treeProps) =>
-          hierarchyLevelConfig ? (
+          hierarchyLevelConfig?.isFilteringEnabled ? (
             <FilterableTreeRenderer
               {...treeProps}
               {...treeRendererProps}
