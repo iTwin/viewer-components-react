@@ -3,46 +3,48 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp, Viewport } from "@itwin/core-frontend";
-import { render } from "@testing-library/react";
+import type { FeatureOverrideProvider } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import { cleanup, render } from "@testing-library/react";
 import React from "react";
-
 import { FeatureOverrideReactProvider, FeatureSymbologyContext, useFeatureOverrides } from "./useFeatureOverrides";
 
 jest.mock("@itwin/core-frontend", () => ({
   IModelApp: {
     viewManager: {
-      __vp: {
-        featureOverrideProvider: {},
-        onFeatureOverrideProviderChanged: {
-          addListener: jest.fn(),
-        },
-        setFeatureOverrideProviderChanged: jest.fn(),
-      },
-      forEachViewport(func: (vp: Viewport) => void) {
-        func((this.__vp as any) as Viewport);
-      },
+      __viewports: [{
+          featureOverrideProviders: new Array<FeatureOverrideProvider>(),
+          onFeatureOverrideProviderChanged: {
+            addListener: jest.fn(),
+          },
+          setFeatureOverrideProviderChanged: jest.fn(),
+          addFeatureOverrideProvider(provider: FeatureOverrideProvider){
+            this.featureOverrideProviders.push(provider);
+          }
+        }
+      ],
       invalidateViewportScenes: jest.fn(),
       onViewOpen: {
         addListener: jest.fn(),
       },
+      [Symbol.iterator]() {
+        return this.__viewports[Symbol.iterator]();
+      }
     },
   },
   FeatureOverrideProvider: class FeatureOverrideProvider { },
 }));
 
-const register = jest.fn();
-const unregister = jest.fn();
-const invalidate = jest.fn();
-
 describe("Hook useFeatureOverrides", () => {
-  beforeEach(() => {
-    register.mockClear();
-    unregister.mockClear();
-    invalidate.mockClear();
-  });
+  afterEach(() => {
+    cleanup();
+  })
 
   it("children are registered in tree order", () => {
+    const unregister = jest.fn();
+    const register = jest.fn();
+    const invalidate = jest.fn();
+
     const a = { overrider: jest.fn() };
     const A = () => {
       useFeatureOverrides(a, []);
@@ -75,25 +77,29 @@ describe("Hook useFeatureOverrides", () => {
     expect(register.mock.calls[2][0].current).toEqual(c);
   });
 
-  it.skip("children unregistered on unmount", () => {
+  it("children unregistered on unmount", async () => {
+
+    const [unregister, unregistered] = getAwaitableMock();
+    const register = jest.fn();
+    const invalidate = jest.fn();
+
     const A = () => {
       useFeatureOverrides({ overrider: jest.fn() }, []);
       return <></>;
     };
     const wrapper = render(
-      <FeatureSymbologyContext.Provider
-        value={{ register, unregister, invalidate }}
-      >
+      <FeatureSymbologyContext.Provider value={{ register, unregister, invalidate }}>
         <A />
-      </FeatureSymbologyContext.Provider>
+      </FeatureSymbologyContext.Provider>,
     );
     expect(register).toBeCalledTimes(1);
     expect(unregister).toBeCalledTimes(0);
     wrapper.unmount();
+    await unregistered;
     expect(unregister).toBeCalledTimes(1);
   });
 
-  it.skip("should ignore components above in the tree when there is a 'complete override'", async () => {
+  it("should ignore components above in the tree when there is a 'complete override'", async () => {
     const override = jest.fn((arg) => {
       const test = arg;
       return test as any;
@@ -112,10 +118,7 @@ describe("Hook useFeatureOverrides", () => {
       return null;
     };
     const C = () => {
-      useFeatureOverrides(
-        { overrider: () => override("C"), completeOverride: true },
-        []
-      );
+      useFeatureOverrides({ overrider: () => override("C"), completeOverride: true }, []);
       return <D />;
     };
     const D = () => {
@@ -125,12 +128,22 @@ describe("Hook useFeatureOverrides", () => {
     render(
       <FeatureOverrideReactProvider>
         <A />
-      </FeatureOverrideReactProvider>
+      </FeatureOverrideReactProvider>,
     );
     await new Promise((resolve) => setTimeout(resolve, 10));
     for (const vp of IModelApp.viewManager) {
-      vp.addFeatureOverrideProvider(undefined!);
+      for (const provider of vp.featureOverrideProviders) {
+        provider.addFeatureOverrides(undefined!, vp);
+      }
     }
     expect(override.mock.calls).toEqual([["C"], ["D"]]);
   });
 });
+
+function getAwaitableMock(): [jest.Mock<void>, Promise<void>] {
+  let resolve: (() => void) | undefined;
+  const promise = new Promise<void>((_resolve) => {resolve = _resolve});
+  const callback = jest.fn(resolve);
+
+  return [callback, promise];
+}
