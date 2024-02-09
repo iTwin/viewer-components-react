@@ -67,7 +67,6 @@
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.4.0-dev.32",
-    "@itwin/appui-layout-react": "^4.8.3",
     "@itwin/appui-react": "^4.9.0",
     "@itwin/build-tools": "^4.4.0-dev.32",
     "@itwin/components-react": "^4.9.0",

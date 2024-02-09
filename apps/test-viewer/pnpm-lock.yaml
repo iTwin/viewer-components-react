@@ -11,9 +11,6 @@ dependencies:
   '@itwin/appui-abstract':
     specifier: ^4.4.0-dev.32
     version: 4.4.0-dev.32(@itwin/core-bentley@4.4.0-dev.32)
-  '@itwin/appui-layout-react':
-    specifier: ^4.8.3
-    version: 4.8.3(@itwin/appui-abstract@4.4.0-dev.32)(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-react@4.9.0)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
   '@itwin/appui-react':
     specifier: ^4.9.0
     version: 4.9.0(@itwin/appui-abstract@4.4.0-dev.32)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-common@4.4.0-dev.32)(@itwin/core-frontend@4.4.0-dev.32)(@itwin/core-geometry@4.4.0-dev.32)(@itwin/core-quantity@4.4.0-dev.32)(@itwin/core-react@4.9.0)(@itwin/core-telemetry@4.4.0-dev.32)(@itwin/imodel-components-react@4.9.0)(@types/react@17.0.19)(react-dom@17.0.2)(react-redux@7.2.9)(react@17.0.2)(redux@4.2.1)
