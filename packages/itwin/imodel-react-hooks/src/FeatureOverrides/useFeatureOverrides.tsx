@@ -5,16 +5,12 @@
 
 import type { FeatureOverrideProvider, FeatureSymbology, Viewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import React, { useContext, useEffect, useMemo, useRef } from "react";
-import { useCallback } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 
 import { useOnMountInRenderOrder } from "../utils/basic-hooks";
 import { makeContextWithProviderRequired } from "../utils/react-context";
 
-export type FeatureOverrider = (
-  overrides: FeatureSymbology.Overrides,
-  viewport: Viewport
-) => void;
+export type FeatureOverrider = (overrides: FeatureSymbology.Overrides, viewport: Viewport) => void;
 
 export interface UseFeatureOverridesOpts {
   overrider: FeatureOverrider;
@@ -33,9 +29,7 @@ export interface FeatureSymbologyContext {
 }
 
 /** @internal only exported for testing right now */
-export const FeatureSymbologyContext = makeContextWithProviderRequired<
-  FeatureSymbologyContext
->("FeatureSymbologyContext");
+export const FeatureSymbologyContext = makeContextWithProviderRequired<FeatureSymbologyContext>("FeatureSymbologyContext");
 
 /** useFeatureOverrides allows components to declare and override features in a cascade,
  * components further down the component tree will be able to override their ancestors.
@@ -62,7 +56,7 @@ export const useFeatureOverrides = (
 
   useEffect(() => {
     symbologyCtx.invalidate();
-  }, deps);
+  }, [...deps, symbologyCtx]);
 };
 
 export type FeatureOverrideReactProviderProps = React.PropsWithChildren<{
@@ -116,14 +110,14 @@ export const FeatureOverrideReactProvider = ({
     };
     attach();
 
-    IModelApp.viewManager.onViewOpen.addListener(attach);
+    const removeListener = IModelApp.viewManager.onViewOpen.addListener(attach);
     return () => {
       for (const vp of IModelApp.viewManager) {
         if (!viewFilter || viewFilter(vp)) {
           vp.dropFeatureOverrideProvider(impl);
         }
       }
-      IModelApp.viewManager.onViewOpen.removeListener(attach);
+      removeListener();
     };
   }, [impl, viewFilter]);
 
@@ -147,7 +141,7 @@ export const FeatureOverrideReactProvider = ({
       },
       invalidate,
     }),
-    [providers, viewFilter]
+    [providers, invalidate],
   );
 
   return (

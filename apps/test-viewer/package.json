@@ -74,6 +74,9 @@
     },
     "@itwin/geo-tools-react": {
       "injected": true
+    },
+    "@itwin/imodel-react-hooks": {
+      "injected": true
     }
   },
   "scripts": {

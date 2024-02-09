@@ -70,7 +70,7 @@ dependencies:
     version: 4.8.2(@itwin/appui-abstract@4.4.0-dev.32)(@itwin/components-react@4.8.2)(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-common@4.4.0-dev.32)(@itwin/core-frontend@4.4.0-dev.32)(@itwin/core-geometry@4.4.0-dev.32)(@itwin/core-quantity@4.4.0-dev.32)(@itwin/core-react@4.8.2)(react-dom@17.0.2)(react@17.0.2)
   '@itwin/imodel-react-hooks':
     specifier: workspace:*
-    version: link:../../packages/itwin/imodel-react-hooks
+    version: file:../../packages/itwin/imodel-react-hooks(@itwin/core-frontend@4.4.0-dev.32)(@itwin/core-geometry@4.4.0-dev.32)(react-dom@17.0.2)(react@17.0.2)
   '@itwin/imodels-access-frontend':
     specifier: ^4.0.0
     version: 4.0.0(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-common@4.4.0-dev.32)(@itwin/core-frontend@4.4.0-dev.32)
@@ -174,6 +174,8 @@ dependenciesMeta:
   '@itwin/map-layers':
     injected: true
   '@itwin/geo-tools-react':
+    injected: true
+  '@itwin/imodel-react-hooks':
     injected: true
 
 packages:
@@ -13852,6 +13854,22 @@ packages:
       react-autosuggest: 10.1.0(react@17.0.2)
       react-dom: 17.0.2(react@17.0.2)
       redux: 4.2.1
+    dev: false
+
+  file:../../packages/itwin/imodel-react-hooks(@itwin/core-frontend@4.4.0-dev.32)(@itwin/core-geometry@4.4.0-dev.32)(react-dom@17.0.2)(react@17.0.2):
+    resolution: {directory: ../../packages/itwin/imodel-react-hooks, type: directory}
+    id: file:../../packages/itwin/imodel-react-hooks
+    name: '@itwin/imodel-react-hooks'
+    peerDependencies:
+      '@itwin/core-frontend': ^4
+      '@itwin/core-geometry': ^4
+      react: ^17.0.2
+      react-dom: ^17.0.2
+    dependencies:
+      '@itwin/core-frontend': 4.4.0-dev.32(@itwin/appui-abstract@4.4.0-dev.32)(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-common@4.4.0-dev.32)(@itwin/core-geometry@4.4.0-dev.32)(@itwin/core-orbitgt@4.4.0-dev.32)(@itwin/core-quantity@4.4.0-dev.32)(inversify@6.0.2)(reflect-metadata@0.1.14)
+      '@itwin/core-geometry': 4.4.0-dev.32
+      react: 17.0.2
+      react-dom: 17.0.2(react@17.0.2)
     dev: false
 
   file:../../packages/itwin/map-layers(@itwin/appui-abstract@4.4.0-dev.32)(@itwin/appui-layout-react@4.8.2)(@itwin/appui-react@4.8.2)(@itwin/components-react@4.8.2)(@itwin/core-bentley@4.4.0-dev.32)(@itwin/core-common@4.4.0-dev.32)(@itwin/core-frontend@4.4.0-dev.32)(@itwin/core-react@4.8.2)(@itwin/imodel-components-react@4.8.2)(react-dom@17.0.2)(react@17.0.2):

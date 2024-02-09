@@ -55,15 +55,15 @@ export function Viewer() {
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
       theme="os"
-      viewportOptions={{
-        supplyViewOverlay: (vp) => (
-          <FeatureOverrideReactProvider viewFilter={(v) => v.viewportId === vp.viewportId}>
-            <RandomColorOverrides className="IdahoDataSet:IdahoPipe" />
-            <RandomColorOverrides className="IdahoDataSet:CustomerNode" />
-            <RandomColorOverrides className="HydraulicAnalytical:LateralLink" />
-          </FeatureOverrideReactProvider>
-        ),
-      }}
+      // viewportOptions={{
+      //   supplyViewOverlay: (vp) => (
+      //     <FeatureOverrideReactProvider viewFilter={(v) => v.viewportId === vp.viewportId}>
+      //       <RandomColorOverrides className="IdahoDataSet:IdahoPipe" />
+      //       <RandomColorOverrides className="IdahoDataSet:CustomerNode" />
+      //       <RandomColorOverrides className="HydraulicAnalytical:LateralLink" />
+      //     </FeatureOverrideReactProvider>
+      //   ),
+      // }}
     />
   );
 }
