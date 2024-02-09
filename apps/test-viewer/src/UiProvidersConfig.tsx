@@ -72,23 +72,27 @@ const configuredUiItems = new Map<string, UiItem>([
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
               render: () => (
-                <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} isHierarchyLevelFilteringEnabled={true} />
+                <ModelsTreeComponent
+                  selectionPredicate={() => true}
+                  selectionMode={SelectionMode.Multiple}
+                  hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                />
               ),
             },
             {
               id: CategoriesTreeComponent.id,
               getLabel: CategoriesTreeComponent.getLabel,
-              render: () => <CategoriesTreeComponent isHierarchyLevelFilteringEnabled={true} />,
+              render: () => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
             },
             {
               id: IModelContentTreeComponent.id,
               getLabel: IModelContentTreeComponent.getLabel,
-              render: () => <IModelContentTreeComponent isHierarchyLevelFilteringEnabled={true} />,
+              render: () => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
             },
             {
               id: ExternalSourcesTreeComponent.id,
               getLabel: ExternalSourcesTreeComponent.getLabel,
-              render: () => <ExternalSourcesTreeComponent isHierarchyLevelFilteringEnabled={true} />,
+              render: () => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
             },
             {
               id: "spatial-containment-tree",

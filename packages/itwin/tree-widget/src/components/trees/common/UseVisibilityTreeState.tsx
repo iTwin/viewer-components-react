@@ -32,6 +32,8 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
   selectionPredicate?: VisibilityTreeSelectionPredicate;
   /** Factory for custom `VisibilityTreeEventHandler`. Defaults to `VisibilityTreeEventHandler`. */
   eventHandler?: (props: VisibilityTreeEventHandlerParams) => VisibilityTreeEventHandler;
+  /** The limit for how many items should be loaded for a single hierarchy level. */
+  hierarchyLevelSizeLimit?: number;
 }
 
 /**
