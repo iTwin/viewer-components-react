@@ -2,24 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { renderToStaticMarkup } from "react-dom/server";
 import { PropertyValueFormat } from "@itwin/presentation-common";
 import type { SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
   Button,
   Fieldset,
-  Icon,
-  IconButton,
-  Label,
   LabeledInput,
   LabeledSelect,
-  Modal,
-  ModalButtonBar,
-  Surface,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { getLocalizedStringPresentation, handleError } from "../../../common/utils";
@@ -32,18 +25,10 @@ import type {
   GroupProperty,
   GroupPropertyCreate,
 } from "@itwin/insights-client";
-import {
-  SvgClose,
-  SvgDragHandleVertical,
-  SvgMoreVerticalSmall,
-  SvgRemove,
-  SvgSearch,
-} from "@itwin/itwinui-icons-react";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import {
   closestCenter,
   DndContext,
-  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -51,12 +36,8 @@ import {
 } from "@dnd-kit/core";
 import {
   arrayMove,
-  SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import SortableHorizontalTile from "./SortableHorizontalTile";
-import Split from "react-split";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import {
@@ -67,6 +48,7 @@ import {
 } from "./GroupPropertyUtils";
 import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
+import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -105,9 +87,6 @@ export const GroupPropertyAction = ({
   const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [searchInput, setSearchInput] = useState<string>("");
-  const [activeSearchInput, setActiveSearchInput] = useState<string>("");
-  const [searched, setSearched] = useState<boolean>(false);
   const [activeDragProperty, setActiveDragProperty] = useState<PropertyMetaData | undefined>();
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -138,16 +117,6 @@ export const GroupPropertyAction = ({
 
     setActiveDragProperty(undefined);
   }, [selectedProperties]);
-
-  const filteredProperties = useMemo(
-    () =>
-      propertiesMetaData.filter((p) =>
-        [p.displayLabel, p.categoryLabel, p.actualECClassName]
-          .map((l) => l.toLowerCase())
-          .some((l) => l.includes(activeSearchInput.toLowerCase()))
-      ),
-    [activeSearchInput, propertiesMetaData]
-  );
 
   const reset = useCallback(() => {
     setPropertyName("");
@@ -257,18 +226,8 @@ export const GroupPropertyAction = ({
       handleError(error.status);
     } finally {
       setIsLoading(false);
-    if (oldPropertyName !== propertyName && oldPropertyName !== "") {
-      setShowSaveModal(true);
-    } else {
-      onSave();
     }
   };
-
-  const handleCloseSaveModal = () => {
-    setShowSaveModal(false);
-  };
-
-  const isLoading = isLoadingProperties || isSaving;
 
   return (
     <DndContext
@@ -380,11 +339,6 @@ export const GroupPropertyAction = ({
           selectedProperties.length === 0 || !propertyName || dataType === DataType.Undefined
         }
       />
-      <SaveModal
-        onSave={onSave}
-        onClose={handleCloseSaveModal}
-        showSaveModal={showSaveModal}
-      />
       <GroupsPropertiesSelectionModal
         showModal={showModal}
         setShowModal={setShowModal}
@@ -392,6 +346,11 @@ export const GroupPropertyAction = ({
         setSelectedProperties={setSelectedProperties}
         propertiesMetaData={propertiesMetaData}
         activeDragProperty={activeDragProperty}
+      />
+      <SaveModal
+        onSave={onSave}
+        onClose={handleCloseSaveModal}
+        showSaveModal={showSaveModal}
       />
     </DndContext>
   );
