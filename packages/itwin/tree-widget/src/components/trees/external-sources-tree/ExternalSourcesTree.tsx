@@ -12,7 +12,7 @@ import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
-import type { BaseTreeProps } from "../common/Types";
+import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
 /**
  * Presentation rules used by ControlledCategoriesTree
  * @internal
@@ -27,9 +27,10 @@ const PAGING_SIZE = 20;
  */
 export interface ExternalSourcesTreeProps extends BaseTreeProps {
   /**
-   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * Props for configuring hierarchy level.
+   * @beta
    */
-  isHierarchyLevelFilteringEnabled?: boolean;
+  hierarchyLevelConfig?: HierarchyLevelConfig;
 }
 
 /**
@@ -37,18 +38,21 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
  * @alpha
  */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
+  const { hierarchyLevelConfig, contextMenuItems, nodeLabelRenderer, density } = props;
+
   const state = usePresentationTreeState({
     imodel: props.iModel,
     ruleset: RULESET_EXTERNAL_SOURCES,
     pagingSize: PAGING_SIZE,
     eventHandlerFactory: unifiedSelectionTreeEventHandlerFactory,
     customizeTreeNodeItem,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
   });
 
   const treeRendererProps = {
-    contextMenuItems: props.contextMenuItems,
-    nodeLabelRenderer: props.nodeLabelRenderer,
-    density: props.density,
+    contextMenuItems,
+    nodeLabelRenderer,
+    density,
   };
 
   if (!state) {
@@ -64,7 +68,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         selectionMode={props.selectionMode ?? SelectionMode.Extended}
         iconsEnabled={true}
         treeRenderer={(treeProps) =>
-          props.isHierarchyLevelFilteringEnabled ? (
+          hierarchyLevelConfig?.isFilteringEnabled ? (
             <FilterableTreeRenderer
               {...treeProps}
               {...treeRendererProps}

@@ -14,14 +14,10 @@ import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition } from "@itwin/presentation-common";
-import { PresentationTreeDataProvider } from "@itwin/presentation-components";
+import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel,
-  HierarchyBuilder,
-  HierarchyCacheMode,
-  initialize as initializePresentationTesting,
-  terminate as terminatePresentationTesting,
+  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { ClassGroupingOption } from "../../../components/trees/common/Types";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
@@ -30,17 +26,8 @@ import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 import {
-  createCategoryNode,
-  createElementClassGroupingNode,
-  createElementNode,
-  createKey,
-  createModelNode,
-  createPresentationTreeNodeItem,
-  createSimpleTreeModelNode,
-  createSubjectNode,
-  createTestContentDescriptor,
-  createTestPropertiesContentField,
-  createTestPropertyInfo,
+  createCategoryNode, createElementClassGroupingNode, createElementNode, createInfoNode, createKey, createModelNode, createPresentationTreeNodeItem,
+  createSimpleTreeModelNode, createSubjectNode, createTestContentDescriptor, createTestPropertiesContentField, createTestPropertyInfo,
 } from "../Common";
 
 import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
@@ -347,7 +334,7 @@ describe("ModelsTree", () => {
               iModel={imodelMock.object}
               modelsVisibilityHandler={visibilityHandlerMock}
               activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
             />,
           );
 
@@ -370,11 +357,28 @@ describe("ModelsTree", () => {
               iModel={imodelMock.object}
               modelsVisibilityHandler={visibilityHandlerMock}
               activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
             />,
           );
 
           await waitFor(() => expect(queryByTitle("tree.filter-hierarchy-level")).to.not.be.null);
+        });
+
+        it("renders information message when node item is of `ResultSetTooLarge` type", async () => {
+          const nodeItem = createInfoNode(undefined, "filtering message", InfoTreeNodeItemType.ResultSetTooLarge);
+          setupDataProvider([nodeItem]);
+
+          const { queryByText } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true, sizeLimit: 0 }}
+            />,
+          );
+
+          await waitFor(() => expect(queryByText("filtering message")).to.not.be.null);
         });
 
         it("renders node with active filtering", async () => {
@@ -401,7 +405,7 @@ describe("ModelsTree", () => {
               iModel={imodelMock.object}
               modelsVisibilityHandler={visibilityHandlerMock}
               activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
             />,
           );
 

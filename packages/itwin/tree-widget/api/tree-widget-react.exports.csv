@@ -27,6 +27,7 @@ beta;FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse
 beta;FilterableVisibilityTreeNodeRendererProps = Omit
 public;hideAllCategories(categories: string[], viewport: Viewport): Promise
 public;hideAllModels(models: string[], viewport: Viewport): Promise
+beta;HierarchyLevelConfig
 public;IModelContentTree: (props: IModelContentTreeProps) => JSX.Element | null
 public;IModelContentTreeComponent:
 public;IModelContentTreeComponentProps = Omit

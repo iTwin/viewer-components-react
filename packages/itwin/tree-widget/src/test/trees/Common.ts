@@ -7,10 +7,11 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { Id64 } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
 import { Descriptor, PropertiesField, StandardNodeTypes } from "@itwin/presentation-common";
+import { InfoTreeNodeItemType } from "@itwin/presentation-components";
 import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNodeRenderer";
 
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import type { TreeModelNode } from "@itwin/components-react";
+import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type {
   CategoryDescription,
@@ -28,7 +29,7 @@ import type {
   SelectClassInfo,
   TypeDescription,
 } from "@itwin/presentation-common";
-import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
+import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
 
 export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: labelValue ?? "Node Label" });
@@ -84,6 +85,19 @@ export function createPresentationTreeNodeItem(item?: Partial<PresentationTreeNo
     key: item?.key ?? createTestECInstancesNodeKey(),
     label: item?.label ?? PropertyRecord.fromString("Node Label"),
     ...item,
+  };
+}
+
+export function createInfoNode(parentNode: TreeNodeItem | undefined, message: string, type?: InfoTreeNodeItemType): PresentationInfoTreeNodeItem {
+  const id = parentNode ? `${parentNode.id}/info-node` : `/info-node/${message}`;
+  return {
+    id,
+    parentId: parentNode?.id,
+    label: PropertyRecord.fromString(message),
+    message,
+    isSelectionDisabled: true,
+    children: undefined,
+    type: type ?? InfoTreeNodeItemType.Unset,
   };
 }
 

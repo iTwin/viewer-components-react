@@ -13,7 +13,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-common";
-import { PresentationTreeDataProvider } from "@itwin/presentation-components";
+import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
   buildTestIModel,
@@ -27,6 +27,7 @@ import { CategoryVisibilityHandler } from "../../../components/trees/category-tr
 import { addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory } from "../../IModelUtils";
 import { mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 import {
+  createInfoNode,
   createPresentationTreeNodeItem,
   createSimpleTreeModelNode,
   createTestContentDescriptor,
@@ -325,12 +326,29 @@ describe("CategoryTree", () => {
               iModel={imodelMock.object}
               categories={categories}
               activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
             />,
           );
 
           await waitFor(() => getByText("Node Label"));
           expect(queryByTitle("tree.filter-hierarchy-level")).to.be.null;
+        });
+
+        it("renders information message when node item is of `ResultSetTooLarge` type", async () => {
+          const nodeItem = createInfoNode(undefined, "filtering message", InfoTreeNodeItemType.ResultSetTooLarge);
+          setupDataProvider([nodeItem]);
+
+          const { queryByText } = render(
+            <CategoryTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              categories={categories}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true, sizeLimit: 0 }}
+            />,
+          );
+
+          await waitFor(() => expect(queryByText("filtering message")).to.not.be.null);
         });
 
         it("renders filterable node", async () => {
@@ -348,7 +366,7 @@ describe("CategoryTree", () => {
               iModel={imodelMock.object}
               categories={categories}
               activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
             />,
           );
 
@@ -379,7 +397,7 @@ describe("CategoryTree", () => {
               iModel={imodelMock.object}
               categories={categories}
               activeView={mockViewport().object}
-              isHierarchyLevelFilteringEnabled={true}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
             />,
           );
 
