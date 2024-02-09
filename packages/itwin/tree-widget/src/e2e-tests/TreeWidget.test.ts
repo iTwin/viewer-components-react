@@ -89,10 +89,9 @@ test.describe("should match image snapshot", () => {
     await locateInstanceFilter(page).waitFor();
     await selectPropertyInDialog(page, "Is Private");
 
-    // TO-DO: add ability to locate dialog rule operator items without using iTwinUI selectors
-    await page.locator(".rule-operator", { hasText: "Is True" }).click();
-    await page.locator(".iui-menu-item", { hasText: "Is True" }).waitFor();
-    await page.locator(".iui-menu-item", { hasText: "Is False" }).click();
+    await page.locator(".fb-row-condition", { hasText: "Is true" }).click();
+    await page.locator("div[role=option]", { hasText: "Is true" }).waitFor();
+    await page.locator("div[role=option]", { hasText: "Is false" }).click();
 
     await page.locator(".presentation-instance-filter-dialog-apply-button", { hasText: "Apply" }).click();
 
