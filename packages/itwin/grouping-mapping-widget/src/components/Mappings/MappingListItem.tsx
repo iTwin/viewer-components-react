@@ -10,8 +10,6 @@ import { Anchor, ListItem, Text } from "@itwin/itwinui-react";
 import { ExtractionStates } from "./Extraction/ExtractionStatus";
 import { ExtractionStatus } from "./Extraction/ExtractionStatus";
 import { useExtractionStateJobContext } from "../context/ExtractionStateJobContext";
-import { resetMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetchMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
 import "./MappingListItem.scss";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
@@ -27,8 +25,8 @@ export interface MappingListItemProps {
   onRefreshMappings: () => Promise<void>;
   onToggleExtraction: (mapping: Mapping) => Promise<void>;
   setShowDeleteModal: (mapping?: Mapping) => void;
-  isMappingPageReloaded?: boolean;
-  setIsMappingPageReloaded?: (isMappingPageReloaded?: boolean) => void;
+  initialStateExtractionFlag?: boolean;
+  setInitialExtractionStateFlag?: (initialStateExtractionFlag: boolean) => void;
 }
 
 export const MappingListItem = ({
@@ -42,16 +40,14 @@ export const MappingListItem = ({
   onRefreshMappings,
   onToggleExtraction,
   setShowDeleteModal,
-  isMappingPageReloaded,
-  setIsMappingPageReloaded,
+  initialStateExtractionFlag,
+  setInitialExtractionStateFlag,
 }: MappingListItemProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates | undefined>(ExtractionStates.None);
   const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
-  const [isListItemMounted, setIsListItemMounted] = useState<boolean>(false);
-  const { statusQuery } = useFetchMappingExtractionStatus({isMounted: isListItemMounted, ...groupingMappingApiConfig, mapping, enabled: isJobStarted});
-  const queryClient = useQueryClient();
+  const statusQuery = useFetchMappingExtractionStatus({ ...groupingMappingApiConfig, mapping, enabled: isJobStarted });
 
   const onClickTile = () => {
     onSelectionChange(mapping);
@@ -60,12 +56,11 @@ export const MappingListItem = ({
   useEffect(() => {
     // Only apply to all mappings when the page is reloaded, not the list component
     // or when users modify mappings
-    if(isMappingPageReloaded && setIsMappingPageReloaded){
-      setIsListItemMounted(true);
+    if (initialStateExtractionFlag && setInitialExtractionStateFlag) {
       setIsJobStarted(true);
-      setIsMappingPageReloaded(false);
+      setInitialExtractionStateFlag(false);
     }
-  }, [isMappingPageReloaded, setIsMappingPageReloaded]);
+  }, [initialStateExtractionFlag, setInitialExtractionStateFlag]);
 
   // Check whether the job is still running when users refresh the mapping list
   // or modify any mappings
@@ -83,9 +78,9 @@ export const MappingListItem = ({
         newMap.delete(mapping.id);
         return newMap;
       });
-      await resetMappingExtractionStatus(mapping.id, queryClient);
+      // await resetMappingExtractionStatus(queryClient);
     }
-  }, [statusQuery, mapping.id, queryClient, setMappingIdJobInfo]);
+  }, [mapping.id, setMappingIdJobInfo, statusQuery.data]);
 
   useEffect(() => {
     const listener = (startedMappingId: string) => {
@@ -101,21 +96,14 @@ export const MappingListItem = ({
     };
   }, [jobStartEvent, mapping.id, jobId]);
 
-  const onResolveStatusData = useMutation({
-    mutationKey: ["onResolveStatusData", isJobStarted],
-    mutationFn: async () => {
-      setExtractionState(statusQuery.data!.finalExtractionStateValue);
-      await resolveTerminalExtractionStatus();
-    },
-  });
-
   useEffect(() => {
     const isStatusReady = statusQuery.data && statusQuery.isFetched && !statusQuery.isStale;
-    if(isJobStarted && isStatusReady){
-      onResolveStatusData.mutate();
+    if (isStatusReady) {
+      setExtractionState(statusQuery.data.finalExtractionStateValue);
+      // No need to await. We don't need to wait for the status to be resolved in invalidation.
+      void resolveTerminalExtractionStatus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[isJobStarted, statusQuery]);
+  }, [resolveTerminalExtractionStatus, statusQuery]);
 
   return (
     <ListItem actionable

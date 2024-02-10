@@ -65,8 +65,8 @@ export interface MappingsViewProps {
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
   alert?: React.ReactElement<typeof Alert>;
-  isMappingPageReloaded?: boolean;
-  setIsMappingPageReloaded?: (isMappingPageReloaded?: boolean) => void;
+  initialStateExtractionFlag?: boolean;
+  setInitialExtractionStateFlag?: (initialStateExtractionFlag: boolean) => void;
 }
 
 export const MappingsView = ({
@@ -90,8 +90,8 @@ export const MappingsView = ({
   onClickMappingTitle,
   onClickMappingModify,
   alert,
-  isMappingPageReloaded,
-  setIsMappingPageReloaded,
+  initialStateExtractionFlag,
+  setInitialExtractionStateFlag,
 }: MappingsViewProps) => {
   const displayStrings = React.useMemo(
     () => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }),
@@ -202,8 +202,8 @@ export const MappingsView = ({
                 onRefreshMappings={onRefreshMappings}
                 onClickMappingModify={onClickMappingModify}
                 setShowDeleteModal={setShowDeleteModal}
-                isMappingPageReloaded={isMappingPageReloaded}
-                setIsMappingPageReloaded={setIsMappingPageReloaded}
+                initialStateExtractionFlag={initialStateExtractionFlag}
+                setInitialExtractionStateFlag={setInitialExtractionStateFlag}
               />
             ))}
           </div>

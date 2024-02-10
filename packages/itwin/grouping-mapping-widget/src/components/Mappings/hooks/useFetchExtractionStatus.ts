@@ -58,7 +58,7 @@ export const useFetchExtractionStatus = ({
         }
       }
 
-      return { extractionStatusIcon, extractionMessageData };
+      return { extractionStatusIcon, extractionMessageData, latestExtractionResult };
     },
   });
 };

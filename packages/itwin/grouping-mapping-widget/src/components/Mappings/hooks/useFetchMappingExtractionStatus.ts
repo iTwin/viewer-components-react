@@ -11,11 +11,9 @@ import { STATUS_CHECK_INTERVAL } from "../../Constants";
 import { ExtractionStates } from "../Extraction/ExtractionStatus";
 import type { GetAccessTokenFn, GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useExtractionClient } from "../../context/ExtractionClientContext";
-import { useMemo } from "react";
 import { useExtractionStateJobContext } from "../../context/ExtractionStateJobContext";
 
 export interface MappingExtractionStatusProps extends GroupingMappingApiConfig {
-  isMounted: boolean;
   mapping: Mapping;
   enabled: boolean;
 }
@@ -26,11 +24,9 @@ export interface MappingQueryResult {
 }
 
 export const fetchMappingStatus = async (
-  isMounted: boolean,
   mappingId: string,
-  jobId: string,
+  jobId: string|undefined,
   getAccessToken: GetAccessTokenFn,
-  iModelId: string,
   extractionClient: IExtractionClient,
 ) => {
   const accessToken = await getAccessToken();
@@ -52,51 +48,32 @@ export const fetchMappingStatus = async (
     }
   });
 
-  if(isMounted){
-    const iModelExtraction = extractionClient.getExtractionHistoryIterator(accessToken, iModelId, 1);
-    const latestExtractionResult = await iModelExtraction.next();
-    const iModelJobId = latestExtractionResult.value.jobId;
-    const response = await extractionClient.getExtractionStatus(accessToken, iModelJobId);
-    return getFinalExtractionStatus(response);
-  } else {
-    if(jobId === ""){
-      return {mappingId, finalExtractionStateValue: ExtractionStates.None};
-    }
-    const extractionStatusResponse = await extractionClient.getExtractionStatus(accessToken, jobId);
-    return getFinalExtractionStatus(extractionStatusResponse);
+  if(!jobId){
+    return {mappingId, finalExtractionStateValue: ExtractionStates.None};
   }
+  const extractionStatusResponse = await extractionClient.getExtractionStatus(accessToken, jobId);
+  return getFinalExtractionStatus(extractionStatusResponse);
 };
 
-export const createQueryExtractionStatus = (isMounted: boolean, mappingId: string, jobId: string, getAccessToken: GetAccessTokenFn, iModelId: string, extractionClient: IExtractionClient, enabled: boolean) => ({
-  queryKey: ["extractionState", mappingId],
-  staleTime: Infinity,
-  initialData: undefined,
-  queryFn: async () => fetchMappingStatus(isMounted, mappingId, jobId, getAccessToken, iModelId, extractionClient),
-  enabled,
-  refetchInterval: STATUS_CHECK_INTERVAL,
-});
-
-export const resetMappingExtractionStatus = async (mappingId: string, queryClient: QueryClient) => {
-  await queryClient.invalidateQueries({queryKey: ["extractionState", mappingId]});
+export const resetMappingExtractionStatus = async (queryClient: QueryClient) => {
+  await queryClient.invalidateQueries({queryKey: ["extractionState"]});
 };
 
 export const useFetchMappingExtractionStatus = ({
-  isMounted,
-  iModelId,
   getAccessToken,
   mapping,
   enabled,
 }: MappingExtractionStatusProps) => {
   const extractionClient = useExtractionClient();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
-  const jobId = mappingIdJobInfo.get(mapping.id) ?? "";
+  const jobId = mappingIdJobInfo.get(mapping.id);
 
-  const mappingQuery = useMemo(() => createQueryExtractionStatus(isMounted, mapping.id, jobId, getAccessToken, iModelId, extractionClient, enabled)
-    // Not trigger hook everytime user (de)selects a mapping.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    , [iModelId, getAccessToken, enabled, extractionClient, mappingIdJobInfo]);
+  const statusQuery = useQuery<MappingQueryResult>({
+    queryKey: ["extractionState", jobId],
+    queryFn: async () => fetchMappingStatus(mapping.id, jobId, getAccessToken, extractionClient),
+    enabled,
+    refetchInterval: STATUS_CHECK_INTERVAL,
+  });
 
-  const statusQuery = useQuery<MappingQueryResult>(mappingQuery);
-
-  return { statusQuery };
+  return statusQuery;
 };

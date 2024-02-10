@@ -9,7 +9,7 @@ import { useExtractionClient } from "../../context/ExtractionClientContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetchMappings } from "./useFetchMappings";
 import { useFetchExtractionStatus } from "./useFetchExtractionStatus";
-import { useIsMounted } from "../../../common/hooks/useIsMounted";
+import { useExtractionStateJobContext } from "../../context/ExtractionStateJobContext";
 
 export interface MappingsOperationsProps extends GroupingMappingApiConfig {
   mappingClient: IMappingsClient;
@@ -21,22 +21,39 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const extractionClient = useExtractionClient();
   const [showExtractionMessageModal, setShowExtractionMessageModal] = useState<boolean>(false);
   const queryClient = useQueryClient();
-  const isMounted = useIsMounted();
-  const [isMappingPageReloaded, setIsMappingPageReloaded] = useState<boolean | undefined>(false);
+  const [initialStateExtractionFlag, setInitialExtractionStateFlag] = useState<boolean>(true);
+  const { setMappingIdJobInfo } = useExtractionStateJobContext();
 
   const {
     data: mappings,
+    isFetched: isMappingsFetched,
     isFetching: isLoadingMappings,
   } = useFetchMappings(iModelId, getAccessToken, mappingClient);
 
   const {
     data: extractionStatus,
+    isFetched: isExtractionStatusFetched,
     isFetching: isLoadingExtractionStatus,
   } = useFetchExtractionStatus({ iModelId, getAccessToken, extractionClient });
 
   const refreshExtractionStatus = useCallback(async () => {
     await queryClient.invalidateQueries({queryKey: ["iModelExtractionStatus"]});
+    setInitialExtractionStateFlag(false);
   }, [queryClient]);
+
+  useEffect(() => {
+    if(initialStateExtractionFlag && isMappingsFetched && isExtractionStatusFetched && mappings && extractionStatus){
+      const newMappingIdJobInfo = new Map<string, string>();
+      mappings.forEach((mapping) => {
+        if(mapping.extractionEnabled){
+          const mappingId = mapping.id;
+          const jobId = extractionStatus.latestExtractionResult.value.jobId;
+          newMappingIdJobInfo.set(mappingId, jobId);
+        }
+      });
+      setMappingIdJobInfo(newMappingIdJobInfo);
+    }
+  });
 
   const refreshMappings = useCallback(async () => {
     await queryClient.invalidateQueries({queryKey: ["mappings"]});
@@ -63,17 +80,11 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     },
   });
 
-  useEffect(() => {
-    if(isMounted()){
-      setIsMappingPageReloaded(true);
-    }
-  }, [isMounted]);
-
   const isLoading = isLoadingMappings || isLoadingExtractionStatus || isTogglingExtraction || isDeletingMapping;
   const extractionStatusGated = extractionStatus ?? {extractionStatusIcon: {
     iconStatus: undefined,
     iconMessage: "Loading...",
   }, extractionMessageData : []};
 
-  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, isMappingPageReloaded, setIsMappingPageReloaded};
+  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, initialStateExtractionFlag, setInitialExtractionStateFlag};
 };
