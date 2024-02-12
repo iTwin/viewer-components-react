@@ -56,8 +56,8 @@ test.describe("should match image snapshot", () => {
     await filterBuilder.getByPlaceholder("Choose property").click();
 
     // ensure that options are loaded
-    await page.locator(".property-display-label", { hasText: "Model" }).waitFor();
-    await page.locator(".property-display-label", { hasText: propertyText }).click();
+    await page.getByRole("menuitem", { name: "Model" }).waitFor();
+    await page.getByRole("menuitem", { name: propertyText }).click();
   }
 
   test("node with active filtering - information message", async ({ page }) => {
@@ -89,14 +89,13 @@ test.describe("should match image snapshot", () => {
     await locateInstanceFilter(page).waitFor();
     await selectPropertyInDialog(page, "Is Private");
 
-    // TO-DO: add ability to locate dialog rule operator items without using iTwinUI selectors
-    await page.locator(".rule-operator", { hasText: "Is True" }).click();
-    await page.locator(".iui-menu-item", { hasText: "Is True" }).waitFor();
-    await page.locator(".iui-menu-item", { hasText: "Is False" }).click();
+    await page.locator(".fb-row-condition", { hasText: "Is true" }).click();
+    await page.getByRole("option", { name: "Is true" }).waitFor();
+    await page.getByRole("option", { name: "Is false" }).click();
 
     await page.locator(".presentation-instance-filter-dialog-apply-button", { hasText: "Apply" }).click();
 
-    // hover the node for the button to appear
+    // hover the node for buttons to appear
     await physicalModelNode.hover();
     await treeWidget.getByTitle("Clear active filter").waitFor();
 
