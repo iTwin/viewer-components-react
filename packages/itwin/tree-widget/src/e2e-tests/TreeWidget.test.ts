@@ -70,7 +70,7 @@ test.describe("should match image snapshot", () => {
     await locateInstanceFilter(page).waitFor();
     await selectPropertyInDialog(page, "Is Private");
 
-    await page.locator(".presentation-instance-filter-dialog-apply-button", { hasText: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply" }).click();
 
     // hover the node for the button to appear
     await physicalModelNode.hover();
@@ -89,11 +89,14 @@ test.describe("should match image snapshot", () => {
     await locateInstanceFilter(page).waitFor();
     await selectPropertyInDialog(page, "Is Private");
 
-    await page.locator(".fb-row-condition", { hasText: "Is true" }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ has: page.getByText("Is true") })
+      .click();
     await page.getByRole("option", { name: "Is true" }).waitFor();
     await page.getByRole("option", { name: "Is false" }).click();
 
-    await page.locator(".presentation-instance-filter-dialog-apply-button", { hasText: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply" }).click();
 
     // hover the node for buttons to appear
     await physicalModelNode.hover();
