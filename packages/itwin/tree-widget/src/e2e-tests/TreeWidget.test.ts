@@ -95,7 +95,7 @@ test.describe("should match image snapshot", () => {
 
     await page.locator(".presentation-instance-filter-dialog-apply-button", { hasText: "Apply" }).click();
 
-    // hover the node for the button to appear
+    // hover the node for buttons to appear
     await physicalModelNode.hover();
     await treeWidget.getByTitle("Clear active filter").waitFor();
 
