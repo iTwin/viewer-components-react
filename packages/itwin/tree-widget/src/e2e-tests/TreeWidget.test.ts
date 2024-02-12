@@ -56,8 +56,8 @@ test.describe("should match image snapshot", () => {
     await filterBuilder.getByPlaceholder("Choose property").click();
 
     // ensure that options are loaded
-    await page.locator(".property-display-label", { hasText: "Model" }).waitFor();
-    await page.locator(".property-display-label", { hasText: propertyText }).click();
+    await page.getByRole("menuitem", { name: "Model" }).waitFor();
+    await page.getByRole("menuitem", { name: propertyText }).click();
   }
 
   test("node with active filtering - information message", async ({ page }) => {
@@ -90,8 +90,8 @@ test.describe("should match image snapshot", () => {
     await selectPropertyInDialog(page, "Is Private");
 
     await page.locator(".fb-row-condition", { hasText: "Is true" }).click();
-    await page.locator("div[role=option]", { hasText: "Is true" }).waitFor();
-    await page.locator("div[role=option]", { hasText: "Is false" }).click();
+    await page.getByRole("option", { name: "Is true" }).waitFor();
+    await page.getByRole("option", { name: "Is false" }).click();
 
     await page.locator(".presentation-instance-filter-dialog-apply-button", { hasText: "Apply" }).click();
 
