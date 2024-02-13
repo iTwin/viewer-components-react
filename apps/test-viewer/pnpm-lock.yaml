@@ -72,11 +72,11 @@ dependencies:
     specifier: ^2.8.0
     version: 2.8.0(react-dom@17.0.2)(react@17.0.2)
   '@itwin/itwinui-react':
-    specifier: ^3.4.1
-    version: 3.4.1(react-dom@17.0.2)(react@17.0.2)
+    specifier: ^3.4.2
+    version: 3.4.2(react-dom@17.0.2)(react@17.0.2)
   '@itwin/map-layers':
     specifier: workspace:*
-    version: file:../../packages/itwin/map-layers(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.9.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-react@4.9.0)(@itwin/imodel-components-react@4.9.0)(@itwin/itwinui-react@3.4.1)(react-dom@17.0.2)(react@17.0.2)
+    version: file:../../packages/itwin/map-layers(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.9.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-react@4.9.0)(@itwin/imodel-components-react@4.9.0)(@itwin/itwinui-react@3.4.2)(react-dom@17.0.2)(react@17.0.2)
   '@itwin/map-layers-auth':
     specifier: ^4.4.0
     version: 4.4.0(@itwin/core-bentley@4.4.0)
@@ -2593,8 +2593,25 @@ packages:
       tippy.js: 6.3.7
     dev: false
 
-  /@itwin/itwinui-react@3.4.1(react-dom@17.0.2)(react@17.0.2):
-    resolution: {integrity: sha512-OiVSGIPUwnRas31OiRcF2ze6nrwJ81lvBuuxtSvO/2zBOT4SX0m49GbutUa8YSuoCPQVnvcuFpnpOAg9DNz4Xg==}
+  /@itwin/itwinui-react@2.12.23(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-qT9ylbY4rWLXZ/PH7VhopV+3hm9Y/y59fR2RYf++X0wpcgYbY0qqXcX0jvLtDkT706t+rtA0t7KhPxRxOOUvwA==}
+    peerDependencies:
+      react: '>=16.8.6 < 19.0.0'
+      react-dom: '>=16.8.6 < 19.0.0'
+    dependencies:
+      '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
+      '@tippyjs/react': 4.2.6(react-dom@17.0.2)(react@17.0.2)
+      '@types/react-table': 7.7.18
+      classnames: 2.3.2
+      react: 17.0.2
+      react-dom: 17.0.2(react@17.0.2)
+      react-table: 7.8.0(react@17.0.2)
+      react-transition-group: 4.4.5(react-dom@17.0.2)(react@17.0.2)
+      tippy.js: 6.3.7
+    dev: false
+
+  /@itwin/itwinui-react@3.4.2(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-NJbzAcSdbh0+waBQABYwKxmsMNuftT6VzmWp8B1QAZirthQLzmA5BR8KyEOHmF6tN5alGUec0n4WsjLl3FHlFA==}
     peerDependencies:
       react: '>= 17.0.0 < 19.0.0'
       react-dom: '>=17.0.0 < 19.0.0'
@@ -2602,17 +2619,11 @@ packages:
       '@floating-ui/react': 0.26.9(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
       classnames: 2.3.2
-      jsdom: 24.0.0
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       react-table: 7.8.0(react@17.0.2)
       react-transition-group: 4.4.5(react-dom@17.0.2)(react@17.0.2)
       tslib: 2.6.2
-    transitivePeerDependencies:
-      - bufferutil
-      - canvas
-      - supports-color
-      - utf-8-validate
     dev: false
 
   /@itwin/itwinui-variables@2.1.2:
@@ -2721,7 +2732,7 @@ packages:
       '@itwin/imodel-components-react': 4.9.0(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.9.0)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 3.4.1(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 3.4.2(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-common': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)
       '@itwin/presentation-frontend': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/presentation-common@4.4.0)
       classnames: 2.3.2
@@ -2736,10 +2747,6 @@ packages:
       rxjs: 7.8.1
     transitivePeerDependencies:
       - '@types/react'
-      - bufferutil
-      - canvas
-      - supports-color
-      - utf-8-validate
     dev: false
 
   /@itwin/presentation-frontend@4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/presentation-common@4.4.0):
@@ -4249,15 +4256,6 @@ packages:
       - supports-color
     dev: false
 
-  /agent-base@7.1.0:
-    resolution: {integrity: sha512-o/zjMZRhJxny7OyEF+Op8X+efiELC7k7yOjMzgfzVqOzXqkBkWI79YoTdOtsuWd5BWhAGAuOY/Xa6xpiaWXiNg==}
-    engines: {node: '>= 14'}
-    dependencies:
-      debug: 4.3.4(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /ajv-formats@2.1.1(ajv@8.12.0):
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
     peerDependencies:
@@ -5655,13 +5653,6 @@ packages:
       cssom: 0.3.8
     dev: false
 
-  /cssstyle@4.0.1:
-    resolution: {integrity: sha512-8ZYiJ3A/3OkDd093CBT/0UKDWry7ak4BdPTFP2+QEP7cmhouyq/Up709ASSj2cK02BbZiMgk7kYjZNS4QP5qrQ==}
-    engines: {node: '>=18'}
-    dependencies:
-      rrweb-cssom: 0.6.0
-    dev: false
-
   /csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
     dev: false
@@ -5677,14 +5668,6 @@ packages:
       abab: 2.0.6
       whatwg-mimetype: 2.3.0
       whatwg-url: 8.7.0
-    dev: false
-
-  /data-urls@5.0.0:
-    resolution: {integrity: sha512-ZYP5VBHshaDAiVZxjbRVcFJpc+4xGgT0bK3vzy1HLN8jTO975HEbuYzZJcHoQEY5K1a0z8YayJkyVETa08eNTg==}
-    engines: {node: '>=18'}
-    dependencies:
-      whatwg-mimetype: 4.0.0
-      whatwg-url: 14.0.0
     dev: false
 
   /debug@2.6.9:
@@ -7492,13 +7475,6 @@ packages:
       whatwg-encoding: 1.0.5
     dev: false
 
-  /html-encoding-sniffer@4.0.0:
-    resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
-    engines: {node: '>=18'}
-    dependencies:
-      whatwg-encoding: 3.1.1
-    dev: false
-
   /html-entities@2.4.0:
     resolution: {integrity: sha512-igBTJcNNNhvZFRtm8uA6xMY6xYleeDwn3PeBCkDz7tHttv4F2hsDI2aPgNERWzvRcNYHNT3ymRaQzllmXj4YsQ==}
     dev: false
@@ -7605,16 +7581,6 @@ packages:
       - supports-color
     dev: false
 
-  /http-proxy-agent@7.0.1:
-    resolution: {integrity: sha512-My1KCEPs6A0hb4qCVzYp8iEvA8j8YqcvXLZZH8C9OFuTYpYjHE7N2dtG3mRl1HMD4+VGXpF3XcDVcxGBT7yDZQ==}
-    engines: {node: '>= 14'}
-    dependencies:
-      agent-base: 7.1.0
-      debug: 4.3.4(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /http-proxy-middleware@2.0.6(@types/express@4.17.21):
     resolution: {integrity: sha512-ya/UeJ6HVBYxrgYotAZo1KvPWlgB48kUJLDePFeneHsVujFaW5WNj2NgWCAE//B1Dl02BIfYlpNgBy8Kf8Rjmw==}
     engines: {node: '>=12.0.0'}
@@ -7658,16 +7624,6 @@ packages:
     engines: {node: '>= 6'}
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.4(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /https-proxy-agent@7.0.3:
-    resolution: {integrity: sha512-kCnwztfX0KZJSLOBrcL0emLeFako55NWMovvyPP2AjsghNk9RB1yjSI+jVumPHYZsNXegNoqupSW9IY3afSH8w==}
-    engines: {node: '>= 14'}
-    dependencies:
-      agent-base: 7.1.0
       debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
@@ -8855,42 +8811,6 @@ packages:
       - utf-8-validate
     dev: false
 
-  /jsdom@24.0.0:
-    resolution: {integrity: sha512-UDS2NayCvmXSXVP6mpTj+73JnNQadZlr9N68189xib2tx5Mls7swlTNao26IoHv46BZJFvXygyRtyXd1feAk1A==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      canvas: ^2.11.2
-    peerDependenciesMeta:
-      canvas:
-        optional: true
-    dependencies:
-      cssstyle: 4.0.1
-      data-urls: 5.0.0
-      decimal.js: 10.4.3
-      form-data: 4.0.0
-      html-encoding-sniffer: 4.0.0
-      http-proxy-agent: 7.0.1
-      https-proxy-agent: 7.0.3
-      is-potential-custom-element-name: 1.0.1
-      nwsapi: 2.2.7
-      parse5: 7.1.2
-      rrweb-cssom: 0.6.0
-      saxes: 6.0.0
-      symbol-tree: 3.2.4
-      tough-cookie: 4.1.3
-      w3c-xmlserializer: 5.0.0
-      webidl-conversions: 7.0.0
-      whatwg-encoding: 3.1.1
-      whatwg-mimetype: 4.0.0
-      whatwg-url: 14.0.0
-      ws: 8.16.0
-      xml-name-validator: 5.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    dev: false
-
   /jsesc@0.5.0:
     resolution: {integrity: sha512-uZz5UnB7u4T9LvwmFqXii7pZSouaRPorGs5who1Ip7VO0wxanFvBL7GkM6dTHlgX+jhBApRetaWpnDabOeTcnA==}
     hasBin: true
@@ -10011,12 +9931,6 @@ packages:
 
   /parse5@6.0.1:
     resolution: {integrity: sha512-Ofn/CTFzRGTTxwpNEs9PP93gXShHcTq255nzRYSKe8AkVpZY7e1fpmTfOyoIvjP5HG7Z2ZM7VS9PPhQGW2pOpw==}
-    dev: false
-
-  /parse5@7.1.2:
-    resolution: {integrity: sha512-Czj1WaSVpaoj0wbhMzLmWD69anp2WH7FXMB9n1Sy8/ZFF9jolSQVMu1Ij5WIyGmcBmhk7EOndpO4mIpihVqAXw==}
-    dependencies:
-      entities: 4.5.0
     dev: false
 
   /parseurl@1.3.3:
@@ -11727,10 +11641,6 @@ packages:
       fsevents: 2.3.3
     dev: false
 
-  /rrweb-cssom@0.6.0:
-    resolution: {integrity: sha512-APM0Gt1KoXBz0iIkkdB/kfvGOwC4UuJFeG/c+yV7wSc7q96cG/kJ0HiYCnzivD9SB53cLV1MlHFNfOuPaadYSw==}
-    dev: false
-
   /run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
@@ -11829,13 +11739,6 @@ packages:
   /saxes@5.0.1:
     resolution: {integrity: sha512-5LBh1Tls8c9xgGjw3QrMwETmTMVk0oFgvrFSvWx62llR2hcEInrKNZ2GZCCuuy2lvWrdl5jhbpeqc5hRYKFOcw==}
     engines: {node: '>=10'}
-    dependencies:
-      xmlchars: 2.2.0
-    dev: false
-
-  /saxes@6.0.0:
-    resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
-    engines: {node: '>=v12.22.7'}
     dependencies:
       xmlchars: 2.2.0
     dev: false
@@ -12851,13 +12754,6 @@ packages:
       punycode: 2.3.1
     dev: false
 
-  /tr46@5.0.0:
-    resolution: {integrity: sha512-tk2G5R2KRwBd+ZN0zaEXpmzdKyOYksXwywulIX95MBODjSzMIuQnQ3m8JxgbhnL1LeVo7lqQKsYa1O3Htl7K5g==}
-    engines: {node: '>=18'}
-    dependencies:
-      punycode: 2.3.1
-    dev: false
-
   /traverse@0.6.8:
     resolution: {integrity: sha512-aXJDbk6SnumuaZSANd21XAo15ucCDE38H4fkqiGsc3MhCK+wOlZvLP9cB/TvpHT0mOyWgC4Z8EwRlzqYSUzdsA==}
     engines: {node: '>= 0.4'}
@@ -13262,13 +13158,6 @@ packages:
       xml-name-validator: 3.0.0
     dev: false
 
-  /w3c-xmlserializer@5.0.0:
-    resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
-    engines: {node: '>=18'}
-    dependencies:
-      xml-name-validator: 5.0.0
-    dev: false
-
   /walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
     dependencies:
@@ -13305,11 +13194,6 @@ packages:
   /webidl-conversions@6.1.0:
     resolution: {integrity: sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==}
     engines: {node: '>=10.4'}
-    dev: false
-
-  /webidl-conversions@7.0.0:
-    resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
-    engines: {node: '>=12'}
     dev: false
 
   /webpack-dev-middleware@5.3.3(webpack@5.89.0):
@@ -13468,32 +13352,12 @@ packages:
       iconv-lite: 0.4.24
     dev: false
 
-  /whatwg-encoding@3.1.1:
-    resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
-    engines: {node: '>=18'}
-    dependencies:
-      iconv-lite: 0.6.3
-    dev: false
-
   /whatwg-fetch@3.6.20:
     resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
     dev: false
 
   /whatwg-mimetype@2.3.0:
     resolution: {integrity: sha512-M4yMwr6mAnQz76TbJm914+gPpB/nCwvZbJU28cUD6dR004SAxDLOOSUaB1JDRqLtaOV/vi0IC5lEAGFgrjGv/g==}
-    dev: false
-
-  /whatwg-mimetype@4.0.0:
-    resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
-    engines: {node: '>=18'}
-    dev: false
-
-  /whatwg-url@14.0.0:
-    resolution: {integrity: sha512-1lfMEm2IEr7RIV+f4lUNPOqfFL+pO+Xw3fJSqmjX9AbXcXcYOkCe1P6+9VBZB6n94af16NfZf+sSk0JCBZC9aw==}
-    engines: {node: '>=18'}
-    dependencies:
-      tr46: 5.0.0
-      webidl-conversions: 7.0.0
     dev: false
 
   /whatwg-url@5.0.0:
@@ -13820,26 +13684,8 @@ packages:
         optional: true
     dev: false
 
-  /ws@8.16.0:
-    resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-    dev: false
-
   /xml-name-validator@3.0.0:
     resolution: {integrity: sha512-A5CUptxDsvxKJEU3yO6DuWBSJz/qizqzJKOMIfUJHETbBw/sFaDxgd6fxm1ewUaM0jZ444Fc5vC5ROYurg/4Pw==}
-    dev: false
-
-  /xml-name-validator@5.0.0:
-    resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
-    engines: {node: '>=18'}
     dev: false
 
   /xmlchars@2.2.0:
@@ -14029,7 +13875,7 @@ packages:
       redux: 4.2.1
     dev: false
 
-  file:../../packages/itwin/map-layers(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.9.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-react@4.9.0)(@itwin/imodel-components-react@4.9.0)(@itwin/itwinui-react@3.4.1)(react-dom@17.0.2)(react@17.0.2):
+  file:../../packages/itwin/map-layers(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.9.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-react@4.9.0)(@itwin/imodel-components-react@4.9.0)(@itwin/itwinui-react@3.4.2)(react-dom@17.0.2)(react@17.0.2):
     resolution: {directory: ../../packages/itwin/map-layers, type: directory}
     id: file:../../packages/itwin/map-layers
     name: '@itwin/map-layers'
@@ -14058,7 +13904,7 @@ packages:
       '@itwin/imodel-components-react': 4.9.0(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.9.0)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-color-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 3.4.1(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 3.4.2(react-dom@17.0.2)(react@17.0.2)
       classnames: 2.3.2
       react: 17.0.2
       react-beautiful-dnd: 13.1.1(react-dom@17.0.2)(react@17.0.2)
@@ -14112,7 +13958,7 @@ packages:
       '@itwin/core-bentley': ^4.0.0
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-react': ^4.3.0
-      '@itwin/presentation-components': ^4.0.0 || ^5.0.0-dev.3
+      '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^4.0.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
@@ -14125,7 +13971,7 @@ packages:
       '@itwin/core-react': 4.9.0(@itwin/appui-abstract@4.4.0)(@itwin/core-bentley@4.4.0)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 2.12.19(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 2.12.23(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-components': 5.0.0-dev.3(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.9.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/imodel-components-react@4.9.0)(@itwin/presentation-common@4.4.0)(@itwin/presentation-frontend@4.4.0)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-frontend': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/presentation-common@4.4.0)
       classnames: 2.3.2
@@ -14156,7 +14002,7 @@ packages:
       '@itwin/core-react': 4.9.0(@itwin/appui-abstract@4.4.0)(@itwin/core-bentley@4.4.0)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
-      '@itwin/itwinui-react': 3.4.1(react-dom@17.0.2)(react@17.0.2)
+      '@itwin/itwinui-react': 3.4.2(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-components': 5.0.0-dev.3(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.9.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/imodel-components-react@4.9.0)(@itwin/presentation-common@4.4.0)(@itwin/presentation-frontend@4.4.0)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
       classnames: 2.3.2
       i18next: 10.6.0
@@ -14164,9 +14010,4 @@ packages:
       react-dom: 17.0.2(react@17.0.2)
       react-error-boundary: 4.0.12(react@17.0.2)
       rxjs: 7.8.1
-    transitivePeerDependencies:
-      - bufferutil
-      - canvas
-      - supports-color
-      - utf-8-validate
     dev: false
