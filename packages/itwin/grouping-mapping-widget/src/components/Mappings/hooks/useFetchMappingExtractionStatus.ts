@@ -25,7 +25,7 @@ export interface MappingQueryResult {
 
 export const fetchMappingStatus = async (
   mappingId: string,
-  jobId: string|undefined,
+  jobId: string,
   getAccessToken: GetAccessTokenFn,
   extractionClient: IExtractionClient,
 ) => {
@@ -47,10 +47,6 @@ export const fetchMappingStatus = async (
         return { mappingId, finalExtractionStateValue: ExtractionStates.None};
     }
   });
-
-  if(!jobId){
-    return {mappingId, finalExtractionStateValue: ExtractionStates.None};
-  }
   const extractionStatusResponse = await extractionClient.getExtractionStatus(accessToken, jobId);
   return getFinalExtractionStatus(extractionStatusResponse);
 };
@@ -66,12 +62,12 @@ export const useFetchMappingExtractionStatus = ({
 }: MappingExtractionStatusProps) => {
   const extractionClient = useExtractionClient();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
-  const jobId = mappingIdJobInfo.get(mapping.id);
+  const jobId = mappingIdJobInfo.get(mapping.id) ?? "";
 
   const statusQuery = useQuery<MappingQueryResult>({
     queryKey: ["extractionState", jobId],
     queryFn: async () => fetchMappingStatus(mapping.id, jobId, getAccessToken, extractionClient),
-    enabled,
+    enabled: enabled && !!jobId,
     refetchInterval: STATUS_CHECK_INTERVAL,
   });
 

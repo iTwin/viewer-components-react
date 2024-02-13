@@ -13,6 +13,7 @@ import { useExtractionStateJobContext } from "../context/ExtractionStateJobConte
 import { useFetchMappingExtractionStatus } from "./hooks/useFetchMappingExtractionStatus";
 import "./MappingListItem.scss";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface MappingListItemProps {
   selected: boolean;
@@ -48,6 +49,7 @@ export const MappingListItem = ({
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
   const statusQuery = useFetchMappingExtractionStatus({ ...groupingMappingApiConfig, mapping, enabled: isJobStarted });
+  const queryClient = useQueryClient();
 
   const onClickTile = () => {
     onSelectionChange(mapping);
@@ -78,9 +80,9 @@ export const MappingListItem = ({
         newMap.delete(mapping.id);
         return newMap;
       });
-      // await resetMappingExtractionStatus(queryClient);
+      await queryClient.invalidateQueries({ queryKey: ["iModelExtractionStatus"] });
     }
-  }, [mapping.id, setMappingIdJobInfo, statusQuery.data]);
+  }, [mapping.id, queryClient, setMappingIdJobInfo, statusQuery.data]);
 
   useEffect(() => {
     const listener = (startedMappingId: string) => {
@@ -97,7 +99,7 @@ export const MappingListItem = ({
   }, [jobStartEvent, mapping.id, jobId]);
 
   useEffect(() => {
-    const isStatusReady = statusQuery.data && statusQuery.isFetched && !statusQuery.isStale;
+    const isStatusReady = statusQuery.data && statusQuery.isFetched;
     if (isStatusReady) {
       setExtractionState(statusQuery.data.finalExtractionStateValue);
       // No need to await. We don't need to wait for the status to be resolved in invalidation.
