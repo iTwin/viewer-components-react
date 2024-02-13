@@ -11,8 +11,7 @@
 
   .property-grid-react-data {
     height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
   }
 
   .property-grid-header-title {
