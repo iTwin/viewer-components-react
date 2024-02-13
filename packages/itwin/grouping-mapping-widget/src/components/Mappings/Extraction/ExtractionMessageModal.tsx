@@ -12,11 +12,11 @@ import { StatusIcon } from "../../SharedComponents/StatusIcon";
 import { ExtractionLogCustomFilter } from "./ExtractionLogCustomFilter";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMappingClient } from "../../context/MappingClientContext";
-import { useMappingsOperations } from "../hooks/useMappingsOperations";
 import type { Mapping } from "@itwin/insights-client";
 import { useQueries } from "@tanstack/react-query";
 import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedCollectionPick";
 import { fetchGroups } from "../../Groups/hooks/useFetchGroups";
+import { useFetchMappings } from "../hooks/useFetchMappings";
 
 export interface ExtractionMessageData {
   date: string;
@@ -35,36 +35,40 @@ export interface ExtractionMessageModalProps {
 export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData, timestamp }: ExtractionMessageModalProps) => {
   const [formattedExtractionMessage, setFormattedExtractionMessage] = useState<ExtractionMessageData[] | undefined>(undefined);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
+  const { iModelId, getAccessToken } = groupingMappingApiConfig;
   const mappingClient = useMappingClient();
-  const { mappings, isLoading: isMappingsLoading } = useMappingsOperations({ ...groupingMappingApiConfig, mappingClient });
+  const { data: mappings, isLoading: isMappingsLoading } = useFetchMappings(iModelId, getAccessToken, mappingClient);
   const [formattedTimestamp, setFormattedTimestamp] = useState<string>("");
 
   const getMappingName = useCallback((mappingId: string, mappings: Mapping[]) => {
     return mappings.find((mapping) => mapping.id === mappingId)?.mappingName ?? "";
   }, []);
 
-  // Extract groupIds and mappingIds from messages
   const extractionInfo = useMemo(() => {
-    return extractionMessageData.reduce<{
-      mappingId: string;
-      groupId: string;
-    }[]>((acc, message) => {
+    const infoMap = new Map<string, { mappingId: string, groupId: string }>();
+
+    extractionMessageData.forEach((message) => {
       const splittedMessage = message.message.split(" ");
       const mappingId = splittedMessage[splittedMessage.indexOf("MappingId:") + 1]?.match(/^([^,]+),$/)?.[1];
       const groupId = splittedMessage[splittedMessage.indexOf("GroupId:") + 1]?.match(/^([^,]+).$/)?.[1];
 
       if (mappingId && groupId) {
-        acc.push({ mappingId, groupId });
+        infoMap.set(message.message, { mappingId, groupId });
       }
-      return acc;
-    }, []);
+    });
+
+    return infoMap;
   }, [extractionMessageData]);
 
   // useQueries to fetch all group names
   const groupQueriesResults = useQueries({
-    queries: extractionInfo.map(({ mappingId }) => ({
+    queries: Array.from(extractionInfo.values()).map(({ mappingId }) => ({
       queryKey: ["groups", mappingId],
-      queryFn: async () => fetchGroups(groupingMappingApiConfig.iModelId, mappingId, groupingMappingApiConfig.getAccessToken, mappingClient),
+      queryFn: async () => {
+        const groups = await fetchGroups(groupingMappingApiConfig.iModelId, mappingId, groupingMappingApiConfig.getAccessToken, mappingClient);
+        // Return both mappingId and groups in the result
+        return { mappingId, groups };
+      },
     })),
   });
 
@@ -73,19 +77,24 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
 
   useEffect(() => {
     if (pickedResult.every((query) => query.isSuccess) && mappings) {
-      const formattedMessages = extractionMessageData.map((extractionMessage, index) => {
+      const formattedMessages = extractionMessageData.map((extractionMessage) => {
         let replacedMessage: string = extractionMessage.message;
 
-        const { mappingId, groupId } = extractionInfo[index];
-        const groupName = pickedResult[index].data!.find((group) => group.id === groupId)?.groupName;
+        const info = extractionInfo.get(extractionMessage.message);
+        if (info) {
+          const { mappingId, groupId } = info;
 
-        if (replacedMessage.includes("MappingId:")) {
-          const mappingName = getMappingName(mappingId, mappings);
-          replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
-        }
+          const queryResult = pickedResult.find((result) => result.data?.mappingId === mappingId);
+          const groupName = queryResult?.data?.groups?.find((group) => group.id === groupId)?.groupName;
 
-        if (replacedMessage.includes("GroupId:")) {
-          replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName ? groupName : "<Not Found>"}`);
+          if (replacedMessage.includes("MappingId:")) {
+            const mappingName = getMappingName(mappingId, mappings);
+            replacedMessage = replacedMessage.replace(/MappingId: [\w-]+/, `Mapping: ${mappingName}`);
+          }
+
+          if (replacedMessage.includes("GroupId:")) {
+            replacedMessage = replacedMessage.replace(/GroupId: [\w-]+/, `Group: ${groupName ? groupName : "<Not Found>"}`);
+          }
         }
 
         return { ...extractionMessage, message: replacedMessage };
