@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "Update `@itwin/presentation-components` peer dependency to `5.x`",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

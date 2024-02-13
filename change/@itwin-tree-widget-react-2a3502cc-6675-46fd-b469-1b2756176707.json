@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "Update `@itwin/itwinui-react` dependency to `3.x`",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
