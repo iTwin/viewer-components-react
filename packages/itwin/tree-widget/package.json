@@ -59,7 +59,7 @@
     "@bentley/icons-generic": "^1.0.34",
     "@itwin/itwinui-icons-react": "^2.8.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "^3.4.1",
+    "@itwin/itwinui-react": "^3.4.2",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-error-boundary": "^4.0.10",

@@ -30,9 +30,6 @@
 
   .debounced-search-bar-input {
     box-sizing: border-box;
-
-    // temporary workaround for an itwinui-react issue: https://github.com/iTwin/iTwinUI/issues/1849
-    outline: none;
   }
 
   .expandable-search-bar {
