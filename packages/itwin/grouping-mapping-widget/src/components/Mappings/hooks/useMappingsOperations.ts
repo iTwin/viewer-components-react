@@ -80,11 +80,14 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     },
   });
 
-  const isLoading = isLoadingMappings || isLoadingExtractionStatus || isTogglingExtraction || isDeletingMapping;
-  const extractionStatusGated = extractionStatus ?? {extractionStatusIcon: {
-    iconStatus: undefined,
-    iconMessage: "Loading...",
-  }, extractionMessageData : []};
+  const isLoading = isLoadingMappings || isTogglingExtraction || isDeletingMapping;
+  const extractionStatusGated = (!extractionStatus || isLoadingExtractionStatus) ? {
+    extractionStatusIcon: {
+      iconStatus: undefined,
+      iconMessage: "Loading...",
+    },
+    extractionMessageData: [],
+  } : extractionStatus;
 
   return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, initialStateExtractionFlag, setInitialExtractionStateFlag};
 };

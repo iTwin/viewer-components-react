@@ -20,7 +20,7 @@ import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps } from "../common/Types";
+import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
 const PAGING_SIZE = 20;
 
@@ -54,10 +54,10 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
    */
   viewManager?: ViewManager;
   /**
-   * Flag that determines if hierarchy level filtering will be enabled for this tree.
+   * Props for configuring hierarchy level.
    * @beta
    */
-  isHierarchyLevelFilteringEnabled?: boolean;
+  hierarchyLevelConfig?: HierarchyLevelConfig;
 }
 
 /**
@@ -67,7 +67,7 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
 export function CategoryTree(props: CategoryTreeProps) {
   // istanbul ignore next
   const viewManager = props.viewManager ?? IModelApp.viewManager;
-  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density } = props;
+  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density, hierarchyLevelConfig } = props;
 
   const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, activeView, allViewports, categoryVisibilityHandler);
   const onFilterChange = useCallback(
@@ -86,6 +86,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     customizeTreeNodeItem,
     filterInfo: props.filterInfo,
     onFilterChange,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
   });
 
   useEffect(() => {
@@ -126,7 +127,7 @@ export function CategoryTree(props: CategoryTreeProps) {
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.None}
         treeRenderer={
-          props.isHierarchyLevelFilteringEnabled
+          hierarchyLevelConfig?.isFilteringEnabled
             ? (rendererProps) => (
                 <FilterableTreeRenderer
                   {...rendererProps}

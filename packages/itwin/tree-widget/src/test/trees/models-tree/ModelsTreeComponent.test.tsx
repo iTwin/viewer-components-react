@@ -203,7 +203,7 @@ describe("<ModelsTreeComponent />", () => {
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(view2DSpy).to.not.be.called;
-        expect(button.getAttribute("disabled")).to.not.be.null;
+        expect(button.getAttribute("aria-disabled")).to.not.be.null;
       });
 
       it("on click changes models visibility when models are not visible", async () => {
@@ -263,7 +263,7 @@ describe("<ModelsTreeComponent />", () => {
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(view3DSpy).to.not.be.called;
-        expect(button.getAttribute("disabled")).to.not.be.null;
+        expect(button.getAttribute("aria-disabled")).to.not.be.null;
       });
 
       it("on click changes models visibility when models are not visible", async () => {

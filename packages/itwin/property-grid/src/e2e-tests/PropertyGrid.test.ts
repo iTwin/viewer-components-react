@@ -100,13 +100,10 @@ test.describe("property grid", () => {
       const propertyWidget = await selectMultipleElements(page);
       await propertyWidget.getByTitle("Selected Elements").click();
 
-      const elementList = propertyWidget.locator(".property-grid-react-element-list").getByRole("list");
-      await elementList.getByText("BayTown", { exact: false }).first().click();
+      const elementList = propertyWidget.getByRole("list");
+      await elementList.getByRole("listitem").filter({ hasText: "BayTown" }).click();
 
-      // wait for element's label and values (use text that's not in elements' list)
-      const singleElementPropertyGrid = propertyWidget.locator(".property-grid-react-single-element-property-grid").first();
-      await singleElementPropertyGrid.getByText("Subject", { exact: false }).first().waitFor();
-      await singleElementPropertyGrid.getByText("Empty seed file.", { exact: false }).first().waitFor();
+      await propertyWidget.getByTitle("Empty seed file.").waitFor();
 
       return propertyWidget;
     };
