@@ -10,8 +10,8 @@
   flex-direction: column;
 
   .property-grid-react-data {
-    overflow: scroll;
-    height: calc(100% - calc(var(--iui-size-l) * 2));
+    height: 100%;
+    overflow: hidden auto;
   }
 
   .property-grid-header-title {
