@@ -97,7 +97,7 @@ function DebouncedSearchBox({
   }, [inputValue, delay]);
 
   return (
-    <SearchBox expandable onExpand={onOpen} onCollapse={onClose} className={classnames("tree-widget-search-box", !isOpened && "contracted")}>
+    <SearchBox expandable onExpand={onOpen} onCollapse={onClose} size="small" className={classnames("tree-widget-search-box", !isOpened && "contracted")}>
       <SearchBox.CollapsedState>
         <SearchBox.ExpandButton title={TreeWidget.translate("searchBox.searchForSomething")} aria-label={TreeWidget.translate("searchBox.open")} size="small" />
       </SearchBox.CollapsedState>
