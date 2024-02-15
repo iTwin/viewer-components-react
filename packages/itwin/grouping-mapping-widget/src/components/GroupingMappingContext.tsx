@@ -15,7 +15,7 @@ import {
   createMappingClient,
   MappingClientContext,
 } from "./context/MappingClientContext";
-import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IExtractionClient, IMappingsClient } from "@itwin/insights-client";
+import type { Group, IExtractionClient, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import type { OverlappedElementsMetadata } from "./context/GroupHilitedElementsContext";
@@ -119,9 +119,6 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
   const [propertiesShowGroup, setPropertiesShowGroup] = useState<boolean>(false);
   const [groups, setGroups] = useState<Group[]>([]);
-  const [groupProperties, setGroupProperties] = useState<GroupProperty[]>([]);
-  const [calculatedProperties, setCalculatedProperties] = useState<CalculatedProperty[]>([]);
-  const [customCalculationProperties, setCustomCalculationProperties] = useState<CustomCalculation[]>([]);
   const [numberOfVisualizedGroups, setNumberOfVisualizedGroups] = useState(0);
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);
   const [currentHilitedGroups, setCurrentHilitedGroups] = useState<number>(1);
@@ -180,14 +177,8 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     () => ({
       showGroupColor: propertiesShowGroup,
       setShowGroupColor: setPropertiesShowGroup,
-      groupProperties,
-      setGroupProperties,
-      calculatedProperties,
-      setCalculatedProperties,
-      customCalculationProperties,
-      setCustomCalculationProperties,
     }),
-    [calculatedProperties, customCalculationProperties, groupProperties, propertiesShowGroup]
+    [propertiesShowGroup]
   );
 
   const customUIContextValue = useMemo(() => ({

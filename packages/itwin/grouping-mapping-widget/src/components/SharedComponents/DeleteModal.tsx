@@ -18,21 +18,18 @@ export interface DeleteModalProps {
   entityName: string;
   onClose: () => void;
   onDelete: () => Promise<void>;
-  refresh?: () => Promise<void>;
 }
 
 export const DeleteModal = ({
   entityName,
   onClose,
   onDelete,
-  refresh,
 }: DeleteModalProps) => {
   const [localEntityName] = useState(entityName);
 
   const deleteMutation = useMutation({
     mutationFn: onDelete,
     onSuccess: async () => {
-      refresh && await refresh();
       onClose();
     },
   });

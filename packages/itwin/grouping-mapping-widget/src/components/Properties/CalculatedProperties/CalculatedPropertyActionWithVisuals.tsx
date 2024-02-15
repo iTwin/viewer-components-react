@@ -19,14 +19,15 @@ import {
   BboxDimensionsDecorator,
 } from "../../../decorators/BboxDimensionsDecorator";
 import useValidator from "../hooks/useValidator";
-import { handleError } from "../../../common/utils";
 import { visualizeElements, zoomToElements } from "../../../common/viewerUtils";
 import "./CalculatedPropertyActionWithVisuals.scss";
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import type { CalculatedProperty, CalculatedPropertyType, Group } from "@itwin/insights-client";
+import { CalculatedPropertyType } from "@itwin/insights-client";
+import type { CalculatedProperty, Group } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
@@ -53,11 +54,11 @@ export const CalculatedPropertyActionWithVisuals = ({
   );
   const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
   const [validator, showValidationMessage] = useValidator();
   const [colorProperty, setColorProperty] = useState<boolean>(false);
   const { data } = useGroupKeySetQuery(group, iModelConnection, true);
+  const queryClient = useQueryClient();
 
   const resolvedHiliteIds = useMemo(() => {
     // Resolved ids, default to an empty array if not available
@@ -104,46 +105,41 @@ export const CalculatedPropertyActionWithVisuals = ({
     }
   }, [bboxDecorator, colorProperty, inferredSpatialData, type]);
 
-  const onSave = async () => {
+  const { mutate: saveMutation, isLoading } = useMutation(async (type: CalculatedPropertyType) => {
+    const accessToken = await getAccessToken();
+
+    return calculatedProperty
+      ? mappingClient.updateCalculatedProperty(
+        accessToken,
+        iModelId,
+        mappingId,
+        group.id,
+        calculatedProperty.id,
+        { propertyName, type },
+      )
+      : mappingClient.createCalculatedProperty(
+        accessToken,
+        iModelId,
+        mappingId,
+        group.id,
+        { propertyName, type },
+      );
+  }, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties"] });
+      onSaveSuccess();
+      setPropertyName("");
+      setType(CalculatedPropertyType.Undefined);
+    },
+  });
+
+  const onSave = () => {
     if (!validator.allValid() || !type) {
       showValidationMessage(true);
       return;
     }
-    try {
-      setIsLoading(true);
 
-      const accessToken = await getAccessToken();
-
-      calculatedProperty
-        ? await mappingClient.updateCalculatedProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          calculatedProperty.id,
-          {
-            propertyName,
-            type,
-          },
-        )
-        : await mappingClient.createCalculatedProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          {
-            propertyName,
-            type,
-          },
-        );
-      onSaveSuccess();
-      setPropertyName("");
-      setType(undefined);
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsLoading(false);
-    }
+    saveMutation(type);
   };
 
   const getSpatialData = (value: string) =>

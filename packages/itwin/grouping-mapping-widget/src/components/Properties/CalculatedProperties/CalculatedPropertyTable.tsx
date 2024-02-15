@@ -9,13 +9,14 @@ import {
   MenuItem,
 } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
-import type { CellProps } from "react-table";
+import type { CellProps, Column } from "react-table";
 import type { CalculatedProperty } from "@itwin/insights-client";
 import { useMappingClient } from "../../context/MappingClientContext";
 import "./CalculatedPropertyTable.scss";
 import { PropertyNameCell } from "../PropertyNameCell";
 import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface CalculatedPropertyTableProps {
   mappingId: string;
@@ -38,90 +39,89 @@ export const CalculatedPropertyTable = ({
 }: CalculatedPropertyTableProps) => {
   const mappingClient = useMappingClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const queryClient = useQueryClient();
 
   const columnsFactory = useCallback(
-    (handleShowDeleteModal: (value: CalculatedProperty) => void) => [
+    (handleShowDeleteModal: (value: CalculatedProperty) => void): Column<CalculatedProperty>[] => [
       {
-        Header: "Table",
-        columns: [
-          {
-            id: "propertyName",
-            Header: "Calculated Property",
-            accessor: "propertyName",
-            Cell: (value: CellProps<CalculatedProperty>) => (
-              <PropertyNameCell
-                property={value.row.original}
-                onClickModify={onClickModify}
-              />
-            ),
-          },
-          {
-            id: "dropdown",
-            Header: "",
-            width: 80,
-            Cell: (value: CellProps<CalculatedProperty>) => {
-              return (
-                <DropdownMenu
-                  menuItems={(close: () => void) =>
-                    [
-                      onClickModify
-                        ? [
-                          <MenuItem
-                            key={0}
-                            onClick={() => {
-                              onClickModify(
-                                value.row.original
-                              );
-                              close();
-                            }
-                            }
-                            icon={<SvgEdit />}
-                          >
-                            Modify
-                          </MenuItem>,
-                        ]
-                        : [],
+        id: "propertyName",
+        Header: "Calculated Property",
+        accessor: "propertyName",
+        Cell: (value: CellProps<CalculatedProperty>) => (
+          <PropertyNameCell
+            property={value.row.original}
+            onClickModify={onClickModify}
+          />
+        ),
+      },
+      {
+        id: "dropdown",
+        Header: "",
+        width: 80,
+        Cell: (value: CellProps<CalculatedProperty>) => {
+          return (
+            <DropdownMenu
+              menuItems={(close: () => void) =>
+                [
+                  onClickModify
+                    ? [
                       <MenuItem
-                        key={1}
+                        key={0}
                         onClick={() => {
-                          handleShowDeleteModal(value.row.original);
+                          onClickModify(
+                            value.row.original
+                          );
                           close();
-                        }}
-                        icon={<SvgDelete />}
+                        }
+                        }
+                        icon={<SvgEdit />}
                       >
-                        Remove
+                        Modify
                       </MenuItem>,
-                    ].flatMap((p) => p)
-                  }
-                >
-                  <IconButton styleType="borderless">
-                    <SvgMore
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                      }}
-                    />
-                  </IconButton>
-                </DropdownMenu>
-              );
-            },
-          },
-        ],
+                    ]
+                    : [],
+                  <MenuItem
+                    key={1}
+                    onClick={() => {
+                      handleShowDeleteModal(value.row.original);
+                      close();
+                    }}
+                    icon={<SvgDelete />}
+                  >
+                    Remove
+                  </MenuItem>,
+                ].flatMap((p) => p)
+              }
+            >
+              <IconButton styleType="borderless">
+                <SvgMore
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                  }}
+                />
+              </IconButton>
+            </DropdownMenu>
+          );
+        },
       },
     ],
     [onClickModify]
   );
 
-  const deleteProperty = useCallback(async (propertyId: string) => {
-    const accessToken = await getAccessToken();
-    await mappingClient.deleteCalculatedProperty(
-      accessToken,
-      iModelId,
-      mappingId,
-      groupId,
-      propertyId,
-    );
-  }, [getAccessToken, groupId, iModelId, mappingClient, mappingId]);
+  const { mutateAsync: deleteProperty } = useMutation({
+    mutationFn: async (propertyId: string) => {
+      const accessToken = await getAccessToken();
+      await mappingClient.deleteCalculatedProperty(
+        accessToken,
+        iModelId,
+        mappingId,
+        groupId,
+        propertyId,
+      );
+    },
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties"] }),
+  });
 
   return (
     <PropertyTable

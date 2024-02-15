@@ -2,16 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useMemo } from "react";
+import React, { useCallback } from "react";
 import "./PropertyMenu.scss";
 import { GroupPropertyTable } from "./GroupProperties/GroupPropertyTable";
-import { useCombinedFetchRefresh } from "./hooks/useFetchData";
 import { useMappingClient } from "../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, Mapping } from "@itwin/insights-client";
-import { usePropertiesContext } from "../context/PropertiesContext";
 import { CalculatedPropertyTable } from "./CalculatedProperties/CalculatedPropertyTable";
 import { CustomCalculationTable } from "./CustomCalculations/CustomCalculationTable";
+import { useGroupPropertiesQuery } from "./hooks/useGroupPropertiesQuery";
+import { useCalculatedPropertiesQuery } from "./hooks/useCalculatedPropertiesQuery";
+import { useCustomCalculationsQuery } from "./hooks/useCustomCalculationsQuery";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface PropertyMenuProps {
   mapping: Mapping;
@@ -44,41 +46,15 @@ export const PropertyMenu = ({
   const mappingId = mapping.id;
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const {
-    groupProperties,
-    setGroupProperties,
-    calculatedProperties,
-    setCalculatedProperties,
-    customCalculationProperties,
-    setCustomCalculationProperties,
-  } = usePropertiesContext();
+  const queryClient = useQueryClient();
 
-  const fetchGroupProperties = useMemo(
-    () => {
-      return async () => mappingClient.getGroupProperties(await getAccessToken(), iModelId, mappingId, groupId);
-    },
-    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
-  );
-  const { isLoading: isLoadingGroupProperties, refreshData: refreshGroupProperties } =
-    useCombinedFetchRefresh<GroupProperty>(fetchGroupProperties, setGroupProperties);
+  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
+  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useCalculatedPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
+  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useCustomCalculationsQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
 
-  const fetchCalculatedProperties = useMemo(
-    () => {
-      return async () => mappingClient.getCalculatedProperties(await getAccessToken(), iModelId, mappingId, groupId);
-    },
-    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
-  );
-  const { isLoading: isLoadingCalculatedProperties, refreshData: refreshCalculatedProperties } =
-    useCombinedFetchRefresh<CalculatedProperty>(fetchCalculatedProperties, setCalculatedProperties);
-
-  const fetchCustomCalculations = useMemo(
-    () => {
-      return async () => mappingClient.getCustomCalculations(await getAccessToken(), iModelId, mappingId, groupId);
-    },
-    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
-  );
-  const { isLoading: isLoadingCustomCalculations, refreshData: refreshCustomCalculations } =
-    useCombinedFetchRefresh<CustomCalculation>(fetchCustomCalculations, setCustomCalculationProperties);
+  const refreshGroupProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties"] }), [queryClient]);
+  const refreshCalculatedProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties"] }), [queryClient]);
+  const refreshCustomCalculations = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["customCalculations"] }), [queryClient]);
 
   return (
     <div className='gmw-property-menu-wrapper'>
