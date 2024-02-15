@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useState } from "react";
+import { ExtractorState } from "@itwin/insights-client";
 import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import type { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useExtractionClient } from "../../context/ExtractionClientContext";
@@ -22,7 +23,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const [showExtractionMessageModal, setShowExtractionMessageModal] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const [initialStateExtractionFlag, setInitialExtractionStateFlag] = useState<boolean>(true);
-  const { setMappingIdJobInfo } = useExtractionStateJobContext();
+  const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
 
   const {
     data: mappings,
@@ -42,18 +43,20 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   }, [queryClient]);
 
   useEffect(() => {
-    if(initialStateExtractionFlag && isMappingsFetched && isExtractionStatusFetched && mappings && extractionStatus){
+    if(initialStateExtractionFlag && isMappingsFetched && isExtractionStatusFetched && mappings && extractionStatus && !mappingIdJobInfo.size){
       const newMappingIdJobInfo = new Map<string, string>();
       const jobId = extractionStatus.latestExtractionResult.value.jobId;
+      const state = extractionStatus.latestJobStatus?.state;
+      if((state === ExtractorState.Failed || state === ExtractorState.Succeeded)) return;
       !!jobId && mappings.forEach((mapping) => {
         const mappingId = mapping.id;
         const jobId = extractionStatus.latestExtractionResult.value.jobId;
         newMappingIdJobInfo.set(mappingId, jobId);
-
       });
       setMappingIdJobInfo(newMappingIdJobInfo);
+      setInitialExtractionStateFlag(false);
     }
-  });
+  }, [extractionStatus, initialStateExtractionFlag, isExtractionStatusFetched, isMappingsFetched, mappingIdJobInfo.size, mappings, setMappingIdJobInfo]);
 
   const refreshMappings = useCallback(async () => {
     await queryClient.invalidateQueries({queryKey: ["mappings"]});
@@ -89,5 +92,5 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     extractionMessageData: [],
   } : extractionStatus;
 
-  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction, initialStateExtractionFlag, setInitialExtractionStateFlag};
+  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction};
 };

@@ -90,8 +90,6 @@ export const MappingsView = ({
   onClickMappingTitle,
   onClickMappingModify,
   alert,
-  initialStateExtractionFlag,
-  setInitialExtractionStateFlag,
 }: MappingsViewProps) => {
   const displayStrings = React.useMemo(
     () => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }),
@@ -202,8 +200,6 @@ export const MappingsView = ({
                 onRefreshMappings={onRefreshMappings}
                 onClickMappingModify={onClickMappingModify}
                 setShowDeleteModal={setShowDeleteModal}
-                initialStateExtractionFlag={initialStateExtractionFlag}
-                setInitialExtractionStateFlag={setInitialExtractionStateFlag}
               />
             ))}
           </div>

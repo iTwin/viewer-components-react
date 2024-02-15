@@ -62,12 +62,18 @@ export const useFetchMappingExtractionStatus = ({
 }: MappingExtractionStatusProps) => {
   const extractionClient = useExtractionClient();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
-  const jobId = mappingIdJobInfo.get(mapping.id) ?? "";
+  const jobId = mappingIdJobInfo.get(mapping.id);
 
   const statusQuery = useQuery<MappingQueryResult>({
     queryKey: ["extractionState", jobId],
-    queryFn: async () => fetchMappingStatus(mapping.id, jobId, getAccessToken, extractionClient),
-    enabled: enabled && !!jobId,
+    queryFn: async () => {
+      if (jobId) {
+        return fetchMappingStatus(mapping.id, jobId, getAccessToken, extractionClient);
+      }
+      // This should not happen as jobId should be defined if enabled is true
+      throw new Error("Job ID is undefined");
+    },
+    enabled: enabled && Boolean(jobId), // Only enable the query if enabled is true and jobId is defined
     refetchInterval: STATUS_CHECK_INTERVAL,
   });
 

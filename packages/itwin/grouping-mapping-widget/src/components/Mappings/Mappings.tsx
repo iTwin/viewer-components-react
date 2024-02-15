@@ -38,8 +38,6 @@ export const Mappings = (props: MappingsProps) => {
     setShowDeleteModal,
     showDeleteModal,
     isTogglingExtraction,
-    initialStateExtractionFlag,
-    setInitialExtractionStateFlag,
   } = useMappingsOperations({ ...groupingMappingApiConfig, mappingClient });
 
   return (
@@ -59,8 +57,6 @@ export const Mappings = (props: MappingsProps) => {
       showDeleteModal={showDeleteModal}
       setShowDeleteModal={setShowDeleteModal}
       isTogglingExtraction={isTogglingExtraction}
-      initialStateExtractionFlag={initialStateExtractionFlag}
-      setInitialExtractionStateFlag={setInitialExtractionStateFlag}
       {...props}
     />
   );

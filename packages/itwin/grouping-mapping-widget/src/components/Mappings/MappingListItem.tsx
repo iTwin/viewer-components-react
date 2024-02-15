@@ -41,8 +41,6 @@ export const MappingListItem = ({
   onRefreshMappings,
   onToggleExtraction,
   setShowDeleteModal,
-  initialStateExtractionFlag,
-  setInitialExtractionStateFlag,
 }: MappingListItemProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates | undefined>(ExtractionStates.None);
   const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
@@ -55,15 +53,6 @@ export const MappingListItem = ({
     onSelectionChange(mapping);
   };
 
-  useEffect(() => {
-    // Only apply to all mappings when the page is reloaded, not the list component
-    // or when users modify mappings
-    if (initialStateExtractionFlag && setInitialExtractionStateFlag) {
-      setIsJobStarted(true);
-      setInitialExtractionStateFlag(false);
-    }
-  }, [initialStateExtractionFlag, setInitialExtractionStateFlag]);
-
   // Check whether the job is still running when users refresh the mapping list
   // or modify any mappings
   useEffect(() => {
@@ -73,7 +62,8 @@ export const MappingListItem = ({
   }, [mappingIdJobInfo, mapping.id]);
 
   const resolveTerminalExtractionStatus = useCallback(async () => {
-    if(statusQuery.data!.finalExtractionStateValue === ExtractionStates.Failed || statusQuery.data!.finalExtractionStateValue === ExtractionStates.Succeeded){
+    const state = statusQuery.data!.finalExtractionStateValue;
+    if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded) {
       setIsJobStarted(false);
       setMappingIdJobInfo((prevMap: Map<string, string>) => {
         const newMap = new Map(prevMap);

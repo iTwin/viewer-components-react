@@ -26,7 +26,7 @@ export const useRunExtraction = ({
     mutationFn: async (mappings: Mapping[]) => {
       const accessToken = await getAccessToken();
       const mappingIds: ExtractionRequestMapping[] = mappings.length > 0 ? mappings.map((mapping) => { return { id: mapping.id }; }) : [];
-      const extractionRequest: ExtractionRunRequest | undefined = {
+      const extractionRequest: ExtractionRunRequest = {
         mappings: mappingIds,
       };
 
