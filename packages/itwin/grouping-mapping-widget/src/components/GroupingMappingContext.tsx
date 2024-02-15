@@ -28,6 +28,7 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@ta
 import { toaster } from "@itwin/itwinui-react";
 import { getErrorMessage } from "../common/utils";
 import { TErrCodes } from "./Constants";
+import { ExtractionStatusJobContext } from "./context/ExtractionStateJobContext";
 
 export interface GroupingMappingContextProps {
   /**
@@ -132,6 +133,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     overlappedElementGroupPairs: [],
   });
   const queryClient = props.queryClient ?? defaultQueryClient;
+  const [mappingIdJobInfo, setMappingIdJobInfo] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     setApiConfig(() => ({
@@ -195,18 +197,25 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     setCustomUIs,
   }), [customUIs]);
 
+  const extractionStateJobContextValue = useMemo(() => ({
+    mappingIdJobInfo,
+    setMappingIdJobInfo,
+  }), [mappingIdJobInfo]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <GroupingMappingApiConfigContext.Provider value={apiConfig}>
         <MappingClientContext.Provider value={mappingClient}>
           <ExtractionClientContext.Provider value={extractionClient}>
-            <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
-              <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-                <PropertiesContext.Provider value={propertiesContextValue}>
-                  {props.children}
-                </PropertiesContext.Provider>
-              </GroupHilitedElementsContext.Provider>
-            </GroupingMappingCustomUIContext.Provider>
+            <ExtractionStatusJobContext.Provider value={extractionStateJobContextValue}>
+              <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
+                <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
+                  <PropertiesContext.Provider value={propertiesContextValue}>
+                    {props.children}
+                  </PropertiesContext.Provider>
+                </GroupHilitedElementsContext.Provider>
+              </GroupingMappingCustomUIContext.Provider>
+            </ExtractionStatusJobContext.Provider>
           </ExtractionClientContext.Provider>
         </MappingClientContext.Provider>
       </GroupingMappingApiConfigContext.Provider>
