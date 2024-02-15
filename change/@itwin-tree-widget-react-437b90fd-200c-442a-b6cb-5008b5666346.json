@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "Bump `itwinjs-core` dev dependencies to `4.4.0`",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "none"
+}

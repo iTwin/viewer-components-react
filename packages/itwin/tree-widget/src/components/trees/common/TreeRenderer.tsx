@@ -77,10 +77,10 @@ export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "no
  * @beta
  */
 export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps) {
-  const { onClearFilterClick, onFilterClick, filterDialog, containerRef } = useFilterablePresentationTree<HTMLDivElement>({ nodeLoader });
+  const { onClearFilterClick, onFilterClick, filterDialog } = useFilterablePresentationTree({ nodeLoader });
 
   return (
-    <div ref={containerRef}>
+    <div>
       <TreeRenderer
         {...restProps}
         nodeLoader={nodeLoader}
