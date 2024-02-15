@@ -94,8 +94,8 @@ export const GroupPropertyAction = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
+  const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
+  const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -184,14 +184,14 @@ export const GroupPropertyAction = ({
       return;
     }
     if (oldPropertyName !== propertyName && oldPropertyName !== "") {
-      setShowSaveModal(true);
+      setShowSaveConfirmationModal(true);
     } else {
       await onSave();
     }
   };
 
   const handleCloseSaveModal = () => {
-    setShowSaveModal(false);
+    setShowSaveConfirmationModal(false);
   };
 
   const onSave = async () => {
@@ -307,7 +307,7 @@ export const GroupPropertyAction = ({
         <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
           <div className="gmw-property-view-button">
             <Button
-              onClick={async () => setShowModal(true)}
+              onClick={async () => setShowPropertiesSelectionModal(true)}
               disabled={isLoading}
             >
               Select Properties
@@ -340,8 +340,8 @@ export const GroupPropertyAction = ({
         }
       />
       <GroupsPropertiesSelectionModal
-        showModal={showModal}
-        setShowModal={setShowModal}
+        showModal={showPropertiesSelectionModal}
+        setShowModal={setShowPropertiesSelectionModal}
         selectedProperties={selectedProperties}
         setSelectedProperties={setSelectedProperties}
         propertiesMetaData={propertiesMetaData}
@@ -350,7 +350,7 @@ export const GroupPropertyAction = ({
       <SaveModal
         onSave={onSave}
         onClose={handleCloseSaveModal}
-        showSaveModal={showSaveModal}
+        showSaveModal={showSaveConfirmationModal}
       />
     </DndContext>
   );

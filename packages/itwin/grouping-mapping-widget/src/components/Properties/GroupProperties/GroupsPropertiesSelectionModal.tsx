@@ -32,7 +32,7 @@ import {
 } from "@dnd-kit/sortable";
 import SortableHorizontalTile from "./SortableHorizontalTile";
 import Split from "react-split";
-import "./GroupPropertyAction.scss";
+import "./GroupsPropertiesSelectionModal.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import { getLocalizedStringPresentation } from "../../../common/utils";
 
