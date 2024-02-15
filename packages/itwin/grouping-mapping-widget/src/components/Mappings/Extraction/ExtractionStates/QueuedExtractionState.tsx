@@ -2,11 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-export const STATUS_CHECK_INTERVAL = 5000;
-export const ANIMATION_DELAY = "3s";
-export const ANIMATION_DURATION = "1s";
+import React from "react";
+import { SvgStatusPending } from "@itwin/itwinui-icons-react";
 
-// Types of error codes that get handled by query cache error handler.
-export enum TErrCodes {
-  QUERY_HILITE_FETCH_FAILED // Error code when failing to fetch hilite ids for a group.
-}
+export const QueuedExtractionState = () => (
+  <div
+    title="Queued"
+    className="gmw-extraction-status">
+    <div className="gmw-status-icon">
+      <SvgStatusPending />
+    </div>
+  </div>
+);
