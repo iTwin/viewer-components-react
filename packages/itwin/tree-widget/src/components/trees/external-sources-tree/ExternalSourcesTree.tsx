@@ -5,14 +5,14 @@
 
 import "../VisibilityTreeBase.scss";
 import { SelectionMode } from "@itwin/components-react";
-import { PresentationTree, UnifiedSelectionTreeEventHandler, usePresentationTreeState } from "@itwin/presentation-components";
-import { TreeRenderer } from "../common/TreeRenderer";
+import { PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState } from "@itwin/presentation-components";
+import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
-import type { BaseTreeProps } from "../common/Types";
+import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
 /**
  * Presentation rules used by ControlledCategoriesTree
  * @internal
@@ -25,20 +25,35 @@ const PAGING_SIZE = 20;
  * Props for the [[ExternalSourcesTree]] component
  * @alpha
  */
-export type ExternalSourcesTreeProps = BaseTreeProps;
+export interface ExternalSourcesTreeProps extends BaseTreeProps {
+  /**
+   * Props for configuring hierarchy level.
+   * @beta
+   */
+  hierarchyLevelConfig?: HierarchyLevelConfig;
+}
 
 /**
  * Tree which displays a hierarchy of ExternalSources and their elements.
  * @alpha
  */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
+  const { hierarchyLevelConfig, contextMenuItems, nodeLabelRenderer, density } = props;
+
   const state = usePresentationTreeState({
     imodel: props.iModel,
     ruleset: RULESET_EXTERNAL_SOURCES,
     pagingSize: PAGING_SIZE,
     eventHandlerFactory: unifiedSelectionTreeEventHandlerFactory,
     customizeTreeNodeItem,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
   });
+
+  const treeRendererProps = {
+    contextMenuItems,
+    nodeLabelRenderer,
+    density,
+  };
 
   if (!state) {
     return null;
@@ -52,9 +67,18 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.Extended}
         iconsEnabled={true}
-        treeRenderer={(treeProps) => (
-          <TreeRenderer {...treeProps} contextMenuItems={props.contextMenuItems} nodeLabelRenderer={props.nodeLabelRenderer} density={props.density} />
-        )}
+        treeRenderer={(treeProps) =>
+          hierarchyLevelConfig?.isFilteringEnabled ? (
+            <FilterableTreeRenderer
+              {...treeProps}
+              {...treeRendererProps}
+              nodeLoader={state.nodeLoader}
+              nodeRenderer={(nodeRendererProps) => <PresentationTreeNodeRenderer {...nodeRendererProps} />}
+            />
+          ) : (
+            <TreeRenderer {...treeProps} {...treeRendererProps} />
+          )
+        }
       />
     </div>
   );
