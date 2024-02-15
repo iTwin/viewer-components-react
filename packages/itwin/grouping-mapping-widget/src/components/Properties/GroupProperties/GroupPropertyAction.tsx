@@ -25,19 +25,6 @@ import type {
   GroupProperty,
   GroupPropertyCreate,
 } from "@itwin/insights-client";
-import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import {
-  closestCenter,
-  DndContext,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import {
@@ -87,36 +74,8 @@ export const GroupPropertyAction = ({
   const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [activeDragProperty, setActiveDragProperty] = useState<PropertyMetaData | undefined>();
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
-
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    const { active } = event;
-    const activeProperty = selectedProperties.find((p) => active.id === p.key);
-    setActiveDragProperty(activeProperty);
-  }, [selectedProperties]);
-
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && (active.id !== over.id)) {
-      setSelectedProperties((items) => {
-        const oldIndex = selectedProperties.findIndex((p) => active.id === p.key);
-        const newIndex = selectedProperties.findIndex((p) => over.id === p.key);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-
-    setActiveDragProperty(undefined);
-  }, [selectedProperties]);
 
   const reset = useCallback(() => {
     setPropertyName("");
@@ -230,12 +189,7 @@ export const GroupPropertyAction = ({
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
+    <>
       <div className='gmw-group-property-action-container'>
         <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
           <Text variant='small' as='small' className='gmw-field-legend'>
@@ -345,13 +299,12 @@ export const GroupPropertyAction = ({
         selectedProperties={selectedProperties}
         setSelectedProperties={setSelectedProperties}
         propertiesMetaData={propertiesMetaData}
-        activeDragProperty={activeDragProperty}
       />
       <SaveModal
         onSave={onSave}
         onClose={handleCloseSaveModal}
         showSaveModal={showSaveConfirmationModal}
       />
-    </DndContext>
+    </>
   );
 };

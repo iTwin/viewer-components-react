@@ -35,6 +35,19 @@ import Split from "react-split";
 import "./GroupsPropertiesSelectionModal.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import { getLocalizedStringPresentation } from "../../../common/utils";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 
 export interface GroupPropertiesSelectionModalProps {
   showModal: boolean;
@@ -42,7 +55,6 @@ export interface GroupPropertiesSelectionModalProps {
   selectedProperties: PropertyMetaData[];
   setSelectedProperties: (selectedProperties: (selectedProperties: PropertyMetaData[]) => PropertyMetaData[]) => void;
   propertiesMetaData: PropertyMetaData[];
-  activeDragProperty: PropertyMetaData | undefined;
 }
 
 export const GroupsPropertiesSelectionModal = (
@@ -52,12 +64,39 @@ export const GroupsPropertiesSelectionModal = (
     selectedProperties,
     setSelectedProperties,
     propertiesMetaData,
-    activeDragProperty,
   }: GroupPropertiesSelectionModalProps
 ) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
   const [searched, setSearched] = useState<boolean>(false);
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  const [activeDragProperty, setActiveDragProperty] = useState<PropertyMetaData | undefined>();
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const { active } = event;
+    const activeProperty = selectedProperties.find((p) => active.id === p.key);
+    setActiveDragProperty(activeProperty);
+  }, [selectedProperties]);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && (active.id !== over.id)) {
+      setSelectedProperties((items) => {
+        const oldIndex = selectedProperties.findIndex((p) => active.id === p.key);
+        const newIndex = selectedProperties.findIndex((p) => over.id === p.key);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+
+    setActiveDragProperty(undefined);
+  }, [selectedProperties, setSelectedProperties]);
 
   const clearSearch = useCallback(() => {
     setSearchInput("");
@@ -89,7 +128,12 @@ export const GroupsPropertiesSelectionModal = (
   }, [searchInput, setSearched, clearSearch]);
 
   return (
-    <>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <Modal
         title="Properties Selection"
         isOpen={showModal}
@@ -247,6 +291,6 @@ export const GroupsPropertiesSelectionModal = (
             }
           /> : null}
       </DragOverlay>
-    </>
+    </DndContext>
   );
 };
