@@ -83,60 +83,6 @@ export const GroupPropertyAction = ({
     setSelectedProperties([]);
   }, []);
 
-  // useEffect(() => {
-  //   const generateProperties = async () => {
-  //     setIsLoading(true);
-
-  //     if (!iModelConnection) return;
-
-  //     const result = await manufactureKeys(group.query, iModelConnection);
-
-  //     const descriptor = await fetchPresentationDescriptor(iModelConnection, result);
-
-  //     // Only allow primitives and structs
-  //     const propertyFields =
-  //       descriptor?.fields.filter(
-  //         (field) =>
-  //           field.type.valueFormat === PropertyValueFormat.Primitive ||
-  //           field.type.valueFormat === PropertyValueFormat.Struct
-  //       ) ?? [];
-
-  //     const propertiesMetaData = convertPresentationFields(propertyFields);
-
-  //     setPropertiesMetaData(propertiesMetaData);
-
-  //     if (groupProperty) {
-  //       const accessToken = await getAccessToken();
-  //       let response: GroupProperty | undefined;
-  //       try {
-  //         response = await mappingClient.getGroupProperty(
-  //           accessToken,
-  //           iModelId,
-  //           mappingId,
-  //           group.id,
-  //           groupProperty.id
-  //         );
-
-  //         setPropertyName(response.propertyName);
-  //         setOldPropertyName(response.propertyName);
-  //         setDataType(response.dataType);
-  //         setQuantityType(response.quantityType);
-  //         const properties = findProperties(response.ecProperties, propertiesMetaData);
-  //         if (properties.length === 0) {
-  //           setPropertiesNotFoundAlert(true);
-  //         }
-
-  //         setSelectedProperties(properties);
-  //       } catch (error: any) {
-  //         handleError(error.status);
-  //       }
-  //     }
-
-  //     setIsLoading(false);
-  //   };
-  //   void generateProperties();
-  // }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
-
   const fetchProperties = useCallback(async () => {
     if (!iModelConnection) return;
 
