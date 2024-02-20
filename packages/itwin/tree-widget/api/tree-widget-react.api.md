@@ -104,7 +104,7 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
     // @internal
     categoryVisibilityHandler?: CategoryVisibilityHandler;
     // @beta
-    isHierarchyLevelFilteringEnabled?: boolean;
+    hierarchyLevelConfig?: HierarchyLevelConfig;
     // @internal
     viewManager?: ViewManager;
 }
@@ -121,13 +121,13 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     // (undocumented)
     enableSubCategory(key: string, enabled: boolean): void;
     // (undocumented)
-    getCategoryVisibility(id: string): "visible" | "hidden";
+    getCategoryVisibility(id: string): "hidden" | "visible";
     // (undocumented)
     static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey): string;
     // (undocumented)
     getParent(key: string): CategoryInfo | undefined;
     // (undocumented)
-    getSubCategoryVisibility(id: string): "visible" | "hidden";
+    getSubCategoryVisibility(id: string): "hidden" | "visible";
     // (undocumented)
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus;
     // (undocumented)
@@ -191,7 +191,8 @@ export type ExternalSourcesTreeComponentProps = Omit<ExternalSourcesTreeProps, "
 
 // @alpha
 export interface ExternalSourcesTreeProps extends BaseTreeProps {
-    isHierarchyLevelFilteringEnabled?: boolean;
+    // @beta
+    hierarchyLevelConfig?: HierarchyLevelConfig;
 }
 
 // @beta
@@ -217,6 +218,14 @@ export function hideAllCategories(categories: string[], viewport: Viewport): Pro
 // @public
 export function hideAllModels(models: string[], viewport: Viewport): Promise<void>;
 
+// @beta
+export interface HierarchyLevelConfig {
+    // (undocumented)
+    isFilteringEnabled: true;
+    // (undocumented)
+    sizeLimit?: number;
+}
+
 // @public
 export const IModelContentTree: (props: IModelContentTreeProps) => JSX.Element | null;
 
@@ -233,7 +242,7 @@ export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iMod
 // @public
 export interface IModelContentTreeProps extends BaseTreeProps {
     // @beta
-    isHierarchyLevelFilteringEnabled?: boolean;
+    hierarchyLevelConfig?: HierarchyLevelConfig;
 }
 
 // @public
@@ -316,7 +325,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     enableHierarchyAutoUpdate?: boolean;
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     // @beta
-    isHierarchyLevelFilteringEnabled?: boolean;
+    hierarchyLevelConfig?: HierarchyLevelConfig;
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
@@ -492,8 +501,6 @@ export class TreeWidget {
     static get i18n(): Localization;
     static get i18nNamespace(): string;
     static initialize(i18n?: Localization): Promise<void>;
-    // (undocumented)
-    static get packageName(): string;
     static terminate(): void;
     static translate(key: string | string[], options?: LocalizationOptions): string;
 }

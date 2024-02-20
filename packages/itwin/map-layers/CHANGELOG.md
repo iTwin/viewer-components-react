@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Tue, 06 Feb 2024 13:45:21 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Feb 2024 21:16:44 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.3.1
+
+Wed, 07 Feb 2024 21:16:44 GMT
+
+### Patches
+
+- Fix map feature info widget tech preview badge ([#759](https://github.com/iTwin/viewer-components-react/pull/759))
 
 ## 5.3.0
 

@@ -31,6 +31,15 @@ export interface VisibilityTreeFilterInfo {
 }
 
 /**
+ * Configuration for hierarchy levels. Setting it implies that hierarchy level filtering will be enabled.
+ * @beta
+ */
+export interface HierarchyLevelConfig {
+  isFilteringEnabled: true;
+  sizeLimit?: number;
+}
+
+/**
  * Base props for tree components.
  * @public
  */

@@ -1,0 +1,25 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+.gmw-list-item-container{
+  display: flex;
+  justify-content: space-between;
+  border-radius: 5px;
+  min-height: calc(var(--iui-size-s) * 5);
+  padding: 5.5px var(--iui-size-xs);
+  padding-bottom: 2px var(--iui-size-xs);
+  padding-top: 2px var(--iui-size-xs);
+}
+
+.gmw-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  justify-content: center;
+  &-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
