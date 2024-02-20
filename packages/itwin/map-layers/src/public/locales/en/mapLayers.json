@@ -89,7 +89,6 @@
     "SelectLayersToCreate": "Select Layers To Add",
     "StoreOnModelSettings": "Store on Model Settings",
     "StoreOnITwinSettings": "Store on iTwin Settings",
-    "TechPreviewBadgeTooltip": "Technology preview",
     "TooManyLayersSelected": "{{layerCount}} layers selected; performance may be affected.",
     "Type": "Type",
     "URL": "URL",
@@ -102,6 +101,9 @@
     "PasswordRequired": "Password required",
     "Username": "Username",
     "UsernameRequired": "Username required"
+  },
+  "Labels" : {
+    "TechPreviewBadgeTooltip": "Technology preview"
   },
   "Messages": {
     "NotSupported": "No active viewport or geo-located iModel available.",

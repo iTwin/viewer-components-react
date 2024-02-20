@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Icon, MenuItem, Select, SelectOption } from "@itwin/itwinui-react";
-import * as React from "react";
-import { MapTypesOptions } from "../Interfaces";
 import "./MapUrlDialog.scss";
-import {SvgTechnicalPreviewMini} from "@itwin/itwinui-icons-color-react";
-import { MapLayersUI } from "../../mapLayers";
+import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
+import { SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
+import { Icon, MenuItem, Select, SelectOption } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
+import { MapTypesOptions } from "../Interfaces";
 
 // TODO:
 // Remove this structure and iterate over the registry's active formats.
@@ -35,7 +35,6 @@ interface SelectMapFormatProps {
 export function SelectMapFormat(props: SelectMapFormatProps) {
 
   const [mapFormat, setMapFormat] = React.useState(props.value ?? MAP_TYPES.arcGis);
-  const [techPreviewTooltip] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.TechPreviewBadgeTooltip"));
 
   const [mapFormats] = React.useState((): SelectOption<string>[] => {
     const formats: SelectOption<string>[] = [
@@ -72,7 +71,7 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
         (option) => (
           <MenuItem
             badge={option.id?.includes("techPreview") ?
-              <div title={techPreviewTooltip} className="map-layer-source-select-previewBadge">
+              <div title={MapLayersUI.translate("Labels.TechPreviewBadgeTooltip")} className="map-layer-source-select-previewBadge">
                 <Icon size="small"><SvgTechnicalPreviewMini /></Icon>
               </div>
               : undefined}>

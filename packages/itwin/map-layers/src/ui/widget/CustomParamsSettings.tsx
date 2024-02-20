@@ -6,9 +6,10 @@
 import "./CustomParamsSettings.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import { Icon, Listbox, ListboxItem, ListboxValue } from "@itwin/core-react";
-import { SvgAdd } from "@itwin/itwinui-icons-react";
-import { Button, IconButton } from "@itwin/itwinui-react";
+import { Listbox, ListboxItem, ListboxValue } from "@itwin/core-react";
+import { SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
+import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
+import { Icon, IconButton } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
@@ -95,7 +96,7 @@ export function CustomParamsSettingsPanel() {
     tmpParams[newItem.name] = newItem;
     setParams(tmpParams);
     setSelectedValue(undefined); // clear listbox focus
-  }, [deleteMapping, params, storage]);
+  }, [mappingStorage, params, storage]);
 
   const handleAddClick = React.useCallback(() => {
     UiFramework.dialogs.modal.open(
@@ -118,7 +119,13 @@ export function CustomParamsSettingsPanel() {
   return (
     <div className="customParamsSettings-container">
       <div className="customParamsSettings-header">
-        <span className="customParamsSettings-header-label">{MapLayersUI.translate("CustomParamSettings.SectionLabel")}</span>
+        <span className="customParamsSettings-header-label">
+          <div title={MapLayersUI.translate("Labels.TechPreviewBadgeTooltip")} className="customParamsSettings-previewBadge">
+            <Icon size="small"><SvgTechnicalPreviewMini /></Icon>
+          </div>
+          {MapLayersUI.translate("CustomParamSettings.SectionLabel")}
+        </span>
+
         <IconButton size="small" styleType="borderless" className="customParamsSettings-header-add-button" onClick={handleAddClick}>
           <SvgAdd/>
         </IconButton>
@@ -141,23 +148,22 @@ export function CustomParamsSettingsPanel() {
                 { // Display the delete icon only when the mouse over a specific item otherwise list feels cluttered.
                   (listItemUnderCursor && listItemUnderCursor === keyName) &&
                   <>
-                    <Button
+                    <IconButton
                       size="small"
                       styleType="borderless"
                       className="map-source-list-entry-button"
                       title={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}
                       onClick={(_event) => {}}>
-                      <Icon iconSpec="icon-edit" />
-                    </Button>
-                    <Button
+                      <SvgEdit/>
+                    </IconButton>
+                    <IconButton
                       size="small"
                       styleType="borderless"
                       className="customParamsSettings-content-entry-button"
                       title={MapLayersUI.translate("CustomParamSettings.DeleteButtonTitle")}
                       onClick={(event) => {onItemRemoveButtonClicked(keyName, event);}}>
-                      <Icon iconSpec="icon-delete" />
-                    </Button>
-
+                      <SvgDelete/>
+                    </IconButton>
                   </>}
               </ListboxItem>
             )
