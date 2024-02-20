@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Support for custom query parameters.",
+  "packageName": "@itwin/map-layers",
+  "email": "mdastous-bentley@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
