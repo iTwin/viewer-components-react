@@ -10,6 +10,7 @@ import type { Locator, Page } from "@playwright/test";
 
 export const locateNode = (tree: Page | Locator, name: string) => tree.getByRole("treeitem", { name });
 export const locateWidget = (page: Page | Locator, widgetName: string) => page.locator(`.${widgetName}-widget`);
+export const locateInstanceFilter = (page: Page | Locator) => page.locator(`.presentation-instance-filter`);
 
 type PanelSide = "left" | "right" | "top" | "bottom";
 export const locatePanel = (page: Page, side: PanelSide) => page.locator(`.nz-widgetPanels-panel.nz-${side}`);

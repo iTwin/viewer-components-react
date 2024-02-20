@@ -7,13 +7,74 @@ import { render as rtlRender } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReportsConfigContextProps } from "../widget/components/ReportsConfigContext";
 import { ReportsConfigContext } from "../widget/components/ReportsConfigContext";
+import { IModelState } from "@itwin/imodels-client-management";
 
 export const mockAccessToken = async () => "Bearer eyJhbGci";
+
+export const mockIModelId1 = "mockIModelId1";
+export const mockIModelId2 = "mockIModelId2";
+
+export const mockReportId = "mockReportId";
+export const mockITwinId: string = "mockiTwinId";
+
+export const mockIModelsResponse = [
+  {
+    iModel: {
+      id: mockIModelId1,
+      displayName: "rAnDoMdIsPlAynAmE1",
+      name: "rAnDomName1",
+      description: "rAnDoMDeScRiPtIoN1",
+      createdDateTime: "2021-10-04T22:13:50.397Z",
+      state: IModelState.Initialized,
+      iTwinId: mockITwinId,
+      extent: null,
+      getCreator: async () => undefined,
+      _links: {
+        creator: {
+          href: "",
+        },
+        namedVersions: {
+          href: "",
+        },
+        changesets: {
+          href: "",
+        },
+        upload: undefined,
+        complete: undefined,
+      },
+    },
+  },
+  {
+    iModel: {
+      id: mockIModelId2,
+      displayName: "rAnDoMdIsPlAynAmE2",
+      name: "rAnDomName2",
+      description: "rAnDoMDeScRiPtIoN2",
+      createdDateTime: "2021-10-04T22:13:50.397Z",
+      state: IModelState.Initialized,
+      iTwinId: mockITwinId,
+      extent: null,
+      getCreator: async () => undefined,
+      _links: {
+        creator: {
+          href: "",
+        },
+        namedVersions: {
+          href: "",
+        },
+        changesets: {
+          href: "",
+        },
+        upload: undefined,
+        complete: undefined,
+      },
+    },
+  },
+];
 
 interface WrapperProps {
   children?: React.ReactNode;
 }
-export const mockITwinId: string = "mockiTwinId";
 
 function render(ui: React.ReactElement, contextProps?: Partial<ReportsConfigContextProps>, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (

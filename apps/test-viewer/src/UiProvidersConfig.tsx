@@ -3,30 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { UiItemsProvider } from "@itwin/appui-react";
-import {
-  CategoriesTreeComponent,
-  ExternalSourcesTreeComponent,
-  IModelContentTreeComponent,
-  ModelsTreeComponent,
-  TreeWidget,
-  TreeWidgetUiItemsProvider,
-} from "@itwin/tree-widget-react";
-import {
-  AddFavoritePropertyContextMenuItem,
-  AncestorsNavigationControls,
-  CopyPropertyTextContextMenuItem,
-  PropertyGridManager,
-  PropertyGridUiItemsProvider,
-  RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
-} from "@itwin/property-grid-react";
-import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
-import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
-import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { SelectionMode } from "@itwin/components-react";
+import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
+import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import { MapLayersFormats } from "@itwin/map-layers-formats";
+import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
+import {
+  AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
+  RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
+} from "@itwin/property-grid-react";
+import {
+  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetUiItemsProvider,
+} from "@itwin/tree-widget-react";
+import { SampleSpatialTree } from "./components/SampleSpatialTree";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -81,22 +71,28 @@ const configuredUiItems = new Map<string, UiItem>([
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: () => <ModelsTreeComponent selectionPredicate={() => true} selectionMode={SelectionMode.Multiple} />,
+              render: () => (
+                <ModelsTreeComponent
+                  selectionPredicate={() => true}
+                  selectionMode={SelectionMode.Multiple}
+                  hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                />
+              ),
             },
             {
               id: CategoriesTreeComponent.id,
               getLabel: CategoriesTreeComponent.getLabel,
-              render: () => <CategoriesTreeComponent />,
+              render: () => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
             },
             {
               id: IModelContentTreeComponent.id,
               getLabel: IModelContentTreeComponent.getLabel,
-              render: () => <IModelContentTreeComponent />,
+              render: () => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
             },
             {
               id: ExternalSourcesTreeComponent.id,
               getLabel: ExternalSourcesTreeComponent.getLabel,
-              render: () => <ExternalSourcesTreeComponent />,
+              render: () => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
             },
             {
               id: "spatial-containment-tree",

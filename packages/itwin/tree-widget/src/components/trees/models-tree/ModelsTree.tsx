@@ -9,10 +9,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SelectionMode } from "@itwin/components-react";
 import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
+import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
-import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
@@ -21,8 +22,8 @@ import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHan
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps } from "../common/Types";
+import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
+import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
 
@@ -68,6 +69,11 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * Custom visibility handler.
    */
   modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
+  /**
+   * Props for configuring hierarchy level.
+   * @beta
+   */
+  hierarchyLevelConfig?: HierarchyLevelConfig;
 }
 
 /**
@@ -77,9 +83,10 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
+  const { hierarchyLevelConfig, density, height, width, selectionMode } = props;
   const state = useModelsTreeState(props);
 
-  const treeRenderer = createVisibilityTreeRenderer({
+  const baseRendererProps = {
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
     density: props.density,
@@ -89,7 +96,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       levelOffset: 10,
       disableRootNodeCollapse: true,
     },
-  });
+  };
 
   // istanbul ignore next
   const noFilteredDataRenderer = useCallback(() => {
@@ -108,14 +115,38 @@ export function ModelsTree(props: ModelsTreeProps) {
     <div className={classNames("tree-widget-visibility-tree-base", "tree-widget-tree-container")}>
       <PresentationTree
         state={state}
-        selectionMode={props.selectionMode || SelectionMode.None}
-        treeRenderer={treeRenderer}
+        selectionMode={selectionMode || SelectionMode.None}
+        treeRenderer={
+          hierarchyLevelConfig?.isFilteringEnabled
+            ? (rendererProps) => (
+                <FilterableTreeRenderer
+                  {...rendererProps}
+                  {...baseRendererProps}
+                  nodeLoader={state.nodeLoader}
+                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
+                />
+              )
+            : createVisibilityTreeRenderer(baseRendererProps)
+        }
         noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
-        width={props.width}
-        height={props.height}
+        width={width}
+        height={height}
       />
       {overlay}
     </div>
+  );
+}
+
+function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
+  return (
+    <FilterableVisibilityTreeNodeRenderer
+      {...props}
+      iconsEnabled={true}
+      descriptionEnabled={false}
+      levelOffset={10}
+      disableRootNodeCollapse={true}
+      isEnlarged={props.density === "enlarged"}
+    />
   );
 }
 
@@ -169,6 +200,7 @@ function useTreeState({
   enableHierarchyAutoUpdate,
   filterInfo,
   onFilterApplied,
+  hierarchyLevelConfig,
 }: UseTreeProps) {
   const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
@@ -207,6 +239,7 @@ function useTreeState({
       [],
     ),
     eventHandler: eventHandlerFactory,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
   });
 }
 

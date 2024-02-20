@@ -1,6 +1,6 @@
 {
-  "type": "minor",
-  "comment": "Groups related components have been refactored to use react-query.",
+  "type": "patch",
+  "comment": "Fixed an issue where job id's were potentially undefined.",
   "packageName": "@itwin/grouping-mapping-widget",
   "email": "Guillar1@users.noreply.github.com",
   "dependentChangeType": "patch"

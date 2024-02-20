@@ -2,6 +2,56 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Fri, 02 Feb 2024 00:04:15 GMT",
+      "version": "0.23.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.23.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a0c5d1c10689446ebd10fb192b5205168e87bebb",
+            "comment": "Fixed an issue where hidden elements would not reappear when the group for those elements was deleted and group color was disabled."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "46077de8d6019d696ebf6d722b29e475ca1c1878",
+            "comment": "Fixed iModel selection not populating in Import Mappings."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "ec2db4b168ad7e06a931e2289a4b0e769d1642e8",
+            "comment": "Fixed form validation not running when creating a group."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 29 Jan 2024 21:37:20 GMT",
+      "version": "0.23.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.23.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "d1bff484dd03f5ec61f85fcb52893e4d0755912c",
+            "comment": "Presentation is now correctly localized."
+          }
+        ],
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "2d1cd72ecbc3c9b3919e46fb49541b287d5a4c1e",
+            "comment": "Groups related components have been refactored to use react-query."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.0",
       "tag": "@itwin/grouping-mapping-widget_v0.22.0",
       "date": "Mon, 18 Dec 2023 18:31:01 GMT",
