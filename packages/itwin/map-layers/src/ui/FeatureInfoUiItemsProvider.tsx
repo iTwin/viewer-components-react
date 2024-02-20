@@ -11,6 +11,7 @@ import { MapLayersUI } from "../mapLayers";
 import { IModelApp } from "@itwin/core-frontend";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
+import { BadgeType } from "@itwin/appui-abstract";
 
 export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({
@@ -19,6 +20,7 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
     label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
     description: () => MapFeatureInfoTool.description,
     execute: async () => { await IModelApp.tools.run(MapFeatureInfoTool.toolId); },
+    badgeType: BadgeType.TechnicalPreview,
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-disable-line deprecation/deprecation
@@ -58,6 +60,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
         icon: <SvgMapInfo/>,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
         defaultState: WidgetState.Hidden,
+        badge: BadgeType.TechnicalPreview,
       });
     }
 

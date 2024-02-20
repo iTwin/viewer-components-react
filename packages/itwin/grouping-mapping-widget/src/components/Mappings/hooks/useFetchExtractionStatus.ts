@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IExtractionClient } from "@itwin/insights-client";
+import type { ExtractionStatus, IExtractionClient } from "@itwin/insights-client";
 import { useQuery } from "@tanstack/react-query";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 import type { ExtractionMessageData } from "../Extraction/ExtractionMessageModal";
@@ -29,16 +29,19 @@ export const useFetchExtractionStatus = ({
       let extractionStatusIcon: ExtractionStatusData;
       let extractionMessageData: ExtractionMessageData[] = [];
 
+      const jobId = latestExtractionResult.value?.jobId;
+      let latestJobStatus: ExtractionStatus|undefined;
+      if (jobId) {
+        latestJobStatus = await extractionClient.getExtractionStatus(accessToken, jobId);
+      }
+
       if (latestExtractionResult.done) {
         extractionStatusIcon = {
           iconStatus: "negative",
           iconMessage: "No extraction found.",
         };
       } else {
-        const jobId = latestExtractionResult.value.jobId;
-        const status = await extractionClient.getExtractionStatus(accessToken, jobId);
-
-        if (status.containsIssues) {
+        if (latestJobStatus?.containsIssues) {
           const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
           extractionMessageData = logs.filter((log) => log.message !== null).map((log) => ({
             date: log.dateTime,
@@ -58,7 +61,7 @@ export const useFetchExtractionStatus = ({
         }
       }
 
-      return { extractionStatusIcon, extractionMessageData };
+      return { extractionStatusIcon, extractionMessageData, latestExtractionResult, latestJobStatus };
     },
   });
 };

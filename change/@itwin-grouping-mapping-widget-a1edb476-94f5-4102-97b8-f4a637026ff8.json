@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Fixed an issue where hidden elements would not reappear when the group for those elements was deleted and group color was disabled.",
+  "comment": "Fixed an issue where extraction status would go out of bounds when trying to find the group name in extraction logs.",
   "packageName": "@itwin/grouping-mapping-widget",
   "email": "Guillar1@users.noreply.github.com",
   "dependentChangeType": "patch"

@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Fixed form validation not running when creating a group.",
+  "comment": "Fixed an issue where job id's were potentially undefined.",
   "packageName": "@itwin/grouping-mapping-widget",
   "email": "Guillar1@users.noreply.github.com",
   "dependentChangeType": "patch"

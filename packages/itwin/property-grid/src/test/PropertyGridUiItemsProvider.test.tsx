@@ -36,6 +36,10 @@ describe("PropertyGridUiItemsProvider", () => {
     sinon.restore();
   });
 
+  afterEach(() => {
+    propertyGridComponentStub.reset();
+  });
+
   it("provides widgets to default location", () => {
     const provider = new PropertyGridUiItemsProvider();
 

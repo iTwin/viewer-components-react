@@ -11,17 +11,17 @@ import { IModelApp } from "@itwin/core-frontend";
 import { PresentationTree } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
+import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
-import { createVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
-import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps } from "../common/Types";
+import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
+import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
-
 const PAGING_SIZE = 20;
 
 /**
@@ -53,6 +53,11 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
    * @internal
    */
   viewManager?: ViewManager;
+  /**
+   * Props for configuring hierarchy level.
+   * @beta
+   */
+  hierarchyLevelConfig?: HierarchyLevelConfig;
 }
 
 /**
@@ -62,7 +67,7 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
 export function CategoryTree(props: CategoryTreeProps) {
   // istanbul ignore next
   const viewManager = props.viewManager ?? IModelApp.viewManager;
-  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied } = props;
+  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density, hierarchyLevelConfig } = props;
 
   const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, activeView, allViewports, categoryVisibilityHandler);
   const onFilterChange = useCallback(
@@ -81,13 +86,14 @@ export function CategoryTree(props: CategoryTreeProps) {
     customizeTreeNodeItem,
     filterInfo: props.filterInfo,
     onFilterChange,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
   });
 
   useEffect(() => {
     setViewType(activeView); // eslint-disable-line @typescript-eslint/no-floating-promises
   }, [activeView]);
 
-  const treeRenderer = createVisibilityTreeRenderer({
+  const baseRendererProps = {
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
     density: props.density,
@@ -96,7 +102,8 @@ export function CategoryTree(props: CategoryTreeProps) {
       descriptionEnabled: true,
       levelOffset: 10,
     },
-  });
+  };
+
   const noFilteredDataRenderer = useCallback(() => {
     return (
       <VisibilityTreeNoFilteredData
@@ -119,13 +126,37 @@ export function CategoryTree(props: CategoryTreeProps) {
         height={props.height}
         state={state}
         selectionMode={props.selectionMode ?? SelectionMode.None}
-        treeRenderer={treeRenderer}
+        treeRenderer={
+          hierarchyLevelConfig?.isFilteringEnabled
+            ? (rendererProps) => (
+                <FilterableTreeRenderer
+                  {...rendererProps}
+                  {...baseRendererProps}
+                  nodeLoader={state.nodeLoader}
+                  nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} />}
+                />
+              )
+            : createVisibilityTreeRenderer(baseRendererProps)
+        }
         descriptionsEnabled={true}
         noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
       />
       {overlay}
     </div>
   );
+}
+
+function CategoriesTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
+  return (
+    <FilterableVisibilityTreeNodeRenderer
+      {...props}
+      iconsEnabled={false}
+      descriptionEnabled={true}
+      levelOffset={10}
+      isEnlarged={props.density === "enlarged"}
+    />
+  );
+
 }
 
 function useCategoryVisibilityHandler(

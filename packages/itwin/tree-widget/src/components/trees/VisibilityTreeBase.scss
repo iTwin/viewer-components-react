@@ -25,6 +25,7 @@
     .core-tree-node {
       &.with-checkbox {
         > .contents {
+          margin-left: 0 !important;
           padding-left: calc(var(--iui-size-3xs) / 2);
         }
       }

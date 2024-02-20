@@ -4,9 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./index.scss";
+import "@itwin/itwinui-react/styles.css";
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "@itwin/itwinui-react";
 import { App } from "./components/App";
 
 // Set custom global variables
@@ -37,7 +39,9 @@ if (!process.env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ThemeProvider theme="os">
+        <App />
+      </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root"),
