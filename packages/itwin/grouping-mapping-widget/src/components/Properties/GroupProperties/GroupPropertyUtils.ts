@@ -203,31 +203,36 @@ const extractNested = (propertyTraversal: string[], propertyFields: Field[]): Pr
 export const convertPresentationFields = (propertyFields: Field[]): PropertyMetaData[] => {
   const uniquePropertiesMap = new Map<string, PropertyMetaData>();
 
-  propertyFields.flatMap((property) => {
+  propertyFields.forEach((property) => {
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
+        // Generate base ECProperty
         const extractedPrimitives = extractPrimitives([], property as PropertiesField);
         extractedPrimitives.forEach((extractedPrimitive) => {
           extractedPrimitive.sourceSchema = "*";
           extractedPrimitive.sourceClassName = "*";
-          // Use the key to ensure uniqueness
           uniquePropertiesMap.set(extractedPrimitive.key, extractedPrimitive);
         });
         break;
       }
       case PropertyValueFormat.Struct: {
+        // Get structs
         const nestedContentField = property as NestedContentField;
+        // Only handling single path and not handling nested content fields within navigations
         if (
           nestedContentField.pathToPrimaryClass &&
-          nestedContentField.pathToPrimaryClass.length > 1
+            nestedContentField.pathToPrimaryClass.length > 1
         ) {
           break;
         }
         switch (nestedContentField.relationshipMeaning) {
           case RelationshipMeaning.SameInstance: {
+            // Check for aspects.
             if (
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:ElementOwnsUniqueAspect" ||
-                nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:ElementOwnsMultiAspects"
+              (nestedContentField.pathToPrimaryClass[0].relationshipInfo
+                .name === "BisCore:ElementOwnsUniqueAspect" ||
+                  nestedContentField.pathToPrimaryClass[0].relationshipInfo
+                    .name === "BisCore:ElementOwnsMultiAspects")
             ) {
               const fullClassName = nestedContentField.contentClassInfo.name;
               const sourceSchema = fullClassName.split(":")[0];
@@ -241,8 +246,11 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
             break;
           }
           case RelationshipMeaning.RelatedInstance: {
+            // Navigation properties
             if (
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:GeometricElement3dHasTypeDefinition"
+            // Deal with a TypeDefinition
+              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
+                "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
               const extractedNested = extractNested(["TypeDefinition"], nestedContentField.nestedFields);
               extractedNested.forEach((ecProperty) => {
@@ -252,6 +260,8 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
             break;
           }
           default: {
+            // Some elements don't have a path to primary class or relationship meaning..
+            // Most likely a simple struct property
             if (!nestedContentField.pathToPrimaryClass) {
               const extractedStruct = extractStruct(property);
               extractedStruct.forEach((ecProperty) => {
