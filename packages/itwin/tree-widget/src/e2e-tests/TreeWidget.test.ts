@@ -103,7 +103,7 @@ test.describe("should match image snapshot", () => {
     await treeWidget.getByTitle("Clear active filter").waitFor();
 
     // ensure the last node is loaded before taking a screenshot to avoid flakiness
-    await locateNode(treeWidget, "SWS-1-SWS-0311-EX-OPM").waitFor();
+    await locateNode(treeWidget, "Tag-Category").waitFor();
     await takeScreenshot(page, treeWidget);
   });
 
