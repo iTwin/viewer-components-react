@@ -19,6 +19,8 @@ import {
   OutputMessagePriority, ScreenViewport, TileTreeOwner, Viewport,
 } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
+import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
+import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
@@ -27,9 +29,6 @@ import { MapLayerActionButtons } from "./MapLayerActionButtons";
 import { MapLayerDroppable } from "./MapLayerDroppable";
 import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
-import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
-import { CustomParamUtils } from "../../CustomParamUtils";
-import "./MapLayerManager.scss";
 
 /** @internal */
 export interface SourceMapContextProps {

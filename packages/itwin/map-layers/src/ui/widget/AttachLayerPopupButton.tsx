@@ -246,7 +246,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                     signInModeArgs={{layer, validation: sourceValidation, source: foundSource}}
                     onOkResult={(sourceState?: SourceState) => handleModalUrlDialogOk(LayerAction.New, sourceState)}
                     onCancelResult={handleModalUrlDialogCancel}
-                  {...mapLayerOptions} />
+                    {...mapLayerOptions} />
                 );
               }
 
