@@ -133,6 +133,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [accessClient, setAccessClient] = React.useState<MapLayerAccessClient | undefined>();
   const [isAccessClientInitialized, setAccessClientInitialized] = React.useState(false);
   const [shouldAutoAttachSource, setShouldAutoAttachSource] = React.useState(true);
+  const [incompatibleFormat, setIncompatibleFormat] = React.useState(false);
 
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
   const [customParamNamesChangedByUser, SetCustomParamNamesChangedByUser] = React.useState<boolean>(false);
@@ -360,6 +361,8 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
           onOkResult({source, validation});
+        } else if (validation.status === MapLayerSourceStatus.IncompatibleFormat) {
+          setIncompatibleFormat(true);
         } else {
           const authNeeded = await updateAuthState(source, validation);
           if (!authNeeded)  {
@@ -410,6 +413,11 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   React.useEffect(() => {
     resetSignInState();
   }, [mapType, resetSignInState]);
+
+  // After a map type change, make sure the different Oauth states are reset.
+  React.useEffect(() => {
+    setIncompatibleFormat(false);
+  }, [mapType, mapUrl]);
 
   // The first time the dialog is loaded and we already know the layer requires auth. (i.e ImageryProvider already made an attempt)
   // makes a request to discover the authentification types and adjust UI accordingly (i.e. username/password fields, Oauth popup)
@@ -465,9 +473,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       && !layerAttachPending
       && (!serverRequireCredentials || credentialsSet)
       && !invalidCredentialsProvided
+      && !incompatibleFormat
       && (externalLoginUrl === undefined || (externalLoginUrl !== undefined && oauthProcessSucceeded));
     return ready;
-  }, [userName, password, mapUrl, mapName, serverRequireCredentials, layerAttachPending, invalidCredentialsProvided, externalLoginUrl, oauthProcessSucceeded]);
+  }, [userName, password, mapUrl, mapName, layerAttachPending, serverRequireCredentials, invalidCredentialsProvided, incompatibleFormat, externalLoginUrl, oauthProcessSucceeded]);
 
   const handleOnKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     // eslint-disable-next-line deprecation/deprecation
@@ -518,7 +527,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   // Utility function to get warning message section
   function renderWarningMessage(): React.ReactNode {
-    let node: React.ReactNode;
     let warningMessage: string | undefined;
 
     // Get the proper warning message
@@ -610,6 +618,8 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
               disabled={props.signInModeArgs !== undefined || props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending}
               onChange={setMapType}
               mapTypesOptions={mapTypesOptions}
+              status={incompatibleFormat ? "warning" : undefined}
+              message={incompatibleFormat ? MapLayersUI.translate("CustomAttach.InvalidType") : undefined}
             />
             <span className="map-layer-source-label">{nameLabel}</span>
             <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={!!props.signInModeArgs || layerAttachPending || layerAuthPending} />

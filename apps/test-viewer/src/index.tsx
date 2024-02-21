@@ -6,7 +6,7 @@
 import "./index.scss";
 import "@itwin/itwinui-react/styles.css";
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@itwin/itwinui-react";
 import { App } from "./components/App";
@@ -36,7 +36,8 @@ if (!process.env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
   throw new Error("Please add a valid redirect URI to the .env file and restart the application. See the README for more information.");
 }
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("root")!);
+root.render(
   <React.StrictMode>
     <BrowserRouter>
       <ThemeProvider theme="os">
@@ -44,5 +45,4 @@ ReactDOM.render(
       </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,
-  document.getElementById("root"),
 );

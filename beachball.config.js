@@ -14,7 +14,7 @@ module.exports = {
     "!packages/itwin/tree-widget", // tree-widget is in pre-release mode and should be ignore when publishing using this config. Check `beachball.config.dev.js`
     "!packages/itwin/breakdown-trees", // disable breakdown-trees publishing. It has peer dep on tree-widget that requires to publish new major versions when tree-widget is published.
   ],
-  ignorePatterns: [".nycrc", "eslint.config.js", ".mocharc.json", ".*ignore", ".github/**", ".vscode/**", "**/test/**", "pnpm-lock.yaml"],
+  ignorePatterns: [".nycrc", "eslint.config.js", ".mocharc.json", ".*ignore", ".github/**", ".vscode/**", "**/test/**", "**/e2e-tests/**", "pnpm-lock.yaml"],
   changehint: "Run 'pnpm change' to generate a change file",
   changelog: {
     customRenderers: {
