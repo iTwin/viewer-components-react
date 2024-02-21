@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Icon, MenuItem, Select, SelectOption } from "@itwin/itwinui-react";
-import * as React from "react";
-import { MapTypesOptions } from "../Interfaces";
 import "./MapUrlDialog.scss";
-import {SvgTechnicalPreviewMini} from "@itwin/itwinui-icons-color-react";
-import { MapLayersUI } from "../../mapLayers";
+import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
+import { SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
+import { Icon, LabeledSelect, MenuItem, SelectOption } from "@itwin/itwinui-react";
+import { MapLayersUI } from "../../mapLayers";
+import { MapTypesOptions } from "../Interfaces";
 
 // TODO:
 // Remove this structure and iterate over the registry's active formats.
@@ -29,6 +29,15 @@ interface SelectMapFormatProps {
   disabled?: boolean;
   mapTypesOptions?: MapTypesOptions;
   onChange?: (mapType: string) => void;
+  /**
+     * Message below the select. Does not apply to 'inline' select.
+     */
+  message?: React.ReactNode;
+  /**
+   * Status of the select.
+   * @default ''
+   */
+  status?: "positive" | "warning" | "negative";
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -61,13 +70,14 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
 
   return (
 
-    <Select
+    <LabeledSelect
       className="map-layer-source-select"
       options={mapFormats}
       value={mapFormat}
-      disabled={props.disabled}
+      // disabled={props.disabled}
       onChange={handleOnChange}
       size="small"
+      {...props}
       itemRenderer={
         (option) => (
           <MenuItem
