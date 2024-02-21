@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { BeEvent } from "@itwin/core-bentley";
-import {  BaseMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
+import { BaseMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
 import { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
 
 export interface StyleMapLayerSettings {
@@ -44,6 +44,9 @@ export interface MapLayerOptions {
 
   /** Optional list of base map-layers to display in the base map select control */
   baseMapLayers?: BaseMapLayerSettings[];
+
+  /** Optionally show the user preferences storage options(i.e. iTwin vs iModel).  Defaults to false */
+  showUserPreferencesStorageOptions?: boolean;
 }
 
 export interface MapFeatureInfoPropertyGridOptions {

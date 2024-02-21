@@ -7,23 +7,26 @@
 // the following quiet warning caused by react-beautiful-dnd package
 /* eslint-disable @typescript-eslint/unbound-method */
 
-import { BentleyError, compareStrings } from "@itwin/core-bentley";
-import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings, MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
-import {
-  ImageryMapTileTree, IModelApp, MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, MapLayerSources, NotifyMessageDetails, OutputMessagePriority,
-  ScreenViewport, TileTreeOwner, Viewport,
-} from "@itwin/core-frontend";
-import { ToggleSwitch } from "@itwin/itwinui-react";
+import "./MapLayerManager.scss";
 import * as React from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { BentleyError, compareStrings } from "@itwin/core-bentley";
+import {
+  BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings, MapImagerySettings, MapSubLayerProps, MapSubLayerSettings,
+} from "@itwin/core-common";
+import {
+  ImageryMapTileTree, IModelApp, MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, MapLayerSources, NotifyMessageDetails,
+  OutputMessagePriority, ScreenViewport, TileTreeOwner, Viewport,
+} from "@itwin/core-frontend";
+import { ToggleSwitch } from "@itwin/itwinui-react";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../../MapLayerPreferences";
+import { MapLayersUI } from "../../mapLayers";
 import { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 import { BasemapPanel } from "./BasemapPanel";
-import { MapLayerDroppable } from "./MapLayerDroppable";
-import { MapLayersUI } from "../../mapLayers";
 import { MapLayerActionButtons } from "./MapLayerActionButtons";
-import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
+import { MapLayerDroppable } from "./MapLayerDroppable";
 import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
+import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
 import "./MapLayerManager.scss";
@@ -543,7 +546,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
           disabled={!backgroundMapVisible}
           isOverlay={isOverlay}
           layersList={layerList}
-          mapTypesOptions={props.mapLayerOptions?.mapTypeOptions}
+          mapLayerOptions={props.mapLayerOptions}
           getContainerForClone={props.getContainerForClone as any}
           activeViewport={props.activeViewport}
           onMenuItemSelected={handleOnMenuItemSelection}
@@ -553,7 +556,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       </div>
     );
 
-  },[backgroundMapLayers, backgroundMapVisible, changeAllLayerVisibility, detachSelectedLayers, handleItemSelected, handleLayerVisibilityChange, handleOnMenuItemSelection, handleRefreshFromStyle, hasItemSelected, invertAllLayerVisibility, overlayMapLayers, overlaysLabel, props.activeViewport, props.getContainerForClone, props.mapLayerOptions?.mapTypeOptions, selectAllLayers, underlaysLabel]);
+  },[backgroundMapLayers, backgroundMapVisible, changeAllLayerVisibility, detachSelectedLayers, handleItemSelected, handleLayerVisibilityChange, handleOnMenuItemSelection, handleRefreshFromStyle, hasItemSelected, invertAllLayerVisibility, overlayMapLayers, overlaysLabel, props.activeViewport, props.getContainerForClone, props.mapLayerOptions, selectAllLayers, underlaysLabel]);
 
   const [baseMapPanelLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Basemap.BaseMapPanelTitle"));
 
