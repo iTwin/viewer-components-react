@@ -73,10 +73,9 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
       className="map-layer-source-select"
       options={mapFormats}
       value={mapFormat}
-      // disabled={props.disabled}
+      disabled={props.disabled}
       onChange={handleOnChange}
       size="small"
-      {...props}
       itemRenderer={
         (option) => (
           <MenuItem
