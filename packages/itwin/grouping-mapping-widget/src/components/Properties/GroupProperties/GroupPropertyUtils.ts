@@ -55,6 +55,14 @@ const convertType = (type: string): DataType => {
   }
 };
 
+const generateKey = (
+  parentPropertyClassName: string | undefined,
+  actualECClassName: string,
+  propertyTraversal: string[]
+): string => {
+  return `${parentPropertyClassName}|${actualECClassName}|${propertyTraversal.join("|")}`;
+};
+
 const extractPrimitives = (
   propertyTraversal: string[],
   propertyField: PropertiesField
@@ -82,7 +90,7 @@ const extractPrimitives = (
       primitiveNavigationClass,
       actualECClassName,
       parentPropertyClassName,
-      key: `${parentPropertyClassName}|${actualECClassName}|${newPropertyTraversal.join("|")}`,
+      key: generateKey(parentPropertyClassName, actualECClassName, newPropertyTraversal),
       categoryLabel: propertyField.category.label,
     }
   );
@@ -110,7 +118,7 @@ const extractPrimitiveStructProperties = (
       primitiveNavigationClass: "",
       actualECClassName,
       parentPropertyClassName,
-      key: `${parentPropertyClassName}|${actualECClassName}|${newPropertyTraversal.join("|")}`,
+      key: generateKey(parentPropertyClassName, actualECClassName, newPropertyTraversal),
       categoryLabel,
     });
 
@@ -192,23 +200,23 @@ const extractNested = (propertyTraversal: string[], propertyFields: Field[]): Pr
     return [];
   });
 
-export const convertPresentationFields = (propertyFields: Field[]): PropertyMetaData[] =>
+export const convertPresentationFields = (propertyFields: Field[]): PropertyMetaData[] => {
+  const uniquePropertiesMap = new Map<string, PropertyMetaData>();
+
   propertyFields.flatMap((property) => {
-    // Generate base ECProperty
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
         const extractedPrimitives = extractPrimitives([], property as PropertiesField);
-        for (const extractedPrimitive of extractedPrimitives) {
+        extractedPrimitives.forEach((extractedPrimitive) => {
           extractedPrimitive.sourceSchema = "*";
           extractedPrimitive.sourceClassName = "*";
-          return extractedPrimitive;
-        }
+          // Use the key to ensure uniqueness
+          uniquePropertiesMap.set(extractedPrimitive.key, extractedPrimitive);
+        });
         break;
       }
-      // Get structs
       case PropertyValueFormat.Struct: {
         const nestedContentField = property as NestedContentField;
-        // Only handling single path and not handling nested content fields within navigations
         if (
           nestedContentField.pathToPrimaryClass &&
           nestedContentField.pathToPrimaryClass.length > 1
@@ -217,45 +225,47 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
         }
         switch (nestedContentField.relationshipMeaning) {
           case RelationshipMeaning.SameInstance: {
-            // Check for aspects.
             if (
-              (nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                .name === "BisCore:ElementOwnsUniqueAspect" ||
-                nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                  .name === "BisCore:ElementOwnsMultiAspects")
+              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:ElementOwnsUniqueAspect" ||
+                nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:ElementOwnsMultiAspects"
             ) {
               const fullClassName = nestedContentField.contentClassInfo.name;
               const sourceSchema = fullClassName.split(":")[0];
               const sourceClassName = fullClassName.split(":")[1];
               const extractedNested = extractNested([], nestedContentField.nestedFields);
-              const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, sourceSchema, sourceClassName }));
-              return aspectExtractedNested;
+              extractedNested.forEach((ecProperty) => {
+                const propertyWithSchema = { ...ecProperty, sourceSchema, sourceClassName };
+                uniquePropertiesMap.set(propertyWithSchema.key, propertyWithSchema);
+              });
             }
             break;
           }
-          // Navigation properties
           case RelationshipMeaning.RelatedInstance: {
             if (
-              // Deal with a TypeDefinition
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-              "BisCore:GeometricElement3dHasTypeDefinition"
+              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
-              return extractNested(["TypeDefinition"], nestedContentField.nestedFields);
+              const extractedNested = extractNested(["TypeDefinition"], nestedContentField.nestedFields);
+              extractedNested.forEach((ecProperty) => {
+                uniquePropertiesMap.set(ecProperty.key, ecProperty);
+              });
             }
             break;
           }
           default: {
-            // Some elements don't have a path to primary class or relationship meaning..
-            // Most likely a simple struct property
             if (!nestedContentField.pathToPrimaryClass) {
-              return extractStruct(property);
+              const extractedStruct = extractStruct(property);
+              extractedStruct.forEach((ecProperty) => {
+                uniquePropertiesMap.set(ecProperty.key, ecProperty);
+              });
             }
           }
         }
       }
     }
-    return [];
   });
+
+  return Array.from(uniquePropertiesMap.values());
+};
 
 export const convertToECProperties = (property: PropertyMetaData): ECProperty[] => {
   const ecProperty: ECProperty = {
