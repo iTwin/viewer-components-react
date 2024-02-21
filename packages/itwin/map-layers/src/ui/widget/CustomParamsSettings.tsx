@@ -120,10 +120,10 @@ export function CustomParamsSettingsPanel() {
     <div className="customParamsSettings-container">
       <div className="customParamsSettings-header">
         <span className="customParamsSettings-header-label">
+          {MapLayersUI.translate("CustomParamSettings.SectionLabel")}
           <div title={MapLayersUI.translate("Labels.TechPreviewBadgeTooltip")} className="customParamsSettings-previewBadge">
             <Icon size="small"><SvgTechnicalPreviewMini /></Icon>
           </div>
-          {MapLayersUI.translate("CustomParamSettings.SectionLabel")}
         </span>
 
         <IconButton size="small" styleType="borderless" className="customParamsSettings-header-add-button" onClick={handleAddClick}>

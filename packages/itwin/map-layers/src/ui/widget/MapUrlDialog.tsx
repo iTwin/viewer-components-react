@@ -14,7 +14,7 @@ import {
   ScreenViewport,
 } from "@itwin/core-frontend";
 import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
-import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
+import { SvgStatusWarning, SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import { Button, Icon, Input, LabeledInput, ProgressLinear } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
@@ -624,7 +624,11 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={!!props.signInModeArgs || layerAttachPending || layerAuthPending} />
             <span className="map-layer-source-label">{urlLabel}</span>
             <Input className="map-layer-source-input" placeholder={urlInputPlaceHolder} onKeyPress={handleOnKeyDown} onChange={onUrlChange} disabled={!!props.signInModeArgs || props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending} value={mapUrl} />
-            <span className="map-layer-source-label">{MapLayersUI.translate("CustomAttach.CustomParamsLabel")}</span>
+            <span className="map-layer-source-label">{MapLayersUI.translate("CustomAttach.CustomParamsLabel")}
+              <div title={MapLayersUI.translate("Labels.TechPreviewBadgeTooltip")} className="map-layer-source-previewBadge-icon">
+                <Icon size="small"><SvgTechnicalPreviewMini /></Icon>
+              </div>
+            </span>
             <SelectCustomParam value={customParamNames} disabled={layerAttachPending || layerAuthPending} onChange={(paramNames) => {setCustomParamNames(paramNames); SetCustomParamNamesChangedByUser(true); resetSignInState();}}/>
 
             {serverRequireCredentials
