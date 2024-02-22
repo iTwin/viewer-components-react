@@ -4,21 +4,21 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 
-export interface Properties {
+export interface PropertiesGroupColor {
   showGroupColor: boolean;
   setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
 }
 
-export const PropertiesContext = React.createContext<Properties>({
+export const PropertiesGroupColorContext = React.createContext<PropertiesGroupColor>({
   showGroupColor: false,
   setShowGroupColor: () => { },
 });
 
-export const usePropertiesContext = (): Properties => {
-  const context = React.useContext(PropertiesContext);
+export const usePropertiesGroupColorContext = (): PropertiesGroupColor => {
+  const context = React.useContext(PropertiesGroupColorContext);
   if (!context) {
     throw new Error(
-      "usePropertiesContext should be used within a PropertiesContext provider"
+      "usePropertiesGroupColorContext should be used within a PropertiesGroupColorContext provider"
     );
   }
   return context;

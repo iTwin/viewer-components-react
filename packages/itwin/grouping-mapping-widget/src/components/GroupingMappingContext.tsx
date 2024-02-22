@@ -20,7 +20,7 @@ import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from ".
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import type { OverlappedElementsMetadata } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
-import { PropertiesContext } from "./context/PropertiesContext";
+import { PropertiesGroupColorContext } from "./context/PropertiesGroupColorContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { createExtractionClient, ExtractionClientContext } from "./context/ExtractionClientContext";
 import type { Query } from "@tanstack/react-query";
@@ -201,9 +201,9 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
             <ExtractionStatusJobContext.Provider value={extractionStateJobContextValue}>
               <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
                 <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-                  <PropertiesContext.Provider value={propertiesContextValue}>
+                  <PropertiesGroupColorContext.Provider value={propertiesContextValue}>
                     {props.children}
-                  </PropertiesContext.Provider>
+                  </PropertiesGroupColorContext.Provider>
                 </GroupHilitedElementsContext.Provider>
               </GroupingMappingCustomUIContext.Provider>
             </ExtractionStatusJobContext.Provider>

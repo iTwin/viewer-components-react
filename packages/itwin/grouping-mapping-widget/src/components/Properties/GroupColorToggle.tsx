@@ -11,7 +11,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import type { QueryResults } from "../Groups/hooks/useKeySetHiliteQueries";
 import { useGroupKeySetQuery } from "../Groups/hooks/useKeySetHiliteQueries";
-import { usePropertiesContext } from "../context/PropertiesContext";
+import { usePropertiesGroupColorContext } from "../context/PropertiesGroupColorContext";
 import { useMutation } from "@tanstack/react-query";
 import { useIsMounted } from "../../common/hooks/useIsMounted";
 
@@ -29,7 +29,7 @@ export const GroupColorToggle = ({
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const { showGroupColor, setShowGroupColor } = usePropertiesContext();
+  const { showGroupColor, setShowGroupColor } = usePropertiesGroupColorContext();
   const { data: hiliteIdsResult, isFetched, isFetching } = useGroupKeySetQuery(group, iModelConnection, showGroupColor);
   const isMounted = useIsMounted();
 
