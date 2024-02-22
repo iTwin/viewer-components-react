@@ -62,11 +62,6 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
     return "";
   }
 
-  private loadFromStorage2(arg: PreferenceKeyArg & ITwinIdArg) {
-    const storage = new BrowserStorage<KeyContentProps>({itemKeyName: this.getStorageItemKey(arg)});
-    return storage.getContent();
-  }
-
   public async get(arg: PreferenceKeyArg & ITwinIdArg) {
     const storage = new BrowserStorage<KeyContentProps>({itemKeyName: this.getStorageItemKey(arg)});
     return storage.get(PreferencesBrowserStorage.getPreferenceKey(arg));

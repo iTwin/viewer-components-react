@@ -152,8 +152,7 @@ export function CustomParamsSettingsPanel() {
                       size="small"
                       styleType="borderless"
                       className="map-source-list-entry-button"
-                      title={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}
-                      onClick={(_event) => {}}>
+                      title={MapLayersUI.translate("CustomParamSettings.EditButtonTitle")}>
                       <SvgEdit/>
                     </IconButton>
                     <IconButton
