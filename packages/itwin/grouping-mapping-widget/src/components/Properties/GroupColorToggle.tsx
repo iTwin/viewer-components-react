@@ -33,7 +33,7 @@ export const GroupColorToggle = ({
   const { data: hiliteIdsResult, isFetched, isFetching } = useGroupKeySetQuery(group, iModelConnection, showGroupColor);
   const isMounted = useIsMounted();
 
-  const { mutate: visualizationMutate, isLoading: isVisualizing } = useMutation({
+  const { mutate: mutateVisualization, isLoading: isVisualizing } = useMutation({
     mutationFn: async (hiliteIds: QueryResults) => {
       Presentation.selection.clearSelection(
         "GroupingMappingWidget",
@@ -50,8 +50,8 @@ export const GroupColorToggle = ({
   });
 
   useEffect(() => {
-    isFetched && showGroupColor && hiliteIdsResult && isMounted() && visualizationMutate(hiliteIdsResult);
-  }, [hiliteIdsResult, isFetched, isMounted, showGroupColor, visualizationMutate]);
+    isFetched && showGroupColor && hiliteIdsResult && isMounted() && mutateVisualization(hiliteIdsResult);
+  }, [hiliteIdsResult, isFetched, isMounted, showGroupColor, mutateVisualization]);
 
   const handleToggleChange = useCallback(() => {
     setShowGroupColor((b) => {

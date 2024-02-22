@@ -62,7 +62,7 @@ export const CalculatedPropertyAction = ({
       );
   }, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties"] });
+      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] });
       onSaveSuccess();
       setPropertyName("");
       setType(CalculatedPropertyType.Undefined);

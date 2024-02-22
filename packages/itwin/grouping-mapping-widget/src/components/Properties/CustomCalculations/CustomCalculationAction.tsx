@@ -128,7 +128,7 @@ export const CustomCalculationAction = ({
       );
   }, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["customCalculations"] });
+      await queryClient.invalidateQueries({ queryKey: ["customCalculations", iModelId, mappingId, groupId] });
       onSaveSuccess();
       setPropertyName("");
       setFormula("");

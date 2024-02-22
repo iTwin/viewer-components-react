@@ -12,7 +12,7 @@ import {
   LabeledSelect,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useMappingClient } from "../../context/MappingClientContext";
@@ -113,28 +113,27 @@ export const GroupPropertyAction = ({
     return { propertiesMetaData, groupPropertyDetails };
   }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, iModelId, mappingClient, mappingId]);
 
-  const onSuccess = useCallback((data) => {
-    setPropertiesMetaData(data.propertiesMetaData);
+  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["groupProperties", iModelId, mappingId, group.id], fetchProperties);
 
-    if (data.groupPropertyDetails) {
-      const { propertyName, dataType, quantityType, ecProperties } = data.groupPropertyDetails;
-      setPropertyName(propertyName);
-      setOldPropertyName(propertyName);
-      setDataType(dataType);
-      setQuantityType(quantityType);
+  useEffect(() => {
+    if (isLoadingPropertiesSuccessful && data) {
+      setPropertiesMetaData(data.propertiesMetaData);
 
-      const properties = findProperties(ecProperties, data.propertiesMetaData);
-      if (properties.length === 0) {
-        setPropertiesNotFoundAlert(true);
+      if (data.groupPropertyDetails) {
+        setPropertyName(data.groupPropertyDetails.propertyName);
+        setOldPropertyName(data.groupPropertyDetails.propertyName);
+        setDataType(data.groupPropertyDetails.dataType);
+        setQuantityType(data.groupPropertyDetails.quantityType);
+
+        const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
+        if (properties.length === 0) {
+          setPropertiesNotFoundAlert(true);
+        }
+
+        setSelectedProperties(properties);
       }
-
-      setSelectedProperties(properties);
     }
-  }, []);
-
-  const { isLoading: isLoadingProperties } = useQuery(["properties", iModelId, mappingId, group.id], fetchProperties, {
-    onSuccess,
-  });
+  }, [data, isLoadingPropertiesSuccessful]);
 
   const { mutate: onSave, isLoading: isSaving } = useMutation({
     mutationFn: async () => {
@@ -166,7 +165,7 @@ export const GroupPropertyAction = ({
     onSuccess: async () => {
       onSaveSuccess();
       reset();
-      await queryClient.invalidateQueries(["groupProperties"]);
+      await queryClient.invalidateQueries(["groupProperties", iModelId, mappingId, group.id]);
     },
   });
 
