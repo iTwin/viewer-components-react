@@ -7,27 +7,30 @@
 // the following quiet warning caused by react-beautiful-dnd package
 /* eslint-disable @typescript-eslint/unbound-method */
 
+import "./MapLayerManager.scss";
 import * as React from "react";
 import { Draggable, DraggableChildrenFn, Droppable, DroppableProvided, DroppableStateSnapshot } from "react-beautiful-dnd";
-import { IModelApp, MapLayerImageryProviderStatus, MapLayerIndex, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority, ScreenViewport } from "@itwin/core-frontend";
-import { Icon } from "@itwin/core-react";
-import { assert } from "@itwin/core-bentley";
 import { UiFramework } from "@itwin/appui-react";
+import { assert } from "@itwin/core-bentley";
+import { ImageMapLayerSettings, SubLayerId } from "@itwin/core-common";
+import {
+  IModelApp, MapLayerImageryProviderStatus, MapLayerIndex, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority,
+  ScreenViewport,
+} from "@itwin/core-frontend";
+import { Icon } from "@itwin/core-react";
 import { Button, Checkbox } from "@itwin/itwinui-react";
-import { SubLayersPopupButton } from "./SubLayersPopupButton";
+import { MapLayersUI } from "../../mapLayers";
+import { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
-import { MapTypesOptions, StyleMapLayerSettings } from "../Interfaces";
 import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
 import { MapUrlDialog, SourceState } from "./MapUrlDialog";
-import "./MapLayerManager.scss";
-import { MapLayersUI } from "../../mapLayers";
-import { ImageMapLayerSettings, SubLayerId } from "@itwin/core-common";
+import { SubLayersPopupButton } from "./SubLayersPopupButton";
 
 /** @internal */
 interface MapLayerDroppableProps {
   isOverlay: boolean;
   layersList?: StyleMapLayerSettings[];
-  mapTypesOptions?: MapTypesOptions;
+  mapLayerOptions?: MapLayerOptions;
   getContainerForClone: () => HTMLElement;
   activeViewport: ScreenViewport;
   onMenuItemSelected: (action: string, mapLayerSettings: StyleMapLayerSettings) => void;
@@ -155,7 +158,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
                     layerRequiringCredentials={layerSettings?.toJSON()}
                     onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
                     onCancelResult={() => {UiFramework.dialogs.modal.close();}}
-                    mapTypesOptions={props.mapTypesOptions}></MapUrlDialog>);
+                    mapLayerOptions={props.mapLayerOptions}></MapUrlDialog>);
                 }
               }
 
