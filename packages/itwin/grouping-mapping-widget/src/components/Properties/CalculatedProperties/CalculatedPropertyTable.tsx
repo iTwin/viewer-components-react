@@ -94,12 +94,7 @@ export const CalculatedPropertyTable = ({
               }
             >
               <IconButton styleType="borderless">
-                <SvgMore
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                  }}
-                />
+                <SvgMore />
               </IconButton>
             </DropdownMenu>
           );
@@ -120,7 +115,7 @@ export const CalculatedPropertyTable = ({
         propertyId,
       );
     },
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties"] }),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, groupId] }),
   });
 
   return (

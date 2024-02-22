@@ -83,7 +83,7 @@ export const GroupPropertyAction = ({
     setSelectedProperties([]);
   }, []);
 
-  const fetchProperties = useCallback(async () => {
+  const fetchPropertiesMetadata = useCallback(async () => {
     if (!iModelConnection) return;
 
     const result = await manufactureKeys(group.query, iModelConnection);
@@ -113,10 +113,10 @@ export const GroupPropertyAction = ({
     return { propertiesMetaData, groupPropertyDetails };
   }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, iModelId, mappingClient, mappingId]);
 
-  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["groupProperties", iModelId, mappingId, group.id], fetchProperties);
+  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["groupProperties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
 
   useEffect(() => {
-    if (isLoadingPropertiesSuccessful && data) {
+    if (isLoadingPropertiesSuccessful && data?.propertiesMetaData) {
       setPropertiesMetaData(data.propertiesMetaData);
 
       if (data.groupPropertyDetails) {

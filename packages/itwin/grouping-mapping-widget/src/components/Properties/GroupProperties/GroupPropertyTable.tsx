@@ -91,12 +91,7 @@ export const GroupPropertyTable = ({
               ].flatMap((p) => p)}
             >
               <IconButton styleType='borderless' title='Property Options'>
-                <SvgMore
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                  }}
-                />
+                <SvgMore />
               </IconButton>
             </DropdownMenu>
           );
@@ -117,7 +112,7 @@ export const GroupPropertyTable = ({
         propertyId,
       );
     },
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["groupProperties"] }),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, groupId] }),
   });
 
   return (

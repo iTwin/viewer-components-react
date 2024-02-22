@@ -93,12 +93,7 @@ export const CustomCalculationTable = ({
               ].flatMap((p) => p)}
             >
               <IconButton styleType='borderless'>
-                <SvgMore
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                  }}
-                />
+                <SvgMore />
               </IconButton>
             </DropdownMenu>
           );
@@ -119,7 +114,7 @@ export const CustomCalculationTable = ({
         propertyId,
       );
     },
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["customCalculations"] }),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["customCalculations", iModelId, mappingId, groupId] }),
   });
 
   return (

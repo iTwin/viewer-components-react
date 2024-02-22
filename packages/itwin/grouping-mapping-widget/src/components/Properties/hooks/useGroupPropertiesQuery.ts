@@ -8,7 +8,7 @@ import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 
 export const useGroupPropertiesQuery = (iModelId: string, mappingId: string, groupId: string, getAccessToken: GetAccessTokenFn, mappingsClient: IMappingsClient) => {
   return useQuery({
-    queryKey: ["groupProperties", mappingId, groupId],
+    queryKey: ["groupProperties", iModelId, mappingId, groupId],
     queryFn:  async () => mappingsClient.getGroupProperties(await getAccessToken(), iModelId, mappingId, groupId),
   });
 };
