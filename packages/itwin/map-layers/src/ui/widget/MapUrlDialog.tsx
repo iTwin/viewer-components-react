@@ -4,22 +4,23 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
+import "./MapUrlDialog.scss";
+import * as React from "react";
 import { SpecialKey } from "@itwin/appui-abstract";
-import { Button, Icon, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
+import { BeEvent, Guid } from "@itwin/core-bentley";
 import { ImageMapLayerProps } from "@itwin/core-common";
 import {
-  IModelApp, MapLayerAccessClient, MapLayerSource,
-  MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority, ScreenViewport,
+  IModelApp, MapLayerAccessClient, MapLayerSource, MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority,
+  ScreenViewport,
 } from "@itwin/core-frontend";
 import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
-import * as React from "react";
+import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
+import { Button, Icon, Input, LabeledInput, ProgressLinear } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
-import { MapTypesOptions } from "../Interfaces";
-import { BeEvent, Guid } from "@itwin/core-bentley";
+import { MapLayerOptions } from "../Interfaces";
 import { SelectMapFormat } from "./SelectMapFormat";
-import "./MapUrlDialog.scss";
-import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
+import { UserPreferencesStorageOptions } from "./UserPreferencesStorageOptions";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -35,7 +36,7 @@ interface MapUrlDialogProps {
   isOverlay: boolean;
   onOkResult: (result?: SourceState) => void;
   onCancelResult?: () => void;
-  mapTypesOptions?: MapTypesOptions;
+  mapLayerOptions?: MapLayerOptions;
 
   // An optional layer definition can be provide to enable the edit mode
   layerRequiringCredentials?: ImageMapLayerProps;
@@ -50,7 +51,7 @@ export interface SourceState {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapUrlDialog(props: MapUrlDialogProps) {
-  const { onOkResult, mapTypesOptions } = props;
+  const { onOkResult, mapLayerOptions } = props;
 
   const getMapUrlFromProps = React.useCallback(() => {
     if (props.mapLayerSourceToEdit) {
@@ -85,8 +86,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [nameInputPlaceHolder] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.NameInputPlaceHolder"));
   const [urlLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.URL"));
   const [urlInputPlaceHolder] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.UrlInputPlaceHolder"));
-  const [iTwinSettingsLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.StoreOnITwinSettings"));
-  const [modelSettingsLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.StoreOnModelSettings"));
   const [missingCredentialsLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.MissingCredentials"));
   const [invalidCredentialsLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCredentials"));
   const [externalLoginTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.ExternalLogin"));
@@ -115,6 +114,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [accessClient, setAccessClient] = React.useState<MapLayerAccessClient | undefined>();
   const [isAccessClientInitialized, setAccessClientInitialized] = React.useState(false);
   const [shouldAutoAttachSource, setShouldAutoAttachSource] = React.useState(true);
+  const [incompatibleFormat, setIncompatibleFormat] = React.useState(false);
 
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
 
@@ -292,6 +292,8 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
           onOkResult({source, validation});
+        } else if (validation.status === MapLayerSourceStatus.IncompatibleFormat) {
+          setIncompatibleFormat(true);
         } else {
           const authNeeded = await updateAuthState(source, validation);
           if (!authNeeded)  {
@@ -341,6 +343,11 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   }, [mapType]);
 
+  // After a map type change, make sure the different Oauth states are reset.
+  React.useEffect(() => {
+    setIncompatibleFormat(false);
+  }, [mapType, mapUrl]);
+
   // The first time the dialog is loaded and we already know the layer requires auth. (i.e ImageryProvider already made an attempt)
   // makes a request to discover the authentification types and adjust UI accordingly (i.e. username/password fields, Oauth popup)
   // Without this effect, user would have to manually click the 'OK' button in order to trigger the layer connection.
@@ -382,9 +389,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       && !layerAttachPending
       && (!serverRequireCredentials || credentialsSet)
       && !invalidCredentialsProvided
+      && !incompatibleFormat
       && (externalLoginUrl === undefined || (externalLoginUrl !== undefined && oauthProcessSucceeded));
     return ready;
-  }, [userName, password, mapUrl, mapName, serverRequireCredentials, layerAttachPending, invalidCredentialsProvided, externalLoginUrl, oauthProcessSucceeded]);
+  }, [userName, password, mapUrl, mapName, layerAttachPending, serverRequireCredentials, invalidCredentialsProvided, incompatibleFormat, externalLoginUrl, oauthProcessSucceeded]);
 
   // const buttonCluster = React.useMemo(() => [
   //   { type: DialogButtonType.OK, onClick: handleOk, disabled: !readyToSave() },
@@ -440,7 +448,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   // Utility function to get warning message section
   function renderWarningMessage(): React.ReactNode {
-    let node: React.ReactNode;
     let warningMessage: string | undefined;
 
     // Get the proper warning message
@@ -474,7 +481,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     } else {
       return (<span className="map-layer-source-placeholder">&nbsp;</span>);
     }
-    return node;
   }
 
   // Use a hook to display the popup.
@@ -532,7 +538,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
               value={mapType}
               disabled={props.layerRequiringCredentials !== undefined || props.mapLayerSourceToEdit !== undefined || layerAttachPending || layerAuthPending}
               onChange={setMapType}
-              mapTypesOptions={mapTypesOptions}
+              mapTypesOptions={mapLayerOptions?.mapTypeOptions}
+              status={incompatibleFormat ? "warning" : undefined}
+              message={incompatibleFormat ? MapLayersUI.translate("CustomAttach.InvalidType") : undefined}
             />
             <span className="map-layer-source-label">{nameLabel}</span>
             <Input className="map-layer-source-input" placeholder={nameInputPlaceHolder} onChange={onNameChange} value={mapName} disabled={props.layerRequiringCredentials !== undefined || layerAttachPending || layerAuthPending} />
@@ -571,17 +579,14 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             {!props.layerRequiringCredentials
             && !props.mapLayerSourceToEdit
             && <div title={!isSettingsStorageAvailable ? noSaveSettingsWarning : ""}>
-              {hasImodelContext &&
-                <div>
-                  <Radio disabled={!isSettingsStorageAvailable}
-                    name="settingsStorage" value="iTwin"
-                    label={iTwinSettingsLabel} checked={settingsStorage === "iTwin"}
-                    onChange={onRadioChange} />
-                  <Radio disabled={!isSettingsStorageAvailable}
-                    name="settingsStorage" value="Model"
-                    label={modelSettingsLabel} checked={settingsStorage === "Model"}
-                    onChange={onRadioChange} />
-                </div>}
+              {hasImodelContext && mapLayerOptions?.showUserPreferencesStorageOptions && (
+                <UserPreferencesStorageOptions
+                  disabled={!isSettingsStorageAvailable}
+                  itwinChecked={settingsStorage === "iTwin"}
+                  modelChecked={settingsStorage === "Model"}
+                  onChange={onRadioChange}
+                />
+              )}
             </div>}
           </div>
         </div>
