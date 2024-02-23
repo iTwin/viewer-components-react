@@ -44,7 +44,6 @@ interface SelectMapFormatProps {
 export function SelectMapFormat(props: SelectMapFormatProps) {
 
   const [mapFormat, setMapFormat] = React.useState(props.value ?? MAP_TYPES.arcGis);
-  const [techPreviewTooltip] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.TechPreviewBadgeTooltip"));
 
   const [mapFormats] = React.useState((): SelectOption<string>[] => {
     const formats: SelectOption<string>[] = [
@@ -74,15 +73,14 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
       className="map-layer-source-select"
       options={mapFormats}
       value={mapFormat}
-      // disabled={props.disabled}
+      disabled={props.disabled}
       onChange={handleOnChange}
       size="small"
-      {...props}
       itemRenderer={
         (option) => (
           <MenuItem
             badge={option.id?.includes("techPreview") ?
-              <div title={techPreviewTooltip} className="map-layer-source-select-previewBadge">
+              <div title={MapLayersUI.translate("Labels.TechPreviewBadgeTooltip")} className="map-layer-source-select-previewBadge">
                 <Icon size="small"><SvgTechnicalPreviewMini /></Icon>
               </div>
               : undefined}>

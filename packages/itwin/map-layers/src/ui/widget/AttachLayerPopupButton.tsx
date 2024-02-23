@@ -102,9 +102,10 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           if (clonedSource !== undefined) {
             clonedSource.userName = source.userName;
             clonedSource.password = source.password;
+            clonedSource.unsavedQueryParams = {...source.unsavedQueryParams};
+            clonedSource.savedQueryParams = {...source.savedQueryParams};
             sourceToAdd = clonedSource;
           }
-
         }
 
         const settings = sourceToAdd.toLayerSettings(subLayer ? [subLayer] : subLayers);
@@ -118,7 +119,6 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       if (oneMapLayerPerSubLayer && subLayers) {
         const layerNamesAttached: string[] = [];
         for (const subLayer of subLayers) {
-
           const attachedLayerName = doAttachLayer(`${source.name} - ${subLayer.name}`, subLayer);
           if (attachedLayerName !== undefined)  {
             layerNamesAttached.push(attachedLayerName);
@@ -130,7 +130,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
         }
       } else {
-        const attachedLayerName = doAttachLayer(source.name);
+        const attachedLayerName = doAttachLayer(source.name, undefined);
         if (attachedLayerName !== undefined) {
           const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: attachedLayerName });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
@@ -215,8 +215,8 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     async function attemptToAddLayer() {
       if (layerNameToAdd && activeViewport) {
         // if the layer is not in the style add it now.
-        const mapLayerSettings = sources?.find((source) => source.name === layerNameToAdd);
-        if (mapLayerSettings === undefined) {
+        const foundSource = sources?.find((source) => source.name === layerNameToAdd);
+        if (foundSource === undefined) {
           return;
         }
 
@@ -225,34 +225,38 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
             setLoading(true);
           }
 
-          const sourceValidation = await mapLayerSettings.validateSource();
+          const sourceValidation = await foundSource.validateSource();
           if (sourceValidation.status === MapLayerSourceStatus.Valid || sourceValidation.status === MapLayerSourceStatus.RequireAuth) {
             if (sourceValidation.status === MapLayerSourceStatus.Valid) {
-              if (sourceValidation.subLayers && needsFeatureSelection(mapLayerSettings, sourceValidation)) {
-                openFeatureSelectionDialog(sourceValidation.subLayers, mapLayerSettings);
+              if (sourceValidation.subLayers && needsFeatureSelection(foundSource, sourceValidation)) {
+                openFeatureSelectionDialog(sourceValidation.subLayers, foundSource);
                 if (onHandleOutsideClick) {
                   onHandleOutsideClick(false);
                 }
               } else {
-                attachLayer(mapLayerSettings, sourceValidation.subLayers, false);
+                attachLayer(foundSource, sourceValidation.subLayers, false);
               }
             } else if (sourceValidation.status === MapLayerSourceStatus.RequireAuth && isMounted.current) {
-              UiFramework.dialogs.modal.open(
-                <MapUrlDialog
-                  activeViewport={activeViewport}
-                  isOverlay={isOverlay}
-                  layerRequiringCredentials={mapLayerSettings.toJSON()}
-                  onOkResult={(sourceState?: SourceState) => handleModalUrlDialogOk(LayerAction.New, sourceState)}
-                  onCancelResult={handleModalUrlDialogCancel}
-                  {...mapLayerOptions} />
-              );
+              const layer = foundSource.toLayerSettings();
+              if (layer) {
+                UiFramework.dialogs.modal.open(
+                  <MapUrlDialog
+                    activeViewport={activeViewport}
+                    isOverlay={isOverlay}
+                    signInModeArgs={{layer, validation: sourceValidation, source: foundSource}}
+                    onOkResult={(sourceState?: SourceState) => handleModalUrlDialogOk(LayerAction.New, sourceState)}
+                    onCancelResult={handleModalUrlDialogCancel}
+                    {...mapLayerOptions} />
+                );
+              }
+
               if (onHandleOutsideClick) {
                 onHandleOutsideClick(false);
               }
             }
 
           } else {
-            const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerValidationFailed", { sourceUrl: mapLayerSettings.url });
+            const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerValidationFailed", { sourceUrl: foundSource.url });
             IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
             if (isMounted.current) {
               setLoading(false);
@@ -262,7 +266,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           if (isMounted.current) {
             setLoading(false);
           }
-          const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error: err, sourceName: mapLayerSettings.name });
+          const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error: err, sourceName: foundSource.name });
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
         }
       }
