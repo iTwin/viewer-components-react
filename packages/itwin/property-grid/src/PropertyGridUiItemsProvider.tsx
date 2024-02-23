@@ -12,7 +12,7 @@ import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { Key } from "@itwin/presentation-common";
-import { Presentation } from "@itwin/presentation-frontend";
+import { Presentation, SelectionChangeType } from "@itwin/presentation-frontend";
 import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState";
 import { PropertyGridComponent } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
@@ -85,9 +85,17 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
 
     return Presentation.selection.selectionChange.addListener((args) => {
       const selection = Presentation.selection.getSelection(args.imodel);
-      // show property grid widget if there are at least one node or valid instance selected.
-      const show = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
-      widgetDef.setWidgetState(show ? WidgetState.Open : WidgetState.Hidden);
+      // hide grid widget if there are no nodes or valid instances selected.
+      const hasSelectedElements = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
+
+      if (!hasSelectedElements) {
+        widgetDef.setWidgetState(WidgetState.Hidden);
+        return;
+      }
+
+      if (widgetDef.state === WidgetState.Hidden || args.changeType === SelectionChangeType.Replace) {
+        widgetDef.setWidgetState(WidgetState.Open);
+      }
     });
   }, [widgetDef]);
 
