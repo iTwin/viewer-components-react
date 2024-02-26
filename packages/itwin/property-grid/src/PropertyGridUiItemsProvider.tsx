@@ -85,9 +85,17 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
 
     return Presentation.selection.selectionChange.addListener((args) => {
       const selection = Presentation.selection.getSelection(args.imodel);
-      // show property grid widget if there are at least one node or valid instance selected.
-      const show = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
-      widgetDef.setWidgetState(show ? WidgetState.Open : WidgetState.Hidden);
+      // hide grid widget if there are no nodes or valid instances selected.
+      const hasSelectedElements = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
+
+      if (!hasSelectedElements) {
+        widgetDef.setWidgetState(WidgetState.Hidden);
+        return;
+      }
+
+      if (widgetDef.state === WidgetState.Hidden) {
+        widgetDef.setWidgetState(WidgetState.Open);
+      }
     });
   }, [widgetDef]);
 
