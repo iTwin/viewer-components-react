@@ -23,6 +23,28 @@
     "AllOn": "Select All",
     "AllOff": "Select None"
   },
+  "CustomParamEditDialog":
+  {
+    "DialogTitleAdd": "Add custom query parameter",
+    "DialogTitleEdit": "Edit custom query parameter",
+    "NameExists": "Name already exists",
+    "ParamKeyLabel": "Key",
+    "ParamNameLabel": "Name",
+    "ParamValueLabel": "Value",
+    "ParamValueNonPrivateMessage": "Value should not contain sensitive data",
+    "PrivateToggleTooltip": "Private query parameters won't be saved part of the iTwin",
+    "PrivateToggleLabel": "Keep query parameter private"
+  },
+  "CustomParamSelect":
+  {
+    "DisabledTitle": "Custom query parameter can be configured in the advanced settings"
+  },
+  "CustomParamSettings":
+  {
+    "DeleteButtonTitle": "Delete custom parameter",
+    "EditButtonTitle": "Edit custom parameter",
+    "SectionLabel": "Custom parameters"
+  },
   "MapLayerActionButtons": {
     "ShowAllLabel": "Show all",
     "HideAllLabel": "Hide all",
@@ -38,9 +60,10 @@
     "AttachCustomLayer": "Add New Layer",
     "AttacheInfo": "Map layer attached from URL:",
     "Custom": "New",
+    "CustomParamsLabel": "Custom Query Parameters",
     "LoadingMapSources": "Loading Map Sources",
     "EditCustomLayer": "Edit Layer",
-    "EditLayerDefButtonTitle": "Edit Layer Definition",
+    "EditLayerDefButtonTitle": "Edit layer definition",
     "ErrorLoadingLayers": "Error retrieving map layers stored in the settings service",
     "ErrorRetrieveUserModel": "Could not get saved Map Layers for user by model: {{errorMessage}}",
     "ErrorRetrieveUserITwin": "Could not get saved Map Layers for user by iTwin: {{errorMessage}}",
@@ -67,7 +90,6 @@
     "SelectLayersToCreate": "Select Layers To Add",
     "StoreOnModelSettings": "Store on Model Settings",
     "StoreOnITwinSettings": "Store on iTwin Settings",
-    "TechPreviewBadgeTooltip": "Technology preview",
     "TooManyLayersSelected": "{{layerCount}} layers selected; performance may be affected.",
     "Type": "Type",
     "URL": "URL",
@@ -80,6 +102,9 @@
     "PasswordRequired": "Password required",
     "Username": "Username",
     "UsernameRequired": "Username required"
+  },
+  "Labels" : {
+    "TechPreviewBadgeTooltip": "Technology preview"
   },
   "Messages": {
     "NotSupported": "No active viewport or geo-located iModel available.",

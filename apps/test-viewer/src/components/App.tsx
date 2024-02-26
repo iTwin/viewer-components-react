@@ -7,9 +7,9 @@ import "./App.scss";
 import { Route, Routes } from "react-router-dom";
 import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
+import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
 import { Viewer } from "./Viewer";
-import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 
 export function App() {
   return (
