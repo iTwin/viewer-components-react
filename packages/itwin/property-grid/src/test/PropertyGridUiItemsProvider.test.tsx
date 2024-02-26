@@ -8,7 +8,6 @@ import { createRef } from "react";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework, WidgetState } from "@itwin/appui-react";
 import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
-import { SelectionChangeType } from "@itwin/presentation-frontend";
 import * as usePropertyGridTransientStateModule from "../hooks/UsePropertyGridTransientState";
 import * as propertyGridComponent from "../PropertyGridComponent";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -161,19 +160,6 @@ describe("PropertyGridUiItemsProvider", () => {
       };
       selectionManager.getSelection.returns(new KeySet([key]));
       selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
-
-      await waitFor(() => {
-        expect(widgetDef.setWidgetState).to.be.called;
-        expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Open);
-      });
-    });
-
-    it("opens widget when state is not `Hidden` and `UnifiedSelection` replaced", async () => {
-      renderWidget();
-
-      widgetDef.state = WidgetState.Closed;
-      selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
-      selectionManager.selectionChange.raiseEvent({ changeType: SelectionChangeType.Replace } as SelectionChangeEventArgs, {} as ISelectionProvider);
 
       await waitFor(() => {
         expect(widgetDef.setWidgetState).to.be.called;

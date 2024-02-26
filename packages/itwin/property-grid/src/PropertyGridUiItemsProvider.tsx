@@ -12,7 +12,7 @@ import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { Key } from "@itwin/presentation-common";
-import { Presentation, SelectionChangeType } from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState";
 import { PropertyGridComponent } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
@@ -93,7 +93,7 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
         return;
       }
 
-      if (widgetDef.state === WidgetState.Hidden || args.changeType === SelectionChangeType.Replace) {
+      if (widgetDef.state === WidgetState.Hidden) {
         widgetDef.setWidgetState(WidgetState.Open);
       }
     });
