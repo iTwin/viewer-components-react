@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix property widget selection focus",
+  "packageName": "@itwin/property-grid-react",
+  "email": "33428304+jasdom@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
