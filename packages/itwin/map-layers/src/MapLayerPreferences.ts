@@ -58,6 +58,8 @@ export class MapLayerPreferences {
     const accessToken = undefined !== IModelApp.authorizationClient ? (await IModelApp.authorizationClient.getAccessToken()) : undefined;
 
     const sourceJSON = source.toJSON();
+    if (!sourceJSON.formatId)
+      return false;
     const mapLayerSetting: MapLayerPreferencesContent = {
       url: sourceJSON.url,
       name: sourceJSON.name,

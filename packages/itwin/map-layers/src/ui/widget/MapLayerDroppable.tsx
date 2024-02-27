@@ -127,6 +127,35 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
 
         >
           {activeLayer.name}
+          {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth &&
+          <Button
+            disabled={props.disabled}
+            size="small"
+            styleType="borderless"
+            onClick={() => {
+              const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
+              if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
+                const index = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
+                const layer = props.activeViewport.displayStyle.mapLayerAtIndex(index);
+                if (layer instanceof ImageMapLayerSettings) {
+                  UiFramework.dialogs.modal.open(
+                    <MapUrlDialog
+                      activeViewport={props.activeViewport}
+                      isOverlay={props.isOverlay}
+                      signInModeArgs={{layer}}
+                      onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
+                      onCancelResult={() => {UiFramework.dialogs.modal.close();}}
+                      mapLayerOptions={props.mapLayerOptions} />
+                  );
+                }
+              }
+
+            }}
+            title={requireAuthTooltip}
+          >
+            <Icon className="map-layer-source-item-warnMessage-icon" iconSpec="icon-status-warning" />
+          </Button>
+          }
         </span>
 
         {/* SubLayersPopupButton */}
@@ -137,9 +166,8 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
               expandMode="rootGroupOnly"
               subLayers={props.activeViewport ? activeLayer.subLayers : undefined}
               singleVisibleSubLayer={activeLayer.provider?.mutualExclusiveSubLayer}
-              onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }
-
-              } />
+              onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }}
+            />
           }
         </div>
         {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth &&
@@ -151,14 +179,17 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
               const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
               if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
                 const index = { index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay };
-                const layerSettings = props.activeViewport.displayStyle.mapLayerAtIndex(index);
-                if (layerSettings instanceof ImageMapLayerSettings) {
-                  UiFramework.dialogs.modal.open(<MapUrlDialog activeViewport={props.activeViewport}
-                    isOverlay={props.isOverlay}
-                    layerRequiringCredentials={layerSettings?.toJSON()}
-                    onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
-                    onCancelResult={() => {UiFramework.dialogs.modal.close();}}
-                    mapLayerOptions={props.mapLayerOptions}></MapUrlDialog>);
+                const layer = props.activeViewport.displayStyle.mapLayerAtIndex(index);
+                if (layer instanceof ImageMapLayerSettings) {
+                  UiFramework.dialogs.modal.open(
+                    <MapUrlDialog
+                      activeViewport={props.activeViewport}
+                      isOverlay={props.isOverlay}
+                      signInModeArgs={{layer}}
+                      onOkResult={(sourceState?: SourceState) => handleOk(index, sourceState)}
+                      onCancelResult={() => {UiFramework.dialogs.modal.close();}}
+                      mapLayerOptions={props.mapLayerOptions} />
+                  );
                 }
               }
 
