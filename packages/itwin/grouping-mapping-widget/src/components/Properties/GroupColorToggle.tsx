@@ -6,7 +6,7 @@ import React, { useCallback, useEffect } from "react";
 import type { ToggleSwitchProps } from "@itwin/itwinui-react";
 import { toaster, ToggleSwitch } from "@itwin/itwinui-react";
 import type { Group } from "@itwin/insights-client";
-import { clearEmphasizedOverriddenElements, clearHiddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
+import { clearAll, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import type { QueryResults } from "../Groups/hooks/useKeySetHiliteQueries";
@@ -35,6 +35,7 @@ export const GroupColorToggle = ({
 
   const { mutate: mutateVisualization, isLoading: isVisualizing } = useMutation({
     mutationFn: async (hiliteIds: QueryResults) => {
+      clearAll();
       Presentation.selection.clearSelection(
         "GroupingMappingWidget",
         iModelConnection,
@@ -56,8 +57,7 @@ export const GroupColorToggle = ({
   const handleToggleChange = useCallback(() => {
     setShowGroupColor((b) => {
       if (b) {
-        clearEmphasizedOverriddenElements();
-        clearHiddenElements();
+        clearAll();
       }
       return !b;
     });
