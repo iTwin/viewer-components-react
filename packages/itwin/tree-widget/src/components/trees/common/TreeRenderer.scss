@@ -77,6 +77,22 @@
           margin: 0 calc(var(--enlarged-node-icon-padding) / 2);
         }
       }
+
+      > .presentation-components-node-action-buttons {
+        height: var(--enlarged-node-height);
+        width: var(--enlarged-node-height);
+
+        ._iui3-button {
+          height: var(--enlarged-node-height);
+          width: var(--enlarged-node-height);
+
+          svg {
+            height: var(--enlarged-node-height);
+            width: var(--enlarged-node-height);
+            padding: var(--iui-size-s);
+          }
+        }
+      }
     }
   }
 }

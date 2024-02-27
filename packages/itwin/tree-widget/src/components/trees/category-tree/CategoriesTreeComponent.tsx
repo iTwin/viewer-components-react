@@ -126,13 +126,32 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
         onSelectedChanged={searchOptions.onResultSelectedChanged}
         resultCount={searchOptions.matchedResultCount}
         selectedIndex={searchOptions.activeMatchIndex}
+        density={props.density}
       >
         {props.headerButtons
           ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport: props.viewport, categories, filteredCategories })}</Fragment>)
           : [
-              <ShowAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="show-all-btn" />,
-              <HideAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="hide-all-btn" />,
-              <InvertAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="invert-all-btn" />,
+              <ShowAllButton
+                viewport={props.viewport}
+                categories={categories}
+                filteredCategories={filteredCategories}
+                key="show-all-btn"
+                density={props.density}
+              />,
+              <HideAllButton
+                viewport={props.viewport}
+                categories={categories}
+                filteredCategories={filteredCategories}
+                key="hide-all-btn"
+                density={props.density}
+              />,
+              <InvertAllButton
+                viewport={props.viewport}
+                categories={categories}
+                filteredCategories={filteredCategories}
+                key="invert-all-btn"
+                density={props.density}
+              />,
             ]}
       </TreeHeader>
       <div className="tree-widget-tree-content">
@@ -175,7 +194,7 @@ async function getFilteredCategories(filteredProvider: IPresentationTreeDataProv
 function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
       onClick={() =>
@@ -193,7 +212,7 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
       onClick={() =>
@@ -212,7 +231,7 @@ function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
       title={TreeWidget.translate("invert")}
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       onClick={() => void invertAllCategories(props.filteredCategories ?? props.categories, props.viewport)}
     >

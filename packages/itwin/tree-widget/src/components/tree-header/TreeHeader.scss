@@ -14,6 +14,10 @@
     width: 100%;
     height: var(--iui-size-xl);
 
+    &.enlarge {
+      height: calc(var(--iui-size-xl) + var(--iui-size-m));
+    }
+
     > * {
       width: 100%;
       height: 100%;
@@ -64,6 +68,32 @@
 
     &.contracted {
       width: var(--iui-size-xl);
+    }
+  }
+
+  &.enlarge {
+    --enlarged-header-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
+    height: var(--enlarged-header-height);
+
+    .tree-widget-search-box {
+      height: var(--enlarged-header-height);
+
+      &.contracted {
+        width: var(--enlarged-header-height);
+      }
+    }
+
+    .button-container {
+      width: calc(100% - var(--enlarged-header-height));
+
+      ._iui3-button {
+        height: var(--enlarged-header-height);
+        min-width: var(--enlarged-header-height);
+      }
+
+      &.contracted {
+        width: var(--enlarged-header-height);
+      }
     }
   }
 }

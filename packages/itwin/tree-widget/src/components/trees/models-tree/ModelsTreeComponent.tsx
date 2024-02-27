@@ -146,15 +146,16 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
         onSelectedChanged={searchOptions.onResultSelectedChanged}
         resultCount={searchOptions.matchedResultCount}
         selectedIndex={searchOptions.activeMatchIndex}
+        density={props.density}
       >
         {props.headerButtons
           ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels })}</Fragment>)
           : [
-              <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" />,
-              <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" />,
-              <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" />,
-              <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" />,
-              <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" />,
+              <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={props.density} />,
+              <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={props.density} />,
+              <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={props.density} />,
+              <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={props.density} />,
+              <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={props.density} />,
             ]}
       </TreeHeader>
       <div className="tree-widget-tree-content">
@@ -179,7 +180,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
       onClick={() =>
@@ -197,7 +198,7 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
       onClick={() =>
@@ -215,7 +216,7 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("invert")}
       onClick={() =>
@@ -244,7 +245,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
       onClick={() => void toggleModels(models2d, is2dToggleActive, props.viewport)}
@@ -270,7 +271,7 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
-      size="small"
+      size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
       onClick={() => void toggleModels(models3d, is3dToggleActive, props.viewport)}
