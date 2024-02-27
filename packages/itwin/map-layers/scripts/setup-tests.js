@@ -14,7 +14,12 @@ const path = require("path");
 // A workaround to @testing-library/react {@testing-library/dom {wait-for-expect}} breaking somewhere,
 // because somewhere (most likely in jsdom) window.Date becomes undefined.
 // Similar issue mentioned in https://github.com/vuejs/vue-test-utils/issues/936
-require('jsdom-global')();
+require('jsdom-global')(
+  undefined,
+  {
+      url: "https://dev.wue-theme.test"
+  }
+);
 window.Date = Date;
 document.elementFromPoint = () => null;
 

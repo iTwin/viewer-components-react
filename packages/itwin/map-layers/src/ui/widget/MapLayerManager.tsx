@@ -19,6 +19,8 @@ import {
   OutputMessagePriority, ScreenViewport, TileTreeOwner, Viewport,
 } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
+import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
+import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences, MapLayerSourceChangeType } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
@@ -245,14 +247,21 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         return;
       }
 
-      // This is where the list of layers first gets populated...
+      // This is where the list of sources first gets populated...
       const sources: MapLayerSource[] = [];
       const addSource = (source: MapLayerSource) => !source.baseMap && sources.push(source);  // No longer let MapLayerSources drive bg maps.
       sourceLayers?.allSource.forEach(addSource);
+      const cpMappingStorage = new CustomParamsMappingStorage();
       preferenceSources.forEach((source) => {
-        // Do not add duplicate
-        if (!sources.find((curSource) => source.name === curSource.name))
+        // Find existing entries to avoid adding duplicated sources
+        if (!sources.find((curSource) => source.name === curSource.name)) {
+          const cpMapping = cpMappingStorage.get(source.url.toLowerCase());
+          if (cpMapping && cpMapping.length > 0) {
+            CustomParamUtils.setSourceCustomParams(source, cpMapping[0].customParamNames);
+          }
           addSource(source);
+        }
+
       });
       sources.sort((a: MapLayerSource, b: MapLayerSource) => compareStrings(a.name.toLowerCase(), b.name.toLowerCase()));
 

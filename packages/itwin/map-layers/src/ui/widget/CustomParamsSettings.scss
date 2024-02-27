@@ -1,0 +1,67 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+
+.customParamsSettings-previewBadge {
+  margin-left: 4px;
+  display:inline;
+  vertical-align: middle;
+}
+
+
+button.customParamsSettings-button {
+  font-size: 12px;
+  }
+
+.customParamsSettings-header {
+  display: flex;
+  align-content: center;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.customParamsSettings-container {
+  margin-top: 1rem;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+
+  .customParamsSettings-header-label {
+    width: auto;
+    white-space: nowrap;
+    flex: 1 1 auto;
+    padding-left: 10px;
+  }
+
+  button.customParamsSettings-header-add-button {
+    margin-right: 2px;
+  }
+
+.customParamsSettings-content {
+  height: 100px;
+  min-height: 60px;
+  border-top: 1px solid #ccc;
+
+    .customParamsSettings-content-listbox {
+      margin-top: 0;
+      border: none;
+    }
+
+    .customParamsSettings-content-entry {
+       margin-left: 4px;
+
+      button.customParamsSettings-content-entry-button {
+        height: auto;
+        padding: 0 4px 0 4px;
+      }
+      .customParamsSettings-content-entry-name {
+        flex: 1 1 auto;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        margin-right: 4px;
+      }
+    }
+  }
+}

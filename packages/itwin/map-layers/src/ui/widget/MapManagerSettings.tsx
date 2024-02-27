@@ -10,9 +10,10 @@ import { QuantityType, ViewState3d } from "@itwin/core-frontend";
 import { BackgroundMapProps, BackgroundMapSettings, PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode, TerrainProps } from "@itwin/core-common";
 import { useSourceMapContext } from "./MapLayerManager";
 import "./MapManagerSettings.scss";
-import { Select, SelectOption, Slider, ToggleSwitch } from "@itwin/itwinui-react";
+import { Select, SelectOption, Slider, Tab, Tabs, ToggleSwitch } from "@itwin/itwinui-react";
 import { QuantityNumberInput } from "@itwin/imodel-components-react";
 import { MapLayersUI } from "../../mapLayers";
+import { CustomParamsSettingsPanel } from "./CustomParamsSettings";
 
 /* eslint-disable deprecation/deprecation */
 
@@ -196,60 +197,74 @@ export function MapManagerSettings() {
   const [overrideMaskTransparencyLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Settings.OverrideMaskTransparency"));
   const [maskTransparencyLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Settings.MaskTransparency"));
 
+  const [tabIndex, setTabIndex] = React.useState(0);
+
   return (
-    <>
-      <div className="maplayers-settings-container">
+    <Tabs
+      labels={[
+        <Tab key={"general"} label='General' />,
+        <Tab key={"advanced"} label='Advanced' />,
+      ]}
+      onTabSelected={setTabIndex}>
+      {tabIndex === 0 && <>
+        <div className="maplayers-settings-container">
 
-        <span className="map-manager-settings-label">{transparencyLabel}</span>
-        <Slider min={0} max={100} values={[transparency * 100]} onChange={handleAlphaChange} step={1} />
+          <span className="map-manager-settings-label">{transparencyLabel}</span>
+          <Slider min={0} max={100} values={[transparency * 100]} onChange={handleAlphaChange} step={1} />
 
-        <span className="map-manager-settings-label">{locatableLabel}</span>
-        {/* eslint-disable-next-line deprecation/deprecation */}
-        <ToggleSwitch onChange={onLocatableToggle} checked={isLocatable} />
-
-        <span className="map-manager-settings-label">{maskingLabel}</span>
-        {/* eslint-disable-next-line deprecation/deprecation */}
-        <ToggleSwitch onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
-
-        <span className="map-manager-settings-label">{overrideMaskTransparencyLabel}</span>
-        <ToggleSwitch disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
-
-        <span className="map-manager-settings-label">{maskTransparencyLabel}</span>
-        <Slider disabled={masking === MapMaskingOption.None || !overrideMaskTransparency} min={0} max={100} values={[getNormalizedMaskTransparency() * 100]} onChange={handleMaskTransparencyChange} step={1} />
-
-        <>
-          <span className="map-manager-settings-label">{elevationOffsetLabel}</span>
-          <QuantityNumberInput disabled={applyTerrain} persistenceValue={groundBias} step={1} snap quantityType={QuantityType.LengthEngineering} onChange={handleElevationChange} onKeyDown={onKeyDown} />
-
-          <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
+          <span className="map-manager-settings-label">{locatableLabel}</span>
           {/* eslint-disable-next-line deprecation/deprecation */}
-          <ToggleSwitch disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
-        </>
+          <ToggleSwitch onChange={onLocatableToggle} checked={isLocatable} />
 
-      </div>
-      <div className="map-manager-settings-group">
-        <fieldset>
-          <legend>{terrainLabel}</legend>
+          <span className="map-manager-settings-label">{maskingLabel}</span>
+          {/* eslint-disable-next-line deprecation/deprecation */}
+          <ToggleSwitch onChange={onMaskingToggle} checked={masking !== MapMaskingOption.None} />
 
-          <div className="maplayers-settings-container">
+          <span className="map-manager-settings-label">{overrideMaskTransparencyLabel}</span>
+          <ToggleSwitch disabled={masking === MapMaskingOption.None} onChange={onOverrideMaskTransparencyToggle} checked={overrideMaskTransparency} />
 
-            <span className="map-manager-settings-label">{enableLabel}</span>
+          <span className="map-manager-settings-label">{maskTransparencyLabel}</span>
+          <Slider disabled={masking === MapMaskingOption.None || !overrideMaskTransparency} min={0} max={100} values={[getNormalizedMaskTransparency() * 100]} onChange={handleMaskTransparencyChange} step={1} />
+
+          <>
+            <span className="map-manager-settings-label">{elevationOffsetLabel}</span>
+            <QuantityNumberInput disabled={applyTerrain} persistenceValue={groundBias} step={1} snap quantityType={QuantityType.LengthEngineering} onChange={handleElevationChange} onKeyDown={onKeyDown} />
+
+            <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
             {/* eslint-disable-next-line deprecation/deprecation */}
-            <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
+            <ToggleSwitch disabled={applyTerrain} onChange={onToggleUseDepthBuffer} checked={useDepthBuffer} />
+          </>
 
-            <span className="map-manager-settings-label">{modelHeightLabel}</span>
-            <QuantityNumberInput disabled={!applyTerrain} persistenceValue={terrainOrigin} snap quantityType={QuantityType.LengthEngineering} onChange={handleHeightOriginChange} onKeyDown={onKeyDown} />
+        </div>
+        <div className="map-manager-settings-group">
+          <fieldset>
+            <legend>{terrainLabel}</legend>
 
-            <span className="map-manager-settings-label">{heightOriginLabel}</span>
-            {/* elevation correction component:  'popoverProps' is needed here otherwise selecting an option closes the menu popup.*/}
-            <Select popoverProps={{ appendTo: "parent" }} options={terrainHeightOptions.current} disabled={!applyTerrain} value={heightOriginMode} onChange={handleElevationTypeSelected} size="small" />
+            <div className="maplayers-settings-container">
 
-            <span className="map-manager-settings-label">{exaggerationLabel}</span>
-            <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
-          </div>
+              <span className="map-manager-settings-label">{enableLabel}</span>
+              {/* eslint-disable-next-line deprecation/deprecation */}
+              <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
 
-        </fieldset>
-      </div>
-    </>
+              <span className="map-manager-settings-label">{modelHeightLabel}</span>
+              <QuantityNumberInput disabled={!applyTerrain} persistenceValue={terrainOrigin} snap quantityType={QuantityType.LengthEngineering} onChange={handleHeightOriginChange} onKeyDown={onKeyDown} />
+
+              <span className="map-manager-settings-label">{heightOriginLabel}</span>
+              {/* elevation correction component:  'popoverProps' is needed here otherwise selecting an option closes the menu popup.*/}
+              <Select popoverProps={{ appendTo: "parent" }} options={terrainHeightOptions.current} disabled={!applyTerrain} value={heightOriginMode} onChange={handleElevationTypeSelected} size="small" />
+
+              <span className="map-manager-settings-label">{exaggerationLabel}</span>
+              <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />
+            </div>
+
+          </fieldset>
+        </div>
+
+      </>
+      }
+      {tabIndex === 1 &&
+        <CustomParamsSettingsPanel></CustomParamsSettingsPanel>
+      }
+    </Tabs>
   );
 }

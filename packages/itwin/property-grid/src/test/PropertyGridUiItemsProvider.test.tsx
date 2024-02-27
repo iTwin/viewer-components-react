@@ -86,6 +86,7 @@ describe("PropertyGridUiItemsProvider", () => {
   describe("widget state", () => {
     const widgetDef = {
       id: PropertyGridWidgetId,
+      state: WidgetState.Hidden,
       setWidgetState: sinon.stub<Parameters<WidgetDef["setWidgetState"]>, ReturnType<WidgetDef["setWidgetState"]>>(),
     };
     const frontstageDef = {
@@ -100,6 +101,7 @@ describe("PropertyGridUiItemsProvider", () => {
     });
 
     beforeEach(() => {
+      widgetDef.state = WidgetState.Hidden;
       selectionManager.getSelection.reset();
       widgetDef.setWidgetState.reset();
     });
@@ -163,6 +165,16 @@ describe("PropertyGridUiItemsProvider", () => {
         expect(widgetDef.setWidgetState).to.be.called;
         expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Open);
       });
+    });
+
+    it("does not open widget when state is not `Hidden` and `UnifiedSelection` changes to non-empty", async () => {
+      renderWidget();
+
+      widgetDef.state = WidgetState.Closed;
+      selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
+      selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
+
+      await waitFor(() => expect(widgetDef.setWidgetState).to.not.be.called);
     });
   });
 });
