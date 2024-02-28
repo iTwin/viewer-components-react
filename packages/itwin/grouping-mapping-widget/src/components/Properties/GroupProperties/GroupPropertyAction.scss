@@ -39,7 +39,7 @@
   flex-direction: column;
   flex-grow: 1;
   gap: var(--iui-size-s);
-  min-height: 0;
+  min-height: calc(var(--iui-size-3x1) * 2);
   padding: var(--iui-size-s) var(--iui-size-m);
   min-width: 0;
   .gmw-property-view-button {
