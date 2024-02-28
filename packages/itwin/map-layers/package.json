@@ -120,6 +120,7 @@
     "@itwin/core-frontend": "^4.3.0",
     "@itwin/core-react": "^4.3.0",
     "@itwin/imodel-components-react": "^4.0.0",
+    "@itwin/map-layers-formats": "^4.3.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"
   },
