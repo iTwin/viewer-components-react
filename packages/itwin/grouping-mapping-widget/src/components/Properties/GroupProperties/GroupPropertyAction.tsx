@@ -15,7 +15,6 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { getLocalizedStringPresentation, handleError } from "../../../common/utils";
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { HorizontalTile } from "../../SharedComponents/HorizontalTile";
@@ -36,6 +35,7 @@ import {
 import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -73,9 +73,9 @@ export const GroupPropertyAction = ({
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>([]);
   const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   const reset = useCallback(() => {
     setPropertyName("");
@@ -83,59 +83,91 @@ export const GroupPropertyAction = ({
     setSelectedProperties([]);
   }, []);
 
+  const fetchPropertiesMetadata = useCallback(async () => {
+    if (!iModelConnection) return;
+
+    const result = await manufactureKeys(group.query, iModelConnection);
+    const descriptor = await fetchPresentationDescriptor(iModelConnection, result);
+
+    // Only allow primitives and structs
+    const propertyFields = descriptor?.fields.filter(
+      (field) =>
+        field.type.valueFormat === PropertyValueFormat.Primitive ||
+        field.type.valueFormat === PropertyValueFormat.Struct
+    ) ?? [];
+
+    const propertiesMetaData = convertPresentationFields(propertyFields);
+
+    let groupPropertyDetails = null;
+    if (groupProperty) {
+      const accessToken = await getAccessToken();
+      groupPropertyDetails = await mappingClient.getGroupProperty(
+        accessToken,
+        iModelId,
+        mappingId,
+        group.id,
+        groupProperty.id
+      );
+    }
+
+    return { propertiesMetaData, groupPropertyDetails };
+  }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, iModelId, mappingClient, mappingId]);
+
+  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["groupProperties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
+
   useEffect(() => {
-    const generateProperties = async () => {
-      setIsLoading(true);
+    if (isLoadingPropertiesSuccessful && data?.propertiesMetaData) {
+      setPropertiesMetaData(data.propertiesMetaData);
 
-      if (!iModelConnection) return;
+      if (data.groupPropertyDetails) {
+        setPropertyName(data.groupPropertyDetails.propertyName);
+        setOldPropertyName(data.groupPropertyDetails.propertyName);
+        setDataType(data.groupPropertyDetails.dataType);
+        setQuantityType(data.groupPropertyDetails.quantityType);
 
-      const result = await manufactureKeys(group.query, iModelConnection);
-
-      const descriptor = await fetchPresentationDescriptor(iModelConnection, result);
-
-      // Only allow primitives and structs
-      const propertyFields =
-        descriptor?.fields.filter(
-          (field) =>
-            field.type.valueFormat === PropertyValueFormat.Primitive ||
-            field.type.valueFormat === PropertyValueFormat.Struct
-        ) ?? [];
-
-      const propertiesMetaData = convertPresentationFields(propertyFields);
-
-      setPropertiesMetaData(propertiesMetaData);
-
-      if (groupProperty) {
-        const accessToken = await getAccessToken();
-        let response: GroupProperty | undefined;
-        try {
-          response = await mappingClient.getGroupProperty(
-            accessToken,
-            iModelId,
-            mappingId,
-            group.id,
-            groupProperty.id
-          );
-
-          setPropertyName(response.propertyName);
-          setOldPropertyName(response.propertyName);
-          setDataType(response.dataType);
-          setQuantityType(response.quantityType);
-          const properties = findProperties(response.ecProperties, propertiesMetaData);
-          if (properties.length === 0) {
-            setPropertiesNotFoundAlert(true);
-          }
-
-          setSelectedProperties(properties);
-        } catch (error: any) {
-          handleError(error.status);
+        const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
+        if (properties.length === 0) {
+          setPropertiesNotFoundAlert(true);
         }
-      }
 
-      setIsLoading(false);
-    };
-    void generateProperties();
-  }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
+        setSelectedProperties(properties);
+      }
+    }
+  }, [data, isLoadingPropertiesSuccessful]);
+
+  const { mutate: onSave, isLoading: isSaving } = useMutation({
+    mutationFn: async () => {
+      const accessToken = await getAccessToken();
+      const newGroupProperty: GroupPropertyCreate = {
+        propertyName,
+        dataType,
+        quantityType,
+        ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
+      };
+
+      return groupProperty
+        ? mappingClient.updateGroupProperty(
+          accessToken,
+          iModelId,
+          mappingId,
+          group.id,
+          groupProperty.id,
+          newGroupProperty
+        )
+        : mappingClient.createGroupProperty(
+          accessToken,
+          iModelId,
+          mappingId,
+          group.id,
+          newGroupProperty
+        );
+    },
+    onSuccess: async () => {
+      onSaveSuccess();
+      reset();
+      await queryClient.invalidateQueries(["groupProperties", iModelId, mappingId, group.id]);
+    },
+  });
 
   const handleSaveClick = async () => {
     if (!validator.allValid()) {
@@ -145,7 +177,7 @@ export const GroupPropertyAction = ({
     if (oldPropertyName !== propertyName && oldPropertyName !== "") {
       setShowSaveConfirmationModal(true);
     } else {
-      await onSave();
+      onSave();
     }
   };
 
@@ -153,40 +185,7 @@ export const GroupPropertyAction = ({
     setShowSaveConfirmationModal(false);
   };
 
-  const onSave = async () => {
-    try {
-      setIsLoading(true);
-      const accessToken = await getAccessToken();
-      const newGroupProperty: GroupPropertyCreate = {
-        propertyName,
-        dataType,
-        quantityType,
-        ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
-      };
-      groupProperty
-        ? await mappingClient.updateGroupProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          groupProperty.id,
-          newGroupProperty
-        )
-        : await mappingClient.createGroupProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          newGroupProperty
-        );
-      onSaveSuccess();
-      reset();
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isLoading = isLoadingProperties || isSaving;
 
   return (
     <>
@@ -278,7 +277,7 @@ export const GroupPropertyAction = ({
                   key={property.key}
                   title={`${property.displayLabel} (${property.propertyType})`}
                   titleTooltip={`${property.actualECClassName}`}
-                  subText={getLocalizedStringPresentation(property.categoryLabel)}
+                  subText={property.categoryLabel}
                   actionGroup={null}
                 />
               ))}

@@ -73,7 +73,6 @@ export const PropertyTable = <T extends PropertyTableItem>({
           entityName={showDeleteModal.propertyName}
           onClose={handleCloseDeleteModal}
           onDelete={handleDeleteProperty}
-          refresh={refreshProperties}
         />}
     </div>
   );
