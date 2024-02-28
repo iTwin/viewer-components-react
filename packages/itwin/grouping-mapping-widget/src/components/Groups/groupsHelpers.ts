@@ -70,7 +70,6 @@ export const visualizeGroupColors = async (
   doEmphasizeElements: boolean = true,
 ) => {
   clearEmphasizedOverriddenElements();
-
   const singleGroupPromises = groupsWithGroupedOverlaps
     .filter((group) => group.groupIds.size === 1)
     .map(async (group, index) =>
@@ -98,6 +97,7 @@ export const visualizeGroupColors = async (
     );
 
   clearHiddenElements();
+  hideGroupIds(hiddenGroupsIds, groupsWithGroupedOverlaps);
 
   const allPromises = [...singleGroupPromises, ...overlappedGroupPromises];
 

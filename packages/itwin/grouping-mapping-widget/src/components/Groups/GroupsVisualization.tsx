@@ -137,9 +137,6 @@ export const GroupsVisualization = ({
       } else {
         clearEmphasizedOverriddenElements();
       }
-
-      clearHiddenElements();
-      hideGroupIds(hiddenGroupsIds, groupsWithGroupedOverlaps);
     };
 
     const shouldProcessOverlappedGroups = () => !isOverlappedColored && hiliteIds.length > 0 && !isGroupsFetching;
