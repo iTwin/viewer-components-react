@@ -9,6 +9,7 @@ import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsC
 import {
   generateOverlappedGroups,
   hideGroupConsideringOverlaps,
+  hideGroupIds,
   visualizeGroupColors,
 } from "./groupsHelpers";
 import {
@@ -121,7 +122,7 @@ export const GroupsVisualization = ({
   );
 
   useEffect(() => {
-    const processOverlappedGroups = () => {
+    const processOverlappedGroups = async () => {
       const results = generateOverlappedGroups(hiliteIds);
       const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
 
@@ -132,16 +133,19 @@ export const GroupsVisualization = ({
       });
 
       if (showGroupColor) {
-        visualizationMutation.mutate(groupsWithGroupedOverlaps);
+        await visualizationMutation.mutateAsync(groupsWithGroupedOverlaps);
       } else {
         clearEmphasizedOverriddenElements();
       }
+
+      clearHiddenElements();
+      hideGroupIds(hiddenGroupsIds, groupsWithGroupedOverlaps);
     };
 
     const shouldProcessOverlappedGroups = () => !isOverlappedColored && hiliteIds.length > 0 && !isGroupsFetching;
 
     if (shouldProcessOverlappedGroups()) {
-      processOverlappedGroups();
+      void processOverlappedGroups();
     }
     // We don't want to trigger full visualization when toggling individual groups.
     // eslint-disable-next-line react-hooks/exhaustive-deps
