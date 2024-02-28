@@ -13,9 +13,9 @@ import "./CalculatedPropertyAction.scss";
 import type { CalculatedProperty, Group } from "@itwin/insights-client";
 import { CalculatedPropertyType } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
-import { handleError } from "../../../common/utils";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMappingClient } from "../../context/MappingClientContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface CalculatedPropertyActionProps {
   mappingId: string;
@@ -38,49 +38,44 @@ export const CalculatedPropertyAction = ({
     calculatedProperty?.propertyName ?? "",
   );
   const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
+  const queryClient = useQueryClient();
 
-  const onSave = async () => {
+  const { mutate: saveMutation, isLoading } = useMutation(async (type: CalculatedPropertyType) => {
+    const accessToken = await getAccessToken();
+
+    return calculatedProperty
+      ? mappingClient.updateCalculatedProperty(
+        accessToken,
+        iModelId,
+        mappingId,
+        group.id,
+        calculatedProperty.id,
+        { propertyName, type },
+      )
+      : mappingClient.createCalculatedProperty(
+        accessToken,
+        iModelId,
+        mappingId,
+        group.id,
+        { propertyName, type },
+      );
+  }, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] });
+      onSaveSuccess();
+      setPropertyName("");
+      setType(CalculatedPropertyType.Undefined);
+    },
+  });
+
+  const onSave = () => {
     if (!validator.allValid() || !type) {
       showValidationMessage(true);
       return;
     }
-    try {
-      setIsLoading(true);
 
-      const accessToken = await getAccessToken();
-
-      calculatedProperty
-        ? await mappingClient.updateCalculatedProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          calculatedProperty.id,
-          {
-            propertyName,
-            type,
-          },
-        )
-        : await mappingClient.createCalculatedProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          group.id,
-          {
-            propertyName,
-            type,
-          },
-        );
-      onSaveSuccess();
-      setPropertyName("");
-      setType(CalculatedPropertyType.Undefined);
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsLoading(false);
-    }
+    saveMutation(type);
   };
 
   return (
