@@ -9,7 +9,6 @@ import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsC
 import {
   generateOverlappedGroups,
   hideGroupConsideringOverlaps,
-  hideGroupIds,
   visualizeGroupColors,
 } from "./groupsHelpers";
 import {
