@@ -14,7 +14,7 @@ import { TErrCodes } from "../../Constants";
 import { getHiliteIdsAndKeysetFromGroup } from "../groupsHelpers";
 
 export interface QueryResults {
-  group: Group;
+  query: string;
   result: {
     keySet: KeySet;
     ids: string[];
