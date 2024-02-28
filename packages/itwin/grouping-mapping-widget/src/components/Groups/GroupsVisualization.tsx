@@ -108,10 +108,11 @@ export const GroupsVisualization = ({
   const hiliteIds = useMemo(() => {
     if (!isGroupsQueriesReady || !groups) return [];
 
+    // Map to track which groups have been processed for each query to ensure unique associations between groups and queries
     const processedGroupIds = new Map<string, string[]>();
 
     return groupQueries.flatMap((query) => {
-      // Find all groups that match the current query and haven't been processed yet
+      // Find all groups that match the current query and haven't been processed yet for this query
       const matchingGroups = groups.filter((group) => {
         const isMatch = group.query === query.data!.query;
         const isProcessed = processedGroupIds.get(query.data!.query)?.includes(group.id);
