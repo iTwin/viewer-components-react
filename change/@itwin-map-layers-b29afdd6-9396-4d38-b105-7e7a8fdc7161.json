@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Hide User Preferences Options to store at the iTwin/iModel scope.",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed an issue where the list of properties would disappear if window was too small.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

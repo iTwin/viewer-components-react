@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed property widget being focused in a panel when there are more widgets and selection changes",
-  "packageName": "@itwin/property-grid-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed an issue where visualized groups were not rehidden after going back into the Groups view.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
