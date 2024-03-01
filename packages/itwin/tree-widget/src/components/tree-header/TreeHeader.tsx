@@ -33,7 +33,7 @@ export interface TreeHeaderProps extends CommonProps {
   onSelectedChanged: (index: number) => void;
   /** Header buttons */
   children?: React.ReactNode;
-  /** Modifies the density of tree nodes. `enlarged` tree nodes have bigger height and bigger button hit boxes. */
+  /** Modifies the density of tree header. `enlarged` header contains larger content */
   density?: "default" | "enlarged";
 }
 
@@ -56,7 +56,7 @@ export function TreeHeader(props: TreeHeaderProps) {
         selectedResultIndex={selectedIndex}
         resultCount={resultCount}
         onSelectedResultChanged={onSelectedChanged}
-        isEnlarged={isEnlarged}
+        size={isEnlarged ? undefined : "small"}
       />
     </div>
   );
@@ -71,7 +71,7 @@ interface DebouncedSearchBoxProps {
   selectedResultIndex?: number;
   resultCount?: number;
   onSelectedResultChanged: (index: number) => void;
-  isEnlarged?: boolean;
+  size: "small" | undefined;
 }
 
 function DebouncedSearchBox({
@@ -83,7 +83,7 @@ function DebouncedSearchBox({
   onOpen,
   onClose,
   delay,
-  isEnlarged,
+  size,
 }: DebouncedSearchBoxProps) {
   const [inputValue, setInputValue] = useState<string>("");
   const onChangeRef = useRef(onChange);
@@ -106,18 +106,13 @@ function DebouncedSearchBox({
   }, [inputValue, delay]);
 
   return (
-    <SearchBox
-      expandable
-      onExpand={onOpen}
-      onCollapse={onClose}
-      size={isEnlarged ? undefined : "small"}
-      className={classnames("tree-widget-search-box", !isOpened && "contracted")}
-    >
+    <SearchBox expandable onExpand={onOpen} onCollapse={onClose} size={size} className={classnames("tree-widget-search-box", !isOpened && "contracted")}>
       <SearchBox.CollapsedState>
         <SearchBox.ExpandButton
           title={TreeWidget.translate("searchBox.searchForSomething")}
           aria-label={TreeWidget.translate("searchBox.open")}
-          size={isEnlarged ? undefined : "small"}
+          size={size}
+          className="search-open"
         />
       </SearchBox.CollapsedState>
       <SearchBox.ExpandedState>
@@ -126,14 +121,15 @@ function DebouncedSearchBox({
           onChange={(e) => setInputValue(e.currentTarget.value)}
           className="search-input"
         />
-        <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} isEnlarged={isEnlarged} />
+        <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} size={size} />
         <SearchBox.CollapseButton
           onClick={() => {
             setInputValue("");
             onClose();
           }}
-          size={isEnlarged ? undefined : "small"}
+          size={size}
           aria-label={TreeWidget.translate("searchBox.close")}
+          className="search-close"
         />
       </SearchBox.ExpandedState>
     </SearchBox>
@@ -166,7 +162,7 @@ function HeaderButtons(props: HeaderButtonsProps) {
           }
           className="tree-header-button-dropdown-container"
         >
-          <IconButton title={TreeWidget.translate("dropdownMenu.More")} styleType="borderless" size={props.isEnlarged ? undefined : "small"}>
+          <IconButton title={TreeWidget.translate("dropdownMore")} styleType="borderless" size={props.isEnlarged ? undefined : "small"}>
             <SvgMore />
           </IconButton>
         </DropdownMenu>
@@ -181,7 +177,7 @@ interface SearchResultStepperProps {
   total?: number;
   onStep: (newIndex: number) => void;
   selectedIndex?: number;
-  isEnlarged?: boolean;
+  size: "small" | undefined;
 }
 
 function SearchResultStepper(props: SearchResultStepperProps) {
@@ -195,8 +191,9 @@ function SearchResultStepper(props: SearchResultStepperProps) {
       <span className="searchbox-stepping-count">{`${selectedIndex}/${total}`}</span>
       <Divider orientation="vertical" />
       <SearchBox.Button
+        className="search-previous"
         title={TreeWidget.translate("searchBox.previous")}
-        size={props.isEnlarged ? undefined : "small"}
+        size={props.size}
         onClick={() => {
           if (selectedIndex > 1) {
             onStep(selectedIndex - 1);
@@ -206,8 +203,9 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         <SvgCaretUpSmall />
       </SearchBox.Button>
       <SearchBox.Button
+        className="search-next"
         title={TreeWidget.translate("searchBox.next")}
-        size={props.isEnlarged ? undefined : "small"}
+        size={props.size}
         onClick={() => {
           if (selectedIndex < total) {
             onStep(selectedIndex + 1);

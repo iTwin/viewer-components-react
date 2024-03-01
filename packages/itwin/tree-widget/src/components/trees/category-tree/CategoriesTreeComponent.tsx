@@ -194,6 +194,7 @@ async function getFilteredCategories(filteredProvider: IPresentationTreeDataProv
 function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
+      className="header-button"
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
@@ -212,6 +213,7 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
+      className="header-button"
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
@@ -230,6 +232,7 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
+      className="header-button"
       title={TreeWidget.translate("invert")}
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"

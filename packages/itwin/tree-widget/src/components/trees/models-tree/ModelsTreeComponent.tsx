@@ -180,6 +180,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
+      className="header-button"
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
@@ -198,6 +199,7 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
+      className="header-button"
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
@@ -216,6 +218,7 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
+      className="header-button"
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("invert")}
@@ -245,6 +248,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
+      className="header-button"
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
@@ -271,6 +275,7 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
+      className="header-button"
       size={props.density === "enlarged" ? undefined : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}

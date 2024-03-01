@@ -46,7 +46,7 @@ describe("<TreeHeader />", () => {
       </TreeHeader>,
     );
 
-    const button = getByTitle(TreeWidget.translate("dropdownMenu.More"));
+    const button = getByTitle(TreeWidget.translate("dropdownMore"));
 
     await waitFor(() => expect(container.querySelector(".enlarge")).to.be.null);
     expect(button.getAttribute("data-iui-size")).to.be.eq("small");
@@ -63,7 +63,7 @@ describe("<TreeHeader />", () => {
       </TreeHeader>,
     );
 
-    const button = getByTitle(TreeWidget.translate("dropdownMenu.More"));
+    const button = getByTitle(TreeWidget.translate("dropdownMore"));
 
     await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null);
     expect(button.getAttribute("data-iui-size")).to.be.null;

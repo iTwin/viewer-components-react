@@ -49,6 +49,22 @@
         margin-left:  var(--enlarged-node-without-expander-margin);
       }
 
+      > .presentation-components-node-action-buttons {
+        height: var(--enlarged-node-height);
+        width: var(--enlarged-node-height);
+
+        ._iui3-button {
+          height: var(--enlarged-node-height);
+          width: var(--enlarged-node-height);
+
+          svg {
+            height: var(--enlarged-node-height);
+            width: var(--enlarged-node-height);
+            padding: var(--iui-size-s);
+          }
+        }
+      }
+
       > .contents {
         height: var(--enlarged-node-height);
         font-size: var(--iui-font-size-2);
@@ -75,22 +91,6 @@
 
         .iui-progress-indicator-radial {
           margin: 0 calc(var(--enlarged-node-icon-padding) / 2);
-        }
-      }
-
-      > .presentation-components-node-action-buttons {
-        height: var(--enlarged-node-height);
-        width: var(--enlarged-node-height);
-
-        ._iui3-button {
-          height: var(--enlarged-node-height);
-          width: var(--enlarged-node-height);
-
-          svg {
-            height: var(--enlarged-node-height);
-            width: var(--enlarged-node-height);
-            padding: var(--iui-size-s);
-          }
         }
       }
     }

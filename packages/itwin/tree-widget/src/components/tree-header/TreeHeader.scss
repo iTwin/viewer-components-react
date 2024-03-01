@@ -15,7 +15,7 @@
     height: var(--iui-size-xl);
 
     &.enlarge {
-      height: calc(var(--iui-size-xl) + var(--iui-size-m));
+      height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
     }
 
     > * {
@@ -73,20 +73,28 @@
 
   &.enlarge {
     --enlarged-header-height: calc(var(--iui-size-l) + var(--iui-size-m) + var(--iui-size-3xs));
+
     height: var(--enlarged-header-height);
+    min-width: calc(100% - var(--enlarged-header-height));
 
     .tree-widget-search-box {
       height: var(--enlarged-header-height);
+      width: calc(100% - var(--enlarged-header-height));
 
       &.contracted {
         width: var(--enlarged-header-height);
+      }
+
+      .search-open, .search-input, .search-close {
+        height: var(--enlarged-header-height);
+        min-width: var(--enlarged-header-height);
       }
     }
 
     .button-container {
       width: calc(100% - var(--enlarged-header-height));
 
-      ._iui3-button {
+      .header-button {
         height: var(--enlarged-header-height);
         min-width: var(--enlarged-header-height);
       }
