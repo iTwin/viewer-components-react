@@ -17,6 +17,7 @@ import {
   CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetUiItemsProvider,
 } from "@itwin/tree-widget-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
+import { useViewerOptionsContext } from "./components/ViewerOptions";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -71,28 +72,47 @@ const configuredUiItems = new Map<string, UiItem>([
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: () => (
-                <ModelsTreeComponent
+              render: () => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const { density } = useViewerOptionsContext();
+
+                return (<ModelsTreeComponent
                   selectionPredicate={() => true}
                   selectionMode={SelectionMode.Multiple}
                   hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                />
-              ),
+                  density={density}
+                />)
+              },
             },
             {
               id: CategoriesTreeComponent.id,
               getLabel: CategoriesTreeComponent.getLabel,
-              render: () => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+              render: () => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const { density } = useViewerOptionsContext();
+
+                return <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />
+              },
             },
             {
               id: IModelContentTreeComponent.id,
               getLabel: IModelContentTreeComponent.getLabel,
-              render: () => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+              render: () => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const { density } = useViewerOptionsContext();
+
+                return <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />
+              },
             },
             {
               id: ExternalSourcesTreeComponent.id,
               getLabel: ExternalSourcesTreeComponent.getLabel,
-              render: () => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+              render: () => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const { density } = useViewerOptionsContext();
+
+                return <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />
+              },
             },
             {
               id: "spatial-containment-tree",
