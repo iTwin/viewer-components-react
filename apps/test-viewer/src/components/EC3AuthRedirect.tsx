@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { handleEC3AuthCallback } from "@itwin/ec3-widget-react";
 import { ProgressRadial } from "@itwin/itwinui-react";
 import { useEffect } from "react";
