@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 18 Jan 2024 15:05:39 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Feb 2024 19:46:34 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.5.2
+
+Thu, 29 Feb 2024 19:46:34 GMT
+
+### Patches
+
+- Fixed property widget being focused in a panel when there are more widgets and selection changes ([#780](https://github.com/iTwin/viewer-components-react/pull/780))
 
 ## 1.5.1
 

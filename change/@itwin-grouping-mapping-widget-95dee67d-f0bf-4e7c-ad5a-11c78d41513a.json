@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed an issue where duplicate properties would be listed in group properties generation.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -105,16 +105,37 @@ export const GroupsVisualization = ({
   const groupQueriesProgressCount = useMemo(() => groupQueries.filter((query) => query.isFetched).length, [groupQueries]);
   const isResolvingGroupQueries = useMemo(() => groupQueries.some((query) => query.isFetching), [groupQueries]);
 
-  const hiliteIds = useMemo(
-    () =>
-      isGroupsQueriesReady
-        ? groupQueries.map((query) => ({
-          groupId: query.data!.group.id,
-          elementIds: query.data!.result.ids,
-        }))
-        : [],
-    [groupQueries, isGroupsQueriesReady]
-  );
+  const hiliteIds = useMemo(() => {
+    if (!isGroupsQueriesReady || !groups) return [];
+
+    // Map to track which groups have been processed for each query to ensure unique associations between groups and queries
+    const processedGroupIds = new Map<string, string[]>();
+
+    return groupQueries.flatMap((query) => {
+      // Find all groups that match the current query and haven't been processed yet for this query
+      const matchingGroups = groups.filter((group) => {
+        const isMatch = group.query === query.data!.query;
+        const isProcessed = processedGroupIds.get(query.data!.query)?.includes(group.id);
+        return isMatch && !isProcessed;
+      });
+
+      matchingGroups.forEach((group) => {
+        const existingGroupIds = processedGroupIds.get(query.data!.query);
+        if (existingGroupIds) {
+          existingGroupIds.push(group.id);
+        } else {
+          processedGroupIds.set(query.data!.query, [group.id]);
+        }
+      });
+
+      // Map each matching group to an object with groupId and elementIds
+      return matchingGroups.map((group) => ({
+        groupId: group.id,
+        elementIds: query.data!.result.ids,
+      }));
+    });
+  }, [groupQueries, isGroupsQueriesReady, groups]);
+
   const getHiliteIdsFromGroupsWrapper = useCallback(
     (groups: Group[]) =>
       hiliteIds.filter((id) => groups.some((group) => group.id === id.groupId)).flatMap((id) => id.elementIds),
@@ -122,7 +143,7 @@ export const GroupsVisualization = ({
   );
 
   useEffect(() => {
-    const processOverlappedGroups = () => {
+    const processOverlappedGroups = async () => {
       const results = generateOverlappedGroups(hiliteIds);
       const { groupsWithGroupedOverlaps, overlappedElementsInfo, numberOfElementsInGroups } = results;
 
@@ -133,7 +154,7 @@ export const GroupsVisualization = ({
       });
 
       if (showGroupColor) {
-        visualizationMutation.mutate(groupsWithGroupedOverlaps);
+        await visualizationMutation.mutateAsync(groupsWithGroupedOverlaps);
       } else {
         clearEmphasizedOverriddenElements();
       }
@@ -145,7 +166,7 @@ export const GroupsVisualization = ({
     const shouldProcessOverlappedGroups = () => !isOverlappedColored && hiliteIds.length > 0 && !isGroupsFetching;
 
     if (shouldProcessOverlappedGroups()) {
-      processOverlappedGroups();
+      void processOverlappedGroups();
     }
     // We don't want to trigger full visualization when toggling individual groups.
     // eslint-disable-next-line react-hooks/exhaustive-deps

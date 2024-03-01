@@ -2,6 +2,47 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Thu, 29 Feb 2024 19:46:34 GMT",
+      "version": "5.4.0",
+      "tag": "@itwin/map-layers_v5.4.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "5a2cf9d2f64d2338e884b4ccbe4f4d257e95edb1",
+            "comment": "Improved warning message when an incompatible map-layer type is provided."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "fc3504a3b691cdf97c695cc3d18e02c7cde5d3df",
+            "comment": "Moved @itwin/itwinui-react to direct dependencies"
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "5ba336b59cd8cb1cf0f03ac4f79c655e0045af35",
+            "comment": "Hide User Preferences Options to store at the iTwin/iModel scope."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "56ccf3c964674f8d9d1194d49006b150280fc80c",
+            "comment": "Added @itwin/itwinui-react to peer dependencies"
+          }
+        ],
+        "minor": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "05815f4e7587b2e42227194574abf4ee49fbce4e",
+            "comment": "Support for custom query parameters."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 07 Feb 2024 21:16:44 GMT",
       "version": "5.3.1",
       "tag": "@itwin/map-layers_v5.3.1",

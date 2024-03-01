@@ -2,6 +2,67 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Thu, 29 Feb 2024 19:46:34 GMT",
+      "version": "0.24.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.24.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "3dfed20b3f7f63c6173227d1e5ab5084a41f55cc",
+            "comment": "Property related components have been refactored to use react-query."
+          },
+          {
+            "author": "smmr-dn@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "37e4951e862a099a576e8209b155770bb8cdd5f7",
+            "comment": "Added feature to trigger extraction and show extraction status on mapping UI."
+          }
+        ],
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "91246414fa3b871ec4d95734e2166a3d7b6c44c9",
+            "comment": "Fixed an issue where the list of properties would disappear if window was too small."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "368b4c6ada7b362cad0472b4b6d758ca6af774ea",
+            "comment": "Fixed an issue where duplicate properties would be listed in group properties generation."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "70625a9c78d34e5c47f94af1a59a5f1fe031e1eb",
+            "comment": "Fixed an issue where extraction status would go out of bounds when trying to find the group name in extraction logs."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "8a9e86e84aa5aa3380e30cdba9419640391ac72e",
+            "comment": "Fixed an issue where job id's were potentially undefined."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "b24a225e739a7c007af521338a032112705b4674",
+            "comment": "Fixed an issue where visualized groups were not rehidden after going back into the Groups view."
+          }
+        ],
+        "none": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a1d6a48e53c2270fe209dd1359776de0c046863a",
+            "comment": "Select properties modal moved to its own file."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 02 Feb 2024 00:04:15 GMT",
       "version": "0.23.1",
       "tag": "@itwin/grouping-mapping-widget_v0.23.1",

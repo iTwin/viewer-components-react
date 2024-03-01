@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added feature to trigger extraction and show extraction status on mapping UI.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "smmr-dn@users.noreply.github.com",
-  "dependentChangeType": "minor"
-}

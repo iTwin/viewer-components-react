@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Added @itwin/itwinui-react to peer dependencies",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
