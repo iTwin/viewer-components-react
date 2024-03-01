@@ -19,7 +19,18 @@ test.beforeEach(async ({ page, baseURL }) => {
   await treeWidget.waitFor();
 });
 
-test.describe("should match image snapshot", () => {
+// make sure to open the filter dialog before calling this.
+async function selectPropertyInDialog(page: Page, propertyText: string) {
+  const filterBuilder = page.locator(".presentation-property-filter-builder");
+
+  await filterBuilder.getByPlaceholder("Choose property").click();
+
+  // ensure that options are loaded
+  await page.getByRole("menuitem", { name: "Model" }).waitFor();
+  await page.getByRole("menuitem", { name: propertyText }).click();
+}
+
+const componentTests = () => {
   test("initial tree", async ({ page }) => {
     // wait for element to be visible in the tree
     await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible", exact: true }).waitFor();
@@ -48,17 +59,6 @@ test.describe("should match image snapshot", () => {
     await locateNode(treeWidget, "Hanger Rod [4-2UH]").waitFor();
     await takeScreenshot(page, treeWidget);
   });
-
-  // make sure to open the filter dialog before calling this.
-  async function selectPropertyInDialog(page: Page, propertyText: string) {
-    const filterBuilder = page.locator(".presentation-property-filter-builder");
-
-    await filterBuilder.getByPlaceholder("Choose property").click();
-
-    // ensure that options are loaded
-    await page.getByRole("menuitem", { name: "Model" }).waitFor();
-    await page.getByRole("menuitem", { name: propertyText }).click();
-  }
 
   test("node with active filtering - information message", async ({ page }) => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
@@ -123,4 +123,27 @@ test.describe("should match image snapshot", () => {
     await treeWidget.locator(".components-activehighlight").waitFor();
     await takeScreenshot(page, treeWidget);
   });
+
+  test("button dropdown", async ({ page }) => {
+    await treeWidget.getByTitle("Search for something").click();
+    await treeWidget.getByTitle("More").click();
+    await page.locator(".tree-header-button-dropdown-container").waitFor();
+    await takeScreenshot(page, treeWidget);
+  });
+};
+
+test.describe("should match image snapshot", () => {
+  componentTests();
+});
+
+test.describe("should match image snapshot when Tree Widget is enlarged", () => {
+  test.beforeEach(async ({ page }) => {
+    const expandedLayoutToggleButton = page.getByTitle("Toggle expanded layout");
+    await expandedLayoutToggleButton.click();
+    await new Promise((f) => setTimeout(f, 1000));
+    treeWidget = locateWidget(page, "tree");
+    await treeWidget.waitFor();
+  });
+
+  componentTests();
 });
