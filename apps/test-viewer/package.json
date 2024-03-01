@@ -22,6 +22,10 @@
     "@itwin/ecschema-metadata": "^4.4.0",
     "@itwin/frontend-devtools": "^4.4.0",
     "@itwin/geo-tools-react": "workspace:*",
+    "@itwin/grouping-mapping-widget": "workspace:*",
+    "@itwin/reports-config-widget-react": "workspace:*",
+    "@itwin/ec3-widget-react": "workspace:*",
+    "@itwin/one-click-lca-react": "workspace:*",
     "@itwin/imodels-access-frontend": "^4.0.0",
     "@itwin/imodel-components-react": "^4.9.0",
     "@itwin/itwinui-react": "^3.4.2",
@@ -71,6 +75,18 @@
       "injected": true
     },
     "@itwin/geo-tools-react": {
+      "injected": true
+    },
+    "@itwin/grouping-mapping-widget": {
+      "injected": true
+    },
+    "@itwin/reports-config-widget-react": {
+      "injected": true
+    },
+    "@itwin/ec3-widget-react": {
+      "injected": true
+    },
+    "@itwin/one-click-lca-react": {
       "injected": true
     }
   },
