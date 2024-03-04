@@ -180,8 +180,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      className="header-button"
-      size={props.density === "enlarged" ? undefined : "small"}
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
       onClick={() =>
@@ -199,8 +198,7 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      className="header-button"
-      size={props.density === "enlarged" ? undefined : "small"}
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
       onClick={() =>
@@ -218,8 +216,7 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      className="header-button"
-      size={props.density === "enlarged" ? undefined : "small"}
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("invert")}
       onClick={() =>
@@ -248,8 +245,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
-      className="header-button"
-      size={props.density === "enlarged" ? undefined : "small"}
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
       onClick={() => void toggleModels(models2d, is2dToggleActive, props.viewport)}
@@ -275,8 +271,7 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
-      className="header-button"
-      size={props.density === "enlarged" ? undefined : "small"}
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
       onClick={() => void toggleModels(models3d, is3dToggleActive, props.viewport)}
