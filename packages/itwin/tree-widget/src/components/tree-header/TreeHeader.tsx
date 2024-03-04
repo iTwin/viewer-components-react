@@ -153,7 +153,7 @@ function HeaderButtons(props: HeaderButtonsProps) {
         <DropdownMenu
           menuItems={() =>
             Children.toArray(props.children)
-              .slice(overflowStart - 1)
+              .slice(overflowStart)
               .map((btn, index) => (
                 <li key={index} className={dropdownClassName} role="menuitem">
                   {btn}
