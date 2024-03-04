@@ -10,7 +10,7 @@ import {
   LabeledTextarea,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError } from "../../../common/utils";
@@ -22,7 +22,10 @@ import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { CalculatedProperty, CustomCalculation, GroupProperty } from "@itwin/insights-client";
 import { QuantityType } from "@itwin/insights-client";
-import { usePropertiesContext } from "../../context/PropertiesContext";
+import { useCalculatedPropertiesQuery } from "../hooks/useCalculatedPropertiesQuery";
+import { useCustomCalculationsQuery } from "../hooks/useCustomCalculationsQuery";
+import { useGroupPropertiesQuery } from "../hooks/useGroupPropertiesQuery";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface CustomCalculationActionProps {
   mappingId: string;
@@ -87,98 +90,52 @@ export const CustomCalculationAction = ({
   const [formula, setFormula] = useState<string>(
     customCalculation?.formula ?? "",
   );
-  const {
-    groupProperties,
-    setGroupProperties,
-    calculatedProperties,
-    setCalculatedProperties,
-    customCalculationProperties,
-    setCustomCalculationProperties,
-  } = usePropertiesContext();
   const [quantityType, setQuantityType] = useState<QuantityType>(customCalculation?.quantityType ?? QuantityType.Undefined);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [properties, setProperties] = useState<PropertyMap>({});
   const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
+  const queryClient = useQueryClient();
 
-  const initialize = useCallback(async () => {
-    const accessToken = await getAccessToken();
-    const [groupProps, calcProps, customCalcProps] = await Promise.all([
-      mappingClient.getGroupProperties(accessToken, iModelId, mappingId, groupId),
-      mappingClient.getCalculatedProperties(accessToken, iModelId, mappingId, groupId),
-      mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, groupId),
-    ]);
-    setGroupProperties(groupProps);
-    setCalculatedProperties(calcProps);
-    setCustomCalculationProperties(customCalcProps);
-  }, [getAccessToken, groupId, iModelId, mappingClient, mappingId, setCalculatedProperties, setCustomCalculationProperties, setGroupProperties]);
-
-  const fetchAllProperties = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      if (!groupProperties || !calculatedProperties || !customCalculationProperties) {
-        await initialize();
-      }
-    } catch (error: any) {
-      handleError(error.status);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [calculatedProperties, customCalculationProperties, groupProperties, initialize]);
+  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
+  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useCalculatedPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
+  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useCustomCalculationsQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
 
   useEffect(() => {
     const propertiesMap = convertToPropertyMap(groupProperties ?? [], calculatedProperties ?? [], customCalculationProperties ?? []);
     setProperties(propertiesMap);
   }, [calculatedProperties, customCalculationProperties, groupProperties]);
 
-  useEffect(() => {
-    void fetchAllProperties();
-  }, [fetchAllProperties]);
+  const { mutate: saveMutation, isLoading: isSaving } = useMutation(async () => {
 
-  const onSave = async () => {
-    if (!validator.allValid()) {
-      showValidationMessage(true);
-      return;
-    }
-    if (!forceValidation()) {
-      return;
-    }
-    try {
-      setIsLoading(true);
-      const accessToken = await getAccessToken();
-      customCalculation
-        ? await mappingClient.updateCustomCalculation(
-          accessToken,
-          iModelId,
-          mappingId,
-          groupId,
-          customCalculation.id,
-          {
-            propertyName,
-            formula,
-            quantityType,
-          }
-        )
-        : await mappingClient.createCustomCalculation(
-          accessToken,
-          iModelId,
-          mappingId,
-          groupId,
-          {
-            propertyName,
-            formula,
-            quantityType,
-          }
-        );
+    const accessToken = await getAccessToken();
+
+    return customCalculation
+      ? mappingClient.updateCustomCalculation(
+        accessToken,
+        iModelId,
+        mappingId,
+        groupId,
+        customCalculation.id,
+        { propertyName, formula, quantityType }
+      )
+      : mappingClient.createCustomCalculation(
+        accessToken,
+        iModelId,
+        mappingId,
+        groupId,
+        { propertyName, formula, quantityType }
+      );
+  }, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["customCalculations", iModelId, mappingId, groupId] });
       onSaveSuccess();
       setPropertyName("");
       setFormula("");
       setQuantityType(QuantityType.Undefined);
-    } catch (error: any) {
-      // error instanceof Response refuses to be true when it should be.
+    },
+    onError: async (error: any) => {
       if (error.status === 422) {
-        error = error as Response;
         const erroredResponse = await error.json();
         if (
           erroredResponse.error.code === "InvalidInsightsRequest" &&
@@ -189,10 +146,21 @@ export const CustomCalculationAction = ({
       } else {
         handleError(error.status);
       }
-    } finally {
-      setIsLoading(false);
+    },
+  });
+
+  const onSave = () => {
+    if (!validator.allValid()) {
+      showValidationMessage(true);
+      return;
     }
+    if (!forceValidation()) {
+      return;
+    }
+    saveMutation();
   };
+
+  const isLoading = isSaving || isLoadingGroupProperties || isLoadingCalculatedProperties || isLoadingCustomCalculations;
 
   return (
     <>

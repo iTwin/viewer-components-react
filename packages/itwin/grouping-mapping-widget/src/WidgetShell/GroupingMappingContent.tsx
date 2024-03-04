@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React, { useEffect } from "react";
 import { useGroupHilitedElementsContext } from "../components/context/GroupHilitedElementsContext";
-import { usePropertiesContext } from "../components/context/PropertiesContext";
+import { usePropertiesGroupColorContext } from "../components/context/PropertiesGroupColorContext";
 import type { Route } from "./GroupingMapping";
 import { GroupingMappingRouter } from "./Router/GroupingMappingRouter";
 import { clearAll } from "../common/viewerUtils";
@@ -19,7 +19,7 @@ export const GroupingMappingContent = ({
   goBack: () => void;
 }) => {
   const { setShowGroupColor, setHiddenGroupsIds } = useGroupHilitedElementsContext();
-  const { setShowGroupColor: setPropertiesShowGroup } = usePropertiesContext();
+  const { setShowGroupColor: setPropertiesShowGroup } = usePropertiesGroupColorContext();
   const currentRoute = routingHistory[routingHistory.length - 1];
 
   // Clean up group visualization when in mappings

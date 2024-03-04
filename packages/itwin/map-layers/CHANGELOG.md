@@ -1,8 +1,23 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Wed, 07 Feb 2024 21:16:44 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Feb 2024 19:46:34 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.4.0
+
+Thu, 29 Feb 2024 19:46:34 GMT
+
+### Minor changes
+
+- Support for custom query parameters. ([#705](https://github.com/iTwin/viewer-components-react/pull/705))
+
+### Patches
+
+- Improved warning message when an incompatible map-layer type is provided. ([#760](https://github.com/iTwin/viewer-components-react/pull/760))
+- Moved @itwin/itwinui-react to direct dependencies ([#772](https://github.com/iTwin/viewer-components-react/pull/772))
+- Hide User Preferences Options to store at the iTwin/iModel scope. ([#756](https://github.com/iTwin/viewer-components-react/pull/756))
+- Added @itwin/itwinui-react to peer dependencies ([#767](https://github.com/iTwin/viewer-components-react/pull/767))
 
 ## 5.3.1
 

@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "Bump `itwinjs-core` dev dependencies to `4.4.0`",
-  "packageName": "@itwin/property-grid-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "none"
-}

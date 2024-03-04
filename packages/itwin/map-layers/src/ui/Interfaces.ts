@@ -60,3 +60,14 @@ export interface MapFeatureInfoOptions {
   showLoadProgressAnimation?: boolean;
   propertyGridOptions?: MapFeatureInfoPropertyGridOptions;
 }
+
+export interface CustomParamItem {
+  name: string;
+  key: string;
+  value: string;
+  secret: boolean;
+}
+
+export interface CustomParamsMappingItem {
+  customParamNames: string[];
+}

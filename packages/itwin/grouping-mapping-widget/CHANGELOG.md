@@ -1,8 +1,25 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 02 Feb 2024 00:04:15 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Feb 2024 19:46:34 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.24.0
+
+Thu, 29 Feb 2024 19:46:34 GMT
+
+### Minor changes
+
+- Property related components have been refactored to use react-query. ([#776](https://github.com/iTwin/viewer-components-react/pull/776))
+- Added feature to trigger extraction and show extraction status on mapping UI. ([#733](https://github.com/iTwin/viewer-components-react/pull/733))
+
+### Patches
+
+- Fixed an issue where the list of properties would disappear if window was too small. ([#784](https://github.com/iTwin/viewer-components-react/pull/784))
+- Fixed an issue where duplicate properties would be listed in group properties generation. ([#778](https://github.com/iTwin/viewer-components-react/pull/778))
+- Fixed an issue where extraction status would go out of bounds when trying to find the group name in extraction logs. ([#768](https://github.com/iTwin/viewer-components-react/pull/768))
+- Fixed an issue where job id's were potentially undefined. ([#777](https://github.com/iTwin/viewer-components-react/pull/777))
+- Fixed an issue where visualized groups were not rehidden after going back into the Groups view. ([#783](https://github.com/iTwin/viewer-components-react/pull/783))
 
 ## 0.23.1
 

@@ -2,6 +2,47 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 29 Feb 2024 19:46:34 GMT",
+      "version": "1.5.2",
+      "tag": "@itwin/property-grid-react_v1.5.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "911590990e83fcc671e304f5fdfebe09daacd844",
+            "comment": "Fixed property widget being focused in a panel when there are more widgets and selection changes"
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "a06e10d377e8a8cbfa08309cd77dd77a4bfda624",
+            "comment": ""
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "5430c6c2536dfd9b5be8ff52bd58929f448d2e02",
+            "comment": "Bump `itwinjs-core` dev dependencies to `4.4.0`"
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "716aad28ddec9197a763e52eb03262e51f6c827e",
+            "comment": ""
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "4cffea73db2a9c1f723f04a0d575644b3da04433",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 06 Feb 2024 13:45:21 GMT",
       "version": "1.5.1",
       "tag": "@itwin/property-grid-react_v1.5.1",

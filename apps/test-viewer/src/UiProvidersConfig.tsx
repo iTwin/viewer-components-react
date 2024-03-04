@@ -5,21 +5,20 @@
 import { UiItemsProvider } from "@itwin/appui-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SelectionMode } from "@itwin/components-react";
+import { EC3Provider } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
+import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
+import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
   AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
   RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
+import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent,
-  ExternalSourcesTreeComponent,
-  IModelContentTreeComponent,
-  ModelsTreeComponent,
-  TreeWidget,
-  TreeWidgetOptions,
+  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetOptions,
 } from "@itwin/tree-widget-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
 import { TreeWidgetWithOptionsUiItemsProvider } from "./components/TreeWidgetWithOptionsUiItemsProvider";
@@ -57,6 +56,13 @@ function collectSupportedItems(ids: string[]) {
   }
   return items;
 }
+
+const prefixUrl = (baseUrl?: string, prefix?: string) => {
+  if (prefix && baseUrl) {
+    return baseUrl.replace("api.bentley.com", `${prefix}api.bentley.com`);
+  }
+  return baseUrl;
+};
 
 interface UiItem {
   initialize: () => Promise<void>;
@@ -158,6 +164,43 @@ const configuredUiItems = new Map<string, UiItem>([
         GeoTools.initialize();
       },
       createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
+    },
+  ],
+  [
+    "grouping-mapping-widget",
+    {
+      initialize: async () => Promise.resolve(),
+      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: `${process.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix })],
+    },
+  ],
+  [
+    "reports-config-widget",
+    {
+      initialize: async () => { await ReportsConfigWidget.initialize() },
+      createUiItemsProviders: () => [new ReportsConfigProvider(
+        undefined,
+        prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX)
+      )],
+    },
+  ],
+  [
+    "ec3-widget",
+    {
+      initialize: async () => Promise.resolve(),
+      createUiItemsProviders: () => [new EC3Provider({
+        clientId: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
+        redirectUri:
+          process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
+        reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
+        carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
+      })],
+    },
+  ],
+  [
+    "one-click-lca-widget",
+    {
+      initialize: async () => Promise.resolve(),
+      createUiItemsProviders: () => [new OneClickLCAProvider()],
     },
   ],
 ]);

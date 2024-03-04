@@ -111,7 +111,7 @@ export const getHiliteIdsAndKeysetFromGroup = async (
 ) => {
   const query = group.query;
   const result = await getHiliteIds(query, iModelConnection);
-  return {group, result};
+  return {query, result};
 
 };
 

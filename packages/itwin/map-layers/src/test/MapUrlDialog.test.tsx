@@ -3,18 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { ImageMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
-import { DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NotifyMessageDetails, OutputMessagePriority, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
-import { Select } from "@itwin/itwinui-react";
 import { assert, expect } from "chai";
 import * as enzyme from "enzyme";
-import * as React from "react";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
+import { ImageMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
+import {
+  DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NotifyMessageDetails,
+  OutputMessagePriority, ScreenViewport, ViewState3d,
+} from "@itwin/core-frontend";
+import { Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../mapLayers";
 import { MapUrlDialog, SourceState } from "../ui/widget/MapUrlDialog";
 import { AccessClientMock, TokenEndpointMock } from "./AccessClientMock";
 import { TestUtils } from "./TestUtils";
+import * as React from "react";
 
 describe("MapUrlDialog", () => {
   const sandbox = sinon.createSandbox();
@@ -62,7 +65,7 @@ describe("MapUrlDialog", () => {
 
     const spyOnOkResult= sandbox.fake();
     const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
-    const layerTypeSelect = component.find(Select);
+    const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange(format);
 
     // First, lets fill the 'Name' and 'URL' fields
@@ -166,7 +169,7 @@ describe("MapUrlDialog", () => {
     expect(allInputs.length).to.equals(defaultNumberOfInput);
 
     const layerTypeSelect = component.find(Select);
-    expect(layerTypeSelect.length).to.equals(1);
+    expect(layerTypeSelect.length).to.equals(2);
 
     const allButtons = component.find("button");
     expect(allButtons.length).to.equals(3);
@@ -187,7 +190,7 @@ describe("MapUrlDialog", () => {
     });
 
     const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
-    const layerTypeSelect = component.find(Select);
+    const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange("WMS");
 
     const allInputs = component.find("input");
@@ -275,7 +278,7 @@ describe("MapUrlDialog", () => {
     });
 
     const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
-    const layerTypeSelect = component.find(Select);
+    const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange("WMS");
 
     const allInputs = component.find("input");
