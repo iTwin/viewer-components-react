@@ -14,10 +14,15 @@ import {
   RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetUiItemsProvider,
+  CategoriesTreeComponent,
+  ExternalSourcesTreeComponent,
+  IModelContentTreeComponent,
+  ModelsTreeComponent,
+  TreeWidget,
+  TreeWidgetOptions,
 } from "@itwin/tree-widget-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { useViewerOptionsContext } from "./components/ViewerOptions";
+import { TreeWidgetWithOptionsUiItemsProvider } from "./components/TreeWidgetWithOptionsUiItemsProvider";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -67,52 +72,34 @@ const configuredUiItems = new Map<string, UiItem>([
         await TreeWidget.initialize();
       },
       createUiItemsProviders: () => [
-        new TreeWidgetUiItemsProvider({
+        new TreeWidgetWithOptionsUiItemsProvider({
           trees: [
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: () => {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                const { density } = useViewerOptionsContext();
-
-                return (<ModelsTreeComponent
+              render: (density: "enlarged" | "default") => (
+                <ModelsTreeComponent
                   selectionPredicate={() => true}
                   selectionMode={SelectionMode.Multiple}
                   hierarchyLevelConfig={{ isFilteringEnabled: true }}
                   density={density}
-                />)
-              },
+                />
+              ),
             },
             {
               id: CategoriesTreeComponent.id,
               getLabel: CategoriesTreeComponent.getLabel,
-              render: () => {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                const { density } = useViewerOptionsContext();
-
-                return <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />
-              },
+              render: (density: "enlarged" | "default") => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />,
             },
             {
               id: IModelContentTreeComponent.id,
               getLabel: IModelContentTreeComponent.getLabel,
-              render: () => {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                const { density } = useViewerOptionsContext();
-
-                return <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />
-              },
+              render: (density: "enlarged" | "default") => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />,
             },
             {
               id: ExternalSourcesTreeComponent.id,
               getLabel: ExternalSourcesTreeComponent.getLabel,
-              render: () => {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                const { density } = useViewerOptionsContext();
-
-                return <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />
-              },
+              render: (density: "enlarged" | "default") => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />,
             },
             {
               id: "spatial-containment-tree",
@@ -120,7 +107,7 @@ const configuredUiItems = new Map<string, UiItem>([
               render: () => <SampleSpatialTree />,
             },
           ],
-        }),
+        } as TreeWidgetOptions),
       ],
     },
   ],

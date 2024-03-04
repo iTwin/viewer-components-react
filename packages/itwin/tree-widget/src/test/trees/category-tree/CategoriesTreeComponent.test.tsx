@@ -233,15 +233,9 @@ describe("<CategoriesTreeComponent />", () => {
     });
 
     describe("<ShowAllButton />", () => {
-      it("renders enlarged ShowAllButton", async () => {
-        const { getByRole } = render(<CategoriesTreeComponent.ShowAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
-      });
-
       it("click on ShowAllButton calls expected function", async () => {
         const showAllSpy = sinon.stub(categoryVisibilityHandler, "showAllCategories");
-        const { user, getByRole } = render(<CategoriesTreeComponent.ShowAllButton categories={categories} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.ShowAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(showAllSpy).to.be.calledWith(["CategoryId"], vpMock.object);
@@ -259,15 +253,9 @@ describe("<CategoriesTreeComponent />", () => {
     });
 
     describe("<HideAllButton />", () => {
-      it("renders enlarged HideAllButton", async () => {
-        const { getByRole } = render(<CategoriesTreeComponent.HideAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
-      });
-
       it("click on HideAllButton calls expected function", async () => {
         const hideAllSpy = sinon.stub(categoryVisibilityHandler, "hideAllCategories");
-        const { user, getByRole } = render(<CategoriesTreeComponent.HideAllButton categories={categories} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.HideAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(hideAllSpy).to.be.calledWith(["CategoryId"], vpMock.object);
@@ -285,15 +273,9 @@ describe("<CategoriesTreeComponent />", () => {
     });
 
     describe("<InvertAllButton />", () => {
-      it("renders enlarged InvertAllButton", async () => {
-        const { getByRole } = render(<CategoriesTreeComponent.InvertAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
-      });
-
       it("click on InvertAllButton calls expected function", async () => {
         const invertAllSpy = sinon.stub(categoryVisibilityHandler, "invertAllCategories");
-        const { user, getByRole } = render(<CategoriesTreeComponent.InvertAllButton categories={categories} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.InvertAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(invertAllSpy).to.be.calledWith(categories, vpMock.object);

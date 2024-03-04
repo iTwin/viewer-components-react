@@ -12,7 +12,7 @@ import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
-import { ViewerOptionsProvider, ViewerOptionsUiItemsProvider, useViewerOptionsContext } from "./ViewerOptions";
+import { ViewerOptionsProvider, ViewerOptionsUiItemsProvider, useViewerActionsContext } from "./ViewerOptions";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -44,8 +44,8 @@ export function Viewer() {
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
-  const optionsContext = useViewerOptionsContext();
-  const optionsItemsProvider = new ViewerOptionsUiItemsProvider(optionsContext.setDensity);
+  const { setDensity } = useViewerActionsContext();
+  const optionsItemsProvider = new ViewerOptionsUiItemsProvider(setDensity);
 
   return (
     <WebViewer
@@ -62,7 +62,7 @@ function ViewerWithOptions() {
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
-      theme="os"
+      theme="light"
     />
   );
 }

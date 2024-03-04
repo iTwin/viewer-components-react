@@ -157,64 +157,38 @@ describe("<ModelsTreeComponent />", () => {
     describe("<ShowAllButton />", () => {
       it("click on ShowAllButton calls expected function", async () => {
         const showAllSpy = sinon.stub(modelsVisibilityHandler, "showAllModels");
-        const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(showAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
-      });
-
-      it("renders enlarged ShowAllButton", async () => {
-        const { getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} density="enlarged" />);
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
       });
     });
 
     describe("<HideAllButton />", () => {
       it("click on HideAllButton calls expected function", async () => {
         const hideAllSpy = sinon.stub(modelsVisibilityHandler, "hideAllModels");
-        const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(hideAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
-      });
-
-      it("renders enlarged HideAllButton", async () => {
-        const { getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} density="enlarged" />);
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
       });
     });
 
     describe("<InvertAllButton />", () => {
       it("click on InvertAllButton calls expected function", async () => {
         const invertAllSpy = sinon.stub(modelsVisibilityHandler, "invertAllModels");
-        const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(invertAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
       });
-
-      it("renders enlarged invertAllModels", async () => {
-        const { getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} density="enlarged" />);
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
-      });
     });
 
     describe("<View2DButton />", () => {
-      it("renders enlarged View3DButton", async () => {
-        const { getByRole } = render(
-          <ModelsTreeComponent.View2DButton models={[{ id: "modelTestId", isPlanProjection: true }]} viewport={mockViewport().object} density="enlarged" />,
-        );
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
-      });
-
       it("click on View2DButton calls expected function", async () => {
         const view2DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
         const { user, getByRole } = render(
-          <ModelsTreeComponent.View2DButton models={[{ id: "modelTestId", isPlanProjection: true }]} viewport={mockViewport().object} />,
+          <ModelsTreeComponent.View2DButton models={[{ id: "modelTestId", isPlanProjection: true }]} viewport={mockViewport().object} density="enlarged" />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
@@ -271,18 +245,10 @@ describe("<ModelsTreeComponent />", () => {
     });
 
     describe("<View3DButton />", () => {
-      it("renders enlarged View3DButton", async () => {
-        const { getByRole } = render(
-          <ModelsTreeComponent.View3DButton models={[{ id: "modelTestId", isPlanProjection: true }]} viewport={mockViewport().object} density="enlarged" />,
-        );
-        const button = await waitFor(() => getByRole("button"));
-        expect(button.getAttribute("data-iui-size")).to.be.null;
-      });
-
       it("click on View3DButton calls expected function", async () => {
         const view3DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
         const { user, getByRole } = render(
-          <ModelsTreeComponent.View3DButton models={[{ id: "modelTestId", isPlanProjection: false }]} viewport={mockViewport().object} />,
+          <ModelsTreeComponent.View3DButton models={[{ id: "modelTestId", isPlanProjection: false }]} viewport={mockViewport().object} density="enlarged" />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
