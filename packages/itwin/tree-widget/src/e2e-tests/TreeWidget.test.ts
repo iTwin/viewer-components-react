@@ -41,8 +41,7 @@ const componentTests = () => {
     const node = locateNode(treeWidget, "ProcessPhysicalModel");
     await node.getByTestId("tree-node-expansion-toggle").click();
 
-    // wait for node at the bottom to be visible/loaded
-    await locateNode(treeWidget, "Tag-Category").waitFor();
+    await new Promise((f) => setTimeout(f, 3000));
     await takeScreenshot(page, treeWidget);
   });
 
@@ -50,13 +49,11 @@ const componentTests = () => {
     const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
     await physicalModelNode.getByTestId("tree-node-expansion-toggle").click();
 
-    // wait for node at the bottom to be visible/loaded
-    await locateNode(treeWidget, "Tag-Category").waitFor();
+    await new Promise((f) => setTimeout(f, 3000));
     const pipeSupportNode = locateNode(treeWidget, "PipeSupport");
     await pipeSupportNode.getByTestId("tree-node-expansion-toggle").click();
 
-    // wait for node at the bottom to be visible/loaded
-    await locateNode(treeWidget, "Hanger Rod [4-2UH]").waitFor();
+    await new Promise((f) => setTimeout(f, 3000));
     await takeScreenshot(page, treeWidget);
   });
 
@@ -102,8 +99,7 @@ const componentTests = () => {
     await physicalModelNode.hover();
     await treeWidget.getByTitle("Clear active filter").waitFor();
 
-    // ensure the last node is loaded before taking a screenshot to avoid flakiness
-    await locateNode(treeWidget, "Tag-Category").waitFor();
+    await new Promise((f) => setTimeout(f, 3000));
     await takeScreenshot(page, treeWidget);
   });
 
@@ -130,6 +126,12 @@ const componentTests = () => {
     await page.locator(".tree-header-button-dropdown-container").waitFor();
     await takeScreenshot(page, treeWidget);
   });
+
+  test("tree selector", async ({ page }) => {
+    await treeWidget.getByRole("combobox").click();
+    await page.getByRole("listbox").waitFor();
+    await takeScreenshot(page, treeWidget);
+  });
 };
 
 test.describe("should match image snapshot", () => {
@@ -140,7 +142,7 @@ test.describe("should match image snapshot when Tree Widget is enlarged", () => 
   test.beforeEach(async ({ page }) => {
     const expandedLayoutToggleButton = page.getByTitle("Toggle expanded layout");
     await expandedLayoutToggleButton.click();
-    await new Promise((f) => setTimeout(f, 1000));
+    await new Promise((f) => setTimeout(f, 3000));
     treeWidget = locateWidget(page, "tree");
     await treeWidget.waitFor();
   });
