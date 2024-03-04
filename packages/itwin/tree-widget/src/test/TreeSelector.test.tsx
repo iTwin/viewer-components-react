@@ -11,7 +11,7 @@ before(async () => {
   window.HTMLElement.prototype.scrollIntoView = function () {};
 });
 
-describe.only("<TreeSelector />", () => {
+describe("<TreeSelector />", () => {
   it("lists all given content components in select box", async () => {
     const { getByText, queryAllByText, getByRole } = render(
       <TreeSelector defaultSelectedContentId={""}>
