@@ -56,7 +56,7 @@ export function TreeHeader(props: TreeHeaderProps) {
         selectedResultIndex={selectedIndex}
         resultCount={resultCount}
         onSelectedResultChanged={onSelectedChanged}
-        size={isEnlarged ? undefined : "small"}
+        size={isEnlarged ? "large" : "small"}
       />
     </div>
   );
@@ -71,7 +71,7 @@ interface DebouncedSearchBoxProps {
   selectedResultIndex?: number;
   resultCount?: number;
   onSelectedResultChanged: (index: number) => void;
-  size: "small" | undefined;
+  size?: "large" | "small";
 }
 
 function DebouncedSearchBox({
@@ -112,14 +112,12 @@ function DebouncedSearchBox({
           title={TreeWidget.translate("searchBox.searchForSomething")}
           aria-label={TreeWidget.translate("searchBox.open")}
           size={size}
-          className="search-open"
         />
       </SearchBox.CollapsedState>
       <SearchBox.ExpandedState>
         <SearchBox.Input
           placeholder={TreeWidget.translate("searchBox.search")}
           onChange={(e) => setInputValue(e.currentTarget.value)}
-          className="search-input"
         />
         <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} size={size} />
         <SearchBox.CollapseButton
@@ -129,7 +127,6 @@ function DebouncedSearchBox({
           }}
           size={size}
           aria-label={TreeWidget.translate("searchBox.close")}
-          className="search-close"
         />
       </SearchBox.ExpandedState>
     </SearchBox>
@@ -177,7 +174,7 @@ interface SearchResultStepperProps {
   total?: number;
   onStep: (newIndex: number) => void;
   selectedIndex?: number;
-  size: "small" | undefined;
+  size?: "large" | "small";
 }
 
 function SearchResultStepper(props: SearchResultStepperProps) {
@@ -191,7 +188,6 @@ function SearchResultStepper(props: SearchResultStepperProps) {
       <span className="searchbox-stepping-count">{`${selectedIndex}/${total}`}</span>
       <Divider orientation="vertical" />
       <SearchBox.Button
-        className="search-previous"
         title={TreeWidget.translate("searchBox.previous")}
         size={props.size}
         onClick={() => {
@@ -203,7 +199,6 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         <SvgCaretUpSmall />
       </SearchBox.Button>
       <SearchBox.Button
-        className="search-next"
         title={TreeWidget.translate("searchBox.next")}
         size={props.size}
         onClick={() => {

@@ -62,12 +62,12 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       {
         id: ModelsTreeComponent.id,
         getLabel: ModelsTreeComponent.getLabel,
-        render: (density) => <ModelsTreeComponent density={density} />,
+        render: (props) => <ModelsTreeComponent density={props.density} />,
       },
       {
         id: CategoriesTreeComponent.id,
         getLabel: CategoriesTreeComponent.getLabel,
-        render: (density) => <CategoriesTreeComponent density={density} />,
+        render: (props) => <CategoriesTreeComponent density={props.density} />,
       },
     ];
 

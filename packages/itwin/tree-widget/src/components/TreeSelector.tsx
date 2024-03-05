@@ -6,17 +6,18 @@
 import "./TreeSelector.scss";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { useMemo, useState } from "react";
-import { Select } from "@itwin/itwinui-react";
+import { MenuItem, Select } from "@itwin/itwinui-react";
+import type { TreeRenderProps } from "./SelectableTree";
 
 export interface TreeContentDefinition {
   id: string;
   label: string;
-  render: (density?: "enlarged" | "default") => React.ReactNode;
+  render: (props: TreeRenderProps) => React.ReactNode;
 }
 
 export interface TreeSelectorProps {
   defaultSelectedContentId: string;
-  children: TreeContentDefinition[];
+  trees: TreeContentDefinition[];
   selectAriaLabel?: string;
   disabled?: boolean;
   density?: "enlarged" | "default";
@@ -24,29 +25,40 @@ export interface TreeSelectorProps {
 
 export function TreeSelector(props: TreeSelectorProps) {
   const [selectedContentId, setSelectedContentId] = useState(props.defaultSelectedContentId);
-  const selectedContent = props.children.find((c) => c.id === selectedContentId) ?? props.children[0];
-  const className = props.density === "enlarged" ? "presentation-components-tree-selector-menu-enlarged" : "presentation-components-tree-selector-menu";
+  const selectedContent = props.trees.find((c) => c.id === selectedContentId) ?? props.trees[0];
+  const isEnlarged = props.density === "enlarged";
 
   const options = useMemo(() => {
-    return props.children.map((c) => ({ label: c.label, value: c.id })) as SelectOption<string>[];
-  }, [props.children]);
+    return props.trees.map((c) => ({ label: c.label, value: c.id })) as SelectOption<string>[];
+  }, [props.trees]);
 
   return (
-    <div className="presentation-components-tree-selector-content" title={className}>
+    <div className="presentation-components-tree-selector-content">
       <div className="presentation-components-tree-selector-content-header">
         {options.length > 0 && (
           <Select
             options={options}
             value={selectedContent.id}
-            onChange={setSelectedContentId}
             aria-label={props.selectAriaLabel}
             disabled={props.disabled}
-            menuClassName={className}
-            size={props.density === "enlarged" ? "large" : "small"}
+            size={isEnlarged ? "large" : "small"}
+            itemRenderer={(option, itemProps) => (
+              <MenuItem
+                size={isEnlarged ? "large" : "default"}
+                isSelected={itemProps.isSelected}
+                onClick={() => {
+                  setSelectedContentId(option.value);
+                  itemProps.close();
+                }}
+                role='option'
+              >
+                {option.label}
+              </MenuItem>
+            )}
           />
         )}
       </div>
-      <div className="presentation-components-tree-selector-content-wrapper">{selectedContent?.render(props.density)}</div>
+      <div className="presentation-components-tree-selector-content-wrapper">{selectedContent?.render(props)}</div>
     </div>
   );
 }

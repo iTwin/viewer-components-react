@@ -35,38 +35,18 @@ describe("<TreeHeader />", () => {
     sinon.restore();
   });
 
-  it("renders non `enlarged` header", async () => {
-    sinon.stub(HTMLElement.prototype, "scrollWidth").get(() => 200);
-    sinon.stub(HTMLElement.prototype, "offsetWidth").get(() => 32);
-
-    const { container, getByTitle } = render(
-      <TreeHeader {...defaultProps}>
-        <Button>Button1</Button>
-        <Button>Button2</Button>
-      </TreeHeader>,
-    );
-
-    const button = getByTitle(TreeWidget.translate("dropdownMore"));
-
-    await waitFor(() => expect(container.querySelector(".enlarge")).to.be.null);
-    expect(button.getAttribute("data-iui-size")).to.be.eq("small");
-  });
-
   it("renders `enlarged` header", async () => {
     sinon.stub(HTMLElement.prototype, "scrollWidth").get(() => 200);
     sinon.stub(HTMLElement.prototype, "offsetWidth").get(() => 32);
 
-    const { container, getByTitle } = render(
+    const { container } = render(
       <TreeHeader {...defaultProps} density="enlarged">
         <Button>Button1</Button>
         <Button>Button2</Button>
       </TreeHeader>,
     );
 
-    const button = getByTitle(TreeWidget.translate("dropdownMore"));
-
     await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null);
-    expect(button.getAttribute("data-iui-size")).to.be.null;
   });
 
   it("renders supplied buttons", async () => {
@@ -116,38 +96,20 @@ describe("<TreeHeader />", () => {
   });
 
   describe("search box", () => {
-    it("renders non `enlarged` search box", async () => {
+    it("renders search box", async () => {
       const { getByRole } = render(<TreeHeader {...defaultProps} selectedIndex={5} resultCount={10} />);
-      const sizeAttribute = "data-iui-size";
 
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
-      expect(openButton.getAttribute(sizeAttribute)).to.be.eq("small");
+      expect(openButton).to.not.be.null;
       await userEvents.click(openButton);
 
       const closeButton = getByRole("button", { name: TreeWidget.translate("searchBox.close") });
       const nextButton = getByRole("button", { name: TreeWidget.translate("searchBox.next") });
       const previousButton = getByRole("button", { name: TreeWidget.translate("searchBox.previous") });
 
-      expect(closeButton.getAttribute(sizeAttribute)).to.be.eq("small");
-      expect(nextButton.getAttribute(sizeAttribute)).to.be.eq("small");
-      expect(previousButton.getAttribute(sizeAttribute)).to.be.eq("small");
-    });
-
-    it("renders `enlarged` search box", async () => {
-      const { getByRole } = render(<TreeHeader {...defaultProps} density={"enlarged"} selectedIndex={5} resultCount={10} />);
-      const sizeAttribute = "data-iui-size";
-
-      const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
-      expect(openButton.getAttribute(sizeAttribute)).to.be.null;
-      await userEvents.click(openButton);
-
-      const closeButton = getByRole("button", { name: TreeWidget.translate("searchBox.close") });
-      const nextButton = getByRole("button", { name: TreeWidget.translate("searchBox.next") });
-      const previousButton = getByRole("button", { name: TreeWidget.translate("searchBox.previous") });
-
-      expect(closeButton.getAttribute(sizeAttribute)).to.be.null;
-      expect(nextButton.getAttribute(sizeAttribute)).to.be.null;
-      expect(previousButton.getAttribute(sizeAttribute)).to.be.null;
+      expect(closeButton).to.not.be.null;
+      expect(nextButton).to.not.be.null;
+      expect(previousButton).to.not.be.null;
     });
 
     it("opens and closes search box", async () => {

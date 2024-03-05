@@ -84,11 +84,6 @@
       &.contracted {
         width: var(--enlarged-header-height);
       }
-
-      .search-open, .search-input, .search-close {
-        height: var(--enlarged-header-height);
-        min-width: var(--enlarged-header-height);
-      }
     }
 
     .button-container {

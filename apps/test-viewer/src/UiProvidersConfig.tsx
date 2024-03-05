@@ -2,7 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { UiItemsProvider } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SelectionMode } from "@itwin/components-react";
 import { EC3Provider } from "@itwin/ec3-widget-react";
@@ -18,10 +18,10 @@ import {
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetOptions,
+  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps, TreeWidget, TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { TreeWidgetWithOptionsUiItemsProvider } from "./components/TreeWidgetWithOptionsUiItemsProvider";
+import { useViewerOptionsContext } from "./components/ViewerOptions";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -77,44 +77,55 @@ const configuredUiItems = new Map<string, UiItem>([
         await BreakdownTrees.initialize();
         await TreeWidget.initialize();
       },
-      createUiItemsProviders: () => [
-        new TreeWidgetWithOptionsUiItemsProvider({
-          trees: [
+      createUiItemsProviders: () => [{
+        id: "TreeWidgetUIProvider",
+        getWidgets: () => {
+          const trees = [
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: (density: "enlarged" | "default") => (
+              render: (props: TreeRenderProps) => (
                 <ModelsTreeComponent
                   selectionPredicate={() => true}
                   selectionMode={SelectionMode.Multiple}
                   hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                  density={density}
+                  density={props.density}
                 />
               ),
             },
             {
               id: CategoriesTreeComponent.id,
               getLabel: CategoriesTreeComponent.getLabel,
-              render: (density: "enlarged" | "default") => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />,
+              render: (props: TreeRenderProps) => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
             },
             {
               id: IModelContentTreeComponent.id,
               getLabel: IModelContentTreeComponent.getLabel,
-              render: (density: "enlarged" | "default") => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />,
+              render: (props: TreeRenderProps) => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
             },
             {
               id: ExternalSourcesTreeComponent.id,
               getLabel: ExternalSourcesTreeComponent.getLabel,
-              render: (density: "enlarged" | "default") => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={density} />,
+              render: (props: TreeRenderProps) => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
             },
             {
               id: "spatial-containment-tree",
               getLabel: () => "Spatial Containment",
-              render: () => <SampleSpatialTree />,
+              render: (_: TreeRenderProps) => <SampleSpatialTree />,
             },
-          ],
-        } as TreeWidgetOptions),
-      ],
+          ]
+          return [{
+            id: "tree-widget",
+            content: <TreeWidgetWithOptions trees={trees} />,
+            layouts: {
+              standard: {
+                 section: StagePanelSection.Start,
+                 location: StagePanelLocation.Right,
+              }
+            }
+          }]
+        }
+      }]
     },
   ],
   [
@@ -204,3 +215,9 @@ const configuredUiItems = new Map<string, UiItem>([
     },
   ],
 ]);
+
+function TreeWidgetWithOptions(props: SelectableTreeProps) {
+  const { density } = useViewerOptionsContext();
+
+  return <TreeWidgetComponent trees={props.trees} density={density} />;
+}

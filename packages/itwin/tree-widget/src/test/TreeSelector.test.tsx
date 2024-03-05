@@ -14,13 +14,11 @@ before(async () => {
 describe("<TreeSelector />", () => {
   it("lists all given content components in select box", async () => {
     const { getByText, queryAllByText, getByRole } = render(
-      <TreeSelector defaultSelectedContentId={""}>
-        {[
-          { id: "a", label: "A", render: () => <div /> },
-          { id: "b", label: "B", render: () => <div /> },
-          { id: "c", label: "C", render: () => <div /> },
-        ]}
-      </TreeSelector>
+      <TreeSelector defaultSelectedContentId={""} trees={[
+        { id: "a", label: "A", render: () => <div /> },
+        { id: "b", label: "B", render: () => <div /> },
+        { id: "c", label: "C", render: () => <div /> },
+      ]} />
     );
 
     const select = getByRole("combobox");
@@ -33,30 +31,24 @@ describe("<TreeSelector />", () => {
 
   it("renders with default selected content", () => {
     const { getByTestId } = render(
-      <TreeSelector defaultSelectedContentId={"b"}>
-        {[
-          { id: "a", label: "A", render: () => <div data-testid="a" /> },
-          { id: "b", label: "B", render: () => <div data-testid="b" /> },
-          { id: "c", label: "C", render: () => <div data-testid="c" /> },
-        ]}
-      </TreeSelector>
+      <TreeSelector defaultSelectedContentId={"b"} trees={[
+        { id: "a", label: "A", render: () => <div data-testid="a" /> },
+        { id: "b", label: "B", render: () => <div data-testid="b" /> },
+        { id: "c", label: "C", render: () => <div data-testid="c" /> },
+      ]} />
     );
     getByTestId("b");
   });
 
   it("renders the first content in children list if `defaultSelectedContentId` doesn't match provided content definitions", () => {
     const { getByTestId } = render(
-      <TreeSelector defaultSelectedContentId={"b"}>
-        {[{ id: "a", label: "A", render: () => <div data-testid="a" /> }]}
-      </TreeSelector>
+      <TreeSelector defaultSelectedContentId={"b"} trees={[ { id: "a", label: "A", render: () => <div data-testid="a" /> } ]} />
     );
     getByTestId("a");
   });
 
   it("renders without content when provided an empty children list", () => {
-    const { container } = render(
-      <TreeSelector defaultSelectedContentId={""}>{[]}</TreeSelector>
-    );
+    const { container } = render(<TreeSelector defaultSelectedContentId={""} trees={[]} />);
     expect(
       container.getElementsByClassName("presentation-components-tree-selector-content-wrapper")[0].innerHTML
     ).to.be.empty;
@@ -64,13 +56,11 @@ describe("<TreeSelector />", () => {
 
   it("changes displayed content based on selected item in select box", async () => {
     const { getByText, getByRole, queryByText } = render(
-        <TreeSelector defaultSelectedContentId={"a"}>
-          {[
-            { id: "a", label: "A", render: () => <div data-testid="a" /> },
-            { id: "b", label: "B", render: () => <div data-testid="b" /> },
-            { id: "c", label: "C", render: () => <div data-testid="c" /> },
-          ]}
-        </TreeSelector>
+        <TreeSelector defaultSelectedContentId={"a"} trees={[
+          { id: "a", label: "A", render: () => <div data-testid="a" /> },
+          { id: "b", label: "B", render: () => <div data-testid="b" /> },
+          { id: "c", label: "C", render: () => <div data-testid="c" /> },
+        ]} />
     );
     getByText("A");
 

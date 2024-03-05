@@ -16,6 +16,14 @@ import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
 import { TreeSelector } from "./TreeSelector";
 
 /**
+ * Props for rendering trees
+ * @public
+ */
+export interface TreeRenderProps {
+  density?: "enlarged" | "default";
+}
+
+/**
  * Definition of a tree component displayed in [[SelectableTree]]
  * @public
  */
@@ -25,7 +33,7 @@ export interface TreeDefinition {
   /** Callback that is used to get tree label */
   getLabel: () => string;
   /** Callback that is used to render tree component */
-  render: (density?: "enlarged" | "default") => React.ReactNode;
+  render: (props: TreeRenderProps) => React.ReactNode;
   /**
    * Callback that is used to determine if tree should be shown for current active iModel connection.
    * If callback is `undefined` tree is shown for all iModel connections.
@@ -62,7 +70,7 @@ function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConn
 
   return (
     <div className="tree-widget-selectable-tree">
-      <TreeSelector {...getTreeSelectorProps(trees, props.density)} />
+      <TreeSelector {...getTreeSelectorProps(trees)} density={props.density} />
     </div>
   );
 }
@@ -103,12 +111,11 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
   return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
 }
 
-function getTreeSelectorProps(trees?: TreeContentDefinition[], density?: "enlarged" | "default"): TreeSelectorProps {
+function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProps {
   if (trees === undefined) {
     return {
       defaultSelectedContentId: "loading",
-      density,
-      children: [
+      trees: [
         {
           id: "loading",
           label: "",
@@ -125,8 +132,7 @@ function getTreeSelectorProps(trees?: TreeContentDefinition[], density?: "enlarg
   if (trees.length === 0) {
     return {
       defaultSelectedContentId: "no-trees",
-      density,
-      children: [
+      trees: [
         {
           id: "no-trees",
           label: "",
@@ -138,8 +144,7 @@ function getTreeSelectorProps(trees?: TreeContentDefinition[], density?: "enlarg
 
   return {
     defaultSelectedContentId: trees[0].id,
-    children: trees,
-    density,
+    trees,
   };
 }
 
