@@ -10,3 +10,4 @@
 
 # ignore some stuff again
 lib/**/test/**
+lib/**/e2e-tests/**
