@@ -1,6 +1,6 @@
 {
-  "type": "major",
-  "comment": "Bumped `@itwin/presentation-components` peer dependency version to `^4.4.0`.",
+  "type": "patch",
+  "comment": "Fixed progress indicator positioning in enlarged tree layout.",
   "packageName": "@itwin/tree-widget-react",
   "email": "24278440+saskliutas@users.noreply.github.com",
   "dependentChangeType": "patch"

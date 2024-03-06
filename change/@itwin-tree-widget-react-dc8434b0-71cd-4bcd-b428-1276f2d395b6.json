@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "TreeWidget:\n - Allow opt-in to hierarchy level filtering using `isHierarchyLevelFilteringEnabled` flag for all trees.\n - Add support for `enlarged` nodes in non-visibility trees.",
+  "comment": "Tree Widget: Allow opt-in to hierarchy level filtering using `isHierarchyLevelFilteringEnabled` flag for all trees. Add support for `enlarged` nodes in non-visibility trees.",
   "packageName": "@itwin/tree-widget-react",
   "email": "114080994+ViliusBa@users.noreply.github.com",
   "dependentChangeType": "patch"
