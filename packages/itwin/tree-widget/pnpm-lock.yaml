@@ -15,8 +15,8 @@ dependencies:
     specifier: ^2.1.0
     version: 2.1.0(react-dom@18.0.0)(react@18.0.0)
   '@itwin/itwinui-react':
-    specifier: ^3.4.2
-    version: 3.4.2(react-dom@18.0.0)(react@18.0.0)
+    specifier: ^3.5.0
+    version: 3.5.0(react-dom@18.0.0)(react@18.0.0)
   classnames:
     specifier: ^2.3.1
     version: 2.3.1
@@ -1223,8 +1223,8 @@ packages:
       tippy.js: 6.3.7
     dev: true
 
-  /@itwin/itwinui-react@3.4.2(react-dom@18.0.0)(react@18.0.0):
-    resolution: {integrity: sha512-NJbzAcSdbh0+waBQABYwKxmsMNuftT6VzmWp8B1QAZirthQLzmA5BR8KyEOHmF6tN5alGUec0n4WsjLl3FHlFA==}
+  /@itwin/itwinui-react@3.5.0(react-dom@18.0.0)(react@18.0.0):
+    resolution: {integrity: sha512-Xtdq8e4OzQiN0wGa9MRn92tdgp3jk7ITIMlV2hcFoZs16p6pBJVChhpX0ayA6wSDauT6cLg+0dK9K+24TEdQYw==}
     peerDependencies:
       react: '>= 17.0.0 < 19.0.0'
       react-dom: '>=17.0.0 < 19.0.0'
@@ -1339,7 +1339,7 @@ packages:
       '@itwin/imodel-components-react': 4.9.0(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.9.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.9.0)(react-dom@18.0.0)(react@18.0.0)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.0.0)(react@18.0.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0)(react@18.0.0)
-      '@itwin/itwinui-react': 3.4.2(react-dom@18.0.0)(react@18.0.0)
+      '@itwin/itwinui-react': 3.5.0(react-dom@18.0.0)(react@18.0.0)
       '@itwin/presentation-common': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)
       '@itwin/presentation-frontend': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/presentation-common@4.4.0)
       classnames: 2.3.2

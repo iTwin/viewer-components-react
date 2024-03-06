@@ -34,6 +34,12 @@
   }
 
   .core-tree-node {
+    > .contents {
+      .core-tree-node-icon {
+        line-height: 0;
+      }
+    }
+
     &.without-expander {
       > .contents {
         > .core-tree-node-icon {
@@ -74,10 +80,6 @@
       > .contents {
         height: var(--enlarged-node-height);
         font-size: var(--iui-font-size-2);
-
-        .core-tree-node-icon {
-          line-height: 0;
-        }
 
         /* stylelint-disable-next-line selector-class-pattern */
         .core-tree-expansionToggle {
