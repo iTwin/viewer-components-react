@@ -1,7 +1,0 @@
-{
-  "type": "major",
-  "comment": "Bumped `@itwin/presentation-components` peer dependency version to `^4.4.0`.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
