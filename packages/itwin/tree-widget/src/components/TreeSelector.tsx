@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeSelector.scss";
-import type { SelectOption } from "@itwin/itwinui-react";
 import { useMemo, useState } from "react";
 import { MenuItem, Select } from "@itwin/itwinui-react";
+
+import type { SelectOption } from "@itwin/itwinui-react";
 import type { TreeRenderProps } from "./SelectableTree";
 
 /**
@@ -30,7 +31,7 @@ export interface TreeSelectorProps {
 }
 
 /**
- * A component that accepts a list of trees and renders a select box at the top, 
+ * A component that accepts a list of trees and renders a select box at the top,
  * allowing to choose which of the provided tree components should be rendered at the bottom.
  * @internal
  */
@@ -53,10 +54,7 @@ export function TreeSelector(props: TreeSelectorProps) {
             value={selectedContent.id}
             size={isEnlarged ? "large" : "small"}
             itemRenderer={(option, itemProps) => (
-              <MenuItem
-                {...itemProps}
-                size={isEnlarged ? "large" : "default"}
-              >
+              <MenuItem {...option} isSelected={itemProps.isSelected} size={isEnlarged ? "large" : "default"}>
                 {option.label}
               </MenuItem>
             )}
