@@ -4,21 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetUiItemsProvider.scss";
-import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
-import { SvgError } from "@itwin/itwinui-illustrations-react";
-import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
-import { SelectableTree } from "./SelectableTree";
 import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
 import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
-import { useTreeTransientState } from "./utils/UseTreeTransientState";
 
-import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { SelectableTreeProps, TreeDefinition } from "./SelectableTree";
-
+import type { FallbackProps } from "react-error-boundary";
+import { ErrorBoundary } from "react-error-boundary";
+import { SelectableTree } from "./SelectableTree";
+import { useTreeTransientState } from "./utils/UseTreeTransientState";
+import { Button, NonIdealState } from "@itwin/itwinui-react";
+import { SvgError } from "@itwin/itwinui-illustrations-react";
 /**
  * Parameters for creating a [[TreeWidgetUiItemsProvider]].
  * @public
@@ -32,6 +31,8 @@ export interface TreeWidgetOptions {
   defaultTreeWidgetPriority?: number;
   /** Trees to show in the widget. Defaults to [[ModelsTreeComponent]] and [[CategoriesTreeComponent]]. */
   trees?: TreeDefinition[];
+  /** Modifies the density of the tree widget. `enlarged` widget contains larger content */
+  density?: "enlarged" | "default";
 }
 
 /**
@@ -61,12 +62,12 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       {
         id: ModelsTreeComponent.id,
         getLabel: ModelsTreeComponent.getLabel,
-        render: () => <ModelsTreeComponent />,
+        render: (props) => <ModelsTreeComponent density={props.density} />,
       },
       {
         id: CategoriesTreeComponent.id,
         getLabel: CategoriesTreeComponent.getLabel,
-        render: () => <CategoriesTreeComponent />,
+        render: (props) => <CategoriesTreeComponent density={props.density} />,
       },
     ];
 
@@ -74,7 +75,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       {
         id: TreeWidgetId,
         label: TreeWidget.translate("treeview"),
-        content: <SelectableTreeWidget trees={trees} />,
+        content: <TreeWidgetComponent trees={trees} density={this._treeWidgetOptions?.density} />,
         icon: <SvgHierarchyTree />,
         priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
       },
@@ -82,7 +83,11 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   }
 }
 
-function SelectableTreeWidget(props: SelectableTreeProps) {
+/**
+ * Tree widget component which allows selecting which tree to render.
+ * @public
+ */
+export function TreeWidgetComponent(props: SelectableTreeProps) {
   const ref = useTreeTransientState<HTMLDivElement>();
 
   return (

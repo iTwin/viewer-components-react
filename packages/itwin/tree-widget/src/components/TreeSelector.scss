@@ -1,0 +1,27 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.presentation-components-tree-selector-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+
+  .presentation-components-tree-selector-content-header {
+    padding-bottom: var(--iui-size-2xs);
+
+    .presentation-components-tree-selector-content-selector {
+      width: 100%;
+    }
+  }
+
+  .presentation-components-tree-selector-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+    overflow: hidden;
+  }
+}

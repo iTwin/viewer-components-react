@@ -65,10 +65,10 @@ describe("TreeWidgetUiItemsProvider", () => {
     const [props] = widgetComponentStub.args[0];
     expect(props.trees).to.have.lengthOf(2);
 
-    render(<>{props.trees[0].render()}</>);
+    render(<>{props.trees[0].render({})}</>);
     expect(modelsTreeComponentStub).to.be.called;
 
-    render(<>{props.trees[1].render()}</>);
+    render(<>{props.trees[1].render({})}</>);
     expect(categoriesTreeComponentStub).to.be.called;
   });
 

@@ -105,7 +105,7 @@ describe("<ModelsTreeComponent />", () => {
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
-      render(<ModelsTreeComponent headerButtons={[spy]} />);
+      render(<ModelsTreeComponent headerButtons={[spy]} density="enlarged" />);
       await waitFor(() =>
         expect(spy).to.be.calledWith(
           sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels"),
@@ -157,7 +157,7 @@ describe("<ModelsTreeComponent />", () => {
     describe("<ShowAllButton />", () => {
       it("click on ShowAllButton calls expected function", async () => {
         const showAllSpy = sinon.stub(modelsVisibilityHandler, "showAllModels");
-        const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(showAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
@@ -167,7 +167,7 @@ describe("<ModelsTreeComponent />", () => {
     describe("<HideAllButton />", () => {
       it("click on HideAllButton calls expected function", async () => {
         const hideAllSpy = sinon.stub(modelsVisibilityHandler, "hideAllModels");
-        const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(hideAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
@@ -177,7 +177,7 @@ describe("<ModelsTreeComponent />", () => {
     describe("<InvertAllButton />", () => {
       it("click on InvertAllButton calls expected function", async () => {
         const invertAllSpy = sinon.stub(modelsVisibilityHandler, "invertAllModels");
-        const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} />);
+        const { user, getByRole } = render(<ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(invertAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
@@ -188,7 +188,7 @@ describe("<ModelsTreeComponent />", () => {
       it("click on View2DButton calls expected function", async () => {
         const view2DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
         const { user, getByRole } = render(
-          <ModelsTreeComponent.View2DButton models={[{ id: "modelTestId", isPlanProjection: true }]} viewport={mockViewport().object} />,
+          <ModelsTreeComponent.View2DButton models={[{ id: "modelTestId", isPlanProjection: true }]} viewport={mockViewport().object} density="enlarged" />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
@@ -248,7 +248,7 @@ describe("<ModelsTreeComponent />", () => {
       it("click on View3DButton calls expected function", async () => {
         const view3DSpy = sinon.stub(modelsVisibilityHandler, "toggleModels");
         const { user, getByRole } = render(
-          <ModelsTreeComponent.View3DButton models={[{ id: "modelTestId", isPlanProjection: false }]} viewport={mockViewport().object} />,
+          <ModelsTreeComponent.View3DButton models={[{ id: "modelTestId", isPlanProjection: false }]} viewport={mockViewport().object} density="enlarged" />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);

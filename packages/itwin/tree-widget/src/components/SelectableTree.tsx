@@ -6,14 +6,22 @@
 import "./SelectableTree.scss";
 import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { SelectableContent } from "@itwin/components-react";
 import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
 
 import type { PropsWithChildren } from "react";
-import type { SelectableContentDefinition, SelectableContentProps } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
+import { TreeSelector } from "./TreeSelector";
+
+/**
+ * Props for rendering trees
+ * @public
+ */
+export interface TreeRenderProps {
+  density?: "enlarged" | "default";
+}
 
 /**
  * Definition of a tree component displayed in [[SelectableTree]]
@@ -25,7 +33,7 @@ export interface TreeDefinition {
   /** Callback that is used to get tree label */
   getLabel: () => string;
   /** Callback that is used to render tree component */
-  render: () => React.ReactNode;
+  render: (props: TreeRenderProps) => React.ReactNode;
   /**
    * Callback that is used to determine if tree should be shown for current active iModel connection.
    * If callback is `undefined` tree is shown for all iModel connections.
@@ -39,6 +47,7 @@ export interface TreeDefinition {
  */
 export interface SelectableTreeProps {
   trees: TreeDefinition[];
+  density?: "enlarged" | "default";
 }
 
 /**
@@ -61,13 +70,13 @@ function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConn
 
   return (
     <div className="tree-widget-selectable-tree">
-      <SelectableContent {...getSelectableContentProps(trees)} />
+      <TreeSelector {...getTreeSelectorProps(trees)} density={props.density} />
     </div>
   );
 }
 
 function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection) {
-  const [trees, setTrees] = useState<SelectableContentDefinition[]>();
+  const [trees, setTrees] = useState<TreeContentDefinition[]>();
 
   useEffect(() => {
     let disposed = false;
@@ -87,7 +96,7 @@ function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnect
   return trees;
 }
 
-async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection): Promise<SelectableContentDefinition[]> {
+async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection): Promise<TreeContentDefinition[]> {
   const handleDefinition = async (treeDef: TreeDefinition) => {
     if (treeDef.shouldShow !== undefined && !(await treeDef.shouldShow(imodel))) {
       return undefined;
@@ -99,14 +108,14 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
     };
   };
 
-  return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as SelectableContentDefinition[];
+  return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as TreeContentDefinition[];
 }
 
-function getSelectableContentProps(trees?: SelectableContentDefinition[]): SelectableContentProps {
+function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProps {
   if (trees === undefined) {
     return {
       defaultSelectedContentId: "loading",
-      children: [
+      trees: [
         {
           id: "loading",
           label: "",
@@ -123,7 +132,7 @@ function getSelectableContentProps(trees?: SelectableContentDefinition[]): Selec
   if (trees.length === 0) {
     return {
       defaultSelectedContentId: "no-trees",
-      children: [
+      trees: [
         {
           id: "no-trees",
           label: "",
@@ -135,7 +144,7 @@ function getSelectableContentProps(trees?: SelectableContentDefinition[]): Selec
 
   return {
     defaultSelectedContentId: trees[0].id,
-    children: trees,
+    trees,
   };
 }
 

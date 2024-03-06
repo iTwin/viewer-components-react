@@ -72,7 +72,7 @@ describe("<SelectableTree />", () => {
         render: () => <div>Tree Content 2</div>,
       },
     ];
-    const { queryByText } = render(<SelectableTree trees={trees} />);
+    const { queryByText } = render(<SelectableTree trees={trees} density="enlarged" />);
     await waitFor(() => expect(queryByText("Tree Content 1")).to.not.be.null);
   });
 
@@ -110,7 +110,7 @@ describe("<SelectableTree />", () => {
 
     const { container, queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => {
-      const content = container.querySelector(".components-selectable-content-wrapper"); // eslint-disable-line deprecation/deprecation
+      const content = container.querySelector(".presentation-components-tree-selector-content-wrapper"); // eslint-disable-line deprecation/deprecation
       expect(content?.children).to.not.be.empty;
     });
 

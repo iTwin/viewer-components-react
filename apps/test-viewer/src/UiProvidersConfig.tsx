@@ -2,25 +2,26 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { UiItemsProvider } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SelectionMode } from "@itwin/components-react";
+import { EC3Provider } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
+import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
+import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
   AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
   RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
+import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetUiItemsProvider,
+  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps, TreeWidget, TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
-import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
-import { EC3Provider } from "@itwin/ec3-widget-react";
-import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
+import { useViewerOptionsContext } from "./components/ViewerOptions";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -76,43 +77,55 @@ const configuredUiItems = new Map<string, UiItem>([
         await BreakdownTrees.initialize();
         await TreeWidget.initialize();
       },
-      createUiItemsProviders: () => [
-        new TreeWidgetUiItemsProvider({
-          trees: [
+      createUiItemsProviders: () => [{
+        id: "TreeWidgetUIProvider",
+        getWidgets: () => {
+          const trees = [
             {
               id: ModelsTreeComponent.id,
               getLabel: ModelsTreeComponent.getLabel,
-              render: () => (
+              render: (props: TreeRenderProps) => (
                 <ModelsTreeComponent
                   selectionPredicate={() => true}
                   selectionMode={SelectionMode.Multiple}
                   hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                  density={props.density}
                 />
               ),
             },
             {
               id: CategoriesTreeComponent.id,
               getLabel: CategoriesTreeComponent.getLabel,
-              render: () => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+              render: (props: TreeRenderProps) => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
             },
             {
               id: IModelContentTreeComponent.id,
               getLabel: IModelContentTreeComponent.getLabel,
-              render: () => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+              render: (props: TreeRenderProps) => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
             },
             {
               id: ExternalSourcesTreeComponent.id,
               getLabel: ExternalSourcesTreeComponent.getLabel,
-              render: () => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} />,
+              render: (props: TreeRenderProps) => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
             },
             {
               id: "spatial-containment-tree",
               getLabel: () => "Spatial Containment",
-              render: () => <SampleSpatialTree />,
+              render: (_: TreeRenderProps) => <SampleSpatialTree />,
             },
-          ],
-        }),
-      ],
+          ]
+          return [{
+            id: "tree-widget",
+            content: <TreeWidgetWithOptions trees={trees} />,
+            layouts: {
+              standard: {
+                 section: StagePanelSection.Start,
+                 location: StagePanelLocation.Right,
+              }
+            }
+          }]
+        }
+      }]
     },
   ],
   [
@@ -202,3 +215,9 @@ const configuredUiItems = new Map<string, UiItem>([
     },
   ],
 ]);
+
+function TreeWidgetWithOptions(props: SelectableTreeProps) {
+  const { density } = useViewerOptionsContext();
+
+  return <TreeWidgetComponent trees={props.trees} density={density} />;
+}

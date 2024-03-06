@@ -12,6 +12,7 @@ import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
+import { ViewerOptionsProvider, statusBarActionsProvider } from "./ViewerOptions";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -33,6 +34,14 @@ async function onIModelAppInit() {
 }
 
 export function Viewer() {
+  return (
+    <ViewerOptionsProvider>
+      <ViewerWithOptions />
+    </ViewerOptionsProvider>
+  );
+}
+
+function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
 
@@ -43,7 +52,7 @@ export function Viewer() {
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
-      uiProviders={uiConfig.uiItemsProviders}
+      uiProviders={[...uiConfig.uiItemsProviders, statusBarActionsProvider]}
       defaultUiConfig={{
         hideNavigationAid: true,
         hideStatusBar: false,
@@ -51,7 +60,7 @@ export function Viewer() {
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
-      theme="os"
+      theme="light"
     />
   );
 }
