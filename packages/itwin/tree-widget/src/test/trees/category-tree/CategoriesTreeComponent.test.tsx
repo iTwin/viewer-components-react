@@ -115,7 +115,7 @@ describe("<CategoriesTreeComponent />", () => {
       const categoryTreeSpy = sinon.stub(categoryTree, "CategoryTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
-      const result = render(<CategoriesTreeComponent />);
+      const result = render(<CategoriesTreeComponent density="enlarged" />);
       await waitFor(() => {
         expect(result.container.children).to.not.be.empty;
         expect(categoryTreeSpy).to.be.called;

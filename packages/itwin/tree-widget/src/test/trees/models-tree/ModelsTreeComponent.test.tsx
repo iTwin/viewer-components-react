@@ -105,7 +105,7 @@ describe("<ModelsTreeComponent />", () => {
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
-      render(<ModelsTreeComponent headerButtons={[spy]} />);
+      render(<ModelsTreeComponent headerButtons={[spy]} density="enlarged" />);
       await waitFor(() =>
         expect(spy).to.be.calledWith(
           sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels"),

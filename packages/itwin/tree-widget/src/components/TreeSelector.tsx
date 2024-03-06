@@ -63,7 +63,7 @@ export function TreeSelector(props: TreeSelectorProps) {
           />
         )}
       </div>
-      <div className="presentation-components-tree-selector-content-wrapper">{selectedContent?.render(props)}</div>
+      <div className="presentation-components-tree-selector-content-wrapper">{selectedContent?.render({ density: props.density })}</div>
     </div>
   );
 }

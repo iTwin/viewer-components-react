@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { fireEvent, render } from "@testing-library/react";
 import { TreeSelector } from "../components/TreeSelector";
+import { render, waitFor } from "./TestUtils";
 
 before(async () => {
   window.HTMLElement.prototype.scrollIntoView = function () {};
@@ -13,7 +13,7 @@ before(async () => {
 
 describe("<TreeSelector />", () => {
   it("lists all given content components in select box", async () => {
-    const { getByText, queryAllByText, getByRole } = render(
+    const { user, getByText, queryAllByText, getByRole } = render(
       <TreeSelector defaultSelectedContentId={""} trees={[
         { id: "a", label: "A", render: () => <div /> },
         { id: "b", label: "B", render: () => <div /> },
@@ -21,15 +21,17 @@ describe("<TreeSelector />", () => {
       ]} />
     );
 
-    const select = getByRole("combobox");
-    fireEvent.click(select);
+    const select = await waitFor(() => getByRole("combobox"));
+    await user.click(select);
 
-    expect(queryAllByText("A")).to.have.length(2);
-    getByText("B");
-    getByText("C");
+    await waitFor(() => {
+      expect(queryAllByText("A")).to.have.length(2);
+      expect(getByText("B")).to.not.be.null;
+      expect(getByText("C")).to.not.be.null;
+    });
   });
 
-  it("renders with default selected content", () => {
+  it("renders with default selected content", async () => {
     const { getByTestId } = render(
       <TreeSelector defaultSelectedContentId={"b"} trees={[
         { id: "a", label: "A", render: () => <div data-testid="a" /> },
@@ -37,39 +39,45 @@ describe("<TreeSelector />", () => {
         { id: "c", label: "C", render: () => <div data-testid="c" /> },
       ]} />
     );
-    getByTestId("b");
+
+    await waitFor(() => expect(getByTestId("b")).to.not.be.null);
   });
 
-  it("renders the first content in children list if `defaultSelectedContentId` doesn't match provided content definitions", () => {
+  it("renders the first content in children list if `defaultSelectedContentId` doesn't match provided content definitions", async () => {
     const { getByTestId } = render(
       <TreeSelector defaultSelectedContentId={"b"} trees={[ { id: "a", label: "A", render: () => <div data-testid="a" /> } ]} />
     );
-    getByTestId("a");
+
+    await waitFor(() => expect(getByTestId("a")).to.not.be.null);
   });
 
-  it("renders without content when provided an empty children list", () => {
+  it("renders without content when provided an empty children list", async () => {
     const { container } = render(<TreeSelector defaultSelectedContentId={""} trees={[]} />);
-    expect(
-      container.getElementsByClassName("presentation-components-tree-selector-content-wrapper")[0].innerHTML
-    ).to.be.empty;
+
+    await waitFor(() => {
+      expect(container.getElementsByClassName("presentation-components-tree-selector-content-wrapper")[0].innerHTML).to.be.empty;
+    });
   });
 
   it("changes displayed content based on selected item in select box", async () => {
-    const { getByText, getByRole, queryByText } = render(
+    const { user, getByText, getByRole, queryByText } = render(
         <TreeSelector defaultSelectedContentId={"a"} trees={[
           { id: "a", label: "A", render: () => <div data-testid="a" /> },
           { id: "b", label: "B", render: () => <div data-testid="b" /> },
           { id: "c", label: "C", render: () => <div data-testid="c" /> },
         ]} />
     );
-    getByText("A");
+    await waitFor(() => expect(getByText("A")).to.not.be.null);
 
-    const select = getByRole("combobox");
-    fireEvent.click(select);
+    const select = await waitFor(() => getByRole("combobox"));
+    await user.click(select);
 
-    fireEvent.click(getByText("B"));
+    const menuItem = await waitFor(() => getByText("B"));
+    await user.click(menuItem);
 
-    expect(queryByText("A")).to.be.null;
-    getByText("B");
+    await waitFor(() => {
+      expect(queryByText("A")).to.be.null;
+      expect(getByText("B")).to.not.be.null;
+    });
   });
 });
