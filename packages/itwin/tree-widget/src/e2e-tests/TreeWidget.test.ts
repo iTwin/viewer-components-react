@@ -127,6 +127,7 @@ test.describe("tree widget", () => {
     });
 
     test("button dropdown", async ({ page }) => {
+      await treeWidget.getByText("BayTown").waitFor();
       await treeWidget.getByTitle("Search for something").click();
       await treeWidget.getByTitle("More").click();
       await page.locator(".tree-header-button-dropdown-container").waitFor();
@@ -134,6 +135,7 @@ test.describe("tree widget", () => {
     });
 
     test("tree selector", async ({ page }) => {
+      await treeWidget.getByText("BayTown").waitFor();
       await treeWidget.getByRole("combobox").click();
       await page.getByRole("listbox").waitFor();
       await takeScreenshot(page, treeWidget);
