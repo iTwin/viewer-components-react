@@ -14,7 +14,11 @@
   }
 
   .tree-widget-tree-content {
-    height: 100%;
+    height: calc(100% - var(--iui-size-xl));
+
+    &.enlarge {
+      height: calc(100% - var(--iui-size-xl) - var(--iui-size-m));
+    }
   }
 }
 

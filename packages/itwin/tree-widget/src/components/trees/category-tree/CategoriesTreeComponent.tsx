@@ -22,6 +22,7 @@ import type { IPresentationTreeDataProvider } from "@itwin/presentation-componen
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { CategoryTreeProps } from "./CategoriesTree";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
+import classNames from "classnames";
 
 /**
  * Props that get passed to [[CategoriesTreeComponent]] header button renderer.
@@ -107,6 +108,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
   const categories = useCategories(IModelApp.viewManager, props.iModel, props.viewport);
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[]>();
   const { searchOptions, filterString, onFilterApplied, filteredProvider } = useTreeFilteringState();
+  const contentClassName = classNames("tree-widget-tree-content", props.density === "enlarged" && "enlarge");
 
   useEffect(() => {
     void (async () => {
@@ -154,7 +156,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
               />,
             ]}
       </TreeHeader>
-      <div className="tree-widget-tree-content">
+      <div className={contentClassName}>
         <AutoSizer>
           {({ width, height }) => (
             <CategoryTree

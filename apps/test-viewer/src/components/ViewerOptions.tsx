@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, PropsWithChildren, useContext, useState } from "react";
-import { StatusBarItem, StatusBarSection, UiItemsProvider } from "@itwin/appui-react";
+import { StatusBarSection, UiItemsProvider } from "@itwin/appui-react";
 import { SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
 
 export interface ViewerOptionsContext {
   density: "default" | "enlarged";
@@ -36,25 +37,23 @@ export function useViewerActionsContext() {
   return useContext(viewerActionsContext);
 }
 
-export class ViewerOptionsUiItemsProvider implements UiItemsProvider {
-  public readonly id = "ViewerOptionsUiItemsProvider";
-  private readonly setDensity: React.Dispatch<React.SetStateAction<"default" | "enlarged">>;
+export const statusBarActionsProvider: UiItemsProvider = {
+  id: "ViewerOptionsUiItemsProvider",
+  getStatusBarItems: () => [
+    {
+      id: `expandedLayoutButton`,
+      content: <ToggleLayoutButton />,
+      itemPriority: 1,
+      section: StatusBarSection.Left,
+    },
+  ],
+};
 
-  constructor(setDensity: React.Dispatch<React.SetStateAction<"default" | "enlarged">>) {
-    this.setDensity = setDensity;
-  }
-
-  public getStatusBarItems(): ReadonlyArray<StatusBarItem> {
-    return [
-      {
-        id: `${this.id}:expandedLayoutButton`,
-        tooltip: "Toggle expanded layout",
-        icon: <SvgVisibilityShow />,
-        label: "expandedLayoutToggle",
-        section: StatusBarSection.Left,
-        itemPriority: 1,
-        execute: () => this.setDensity((prev) => (prev === "default" ? "enlarged" : "default")),
-      },
-    ];
-  }
+function ToggleLayoutButton() {
+  const { setDensity } = useViewerActionsContext();
+  return (
+    <IconButton title="Toggle expanded layout" styleType="borderless" onClick={() => setDensity((prev) => (prev === "default" ? "enlarged" : "default"))}>
+      <SvgVisibilityShow />
+    </IconButton>
+  );
 }

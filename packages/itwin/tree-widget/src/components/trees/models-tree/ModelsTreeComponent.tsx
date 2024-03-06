@@ -19,6 +19,7 @@ import { queryModelsForHeaderActions } from "./Utils";
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { ModelsTreeProps } from "./ModelsTree";
+import classNames from "classnames";
 /**
  * Information about a single Model.
  * @public
@@ -118,10 +119,9 @@ ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
 
 function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
-
   const { viewport, iModel } = props;
-
   const { searchOptions, filterString, onFilterApplied } = useTreeFilteringState();
+  const contentClassName = classNames("tree-widget-tree-content", props.density === "enlarged" && "enlarge");
 
   useEffect(() => {
     queryModelsForHeaderActions(iModel)
@@ -158,7 +158,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
               <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={props.density} />,
             ]}
       </TreeHeader>
-      <div className="tree-widget-tree-content">
+      <div className={contentClassName}>
         <AutoSizer>
           {({ width, height }) => (
             <ModelsTree

@@ -9,20 +9,31 @@ import { useMemo, useState } from "react";
 import { MenuItem, Select } from "@itwin/itwinui-react";
 import type { TreeRenderProps } from "./SelectableTree";
 
+/**
+ * A definition for trees displayed in [[TreeSelector]]
+ * @internal
+ */
 export interface TreeContentDefinition {
   id: string;
   label: string;
   render: (props: TreeRenderProps) => React.ReactNode;
 }
 
+/**
+ * Props for [[TreeSelector]]
+ * @internal
+ */
 export interface TreeSelectorProps {
   defaultSelectedContentId: string;
   trees: TreeContentDefinition[];
-  selectAriaLabel?: string;
-  disabled?: boolean;
   density?: "enlarged" | "default";
 }
 
+/**
+ * A component that accepts a list of trees and renders a select box at the top, 
+ * allowing to choose which of the provided tree components should be rendered at the bottom.
+ * @internal
+ */
 export function TreeSelector(props: TreeSelectorProps) {
   const [selectedContentId, setSelectedContentId] = useState(props.defaultSelectedContentId);
   const selectedContent = props.trees.find((c) => c.id === selectedContentId) ?? props.trees[0];
@@ -37,20 +48,14 @@ export function TreeSelector(props: TreeSelectorProps) {
       <div className="presentation-components-tree-selector-content-header">
         {options.length > 0 && (
           <Select
+            onChange={setSelectedContentId}
             options={options}
             value={selectedContent.id}
-            aria-label={props.selectAriaLabel}
-            disabled={props.disabled}
             size={isEnlarged ? "large" : "small"}
             itemRenderer={(option, itemProps) => (
               <MenuItem
+                {...itemProps}
                 size={isEnlarged ? "large" : "default"}
-                isSelected={itemProps.isSelected}
-                onClick={() => {
-                  setSelectedContentId(option.value);
-                  itemProps.close();
-                }}
-                role='option'
               >
                 {option.label}
               </MenuItem>

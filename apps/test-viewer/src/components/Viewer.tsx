@@ -12,7 +12,7 @@ import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
-import { ViewerOptionsProvider, ViewerOptionsUiItemsProvider, useViewerActionsContext } from "./ViewerOptions";
+import { ViewerOptionsProvider, statusBarActionsProvider } from "./ViewerOptions";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -44,8 +44,6 @@ export function Viewer() {
 function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
-  const { setDensity } = useViewerActionsContext();
-  const optionsItemsProvider = new ViewerOptionsUiItemsProvider(setDensity);
 
   return (
     <WebViewer
@@ -54,7 +52,7 @@ function ViewerWithOptions() {
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
-      uiProviders={[...uiConfig.uiItemsProviders, optionsItemsProvider]}
+      uiProviders={[...uiConfig.uiItemsProviders, statusBarActionsProvider]}
       defaultUiConfig={{
         hideNavigationAid: true,
         hideStatusBar: false,
