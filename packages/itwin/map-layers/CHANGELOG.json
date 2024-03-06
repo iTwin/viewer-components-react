@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Wed, 06 Mar 2024 15:24:33 GMT",
+      "version": "5.4.1",
+      "tag": "@itwin/map-layers_v5.4.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "18479809216a681f901f884e67db6c8c04787615",
+            "comment": "Added @itwin\\map-layers-formats to peerDependencies"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 29 Feb 2024 19:46:34 GMT",
       "version": "5.4.0",
       "tag": "@itwin/map-layers_v5.4.0",

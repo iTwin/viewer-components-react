@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Tree Widget: allow opt-in to hierarchy level size limiting.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "114080994+ViliusBa@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -2,6 +2,129 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 06 Mar 2024 15:24:33 GMT",
+      "version": "2.0.0",
+      "tag": "@itwin/tree-widget-react_v2.0.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "efc320f43a9ee782160f495c3da153793c2e1ff8",
+            "comment": "Tree Widget: Updated header and its content to be touch friendly when using expanded layout."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "b155f38ae63caacf60740c47770f94b5a3e04fba",
+            "comment": "Added React 18 support."
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "32fec20f0f56f524fa108176ae82724aa3368650",
+            "comment": "Models Tree: zoom to viewport element on node double-click."
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "f9075edff1018819436a99cd02538098f85816c3",
+            "comment": "Tree Widget: allow opt-in to hierarchy level size limiting."
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "48fd3d82437b96368a6855a67147045d5520eacf",
+            "comment": "Tree Widget: Allow opt-in to hierarchy level filtering using `isHierarchyLevelFilteringEnabled` flag for all trees. Add support for `enlarged` nodes in non-visibility trees."
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "cfa4646469b2665305a8d0a0f1dd0ca76e82a6eb",
+            "comment": "Move `VisibilityTreeEventHandler.onNodeDoubleClick` event handler to newly added `ModelsTreeEventHandler`. Expand `useVisibilityTreeState` hook to support custom `VisibilityTreeEventHandler`'s."
+          }
+        ],
+        "none": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "7e69cfd65dfd1badc42125859f1a76e3cd5f4fa7",
+            "comment": "Run prettier to format code"
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "80abe6949242d39712ff62b33a2990ed75712649",
+            "comment": "Bump `itwinjs-core` dev dependencies to `4.4.0-dev.32` (latest rc)"
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "5430c6c2536dfd9b5be8ff52bd58929f448d2e02",
+            "comment": "Bump `itwinjs-core` dev dependencies to `4.4.0`"
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "79268857d3d00ed13e1eb5a6f9cf2d9e07d897ae",
+            "comment": "Bump version"
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "716aad28ddec9197a763e52eb03262e51f6c827e",
+            "comment": ""
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "4cffea73db2a9c1f723f04a0d575644b3da04433",
+            "comment": ""
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "2f711d2cc419c40434c51b166da560be931e4b56",
+            "comment": "Tree Widget: Fix possible `onCheckboxStateChanged` failure when multiple `rxjs` versions are present (#750)"
+          }
+        ],
+        "major": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "a06e10d377e8a8cbfa08309cd77dd77a4bfda624",
+            "comment": "Update `@itwin/itwinui-react` dependency to `3.x`"
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c3ffd407f0821a60d512062382ab1d2bd3ad3f92",
+            "comment": "Bumped `@itwin/presentation-components` peer dependency version to `^5.0.0`."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "c3ffd407f0821a60d512062382ab1d2bd3ad3f92",
+            "comment": "Bumped AppUI peer dependencies version to `^4.10.0`."
+          }
+        ],
+        "patch": [
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "9abc5dcc6ea38533de168e1351d70ca788466877",
+            "comment": "Models Tree: For all header actions only consider Models that model either `InformationPartitionElement` or `GeometricElement3d`. This should omit Models that are not displayed in the component."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "737c255609c81c4bf521dab29a95c3462edbf413",
+            "comment": "Fixed progress indicator positioning in enlarged tree layout."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 30 Jan 2024 13:20:38 GMT",
       "version": "1.2.2",
       "tag": "@itwin/tree-widget-react_v1.2.2",

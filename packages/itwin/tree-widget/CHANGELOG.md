@@ -1,8 +1,32 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 30 Jan 2024 13:20:38 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Mar 2024 15:24:33 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.0.0
+
+Wed, 06 Mar 2024 15:24:33 GMT
+
+### Major changes
+
+- Update `@itwin/itwinui-react` dependency to `3.x` ([#771](https://github.com/iTwin/viewer-components-react/pull/771))
+- Bumped `@itwin/presentation-components` peer dependency version to `^5.0.0`. ([#789](https://github.com/iTwin/viewer-components-react/pull/789))
+- Bumped AppUI peer dependencies version to `^4.10.0`. ([#789](https://github.com/iTwin/viewer-components-react/pull/789))
+
+### Minor changes
+
+- Tree Widget: Updated header and its content to be touch friendly when using expanded layout. ([#782](https://github.com/iTwin/viewer-components-react/pull/782))
+- Added React 18 support. ([#728](https://github.com/iTwin/viewer-components-react/pull/728))
+- Models Tree: zoom to viewport element on node double-click. ([#704](https://github.com/iTwin/viewer-components-react/pull/704))
+- Tree Widget: allow opt-in to hierarchy level size limiting. ([#761](https://github.com/iTwin/viewer-components-react/pull/761))
+- Tree Widget: Allow opt-in to hierarchy level filtering using `isHierarchyLevelFilteringEnabled` flag for all trees. Add support for `enlarged` nodes in non-visibility trees. ([#751](https://github.com/iTwin/viewer-components-react/pull/751))
+- Move `VisibilityTreeEventHandler.onNodeDoubleClick` event handler to newly added `ModelsTreeEventHandler`. Expand `useVisibilityTreeState` hook to support custom `VisibilityTreeEventHandler`'s. ([#741](https://github.com/iTwin/viewer-components-react/pull/741))
+
+### Patches
+
+- Models Tree: For all header actions only consider Models that model either `InformationPartitionElement` or `GeometricElement3d`. This should omit Models that are not displayed in the component. ([#738](https://github.com/iTwin/viewer-components-react/pull/738))
+- Fixed progress indicator positioning in enlarged tree layout. ([#790](https://github.com/iTwin/viewer-components-react/pull/790))
 
 ## 1.2.2
 

@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Tree Widget: Updated header and its content to be touch friendly when using expanded layout.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

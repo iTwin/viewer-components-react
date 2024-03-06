@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Thu, 29 Feb 2024 19:46:34 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Mar 2024 15:24:33 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.4.1
+
+Wed, 06 Mar 2024 15:24:33 GMT
+
+### Patches
+
+- Added @itwin\map-layers-formats to peerDependencies ([#785](https://github.com/iTwin/viewer-components-react/pull/785))
 
 ## 5.4.0
 

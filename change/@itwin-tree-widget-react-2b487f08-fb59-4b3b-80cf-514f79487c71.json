@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models Tree: For all header actions only consider Models that model either `InformationPartitionElement` or `GeometricElement3d`. This should omit Models that are not displayed in the component.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "114080994+ViliusBa@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
