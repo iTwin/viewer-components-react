@@ -14,9 +14,6 @@ dependencies:
   '@itwin/appui-react':
     specifier: ^4.10.0
     version: 4.10.0(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.10.0)(@itwin/core-telemetry@4.4.0)(@itwin/imodel-components-react@4.10.0)(@types/react@18.2.57)(react-dom@18.2.0)(react-redux@7.2.9)(react@18.2.0)(redux@4.2.1)
-  '@itwin/breakdown-trees-react':
-    specifier: workspace:*
-    version: file:../../packages/itwin/breakdown-trees(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.10.0)(@itwin/components-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-react@4.10.0)(@itwin/measure-tools-react@0.14.2)(@itwin/presentation-common@4.4.0)(@itwin/presentation-components@5.0.0)(@itwin/presentation-frontend@4.4.0)(@itwin/tree-widget-react@2.0.0-dev.0)(react-dom@18.2.0)(react-redux@7.2.9)(react@18.2.0)
   '@itwin/browser-authorization':
     specifier: ^1.1.0
     version: 1.1.0(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0)
@@ -174,8 +171,6 @@ dependenciesMeta:
   '@itwin/tree-widget-react':
     injected: true
   '@itwin/measure-tools-react':
-    injected: true
-  '@itwin/breakdown-trees-react':
     injected: true
   '@itwin/map-layers':
     injected: true
@@ -14051,53 +14046,6 @@ packages:
       immer: 9.0.6
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
-    dev: false
-
-  file:../../packages/itwin/breakdown-trees(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.10.0)(@itwin/components-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-react@4.10.0)(@itwin/measure-tools-react@0.14.2)(@itwin/presentation-common@4.4.0)(@itwin/presentation-components@5.0.0)(@itwin/presentation-frontend@4.4.0)(@itwin/tree-widget-react@2.0.0-dev.0)(react-dom@18.2.0)(react-redux@7.2.9)(react@18.2.0):
-    resolution: {directory: ../../packages/itwin/breakdown-trees, type: directory}
-    id: file:../../packages/itwin/breakdown-trees
-    name: '@itwin/breakdown-trees-react'
-    peerDependencies:
-      '@itwin/appui-abstract': ^4.0.0
-      '@itwin/appui-layout-react': ^4.3.0
-      '@itwin/appui-react': ^4.3.0
-      '@itwin/components-react': ^4.3.0
-      '@itwin/core-bentley': ^4.0.0
-      '@itwin/core-common': ^4.0.0
-      '@itwin/core-frontend': ^4.0.0
-      '@itwin/core-geometry': ^4.0.0
-      '@itwin/core-react': ^4.3.0
-      '@itwin/measure-tools-react': workspace:^0.14.2
-      '@itwin/presentation-common': ^4.0.0
-      '@itwin/presentation-components': ^4.0.0
-      '@itwin/presentation-frontend': ^4.0.0
-      '@itwin/tree-widget-react': ^1.2.1
-      react: ^17.0.0
-      react-dom: ^17.0.0
-      react-redux: ^7.2.6
-    dependencies:
-      '@itwin/appui-abstract': 4.4.0(@itwin/core-bentley@4.4.0)
-      '@itwin/appui-layout-react': 4.8.3(@itwin/appui-abstract@4.4.0)(@itwin/core-bentley@4.4.0)(@itwin/core-react@4.10.0)(@types/react@18.2.57)(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/appui-react': 4.10.0(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.10.0)(@itwin/core-telemetry@4.4.0)(@itwin/imodel-components-react@4.10.0)(@types/react@18.2.57)(react-dom@18.2.0)(react-redux@7.2.9)(react@18.2.0)(redux@4.2.1)
-      '@itwin/components-react': 4.10.0(@itwin/appui-abstract@4.4.0)(@itwin/core-bentley@4.4.0)(@itwin/core-react@4.10.0)(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/core-bentley': 4.4.0
-      '@itwin/core-common': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0)
-      '@itwin/core-frontend': 4.4.0(@itwin/appui-abstract@4.4.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-orbitgt@4.4.0)(@itwin/core-quantity@4.4.0)(inversify@6.0.2)(reflect-metadata@0.1.14)
-      '@itwin/core-geometry': 4.4.0
-      '@itwin/core-react': 4.10.0(@itwin/appui-abstract@4.4.0)(@itwin/core-bentley@4.4.0)(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/itwinui-react': 2.12.24(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/itwinui-variables': 2.1.2
-      '@itwin/measure-tools-react': file:../../packages/itwin/measure-tools(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.10.0)(@itwin/components-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-react@4.10.0)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
-      '@itwin/presentation-common': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)
-      '@itwin/presentation-components': 5.0.0(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.10.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/imodel-components-react@4.10.0)(@itwin/presentation-common@4.4.0)(@itwin/presentation-frontend@4.4.0)(@types/react@18.2.57)(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/presentation-frontend': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/presentation-common@4.4.0)
-      '@itwin/tree-widget-react': file:../../packages/itwin/tree-widget(@itwin/appui-abstract@4.4.0)(@itwin/appui-react@4.10.0)(@itwin/components-react@4.10.0)(@itwin/core-frontend@4.4.0)(@itwin/core-react@4.10.0)(@itwin/presentation-components@5.0.0)(react-dom@18.2.0)(react@18.2.0)
-      classnames: 2.5.1
-      i18next: 10.6.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-redux: 7.2.9(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   file:../../packages/itwin/ec3-widget(@itwin/appui-abstract@4.4.0)(@itwin/appui-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-frontend@4.4.0)(react-dom@18.2.0)(react@18.2.0):
