@@ -17,8 +17,8 @@ import type { PropsWithChildren, ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
-import type { PresentationManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
-import type { VariableValue } from "@itwin/presentation-common";
+import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
+import type { RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
 
 export class TestUtils {
   private static _initialized = false;
@@ -50,12 +50,21 @@ export function mockPresentationManager() {
   const rulesetVariablesManagerMock = moq.Mock.ofType<RulesetVariablesManager>();
   rulesetVariablesManagerMock.setup((x) => x.onVariableChanged).returns(() => onRulesetVariableChanged);
 
+  const onRulesetModified = new BeEvent<(curr: RegisteredRuleset, prev: Ruleset) => void>();
+  const rulesetsManagerMock = moq.Mock.ofType<RulesetManager>();
+  rulesetsManagerMock.setup((x) => x.onRulesetModified).returns(() => onRulesetModified);
+
+  const onIModelHierarchyChanged = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
   const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
   presentationManagerMock.setup((x) => x.vars(moq.It.isAny())).returns(() => rulesetVariablesManagerMock.object);
+  // eslint-disable-next-line @itwin/no-internal
+  presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => onIModelHierarchyChanged);
+  presentationManagerMock.setup((x) => x.rulesets()).returns(() => rulesetsManagerMock.object);
 
   return {
     rulesetVariablesManager: rulesetVariablesManagerMock,
     presentationManager: presentationManagerMock,
+    rulesetsManager: rulesetsManagerMock,
   };
 }
 
