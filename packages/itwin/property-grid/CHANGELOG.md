@@ -1,8 +1,17 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 29 Feb 2024 19:46:34 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Mar 2024 13:37:08 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.6.0
+
+Thu, 07 Mar 2024 13:37:08 GMT
+
+### Minor changes
+
+- Added support for `@itwin/presentation-components` version `5.x`. ([#793](https://github.com/iTwin/viewer-components-react/pull/793))
+- Bumped `@itwin/itwinui-react` dependency version to `3.x` ([#793](https://github.com/iTwin/viewer-components-react/pull/793))
 
 ## 1.5.2
 

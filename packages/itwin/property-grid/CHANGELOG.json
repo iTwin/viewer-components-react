@@ -2,6 +2,27 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 07 Mar 2024 13:37:08 GMT",
+      "version": "1.6.0",
+      "tag": "@itwin/property-grid-react_v1.6.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "3c1a00bdefa4a14b705d3649094e6ccecd959a8a",
+            "comment": "Added support for `@itwin/presentation-components` version `5.x`."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "3c1a00bdefa4a14b705d3649094e6ccecd959a8a",
+            "comment": "Bumped `@itwin/itwinui-react` dependency version to `3.x`"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 29 Feb 2024 19:46:34 GMT",
       "version": "1.5.2",
       "tag": "@itwin/property-grid-react_v1.5.2",
