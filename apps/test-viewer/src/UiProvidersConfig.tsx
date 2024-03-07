@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
-import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SelectionMode } from "@itwin/components-react";
 import { EC3Provider } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
@@ -18,9 +17,9 @@ import {
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps, TreeWidget, TreeWidgetComponent,
+  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps,
+  TreeWidget, TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
-import { SampleSpatialTree } from "./components/SampleSpatialTree";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 
 export interface UiProvidersConfig {
@@ -74,58 +73,58 @@ const configuredUiItems = new Map<string, UiItem>([
     "tree-widget",
     {
       initialize: async () => {
-        await BreakdownTrees.initialize();
         await TreeWidget.initialize();
       },
-      createUiItemsProviders: () => [{
-        id: "TreeWidgetUIProvider",
-        getWidgets: () => {
-          const trees = [
-            {
-              id: ModelsTreeComponent.id,
-              getLabel: ModelsTreeComponent.getLabel,
-              render: (props: TreeRenderProps) => (
-                <ModelsTreeComponent
-                  selectionPredicate={() => true}
-                  selectionMode={SelectionMode.Multiple}
-                  hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                  density={props.density}
-                />
-              ),
-            },
-            {
-              id: CategoriesTreeComponent.id,
-              getLabel: CategoriesTreeComponent.getLabel,
-              render: (props: TreeRenderProps) => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
-            },
-            {
-              id: IModelContentTreeComponent.id,
-              getLabel: IModelContentTreeComponent.getLabel,
-              render: (props: TreeRenderProps) => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
-            },
-            {
-              id: ExternalSourcesTreeComponent.id,
-              getLabel: ExternalSourcesTreeComponent.getLabel,
-              render: (props: TreeRenderProps) => <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
-            },
-            {
-              id: "spatial-containment-tree",
-              getLabel: () => "Spatial Containment",
-              render: (_: TreeRenderProps) => <SampleSpatialTree />,
-            },
-          ]
-          return [{
-            id: "tree-widget",
-            content: <TreeWidgetWithOptions trees={trees} />,
-            layouts: {
-              standard: {
-                 section: StagePanelSection.Start,
-                 location: StagePanelLocation.Right,
-              }
-            }
-          }]
-        }
-      }]
+      createUiItemsProviders: () => [
+        {
+          id: "TreeWidgetUIProvider",
+          getWidgets: () => {
+            const trees = [
+              {
+                id: ModelsTreeComponent.id,
+                getLabel: ModelsTreeComponent.getLabel,
+                render: (props: TreeRenderProps) => (
+                  <ModelsTreeComponent
+                    selectionPredicate={() => true}
+                    selectionMode={SelectionMode.Multiple}
+                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                    density={props.density}
+                  />
+                ),
+              },
+              {
+                id: CategoriesTreeComponent.id,
+                getLabel: CategoriesTreeComponent.getLabel,
+                render: (props: TreeRenderProps) => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
+              },
+              {
+                id: IModelContentTreeComponent.id,
+                getLabel: IModelContentTreeComponent.getLabel,
+                render: (props: TreeRenderProps) => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
+              },
+              {
+                id: ExternalSourcesTreeComponent.id,
+                getLabel: ExternalSourcesTreeComponent.getLabel,
+                render: (props: TreeRenderProps) => (
+                  <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />
+                ),
+              },
+            ];
+            return [
+              {
+                id: "tree-widget",
+                content: <TreeWidgetWithOptions trees={trees} />,
+                layouts: {
+                  standard: {
+                    section: StagePanelSection.Start,
+                    location: StagePanelLocation.Right,
+                  },
+                },
+              },
+            ];
+          },
+        },
+      ],
     },
   ],
   [
@@ -187,24 +186,24 @@ const configuredUiItems = new Map<string, UiItem>([
   [
     "reports-config-widget",
     {
-      initialize: async () => { await ReportsConfigWidget.initialize() },
-      createUiItemsProviders: () => [new ReportsConfigProvider(
-        undefined,
-        prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX)
-      )],
+      initialize: async () => {
+        await ReportsConfigWidget.initialize();
+      },
+      createUiItemsProviders: () => [new ReportsConfigProvider(undefined, prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX))],
     },
   ],
   [
     "ec3-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new EC3Provider({
-        clientId: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
-        redirectUri:
-          process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
-        reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
-        carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
-      })],
+      createUiItemsProviders: () => [
+        new EC3Provider({
+          clientId: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
+          redirectUri: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
+          reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
+          carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
+        }),
+      ],
     },
   ],
   [

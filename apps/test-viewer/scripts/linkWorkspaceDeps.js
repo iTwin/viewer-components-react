@@ -20,10 +20,6 @@ const packages = [
     dir: "measure-tools",
   },
   {
-    name: "@itwin/breakdown-trees-react",
-    dir: "breakdown-trees",
-  },
-  {
     name: "@itwin/map-layers",
     dir: "map-layers",
   },
@@ -47,7 +43,6 @@ const packages = [
     name: "@itwin/one-click-lca-react",
     dir: "one-click-lca-widget",
   },
-
 ];
 
 linkPackages();

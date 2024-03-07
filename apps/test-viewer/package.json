@@ -6,7 +6,6 @@
     "@bentley/react-scripts": "^5.0.7",
     "@itwin/appui-abstract": "^4.4.0",
     "@itwin/appui-react": "^4.10.0",
-    "@itwin/breakdown-trees-react": "workspace:*",
     "@itwin/browser-authorization": "^1.1.0",
     "@itwin/components-react": "^4.10.0",
     "@itwin/core-bentley": "^4.4.0",
@@ -66,9 +65,6 @@
       "injected": true
     },
     "@itwin/measure-tools-react": {
-      "injected": true
-    },
-    "@itwin/breakdown-trees-react": {
       "injected": true
     },
     "@itwin/map-layers": {
