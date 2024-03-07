@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added support for `@itwin/presentation-components` version `5.x`.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
