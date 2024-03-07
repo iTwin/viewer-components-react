@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Updated trees to always react to data changes and auto update.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

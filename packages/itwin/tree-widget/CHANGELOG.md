@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 06 Mar 2024 15:24:33 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Mar 2024 13:37:08 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.0.1
+
+Thu, 07 Mar 2024 13:37:08 GMT
+
+### Patches
+
+- Updated trees to always react to data changes and auto update. ([#795](https://github.com/iTwin/viewer-components-react/pull/795))
 
 ## 2.0.0
 
