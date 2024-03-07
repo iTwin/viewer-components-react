@@ -63,6 +63,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
   /**
    * Auto-update the hierarchy when data in the iModel changes.
    * @alpha
+   * @deprecated in 2.0.1. It does not have any effect, auto update is always on.
    */
   enableHierarchyAutoUpdate?: boolean;
   /**
@@ -197,7 +198,6 @@ function useTreeState({
   hierarchyConfig,
   iModel,
   ruleset,
-  enableHierarchyAutoUpdate,
   filterInfo,
   onFilterApplied,
   hierarchyLevelConfig,
@@ -226,7 +226,7 @@ function useTreeState({
     ruleset,
     pagingSize: PAGING_SIZE,
     appendChildrenCountForGroupingNodes: hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts,
-    enableHierarchyAutoUpdate,
+    enableHierarchyAutoUpdate: true,
     customizeTreeNodeItem,
     visibilityHandler,
     filterInfo,

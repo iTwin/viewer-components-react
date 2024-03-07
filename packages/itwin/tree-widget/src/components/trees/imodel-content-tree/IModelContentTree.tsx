@@ -43,6 +43,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
     appendChildrenCountForGroupingNodes: true,
     customizeTreeNodeItem,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
+    enableHierarchyAutoUpdate: true,
   });
 
   const treeRendererProps = {

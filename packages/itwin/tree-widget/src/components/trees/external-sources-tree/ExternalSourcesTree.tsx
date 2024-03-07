@@ -5,7 +5,9 @@
 
 import "../VisibilityTreeBase.scss";
 import { SelectionMode } from "@itwin/components-react";
-import { PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState } from "@itwin/presentation-components";
+import {
+  PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState,
+} from "@itwin/presentation-components";
 import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
@@ -47,6 +49,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
     eventHandlerFactory: unifiedSelectionTreeEventHandlerFactory,
     customizeTreeNodeItem,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
+    enableHierarchyAutoUpdate: true,
   });
 
   const treeRendererProps = {

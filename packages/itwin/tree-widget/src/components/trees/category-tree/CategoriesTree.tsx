@@ -87,6 +87,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     filterInfo: props.filterInfo,
     onFilterChange,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
+    enableHierarchyAutoUpdate: true,
   });
 
   useEffect(() => {
