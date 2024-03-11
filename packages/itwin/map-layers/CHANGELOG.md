@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Wed, 06 Mar 2024 15:24:33 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Mar 2024 18:18:16 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.4.2
+
+Mon, 11 Mar 2024 18:18:16 GMT
+
+### Patches
+
+- Fixed `supportTileUrl` option that would not be honored in some cases ([#796](https://github.com/iTwin/viewer-components-react/pull/796))
 
 ## 5.4.1
 
