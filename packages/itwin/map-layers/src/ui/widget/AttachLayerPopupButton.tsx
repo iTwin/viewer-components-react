@@ -246,7 +246,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                     signInModeArgs={{layer, validation: sourceValidation, source: foundSource}}
                     onOkResult={(sourceState?: SourceState) => handleModalUrlDialogOk(LayerAction.New, sourceState)}
                     onCancelResult={handleModalUrlDialogCancel}
-                    {...mapLayerOptions} />
+                    mapLayerOptions={mapLayerOptions} />
                 );
               }
 
@@ -296,7 +296,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       isOverlay={isOverlay}
       onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.New, result)}
       onCancelResult={handleModalUrlDialogCancel}
-      {...mapLayerOptions} />);
+      mapLayerOptions={mapLayerOptions} />);
     if (onHandleOutsideClick) {
       onHandleOutsideClick(false);
     }
@@ -389,7 +389,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       mapLayerSourceToEdit={matchingSource}
       onOkResult={(result?: SourceState) => handleModalUrlDialogOk(LayerAction.Edit, result)}
       onCancelResult={handleModalUrlDialogCancel}
-      {...mapLayerOptions} />);
+      mapLayerOptions={mapLayerOptions} />);
 
     if (onHandleOutsideClick) {
       onHandleOutsideClick(false);
