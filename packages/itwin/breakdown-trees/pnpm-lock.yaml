@@ -17,6 +17,9 @@ dependencies:
   classnames:
     specifier: ^2.3.1
     version: 2.3.1
+  follow-redirects:
+    specifier: 1.15.6
+    version: 1.15.6
   i18next:
     specifier: ^10.2.2
     version: 10.2.2
@@ -90,7 +93,7 @@ devDependencies:
     version: 4.0.0(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-frontend@4.0.0)(@itwin/core-quantity@4.0.0)(@itwin/ecschema-metadata@4.0.0)(@itwin/presentation-common@4.0.0)
   '@itwin/tree-widget-react':
     specifier: ^1.2.1
-    version: 1.2.1(@itwin/appui-abstract@4.0.0)(@itwin/appui-react@4.5.0)(@itwin/components-react@4.5.0)(@itwin/core-frontend@4.0.0)(@itwin/core-react@4.5.0)(@itwin/presentation-components@4.0.0)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
+    version: 1.2.1(@itwin/appui-abstract@4.0.0)(@itwin/appui-react@4.5.0)(@itwin/components-react@4.5.0)(@itwin/core-frontend@4.0.0)(@itwin/core-react@4.5.0)(@itwin/presentation-components@4.0.0)(react-dom@17.0.2)(react@17.0.2)
   '@itwin/webgl-compatibility':
     specifier: ^4.0.0
     version: 4.0.0
@@ -1189,7 +1192,7 @@ packages:
       '@itwin/presentation-common': 4.0.0(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-quantity@4.0.0)(@itwin/ecschema-metadata@4.0.0)
     dev: true
 
-  /@itwin/tree-widget-react@1.2.1(@itwin/appui-abstract@4.0.0)(@itwin/appui-react@4.5.0)(@itwin/components-react@4.5.0)(@itwin/core-frontend@4.0.0)(@itwin/core-react@4.5.0)(@itwin/presentation-components@4.0.0)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2):
+  /@itwin/tree-widget-react@1.2.1(@itwin/appui-abstract@4.0.0)(@itwin/appui-react@4.5.0)(@itwin/components-react@4.5.0)(@itwin/core-frontend@4.0.0)(@itwin/core-react@4.5.0)(@itwin/presentation-components@4.0.0)(react-dom@17.0.2)(react@17.0.2):
     resolution: {integrity: sha512-X6aGPnN7IvB+9LG5W4XYWcgFDOS3tAt/hbNJLKBFwt5zvtKh4MAI0IIcOux2gVUe61xym6XdnvTdNNK5VieNSg==}
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
@@ -1198,7 +1201,6 @@ packages:
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-react': ^4.3.0
       '@itwin/presentation-components': ^4.0.0
-      '@types/react': '*'
       react: ^17.0.0
       react-dom: ^17.0.0
     dependencies:
@@ -1212,7 +1214,6 @@ packages:
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@17.0.2)(react@17.0.2)
       '@itwin/itwinui-react': 2.12.18(react-dom@17.0.2)(react@17.0.2)
       '@itwin/presentation-components': 4.0.0(@itwin/appui-abstract@4.0.0)(@itwin/components-react@4.5.0)(@itwin/core-bentley@4.0.0)(@itwin/core-common@4.0.0)(@itwin/core-frontend@4.0.0)(@itwin/core-react@4.5.0)(@itwin/imodel-components-react@4.5.0)(@itwin/presentation-common@4.0.0)(@itwin/presentation-frontend@4.0.0)(@types/react@17.0.19)(react-dom@17.0.2)(react@17.0.2)
-      '@types/react': 17.0.19
       classnames: 2.3.1
       i18next: 10.2.2
       react: 17.0.2
@@ -2181,7 +2182,7 @@ packages:
   /axios@0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.3
+      follow-redirects: 1.15.6
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
@@ -3459,15 +3460,14 @@ packages:
     resolution: {integrity: sha512-r5wGx7YeOwNWNlCA0wQ86zKyDLMQr+/RB8xy74M4hTphfmjlijTSSXGuH8rnvKZnfT9i+75zmd8jcKdMR4O6jA==}
     dev: true
 
-  /follow-redirects@1.15.3:
-    resolution: {integrity: sha512-1VzOtuEM8pC9SFU1E+8KfTjZyMztRsgEfwQl44z8A25uy13jSzTj6dyK2Df52iV0vgHCfBwLhDWevLn95w5v6Q==}
+  /follow-redirects@1.15.6:
+    resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
     peerDependenciesMeta:
       debug:
         optional: true
-    dev: true
 
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
