@@ -29,22 +29,34 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
 
   public onDataChanged = new PropertyDataChangeEvent();
   private _data = new SimplePropertyData();
+  private _isActive = false;
 
   constructor() {
     this._detachToolAdminListener = IModelApp.toolAdmin.activeToolChanged.addListener(this.handleActiveToolChanged);
   }
 
   private handleActiveToolChanged = (tool: Tool, _start: StartOrResume) => {
-    if (this._detachActiveToolListener) {
+
+    if (this._detachActiveToolListener)
       this._detachActiveToolListener();
-      this._detachActiveToolListener = undefined;
-    }
+    this._detachActiveToolListener = undefined;
 
     if (tool.toolId === MapFeatureInfoTool.toolId) {
       const mapInfoTool = tool as MapFeatureInfoTool;
+
       this._detachActiveToolListener = mapInfoTool.onInfoReady.addListener(this.handleOnInfoReadyChanged);
+
+      if (this._isActive) {
+        // This is a tool reset, simply clear previous data
+        this._data = new SimplePropertyData();
+        this.onDataChanged.raiseEvent();
+      } else {
+        this._isActive = true;
+      }
+    } else {
       this._data = new SimplePropertyData();
       this.onDataChanged.raiseEvent();
+      this._isActive = false;
     }
   };
 
