@@ -24,8 +24,8 @@ dependencies:
     specifier: ^4.2.1
     version: 4.2.1
   '@itwin/insights-client':
-    specifier: ^0.6.0
-    version: 0.6.0
+    specifier: ^0.7.0
+    version: 0.7.0
   '@itwin/itwins-client':
     specifier: ^1.1.0
     version: 1.1.0
@@ -1183,8 +1183,8 @@ packages:
       - debug
     dev: false
 
-  /@itwin/insights-client@0.6.0:
-    resolution: {integrity: sha512-DeQnoz+POwxnBPDPJ3HNo/JzXSPKgvIwrUk5hFVnrJC6gjvkiZsZLZ78ydBGhQu8QT66TsvPwTTcaAGQ11Z8GQ==}
+  /@itwin/insights-client@0.7.0:
+    resolution: {integrity: sha512-ygQcQk1vtnzwVRAYmyi9QqVed09N13FaMjdkuboSEp7cT0CtkpWUI0q2Ep4cCLKPqKCxSxZh3Hlhz8caee/kVA==}
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.2

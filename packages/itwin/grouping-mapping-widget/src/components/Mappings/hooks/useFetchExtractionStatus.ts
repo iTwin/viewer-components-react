@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { ExtractionStatus, IExtractionClient } from "@itwin/insights-client";
+import { ExtractionState } from "@itwin/insights-client";
 import { useQuery } from "@tanstack/react-query";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 import type { ExtractionMessageData } from "../Extraction/ExtractionMessageModal";
@@ -23,7 +24,7 @@ export const useFetchExtractionStatus = ({
     placeholderData: undefined,
     queryFn: async () => {
       const accessToken = await getAccessToken();
-      const extraction = extractionClient.getExtractionHistoryIterator(accessToken, iModelId, 1);
+      const extraction = extractionClient.getIModelExtractionsIterator(accessToken, iModelId, 1);
       const latestExtractionResult = await extraction.next();
 
       let extractionStatusIcon: ExtractionStatusData;
@@ -41,9 +42,9 @@ export const useFetchExtractionStatus = ({
           iconMessage: "No extraction found.",
         };
       } else {
-        if (latestJobStatus?.containsIssues) {
+        if (latestJobStatus?.state === ExtractionState.PartiallySucceeded || latestJobStatus?.state === ExtractionState.Failed) { // TODO: Check if this would entail `PartiallySucceeded` or `Failed`.
           const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
-          extractionMessageData = logs.filter((log) => log.message !== null).map((log) => ({
+          extractionMessageData = logs.logs.filter((log) => log.message !== null).map((log) => ({
             date: log.dateTime,
             category: log.category,
             level: log.level,

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IExtractionClient } from "@itwin/insights-client";
-import { ExtractionClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
+import { ExtractionClient, GROUPING_AND_MAPPING_BASE_PATH } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 import type { ClientPrefix } from "./GroupingApiConfigContext";
 
@@ -15,7 +15,7 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 };
 
 export const createDefaultExtractionClient = (prefix?: ClientPrefix): IExtractionClient => {
-  const url = prefixUrl(REPORTING_BASE_PATH, prefix);
+  const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
   return new ExtractionClient(url);
 };
 
