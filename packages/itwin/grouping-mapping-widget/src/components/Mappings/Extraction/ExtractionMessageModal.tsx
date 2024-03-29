@@ -12,7 +12,7 @@ import { StatusIcon } from "../../SharedComponents/StatusIcon";
 import { ExtractionLogCustomFilter } from "./ExtractionLogCustomFilter";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMappingClient } from "../../context/MappingClientContext";
-import type { Mapping } from "@itwin/insights-client";
+import type { Group, Mapping } from "@itwin/insights-client";
 import { useQueries } from "@tanstack/react-query";
 import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedCollectionPick";
 import { fetchGroups } from "../../Groups/hooks/useFetchGroups";
@@ -85,7 +85,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
           const { mappingId, groupId } = info;
 
           const queryResult = pickedResult.find((result) => result.data?.mappingId === mappingId);
-          const groupName = queryResult?.data?.groups?.find((group) => group.id === groupId)?.groupName;
+          const groupName = queryResult?.data?.groups?.find((group: Group) => group.id === groupId)?.groupName;
 
           if (replacedMessage.includes("MappingId:")) {
             const mappingName = getMappingName(mappingId, mappings);
