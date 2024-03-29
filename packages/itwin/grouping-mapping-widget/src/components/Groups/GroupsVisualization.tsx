@@ -29,11 +29,11 @@ import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext
 import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupsView";
 import { Alert, Icon, Text } from "@itwin/itwinui-react";
 import { SvgMore } from "@itwin/itwinui-icons-react";
-import { useMappingClient } from "../context/MappingClientContext";
 import { useMutation } from "@tanstack/react-query";
 import { useIsMounted } from "../../common/hooks/useIsMounted";
 import { useFetchGroups } from "./hooks/useFetchGroups";
 import { useKeySetHiliteQueries } from "./hooks/useKeySetHiliteQueries";
+import { useGroupsClient } from "../context/GroupsClientContext";
 
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
@@ -66,9 +66,9 @@ export const GroupsVisualization = ({
     overlappedElementsMetadata,
     setOverlappedElementsMetadata,
   } = useGroupHilitedElementsContext();
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const mappingClient = useMappingClient();
-  const { data: groups, isFetched: isGroupsFetched, isFetching: isGroupsFetching } = useFetchGroups(iModelId, mapping.id, getAccessToken, mappingClient);
+  const { getAccessToken} = useGroupingMappingApiConfig();
+  const groupsClient = useGroupsClient();
+  const { data: groups, isFetched: isGroupsFetched, isFetching: isGroupsFetching } = useFetchGroups(mapping.id, getAccessToken, groupsClient);
   const isMounted = useIsMounted();
   const [enableGroupQueries, setEnableGroupQueries] = useState<boolean>(false);
   const { groupQueries } = useKeySetHiliteQueries(groups ?? [], enableGroupQueries, iModelConnection);

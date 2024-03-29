@@ -9,9 +9,9 @@ import type { ContextCustomUI, GroupingCustomUI } from "../../customUI/GroupingM
 import { GroupingMappingCustomUIType } from "../../customUI/GroupingMappingCustomUI";
 import { useGroupingMappingCustomUI } from "../../context/GroupingMappingCustomUIContext";
 import { useGroupHilitedElementsContext } from "../../context/GroupHilitedElementsContext";
-import { useMappingClient } from "../../context/MappingClientContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetchGroups } from "./useFetchGroups";
+import { useGroupsClient } from "../../context/GroupsClientContext";
 
 export interface GroupsOperationsProps {
   mappingId: string;
@@ -20,10 +20,10 @@ export interface GroupsOperationsProps {
 export const useGroupsOperations = ({
   mappingId,
 }: GroupsOperationsProps) => {
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const { overlappedElementsMetadata: {  overlappedElementsInfo } } = useGroupHilitedElementsContext();
 
-  const mappingClient = useMappingClient();
+  const groupsClient = useGroupsClient();
   const groupUIs: GroupingCustomUI[] =
     useGroupingMappingCustomUI().customUIs.filter(
       (p) => p.type === GroupingMappingCustomUIType.Grouping
@@ -39,7 +39,7 @@ export const useGroupsOperations = ({
   const [activeOverlapInfoPanelGroup, setActiveOverlapInfoPanelGroup] = useState<Group | undefined>(undefined);
   const queryClient = useQueryClient();
 
-  const { data: groups, isLoading } = useFetchGroups(iModelId, mappingId, getAccessToken, mappingClient);
+  const { data: groups, isLoading } = useFetchGroups(mappingId, getAccessToken, groupsClient);
 
   const refresh = useCallback(async () => {
     await queryClient.invalidateQueries({queryKey: ["groups", mappingId]});
@@ -49,7 +49,7 @@ export const useGroupsOperations = ({
     {
       mutationFn: async (group: Group) => {
         const accessToken = await getAccessToken();
-        await mappingClient.deleteGroup(accessToken, iModelId, mappingId, group.id);
+        await groupsClient.deleteGroup(accessToken, mappingId, group.id);
       },
       onSuccess: refresh,
     }
