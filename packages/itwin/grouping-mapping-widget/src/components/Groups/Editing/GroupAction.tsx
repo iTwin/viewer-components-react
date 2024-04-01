@@ -13,7 +13,6 @@ import { LoadingSpinner } from "../../SharedComponents/LoadingSpinner";
 import "./GroupAction.scss";
 import useValidator from "../../Properties/hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingCustomUI } from "../../context/GroupingMappingCustomUIContext";
 import type { GroupingCustomUI } from "../../customUI/GroupingMappingCustomUI";
 import { GroupingMappingCustomUIType } from "../../customUI/GroupingMappingCustomUI";
@@ -24,6 +23,7 @@ import { QueryBuilderActionPanel } from "../QueryBuilder/QueryBuilderActionPanel
 import { GroupDetailsActionPanel } from "./GroupDetailsActionPanel";
 import { useVisualization } from "../hooks/useVisualization";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useGroupsClient } from "../../context/GroupsClientContext";
 
 const defaultDisplayStrings = {
   groupDetails: "Group Details",
@@ -46,11 +46,11 @@ export interface GroupActionProps {
 }
 
 export const GroupAction = (props: GroupActionProps) => {
-  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const mappingClient = useMappingClient();
+  const groupsClient = useGroupsClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
   const [details, setDetails] = useState({
@@ -133,16 +133,14 @@ export const GroupAction = (props: GroupActionProps) => {
     const currentQuery = query || simpleSelectionQuery;
 
     return props.group
-      ? mappingClient.updateGroup(
+      ? groupsClient.updateGroup(
         accessToken,
-        iModelId,
         props.mappingId,
         props.group.id,
         { ...details, query: currentQuery }
       )
-      : mappingClient.createGroup(
+      : groupsClient.createGroup(
         accessToken,
-        iModelId,
         props.mappingId,
         { ...details, query: currentQuery }
       );

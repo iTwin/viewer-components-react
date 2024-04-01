@@ -14,21 +14,21 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
-import type { GroupProperty } from "@itwin/insights-client";
-import { useMappingClient } from "../../context/MappingClientContext";
+import type { Property } from "@itwin/insights-client";
 import { PropertyNameCell } from "../PropertyNameCell";
 import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
   onClickAdd?: () => void;
-  onClickModify?: (value: GroupProperty) => void;
+  onClickModify?: (value: Property) => void;
   isLoading: boolean;
-  groupProperties: GroupProperty[];
+  groupProperties: Property[];
   refresh: () => Promise<void>;
 }
 
@@ -41,17 +41,17 @@ export const GroupPropertyTable = ({
   groupProperties,
   refresh,
 }: GroupPropertyTableProps) => {
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const queryClient = useQueryClient();
 
   const columnsFactory = useCallback(
-    (handleShowDeleteModal: (value: GroupProperty) => void): Column<GroupProperty>[] => [
+    (handleShowDeleteModal: (value: Property) => void): Column<Property>[] => [
       {
         id: "propertyName",
         Header: "Property",
         accessor: "propertyName",
-        Cell: (value: CellProps<GroupProperty>) => (
+        Cell: (value: CellProps<Property>) => (
           <PropertyNameCell
             property={value.row.original}
             onClickModify={onClickModify}
@@ -62,7 +62,7 @@ export const GroupPropertyTable = ({
         id: "dropdown",
         Header: "",
         width: 80,
-        Cell: (value: CellProps<GroupProperty>) => {
+        Cell: (value: CellProps<Property>) => {
           return (
             <DropdownMenu
               menuItems={(close: () => void) => [
@@ -104,9 +104,8 @@ export const GroupPropertyTable = ({
   const { mutateAsync: deleteProperty } = useMutation({
     mutationFn: async (propertyId: string) => {
       const accessToken = await getAccessToken();
-      await mappingClient.deleteGroupProperty(
+      await propertiesClient.deleteProperty(
         accessToken,
-        iModelId,
         mappingId,
         groupId,
         propertyId,

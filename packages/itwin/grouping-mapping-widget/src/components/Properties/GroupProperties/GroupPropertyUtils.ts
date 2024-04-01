@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ECProperty } from "@itwin/insights-client";
+import type { ECPropertyReference } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
 import type {
   ContentDescriptorRequestOptions,
@@ -43,13 +43,12 @@ const convertType = (type: string): DataType => {
     case "int":
     case "enum":
     case "long":
+    case "number":
       return DataType.Integer;
     case "boolean":
       return DataType.Boolean;
     case "double":
       return DataType.Double;
-    case "number":
-      return DataType.Number;
     default:
       return DataType.String;
   }
@@ -277,11 +276,10 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
   return Array.from(uniquePropertiesMap.values());
 };
 
-export const convertToECProperties = (property: PropertyMetaData): ECProperty[] => {
-  const ecProperty: ECProperty = {
+export const convertToECProperties = (property: PropertyMetaData): ECPropertyReference[] => {
+  const ecProperty: ECPropertyReference = {
     ecSchemaName: property.sourceSchema,
     ecClassName: property.sourceClassName,
-    ecPropertyType: property.propertyType,
     ecPropertyName: "",
   };
   switch (property.primitiveNavigationClass) {
@@ -336,7 +334,7 @@ export const convertToECProperties = (property: PropertyMetaData): ECProperty[] 
   }
 };
 
-export const findProperties = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[]) => {
+export const findProperties = (ecProperties: ECPropertyReference[], propertiesMetaData: PropertyMetaData[]) => {
   let ecPropertiesCopy = [...ecProperties];
   const propertiesMetaDataResult: PropertyMetaData[] = new Array<PropertyMetaData>();
   let notFound = false;
