@@ -10,17 +10,17 @@ import React, { useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator from "../hooks/useValidator";
 import "./CalculatedPropertyAction.scss";
-import type { CalculatedProperty, Group } from "@itwin/insights-client";
-import { CalculatedPropertyType } from "@itwin/insights-client";
+import type { Group, Property } from "@itwin/insights-client";
+import { CalculatedPropertyType, DataType } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import { useMappingClient } from "../../context/MappingClientContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface CalculatedPropertyActionProps {
   mappingId: string;
   group: Group;
-  calculatedProperty?: CalculatedProperty;
+  calculatedProperty?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
 }
@@ -33,11 +33,11 @@ export const CalculatedPropertyAction = ({
   onClickCancel,
 }: CalculatedPropertyActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const [propertyName, setPropertyName] = useState<string>(
     calculatedProperty?.propertyName ?? "",
   );
-  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
+  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.calculatedPropertyType);
   const [validator, showValidationMessage] = useValidator();
   const queryClient = useQueryClient();
 
@@ -45,20 +45,26 @@ export const CalculatedPropertyAction = ({
     const accessToken = await getAccessToken();
 
     return calculatedProperty
-      ? mappingClient.updateCalculatedProperty(
+      ? propertiesClient.updateProperty(
         accessToken,
-        iModelId,
         mappingId,
         group.id,
         calculatedProperty.id,
-        { propertyName, type },
+        {
+          propertyName,
+          dataType: calculatedProperty.dataType,
+          calculatedPropertyType: type,
+        },
       )
-      : mappingClient.createCalculatedProperty(
+      : propertiesClient.createProperty(
         accessToken,
-        iModelId,
         mappingId,
         group.id,
-        { propertyName, type },
+        {
+          propertyName,
+          dataType: DataType.Undefined,
+          calculatedPropertyType: type,
+        },
       );
   }, {
     onSuccess: async () => {

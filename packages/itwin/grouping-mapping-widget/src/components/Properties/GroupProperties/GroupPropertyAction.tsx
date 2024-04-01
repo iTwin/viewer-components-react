@@ -15,14 +15,13 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { HorizontalTile } from "../../SharedComponents/HorizontalTile";
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
   Group,
-  GroupProperty,
-  GroupPropertyCreate,
+  Property,
+  PropertyModify,
 } from "@itwin/insights-client";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
@@ -36,11 +35,12 @@ import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
   group: Group;
-  groupProperty?: GroupProperty;
+  groupProperty?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
 }
@@ -64,7 +64,7 @@ export const GroupPropertyAction = ({
   onClickCancel,
 }: GroupPropertyActionProps) => {
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const [propertyName, setPropertyName] = useState<string>("");
   const [oldPropertyName, setOldPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
@@ -101,9 +101,8 @@ export const GroupPropertyAction = ({
     let groupPropertyDetails = null;
     if (groupProperty) {
       const accessToken = await getAccessToken();
-      groupPropertyDetails = await mappingClient.getGroupProperty(
+      groupPropertyDetails = await propertiesClient.getProperty(
         accessToken,
-        iModelId,
         mappingId,
         group.id,
         groupProperty.id
@@ -111,7 +110,7 @@ export const GroupPropertyAction = ({
     }
 
     return { propertiesMetaData, groupPropertyDetails };
-  }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, iModelId, mappingClient, mappingId]);
+  }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, mappingId, propertiesClient]);
 
   const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["groupProperties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
 
@@ -123,9 +122,10 @@ export const GroupPropertyAction = ({
         setPropertyName(data.groupPropertyDetails.propertyName);
         setOldPropertyName(data.groupPropertyDetails.propertyName);
         setDataType(data.groupPropertyDetails.dataType);
-        setQuantityType(data.groupPropertyDetails.quantityType);
+        if(data.groupPropertyDetails.quantityType)
+          setQuantityType(data.groupPropertyDetails.quantityType);
 
-        const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
+        const properties = findProperties(data.groupPropertyDetails.ecProperties ?? [], data.propertiesMetaData);
         if (properties.length === 0) {
           setPropertiesNotFoundAlert(true);
         }
@@ -138,7 +138,7 @@ export const GroupPropertyAction = ({
   const { mutate: onSave, isLoading: isSaving } = useMutation({
     mutationFn: async () => {
       const accessToken = await getAccessToken();
-      const newGroupProperty: GroupPropertyCreate = {
+      const newGroupProperty: PropertyModify = {
         propertyName,
         dataType,
         quantityType,
@@ -146,17 +146,15 @@ export const GroupPropertyAction = ({
       };
 
       return groupProperty
-        ? mappingClient.updateGroupProperty(
+        ? propertiesClient.updateProperty(
           accessToken,
-          iModelId,
           mappingId,
           group.id,
           groupProperty.id,
           newGroupProperty
         )
-        : mappingClient.createGroupProperty(
+        : propertiesClient.createProperty(
           accessToken,
-          iModelId,
           mappingId,
           group.id,
           newGroupProperty
@@ -222,7 +220,7 @@ export const GroupPropertyAction = ({
             id='dataType'
             options={[
               { value: DataType.Boolean, label: "Boolean" },
-              { value: DataType.Number, label: "Number" },
+              { value: DataType.Integer, label: "Number" },
               { value: DataType.String, label: "String" },
             ]}
             required
