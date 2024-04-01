@@ -18,19 +18,19 @@ import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "../GroupProperties/GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PossibleDataType, PropertyMap } from "../../../formula/Types";
-import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import type { CalculatedProperty, CustomCalculation, GroupProperty } from "@itwin/insights-client";
-import { QuantityType } from "@itwin/insights-client";
+import type { Property } from "@itwin/insights-client";
+import { DataType, QuantityType } from "@itwin/insights-client";
 import { useCalculatedPropertiesQuery } from "../hooks/useCalculatedPropertiesQuery";
 import { useCustomCalculationsQuery } from "../hooks/useCustomCalculationsQuery";
 import { useGroupPropertiesQuery } from "../hooks/useGroupPropertiesQuery";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface CustomCalculationActionProps {
   mappingId: string;
   groupId: string;
-  customCalculation?: CustomCalculation;
+  customCalculation?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
 }
@@ -46,9 +46,9 @@ const stringToPossibleDataType = (str?: string): PossibleDataType => {
 };
 
 const convertToPropertyMap = (
-  groupProperties: GroupProperty[],
-  calculatedProperties: CalculatedProperty[],
-  customCalculations: CustomCalculation[],
+  groupProperties: Property[],
+  calculatedProperties: Property[],
+  customCalculations: Property[],
   selectedPropertyName?: string
 ): PropertyMap => {
   const map: PropertyMap = {};
@@ -83,7 +83,7 @@ export const CustomCalculationAction = ({
   onClickCancel,
 }: CustomCalculationActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
   );
@@ -97,12 +97,12 @@ export const CustomCalculationAction = ({
   const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
   const queryClient = useQueryClient();
 
-  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
-  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useCalculatedPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
-  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useCustomCalculationsQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
+  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useCalculatedPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useCustomCalculationsQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
   useEffect(() => {
-    const propertiesMap = convertToPropertyMap(groupProperties ?? [], calculatedProperties ?? [], customCalculationProperties ?? []);
+    const propertiesMap = convertToPropertyMap(groupProperties?.properties ?? [], calculatedProperties?.properties ?? [], customCalculationProperties?.properties ?? []);
     setProperties(propertiesMap);
   }, [calculatedProperties, customCalculationProperties, groupProperties]);
 
@@ -111,20 +111,28 @@ export const CustomCalculationAction = ({
     const accessToken = await getAccessToken();
 
     return customCalculation
-      ? mappingClient.updateCustomCalculation(
+      ? propertiesClient.updateProperty(
         accessToken,
-        iModelId,
         mappingId,
         groupId,
         customCalculation.id,
-        { propertyName, formula, quantityType }
+        {
+          propertyName,
+          dataType: customCalculation.dataType,
+          formula,
+          quantityType,
+        }
       )
-      : mappingClient.createCustomCalculation(
+      : propertiesClient.createProperty(
         accessToken,
-        iModelId,
         mappingId,
         groupId,
-        { propertyName, formula, quantityType }
+        {
+          propertyName,
+          dataType: DataType.Undefined,
+          formula,
+          quantityType,
+        }
       );
   }, {
     onSuccess: async () => {

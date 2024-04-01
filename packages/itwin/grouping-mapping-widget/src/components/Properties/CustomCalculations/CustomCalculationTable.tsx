@@ -14,20 +14,20 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
-import type { CustomCalculation } from "@itwin/insights-client";
-import { useMappingClient } from "../../context/MappingClientContext";
+import type { Property } from "@itwin/insights-client";
 import { PropertyNameCell } from "../PropertyNameCell";
 import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface CustomCalculationTableProps {
   mappingId: string;
   groupId: string;
   onClickAdd?: () => void;
-  onClickModify?: (value: CustomCalculation) => void;
+  onClickModify?: (value: Property) => void;
   isLoading: boolean;
-  customCalculations: CustomCalculation[];
+  customCalculations: Property[];
   refresh: () => Promise<void>;
 }
 
@@ -40,17 +40,17 @@ export const CustomCalculationTable = ({
   customCalculations,
   refresh,
 }: CustomCalculationTableProps) => {
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const queryClient = useQueryClient();
 
   const columnsFactory = useCallback(
-    (handleShowDeleteModal: (value: CustomCalculation) => void): Column<CustomCalculation>[] => [
+    (handleShowDeleteModal: (value: Property) => void): Column<Property>[] => [
       {
         id: "propertyName",
         Header: "Custom Calculation",
         accessor: "propertyName",
-        Cell: (value: CellProps<CustomCalculation>) => (
+        Cell: (value: CellProps<Property>) => (
           <PropertyNameCell
             property={value.row.original}
             onClickModify={onClickModify}
@@ -66,7 +66,7 @@ export const CustomCalculationTable = ({
         id: "dropdown",
         Header: "",
         width: 80,
-        Cell: (value: CellProps<CustomCalculation>) => {
+        Cell: (value: CellProps<Property>) => {
           return (
             <DropdownMenu
               menuItems={(close: () => void) => [onClickModify ? [
@@ -106,9 +106,8 @@ export const CustomCalculationTable = ({
   const { mutateAsync: deleteProperty } = useMutation({
     mutationFn: async (propertyId: string) => {
       const accessToken = await getAccessToken();
-      await mappingClient.deleteCustomCalculation(
+      await propertiesClient.deleteProperty(
         accessToken,
-        iModelId,
         mappingId,
         groupId,
         propertyId,

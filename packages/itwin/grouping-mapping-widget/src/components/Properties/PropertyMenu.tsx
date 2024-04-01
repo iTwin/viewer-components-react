@@ -5,25 +5,25 @@
 import React, { useCallback } from "react";
 import "./PropertyMenu.scss";
 import { GroupPropertyTable } from "./GroupProperties/GroupPropertyTable";
-import { useMappingClient } from "../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
-import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, Mapping } from "@itwin/insights-client";
+import type { Group, Mapping, Property } from "@itwin/insights-client";
 import { CalculatedPropertyTable } from "./CalculatedProperties/CalculatedPropertyTable";
 import { CustomCalculationTable } from "./CustomCalculations/CustomCalculationTable";
 import { useGroupPropertiesQuery } from "./hooks/useGroupPropertiesQuery";
 import { useCalculatedPropertiesQuery } from "./hooks/useCalculatedPropertiesQuery";
 import { useCustomCalculationsQuery } from "./hooks/useCustomCalculationsQuery";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../context/PropertiesClientContext";
 
 export interface PropertyMenuProps {
   mapping: Mapping;
   group: Group;
   onClickAddGroupProperty?: () => void;
-  onClickModifyGroupProperty?: (groupProperty: GroupProperty) => void;
+  onClickModifyGroupProperty?: (groupProperty: Property) => void;
   onClickAddCalculatedProperty?: () => void;
-  onClickModifyCalculatedProperty?: (calculatedProperty: CalculatedProperty) => void;
+  onClickModifyCalculatedProperty?: (calculatedProperty: Property) => void;
   onClickAddCustomCalculationProperty?: () => void;
-  onClickModifyCustomCalculation?: (customCalculation: CustomCalculation) => void;
+  onClickModifyCustomCalculation?: (customCalculation: Property) => void;
   hideGroupProps?: boolean;
   hideCalculatedProps?: boolean;
   hideCustomCalculationProps?: boolean;
@@ -45,12 +45,12 @@ export const PropertyMenu = ({
   const groupId = group.id;
   const mappingId = mapping.id;
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const queryClient = useQueryClient();
 
-  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
-  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useCalculatedPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
-  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useCustomCalculationsQuery(iModelId, mappingId, groupId, getAccessToken, mappingClient);
+  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useCalculatedPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useCustomCalculationsQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
   const refreshGroupProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
   const refreshCalculatedProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
@@ -66,7 +66,7 @@ export const PropertyMenu = ({
           onClickAdd={onClickAddGroupProperty}
           onClickModify={onClickModifyGroupProperty}
           isLoading={isLoadingGroupProperties}
-          groupProperties={groupProperties ?? []}
+          groupProperties={groupProperties ? groupProperties.properties : []}
           refresh={refreshGroupProperties}
         />
       )}
@@ -77,7 +77,7 @@ export const PropertyMenu = ({
           onClickAdd={onClickAddCalculatedProperty}
           onClickModify={onClickModifyCalculatedProperty}
           isLoading={isLoadingCalculatedProperties}
-          calculatedProperties={calculatedProperties ?? []}
+          calculatedProperties={calculatedProperties ? calculatedProperties.properties : []}
           refresh={refreshCalculatedProperties}
         />
       )}
@@ -88,7 +88,7 @@ export const PropertyMenu = ({
           onClickAdd={onClickAddCustomCalculationProperty}
           onClickModify={onClickModifyCustomCalculation}
           isLoading={isLoadingCustomCalculations}
-          customCalculations={customCalculationProperties ?? []}
+          customCalculations={customCalculationProperties ? customCalculationProperties.properties : []}
           refresh={refreshCustomCalculations}
         />
       )}
