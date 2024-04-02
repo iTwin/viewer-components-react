@@ -17,6 +17,7 @@ import { useQueries } from "@tanstack/react-query";
 import { useMemoizedCollectionPick } from "../../../common/hooks/useMemoizedCollectionPick";
 import { fetchGroups } from "../../Groups/hooks/useFetchGroups";
 import { useFetchMappings } from "../hooks/useFetchMappings";
+import { useGroupsClient } from "../../context/GroupsClientContext";
 
 export interface ExtractionMessageData {
   date: string;
@@ -37,6 +38,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const { iModelId, getAccessToken } = groupingMappingApiConfig;
   const mappingClient = useMappingClient();
+  const groupsClient = useGroupsClient();
   const { data: mappings, isLoading: isMappingsLoading } = useFetchMappings(iModelId, getAccessToken, mappingClient);
   const [formattedTimestamp, setFormattedTimestamp] = useState<string>("");
 
@@ -65,7 +67,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
     queries: Array.from(extractionInfo.values()).map(({ mappingId }) => ({
       queryKey: ["groups", mappingId],
       queryFn: async () => {
-        const groups = await fetchGroups(groupingMappingApiConfig.iModelId, mappingId, groupingMappingApiConfig.getAccessToken, mappingClient);
+        const groups = await fetchGroups(mappingId, groupingMappingApiConfig.getAccessToken, groupsClient);
         // Return both mappingId and groups in the result
         return { mappingId, groups };
       },

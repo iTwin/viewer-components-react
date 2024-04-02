@@ -53,7 +53,6 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
   { value: QuantityType.Monetary, label: "Monetary" },
   { value: QuantityType.Time, label: "Time" },
   { value: QuantityType.Volume, label: "Volume" },
-  { value: QuantityType.Undefined, label: "No Quantity Type" },
 ];
 
 export const GroupPropertyAction = ({
@@ -67,8 +66,8 @@ export const GroupPropertyAction = ({
   const propertiesClient = usePropertiesClient();
   const [propertyName, setPropertyName] = useState<string>("");
   const [oldPropertyName, setOldPropertyName] = useState<string>("");
-  const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
-  const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
+  const [dataType, setDataType] = useState<DataType>(DataType.String);
+  const [quantityType, setQuantityType] = useState<QuantityType>();
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>([]);
   const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
@@ -79,7 +78,7 @@ export const GroupPropertyAction = ({
 
   const reset = useCallback(() => {
     setPropertyName("");
-    setDataType(DataType.Undefined);
+    setDataType(DataType.String);
     setSelectedProperties([]);
   }, []);
 
@@ -287,7 +286,7 @@ export const GroupPropertyAction = ({
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
-          selectedProperties.length === 0 || !propertyName || dataType === DataType.Undefined
+          selectedProperties.length === 0 || !propertyName || dataType === undefined
         }
       />
       <GroupsPropertiesSelectionModal

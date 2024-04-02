@@ -10,8 +10,8 @@ import React, { useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator from "../hooks/useValidator";
 import "./CalculatedPropertyAction.scss";
-import type { Group, Property } from "@itwin/insights-client";
-import { CalculatedPropertyType, DataType } from "@itwin/insights-client";
+import type { CalculatedPropertyType, Group , Property} from "@itwin/insights-client";
+import { DataType } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -62,7 +62,7 @@ export const CalculatedPropertyAction = ({
         group.id,
         {
           propertyName,
-          dataType: DataType.Undefined,
+          dataType: DataType.Double,
           calculatedPropertyType: type,
         },
       );
@@ -71,7 +71,7 @@ export const CalculatedPropertyAction = ({
       await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] });
       onSaveSuccess();
       setPropertyName("");
-      setType(CalculatedPropertyType.Undefined);
+      setType(undefined);
     },
   });
 

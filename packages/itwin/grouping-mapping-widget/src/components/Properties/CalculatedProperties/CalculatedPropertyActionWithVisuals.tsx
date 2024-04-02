@@ -22,8 +22,8 @@ import useValidator from "../hooks/useValidator";
 import { visualizeElements, zoomToElements } from "../../../common/viewerUtils";
 import "./CalculatedPropertyActionWithVisuals.scss";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import { CalculatedPropertyType, DataType } from "@itwin/insights-client";
-import type { Group, Property } from "@itwin/insights-client";
+import { DataType } from "@itwin/insights-client";
+import type { CalculatedPropertyType, Group , Property} from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -126,7 +126,7 @@ export const CalculatedPropertyActionWithVisuals = ({
         group.id,
         {
           propertyName,
-          dataType: DataType.Undefined,
+          dataType: DataType.Double,
           calculatedPropertyType: type,
         },
       );
@@ -135,7 +135,7 @@ export const CalculatedPropertyActionWithVisuals = ({
       await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] });
       onSaveSuccess();
       setPropertyName("");
-      setType(CalculatedPropertyType.Undefined);
+      setType(undefined);
     },
   });
 

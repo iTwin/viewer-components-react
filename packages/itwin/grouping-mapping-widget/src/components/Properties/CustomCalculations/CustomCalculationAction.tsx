@@ -19,8 +19,8 @@ import { quantityTypesSelectionOptions } from "../GroupProperties/GroupPropertyA
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PossibleDataType, PropertyMap } from "../../../formula/Types";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import type { Property } from "@itwin/insights-client";
-import { DataType, QuantityType } from "@itwin/insights-client";
+import type { Property , QuantityType } from "@itwin/insights-client";
+import { DataType } from "@itwin/insights-client";
 import { useCalculatedPropertiesQuery } from "../hooks/useCalculatedPropertiesQuery";
 import { useCustomCalculationsQuery } from "../hooks/useCustomCalculationsQuery";
 import { useGroupPropertiesQuery } from "../hooks/useGroupPropertiesQuery";
@@ -90,7 +90,7 @@ export const CustomCalculationAction = ({
   const [formula, setFormula] = useState<string>(
     customCalculation?.formula ?? "",
   );
-  const [quantityType, setQuantityType] = useState<QuantityType>(customCalculation?.quantityType ?? QuantityType.Undefined);
+  const [quantityType, setQuantityType] = useState<QuantityType | undefined>(customCalculation?.quantityType ?? undefined);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [properties, setProperties] = useState<PropertyMap>({});
@@ -129,7 +129,7 @@ export const CustomCalculationAction = ({
         groupId,
         {
           propertyName,
-          dataType: DataType.Undefined,
+          dataType: DataType.String,
           formula,
           quantityType,
         }
@@ -140,7 +140,7 @@ export const CustomCalculationAction = ({
       onSaveSuccess();
       setPropertyName("");
       setFormula("");
-      setQuantityType(QuantityType.Undefined);
+      setQuantityType(undefined);
     },
     onError: async (error: any) => {
       if (error.status === 422) {
