@@ -3,11 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  CalculatedProperty,
-  CustomCalculation,
   Group,
-  GroupProperty,
   Mapping,
+  Property,
 } from "@itwin/insights-client";
 import React, { useCallback, useMemo, useState } from "react";
 import type { GroupingMappingContextProps } from "../components/GroupingMappingContext";
@@ -48,9 +46,9 @@ export interface Route {
 export interface GroupingRouteFields {
   mapping?: Mapping;
   group?: Group;
-  property?: GroupProperty;
-  calculatedProperty?: CalculatedProperty;
-  customCalculation?: CustomCalculation;
+  property?: Property;
+  calculatedProperty?: Property;
+  customCalculation?: Property;
   // Optional prop but cannot be declared undefined.
   groupContextCustomUI?: Exclude<ContextCustomUI["uiComponent"], undefined>;
   queryGenerationType?: string;
