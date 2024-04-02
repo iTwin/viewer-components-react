@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { ECProperty } from "@itwin/insights-client";
+import type { ECPropertyReference } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
 import type { PropertyMetaData } from "../components/Properties/GroupProperties/GroupPropertyUtils";
 import { convertPresentationFields, convertToECProperties, findProperties } from "../components/Properties/GroupProperties/GroupPropertyUtils";
@@ -113,7 +113,7 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propNumber"],
-        propertyType: DataType.Number,
+        propertyType: DataType.Integer,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -499,11 +499,10 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "Schema",
         ecClassName: "Class",
-        ecPropertyType: DataType.String,
         ecPropertyName: "PropertyName.SecondProperty",
       },
     ];
@@ -529,17 +528,15 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.CodeValue",
       },
     ];
@@ -565,17 +562,15 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Category.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Category.CodeValue",
       },
     ];
@@ -601,17 +596,15 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "PhysicalMaterial.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "PhysicalMaterial.CodeValue",
       },
     ];
@@ -648,17 +641,15 @@ describe("Group properties utilities", () => {
       },
     ];
 
-    const ecProperties: ECProperty[] = [
+    const ecProperties: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "propString",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.Integer,
         ecPropertyName: "propInt",
       },
     ];
@@ -686,17 +677,15 @@ describe("Group properties utilities", () => {
       parentPropertyClassName: undefined,
     }];
 
-    const ecProperties: ECProperty[] = [
+    const ecProperties: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.CodeValue",
       },
     ];
@@ -723,17 +712,15 @@ describe("Group properties utilities", () => {
       parentPropertyClassName: undefined,
     }];
 
-    const ecProperties: ECProperty[] = [
+    const ecProperties: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.CodeValue",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.UserLabel",
       },
     ];
