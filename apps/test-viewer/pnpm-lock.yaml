@@ -2623,8 +2623,8 @@ packages:
       - debug
     dev: false
 
-  /@itwin/insights-client@0.4.0:
-    resolution: {integrity: sha512-vOdk5AbcqfnEW0S2VmZzPoBFQPEHIhhUybJqKLajB1/rBSwcK40EIo+JienBrqCgV3KU9N31H4UISEOfRDgqOg==}
+  /@itwin/insights-client@0.10.0:
+    resolution: {integrity: sha512-Jh9Y2Y3IB9u8UA7nxh2c6tK+EGkfttpqhstSrnp6p45UupCJYDQuTIImfM9xl23/UpWdIIcp2BkeJCdExUtwSA==}
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.5
@@ -2632,8 +2632,8 @@ packages:
       - encoding
     dev: false
 
-  /@itwin/insights-client@0.6.0:
-    resolution: {integrity: sha512-DeQnoz+POwxnBPDPJ3HNo/JzXSPKgvIwrUk5hFVnrJC6gjvkiZsZLZ78ydBGhQu8QT66TsvPwTTcaAGQ11Z8GQ==}
+  /@itwin/insights-client@0.4.0:
+    resolution: {integrity: sha512-vOdk5AbcqfnEW0S2VmZzPoBFQPEHIhhUybJqKLajB1/rBSwcK40EIo+JienBrqCgV3KU9N31H4UISEOfRDgqOg==}
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.5
@@ -14133,7 +14133,7 @@ packages:
       '@itwin/imodels-access-common': 4.1.5(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)
       '@itwin/imodels-access-frontend': 4.1.5(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)
       '@itwin/imodels-client-management': 4.3.0
-      '@itwin/insights-client': 0.6.0
+      '@itwin/insights-client': 0.10.0
       '@itwin/itwins-client': 1.2.1
       '@itwin/itwinui-icons-color-react': 2.1.0(react-dom@18.2.0)(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.2.0)(react@18.2.0)
@@ -14268,7 +14268,7 @@ packages:
       '@itwin/core-bentley': ^4.0.0
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-react': ^4.3.0
-      '@itwin/presentation-components': ^4.0.0
+      '@itwin/presentation-components': ^4.0.0 || ^5.0.0
       '@itwin/presentation-frontend': ^4.0.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
@@ -14281,7 +14281,7 @@ packages:
       '@itwin/core-react': 4.10.0(@itwin/appui-abstract@4.4.0)(@itwin/core-bentley@4.4.0)(react-dom@18.2.0)(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.2.0)(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/itwinui-react': 2.12.24(react-dom@18.2.0)(react@18.2.0)
+      '@itwin/itwinui-react': 3.5.0(react-dom@18.2.0)(react@18.2.0)
       '@itwin/presentation-components': 5.0.0(@itwin/appui-abstract@4.4.0)(@itwin/components-react@4.10.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/core-react@4.10.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/imodel-components-react@4.10.0)(@itwin/presentation-common@4.4.0)(@itwin/presentation-frontend@4.4.0)(@types/react@18.2.57)(react-dom@18.2.0)(react@18.2.0)
       '@itwin/presentation-frontend': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-quantity@4.4.0)(@itwin/ecschema-metadata@4.4.0)(@itwin/presentation-common@4.4.0)
       classnames: 2.5.1
