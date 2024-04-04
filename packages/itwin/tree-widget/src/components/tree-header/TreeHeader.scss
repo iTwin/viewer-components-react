@@ -76,7 +76,7 @@
       width: calc(100% - var(--enlarged-header-height));
 
       &.contracted {
-        width: var(--enlarged-header-height);
+        width: unset;
       }
     }
 
