@@ -75,7 +75,7 @@ export const SharedCalculatedPropertyForms = ({
         }}
       />
       <LabeledSelect<CalculatedPropertyType>
-        label="Quantity Type"
+        label="Calculated Property Type"
         required
         options={generateOptionsFromCalculatedPropertyType()}
         value={type}

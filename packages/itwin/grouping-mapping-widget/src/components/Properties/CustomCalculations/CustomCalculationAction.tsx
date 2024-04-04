@@ -38,7 +38,7 @@ export interface CustomCalculationActionProps {
 const stringToPossibleDataType = (str?: string): PossibleDataType => {
   switch (str?.toLowerCase()) {
     case "double":
-    case "number": return "Number";
+    case "integer": return "Number";
     case "string": return "String";
     case "boolean": return "Boolean";
     default: return "Undefined";
@@ -204,7 +204,7 @@ export const CustomCalculationAction = ({
           <Alert
             type='informational'
             clickableText='Click here.'
-            clickableTextProps={{ href: "https://developer.bentley.com/apis/insights/operations/create-customcalculation/", target: "_blank", rel: "noreferrer" }}
+            clickableTextProps={{ href: "https://developer.bentley.com/apis/grouping-and-mapping/operations/create-property/#customcalculations", target: "_blank", rel: "noreferrer" }}
           >
             To learn more about creating custom calculation formulas, view the documentation.
           </Alert>
