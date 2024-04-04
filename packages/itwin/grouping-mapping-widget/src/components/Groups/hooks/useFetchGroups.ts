@@ -3,9 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IGroupsClient } from "@itwin/insights-client";
+import { PreferReturn } from "@itwin/insights-client";
 import { useQuery } from "@tanstack/react-query";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
-import { PreferReturn } from "@itwin/insights-client/lib/cjs/common/CommonInterfaces";
 
 export const fetchGroups = async (
   mappingId: string,

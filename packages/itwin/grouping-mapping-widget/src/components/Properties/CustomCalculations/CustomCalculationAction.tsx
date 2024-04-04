@@ -129,7 +129,7 @@ export const CustomCalculationAction = ({
         groupId,
         {
           propertyName,
-          dataType: DataType.String,
+          dataType: DataType.Double,
           formula,
           quantityType,
         }

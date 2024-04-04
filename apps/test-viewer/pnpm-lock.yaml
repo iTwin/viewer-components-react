@@ -2623,8 +2623,8 @@ packages:
       - debug
     dev: false
 
-  /@itwin/insights-client@0.10.0:
-    resolution: {integrity: sha512-Jh9Y2Y3IB9u8UA7nxh2c6tK+EGkfttpqhstSrnp6p45UupCJYDQuTIImfM9xl23/UpWdIIcp2BkeJCdExUtwSA==}
+  /@itwin/insights-client@0.10.1:
+    resolution: {integrity: sha512-20vqnr0AijYyO5zHmjakOyG6nzL8FFQZ9Wu4pnW4F7ulzlKiayKOW4183UdOX0oTQt3BHMvnkphhEWJF8a/MDw==}
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.5
@@ -14133,7 +14133,7 @@ packages:
       '@itwin/imodels-access-common': 4.1.5(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)
       '@itwin/imodels-access-frontend': 4.1.5(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)
       '@itwin/imodels-client-management': 4.3.0
-      '@itwin/insights-client': 0.10.0
+      '@itwin/insights-client': 0.10.1
       '@itwin/itwins-client': 1.2.1
       '@itwin/itwinui-icons-color-react': 2.1.0(react-dom@18.2.0)(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.2.0)(react@18.2.0)
