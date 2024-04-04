@@ -27,7 +27,7 @@
     "@itwin/one-click-lca-react": "workspace:*",
     "@itwin/imodels-access-frontend": "^4.0.0",
     "@itwin/imodel-components-react": "^4.10.0",
-    "@itwin/itwinui-react": "^3.5.0",
+    "@itwin/itwinui-react": "^3.8.1",
     "@itwin/itwinui-icons-react": "^2.8.0",
     "@itwin/map-layers-formats": "^4.4.0",
     "@itwin/map-layers-auth": "^4.4.0",
