@@ -219,7 +219,8 @@ export const GroupPropertyAction = ({
             id='dataType'
             options={[
               { value: DataType.Boolean, label: "Boolean" },
-              { value: DataType.Integer, label: "Number" },
+              { value: DataType.Integer, label: "Integer" },
+              { value: DataType.Double, label: "Double" },
               { value: DataType.String, label: "String" },
             ]}
             required
