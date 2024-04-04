@@ -112,13 +112,11 @@ function DebouncedSearchBox({
           title={TreeWidget.translate("searchBox.searchForSomething")}
           aria-label={TreeWidget.translate("searchBox.open")}
           size={size}
+          styleType="borderless"
         />
       </SearchBox.CollapsedState>
       <SearchBox.ExpandedState>
-        <SearchBox.Input
-          placeholder={TreeWidget.translate("searchBox.search")}
-          onChange={(e) => setInputValue(e.currentTarget.value)}
-        />
+        <SearchBox.Input placeholder={TreeWidget.translate("searchBox.search")} onChange={(e) => setInputValue(e.currentTarget.value)} />
         <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} size={size} />
         <SearchBox.CollapseButton
           onClick={() => {

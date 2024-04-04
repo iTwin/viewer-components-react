@@ -42,8 +42,7 @@
     width: calc(100% - var(--iui-size-xl));
 
     &.contracted {
-      outline: none;
-      width: var(--iui-size-l);
+      width: unset;
 
       &::before {
         border: none;
@@ -54,11 +53,6 @@
       font-size: var(--iui-size-s);
       color: var(--iui-color-text);
       margin-right: var(--iui-size-2xs);
-    }
-
-    .search-input {
-      margin-right: var(--iui-size-xs);
-      padding: 0 var(--iui-size-xs);
     }
   }
 
@@ -82,7 +76,7 @@
       width: calc(100% - var(--enlarged-header-height));
 
       &.contracted {
-        width: var(--enlarged-header-height);
+        width: unset;
       }
     }
 
