@@ -145,21 +145,19 @@ test.describe("property grid", () => {
       await takeScreenshot(page, propertyWidget);
     });
 
-    // flaky: https://github.com/iTwin/appui/issues/635
-    test.skip("single element selected - context menu", async ({ page }) => {
+    test("single element selected - context menu", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
 
-      await propertyWidget.getByTitle("Description").click({ button: "right" });
+      await propertyWidget.getByTitle("Description").click({ button: "right", position: { x: 5, y: 10 } });
       await page.getByTitle("Add this property to Favorite category").waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
 
-    // flaky: https://github.com/iTwin/appui/issues/635
-    test.skip("single element selected - context menu - add to favorites", async ({ page }) => {
+    test("single element selected - context menu - add to favorites", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
 
-      await propertyWidget.getByTitle("Description").click({ button: "right" });
+      await propertyWidget.getByTitle("Description").click({ button: "right", position: { x: 5, y: 10 } });
       await page.getByTitle("Add this property to Favorite category").click();
       await propertyWidget.getByText("Favorite").first().waitFor();
 
