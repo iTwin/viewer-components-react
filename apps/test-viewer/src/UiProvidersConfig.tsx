@@ -142,6 +142,9 @@ const configuredUiItems = new Map<string, UiItem>([
               (props) => <CopyPropertyTextContextMenuItem {...props} />,
             ],
             settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
+            onPerformanceMeasured: (feature, elapsedTime) => {
+              console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+            },
           },
         }),
       ],

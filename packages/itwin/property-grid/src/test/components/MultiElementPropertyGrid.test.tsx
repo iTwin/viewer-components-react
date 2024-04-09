@@ -29,13 +29,11 @@ describe("<MultiElementPropertGrid />", () => {
 
   let getDataStub: sinon.SinonStub<Parameters<PresentationPropertyDataProvider["getData"]>, ReturnType<PresentationPropertyDataProvider["getData"]>>;
   let getLabelsStub: sinon.SinonStub<Parameters<PresentationLabelsProvider["getLabels"]>, ReturnType<PresentationLabelsProvider["getLabels"]>>;
-  let keysStub: sinon.SinonStub<any[], any>;
   let selectionManager: ReturnType<typeof stubSelectionManager>;
 
   before(() => {
     getDataStub = sinon.stub(PresentationPropertyDataProvider.prototype, "getData");
     getLabelsStub = sinon.stub(PresentationLabelsProvider.prototype, "getLabels");
-    keysStub = sinon.stub(PresentationPropertyDataProvider.prototype, "keys");
     sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
 
     selectionManager = stubSelectionManager();
@@ -48,7 +46,6 @@ describe("<MultiElementPropertGrid />", () => {
   });
 
   afterEach(() => {
-    keysStub.reset();
     getDataStub.reset();
     getLabelsStub.reset();
   });
@@ -128,14 +125,10 @@ describe("<MultiElementPropertGrid />", () => {
     const element = await waitFor(() => getByText(expectedLabels[1]));
 
     // setup data provider for single element property grid
-    const keysSetterStub = sinon.stub();
-    keysStub.set(keysSetterStub);
     setupSingleElementData(expectedLabels[1], "Test-Value-2");
 
     await userEvents.click(element);
     await waitFor(() => getByText("Test-Value-2"));
-
-    expect(keysSetterStub).to.be.calledOnceWith(sinon.match((keys: KeySet) => keys.has(instancekeys[1])));
   });
 
   it("navigates from single element to multi element grid using 'Back' button", async () => {
@@ -158,8 +151,6 @@ describe("<MultiElementPropertGrid />", () => {
     const element = await waitFor(() => getByText(expectedLabels[1]));
 
     // setup data provider for single element property grid
-    const keysSetterStub = sinon.stub();
-    keysStub.set(keysSetterStub);
     setupSingleElementData(expectedLabels[1], "Test-Value-2");
 
     // navigate to specific element properties

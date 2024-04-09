@@ -16,6 +16,7 @@ import { ElementList as ElementListComponent } from "./ElementList";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid";
 import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid";
 
+import type { ElementListProps } from "./ElementList";
 import type { ReactNode } from "react";
 import type { PropertyGridProps } from "./PropertyGrid";
 import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid";
@@ -73,7 +74,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
       className={classnames("property-grid-react-property-grid", props.className)}
       key={"PropertyGrid"}
     />,
-    <ElementListComponent
+    <ElementsList
       imodel={props.imodel}
       instanceKeys={selectedKeys}
       onBack={() => {
@@ -186,4 +187,12 @@ function SingleElementGrid({ instanceKey, ...props }: Omit<SingleElementProperty
   }
 
   return <SingleElementPropertyGridComponent {...props} instanceKey={instanceKey} />;
+}
+
+function ElementsList(props: ElementListProps) {
+  if (props.instanceKeys.length < 2) {
+    return null;
+  }
+
+  return <ElementListComponent {...props} />;
 }

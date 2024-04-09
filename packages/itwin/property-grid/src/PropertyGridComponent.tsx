@@ -5,11 +5,12 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
+import { TelemetryContextProvider } from "./hooks/UseTelemetryContext";
 import { PreferencesContextProvider } from "./PropertyGridPreferencesContext";
 
+import type { PerformanceTrackedFeatures } from "./hooks/UseTelemetryContext";
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid";
 import type { PreferencesStorage } from "./api/PreferencesStorage";
-
 /**
  * Props for `PropertyGridComponent`.
  * @public
@@ -20,21 +21,28 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
    * Defaults to `IModelAppUserPreferencesStorage` that uses `IModelApp.userPreferences`.
    */
   preferencesStorage?: PreferencesStorage;
+
+  /**
+   * Callback that is invoked when performance of tracked feature is measured.
+   */
+  onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
 }
 
 /**
  * Component that renders `MultiElementPropertyGrid` if there is active iModel connection.
  * @public
  */
-export function PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps) {
+export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, ...props }: PropertyGridComponentProps) {
   const imodel = useActiveIModelConnection();
   if (!imodel) {
     return null;
   }
 
   return (
-    <PreferencesContextProvider storage={preferencesStorage}>
-      <MultiElementPropertyGrid {...props} imodel={imodel} />
-    </PreferencesContextProvider>
+    <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasured}>
+      <PreferencesContextProvider storage={preferencesStorage}>
+        <MultiElementPropertyGrid {...props} imodel={imodel} />
+      </PreferencesContextProvider>
+    </TelemetryContextProvider>
   );
 }
