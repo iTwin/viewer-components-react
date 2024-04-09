@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { Group } from "@itwin/insights-client";
-import React from "react";
-import { HorizontalTile } from "../SharedComponents/HorizontalTile";
+import React, { useCallback } from "react";
 import type {
   ContextCustomUI,
   GroupingCustomUI,
@@ -13,6 +12,8 @@ import type { GroupsProps } from "./Groups";
 import { GroupMenuActions } from "./GroupMenuActions";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 import { OverlapProgress } from "./GroupOverlapProgressBar";
+import { Anchor, ListItem } from "@itwin/itwinui-react";
+import "./GroupListItem.scss";
 
 export interface GroupItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
   group: Group;
@@ -24,45 +25,43 @@ export interface GroupItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
   ) => void;
 }
 
-export const GroupItem = ({
+export const GroupListItem = ({
   onClickGroupTitle,
   disableActions,
   group,
-  isVisualizing,
   ...rest
 }: GroupItemProps) => {
   const { overlappedElementsMetadata: { groupElementsInfo, overlappedElementsInfo }, showGroupColor } = useGroupHilitedElementsContext();
 
-  const onTitleClick = () => {
+  const onTitleClick = useCallback(() => {
     if (onClickGroupTitle) {
       onClickGroupTitle(group);
     }
-  };
+  }, [group, onClickGroupTitle]);
 
   return (
-    <HorizontalTile
+    <ListItem
       title={group.groupName}
-      subText={group.description}
-      actionGroup={
-        <GroupMenuActions
-          group={group}
-          disableActions={disableActions}
-          {...rest}
-        />
-      }
-      elementsInfo={
-        overlappedElementsInfo.size > 0 &&
+      key={group.id}
+      className="gmw-group-list-item"
+    >
+      <ListItem.Content>
+        {onClickGroupTitle ? <Anchor onClick={onTitleClick}>{group.groupName}</Anchor> : group.groupName}
+        <ListItem.Description>
+          {group.description}
+        </ListItem.Description>
+      </ListItem.Content>
+      {showGroupColor && overlappedElementsInfo.size > 0 &&
         <OverlapProgress
           group={group}
           overlappedElementsInfo={overlappedElementsInfo}
           groupElementsInfo={groupElementsInfo}
-        />
-      }
-      showGroupColor={showGroupColor}
-      isLoading={isVisualizing}
-      onClickTitle={
-        onClickGroupTitle && !disableActions ? onTitleClick : undefined
-      }
-    />
+        />}
+      <GroupMenuActions
+        group={group}
+        disableActions={disableActions}
+        {...rest}
+      />
+    </ListItem>
   );
 };
