@@ -12,7 +12,7 @@ import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
-import { ViewerOptionsProvider, statusBarActionsProvider } from "./ViewerOptions";
+import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -47,8 +47,8 @@ function ViewerWithOptions() {
 
   return (
     <WebViewer
-      iTwinId={iTwinId ?? ""}
-      iModelId={iModelId ?? ""}
+      iTwinId={iTwinId}
+      iModelId={iModelId}
       authClient={authClient}
       enablePerformanceMonitors={false}
       onIModelAppInit={onIModelAppInit}
@@ -66,39 +66,28 @@ function ViewerWithOptions() {
 }
 
 function useIModelInfo() {
-  const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID);
-  const [iTwinId, setITwinId] = useState(process.env.IMJS_ITWIN_ID);
+  const [state, setState] = useState({ iTwinId: "", iModelId: "" });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has("iTwinId")) {
-      setITwinId(urlParams.get("iTwinId") as string);
-    } else {
-      if (!process.env.IMJS_ITWIN_ID) {
-        throw new Error(
-          "Please add a valid iTwin ID in the .env file and restart the application or add it to the iTwinId query parameter in the url and refresh the page. See the README for more information.",
-        );
-      }
+    const currITwinId = urlParams.get("iTwinId");
+    const currIModelId = urlParams.get("iModelId");
+
+    if (currITwinId && currIModelId) {
+      setState({ iTwinId: currITwinId, iModelId: currIModelId });
+      return;
     }
 
-    if (urlParams.has("iModelId")) {
-      setIModelId(urlParams.get("iModelId") as string);
+    if (!process.env.IMJS_ITWIN_ID || !process.env.IMJS_IMODEL_ID) {
+      throw new Error(
+        "Please add a valid iTwin ID and iModel ID in the .env file and restart the application or add it to the `iTwinId`/`iModelId` query parameter in the url and refresh the page. See the README for more information.",
+      );
     }
+
+    const configuredITwinId = process.env.IMJS_ITWIN_ID;
+    const configuredIModelId = process.env.IMJS_IMODEL_ID;
+    history.push(`?iTwinId=${configuredITwinId}&iModelId=${configuredIModelId}`);
   }, []);
 
-  useEffect(() => {
-    if (iTwinId) {
-      let queryString = `?iTwinId=${iTwinId}`;
-      if (iModelId) {
-        queryString += `&iModelId=${iModelId}`;
-      }
-
-      history.push(queryString);
-    }
-  }, [iTwinId, iModelId]);
-
-  return {
-    iTwinId,
-    iModelId,
-  };
+  return state;
 }
