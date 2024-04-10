@@ -16,7 +16,7 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 
 export const createDefaultExtractionClient = (prefix?: ClientPrefix): IExtractionClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
-  return new ExtractionClient(url);
+  return new ExtractionClient(undefined, url);
 };
 
 export const createExtractionClient = (clientProp: IExtractionClient | ClientPrefix) => {
