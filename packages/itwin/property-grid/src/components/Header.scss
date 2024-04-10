@@ -35,12 +35,8 @@
   .expandable-search-bar {
     overflow: hidden;
 
-    &.contracted {
-      outline: none;
-
-      &::before {
-        border: none;
-      }
+    &.contracted::before {
+      border: none;
     }
   }
 

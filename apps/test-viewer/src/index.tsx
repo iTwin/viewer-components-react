@@ -7,8 +7,6 @@ import "./index.scss";
 import "@itwin/itwinui-react/styles.css";
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "@itwin/itwinui-react";
 import { App } from "./components/App";
 
 // Set custom global variables
@@ -39,10 +37,6 @@ if (!process.env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider theme="light">
-        <App />
-      </ThemeProvider>
-    </BrowserRouter>
+    <App />
   </React.StrictMode>,
 );

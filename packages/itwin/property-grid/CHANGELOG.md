@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 07 Mar 2024 13:37:08 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Apr 2024 14:19:35 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.6.1
+
+Thu, 04 Apr 2024 14:19:35 GMT
+
+### Patches
+
+- Removed border appearing around search button. ([#804](https://github.com/iTwin/viewer-components-react/pull/804))
 
 ## 1.6.0
 
