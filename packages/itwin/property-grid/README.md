@@ -249,9 +249,9 @@ Note that when the search bar is closed, the filter is discarded and all propert
 
 ## Performance tracking
 
-Components from this package allows consumers to track performance of the some features.
+Components from this package allows consumers to track performance of specific features.
 
-This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. `onPerformanceMeasured` function is invoked with feature id and time elapsed. List of tracked features:
+This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
 
 * `"properties-load"` - time it takes to load properties data after selection changes.
 * `"elements-list-load"` - time it takes to populate elements list when multiple elements are selected.
@@ -268,7 +268,7 @@ new PropertyGridUiItemsProvider({
 });
 ```
 
-`TelemetryContextProvider` should be added when individual components are used without `PropertyGridUiItemsProvider`:
+To track performance of individual components when using them directly, rather than through `PropertyGridUiItemsProvider`, the `onPerformanceMeasured` callback should be supplied through `TelemetryContextProvider`:
 
 ```ts
 return (

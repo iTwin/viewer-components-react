@@ -12,8 +12,7 @@ export function trackTime(shouldTrack: boolean, onFinish: (elapsedTime: number) 
   }
 
   let stopped = false;
-  const stopwatch = new StopWatch();
-  stopwatch.start();
+  const stopwatch = new StopWatch(undefined, true);
 
   return (skipResult?: boolean) => {
     if (stopped) {
