@@ -44,6 +44,7 @@ export const GroupListItem = ({
       title={group.groupName}
       key={group.id}
       className="gmw-group-list-item"
+      data-testid="group-list-item"
     >
       <ListItem.Content>
         {onClickGroupTitle ? <Anchor onClick={onTitleClick}>{group.groupName}</Anchor> : group.groupName}
