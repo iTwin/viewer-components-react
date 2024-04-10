@@ -47,7 +47,7 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
   const { onPerformanceMeasured } = useTelemetryContext();
 
   React.useEffect(() => {
-    const finish = trackTime(instanceKeys.length > 0, (elapsedTime) => {
+    const { finish, dispose } = trackTime(instanceKeys.length > 0, (elapsedTime) => {
       onPerformanceMeasured("elements-list-load", elapsedTime);
     });
 
@@ -57,9 +57,7 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
       setData(sortedRowElementData);
     })();
 
-    return () => {
-      finish(true);
-    };
+    return dispose;
   }, [labelsProvider, instanceKeys, onPerformanceMeasured]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;

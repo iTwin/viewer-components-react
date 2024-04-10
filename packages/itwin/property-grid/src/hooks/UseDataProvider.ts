@@ -122,12 +122,16 @@ class PerformanceTrackingProvider implements IPresentationPropertyDataProvider {
     const hasKeys = this.keys.size > 0;
     const currGuid = this.keys.guid;
 
-    const finish = trackTime(this._lastKeysGuid !== currGuid && hasKeys, this._onDataLoaded);
+    const { finish, dispose } = trackTime(this._lastKeysGuid !== currGuid && hasKeys, this._onDataLoaded);
     this._lastKeysGuid = currGuid;
 
     const result = await this._wrappedProvider.getData();
-    finish(currGuid !== this.keys.guid);
 
+    if (currGuid !== this.keys.guid) {
+      dispose();
+    }
+
+    finish();
     return result;
   }
 }
