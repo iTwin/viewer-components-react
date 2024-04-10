@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Clear MapFeatureInfo Widget when active tool changes",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

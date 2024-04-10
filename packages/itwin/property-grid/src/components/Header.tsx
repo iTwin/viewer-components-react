@@ -5,11 +5,12 @@
 
 import "./Header.scss";
 import classnames from "classnames";
+import { useEffect, useRef, useState } from "react";
 import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, SearchBox } from "@itwin/itwinui-react";
 import { PropertyGridManager } from "../PropertyGridManager";
 
-import { type PropsWithChildren, useEffect, useRef, useState } from "react";
+import type { PropsWithChildren } from "react";
 import type React from "react";
 
 /** @internal */
@@ -54,7 +55,7 @@ function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }
   return (
     <SearchBox expandable onCollapse={onClose} onExpand={onOpen} className={className}>
       <SearchBox.CollapsedState>
-        <SearchBox.ExpandButton title={PropertyGridManager.translate("search-bar.open")} />
+        <SearchBox.ExpandButton title={PropertyGridManager.translate("search-bar.open")} styleType="borderless" />
       </SearchBox.CollapsedState>
       <SearchBox.ExpandedState>
         <SearchBox.Input

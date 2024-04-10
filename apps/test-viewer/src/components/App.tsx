@@ -4,24 +4,38 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./App.scss";
-import { Route, Routes } from "react-router-dom";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { FillCentered } from "@itwin/core-react";
-import { ProgressLinear } from "@itwin/itwinui-react";
+import { SvgError } from "@itwin/itwinui-illustrations-react";
+import { NonIdealState, ProgressLinear, ThemeProvider } from "@itwin/itwinui-react";
 import { ArcGisOauthRedirect } from "./ArcGisOauthRedirect";
 import { AuthorizationProvider, AuthorizationState, SignInRedirect, useAuthorizationContext } from "./Authorization";
-import { Viewer } from "./Viewer";
 import { EC3AuthRedirect } from "./EC3AuthRedirect";
+import { Viewer } from "./Viewer";
 
 export function App() {
   return (
-    <AuthorizationProvider>
-      <Routes>
-        <Route path="/signin-callback" element={<SignInRedirect />} />
-        <Route path="/*" element={<Main />} />
-        <Route path="/esri-oauth2-callback" element={<ArcGisOauthRedirect />} />
-        <Route path="/ec3-oauth2-callback" element={<EC3AuthRedirect />} />
-      </Routes>
-    </AuthorizationProvider>
+    <BrowserRouter>
+      <ThemeProvider theme="light">
+        <ErrorBoundary FallbackComponent={ErrorState}>
+          <AuthorizationProvider>
+            <AppRoutes />
+          </AuthorizationProvider>
+        </ErrorBoundary>
+      </ThemeProvider>
+    </BrowserRouter>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/signin-callback" element={<SignInRedirect />} />
+      <Route path="/*" element={<Main />} />
+      <Route path="/esri-oauth2-callback" element={<ArcGisOauthRedirect />} />
+      <Route path="/ec3-oauth2-callback" element={<EC3AuthRedirect />} />
+    </Routes>
   );
 }
 
@@ -39,4 +53,8 @@ function Loader() {
       </div>
     </FillCentered>
   );
+}
+
+function ErrorState({ error }: FallbackProps) {
+  return <NonIdealState svg={<SvgError />} heading={"An error occurred"} description={error.message} />;
 }
