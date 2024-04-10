@@ -204,9 +204,9 @@ export const GroupsPropertiesSelectionModal = (
                   filteredProperties.map((property) => (
                     <GroupPropertyListItem
                       key={property.key}
-                      name={`${property.displayLabel} (${property.propertyType})`}
-                      titleTooltip={`${property.actualECClassName}`}
-                      subText={getLocalizedStringPresentation(property.categoryLabel)}
+                      content={`${property.displayLabel} (${property.propertyType})`}
+                      title={`${property.actualECClassName}`}
+                      description={getLocalizedStringPresentation(property.categoryLabel)}
                       selected={selectedProperties.some((p) => property.key === p.key)}
                       onClick={() =>
                         setSelectedProperties((sp) =>
@@ -237,9 +237,9 @@ export const GroupsPropertiesSelectionModal = (
                     <SortableHorizontalTile
                       key={property.key}
                       id={property.key}
-                      name={`${property.displayLabel} (${property.propertyType})`}
-                      titleTooltip={`${property.actualECClassName}`}
-                      subText={getLocalizedStringPresentation(property.categoryLabel)}
+                      content={`${property.displayLabel} (${property.propertyType})`}
+                      title={`${property.actualECClassName}`}
+                      description={getLocalizedStringPresentation(property.categoryLabel)}
                       action={
                         <div>
                           <IconButton
@@ -275,9 +275,9 @@ export const GroupsPropertiesSelectionModal = (
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
           <GroupPropertyListItem
-            name={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
-            titleTooltip={`${activeDragProperty.actualECClassName}`}
-            subText={getLocalizedStringPresentation(activeDragProperty.categoryLabel)}
+            content={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
+            title={`${activeDragProperty.actualECClassName}`}
+            description={getLocalizedStringPresentation(activeDragProperty.categoryLabel)}
             action={
               <IconButton
                 styleType="borderless">

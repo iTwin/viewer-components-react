@@ -7,30 +7,35 @@ import { ListItem } from "@itwin/itwinui-react";
 import "./GroupPropertyListItem.scss";
 
 export interface GroupPropertyListItemProps {
-  name: string;
-  titleTooltip: string;
-  subText: string;
+  content: string;
+  title: string;
+  description: string;
   selected?: boolean;
   onClick?: () => void;
   action?: JSX.Element;
   dragHandle?: JSX.Element;
 }
 
-export const GroupPropertyListItem = (props: GroupPropertyListItemProps) => {
-  return (
-    <ListItem
-      active={props.selected}
-      onClick={props.onClick}
-      className="gmw-group-property-list-item"
-      title={props.titleTooltip}>
-      {props.dragHandle}
-      <ListItem.Content>
-        {props.name}
-        <ListItem.Description>
-          {props.subText}
-        </ListItem.Description>
-      </ListItem.Content>
-      {props.action}
-    </ListItem>
-  );
-};
+export const GroupPropertyListItem = ({
+  content,
+  title,
+  description,
+  selected,
+  onClick,
+  action,
+  dragHandle,
+}: GroupPropertyListItemProps) =>
+  <ListItem
+    active={selected}
+    onClick={onClick}
+    className="gmw-group-property-list-item"
+    title={title}>
+    {dragHandle}
+    <ListItem.Content>
+      {content}
+      <ListItem.Description>
+        {description}
+      </ListItem.Description>
+    </ListItem.Content>
+    {action}
+  </ListItem>;

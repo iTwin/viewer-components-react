@@ -275,9 +275,9 @@ export const GroupPropertyAction = ({
               selectedProperties.map((property) => (
                 <GroupPropertyListItem
                   key={property.key}
-                  name={`${property.displayLabel} (${property.propertyType})`}
-                  titleTooltip={`${property.actualECClassName}`}
-                  subText={property.categoryLabel}
+                  content={`${property.displayLabel} (${property.propertyType})`}
+                  title={`${property.actualECClassName}`}
+                  description={property.categoryLabel}
                 />
               ))}
           </div>
