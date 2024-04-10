@@ -16,8 +16,6 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 
 export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingsClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
-  // eslint-disable-next-line no-console
-  console.log(url);
   return new MappingsClient(undefined, url);
 };
 
