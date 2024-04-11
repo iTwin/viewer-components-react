@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { firstValueFrom, from, iif, lastValueFrom, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
+import { defer, firstValueFrom, from, iif, lastValueFrom, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
@@ -201,7 +201,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
 
     return iif(
       () => !!this._filteredDataProvider?.nodeMatchesFilter(node),
-      from(this._filteredDataProvider!.getNodes(node)).pipe(
+      defer(async () => this._filteredDataProvider!.getNodes(node)).pipe(
         mergeAll(),
         mergeMap((childNode) => {
           const res = this.getVisibilityStatus(childNode);
