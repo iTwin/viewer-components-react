@@ -18,6 +18,13 @@
     },
   ],
   "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch TestViewer in Chrome",
+      "url": "http://localhost:3000/",
+      "webRoot": "${workspaceFolder}/apps/test-viewer/",
+    },
     { /* Partial */
       "name": "[CERTA] measure-tools tests",
       "presentation": {
