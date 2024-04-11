@@ -4,19 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BeEvent } from "@itwin/core-bentley";
-import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { KeySet, NodeKey } from "@itwin/presentation-common";
+import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
-import { CachingElementIdsContainer } from "./Utils";
+import { ElementIdsCache } from "./internal/ElementIdsCache";
+import { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys } from "@itwin/presentation-common";
+import type { Viewport } from "@itwin/core-frontend";
+import type { ECClassGroupingNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
@@ -372,8 +372,8 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
         on === isDisplayedInSelector
           ? PerModelCategoryVisibility.Override.None
           : on
-          ? PerModelCategoryVisibility.Override.Show
-          : PerModelCategoryVisibility.Override.Hide;
+            ? PerModelCategoryVisibility.Override.Show
+            : PerModelCategoryVisibility.Override.Hide;
       this._props.viewport.perModelCategoryVisibility.setOverride(parentModelId, categoryId, ovr);
       if (ovr === PerModelCategoryVisibility.Override.None && on) {
         // we took off the override which means the category is displayed in selector, but
@@ -487,183 +487,6 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   private async getGroupedElementIds(groupingNodeKey: GroupingNodeKey) {
     return this._elementIdsCache.getGroupedElementIds(groupingNodeKey);
   }
-}
-
-/** @internal */
-export class SubjectModelIdsCache {
-  private _imodel: IModelConnection;
-  private _subjectsHierarchy: Map<Id64String, Id64String[]> | undefined;
-  private _subjectModels: Map<Id64String, Id64String[]> | undefined;
-  private _init: Promise<void> | undefined;
-
-  constructor(imodel: IModelConnection) {
-    this._imodel = imodel;
-  }
-
-  private async initSubjectModels() {
-    const querySubjects = async (): Promise<Array<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>> => {
-      const subjectsQuery = `
-        SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
-        FROM bis.Subject
-      `;
-      return this._imodel.createQueryReader(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
-    };
-    const queryModels = async (): Promise<Array<{ id: Id64String; parentId: Id64String }>> => {
-      const modelsQuery = `
-        SELECT p.ECInstanceId id, p.Parent.Id parentId
-        FROM bis.InformationPartitionElement p
-        INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
-        WHERE NOT m.IsPrivate
-      `;
-      return this._imodel.createQueryReader(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
-    };
-
-    function pushToMap<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue) {
-      let list = map.get(key);
-      if (!list) {
-        list = [];
-        map.set(key, list);
-      }
-      list.push(value);
-    }
-
-    this._subjectsHierarchy = new Map();
-    const targetPartitionSubjects = new Map<Id64String, Id64String[]>();
-    for (const subject of await querySubjects()) {
-      // istanbul ignore else
-      if (subject.parentId) {
-        pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
-      }
-      // istanbul ignore if
-      if (subject.targetPartitionId) {
-        pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
-      }
-    }
-
-    this._subjectModels = new Map();
-    for (const model of await queryModels()) {
-      // istanbul ignore next
-      const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
-      // istanbul ignore else
-      if (!subjectIds.includes(model.parentId)) {
-        subjectIds.push(model.parentId);
-      }
-
-      subjectIds.forEach((subjectId) => {
-        pushToMap(this._subjectModels!, subjectId, model.id);
-      });
-    }
-  }
-
-  private async initCache() {
-    if (!this._init) {
-      this._init = this.initSubjectModels().then(() => {});
-    }
-    return this._init;
-  }
-
-  private appendSubjectModelsRecursively(modelIds: Id64String[], subjectId: Id64String) {
-    const subjectModelIds = this._subjectModels!.get(subjectId);
-    if (subjectModelIds) {
-      modelIds.push(...subjectModelIds);
-    }
-
-    const childSubjectIds = this._subjectsHierarchy!.get(subjectId);
-    if (childSubjectIds) {
-      childSubjectIds.forEach((cs) => this.appendSubjectModelsRecursively(modelIds, cs));
-    }
-  }
-
-  public async getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]> {
-    await this.initCache();
-    const modelIds = new Array<Id64String>();
-    this.appendSubjectModelsRecursively(modelIds, subjectId);
-    return modelIds;
-  }
-}
-
-interface GroupedElementIds {
-  modelId?: string;
-  categoryId?: string;
-  elementIds: CachingElementIdsContainer;
-}
-
-// istanbul ignore next
-class ElementIdsCache {
-  private _assemblyElementIdsCache = new Map<string, CachingElementIdsContainer>();
-  private _groupedElementIdsCache = new Map<string, GroupedElementIds>();
-
-  constructor(
-    private _imodel: IModelConnection,
-    private _rulesetId: string,
-  ) {}
-
-  public clear() {
-    this._assemblyElementIdsCache.clear();
-    this._groupedElementIdsCache.clear();
-  }
-
-  public getAssemblyElementIds(assemblyId: Id64String) {
-    const ids = this._assemblyElementIdsCache.get(assemblyId);
-    if (ids) {
-      return ids;
-    }
-
-    const container = createAssemblyElementIdsContainer(this._imodel, this._rulesetId, assemblyId);
-    this._assemblyElementIdsCache.set(assemblyId, container);
-    return container;
-  }
-
-  public async getGroupedElementIds(groupingNodeKey: GroupingNodeKey): Promise<GroupedElementIds> {
-    const keyString = JSON.stringify(groupingNodeKey);
-    const ids = this._groupedElementIdsCache.get(keyString);
-    if (ids) {
-      return ids;
-    }
-    const info = await createGroupedElementsInfo(this._imodel, this._rulesetId, groupingNodeKey);
-    this._groupedElementIdsCache.set(keyString, info);
-    return info;
-  }
-}
-
-// istanbul ignore next
-async function* createInstanceIdsGenerator(imodel: IModelConnection, rulesetId: string, displayType: string, inputKeys: Keys) {
-  const res = await Presentation.presentation.getContentInstanceKeys({
-    imodel,
-    rulesetOrId: rulesetId,
-    displayType,
-    keys: new KeySet(inputKeys),
-  });
-  for await (const key of res.items()) {
-    yield key.id;
-  }
-}
-
-// istanbul ignore next
-function createAssemblyElementIdsContainer(imodel: IModelConnection, rulesetId: string, assemblyId: Id64String) {
-  return new CachingElementIdsContainer(
-    createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [{ className: "BisCore:Element", id: assemblyId }]),
-  );
-}
-
-// istanbul ignore next
-async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: string, groupingNodeKey: GroupingNodeKey) {
-  const groupedElementIdsContainer = new CachingElementIdsContainer(
-    createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [groupingNodeKey]),
-  );
-  const elementId = await groupedElementIdsContainer.getElementIds().next();
-  if (elementId.done) {
-    throw new Error("Invalid grouping node key");
-  }
-
-  let modelId, categoryId;
-  const query = `SELECT Model.Id AS modelId, Category.Id AS categoryId FROM bis.GeometricElement3d WHERE ECInstanceId = ? LIMIT 1`;
-  const reader = imodel.createQueryReader(query, QueryBinder.from([elementId.value]), { rowFormat: QueryRowFormat.UseJsPropertyNames });
-  if (await reader.step()) {
-    modelId = reader.current.modelId;
-    categoryId = reader.current.categoryId;
-  }
-  return { modelId, categoryId, elementIds: groupedElementIdsContainer };
 }
 
 const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringId: string | undefined): string => {

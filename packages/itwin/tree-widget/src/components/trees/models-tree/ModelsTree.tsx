@@ -14,8 +14,9 @@ import { ClassGroupingOption } from "../common/Types";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
-import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
+import { ModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
