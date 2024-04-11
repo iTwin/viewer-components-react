@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable } from "rxjs";
-import { firstValueFrom, from, map, mergeAll, mergeMap, reduce } from "rxjs";
+import { firstValueFrom, from, iif, lastValueFrom, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
@@ -20,6 +19,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ECClassGroupingNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { Observable } from "rxjs";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
 /**
@@ -191,44 +191,30 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   protected async getSubjectNodeVisibility(ids: Id64String[], node: TreeNodeItem): Promise<VisibilityStatus> {
+    return firstValueFrom(this.getSubjectNodeVisibilityObs(ids, node));
+  }
+
+  private getSubjectNodeVisibilityObs(ids: Id64String[], node: TreeNodeItem): Observable<VisibilityStatus> {
     if (!this._props.viewport.view.isSpatialView()) {
-      return { isDisabled: true, state: "hidden", tooltip: createTooltip("disabled", "subject.nonSpatialView") };
+      return of({ isDisabled: true, state: "hidden", tooltip: createTooltip("disabled", "subject.nonSpatialView") });
     }
 
-    if (this._filteredDataProvider) {
-      return firstValueFrom(this.getFilteredSubjectDisplayStatus(this._filteredDataProvider, ids, node));
-    }
-
-    return firstValueFrom(this.getSubjectDisplayStatus(ids));
-  }
-
-  private getSubjectDisplayStatus(ids: Id64String[]): Observable<VisibilityStatus> {
-    return from(this.getSubjectModelIds(ids)).pipe(
-      mergeAll(),
-      map((x) => this.getModelDisplayStatus(x).state),
-      this.getStatusFromVisibleChildren,
-    );
-  }
-
-  private getFilteredSubjectDisplayStatus(
-    provider: IFilteredPresentationTreeDataProvider,
-    ids: Id64String[],
-    node: TreeNodeItem,
-  ): Observable<VisibilityStatus> {
-    if (provider.nodeMatchesFilter(node)) {
-      return this.getSubjectDisplayStatus(ids);
-    }
-
-    return from(provider.getNodes(node)).pipe(
-      mergeAll(),
-      mergeMap(async (childNode) => this.getVisibilityStatus(childNode)),
+    return iif(
+      () => !!this._filteredDataProvider?.nodeMatchesFilter(node),
+      from(this._filteredDataProvider!.getNodes(node)).pipe(
+        mergeAll(),
+        mergeMap((childNode) => {
+          const res = this.getVisibilityStatus(childNode);
+          return res instanceof Promise ? from(res) : of(res);
+        }),
+      ),
+      from(ids).pipe(
+        this.getSubjectModelIds,
+        mergeAll(),
+        map((x) => this.getModelDisplayStatus(x)),
+      ),
+    ).pipe(
       map((x) => x.state),
-      this.getStatusFromVisibleChildren,
-    );
-  }
-
-  private getStatusFromVisibleChildren(childrenVisibility: Observable<"visible" | "hidden" | "partial">): Observable<VisibilityStatus> {
-    return childrenVisibility.pipe(
       reduce(
         (acc, val) => {
           acc.allVisible &&= val === "visible";
@@ -268,9 +254,9 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       const override = this._props.viewport.perModelCategoryVisibility.getOverride(parentModelId, id);
       switch (override) {
         case PerModelCategoryVisibility.Override.Show:
-          return { state: "visible", tooltip: createTooltip("visible", "category.displayedThroughPerModelOverride") };
+          return createVisibilityStatus("visible", "category.displayedThroughPerModelOverride");
         case PerModelCategoryVisibility.Override.Hide:
-          return { state: "hidden", tooltip: createTooltip("hidden", "category.hiddenThroughPerModelOverride") };
+          return createVisibilityStatus("hidden", "category.hiddenThroughPerModelOverride");
       }
     }
     const isDisplayed = this._props.viewport.view.viewsCategory(id);
@@ -298,12 +284,12 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
         }
       }
       if (atLeastOneElementForceDisplayed) {
-        return { state: "visible", tooltip: createTooltip("visible", "element.displayedThroughAlwaysDrawnList") };
+        return createVisibilityStatus("visible", "element.displayedThroughAlwaysDrawnList");
       }
     }
 
     if (this._props.viewport.alwaysDrawn !== undefined && this._props.viewport.alwaysDrawn.size !== 0 && this._props.viewport.isAlwaysDrawnExclusive) {
-      return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn") };
+      return createVisibilityStatus("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
     }
 
     // istanbul ignore else
@@ -316,36 +302,38 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
         }
       }
       if (allElementsForceHidden) {
-        return { state: "hidden", tooltip: createTooltip("visible", "element.hiddenThroughNeverDrawnList") };
+        return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
       }
     }
 
     if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible") {
-      return { state: "visible", tooltip: createTooltip("visible", undefined) };
+      return createVisibilityStatus("visible", undefined);
     }
 
-    return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenThroughCategory") };
+    return createVisibilityStatus("hidden", "element.hiddenThroughCategory");
   }
 
   protected getElementDisplayStatus(elementId: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined): VisibilityStatus {
     if (!modelId || !this._props.viewport.view.viewsModel(modelId)) {
       return { isDisabled: true, state: "hidden", tooltip: createTooltip("disabled", "element.modelNotDisplayed") };
     }
+
     if (this._props.viewport.neverDrawn !== undefined && this._props.viewport.neverDrawn.has(elementId)) {
-      return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenThroughNeverDrawnList") };
+      return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
     }
+
     if (this._props.viewport.alwaysDrawn !== undefined) {
       if (this._props.viewport.alwaysDrawn.has(elementId)) {
-        return { state: "visible", tooltip: createTooltip("visible", "element.displayedThroughAlwaysDrawnList") };
+        return createVisibilityStatus("visible", "element.displayedThroughAlwaysDrawnList");
       }
       if (this._props.viewport.alwaysDrawn.size !== 0 && this._props.viewport.isAlwaysDrawnExclusive) {
-        return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn") };
+        return createVisibilityStatus("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
       }
     }
     if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible") {
-      return { state: "visible", tooltip: createTooltip("visible", undefined) };
+      return createVisibilityStatus("visible", "visible");
     }
-    return { state: "hidden", tooltip: createTooltip("hidden", "element.hiddenThroughCategory") };
+    return createVisibilityStatus("hidden", "element.hiddenThroughCategory");
   }
 
   protected async changeSubjectNodeState(ids: Id64String[], node: TreeNodeItem, on: boolean) {
@@ -370,7 +358,8 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   private async changeSubjectState(ids: Id64String[], on: boolean) {
-    const modelIds = await this.getSubjectModelIds(ids);
+    const modelIdsObs = from(ids).pipe(this.getSubjectModelIds, toArray());
+    const modelIds = await lastValueFrom(modelIdsObs);
     return this.changeModelsVisibility(modelIds, on);
   }
 
@@ -496,10 +485,10 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     return elementNode.extendedData ? elementNode.extendedData.categoryId : /* istanbul ignore next */ undefined;
   }
 
-  private async getSubjectModelIds(subjectIds: Id64String[]) {
-    return (await Promise.all(subjectIds.map(async (id) => this._subjectModelIdsCache.getSubjectModelIds(id)))).reduce(
-      (allModelIds: Id64String[], curr: Id64String[]) => [...allModelIds, ...curr],
-      [],
+  private getSubjectModelIds(subjectIds: Observable<Id64String>): Observable<Id64String> {
+    return subjectIds.pipe(
+      mergeMap((id) => this._subjectModelIdsCache.getSubjectModelIdObs(id)),
+      mergeAll(),
     );
   }
 
@@ -514,15 +503,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 }
 
-function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled" | "hiddenDisabled", tooltipStringId?: string): VisibilityStatus {
-  if (status === "hiddenDisabled") {
-    return { state: "hidden", isDisabled: true };
-  }
-
-  if (status === "disabled") {
-    return { state: "visible", isDisabled: true, tooltip: createTooltip(status, tooltipStringId) };
-  }
-
+function createVisibilityStatus(status: "visible" | "hidden" | "partial", tooltipStringId: string | undefined): VisibilityStatus {
   return { state: status, tooltip: createTooltip(status, tooltipStringId) };
 }
 
@@ -536,7 +517,7 @@ function createTooltip(status: "visible" | "hidden" | "partial" | "disabled", to
   tooltipStringId = `modelTree.tooltips.${tooltipStringId}`;
   const tooltipString = TreeWidget.translate(tooltipStringId);
   return `${statusString}: ${tooltipString}`;
-};
+}
 
 /**
  * Enables display of all given models. Also enables display of all categories and clears always and

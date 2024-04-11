@@ -32,7 +32,7 @@
         "nonSpatialView": "Active view is not spatial",
         "someModelsHidden": "Some models are hidden",
         "allModelsVisible": "All models are visible",
-        "allModelsAreHidden": "All models are hidden"
+        "allModelsHidden": "All models are hidden"
       },
       "model": {
         "nonSpatialView": "Active view is not spatial"

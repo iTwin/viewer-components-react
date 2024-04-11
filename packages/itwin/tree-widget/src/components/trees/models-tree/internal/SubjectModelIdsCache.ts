@@ -3,11 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { Observable } from "rxjs";
+import { EMPTY, expand, from, map, mergeMap } from "rxjs";
 import { QueryRowFormat } from "@itwin/core-common";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-
 /** @internal */
 export class SubjectModelIdsCache {
   private _imodel: IModelConnection;
@@ -36,15 +37,6 @@ export class SubjectModelIdsCache {
       `;
       return this._imodel.createQueryReader(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
     };
-
-    function pushToMap<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue) {
-      let list = map.get(key);
-      if (!list) {
-        list = [];
-        map.set(key, list);
-      }
-      list.push(value);
-    }
 
     this._subjectsHierarchy = new Map();
     const targetPartitionSubjects = new Map<Id64String, Id64String[]>();
@@ -99,4 +91,27 @@ export class SubjectModelIdsCache {
     this.appendSubjectModelsRecursively(modelIds, subjectId);
     return modelIds;
   }
+
+  public getSubjectModelIdObs(subjectId: Id64String): Observable<Id64String> {
+    return from(this.initCache()).pipe(
+      map(() => ({ modelIds: new Array<Id64String>(), childSubjectId: subjectId })),
+      expand(({ modelIds, childSubjectId }) => {
+        const subjectModelIds = this._subjectModels!.get(childSubjectId);
+        subjectModelIds && modelIds.push(...subjectModelIds);
+
+        const childSubjectIds = this._subjectsHierarchy!.get(childSubjectId);
+        return childSubjectIds ? from(childSubjectIds).pipe(map((cs) => ({ modelIds, childSubjectId: cs }))) : EMPTY;
+      }),
+      mergeMap(({ modelIds }) => modelIds),
+    );
+  }
+}
+
+function pushToMap<TKey, TValue>(_map: Map<TKey, TValue[]>, key: TKey, value: TValue) {
+  let list = _map.get(key);
+  if (!list) {
+    list = [];
+    _map.set(key, list);
+  }
+  list.push(value);
 }
