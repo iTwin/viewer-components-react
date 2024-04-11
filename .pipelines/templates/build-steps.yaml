@@ -20,11 +20,8 @@ steps:
   # - script: pnpm exec prettier . --check
   #   displayName: Check formatting
 
-  - script: pnpm exec lage lint cover --grouped
-    displayName: Build, Lint and Cover
-
-  - script: pnpm exec lage extract-api --grouped
-    displayName: Extract API
+  - script: pnpm exec lage lint cover extract-api --grouped
+    displayName: Build, Lint, Cover and check for unexpected API changes
     env:
-      # Fail the build if there are uncommitted API changes
+      # Fail the build if package uses api-extractor and there are uncommitted API changes
       TF_BUILD: 1

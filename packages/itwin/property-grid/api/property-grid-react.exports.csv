@@ -9,7 +9,7 @@ public;CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuI
 public;DataProviderProps
 public;DefaultContextMenuItemProps 
 public;FavoritePropertiesContextMenuItemProps 
-internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element
+internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element | null
 public;FilteringPropertyGridProps 
 public;IModelAppUserPreferencesStorage 
 internal;InstanceSelectionProps
@@ -20,7 +20,7 @@ internal;NoopPropertyDataFilterer
 public;NullValueSettingContext({ children }: PropsWithChildren
 internal;NullValueSettingContextValue
 public;PreferencesStorage
-public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element
+public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null
 public;PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps): JSX.Element | null
 public;PropertyGridComponentProps 
 internal;PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, onPropertyUpdated, ...props }: PropertyGridContentProps): JSX.Element
@@ -45,7 +45,7 @@ public;ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideNullValues
 public;ShowHideNullValuesSettingsMenuItemProps 
 internal;SHOWNULL_KEY = "showNullValues"
 public;SingleElementDataProviderProps 
-public;SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element
+public;SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element | null
 public;SingleElementPropertyGridProps = Omit
 internal;UseContentMenuProps 
 internal;useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps):

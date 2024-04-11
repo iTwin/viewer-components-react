@@ -15,7 +15,7 @@ public;ClassGroupingOption
 public;ContextMenuItemProps
 public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element
 public;createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element
-public;DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): JSX.Element
+public;DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): React.JSX.Element
 public;DefaultLabelRendererProps
 alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element | null
 alpha;ExternalSourcesTreeComponent:
@@ -69,7 +69,9 @@ public;TreeNodeRendererProps
 public;TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, density, ...restProps }: TreeRendererProps): JSX.Element
 public;TreeRendererBaseProps 
 public;TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps
+public;TreeRenderProps
 public;TreeWidget
+public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element
 public;TreeWidgetId = "tree-widget-react:trees"
 public;TreeWidgetOptions
 public;TreeWidgetUiItemsProvider 
