@@ -15,7 +15,7 @@ import { OverlapProgress } from "./GroupOverlapProgressBar";
 import { Anchor, ListItem } from "@itwin/itwinui-react";
 import "./GroupListItem.scss";
 
-export interface GroupItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
+export interface GroupListItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
   group: Group;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
@@ -30,7 +30,7 @@ export const GroupListItem = ({
   disableActions,
   group,
   ...rest
-}: GroupItemProps) => {
+}: GroupListItemProps) => {
   const { overlappedElementsMetadata: { groupElementsInfo, overlappedElementsInfo }, showGroupColor } = useGroupHilitedElementsContext();
 
   const onTitleClick = useCallback(() => {
