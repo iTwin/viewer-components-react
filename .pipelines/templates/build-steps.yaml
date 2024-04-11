@@ -22,3 +22,9 @@ steps:
 
   - script: pnpm exec lage lint cover --grouped
     displayName: Build, Lint and Cover
+
+  - script: pnpm exec lage extract-api --grouped
+    displayName: Extract API
+    env:
+      # Fail the build if there are uncommitted API changes
+      TF_BUILD: 1
