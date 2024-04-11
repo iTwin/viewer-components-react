@@ -3,6 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { Observable } from "rxjs";
+import { firstValueFrom, from, map, mergeAll, mergeMap, reduce } from "rxjs";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
@@ -194,36 +196,59 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     }
 
     if (this._filteredDataProvider) {
-      return this.getFilteredSubjectDisplayStatus(this._filteredDataProvider, ids, node);
+      return firstValueFrom(this.getFilteredSubjectDisplayStatus(this._filteredDataProvider, ids, node));
     }
 
-    return this.getSubjectDisplayStatus(ids);
+    return firstValueFrom(this.getSubjectDisplayStatus(ids));
   }
 
-  private async getSubjectDisplayStatus(ids: Id64String[]): Promise<VisibilityStatus> {
-    const modelIds = await this.getSubjectModelIds(ids);
-    const isDisplayed = modelIds.some((modelId) => this.getModelDisplayStatus(modelId).state === "visible");
-    if (isDisplayed) {
-      return { state: "visible", tooltip: createTooltip("visible", "subject.atLeastOneModelVisible") };
-    }
-    return { state: "hidden", tooltip: createTooltip("hidden", "subject.allModelsHidden") };
+  private getSubjectDisplayStatus(ids: Id64String[]): Observable<VisibilityStatus> {
+    return from(this.getSubjectModelIds(ids)).pipe(
+      mergeAll(),
+      map((x) => this.getModelDisplayStatus(x).state),
+      this.getStatusFromVisibleChildren,
+    );
   }
 
-  private async getFilteredSubjectDisplayStatus(
+  private getFilteredSubjectDisplayStatus(
     provider: IFilteredPresentationTreeDataProvider,
     ids: Id64String[],
     node: TreeNodeItem,
-  ): Promise<VisibilityStatus> {
+  ): Observable<VisibilityStatus> {
     if (provider.nodeMatchesFilter(node)) {
       return this.getSubjectDisplayStatus(ids);
     }
 
-    const children = await provider.getNodes(node);
-    const childrenDisplayStatuses = await Promise.all(children.map(async (childNode) => this.getVisibilityStatus(childNode)));
-    if (childrenDisplayStatuses.some((status) => status.state === "visible")) {
-      return { state: "visible", tooltip: createTooltip("visible", "subject.atLeastOneModelVisible") };
-    }
-    return { state: "hidden", tooltip: createTooltip("hidden", "subject.allModelsHidden") };
+    return from(provider.getNodes(node)).pipe(
+      mergeAll(),
+      mergeMap(async (childNode) => this.getVisibilityStatus(childNode)),
+      map((x) => x.state),
+      this.getStatusFromVisibleChildren,
+    );
+  }
+
+  private getStatusFromVisibleChildren(childrenVisibility: Observable<"visible" | "hidden" | "partial">): Observable<VisibilityStatus> {
+    return childrenVisibility.pipe(
+      reduce(
+        (acc, val) => {
+          acc.allVisible &&= val === "visible";
+          acc.allHidden &&= val === "hidden";
+          return acc;
+        },
+        { allVisible: true, allHidden: true },
+      ),
+      map(({ allVisible, allHidden }) => {
+        if (allVisible) {
+          return createVisibilityStatus("visible", "subject.allModelsVisible");
+        }
+
+        if (allHidden) {
+          return createVisibilityStatus("hidden", "subject.allModelsHidden");
+        }
+
+        return createVisibilityStatus("partial", "subject.someModelsHidden");
+      }),
+    );
   }
 
   protected getModelDisplayStatus(id: Id64String): VisibilityStatus {
@@ -489,7 +514,19 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 }
 
-const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringId: string | undefined): string => {
+function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled" | "hiddenDisabled", tooltipStringId?: string): VisibilityStatus {
+  if (status === "hiddenDisabled") {
+    return { state: "hidden", isDisabled: true };
+  }
+
+  if (status === "disabled") {
+    return { state: "visible", isDisabled: true, tooltip: createTooltip(status, tooltipStringId) };
+  }
+
+  return { state: status, tooltip: createTooltip(status, tooltipStringId) };
+}
+
+function createTooltip(status: "visible" | "hidden" | "partial" | "disabled", tooltipStringId: string | undefined): string {
   const statusStringId = `modelTree.status.${status}`;
   const statusString = TreeWidget.translate(statusStringId);
   if (!tooltipStringId) {

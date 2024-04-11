@@ -24,13 +24,15 @@
     "status": {
       "visible": "Visible",
       "hidden": "Hidden",
-      "disabled": "Disabled"
+      "disabled": "Disabled",
+      "partial": "Partially visible"
     },
     "tooltips": {
       "subject": {
         "nonSpatialView": "Active view is not spatial",
-        "atLeastOneModelVisible": "At least one model is visible",
-        "allModelsHidden": "All models are hidden"
+        "someModelsHidden": "Some models are hidden",
+        "allModelsVisible": "All models are visible",
+        "allModelsAreHidden": "All models are hidden"
       },
       "model": {
         "nonSpatialView": "Active view is not spatial"
