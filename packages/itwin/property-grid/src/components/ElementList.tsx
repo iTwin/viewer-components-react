@@ -8,12 +8,13 @@ import classnames from "classnames";
 import * as React from "react";
 import { MenuItem, Text } from "@itwin/itwinui-react";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
+import { trackTime } from "../common/TimeTracker";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { Header } from "./Header";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-
 /**
  * Props for `ElementList` component.
  * @internal
@@ -41,17 +42,23 @@ interface RowElementData {
  */
 export function ElementList({ imodel, instanceKeys, onBack, onSelect, className }: ElementListProps) {
   const [data, setData] = React.useState<RowElementData[]>();
-
   const labelsProvider: PresentationLabelsProvider = React.useMemo(() => new PresentationLabelsProvider({ imodel }), [imodel]);
 
-  React.useEffect(() => {
-    const createRowElementData = async () => {
-      const sortedRowElementData = await getSortedLabelInstanceKeyPairs(labelsProvider, instanceKeys);
-      setData(sortedRowElementData);
-    };
+  const { onPerformanceMeasured } = useTelemetryContext();
 
-    void createRowElementData();
-  }, [labelsProvider, instanceKeys]);
+  React.useEffect(() => {
+    const { finish, dispose } = trackTime(instanceKeys.length > 0, (elapsedTime) => {
+      onPerformanceMeasured("elements-list-load", elapsedTime);
+    });
+
+    void (async () => {
+      const sortedRowElementData = await getSortedLabelInstanceKeyPairs(labelsProvider, instanceKeys);
+      finish();
+      setData(sortedRowElementData);
+    })();
+
+    return dispose;
+  }, [labelsProvider, instanceKeys, onPerformanceMeasured]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 

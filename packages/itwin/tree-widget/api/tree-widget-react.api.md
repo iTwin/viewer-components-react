@@ -121,13 +121,13 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     // (undocumented)
     enableSubCategory(key: string, enabled: boolean): void;
     // (undocumented)
-    getCategoryVisibility(id: string): "hidden" | "visible";
+    getCategoryVisibility(id: string): "visible" | "hidden";
     // (undocumented)
     static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey): string;
     // (undocumented)
     getParent(key: string): CategoryInfo | undefined;
     // (undocumented)
-    getSubCategoryVisibility(id: string): "hidden" | "visible";
+    getSubCategoryVisibility(id: string): "visible" | "hidden";
     // (undocumented)
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus;
     // (undocumented)
@@ -168,7 +168,7 @@ export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeC
 export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element;
 
 // @public
-export function DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): JSX.Element;
+export function DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): React.JSX.Element;
 
 // @public
 export interface DefaultLabelRendererProps {
@@ -321,7 +321,7 @@ export enum ModelsTreeNodeType {
 // @public
 export interface ModelsTreeProps extends BaseFilterableTreeProps {
     activeView: Viewport;
-    // @alpha
+    // @alpha @deprecated
     enableHierarchyAutoUpdate?: boolean;
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     // @beta
@@ -409,6 +409,8 @@ export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 // @public
 export interface SelectableTreeProps {
     // (undocumented)
+    density?: "enlarged" | "default";
+    // (undocumented)
     trees: TreeDefinition[];
 }
 
@@ -451,7 +453,7 @@ export interface TreeContextMenuProps {
 export interface TreeDefinition {
     getLabel: () => string;
     id: string;
-    render: () => React.ReactNode;
+    render: (props: TreeRenderProps) => React.ReactNode;
     shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
 }
 
@@ -497,6 +499,12 @@ export interface TreeRendererBaseProps extends TreeContextMenuProps, TreeNodeRen
 export type TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps;
 
 // @public
+export interface TreeRenderProps {
+    // (undocumented)
+    density?: "enlarged" | "default";
+}
+
+// @public
 export class TreeWidget {
     static get i18n(): Localization;
     static get i18nNamespace(): string;
@@ -506,6 +514,9 @@ export class TreeWidget {
 }
 
 // @public
+export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
+
+// @public
 export const TreeWidgetId = "tree-widget-react:trees";
 
 // @public
@@ -513,6 +524,7 @@ export interface TreeWidgetOptions {
     defaultPanelLocation?: StagePanelLocation;
     defaultPanelSection?: StagePanelSection;
     defaultTreeWidgetPriority?: number;
+    density?: "enlarged" | "default";
     trees?: TreeDefinition[];
 }
 
