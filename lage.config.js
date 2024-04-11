@@ -31,7 +31,7 @@ module.exports = {
       inputs: ["src/**"],
     },
     "extract-api": {
-      dependsOn: [],
+      dependsOn: ["build"],
       outputs: ["./api/**"],
       inputs: ["src/**"],
     },

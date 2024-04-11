@@ -137,6 +137,9 @@ export interface NullValueSettingContextValue {
 }
 
 // @public
+export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";
+
+// @public
 export interface PreferencesStorage {
     // (undocumented)
     get(key: string): Promise<string | undefined>;
@@ -148,10 +151,11 @@ export interface PreferencesStorage {
 export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null;
 
 // @public
-export function PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps): JSX.Element | null;
+export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, ...props }: PropertyGridComponentProps): JSX.Element | null;
 
 // @public
 export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
+    onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
     preferencesStorage?: PreferencesStorage;
 }
 
@@ -280,6 +284,9 @@ export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...
 
 // @public
 export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
+
+// @public
+export function TelemetryContextProvider({ onPerformanceMeasured, children }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
 
 // @internal
 export interface UseContentMenuProps extends ContextMenuProps {
