@@ -39,6 +39,7 @@
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
+    "test:unit": "mocha \"./lib/cjs/test/**/*.test.js\" -i -g \"#integration\"",
     "test:e2e": "node ../../../scripts/run-e2e-with-docker.js tree-widget",
     "test:e2e:local": "node ../../../scripts/run-e2e-tests.js",
     "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
