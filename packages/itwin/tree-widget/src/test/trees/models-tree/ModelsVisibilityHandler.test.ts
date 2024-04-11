@@ -21,8 +21,8 @@ import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
-import type { Id64String } from "@itwin/core-bentley";
 import type { Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
@@ -216,6 +216,30 @@ describe("ModelsVisibilityHandler", () => {
         });
       });
 
+      it("returns 'visible' when all models are displayed", async () => {
+        const subjectIds = ["0x1", "0x2"];
+        const node = createSubjectNode(subjectIds);
+        mockSubjectModelIds({
+          imodelMock,
+          subjectsHierarchy: new Map([["0x0", subjectIds]]),
+          subjectModels: new Map([
+            [subjectIds[0], [{ id: "0x3" }, { id: "0x4" }]],
+            [subjectIds[1], [{ id: "0x5" }, { id: "0x6" }]],
+          ]),
+        });
+
+        const viewStateMock = {
+          isSpatialView: () => true,
+          viewsModel: () => true,
+        } as unknown as ViewState;
+
+        const vpMock = mockViewport({ viewState: viewStateMock, imodel: imodelMock });
+        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "hidden" });
+        });
+      });
+
       it("return 'hidden' when all models are not displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
@@ -245,7 +269,7 @@ describe("ModelsVisibilityHandler", () => {
         });
       });
 
-      it("return 'visible' when at least one direct model is displayed", async () => {
+      it("return 'partial' when at least one direct model is displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
         mockSubjectModelIds({
@@ -268,13 +292,11 @@ describe("ModelsVisibilityHandler", () => {
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
-          if (isPromiseLike(result)) {
-            expect(await result).to.include({ state: "visible" });
-          }
+          expect(await result).to.include({ state: "partial" });
         });
       });
 
-      it("return 'visible' when at least one nested model is displayed", async () => {
+      it("return 'partial' when at least one nested model is displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
         mockSubjectModelIds({
@@ -297,9 +319,7 @@ describe("ModelsVisibilityHandler", () => {
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
-          if (isPromiseLike(result)) {
-            expect(await result).to.include({ state: "visible" });
-          }
+          expect(await result).to.include({ state: "partial" });
         });
       });
 
