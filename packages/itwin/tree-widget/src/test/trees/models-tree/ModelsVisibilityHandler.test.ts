@@ -1686,11 +1686,10 @@ describe("ModelsVisibilityHandler", () => {
 
         vpMock.setup((x) => x.isAlwaysDrawnExclusive).returns(() => false);
         vpMock.setup((x) => x.alwaysDrawn).returns(() => new Set());
-        vpMock.setup((x) => x.neverDrawn).returns(() => new Set()); 
+        vpMock.setup((x) => x.neverDrawn).returns(() => new Set());
         vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 1 && set.has(key.id)))).verifiable(moq.Times.once());
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          // note: need to override to avoid running a query on the imodel
           const spy = sinon.spy(handler as any, "getAssemblyElementIds");
 
           await handler.changeVisibility(node, false);
