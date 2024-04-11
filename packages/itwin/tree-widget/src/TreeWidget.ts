@@ -68,4 +68,8 @@ export class TreeWidget {
     const stringKey = `${TreeWidget.i18nNamespace}:${key}`;
     return TreeWidget.i18n.getLocalizedString(stringKey, options);
   }
+
+  public static test(): number {
+    return 42;
+  }
 }
