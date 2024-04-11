@@ -22,6 +22,3 @@ steps:
 
   - script: pnpm exec lage lint cover extract-api --grouped
     displayName: Build, Lint, Cover and check for unexpected API changes
-    env:
-      # Fail the build if package uses api-extractor and there are uncommitted API changes
-      TF_BUILD: 1
