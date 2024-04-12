@@ -15,7 +15,6 @@ import {
   Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { HorizontalTile } from "../../SharedComponents/HorizontalTile";
 import {
   SvgClose,
   SvgDragHandleVertical,
@@ -30,7 +29,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import SortableHorizontalTile from "./SortableHorizontalTile";
+import { SortableHorizontalTile } from "./SortableHorizontalTile";
 import Split from "react-split";
 import "./GroupsPropertiesSelectionModal.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
@@ -48,6 +47,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { GroupPropertyListItem } from "./GroupPropertyListItem";
 
 export interface GroupPropertiesSelectionModalProps {
   showModal: boolean;
@@ -202,12 +202,11 @@ export const GroupsPropertiesSelectionModal = (
               <div className="gmw-properties-list">
                 {
                   filteredProperties.map((property) => (
-                    <HorizontalTile
+                    <GroupPropertyListItem
                       key={property.key}
-                      title={`${property.displayLabel} (${property.propertyType})`}
-                      titleTooltip={`${property.actualECClassName}`}
-                      subText={getLocalizedStringPresentation(property.categoryLabel)}
-                      actionGroup={null}
+                      content={`${property.displayLabel} (${property.propertyType})`}
+                      title={`${property.actualECClassName}`}
+                      description={getLocalizedStringPresentation(property.categoryLabel)}
                       selected={selectedProperties.some((p) => property.key === p.key)}
                       onClick={() =>
                         setSelectedProperties((sp) =>
@@ -238,10 +237,10 @@ export const GroupsPropertiesSelectionModal = (
                     <SortableHorizontalTile
                       key={property.key}
                       id={property.key}
-                      title={`${property.displayLabel} (${property.propertyType})`}
-                      titleTooltip={`${property.actualECClassName}`}
-                      subText={getLocalizedStringPresentation(property.categoryLabel)}
-                      actionGroup={
+                      content={`${property.displayLabel} (${property.propertyType})`}
+                      title={`${property.actualECClassName}`}
+                      description={getLocalizedStringPresentation(property.categoryLabel)}
+                      action={
                         <div>
                           <IconButton
                             styleType="borderless"
@@ -275,11 +274,11 @@ export const GroupsPropertiesSelectionModal = (
       </Modal>
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
-          <HorizontalTile
-            title={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
-            titleTooltip={`${activeDragProperty.actualECClassName}`}
-            subText={getLocalizedStringPresentation(activeDragProperty.categoryLabel)}
-            actionGroup={
+          <GroupPropertyListItem
+            content={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
+            title={`${activeDragProperty.actualECClassName}`}
+            description={getLocalizedStringPresentation(activeDragProperty.categoryLabel)}
+            action={
               <IconButton
                 styleType="borderless">
                 <SvgRemove />

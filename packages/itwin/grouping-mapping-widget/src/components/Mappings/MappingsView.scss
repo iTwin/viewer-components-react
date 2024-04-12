@@ -13,7 +13,6 @@
     display: flex;
     justify-content: space-between;
     gap: var(--iui-size-xs);
-    padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
 
     .gmw-button-spacing {
@@ -28,10 +27,6 @@
   }
 
   .gmw-mappings-list {
-    display: flex;
-    flex-direction: column;
     overflow-y: overlay;
-    gap: var(--iui-size-xs);
-    margin-top: var(--iui-size-xs);
   }
 }

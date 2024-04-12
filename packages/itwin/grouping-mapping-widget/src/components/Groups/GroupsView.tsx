@@ -10,6 +10,7 @@ import {
   ButtonGroup,
   IconButton,
   InformationPanelWrapper,
+  List,
   ProgressLinear,
 } from "@itwin/itwinui-react";
 import {
@@ -20,7 +21,7 @@ import "./GroupsView.scss";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
 import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
 import type { Group, Mapping } from "@itwin/insights-client";
-import { GroupItem } from "./GroupItem";
+import { GroupListItem } from "./GroupListItem";
 import type { ContextCustomUI, GroupingCustomUI } from "../customUI/GroupingMappingCustomUI";
 import { GroupsAddButton } from "./GroupsAddButton";
 import { OverlappedElementsInformationPanel } from "./OverlappedElementsInformationPanel";
@@ -137,9 +138,9 @@ export const GroupsView = ({
       ) : groups.length === 0 ? (
         <EmptyMessage message="No Groups available." />
       ) : (
-        <div className="gmw-group-list">
+        <List className="gmw-group-list">
           {groups.map((group) => (
-            <GroupItem
+            <GroupListItem
               key={group.id}
               mapping={mapping}
               group={group}
@@ -154,7 +155,7 @@ export const GroupsView = ({
               setActiveOverlapInfoPanelGroup={setActiveOverlapInfoPanelGroup}
             />
           ))}
-        </div>
+        </List>
       )}
       {overlappedElementsInfo && setActiveOverlapInfoPanelGroup &&
         <OverlappedElementsInformationPanel
