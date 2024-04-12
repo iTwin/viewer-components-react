@@ -11,9 +11,11 @@ import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentatio
 import { TreeWidget } from "../../../TreeWidget";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
+import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { ModelsTreeComponent } from "./ModelsTreeComponent";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
@@ -75,6 +77,13 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * @beta
    */
   hierarchyLevelConfig?: HierarchyLevelConfig;
+  /**
+   * Reports performance of a feature.
+   * @param featureId ID of the feature.
+   * @param elapsedTime Elapsed time of the feature.
+   * @beta
+   */
+  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 /**
@@ -201,6 +210,7 @@ function useTreeState({
   filterInfo,
   onFilterApplied,
   hierarchyLevelConfig,
+  onPerformanceMeasured,
 }: UseTreeProps) {
   const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
@@ -221,6 +231,13 @@ function useTreeState({
     [onFilterApplied, visibilityHandler],
   );
 
+  const reporting = usePerformanceReporting({
+    treeIdentifier: ModelsTreeComponent.id,
+    iModel,
+    ruleset,
+    onPerformanceMeasured,
+  });
+
   return useVisibilityTreeState({
     imodel: iModel,
     ruleset,
@@ -240,6 +257,7 @@ function useTreeState({
     ),
     eventHandler: eventHandlerFactory,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
+    onNodeLoaded: reporting.onNodeLoaded,
   });
 }
 

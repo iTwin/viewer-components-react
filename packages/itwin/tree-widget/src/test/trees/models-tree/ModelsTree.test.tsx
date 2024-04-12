@@ -79,6 +79,7 @@ describe("ModelsTree", () => {
       const mocks = mockPresentationManager();
       sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
       sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
+      sinon.stub(Presentation, "localization").get(() => new EmptyLocalization());
     });
 
     const setupDataProvider = (nodes: TreeNodeItem[]) => {
@@ -651,6 +652,87 @@ describe("ModelsTree", () => {
           await result.findByText("filtered-node");
 
           expect(spy).to.be.calledOnce;
+        });
+      });
+
+      describe("performance reporting", () => {
+        const onPerformanceMeasuredSpy = sinon.spy();
+        const imodelMock2 = moq.Mock.ofType<IModelConnection>();
+
+        beforeEach(() => {
+          onPerformanceMeasuredSpy.resetHistory();
+        });
+
+        it("reports initial load performance metric", async () => {
+          setupDataProvider([createSimpleTreeModelNode()]);
+
+          const { getByText } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+          expect(onPerformanceMeasuredSpy.callCount).to.be.eq(1);
+          expect(onPerformanceMeasuredSpy.getCall(0).calledWith("models-tree-initial-load")).to.be.true;
+        });
+
+        it("reports initial load performance metric on iModel change", async () => {
+          setupDataProvider([createSimpleTreeModelNode()]);
+
+          const { getByText, rerender } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+
+          rerender(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock2.object}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+          expect(onPerformanceMeasuredSpy.callCount).to.be.eq(2);
+          expect(onPerformanceMeasuredSpy.getCall(0).calledWith("models-tree-initial-load")).to.be.true;
+          expect(onPerformanceMeasuredSpy.getCall(1).calledWith("models-tree-initial-load")).to.be.true;
+        });
+
+        it("reports hierarchy load performance metric", async () => {
+          const nodeItem = createPresentationTreeNodeItem({ hasChildren: true });
+          setupDataProvider([nodeItem]);
+
+          const { user, getByText, getByTestId } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+          const expandButton = getByTestId("tree-node-expansion-toggle");
+          await user.click(expandButton);
+
+          expect(onPerformanceMeasuredSpy.callCount).to.be.eq(2);
+          expect(onPerformanceMeasuredSpy.getCall(0).calledWith("models-tree-initial-load")).to.be.true;
+          expect(onPerformanceMeasuredSpy.getCall(1).calledWith("models-tree-hierarchy-level-load")).to.be.true;
         });
       });
     });

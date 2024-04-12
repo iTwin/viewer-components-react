@@ -28,6 +28,7 @@ export interface TreeSelectorProps {
   defaultSelectedContentId: string;
   trees: TreeContentDefinition[];
   density?: "enlarged" | "default";
+  onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
 }
 
 /**
@@ -61,7 +62,9 @@ export function TreeSelector(props: TreeSelectorProps) {
           />
         )}
       </div>
-      <div className="presentation-components-tree-selector-content-wrapper">{selectedContent?.render({ density: props.density })}</div>
+      <div className="presentation-components-tree-selector-content-wrapper">
+        {selectedContent?.render({ density: props.density, onPerformanceMeasured: props.onPerformanceMeasured })}
+      </div>
     </div>
   );
 }
