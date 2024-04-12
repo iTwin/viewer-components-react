@@ -8,9 +8,12 @@ import sinon from "sinon";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
 import userEvents from "@testing-library/user-event";
 import { ElementList } from "../../components/ElementList";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
 import { PropertyGridManager } from "../../PropertyGridManager";
-import { render, waitFor } from "../TestUtils";
+import { act, createResolvablePromise, render, waitFor } from "../TestUtils";
 
+import type { PropsWithChildren } from "react";
+import type { PerformanceTrackedFeatures } from "../../hooks/UseTelemetryContext";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 
@@ -22,15 +25,16 @@ describe("<ElementList />", () => {
 
   before(() => {
     sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
-    getLabelsStub = sinon.stub(PresentationLabelsProvider.prototype, "getLabels").callsFake(async (keys) => keys.map(buildLabel));
+    getLabelsStub = sinon.stub(PresentationLabelsProvider.prototype, "getLabels");
   });
 
   after(() => {
     sinon.restore();
   });
 
-  afterEach(() => {
-    getLabelsStub.resetHistory();
+  beforeEach(() => {
+    getLabelsStub.reset();
+    getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
   });
 
   it("loads and renders instance labels", async () => {
@@ -110,5 +114,58 @@ describe("<ElementList />", () => {
     await userEvents.click(button);
 
     expect(onBackSpy).to.be.calledOnce;
+  });
+
+  describe("performance tracking", () => {
+    const onPerformanceMeasuredStub = sinon.stub<[PerformanceTrackedFeatures, number], void>();
+
+    function Wrapper({ children }: PropsWithChildren<{}>) {
+      return <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasuredStub}>{children}</TelemetryContextProvider>;
+    }
+
+    beforeEach(() => {
+      onPerformanceMeasuredStub.reset();
+    });
+
+    it("logs performance metrics", async () => {
+      const instanceKeys = [{ id: "0x1", className: "Schema:Class" }];
+      render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />, { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(onPerformanceMeasuredStub).to.be.calledOnceWith("elements-list-load");
+      });
+    });
+
+    it("logs metrics only for latest request", async () => {
+      const firstRequest = createResolvablePromise<string[]>();
+      getLabelsStub.callsFake(async () => firstRequest.promise);
+      const instanceKeys = [{ id: "0x1", className: "Schema:Class" }];
+      const { rerender } = render(<ElementList imodel={imodel} instanceKeys={instanceKeys} onBack={() => {}} onSelect={() => {}} />, { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(getLabelsStub).to.be.called;
+        expect(onPerformanceMeasuredStub).to.not.be.called;
+      });
+      getLabelsStub.reset();
+
+      const secondRequest = createResolvablePromise<string[]>();
+      getLabelsStub.callsFake(async () => secondRequest.promise);
+      const secondInstanceKeys = [{ id: "0x2", className: "Schema:Class" }];
+      rerender(<ElementList imodel={imodel} instanceKeys={secondInstanceKeys} onBack={() => {}} onSelect={() => {}} />);
+      await waitFor(() => {
+        expect(getLabelsStub).to.be.called;
+        expect(onPerformanceMeasuredStub).to.not.be.called;
+      });
+
+      await act(async () => {
+        await firstRequest.resolve(["Test-instance-1"]);
+      });
+      expect(onPerformanceMeasuredStub).to.not.be.called;
+
+      await act(async () => {
+        await secondRequest.resolve(["Test-instance-2"]);
+      });
+      expect(onPerformanceMeasuredStub).to.be.calledOnceWith("elements-list-load");
+    });
   });
 });

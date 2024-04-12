@@ -9,7 +9,7 @@ public;CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuI
 public;DataProviderProps
 public;DefaultContextMenuItemProps 
 public;FavoritePropertiesContextMenuItemProps 
-internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element
+internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element | null
 public;FilteringPropertyGridProps 
 public;IModelAppUserPreferencesStorage 
 internal;InstanceSelectionProps
@@ -19,9 +19,10 @@ internal;NonEmptyValuesPropertyDataFilterer
 internal;NoopPropertyDataFilterer 
 public;NullValueSettingContext({ children }: PropsWithChildren
 internal;NullValueSettingContextValue
+public;PerformanceTrackedFeatures = "properties-load" | "elements-list-load"
 public;PreferencesStorage
-public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element
-public;PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps): JSX.Element | null
+public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null
+public;PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, ...props }: PropertyGridComponentProps): JSX.Element | null
 public;PropertyGridComponentProps 
 internal;PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, onPropertyUpdated, ...props }: PropertyGridContentProps): JSX.Element
 public;PropertyGridContentBaseProps 
@@ -45,8 +46,9 @@ public;ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideNullValues
 public;ShowHideNullValuesSettingsMenuItemProps 
 internal;SHOWNULL_KEY = "showNullValues"
 public;SingleElementDataProviderProps 
-public;SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element
+public;SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element | null
 public;SingleElementPropertyGridProps = Omit
+public;TelemetryContextProvider({ onPerformanceMeasured, children }: PropsWithChildren
 internal;UseContentMenuProps 
 internal;useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps):
 internal;useDataProvider({ imodel, createDataProvider }: DataProviderProps &

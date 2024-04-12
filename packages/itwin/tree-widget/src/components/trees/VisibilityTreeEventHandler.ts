@@ -6,7 +6,7 @@
  * @module IModelComponents
  */
 
-import { from, map, mergeMap, Observable } from "rxjs";
+import { endWith, from, ignoreElements, map, mergeMap, Observable } from "rxjs";
 import { CheckBoxState } from "@itwin/core-react";
 import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
@@ -139,10 +139,11 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     };
 
     new Observable<CheckboxStateChange[]>((subscriber) => event.stateChanges.subscribe(subscriber))
-      .pipe(
-        mergeMap((changes) => this.changeVisibility(changes)),
-      )
+      .pipe(mergeMap((changes) => this.changeVisibility(changes)))
       .subscribe({
+        next: (nodeId) => {
+          void this.updateCheckboxes([nodeId]);
+        },
         complete: handleStateChanged,
         error: handleStateChanged,
       });
@@ -150,13 +151,12 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   private changeVisibility(changes: CheckboxStateChange[]) {
-    return from(changes)
-      .pipe(
-        mergeMap(({ nodeItem, newState }) => {
-          this._isChangingVisibility = true;
-          return from(this._visibilityHandler.changeVisibility(nodeItem, newState === CheckBoxState.On));
-        }, 1),
-      );
+    return from(changes).pipe(
+      mergeMap(({ nodeItem, newState }) => {
+        this._isChangingVisibility = true;
+        return from(this._visibilityHandler.changeVisibility(nodeItem, newState === CheckBoxState.On)).pipe(ignoreElements(), endWith(nodeItem.id));
+      }),
+    );
   }
 
   private async updateCheckboxes(affectedNodes?: string[], visibilityStatus?: Map<string, VisibilityStatus>) {

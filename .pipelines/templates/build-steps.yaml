@@ -20,5 +20,5 @@ steps:
   # - script: pnpm exec prettier . --check
   #   displayName: Check formatting
 
-  - script: pnpm exec lage lint cover --grouped
-    displayName: Build, Lint and Cover
+  - script: pnpm exec lage lint extract-api cover --grouped
+    displayName: Build, Lint, Cover and check for unexpected API changes
