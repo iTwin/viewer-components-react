@@ -343,7 +343,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     // (undocumented)
     protected changeElementsState(modelId: Id64String | undefined, categoryId: Id64String | undefined, elementIds: AsyncGenerator<Id64String>, on: boolean): Promise<void>;
     // (undocumented)
-    protected changeElementState(id: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined, on: boolean): Promise<void>;
+    protected changeElementState(id: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined, on: boolean, hasChildren?: boolean): Promise<void>;
     // (undocumented)
     protected changeModelState(id: Id64String, on: boolean): Promise<void>;
     // (undocumented)
