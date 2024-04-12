@@ -161,10 +161,10 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
 
   /** Changes visibility of the items represented by the tree node. */
   public async changeVisibility(node: TreeNodeItem, on: boolean) {
-    const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
-    if (!nodeKey) {
+    if (!isPresentationTreeNodeItem(node)) {
       return;
     }
+    const nodeKey = node.key;
 
     if (NodeKey.isClassGroupingNodeKey(nodeKey)) {
       await this.changeElementGroupingNodeState(nodeKey, on);
@@ -186,7 +186,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     } else if (ModelsVisibilityHandler.isCategoryNode(node)) {
       this.changeCategoryState(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node), on);
     } else {
-      await this.changeElementState(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on);
+      await this.changeElementState(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on, node.hasChildren);
     }
   }
 
@@ -404,15 +404,18 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     await this.changeElementsState(modelId, categoryId, elementIds.getElementIds(), on);
   }
 
-  protected async changeElementState(id: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined, on: boolean) {
-    const childIdsContainer = this.getAssemblyElementIds(id);
-    async function* elementIds() {
-      yield id;
-      for await (const childId of childIdsContainer.getElementIds()) {
-        yield childId;
-      }
+  protected async changeElementState(id: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined, on: boolean, hasChildren?: boolean) {
+    const isDisplayedByDefault = this.isElementDisplayedByDefault(modelId, categoryId);
+    const isHiddenDueToExclusiveAlwaysDrawnElements = this.hasExclusiveAlwaysDrawnElements();
+    this.changeElementStateInternal(id, on, isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements);
+    if (!hasChildren) {
+      return;
     }
-    await this.changeElementsState(modelId, categoryId, elementIds(), on);
+
+    const childIdsContainer = this.getAssemblyElementIds(id);
+    for await (const childId of childIdsContainer.getElementIds()) {
+      this.changeElementStateInternal(childId, on, isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements);
+    }
   }
 
   protected async changeElementsState(
@@ -421,30 +424,49 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     elementIds: AsyncGenerator<Id64String>,
     on: boolean,
   ) {
-    const isDisplayedByDefault =
-      modelId &&
-      this.getModelDisplayStatus(modelId).state === "visible" &&
-      categoryId &&
-      this.getCategoryDisplayStatus(categoryId, modelId).state === "visible";
-    const isHiddenDueToExclusiveAlwaysDrawnElements =
-      this._props.viewport.isAlwaysDrawnExclusive && this._props.viewport.alwaysDrawn && 0 !== this._props.viewport.alwaysDrawn.size;
+    const isDisplayedByDefault = this.isElementDisplayedByDefault(modelId, categoryId);
+    const isHiddenDueToExclusiveAlwaysDrawnElements = this.hasExclusiveAlwaysDrawnElements();
+    for await (const elementId of elementIds) {
+      this.changeElementStateInternal(elementId, on, isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements);
+    }
+  }
+
+  private changeElementStateInternal(elementId: Id64String, on: boolean, isDisplayedByDefault: boolean, isHiddenDueToExclusiveAlwaysDrawnElements: boolean) {
+    let changedNeverDraw = false;
+    let changedAlwaysDrawn = false;
+
     const currNeverDrawn = new Set(this._props.viewport.neverDrawn ? this._props.viewport.neverDrawn : []);
     const currAlwaysDrawn = new Set(this._props.viewport.alwaysDrawn ? this._props.viewport.alwaysDrawn : /* istanbul ignore next */ []);
-    for await (const elementId of elementIds) {
-      if (on) {
-        currNeverDrawn.delete(elementId);
-        if (!isDisplayedByDefault || isHiddenDueToExclusiveAlwaysDrawnElements) {
-          currAlwaysDrawn.add(elementId);
-        }
-      } else {
-        currAlwaysDrawn.delete(elementId);
-        if (isDisplayedByDefault && !isHiddenDueToExclusiveAlwaysDrawnElements) {
-          currNeverDrawn.add(elementId);
-        }
+
+    if (on) {
+      changedNeverDraw = changedNeverDraw || currNeverDrawn.delete(elementId);
+      if ((!isDisplayedByDefault || isHiddenDueToExclusiveAlwaysDrawnElements) && !currAlwaysDrawn.has(elementId)) {
+        currAlwaysDrawn.add(elementId);
+        changedAlwaysDrawn = true;
+      }
+    } else {
+      changedAlwaysDrawn = changedAlwaysDrawn || currAlwaysDrawn.delete(elementId);
+      if (isDisplayedByDefault && !isHiddenDueToExclusiveAlwaysDrawnElements && !currNeverDrawn.has(elementId)) {
+        currNeverDrawn.add(elementId);
+        changedNeverDraw = true;
       }
     }
-    this._props.viewport.setNeverDrawn(currNeverDrawn);
-    this._props.viewport.setAlwaysDrawn(currAlwaysDrawn, this._props.viewport.isAlwaysDrawnExclusive);
+
+    changedNeverDraw && this._props.viewport.setNeverDrawn(currNeverDrawn);
+    changedAlwaysDrawn && this._props.viewport.setAlwaysDrawn(currAlwaysDrawn, this._props.viewport.isAlwaysDrawnExclusive);
+  }
+
+  private isElementDisplayedByDefault(modelId: Id64String | undefined, categoryId: Id64String | undefined) {
+    return (
+      !!modelId &&
+      this.getModelDisplayStatus(modelId).state === "visible" &&
+      !!categoryId &&
+      this.getCategoryDisplayStatus(categoryId, modelId).state === "visible"
+    );
+  }
+
+  private hasExclusiveAlwaysDrawnElements() {
+    return this._props.viewport.isAlwaysDrawnExclusive && 0 !== this._props.viewport.alwaysDrawn?.size;
   }
 
   private onVisibilityChangeInternal() {

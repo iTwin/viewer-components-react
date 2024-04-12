@@ -1393,17 +1393,17 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.isAlwaysDrawnExclusive).returns(() => false);
         vpMock.setup((x) => x.alwaysDrawn).returns(() => alwaysDisplayed);
         vpMock.setup((x) => x.neverDrawn).returns(() => neverDisplayed);
-        vpMock
-          .setup((x) =>
-            x.setAlwaysDrawn(
-              moq.It.is((set) => {
-                return set.size === 3 && groupedElementIds.reduce<boolean>((result, id) => result && set.has(id), true);
-              }),
-              false,
-            ),
-          )
-          .verifiable();
-        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable();
+        groupedElementIds.forEach((elId) => {
+          vpMock
+            .setup((x) =>
+              x.setAlwaysDrawn(
+                moq.It.is((set) => set.has(elId)),
+                false,
+              ),
+            )
+            .verifiable(moq.Times.once());
+        });
+        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable(moq.Times.once());
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           // note: need to override to avoid running queries on the imodel
@@ -1451,7 +1451,7 @@ describe("ModelsVisibilityHandler", () => {
               false,
             ),
           )
-          .verifiable();
+          .verifiable(moq.Times.never());
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           // note: need to override to avoid running queries on the imodel
@@ -1485,16 +1485,17 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.isAlwaysDrawnExclusive).returns(() => false);
         vpMock.setup((x) => x.alwaysDrawn).returns(() => alwaysDisplayed);
         vpMock.setup((x) => x.neverDrawn).returns(() => neverDisplayed);
-        vpMock
-          .setup((x) =>
-            x.setAlwaysDrawn(
-              moq.It.is((set) => {
-                return set.size === 3 && set.has(key.id) && assemblyChildrenIds.reduce<boolean>((result, id) => result && set.has(id), true);
-              }),
-              false,
-            ),
-          )
-          .verifiable();
+        [key.id, ...assemblyChildrenIds].forEach((elId) => {
+          vpMock
+            .setup((x) =>
+              x.setAlwaysDrawn(
+                moq.It.is((set) => set.has(elId)),
+                false,
+              ),
+            )
+            .verifiable(moq.Times.once());
+        });
+
         vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable();
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
@@ -1536,8 +1537,8 @@ describe("ModelsVisibilityHandler", () => {
               true,
             ),
           )
-          .verifiable();
-        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable();
+          .verifiable(moq.Times.once());
+        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable(moq.Times.never());
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           // note: need to override to avoid running a query on the imodel
@@ -1567,7 +1568,7 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.isAlwaysDrawnExclusive).returns(() => false);
         vpMock.setup((x) => x.alwaysDrawn).returns(() => alwaysDisplayed);
         vpMock.setup((x) => x.neverDrawn).returns(() => neverDisplayed);
-        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable();
+        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable(moq.Times.never());
         vpMock
           .setup((x) =>
             x.setAlwaysDrawn(
@@ -1575,7 +1576,7 @@ describe("ModelsVisibilityHandler", () => {
               false,
             ),
           )
-          .verifiable();
+          .verifiable(moq.Times.once());
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           // note: need to override to avoid running queries on the imodel
@@ -1616,16 +1617,10 @@ describe("ModelsVisibilityHandler", () => {
               false,
             ),
           )
-          .verifiable();
-        vpMock
-          .setup((x) =>
-            x.setNeverDrawn(
-              moq.It.is((set) => {
-                return set.size === 3 && set.has(key.id) && assemblyChildrenIds.reduce<boolean>((result, id) => result && set.has(id), true);
-              }),
-            ),
-          )
-          .verifiable();
+          .verifiable(moq.Times.once());
+        [key.id, ...assemblyChildrenIds].forEach((elId) => {
+          vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.has(elId)))).verifiable(moq.Times.once());
+        });
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           // note: need to override to avoid running a query on the imodel
@@ -1665,7 +1660,7 @@ describe("ModelsVisibilityHandler", () => {
             ),
           )
           .verifiable();
-        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable();
+        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 0))).verifiable(moq.Times.never());
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           // note: need to override to avoid running a query on the imodel
@@ -1675,6 +1670,31 @@ describe("ModelsVisibilityHandler", () => {
 
           await handler.changeVisibility(node, false);
           vpMock.verifyAll();
+        });
+      });
+
+      it("does not look for assembly children when element is not an assembly", async () => {
+        const node = createElementNode("0x4", "0x3", false);
+        const key = (node.key as ECInstancesNodeKey).instanceKeys[0];
+
+        const viewStateMock = moq.Mock.ofType<ViewState3d>();
+        viewStateMock.setup((x) => x.viewsCategory("0x3")).returns(() => true);
+        viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
+        viewStateMock.setup((x) => x.viewsModel("0x4")).returns(() => true);
+
+        const vpMock = mockViewport({ viewState: viewStateMock.object });
+
+        vpMock.setup((x) => x.isAlwaysDrawnExclusive).returns(() => false);
+        vpMock.setup((x) => x.alwaysDrawn).returns(() => new Set());
+        vpMock.setup((x) => x.neverDrawn).returns(() => new Set());
+        vpMock.setup((x) => x.setNeverDrawn(moq.It.is((set) => set.size === 1 && set.has(key.id)))).verifiable(moq.Times.once());
+
+        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+          const spy = sinon.spy(handler as any, "getAssemblyElementIds");
+
+          await handler.changeVisibility(node, false);
+          vpMock.verifyAll();
+          expect(spy).to.not.be.called;
         });
       });
     });
