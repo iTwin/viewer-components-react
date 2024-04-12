@@ -9,10 +9,11 @@ import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
-import { TreeWidget } from "../../../TreeWidget";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { ElementIdsCache } from "./internal/ElementIdsCache";
 import { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
+import { createTooltip, createVisibilityStatus } from "./internal/Tooltip";
+import * as NodeUtils from "./NodeUtils";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
@@ -92,40 +93,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   public static getNodeType(item: TreeNodeItem) {
-    if (!isPresentationTreeNodeItem(item)) {
-      return ModelsTreeNodeType.Unknown;
-    }
-
-    if (NodeKey.isClassGroupingNodeKey(item.key)) {
-      return ModelsTreeNodeType.Grouping;
-    }
-
-    if (!item.extendedData) {
-      return ModelsTreeNodeType.Unknown;
-    }
-
-    if (this.isSubjectNode(item)) {
-      return ModelsTreeNodeType.Subject;
-    }
-    if (this.isModelNode(item)) {
-      return ModelsTreeNodeType.Model;
-    }
-    if (this.isCategoryNode(item)) {
-      return ModelsTreeNodeType.Category;
-    }
-    return ModelsTreeNodeType.Element;
-  }
-
-  public static isSubjectNode(node: TreeNodeItem) {
-    return node.extendedData && node.extendedData.isSubject;
-  }
-
-  public static isModelNode(node: TreeNodeItem) {
-    return node.extendedData && node.extendedData.isModel;
-  }
-
-  public static isCategoryNode(node: TreeNodeItem) {
-    return node.extendedData && node.extendedData.isCategory;
+    return NodeUtils.getNodeType(item);
   }
 
   /** Returns visibility status of the tree node. */
@@ -143,17 +111,17 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return { state: "hidden", isDisabled: true };
     }
 
-    if (ModelsVisibilityHandler.isSubjectNode(node)) {
+    if (NodeUtils.isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
       return this.getSubjectNodeVisibility(
         nodeKey.instanceKeys.map((key) => key.id),
         node,
       );
     }
-    if (ModelsVisibilityHandler.isModelNode(node)) {
+    if (NodeUtils.isModelNode(node)) {
       return this.getModelDisplayStatus(nodeKey.instanceKeys[0].id);
     }
-    if (ModelsVisibilityHandler.isCategoryNode(node)) {
+    if (NodeUtils.isCategoryNode(node)) {
       return this.getCategoryDisplayStatus(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node));
     }
     return this.getElementDisplayStatus(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node));
@@ -175,15 +143,15 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return;
     }
 
-    if (ModelsVisibilityHandler.isSubjectNode(node)) {
+    if (NodeUtils.isSubjectNode(node)) {
       await this.changeSubjectNodeState(
         nodeKey.instanceKeys.map((key) => key.id),
         node,
         on,
       );
-    } else if (ModelsVisibilityHandler.isModelNode(node)) {
+    } else if (NodeUtils.isModelNode(node)) {
       await this.changeModelState(nodeKey.instanceKeys[0].id, on);
-    } else if (ModelsVisibilityHandler.isCategoryNode(node)) {
+    } else if (NodeUtils.isCategoryNode(node)) {
       this.changeCategoryState(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node), on);
     } else {
       await this.changeElementState(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on, node.hasChildren);
@@ -523,22 +491,6 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   private async getGroupedElementIds(groupingNodeKey: GroupingNodeKey) {
     return this._elementIdsCache.getGroupedElementIds(groupingNodeKey);
   }
-}
-
-function createVisibilityStatus(status: "visible" | "hidden" | "partial", tooltipStringId: string | undefined): VisibilityStatus {
-  return { state: status, tooltip: createTooltip(status, tooltipStringId) };
-}
-
-function createTooltip(status: "visible" | "hidden" | "partial" | "disabled", tooltipStringId: string | undefined): string {
-  const statusStringId = `modelTree.status.${status}`;
-  const statusString = TreeWidget.translate(statusStringId);
-  if (!tooltipStringId) {
-    return statusString;
-  }
-
-  tooltipStringId = `modelTree.tooltips.${tooltipStringId}`;
-  const tooltipString = TreeWidget.translate(tooltipStringId);
-  return `${statusString}: ${tooltipString}`;
 }
 
 /**

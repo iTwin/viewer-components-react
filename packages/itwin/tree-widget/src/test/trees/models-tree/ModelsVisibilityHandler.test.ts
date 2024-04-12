@@ -10,11 +10,15 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent, using } from "@itwin/core-bentley";
 import { ECSqlReader, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { StandardNodeTypes } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
-  areAllModelsVisible, hideAllModels, invertAllModels, ModelsTreeNodeType, ModelsVisibilityHandler, showAllModels, toggleModels,
+  areAllModelsVisible,
+  hideAllModels,
+  invertAllModels,
+  ModelsVisibilityHandler,
+  showAllModels,
+  toggleModels,
 } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
@@ -115,42 +119,6 @@ describe("ModelsVisibilityHandler", () => {
       createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true });
       expect(changeEvent.numberOfListeners).to.eq(1);
     });
-  });
-
-  it("getNodeType", () => {
-    expect(ModelsVisibilityHandler.getNodeType({} as TreeNodeItem)).to.be.eq(ModelsTreeNodeType.Unknown);
-    const instanceNode = {
-      key: {
-        type: StandardNodeTypes.ECInstancesNode,
-        version: 0,
-        pathFromRoot: [],
-        instanceKeys: [{ className: "MyDomain:SpatialCategory", id: "testInstanceId" }],
-      },
-      id: "testId",
-      label: PropertyRecord.fromString("category-node"),
-      autoExpand: true,
-      hasChildren: true,
-    } as PresentationTreeNodeItem;
-    expect(ModelsVisibilityHandler.getNodeType(instanceNode)).to.be.eq(ModelsTreeNodeType.Unknown);
-    const groupingNode = {
-      ...instanceNode,
-      key: {
-        type: StandardNodeTypes.ECClassGroupingNode,
-        version: 0,
-        pathFromRoot: [],
-        className: "testClassName",
-        groupedInstancesCount: 0,
-      },
-    };
-    expect(ModelsVisibilityHandler.getNodeType(groupingNode)).to.be.eq(ModelsTreeNodeType.Grouping);
-    const subjectNode = { ...instanceNode, extendedData: { isSubject: true } };
-    expect(ModelsVisibilityHandler.getNodeType(subjectNode)).to.be.eq(ModelsTreeNodeType.Subject);
-    const modelNode = { ...instanceNode, extendedData: { isModel: true } };
-    expect(ModelsVisibilityHandler.getNodeType(modelNode)).to.be.eq(ModelsTreeNodeType.Model);
-    const categoryNode = { ...instanceNode, extendedData: { isCategory: true } };
-    expect(ModelsVisibilityHandler.getNodeType(categoryNode)).to.be.eq(ModelsTreeNodeType.Category);
-    const elementNode = { ...instanceNode, extendedData: { isElement: true } };
-    expect(ModelsVisibilityHandler.getNodeType(elementNode)).to.be.eq(ModelsTreeNodeType.Element);
   });
 
   describe("dispose", () => {
