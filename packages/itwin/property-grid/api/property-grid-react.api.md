@@ -12,7 +12,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-common';
 import type { IPresentationPropertyDataProvider } from '@itwin/presentation-components';
 import type { IPropertyDataFilterer } from '@itwin/components-react';
-import type { Localization } from '@itwin/core-common';
+import { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
 import type { PropertyCategory } from '@itwin/components-react';
 import type { PropertyDataFilterResult } from '@itwin/components-react';
@@ -75,7 +75,7 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
 }
 
 // @internal
-export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element;
+export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element | null;
 
 // @public
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
@@ -137,6 +137,9 @@ export interface NullValueSettingContextValue {
 }
 
 // @public
+export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";
+
+// @public
 export interface PreferencesStorage {
     // (undocumented)
     get(key: string): Promise<string | undefined>;
@@ -145,13 +148,14 @@ export interface PreferencesStorage {
 }
 
 // @public
-export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element;
+export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null;
 
 // @public
-export function PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps): JSX.Element | null;
+export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, ...props }: PropertyGridComponentProps): JSX.Element | null;
 
 // @public
 export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
+    onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
     preferencesStorage?: PreferencesStorage;
 }
 
@@ -276,10 +280,13 @@ export interface SingleElementDataProviderProps extends DataProviderProps {
 }
 
 // @public
-export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element;
+export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element | null;
 
 // @public
 export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
+
+// @public
+export function TelemetryContextProvider({ onPerformanceMeasured, children }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
 
 // @internal
 export interface UseContentMenuProps extends ContextMenuProps {
@@ -298,7 +305,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
 // @internal
 export function useDataProvider({ imodel, createDataProvider }: DataProviderProps & {
     imodel: IModelConnection;
-}): IPresentationPropertyDataProvider;
+}): IPresentationPropertyDataProvider | undefined;
 
 // @internal
 export function useInstanceSelection({ imodel }: InstanceSelectionProps): {

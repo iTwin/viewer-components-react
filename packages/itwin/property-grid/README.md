@@ -246,3 +246,38 @@ One can type into the search bar and notice how properties are automatically fil
 ![Widget search bar expanded](./media/search-bar-filtering.png)
 
 Note that when the search bar is closed, the filter is discarded and all properties are visible again.
+
+## Performance tracking
+
+Components from this package allows consumers to track performance of specific features.
+
+This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+
+* `"properties-load"` - time it takes to load properties data after selection changes.
+* `"elements-list-load"` - time it takes to populate elements list when multiple elements are selected.
+
+Example:
+
+```ts
+new PropertyGridUiItemsProvider({
+  propertyGridProps: {
+    onPerformanceMeasured: (feature, elapsedTime) => {
+      telemetryClient.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+    },
+  },
+});
+```
+
+To track performance of individual components when using them directly, rather than through `PropertyGridUiItemsProvider`, the `onPerformanceMeasured` callback should be supplied through `TelemetryContextProvider`:
+
+```ts
+return (
+  <TelemetryContextProvider
+    onPerformanceMeasured={(feature, elapsedTime) => {
+      telemetryClient.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+    }}
+  >
+    <PropertyGrid />
+  </TelemetryContextProvider>
+);
+```

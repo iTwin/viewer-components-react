@@ -152,7 +152,7 @@ export const createElementClassGroupingNode = (elementIds: Id64String[]): Presen
   label: PropertyRecord.fromString("grouping"),
 });
 
-export const createElementNode = (modelId?: Id64String, categoryId?: Id64String): PresentationTreeNodeItem => ({
+export const createElementNode = (modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): PresentationTreeNodeItem => ({
   key: createKey("element", "element_id"),
   id: "element",
   label: PropertyRecord.fromString("element"),
@@ -160,6 +160,7 @@ export const createElementNode = (modelId?: Id64String, categoryId?: Id64String)
     modelId,
     categoryId,
   },
+  hasChildren: hasChildren ?? true,
 });
 
 export const createKey = (type: "subject" | "model" | "category" | "element", ids: Id64String | Id64String[]): ECInstancesNodeKey => {
