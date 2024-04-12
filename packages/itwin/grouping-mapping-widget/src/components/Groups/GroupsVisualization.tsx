@@ -176,7 +176,7 @@ export const GroupsVisualization = ({
     if (isVisualizationsEnabled) {
       setEnableGroupQueries(true);
     } else {
-      // setShowGroupColor(false);
+      setShowGroupColor(false);
       clearHiddenElements();
       setHiddenGroupsIds(new Set());
     }
