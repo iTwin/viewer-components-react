@@ -51,7 +51,7 @@ export const GroupColorToggle = ({
   });
 
   useEffect(() => {
-    isFetched && showGroupColor && hiliteIdsResult && isMounted() && mutateVisualization(hiliteIdsResult);
+    isFetched && showGroupColor && hiliteIdsResult && isMounted && mutateVisualization(hiliteIdsResult);
   }, [hiliteIdsResult, isFetched, isMounted, showGroupColor, mutateVisualization]);
 
   const handleToggleChange = useCallback(() => {

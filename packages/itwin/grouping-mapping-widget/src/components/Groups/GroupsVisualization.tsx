@@ -84,7 +84,7 @@ export const GroupsVisualization = ({
   const zoomToElementsMutation = useMutation({
     mutationFn: zoomToElements,
     onSuccess: () => {
-      if (isMounted()) {
+      if (isMounted) {
         isNonEmphasizedSelectable && clearEmphasizedElements();
       }
     },
@@ -93,7 +93,7 @@ export const GroupsVisualization = ({
   const visualizationMutation = useMutation({
     mutationFn: triggerVisualization,
     onSuccess: (allIds) => {
-      if (isMounted()) {
+      if (isMounted) {
         zoomToElementsMutation.mutate(allIds);
       }
     },
@@ -176,7 +176,7 @@ export const GroupsVisualization = ({
     if (isVisualizationsEnabled) {
       setEnableGroupQueries(true);
     } else {
-      setShowGroupColor(false);
+      // setShowGroupColor(false);
       clearHiddenElements();
       setHiddenGroupsIds(new Set());
     }
