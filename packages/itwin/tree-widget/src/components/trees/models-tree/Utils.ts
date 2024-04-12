@@ -9,31 +9,9 @@ import { NodeKey } from "@itwin/presentation-common";
 
 import type { ModelInfo } from "./ModelsTreeComponent";
 
-import type { Id64String } from "@itwin/core-bentley";
 import type { ChildNodeSpecification, Node, Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
-/** @internal */
-export class CachingElementIdsContainer {
-  private _ids = new Array<Id64String>();
-  constructor(private _generator: AsyncGenerator<Id64String>) {}
-
-  private async next() {
-    return (await this._generator.next()).value;
-  }
-
-  public async *getElementIds() {
-    for (const id of this._ids) {
-      yield id;
-    }
-
-    let nextId;
-    while ((nextId = await this.next())) {
-      this._ids.push(nextId);
-      yield nextId;
-    }
-  }
-}
 
 /** @internal */
 export type CreateRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping"> & {

@@ -38,7 +38,7 @@
         "nonSpatialView": "Active view is not spatial"
       },
       "category": {
-        "modelNotDisplayed": "Can't control category display if model is not displayed",
+        "modelNotDisplayed": "Hidden through the model",
         "displayedThroughPerModelOverride": "Per-model category override set to 'Show'",
         "hiddenThroughPerModelOverride": "Per-model category override set to 'Hide'",
         "displayedThroughCategorySelector": "Category display enabled through category selector",
