@@ -5,8 +5,8 @@
 import type { Mapping } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useState } from "react";
 import type { BeEvent } from "@itwin/core-bentley";
-import { MappingUIActionGroup } from "./MappingViewActionGroup";
-import { Anchor, ListItem, Text } from "@itwin/itwinui-react";
+import { MappingViewActionGroup } from "./MappingViewActionGroup";
+import { Anchor, ListItem } from "@itwin/itwinui-react";
 import { ExtractionStates } from "./Extraction/ExtractionStatus";
 import { ExtractionStatus } from "./Extraction/ExtractionStatus";
 import { useExtractionStateJobContext } from "../context/ExtractionStateJobContext";
@@ -17,10 +17,10 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export interface MappingListItemProps {
   selected: boolean;
-  onSelectionChange: (mapping: Mapping) => void;
   mapping: Mapping;
   jobId: string;
   jobStartEvent: BeEvent<(mappingId: string) => void>;
+  onSelectionChange?: (mapping: Mapping) => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
   onRefreshMappings: () => Promise<void>;
@@ -49,9 +49,9 @@ export const MappingListItem = ({
   const statusQuery = useFetchMappingExtractionStatus({ ...groupingMappingApiConfig, mapping, enabled: isJobStarted });
   const queryClient = useQueryClient();
 
-  const onClickTile = () => {
-    onSelectionChange(mapping);
-  };
+  const onClickTile = useCallback(() => {
+    onSelectionChange && onSelectionChange(mapping);
+  }, [mapping, onSelectionChange]);
 
   // Check whether the job is still running when users refresh the mapping list
   // or modify any mappings
@@ -98,15 +98,18 @@ export const MappingListItem = ({
   }, [resolveTerminalExtractionStatus, statusQuery]);
 
   return (
-    <ListItem actionable
-      className="gmw-list-item-container"
+    <ListItem
+      actionable={!!onSelectionChange}
+      className="gmw-mapping-list-item"
       active={selected}
       key={mapping.id}
       onClick={onClickTile}
       title={mapping.mappingName}>
       <ListItem.Content>
-        <Anchor onClick={onClickMappingTitle ? () => onClickMappingTitle?.(mapping) : undefined}>{mapping.mappingName ? mapping.mappingName : "Untitled"}</Anchor>
-        {mapping.description && <Text className="gmw-body-text" isMuted={true} title={mapping.description} variant="small">{mapping.description}</Text>}
+        {onClickMappingTitle ? <Anchor onClick={() => onClickMappingTitle(mapping)}>{mapping.mappingName}</Anchor> : mapping.mappingName}
+        <ListItem.Description>
+          {mapping.description}
+        </ListItem.Description>
       </ListItem.Content>
       <ExtractionStatus
         state={extractionState}
@@ -114,7 +117,7 @@ export const MappingListItem = ({
           setExtractionState(ExtractionStates.None);
         }}
       ></ExtractionStatus >
-      <MappingUIActionGroup
+      <MappingViewActionGroup
         mapping={mapping}
         onToggleExtraction={onToggleExtraction}
         onRefresh={onRefreshMappings}
