@@ -17,7 +17,6 @@ import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import { HorizontalTile } from "../../SharedComponents/HorizontalTile";
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
   Group,
@@ -36,6 +35,7 @@ import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GroupPropertyListItem } from "./GroupPropertyListItem";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -273,12 +273,11 @@ export const GroupPropertyAction = ({
                 <Text>Press the &quot;Select Properties&quot; button for options.</Text>
               </div> :
               selectedProperties.map((property) => (
-                <HorizontalTile
+                <GroupPropertyListItem
                   key={property.key}
-                  title={`${property.displayLabel} (${property.propertyType})`}
-                  titleTooltip={`${property.actualECClassName}`}
-                  subText={property.categoryLabel}
-                  actionGroup={null}
+                  content={`${property.displayLabel} (${property.propertyType})`}
+                  title={`${property.actualECClassName}`}
+                  description={property.categoryLabel}
                 />
               ))}
           </div>
