@@ -53,7 +53,6 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
 
   const reporting = usePerformanceReporting({
     treeIdentifier: ExternalSourcesTreeComponent.id,
-    iModel: props.iModel,
     onPerformanceMeasured: props.onPerformanceMeasured,
   });
 

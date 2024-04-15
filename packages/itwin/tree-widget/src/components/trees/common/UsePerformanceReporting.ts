@@ -3,14 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useRef } from "react";
-
-import type { IModelConnection } from "@itwin/core-frontend";
-
 /** @internal */
 export interface UsePerformanceReportingProps {
   treeIdentifier: string;
-  iModel: IModelConnection;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
@@ -24,17 +19,11 @@ export interface UsePerformanceReportingResult {
  * @internal
  */
 export function usePerformanceReporting(props: UsePerformanceReportingProps): UsePerformanceReportingResult {
-  const { treeIdentifier, iModel, onPerformanceMeasured } = props;
-  const firstLoadRef = useRef(true);
-
-  useEffect(() => {
-    firstLoadRef.current = true;
-  }, [iModel]);
+  const { treeIdentifier, onPerformanceMeasured } = props;
 
   const onNodeLoaded = ({ node, duration }: { node: string; duration: number }) => {
-    if (firstLoadRef.current && node === "root") {
+    if (node === "root") {
       onPerformanceMeasured?.(`${treeIdentifier}-initial-load`, duration);
-      firstLoadRef.current = false;
       return;
     }
     onPerformanceMeasured?.(`${treeIdentifier}-hierarchy-level-load`, duration);

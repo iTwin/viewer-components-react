@@ -233,7 +233,6 @@ function useTreeState({
 
   const reporting = usePerformanceReporting({
     treeIdentifier: ModelsTreeComponent.id,
-    iModel,
     onPerformanceMeasured,
   });
 
