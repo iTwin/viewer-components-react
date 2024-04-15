@@ -90,7 +90,6 @@ export function CategoryTree(props: CategoryTreeProps) {
   const reporting = usePerformanceReporting({
     treeIdentifier: CategoriesTreeComponent.id,
     iModel: props.iModel,
-    ruleset: RULESET_CATEGORIES,
     onPerformanceMeasured: props.onPerformanceMeasured,
   });
   const state = useVisibilityTreeState({

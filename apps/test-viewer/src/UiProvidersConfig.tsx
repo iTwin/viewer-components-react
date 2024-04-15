@@ -242,7 +242,9 @@ function TreeWidgetWithOptions(props: SelectableTreeProps) {
     <TreeWidgetComponent
       trees={props.trees}
       density={density}
-      onPerformanceMeasured={(feature: string, duration: number) => console.log(`${feature}: ${duration}`)}
+      onPerformanceMeasured={(feature: string, elapsedTime: number) => {
+        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+      }}
     />
   );
 }

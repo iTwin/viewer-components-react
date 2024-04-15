@@ -48,7 +48,6 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
   const reporting = usePerformanceReporting({
     treeIdentifier: IModelContentTreeComponent.id,
     iModel: props.iModel,
-    ruleset: RULESET_IMODEL_CONTENT,
     onPerformanceMeasured: props.onPerformanceMeasured,
   });
 

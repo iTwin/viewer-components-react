@@ -72,19 +72,6 @@ describe("usePerformanceReporting", () => {
       expect(onPerformanceMeasuredSpy.getCall(1).calledWithExactly("test-tree-initial-load", 30)).to.be.true;
     });
 
-    it("logs initial load when ruleset changes", async () => {
-      const { result, rerender } = renderHook((props) => usePerformanceReporting(props), { initialProps });
-      expect(result.current).to.not.be.undefined;
-
-      result.current.onNodeLoaded?.({ node: "root", duration: 20 });
-      rerender({ ...initialProps, ruleset: {} as Ruleset });
-      result.current.onNodeLoaded?.({ node: "root", duration: 30 });
-
-      expect(onPerformanceMeasuredSpy.callCount).to.be.eq(2);
-      expect(onPerformanceMeasuredSpy.getCall(0).calledWithExactly("test-tree-initial-load", 20)).to.be.true;
-      expect(onPerformanceMeasuredSpy.getCall(1).calledWithExactly("test-tree-initial-load", 30)).to.be.true;
-    });
-
     it("logs hierarchy level load metrics", async () => {
       const { result } = renderHook((props) => usePerformanceReporting(props), { initialProps });
       expect(result.current).to.not.be.undefined;

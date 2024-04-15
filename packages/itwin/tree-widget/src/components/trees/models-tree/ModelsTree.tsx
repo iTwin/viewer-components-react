@@ -234,7 +234,6 @@ function useTreeState({
   const reporting = usePerformanceReporting({
     treeIdentifier: ModelsTreeComponent.id,
     iModel,
-    ruleset,
     onPerformanceMeasured,
   });
 
@@ -257,7 +256,7 @@ function useTreeState({
     ),
     eventHandler: eventHandlerFactory,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
-    onNodeLoaded: reporting.onNodeLoaded,
+    onNodeLoaded: filterInfo ? undefined : reporting.onNodeLoaded,
   });
 }
 

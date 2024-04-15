@@ -3,16 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { Ruleset } from "@itwin/presentation-common";
 
 /** @internal */
 export interface UsePerformanceReportingProps {
   treeIdentifier: string;
   iModel: IModelConnection;
-  ruleset: Ruleset;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
@@ -26,24 +24,21 @@ export interface UsePerformanceReportingResult {
  * @internal
  */
 export function usePerformanceReporting(props: UsePerformanceReportingProps): UsePerformanceReportingResult {
-  const { treeIdentifier, iModel, ruleset, onPerformanceMeasured } = props;
+  const { treeIdentifier, iModel, onPerformanceMeasured } = props;
   const firstLoadRef = useRef(true);
 
   useEffect(() => {
     firstLoadRef.current = true;
-  }, [iModel, ruleset]);
+  }, [iModel]);
 
-  const onNodeLoaded = useCallback(
-    ({ node, duration }: { node: string; duration: number }) => {
-      if (firstLoadRef.current && node === "root") {
-        onPerformanceMeasured?.(`${treeIdentifier}-initial-load`, duration);
-        firstLoadRef.current = false;
-        return;
-      }
-      onPerformanceMeasured?.(`${treeIdentifier}-hierarchy-level-load`, duration);
-    },
-    [treeIdentifier, onPerformanceMeasured],
-  );
+  const onNodeLoaded = ({ node, duration }: { node: string; duration: number }) => {
+    if (firstLoadRef.current && node === "root") {
+      onPerformanceMeasured?.(`${treeIdentifier}-initial-load`, duration);
+      firstLoadRef.current = false;
+      return;
+    }
+    onPerformanceMeasured?.(`${treeIdentifier}-hierarchy-level-load`, duration);
+  };
 
   return { onNodeLoaded: onPerformanceMeasured ? onNodeLoaded : undefined };
 }

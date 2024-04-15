@@ -734,6 +734,38 @@ describe("ModelsTree", () => {
           expect(onPerformanceMeasuredSpy.getCall(0).calledWith("models-tree-initial-load")).to.be.true;
           expect(onPerformanceMeasuredSpy.getCall(1).calledWith("models-tree-hierarchy-level-load")).to.be.true;
         });
+
+        it("does not report hierarchy load performance metric when filtered", async () => {
+          const property = createTestPropertyInfo();
+          const field = createTestPropertiesContentField({ properties: [{ property }] });
+          const filterInfo: PresentationInstanceFilterInfo = {
+            filter: {
+              field,
+              operator: PropertyFilterRuleOperator.IsNull,
+            },
+            usedClasses: [],
+          };
+          const nodeItem = createPresentationTreeNodeItem({
+            hasChildren: true,
+            filtering: { descriptor: createTestContentDescriptor({ fields: [] }), ancestorFilters: [], active: filterInfo },
+          });
+          setupDataProvider([nodeItem]);
+
+          const { getByText } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+              filterInfo={{ filter: "filter" }}
+            />,
+          );
+
+          await waitFor(() => getByText("modelTree.noModelFound"));
+
+          expect(onPerformanceMeasuredSpy.callCount).to.be.eq(0);
+        });
       });
     });
   });
