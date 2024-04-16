@@ -9,6 +9,7 @@ import type {
 import {
   Button,
   IconButton,
+  List,
 } from "@itwin/itwinui-react";
 import {
   SvgAdd,
@@ -184,7 +185,7 @@ export const MappingsView = ({
         ) : mappings.length === 0 ? (
           <EmptyMessage message={`No ${displayStrings.mappings} available.`} />
         ) : (
-          <div className="gmw-mappings-list">
+          <List className="gmw-mappings-list">
             {mappings.map((mapping) => (
               <MappingListItem
                 key={mapping.id}
@@ -202,7 +203,7 @@ export const MappingsView = ({
                 setShowDeleteModal={setShowDeleteModal}
               />
             ))}
-          </div>
+          </List>
         )}
       </div>
       {showExtractionMessageModal && <ExtractionMessageModal

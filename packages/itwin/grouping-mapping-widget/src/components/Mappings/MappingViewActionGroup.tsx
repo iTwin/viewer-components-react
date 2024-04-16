@@ -24,7 +24,7 @@ interface MappingUIActionGroupProps {
   setShowDeleteModal: (mapping?: Mapping) => void;
 }
 
-export const MappingUIActionGroup = ({
+export const MappingViewActionGroup = ({
   mapping,
   onToggleExtraction,
   onRefresh,
