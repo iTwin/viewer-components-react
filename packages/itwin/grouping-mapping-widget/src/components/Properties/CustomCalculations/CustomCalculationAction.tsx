@@ -223,7 +223,7 @@ export const CustomCalculationAction = ({
               forceValidation();
             }}
           />
-          <LabeledSelect<QuantityType>
+          <LabeledSelect<QuantityType | undefined>
             label='Quantity Type'
             disabled={isLoading}
             options={quantityTypesSelectionOptions}
@@ -231,6 +231,7 @@ export const CustomCalculationAction = ({
             onChange={setQuantityType}
             onShow={() => { }}
             onHide={() => { }}
+            placeholder = "No Quantity Type"
           />
         </Fieldset>
       </div>

@@ -45,7 +45,7 @@ export interface GroupPropertyActionProps {
   onClickCancel?: () => void;
 }
 
-export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
+export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefined>[] = [
   { value: QuantityType.Area, label: "Area" },
   { value: QuantityType.Distance, label: "Distance" },
   { value: QuantityType.Force, label: "Force" },
@@ -53,6 +53,7 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
   { value: QuantityType.Monetary, label: "Monetary" },
   { value: QuantityType.Time, label: "Time" },
   { value: QuantityType.Volume, label: "Volume" },
+  { value: undefined, label: "No Quantity Type" }
 ];
 
 export const GroupPropertyAction = ({
@@ -241,13 +242,14 @@ export const GroupPropertyAction = ({
             onShow={() => { }}
             onHide={() => { }}
           />
-          <LabeledSelect<QuantityType>
+          <LabeledSelect<QuantityType | undefined>
             label='Quantity Type'
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
             onShow={() => { }}
             onHide={() => { }}
+            placeholder = 'No Quantity Type'
           />
         </Fieldset>
         {propertiesNotFoundAlert &&
