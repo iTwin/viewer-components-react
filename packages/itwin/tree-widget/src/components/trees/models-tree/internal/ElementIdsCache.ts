@@ -18,9 +18,18 @@ interface GroupedElementIds {
   elementIds: Observable<string>;
 }
 
-/** @internal */
+export interface ElementIdsCache {
+  clear(): void;
+  getAssemblyElementIds(assemblyId: Id64String): Observable<string>;
+  getGroupedElementIds(groupingNodeKey: GroupingNodeKey): Observable<GroupedElementIds>;
+}
+
+export function createElementIdsCache(iModel: IModelConnection, rulesetId: string) {
+  return new ElementIdsCacheImplementation(iModel, rulesetId);
+}
+
 // istanbul ignore next
-export class ElementIdsCache {
+export class ElementIdsCacheImplementation {
   private _assemblyElementIdsCache = new Map<string, Observable<string>>();
   private _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
 
@@ -85,5 +94,6 @@ function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: string, 
     mergeMap((elementId) => imodel.createQueryReader(query, QueryBinder.from([elementId]), { rowFormat: QueryRowFormat.UseJsPropertyNames })),
     first(),
     map((row) => ({ modelId: row.modelId, categoryId: row.categoryId, elementIds: groupedElementsIdObs })),
+    shareReplay(),
   );
 }

@@ -5,10 +5,12 @@
 
 import deepEqual from "deep-equal";
 import { createElement, Fragment, StrictMode } from "react";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
@@ -16,10 +18,10 @@ import { TreeWidget } from "../TreeWidget";
 import type { PropsWithChildren, ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
-import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
+import type { Viewport as CoreViewport, IModelConnection, ViewState } from "@itwin/core-frontend";
 import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import type { RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
-
+import type { Viewport } from "../components/trees/models-tree/internal/VisibilityStateHandler";
 export class TestUtils {
   private static _initialized = false;
 
@@ -75,12 +77,12 @@ export async function flushAsyncOperations() {
 interface ViewportMockProps {
   viewState?: ViewState;
   perModelCategoryVisibility?: PerModelCategoryVisibility.Overrides;
-  onViewedCategoriesPerModelChanged?: BeEvent<(vp: Viewport) => void>;
-  onViewedCategoriesChanged?: BeEvent<(vp: Viewport) => void>;
-  onViewedModelsChanged?: BeEvent<(vp: Viewport) => void>;
+  onViewedCategoriesPerModelChanged?: BeEvent<(vp: CoreViewport) => void>;
+  onViewedCategoriesChanged?: BeEvent<(vp: CoreViewport) => void>;
+  onViewedModelsChanged?: BeEvent<(vp: CoreViewport) => void>;
   onAlwaysDrawnChanged?: BeEvent<() => void>;
   onNeverDrawnChanged?: BeEvent<() => void>;
-  onDisplayStyleChanged?: BeEvent<(vp: Viewport) => void>;
+  onDisplayStyleChanged?: BeEvent<(vp: CoreViewport) => void>;
   imodel?: IModelConnection;
 }
 
@@ -95,16 +97,16 @@ export function mockViewport(props?: ViewportMockProps) {
     props.perModelCategoryVisibility = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>().object;
   }
   if (!props.onViewedCategoriesPerModelChanged) {
-    props.onViewedCategoriesPerModelChanged = new BeEvent<(vp: Viewport) => void>();
+    props.onViewedCategoriesPerModelChanged = new BeEvent<(vp: CoreViewport) => void>();
   }
   if (!props.onDisplayStyleChanged) {
-    props.onDisplayStyleChanged = new BeEvent<(vp: Viewport) => void>();
+    props.onDisplayStyleChanged = new BeEvent<(vp: CoreViewport) => void>();
   }
   if (!props.onViewedCategoriesChanged) {
-    props.onViewedCategoriesChanged = new BeEvent<(vp: Viewport) => void>();
+    props.onViewedCategoriesChanged = new BeEvent<(vp: CoreViewport) => void>();
   }
   if (!props.onViewedModelsChanged) {
-    props.onViewedModelsChanged = new BeEvent<(vp: Viewport) => void>();
+    props.onViewedModelsChanged = new BeEvent<(vp: CoreViewport) => void>();
   }
   if (!props.onAlwaysDrawnChanged) {
     props.onAlwaysDrawnChanged = new BeEvent<() => void>();
@@ -115,7 +117,7 @@ export function mockViewport(props?: ViewportMockProps) {
   if (!props.imodel) {
     props.imodel = moq.Mock.ofType<IModelConnection>().object;
   }
-  const vpMock = moq.Mock.ofType<Viewport>();
+  const vpMock = moq.Mock.ofType<CoreViewport>();
   vpMock.setup((x) => x.iModel).returns(() => props!.imodel!);
   vpMock.setup((x) => x.view).returns(() => props!.viewState!);
   vpMock.setup((x) => x.perModelCategoryVisibility).returns(() => props!.perModelCategoryVisibility!);
@@ -126,6 +128,36 @@ export function mockViewport(props?: ViewportMockProps) {
   vpMock.setup((x) => x.onAlwaysDrawnChanged).returns(() => props!.onAlwaysDrawnChanged!);
   vpMock.setup((x) => x.onNeverDrawnChanged).returns(() => props!.onNeverDrawnChanged!);
   return vpMock;
+}
+
+export type SinonMockedInterface<T extends {}> = {
+  [key in keyof T]: T[key] extends (...args: infer TArgs) => infer TReturn
+    ? sinon.SinonSpy<TArgs, TReturn>
+    : T[key] extends {}
+      ? SinonMockedInterface<T[key]>
+      : T[key];
+};
+
+export function createFakeSinonViewport(props?: Partial<SinonMockedInterface<Viewport>>): SinonMockedInterface<Viewport> {
+  return {
+    alwaysDrawn: undefined,
+    neverDrawn: undefined,
+    setAlwaysDrawn: sinon.fake(),
+    setNeverDrawn: sinon.fake(),
+    addViewedModels: sinon.fake.returns(Promise.resolve()),
+    changeCategoryDisplay: sinon.fake(),
+    changeModelDisplay: sinon.fake.returns(true),
+    isAlwaysDrawnExclusive: false,
+    perModelCategoryVisibility: {
+      getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
+      setOverride: sinon.fake(),
+    } as unknown as SinonMockedInterface<PerModelCategoryVisibility.Overrides>,
+    view: {
+      isSpatialView: sinon.fake.returns(true),
+      viewsCategory: sinon.fake.returns(true),
+    },
+    ...props,
+  };
 }
 
 export function stubCancelAnimationFrame() {

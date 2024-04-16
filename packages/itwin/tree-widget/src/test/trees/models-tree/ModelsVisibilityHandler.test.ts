@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, from } from "rxjs";
+import { EMPTY, from, map } from "rxjs";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
@@ -19,8 +19,8 @@ import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
-import type { TreeNodeItem } from "@itwin/components-react";
 import type { Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
+import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
@@ -57,15 +57,16 @@ describe("ModelsVisibilityHandler", () => {
       ...partialProps,
       rulesetId: "test",
       viewport: partialProps.viewport ?? mockViewport().object,
-      // queryProvider:
     };
     return new ModelsVisibilityHandler(props);
   };
 
   interface SubjectModelIdsMockProps {
-    imodelMock: sinon.SinonStubbedInstance<IModelConnection>;
     subjectsHierarchy: Map<Id64String, Id64String[]>;
     subjectModels: Map<Id64String, Array<{ id: Id64String; content?: string }>>;
+    modelCategories?: Map<Id64String, Id64String[]>;
+    categoryElements?: Map<Id64String, Id64String[]>;
+    elementHierarchy?: Map<Id64String, Id64String[]>;
   }
 
   interface SubjectsRow {
@@ -86,11 +87,16 @@ describe("ModelsVisibilityHandler", () => {
     const elementQueryRows: ElementRow[] = [];
     props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => elementQueryRows.push({ id: modelInfo.id, parentId: subjectId })));
 
-    return {
+    const res: QueryProvider = {
       queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
       queryAllModels: sinon.fake.returns(from(elementQueryRows)),
-      queryModelElements: sinon.fake.returns(EMPTY),
+      queryModelCategories: sinon.fake((x) => from(props.modelCategories?.get(x) ?? [])),
+      queryCategoryElements: sinon.fake((x) => {
+        return from(props.categoryElements?.get(x) ?? []).pipe(map((id) => ({ id, hasChildren: !!props.elementHierarchy?.get(id)?.length })));
+      }),
+      queryElementChildren: () => EMPTY,
     };
+    return res;
   }
 
   const modelsInfo: ModelInfo[] = [{ id: "ModelId1" }, { id: "ModelId2" }];
@@ -167,131 +173,11 @@ describe("ModelsVisibilityHandler", () => {
     });
 
     describe("subject", () => {
-      it("return disabled when active view is not spatial", async () => {
-        const node = createSubjectNode();
-        const vpMock = mockViewport();
-        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.true;
-          if (isPromiseLike(result)) {
-            expect(await result).to.include({ state: "hidden", isDisabled: true });
-          }
-        });
-      });
-
-      it("returns 'visible' when all models are displayed", async () => {
-        const subjectIds = ["0x1", "0x2"];
-        const node = createSubjectNode(subjectIds);
-        const queryProvider = createFakeQueryProvider({
-          imodelMock,
-          subjectsHierarchy: new Map([["0x0", subjectIds]]),
-          subjectModels: new Map([
-            [subjectIds[0], [{ id: "0x3" }, { id: "0x4" }]],
-            [subjectIds[1], [{ id: "0x5" }, { id: "0x6" }]],
-          ]),
-        });
-
-        const viewStateMock = {
-          isSpatialView: () => true,
-          viewsModel: () => true,
-        } as unknown as ViewState;
-
-        const vpMock = mockViewport({ viewState: viewStateMock, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
-          const result = await handler.getVisibilityStatus(node);
-          expect(result).to.include({ state: "hidden" });
-        });
-      });
-
-      it("return 'hidden' when all models are not displayed", async () => {
-        const subjectIds = ["0x1", "0x2"];
-        const node = createSubjectNode(subjectIds);
-        const queryProvider = createFakeQueryProvider({
-          imodelMock,
-          subjectsHierarchy: new Map([["0x0", subjectIds]]),
-          subjectModels: new Map([
-            [subjectIds[0], [{ id: "0x3" }, { id: "0x4" }]],
-            [subjectIds[1], [{ id: "0x5" }, { id: "0x6" }]],
-          ]),
-        });
-
-        const viewStateMock = moq.Mock.ofType<ViewState3d>();
-        viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
-        viewStateMock.setup((x) => x.viewsModel("0x3")).returns(() => false);
-        viewStateMock.setup((x) => x.viewsModel("0x4")).returns(() => false);
-        viewStateMock.setup((x) => x.viewsModel("0x5")).returns(() => false);
-        viewStateMock.setup((x) => x.viewsModel("0x6")).returns(() => false);
-
-        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.true;
-          if (isPromiseLike(result)) {
-            expect(await result).to.include({ state: "hidden" });
-          }
-        });
-      });
-
-      it("return 'partial' when at least one direct model is displayed", async () => {
-        const subjectIds = ["0x1", "0x2"];
-        const node = createSubjectNode(subjectIds);
-        const queryProvider = createFakeQueryProvider({
-          imodelMock,
-          subjectsHierarchy: new Map([["0x0", subjectIds]]),
-          subjectModels: new Map([
-            [subjectIds[0], [{ id: "0x3" }, { id: "0x4" }]],
-            [subjectIds[1], [{ id: "0x5" }, { id: "0x6" }]],
-          ]),
-        });
-
-        const viewStateMock = moq.Mock.ofType<ViewState3d>();
-        viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
-        viewStateMock.setup((x) => x.viewsModel("0x3")).returns(() => false);
-        viewStateMock.setup((x) => x.viewsModel("0x4")).returns(() => false);
-        viewStateMock.setup((x) => x.viewsModel("0x5")).returns(() => true);
-        viewStateMock.setup((x) => x.viewsModel("0x6")).returns(() => false);
-
-        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.true;
-          expect(await result).to.include({ state: "partial" });
-        });
-      });
-
-      it("return 'partial' when at least one nested model is displayed", async () => {
-        const subjectIds = ["0x1", "0x2"];
-        const node = createSubjectNode(subjectIds);
-        const queryProvider = createFakeQueryProvider({
-          imodelMock,
-          subjectsHierarchy: new Map([
-            [subjectIds[0], ["0x3"]],
-            [subjectIds[1], ["0x4"]],
-            ["0x3", ["0x5", "0x6"]],
-            ["0x7", ["0x8"]],
-          ]),
-          subjectModels: new Map([["0x6", [{ id: "0x10" }, { id: "0x11" }]]]),
-        });
-
-        const viewStateMock = moq.Mock.ofType<ViewState3d>();
-        viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
-        viewStateMock.setup((x) => x.viewsModel("0x10")).returns(() => true);
-        viewStateMock.setup((x) => x.viewsModel("0x11")).returns(() => false);
-
-        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.true;
-          expect(await result).to.include({ state: "partial" });
-        });
-      });
-
       it("initializes subject models cache only once", async () => {
         const node = createSubjectNode();
         const key = (node.key as ECInstancesNodeKey).instanceKeys[0];
 
         const queryProvider = createFakeQueryProvider({
-          imodelMock,
           subjectsHierarchy: new Map([["0x0", [key.id]]]),
           subjectModels: new Map([[key.id, [{ id: "0x1" }, { id: "0x2" }]]]),
         });
@@ -317,7 +203,6 @@ describe("ModelsVisibilityHandler", () => {
           filteredProvider.setup((x) => x.nodeMatchesFilter(node)).returns(() => true);
 
           const queryProvider = createFakeQueryProvider({
-            imodelMock,
             subjectsHierarchy: new Map([["0x0", [key.id]]]),
             subjectModels: new Map([[key.id, [{ id: "0x10" }, { id: "0x20" }]]]),
           });
@@ -358,7 +243,6 @@ describe("ModelsVisibilityHandler", () => {
           filteredProvider.setup((x) => x.nodeMatchesFilter(moq.It.isAny())).returns(() => true);
 
           const queryProvider = createFakeQueryProvider({
-            imodelMock,
             subjectsHierarchy: new Map([[parentSubjectId, [childSubjectId]]]),
             subjectModels: new Map([
               [parentSubjectId, [{ id: "0x10" }, { id: "0x11" }]],
@@ -409,7 +293,6 @@ describe("ModelsVisibilityHandler", () => {
           filteredProvider.setup((x) => x.nodeMatchesFilter(childNodes[1])).returns(() => true);
 
           const queryProvider = createFakeQueryProvider({
-            imodelMock,
             subjectsHierarchy: new Map([[parentSubjectId, childSubjectIds]]),
             subjectModels: new Map([
               [parentSubjectId, [{ id: "0x10" }]],
@@ -456,7 +339,6 @@ describe("ModelsVisibilityHandler", () => {
           filteredProvider.setup((x) => x.nodeMatchesFilter(childNode)).returns(() => true);
 
           const queryProvider = createFakeQueryProvider({
-            imodelMock,
             subjectsHierarchy: new Map([
               [parentSubjectIds[0], [childSubjectId]],
               [parentSubjectIds[1], [childSubjectId]],
@@ -1096,7 +978,6 @@ describe("ModelsVisibilityHandler", () => {
             viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
             const queryProvider = createFakeQueryProvider({
-              imodelMock,
               subjectsHierarchy: new Map([]),
               subjectModels: new Map([[key.id, [{ id: subjectModelIds[0], content: "reference" }, { id: subjectModelIds[1] }]]]),
             });
@@ -1138,7 +1019,6 @@ describe("ModelsVisibilityHandler", () => {
             viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
             const queryProvider = createFakeQueryProvider({
-              imodelMock,
               subjectsHierarchy: new Map([["0x1", ["0x2"]]]),
               subjectModels: new Map([
                 ["0x1", [{ id: parentSubjectModelIds[0] }, { id: parentSubjectModelIds[1] }]],

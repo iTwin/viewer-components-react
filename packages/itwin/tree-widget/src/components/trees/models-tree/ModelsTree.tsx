@@ -15,7 +15,7 @@ import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { createQueryProvider } from "./internal/QueryProvider";
-import { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
+import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
@@ -256,7 +256,7 @@ function useVisibilityHandler(
   visibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler),
   hierarchyAutoUpdateEnabled?: boolean,
 ) {
-  const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(createQueryProvider(iModel)), [iModel]);
+  const subjectModelIdsCache = useMemo(() => createSubjectModelIdsCache(createQueryProvider(iModel)), [iModel]);
   const [state, setState] = useState<ModelsVisibilityHandler>();
 
   useEffect(() => {

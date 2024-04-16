@@ -15,31 +15,16 @@ import type { Observable } from "rxjs";
  * @internal
  */
 export interface QueryProvider {
-  queryModelElements(id: Id64String): Observable<{ id: Id64String; isCategory: boolean }>;
   queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>;
   queryAllModels(): Observable<{ id: Id64String; parentId: Id64String }>;
+  queryModelCategories(id: Id64String): Observable<Id64String>;
+  queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }>;
+  queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }>;
 }
 
 // istanbul-ignore-next
-class QueryProviderImplementation implements QueryProvider {
+export class QueryProviderImplementation implements QueryProvider {
   constructor(private readonly _iModel: IModelConnection) {}
-
-  public queryModelElements(id: Id64String): Observable<{ id: Id64String; isCategory: boolean }> {
-    const query = /* sql */ `
-      WITH
-        Categories AS (
-          SELECT ECInstanceId, TRUE as IsCategory
-          FROM bis.Category c
-          WHERE c.Model.Id = ?
-        ),
-        Elements AS (
-          SELECT ECInstanceId, FALSE as IsCategory
-          FROM bis.Element e LEFT JOIN Categories c ON (e.ECInstanceId = c.ECInstanceId)
-        )
-      SELECT * FROM Categories JOIN Elements
-    `;
-    return this.runQuery(query, [id], (row) => ({ id: row.ecInstanceId, isCategory: row.isCategory }));
-  }
 
   public queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }> {
     const query = /* sql */ `
@@ -57,6 +42,57 @@ class QueryProviderImplementation implements QueryProvider {
       WHERE NOT m.IsPrivate
     `;
     return this.runQuery(query, undefined, (row) => ({ id: row.id, parentId: row.parentId }));
+  }
+
+  public queryModelCategories(id: Id64String): Observable<Id64String> {
+    const query = /* sql */ `
+      SELECT ECInstanceId
+      FROM bis.SpatialCategory c
+      WHERE EXISTS (
+        SELECT 1
+        FROM bis.GeometricElement3d e
+        WHERE
+          e.Model.Id = ?
+          AND e.Category.Id = c.ECInstanceId
+          AND e.Parent IS NULL
+      )
+    `;
+    return this.runQuery(query, [id], (row) => row.ecInstanceId);
+  }
+
+  private get hasChildrenClause(): string {
+    return `--sql
+      (EXISTS (
+        SELECT 1
+        FROM (
+          SELECT Parent.Id ParentId FROM bis.GeometricElement3d
+          UNION ALL
+          SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
+        )
+        WHERE ParentId = this.ECInstanceId
+      )) AS HasChildren
+    `;
+  }
+
+  public queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }> {
+    const query = /* sql */ `
+      SELECT ECInstanceId, ${this.hasChildrenClause}
+      FROM bis.GeometricElement3d this
+      WHERE
+        this.Category.Id = :categoryId
+        ${modelId && "AND this.Model.Id = :modelId"}
+        AND this.Parent IS NULL
+    `;
+    return this.runQuery(query, { categoryId: id, modelId }, (row) => ({ id: row.ecInstanceId, hasChildren: row.hasChildren }));
+  }
+
+  public queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }> {
+    const query = /* sql */ `
+      SELECT ECInstanceId, ${this.hasChildrenClause}
+      FROM bis.GeometricElement3d this
+      WHERE this.Parent.Id = ?
+    `;
+    return this.runQuery(query, [id], (row) => ({ id: row.ecInstanceId, hasChildren: row.hasChildren }));
   }
 
   private runQuery<TResult>(

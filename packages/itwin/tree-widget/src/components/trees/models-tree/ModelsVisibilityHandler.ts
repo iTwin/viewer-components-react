@@ -8,13 +8,14 @@ import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
-import { ElementIdsCache } from "./internal/ElementIdsCache";
+import { createElementIdsCache } from "./internal/ElementIdsCache";
 import { createQueryProvider } from "./internal/QueryProvider";
-import { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
+import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { VisibilityStateHandler } from "./internal/VisibilityStateHandler";
 import * as NodeUtils from "./NodeUtils";
 
+import type { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import type { QueryProvider } from "./internal/QueryProvider";
 import type { ECClassGroupingNodeKey, NodeKey } from "@itwin/presentation-common";
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -67,9 +68,9 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
 
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
-    const elementIdsCache = new ElementIdsCache(this._props.viewport.iModel, this._props.rulesetId);
+    const elementIdsCache = createElementIdsCache(this._props.viewport.iModel, this._props.rulesetId);
     const queryProvider = this._props.queryProvider ?? createQueryProvider(this._props.viewport.iModel);
-    const subjectModelIdsCache = props.subjectModelIdsCache ?? new SubjectModelIdsCache(queryProvider);
+    const subjectModelIdsCache = props.subjectModelIdsCache ?? createSubjectModelIdsCache(queryProvider);
     this._visibilityStateHandler = new VisibilityStateHandler({
       viewport: this._props.viewport,
       elementIdsCache,
@@ -192,12 +193,8 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     return createVisibilityStatus("hidden", "element.hiddenThroughCategory");
   }
 
-  protected async getElementDisplayStatusAsync(
-    elementId: Id64String,
-    modelId: Id64String | undefined,
-    categoryId: Id64String | undefined,
-  ): Promise<VisibilityStatus> {
-    return firstValueFrom(this._visibilityStateHandler.getElementDisplayStatus(elementId, modelId, categoryId));
+  protected async getElementDisplayStatusAsync(elementId: Id64String): Promise<VisibilityStatus> {
+    return firstValueFrom(this._visibilityStateHandler.getElementDisplayStatus(elementId));
   }
 
   protected async changeSubjectNodeState(ids: Id64String[], node: TreeNodeItem, on: boolean) {

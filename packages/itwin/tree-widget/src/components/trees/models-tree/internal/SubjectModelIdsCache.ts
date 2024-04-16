@@ -9,8 +9,15 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type { QueryProvider } from "./QueryProvider";
 
-/** @internal */
-export class SubjectModelIdsCache {
+export interface SubjectModelIdsCache {
+  getSubjectModelIdObs(subjectId: Id64String): Observable<Id64String>;
+}
+
+export function createSubjectModelIdsCache(queryProvider: QueryProvider) {
+  return new SubjectModelIdsCacheImplementation(queryProvider);
+}
+
+export class SubjectModelIdsCacheImplementation {
   private readonly _cachedState: Observable<{
     subjectsHierarchy: Map<Id64String, Set<Id64String>>;
     subjectModels: Map<Id64String, Set<Id64String>>;
@@ -52,7 +59,7 @@ export class SubjectModelIdsCache {
 
   public getSubjectModelIdObs(subjectId: Id64String): Observable<Id64String> {
     return this._cachedState.pipe(
-      map((state) => ({ ...state, modelIds: new Array<Id64String>(), childSubjectId: subjectId })),
+      map((state) => ({ ...state, modelIds: [...(state.subjectModels.get(subjectId) ?? [])], childSubjectId: subjectId })),
       expand((state) => {
         const subjectModelIds = state.subjectModels.get(state.childSubjectId);
         subjectModelIds && state.modelIds.push(...subjectModelIds);

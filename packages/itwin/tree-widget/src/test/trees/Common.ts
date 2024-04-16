@@ -126,8 +126,8 @@ export const createSubjectNode = (ids?: Id64String | Id64String[]): Presentation
   },
 });
 
-export const createModelNode = (): PresentationTreeNodeItem => ({
-  key: createKey("model", "model_id"),
+export const createModelNode = (id?: Id64String): PresentationTreeNodeItem => ({
+  key: createKey("model", id ?? "model_id"),
   id: "model",
   label: PropertyRecord.fromString("model"),
   extendedData: {
@@ -135,8 +135,8 @@ export const createModelNode = (): PresentationTreeNodeItem => ({
   },
 });
 
-export const createCategoryNode = (parentModelKey?: InstanceKey): PresentationTreeNodeItem => ({
-  key: createKey("category", "category_id"),
+export const createCategoryNode = (parentModelKey?: InstanceKey, id?: Id64String): PresentationTreeNodeItem => ({
+  key: createKey("category", id ?? "category_id"),
   id: "category",
   parentId: "model",
   label: PropertyRecord.fromString("category"),
@@ -152,8 +152,8 @@ export const createElementClassGroupingNode = (elementIds: Id64String[]): Presen
   label: PropertyRecord.fromString("grouping"),
 });
 
-export const createElementNode = (modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): PresentationTreeNodeItem => ({
-  key: createKey("element", "element_id"),
+export const createElementNode = (modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean, elementId?: string): PresentationTreeNodeItem => ({
+  key: createKey("element", elementId ?? "element_id"),
   id: "element",
   label: PropertyRecord.fromString("element"),
   extendedData: {
