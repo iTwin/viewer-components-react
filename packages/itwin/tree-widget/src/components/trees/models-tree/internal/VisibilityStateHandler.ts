@@ -3,29 +3,34 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, defer, EMPTY, every, forkJoin, from, iif, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
+import { concat, defer, EMPTY, every, forkJoin, from, iif, isObservable, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
-import { TreeWidget } from "../../../../TreeWidget";
+import { and, reduceWhile, some } from "../../../utils/RxjsOperators";
 import { getCategoryParentModelId, getElementCategoryId, getElementModelId, isCategoryNode, isModelNode, isSubjectNode } from "../NodeUtils";
+import { createVisibilityStatus } from "./Tooltip";
 
+import type { Visibility } from "./Tooltip";
+import type { QueryProvider as QueryProvider } from "./QueryProvider";
+import type { Viewport } from "@itwin/core-frontend";
 import type { SubjectModelIdsCache } from "./SubjectModelIdsCache";
 import type { ElementIdsCache } from "./ElementIdsCache";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
-import type { Viewport } from "@itwin/core-frontend";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Observable, OperatorFunction } from "rxjs";
 /**
  * Props for [[ModelsVisibilityHandler]]
+ * @internal
  */
 export interface VisibilityStatusRetrieverProps {
   viewport: Viewport;
   elementIdsCache: ElementIdsCache;
   subjectModelIdsCache: SubjectModelIdsCache;
+  queryProvider: QueryProvider;
 }
 
 /** @internal */
@@ -74,70 +79,83 @@ export class VisibilityStateHandler {
     }
 
     const filteredDataProvider = this._filteredDataProvider;
-    const result = filteredDataProvider
+    const result: Observable<VisibilityStatus> = filteredDataProvider
       ? defer(async () => filteredDataProvider.getNodes(node)).pipe(
           mergeAll(),
           mergeMap((childNode) => {
             const res = this.getVisibilityStatus(childNode);
-            return res instanceof Promise ? from(res) : of(res);
+            return isObservable(res) ? res : of(res);
           }),
         )
       : subjectIds.pipe(
-          this.getSubjectModelIds,
+          this.subjectModelIds(),
           mergeAll(),
-          map((x) => this.getModelDisplayStatus(x)),
+          mergeMap((x) => this.getModelDisplayStatus(x)),
         );
 
     return result.pipe(
       map((x) => x.state),
-      reduce(
-        (acc, val) => {
-          acc.allVisible &&= val === "visible";
-          acc.allHidden &&= val === "hidden";
-          return acc;
-        },
-        { allVisible: true, allHidden: true },
-      ),
-      map(({ allVisible, allHidden }) => {
-        if (allVisible) {
-          return createVisibilityStatus("visible", "subject.allModelsVisible");
-        }
-
-        if (allHidden) {
-          return createVisibilityStatus("hidden", "subject.allModelsHidden");
-        }
-
-        return createVisibilityStatus("partial", "subject.someModelsHidden");
+      getVisibilityStatusFromChildren({
+        visible: "subject.allModelsVisible",
+        hidden: "subject.allModelsHidden",
+        partial: "subject.someModelsHidden",
       }),
     );
   }
 
-  public getModelDisplayStatus(id: Id64String): VisibilityStatus {
+  public getModelDisplayStatus(id: Id64String): Observable<VisibilityStatus> {
     if (!this._props.viewport.view.isSpatialView()) {
-      return createVisibilityStatus("disabled", "model.nonSpatialView");
+      return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
     }
     const isDisplayed = this._props.viewport.view.viewsModel(id);
-    return createVisibilityStatus(isDisplayed ? "visible" : "hidden", undefined);
+    if (!isDisplayed) {
+      return of(createVisibilityStatus("hidden", undefined));
+    }
+
+    return this._props.queryProvider.queryModelElements(id).pipe(
+      mergeMap(({ id: elementId, isCategory }) => {
+        if (isCategory) {
+          return this.getCategoryDisplayStatus(elementId, id);
+        }
+        return this.getElementDisplayStatus(elementId, id, undefined);
+      }),
+      map((x) => x.state),
+      getVisibilityStatusFromChildren({
+        visible: undefined,
+        hidden: "model.allChildElementsHidden",
+        partial: "model.someChildElementsHidden",
+      }),
+    );
   }
 
-  public getCategoryDisplayStatus(id: Id64String, parentModelId: Id64String | undefined): VisibilityStatus {
-    if (parentModelId) {
-      if (this.getModelDisplayStatus(parentModelId).state === "hidden") {
-        return createVisibilityStatus("hidden", "category.modelNotDisplayed");
-      }
-
-      const override = this._props.viewport.perModelCategoryVisibility.getOverride(parentModelId, id);
-      switch (override) {
-        case PerModelCategoryVisibility.Override.Show:
-          return createVisibilityStatus("visible", "category.displayedThroughPerModelOverride");
-        case PerModelCategoryVisibility.Override.Hide:
-          return createVisibilityStatus("hidden", "category.hiddenThroughPerModelOverride");
-      }
-    }
+  private getCategoryViewportVisibility(id: Id64String) {
     const isDisplayed = this._props.viewport.view.viewsCategory(id);
     return isDisplayed
       ? createVisibilityStatus("visible", "category.displayedThroughCategorySelector")
       : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
+  }
+
+  public getCategoryDisplayStatus(id: Id64String, parentModelId: Id64String | undefined): Observable<VisibilityStatus> {
+    if (!parentModelId) {
+      return of(this.getCategoryViewportVisibility(id));
+    }
+
+    return this.getModelDisplayStatus(parentModelId).pipe(
+      map((modelStatus) => {
+        if (modelStatus.state === "hidden") {
+          return createVisibilityStatus("hidden", "category.modelNotDisplayed");
+        }
+
+        const override = this._props.viewport.perModelCategoryVisibility.getOverride(parentModelId, id);
+        switch (override) {
+          case PerModelCategoryVisibility.Override.Show:
+            return createVisibilityStatus("visible", "category.displayedThroughPerModelOverride");
+          case PerModelCategoryVisibility.Override.Hide:
+            return createVisibilityStatus("hidden", "category.hiddenThroughPerModelOverride");
+        }
+        return this.getCategoryViewportVisibility(id);
+      }),
+    );
   }
 
   public getElementGroupingNodeDisplayStatus(key: ECClassGroupingNodeKey): Observable<VisibilityStatus> {
@@ -148,62 +166,70 @@ export class VisibilityStateHandler {
         }
 
         if (!this._props.viewport.alwaysDrawn && !this._props.viewport.neverDrawn) {
-          if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible") {
-            return of(createVisibilityStatus("visible"));
-          }
-          return of(createVisibilityStatus("hidden", "element.hiddenThroughCategory"));
+          const res = categoryId ? this.getCategoryDisplayStatus(categoryId, modelId).pipe(map((x) => x.state === "visible")) : of(false);
+          return res.pipe(map((x) => (x ? createVisibilityStatus("visible") : createVisibilityStatus("hidden", "element.hiddenThroughCategory"))));
         }
 
         return forkJoin({
-          hasAlwaysDrawn: this._props.viewport.alwaysDrawn ? elementIds.pipe(map((id) => this._props.viewport.alwaysDrawn!.has(id))) : of(false),
+          hasAlwaysDrawn: this._props.viewport.alwaysDrawn ? elementIds.pipe(some((id) => this._props.viewport.alwaysDrawn!.has(id))) : of(false),
           allNeverDrawn: this._props.viewport.neverDrawn ? elementIds.pipe(every((id) => this._props.viewport.neverDrawn!.has(id))) : of(false),
         }).pipe(
-          map(({ hasAlwaysDrawn, allNeverDrawn }) => {
-            if (hasAlwaysDrawn) {
-              return createVisibilityStatus("visible", "element.displayedThroughAlwaysDrawnList");
-            }
-
-            if (allNeverDrawn) {
-              return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
-            }
-
-            if (this._props.viewport.alwaysDrawn?.size) {
-              return createVisibilityStatus("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
-            }
-
-            if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible") {
-              return createVisibilityStatus("visible");
-            }
-
-            return createVisibilityStatus("hidden", "element.hiddenThroughCategory");
+          mergeMap(({ hasAlwaysDrawn, allNeverDrawn }) => {
+            return this.getElementDisplayStatusInternal(hasAlwaysDrawn, allNeverDrawn, modelId, categoryId);
           }),
         );
       }),
     );
   }
 
-  public getElementDisplayStatus(elementId: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined): VisibilityStatus {
-    if (!modelId || !this._props.viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatus("disabled", "element.modelNotDisplayed");
+  private getElementDisplayStatusInternal(alwaysDrawn: boolean, neverDrawn: boolean, modelId: Id64String | undefined, categoryId: Id64String | undefined) {
+    if (neverDrawn) {
+      return createVisibilityStatusObs("hidden", "element.hiddenThroughNeverDrawnList");
     }
 
-    if (this._props.viewport.neverDrawn !== undefined && this._props.viewport.neverDrawn.has(elementId)) {
-      return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
-    }
-
-    if (this._props.viewport.alwaysDrawn !== undefined) {
-      if (this._props.viewport.alwaysDrawn.has(elementId)) {
-        return createVisibilityStatus("visible", "element.displayedThroughAlwaysDrawnList");
+    if (this._props.viewport.alwaysDrawn) {
+      if (alwaysDrawn) {
+        return createVisibilityStatusObs("visible", "element.displayedThroughAlwaysDrawnList");
       }
 
       if (this.hasExclusiveAlwaysDrawnElements()) {
-        return createVisibilityStatus("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
+        return createVisibilityStatusObs("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
       }
     }
-    if (categoryId && this.getCategoryDisplayStatus(categoryId, modelId).state === "visible") {
-      return createVisibilityStatus("visible", "visible");
+
+    const res: Observable<VisibilityStatus | undefined> = categoryId ? this.getCategoryDisplayStatus(categoryId, modelId) : of(undefined);
+    return res.pipe(
+      map((x) => {
+        return x?.state === "visible" ? createVisibilityStatus("visible") : createVisibilityStatus("hidden", "element.hiddenThroughCategory");
+      }),
+    );
+  }
+
+  public getElementDisplayStatus(elementId: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined): Observable<VisibilityStatus> {
+    if (!modelId || !this._props.viewport.view.viewsModel(modelId)) {
+      return createVisibilityStatusObs("disabled", "element.modelNotDisplayed");
     }
-    return createVisibilityStatus("hidden", "element.hiddenThroughCategory");
+
+    if (this._props.viewport.neverDrawn?.has(elementId)) {
+      return createVisibilityStatusObs("hidden", "element.hiddenThroughNeverDrawnList");
+    }
+
+    if (this._props.viewport.alwaysDrawn) {
+      if (this._props.viewport.alwaysDrawn.has(elementId)) {
+        return createVisibilityStatusObs("visible", "element.displayedThroughAlwaysDrawnList");
+      }
+
+      if (this._props.viewport.alwaysDrawn.size !== 0) {
+        return createVisibilityStatusObs("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
+      }
+    }
+
+    const res: Observable<VisibilityStatus | undefined> = categoryId ? this.getCategoryDisplayStatus(categoryId, modelId) : of(undefined);
+    return res.pipe(
+      map((x) => {
+        return x?.state === "visible" ? createVisibilityStatus("visible") : createVisibilityStatus("hidden", "element.hiddenThroughCategory");
+      }),
+    );
   }
 
   /** Changes visibility of the items represented by the tree node. */
@@ -267,7 +293,7 @@ export class VisibilityStateHandler {
 
   private changeSubjectState(ids: Observable<Id64String>, on: boolean): Observable<void> {
     return ids.pipe(
-      this.getSubjectModelIds,
+      this.subjectModelIds(),
       toArray(),
       mergeMap((modelId) => this.changeModelsVisibility(modelId, on)),
     );
@@ -337,9 +363,14 @@ export class VisibilityStateHandler {
 
   /** Update visibility of a shallow list of elements by adding them to the always/never drawn list. */
   public changeElementsState(modelId: Id64String | undefined, categoryId: Id64String | undefined, on: boolean): OperatorFunction<string, void> {
-    const isDisplayedByDefault = this.isElementDisplayedByDefault(modelId, categoryId);
-    const isHiddenDueToExclusiveAlwaysDrawnElements = this.hasExclusiveAlwaysDrawnElements();
-    return this.updateAlwaysAndNeverDrawnLists({ isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements, on });
+    return (obs) => {
+      return this.isElementDisplayedByDefault(modelId, categoryId).pipe(
+        mergeMap((isDisplayedByDefault) => {
+          const isHiddenDueToExclusiveAlwaysDrawnElements = this.hasExclusiveAlwaysDrawnElements();
+          return obs.pipe(this.updateAlwaysAndNeverDrawnLists({ isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements, on }));
+        }),
+      );
+    };
   }
 
   private updateAlwaysAndNeverDrawnLists(props: {
@@ -382,37 +413,10 @@ export class VisibilityStateHandler {
     };
   }
 
-  private changeElementStateInternal(elementId: Id64String, on: boolean, isDisplayedByDefault: boolean, isHiddenDueToExclusiveAlwaysDrawnElements: boolean) {
-    let changedNeverDraw = false;
-    let changedAlwaysDrawn = false;
-
-    const currNeverDrawn = new Set(this._props.viewport.neverDrawn ? this._props.viewport.neverDrawn : []);
-    const currAlwaysDrawn = new Set(this._props.viewport.alwaysDrawn ? this._props.viewport.alwaysDrawn : /* istanbul ignore next */ []);
-
-    if (on) {
-      changedNeverDraw = changedNeverDraw || currNeverDrawn.delete(elementId);
-      if ((!isDisplayedByDefault || isHiddenDueToExclusiveAlwaysDrawnElements) && !currAlwaysDrawn.has(elementId)) {
-        currAlwaysDrawn.add(elementId);
-        changedAlwaysDrawn = true;
-      }
-    } else {
-      changedAlwaysDrawn = changedAlwaysDrawn || currAlwaysDrawn.delete(elementId);
-      if (isDisplayedByDefault && !isHiddenDueToExclusiveAlwaysDrawnElements && !currNeverDrawn.has(elementId)) {
-        currNeverDrawn.add(elementId);
-        changedNeverDraw = true;
-      }
-    }
-
-    changedNeverDraw && this._props.viewport.setNeverDrawn(currNeverDrawn);
-    changedAlwaysDrawn && this._props.viewport.setAlwaysDrawn(currAlwaysDrawn, this._props.viewport.isAlwaysDrawnExclusive);
-  }
-
-  private isElementDisplayedByDefault(modelId: Id64String | undefined, categoryId: Id64String | undefined) {
-    return (
-      !!modelId &&
-      this.getModelDisplayStatus(modelId).state === "visible" &&
-      !!categoryId &&
-      this.getCategoryDisplayStatus(categoryId, modelId).state === "visible"
+  private isElementDisplayedByDefault(modelId: Id64String | undefined, categoryId: Id64String | undefined): Observable<boolean> {
+    return and(
+      modelId ? this.getModelDisplayStatus(modelId).pipe(map((x) => x.state === "visible")) : of(false),
+      categoryId ? this.getModelDisplayStatus(categoryId).pipe(map((x) => x.state === "visible")) : of(false),
     );
   }
 
@@ -420,27 +424,43 @@ export class VisibilityStateHandler {
     return this._props.viewport.isAlwaysDrawnExclusive && 0 !== this._props.viewport.alwaysDrawn?.size;
   }
 
-  private getSubjectModelIds(subjectIds: Observable<Id64String>): Observable<Id64String> {
-    return subjectIds.pipe(
-      mergeMap((id) => this._props.subjectModelIdsCache.getSubjectModelIdObs(id)),
-      mergeAll(),
-    );
+  private subjectModelIds(): OperatorFunction<Id64String, Id64String> {
+    return (subjectIds) => {
+      return subjectIds.pipe(
+        mergeMap((id) => this._props.subjectModelIdsCache.getSubjectModelIdObs(id)),
+        mergeAll(),
+      );
+    };
   }
 }
 
-function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled", tooltipStringId?: string): VisibilityStatus {
-  return { state: status === "disabled" ? "hidden" : status, tooltip: createTooltip(status, tooltipStringId) };
+const createVisibilityStatusObs = (status: Visibility | "disabled", tooltipStringId?: string) => of(createVisibilityStatus(status, tooltipStringId));
+
+function getVisibilityFromChildren(obs: Observable<Visibility>): Observable<Visibility> {
+  return obs.pipe(
+    reduceWhile(
+      (x) => x.allVisible || x.allHidden,
+      (acc, val) => {
+        acc.allVisible &&= val === "visible";
+        acc.allHidden &&= val === "hidden";
+        return acc;
+      },
+      { allVisible: true, allHidden: true },
+    ),
+    map((x) => {
+      if (!x) {
+        // TODO: No children?
+        return "visible";
+      }
+      return x.allVisible ? "visible" : x.allHidden ? "hidden" : "partial";
+    }),
+  );
 }
 
-// istanbul-ignore-next
-function createTooltip(status: "visible" | "hidden" | "partial" | "disabled", tooltipStringId: string | undefined): string {
-  const statusStringId = `modelTree.status.${status}`;
-  const statusString = TreeWidget.translate(statusStringId);
-  if (!tooltipStringId) {
-    return statusString;
-  }
-
-  tooltipStringId = `modelTree.tooltips.${tooltipStringId}`;
-  const tooltipString = TreeWidget.translate(tooltipStringId);
-  return `${statusString}: ${tooltipString}`;
+function getVisibilityStatusFromChildren(tooltipMap: {
+  [key in Visibility]: string | undefined;
+}): OperatorFunction<Visibility, VisibilityStatus> {
+  return (obs) => {
+    return getVisibilityFromChildren(obs).pipe(map((visibility) => createVisibilityStatus(visibility, tooltipMap[visibility])));
+  };
 }

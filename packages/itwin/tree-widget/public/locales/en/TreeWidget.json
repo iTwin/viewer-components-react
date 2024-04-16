@@ -35,7 +35,9 @@
         "allModelsHidden": "All models are hidden"
       },
       "model": {
-        "nonSpatialView": "Active view is not spatial"
+        "nonSpatialView": "Active view is not spatial",
+        "allChildElementsHidden": "All child elements are hidden",
+        "someChildElementsHidden": "Some child elements are hidden"
       },
       "category": {
         "modelNotDisplayed": "Hidden through the model",

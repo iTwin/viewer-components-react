@@ -4,36 +4,30 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { EMPTY, from } from "rxjs";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent, using } from "@itwin/core-bentley";
-import { ECSqlReader, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
-  areAllModelsVisible,
-  hideAllModels,
-  invertAllModels,
-  ModelsVisibilityHandler,
-  showAllModels,
-  toggleModels,
+  areAllModelsVisible, hideAllModels, invertAllModels, ModelsVisibilityHandler, showAllModels, toggleModels,
 } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
+import type { TreeNodeItem } from "@itwin/components-react";
 import type { Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
-import type { TreeNodeItem } from "@itwin/components-react";
 import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { ModelInfo } from "../../../tree-widget-react";
-
+import type { QueryProvider } from "../../../components/trees/models-tree/internal/QueryProvider";
 describe("ModelsVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
@@ -60,9 +54,10 @@ describe("ModelsVisibilityHandler", () => {
       partialProps = {};
     }
     const props: ModelsVisibilityHandlerProps = {
+      ...partialProps,
       rulesetId: "test",
-      viewport: partialProps.viewport || mockViewport().object,
-      hierarchyAutoUpdateEnabled: partialProps.hierarchyAutoUpdateEnabled,
+      viewport: partialProps.viewport ?? mockViewport().object,
+      // queryProvider:
     };
     return new ModelsVisibilityHandler(props);
   };
@@ -84,19 +79,19 @@ describe("ModelsVisibilityHandler", () => {
     parentId: Id64String;
   }
 
-  const mockSubjectModelIds = (props: SubjectModelIdsMockProps) => {
+  function createFakeQueryProvider(props: SubjectModelIdsMockProps): QueryProvider {
     const subjectQueryRows: SubjectsRow[] = [];
     props.subjectsHierarchy.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
 
     const elementQueryRows: ElementRow[] = [];
     props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => elementQueryRows.push({ id: modelInfo.id, parentId: subjectId })));
 
-    imodelMock.createQueryReader
-      .withArgs(sinon.match("FROM bis.Subject"), undefined, sinon.match.has("rowFormat", QueryRowFormat.UseJsPropertyNames))
-      .returns(sinon.createStubInstance(ECSqlReader, { toArray: Promise.resolve(subjectQueryRows) }))
-      .withArgs(sinon.match("FROM bis.InformationPartitionElement"), undefined, sinon.match.has("rowFormat", QueryRowFormat.UseJsPropertyNames))
-      .returns(sinon.createStubInstance(ECSqlReader, { toArray: Promise.resolve(elementQueryRows) }));
-  };
+    return {
+      queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
+      queryAllModels: sinon.fake.returns(from(elementQueryRows)),
+      queryModelElements: sinon.fake.returns(EMPTY),
+    };
+  }
 
   const modelsInfo: ModelInfo[] = [{ id: "ModelId1" }, { id: "ModelId2" }];
 
@@ -187,7 +182,7 @@ describe("ModelsVisibilityHandler", () => {
       it("returns 'visible' when all models are displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
-        mockSubjectModelIds({
+        const queryProvider = createFakeQueryProvider({
           imodelMock,
           subjectsHierarchy: new Map([["0x0", subjectIds]]),
           subjectModels: new Map([
@@ -202,7 +197,7 @@ describe("ModelsVisibilityHandler", () => {
         } as unknown as ViewState;
 
         const vpMock = mockViewport({ viewState: viewStateMock, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
@@ -211,7 +206,7 @@ describe("ModelsVisibilityHandler", () => {
       it("return 'hidden' when all models are not displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
-        mockSubjectModelIds({
+        const queryProvider = createFakeQueryProvider({
           imodelMock,
           subjectsHierarchy: new Map([["0x0", subjectIds]]),
           subjectModels: new Map([
@@ -228,7 +223,7 @@ describe("ModelsVisibilityHandler", () => {
         viewStateMock.setup((x) => x.viewsModel("0x6")).returns(() => false);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
           if (isPromiseLike(result)) {
@@ -240,7 +235,7 @@ describe("ModelsVisibilityHandler", () => {
       it("return 'partial' when at least one direct model is displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
-        mockSubjectModelIds({
+        const queryProvider = createFakeQueryProvider({
           imodelMock,
           subjectsHierarchy: new Map([["0x0", subjectIds]]),
           subjectModels: new Map([
@@ -257,7 +252,7 @@ describe("ModelsVisibilityHandler", () => {
         viewStateMock.setup((x) => x.viewsModel("0x6")).returns(() => false);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
           expect(await result).to.include({ state: "partial" });
@@ -267,7 +262,7 @@ describe("ModelsVisibilityHandler", () => {
       it("return 'partial' when at least one nested model is displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
-        mockSubjectModelIds({
+        const queryProvider = createFakeQueryProvider({
           imodelMock,
           subjectsHierarchy: new Map([
             [subjectIds[0], ["0x3"]],
@@ -284,7 +279,7 @@ describe("ModelsVisibilityHandler", () => {
         viewStateMock.setup((x) => x.viewsModel("0x11")).returns(() => false);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
           expect(await result).to.include({ state: "partial" });
@@ -295,7 +290,7 @@ describe("ModelsVisibilityHandler", () => {
         const node = createSubjectNode();
         const key = (node.key as ECInstancesNodeKey).instanceKeys[0];
 
-        mockSubjectModelIds({
+        const queryProvider = createFakeQueryProvider({
           imodelMock,
           subjectsHierarchy: new Map([["0x0", [key.id]]]),
           subjectModels: new Map([[key.id, [{ id: "0x1" }, { id: "0x2" }]]]),
@@ -306,7 +301,7 @@ describe("ModelsVisibilityHandler", () => {
         viewStateMock.setup((x) => x.viewsModel(moq.It.isAny())).returns(() => false);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
-        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+        await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
           await Promise.all([handler.getVisibilityStatus(node), handler.getVisibilityStatus(node)]);
           // expect the `createQueryReader` to be called only twice (once for subjects and once for models)
           expect(imodelMock.createQueryReader).to.be.calledTwice;
@@ -321,7 +316,7 @@ describe("ModelsVisibilityHandler", () => {
           const filteredProvider = moq.Mock.ofType<IFilteredPresentationTreeDataProvider>();
           filteredProvider.setup((x) => x.nodeMatchesFilter(node)).returns(() => true);
 
-          mockSubjectModelIds({
+          const queryProvider = createFakeQueryProvider({
             imodelMock,
             subjectsHierarchy: new Map([["0x0", [key.id]]]),
             subjectModels: new Map([[key.id, [{ id: "0x10" }, { id: "0x20" }]]]),
@@ -334,7 +329,7 @@ describe("ModelsVisibilityHandler", () => {
 
           const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
-          await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+          await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
             const result = handler.getVisibilityStatus(node);
             expect(isPromiseLike(result)).to.be.true;
@@ -362,7 +357,7 @@ describe("ModelsVisibilityHandler", () => {
             .verifiable(moq.Times.never());
           filteredProvider.setup((x) => x.nodeMatchesFilter(moq.It.isAny())).returns(() => true);
 
-          mockSubjectModelIds({
+          const queryProvider = createFakeQueryProvider({
             imodelMock,
             subjectsHierarchy: new Map([[parentSubjectId, [childSubjectId]]]),
             subjectModels: new Map([
@@ -379,7 +374,7 @@ describe("ModelsVisibilityHandler", () => {
 
           const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
-          await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+          await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
             const result = handler.getVisibilityStatus(node);
             expect(isPromiseLike(result)).to.be.true;
@@ -413,7 +408,7 @@ describe("ModelsVisibilityHandler", () => {
           filteredProvider.setup((x) => x.nodeMatchesFilter(childNodes[0])).returns(() => true);
           filteredProvider.setup((x) => x.nodeMatchesFilter(childNodes[1])).returns(() => true);
 
-          mockSubjectModelIds({
+          const queryProvider = createFakeQueryProvider({
             imodelMock,
             subjectsHierarchy: new Map([[parentSubjectId, childSubjectIds]]),
             subjectModels: new Map([
@@ -431,7 +426,7 @@ describe("ModelsVisibilityHandler", () => {
 
           const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
-          await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+          await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
             const result = handler.getVisibilityStatus(node);
             expect(isPromiseLike(result)).to.be.true;
@@ -460,7 +455,7 @@ describe("ModelsVisibilityHandler", () => {
           filteredProvider.setup((x) => x.nodeMatchesFilter(node)).returns(() => false);
           filteredProvider.setup((x) => x.nodeMatchesFilter(childNode)).returns(() => true);
 
-          mockSubjectModelIds({
+          const queryProvider = createFakeQueryProvider({
             imodelMock,
             subjectsHierarchy: new Map([
               [parentSubjectIds[0], [childSubjectId]],
@@ -481,7 +476,7 @@ describe("ModelsVisibilityHandler", () => {
 
           const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
-          await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+          await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
             const result = handler.getVisibilityStatus(node);
             expect(isPromiseLike(result)).to.be.true;
@@ -867,8 +862,7 @@ describe("ModelsVisibilityHandler", () => {
         const vpMock = mockViewport({ viewState: viewStateMock.object });
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden", isDisabled: true });
         });
       });
@@ -882,8 +876,7 @@ describe("ModelsVisibilityHandler", () => {
         const vpMock = mockViewport({ viewState: viewStateMock.object });
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden", isDisabled: true });
         });
       });
@@ -902,8 +895,7 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.alwaysDrawn).returns(() => undefined);
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
       });
@@ -922,8 +914,7 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.alwaysDrawn).returns(() => alwaysDrawn);
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
       });
@@ -940,8 +931,7 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.neverDrawn).returns(() => undefined);
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
       });
@@ -958,8 +948,7 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.neverDrawn).returns(() => undefined);
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
       });
@@ -977,8 +966,7 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.neverDrawn).returns(() => undefined);
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
       });
@@ -995,8 +983,7 @@ describe("ModelsVisibilityHandler", () => {
         vpMock.setup((x) => x.neverDrawn).returns(() => new Set());
 
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          const result = handler.getVisibilityStatus(node);
-          expect(isPromiseLike(result)).to.be.false;
+          const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
       });
@@ -1108,7 +1095,7 @@ describe("ModelsVisibilityHandler", () => {
             const viewStateMock = moq.Mock.ofType<ViewState>();
             viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
-            mockSubjectModelIds({
+            const queryProvider = createFakeQueryProvider({
               imodelMock,
               subjectsHierarchy: new Map([]),
               subjectModels: new Map([[key.id, [{ id: subjectModelIds[0], content: "reference" }, { id: subjectModelIds[1] }]]]),
@@ -1121,7 +1108,7 @@ describe("ModelsVisibilityHandler", () => {
               vpMock.setup((x) => x.changeModelDisplay(subjectModelIds, false)).verifiable();
             }
 
-            await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+            await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
               handler.setFilteredDataProvider(filteredDataProvider.object);
               await handler.changeVisibility(node, mode === "visible");
               vpMock.verifyAll();
@@ -1150,7 +1137,7 @@ describe("ModelsVisibilityHandler", () => {
             const viewStateMock = moq.Mock.ofType<ViewState>();
             viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
-            mockSubjectModelIds({
+            const queryProvider = createFakeQueryProvider({
               imodelMock,
               subjectsHierarchy: new Map([["0x1", ["0x2"]]]),
               subjectModels: new Map([
@@ -1166,7 +1153,7 @@ describe("ModelsVisibilityHandler", () => {
               vpMock.setup((x) => x.changeModelDisplay(childSubjectModelIds, false)).verifiable();
             }
 
-            await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+            await using(createHandler({ viewport: vpMock.object, queryProvider }), async (handler) => {
               handler.setFilteredDataProvider(filteredDataProvider.object);
               await handler.changeVisibility(node, mode === "visible");
               vpMock.verifyAll();
@@ -1855,33 +1842,5 @@ describe("ModelsVisibilityHandler", () => {
         expect(spy).to.be.calledOnce;
       });
     });
-  });
-});
-
-describe("CachingElementIdsContainer", () => {
-  const ids = ["1", "2", "3", "4", "5"];
-  const generator = async function* generator() {
-    for (const id of ids) {
-      yield id;
-    }
-  };
-
-  it("returns correct ids if previously was not fully iterated", async () => {
-    const container = new CachingElementIdsContainer(generator());
-
-    let actualIds: string[] = [];
-    // validate first id
-    for await (const id of container.getElementIds()) {
-      actualIds.push(id);
-      break;
-    }
-    expect(actualIds).to.have.lengthOf(1);
-
-    actualIds = [];
-    // validated that all ids are still returned
-    for await (const id of container.getElementIds()) {
-      actualIds.push(id);
-    }
-    expect(actualIds).to.have.lengthOf(ids.length);
   });
 });
