@@ -4,17 +4,17 @@
 *--------------------------------------------------------------------------------------------*/
 import React, { useEffect } from "react";
 import { useSortable } from "@dnd-kit/sortable";
-import type { HorizontalTileProps } from "../../SharedComponents/HorizontalTile";
-import { HorizontalTile } from "../../SharedComponents/HorizontalTile";
 import { CSS } from "@dnd-kit/utilities";
 import { SvgDragHandleVertical } from "@itwin/itwinui-icons-react";
 import { Icon } from "@itwin/itwinui-react";
+import type { GroupPropertyListItemProps } from "./GroupPropertyListItem";
+import { GroupPropertyListItem } from "./GroupPropertyListItem";
 
-interface SortableHorizontalTileProps extends HorizontalTileProps {
+interface SortableHorizontalTileProps extends GroupPropertyListItemProps {
   id: string;
 }
 
-const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileProps) => {
+export const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileProps) => {
   const {
     attributes,
     listeners,
@@ -45,7 +45,7 @@ const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileProps) =
       {...attributes}
       style={{ ...style, visibility: isDragging ? "hidden" : "visible" }}
     >
-      <HorizontalTile
+      <GroupPropertyListItem
         dragHandle={
           <Icon className="gmw-drag-icon" size="large" style={{ cursor: "grab" }} title="Drag & Drop" {...listeners}>
             <SvgDragHandleVertical />
@@ -56,5 +56,3 @@ const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileProps) =
     </div>
   );
 };
-
-export default SortableHorizontalTile;

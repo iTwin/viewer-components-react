@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Mon, 11 Mar 2024 18:18:16 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Apr 2024 14:19:35 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.4.3
+
+Thu, 04 Apr 2024 14:19:35 GMT
+
+### Patches
+
+- Clear MapFeatureInfo Widget when active tool changes ([#803](https://github.com/iTwin/viewer-components-react/pull/803))
 
 ## 5.4.2
 

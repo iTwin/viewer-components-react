@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Thu, 04 Apr 2024 14:19:35 GMT",
+      "version": "5.4.3",
+      "tag": "@itwin/map-layers_v5.4.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "01c1b960d7d32da1ec69f559c6149770fce56d51",
+            "comment": "Clear MapFeatureInfo Widget when active tool changes"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 11 Mar 2024 18:18:16 GMT",
       "version": "5.4.2",
       "tag": "@itwin/map-layers_v5.4.2",

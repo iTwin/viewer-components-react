@@ -128,7 +128,7 @@ describe("Groups View", () => {
     // Assert
 
     // Should have the correct random mockGroups.groups count listed
-    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    const horizontalTiles = screen.getAllByTestId("group-list-item");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
     horizontalTiles.forEach((horizontalTile, index) => {
@@ -253,7 +253,7 @@ describe("Groups View", () => {
     // Assert
 
     // Should have the right group number
-    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    const horizontalTiles = screen.getAllByTestId("group-list-item");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
     // Click on first group more icon
@@ -328,7 +328,7 @@ describe("Groups View", () => {
     expect(onClickAddGroup).toBeCalledWith(mockGroupingUI.name);
 
     // Check the group tile number
-    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    const horizontalTiles = screen.getAllByTestId("group-list-item");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
     // Click on first group more icon

@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "ModelsTree: Improved performance when changing visibility of multiple element nodes at the same time.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

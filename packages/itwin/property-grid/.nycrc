@@ -1,6 +1,6 @@
 {
   "include": ["src/**/*", "lib/cjs/**/*"],
-  "exclude": ["src/test/**", "lib/cjs/test/**"],
+  "exclude": ["src/test/**", "lib/cjs/test/**", "src/**/property-grid-react.ts"],
   "extension": [".ts", ".tsx"],
   "reporter": ["text-summary", "lcov", "cobertura"],
   "temp-dir": "./lib/test/coverage/.nyc_output",
