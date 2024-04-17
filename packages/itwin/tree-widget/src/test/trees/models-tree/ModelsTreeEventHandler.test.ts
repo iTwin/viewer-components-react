@@ -9,15 +9,17 @@ import sinon from "sinon";
 import { MutableTreeModel, TreeModelSource } from "@itwin/components-react";
 import { BeEvent, using } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { KeySet } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 import { ModelsTreeEventHandler } from "../../../components/trees/models-tree/ModelsTreeEventHandler";
 import { TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementNode, createModelNode, createSimpleTreeModelNode, createSubjectNode } from "../Common";
 
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { IVisibilityHandler, VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import type { AbstractTreeNodeLoaderWithProvider } from "@itwin/components-react";
 import type { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { SelectionHandler } from "@itwin/presentation-frontend";
-
+import type { SelectionChangesListener, SelectionHandler } from "@itwin/presentation-frontend";
 describe("ModelsTreeEventHandler", () => {
   const selectionHandlerStub = {
     getSelection: () => {},
@@ -27,9 +29,20 @@ describe("ModelsTreeEventHandler", () => {
 
   const visibilityHandler = { onVisibilityChange } as IVisibilityHandler;
 
+  const selectionManagerStub = {
+    selectionChange: { addListener: sinon.stub<[SelectionChangesListener, any], () => void>() },
+    getSelection: sinon.stub<[IModelConnection, number], Readonly<KeySet>>(),
+  };
+
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
+  });
+
+  beforeEach(() => {
+    selectionManagerStub.selectionChange.addListener.returns(() => {});
+    selectionManagerStub.getSelection.returns(new KeySet());
+    sinon.stub(Presentation, "selection").get(() => selectionManagerStub);
   });
 
   after(async () => {
@@ -38,6 +51,8 @@ describe("ModelsTreeEventHandler", () => {
   });
 
   afterEach(() => {
+    selectionManagerStub.selectionChange.addListener.reset();
+    selectionManagerStub.getSelection.reset();
     onVisibilityChange.clear();
     sinon.restore();
   });

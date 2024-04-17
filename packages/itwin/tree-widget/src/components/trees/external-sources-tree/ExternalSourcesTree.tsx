@@ -9,8 +9,10 @@ import {
   PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState,
 } from "@itwin/presentation-components";
 import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
+import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
+import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
@@ -33,6 +35,13 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
    * @beta
    */
   hierarchyLevelConfig?: HierarchyLevelConfig;
+  /**
+   * Reports performance of a feature.
+   * @param featureId ID of the feature.
+   * @param elapsedTime Elapsed time of the feature.
+   * @beta
+   */
+  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 /**
@@ -42,6 +51,11 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   const { hierarchyLevelConfig, contextMenuItems, nodeLabelRenderer, density } = props;
 
+  const reporting = usePerformanceReporting({
+    treeIdentifier: ExternalSourcesTreeComponent.id,
+    onPerformanceMeasured: props.onPerformanceMeasured,
+  });
+
   const state = usePresentationTreeState({
     imodel: props.iModel,
     ruleset: RULESET_EXTERNAL_SOURCES,
@@ -50,6 +64,7 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
     customizeTreeNodeItem,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
     enableHierarchyAutoUpdate: true,
+    onNodeLoaded: reporting.onNodeLoaded,
   });
 
   const treeRendererProps = {
