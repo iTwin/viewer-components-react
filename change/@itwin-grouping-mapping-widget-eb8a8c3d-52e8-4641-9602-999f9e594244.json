@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed an issue where a passed in iModelConnection was not being used by the widget shell.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Guillar1@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

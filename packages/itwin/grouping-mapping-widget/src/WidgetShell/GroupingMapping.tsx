@@ -61,7 +61,9 @@ const GroupingMapping = (props: GroupingMappingProps) => {
     { step: RouteStep.Mappings, title: "Mapping", groupingRouteFields: {} },
   ]);
   const currentRoute = routingHistory[routingHistory.length - 1];
-  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
+  const activeIModelConnection = useActiveIModelConnection();
+  const iModelConnection = props.iModelConnection ?? activeIModelConnection;
+  const iModelId = iModelConnection?.iModelId ?? "";
   const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
     setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
   }, []);
