@@ -17,6 +17,7 @@
     "change": "beachball change --no-commit",
     "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
     "publish": "beachball publish --new",
+    "bump": "beachball bump",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write ."
   },

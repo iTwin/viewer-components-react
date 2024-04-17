@@ -2,6 +2,37 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Wed, 17 Apr 2024 15:50:19 GMT",
+      "version": "2.1.0",
+      "tag": "@itwin/tree-widget-react_v2.1.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "bff4b8112d114c059657896c856242e36d89c139",
+            "comment": "Added ability to track performance of `TreeWidget` component features. Requires `@itwin/presentation-components` version `5.1` or higher"
+          }
+        ],
+        "none": [
+          {
+            "author": "yato333@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "3ce3db62689abb58d25f59b0528f4b793d6c4c0c",
+            "comment": ""
+          }
+        ],
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "18bac0b86b52beb1927820e630bd3ff1acf2203f",
+            "comment": "ModelsTree: Improved performance when changing visibility of multiple element nodes at the same time."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 04 Apr 2024 14:19:35 GMT",
       "version": "2.0.2",
       "tag": "@itwin/tree-widget-react_v2.0.2",
