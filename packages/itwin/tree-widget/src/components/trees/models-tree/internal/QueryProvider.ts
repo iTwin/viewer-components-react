@@ -23,7 +23,7 @@ export interface QueryProvider {
 }
 
 // istanbul-ignore-next
-export class QueryProviderImplementation implements QueryProvider {
+class QueryProviderImplementation implements QueryProvider {
   constructor(private readonly _iModel: IModelConnection) {}
 
   public queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }> {

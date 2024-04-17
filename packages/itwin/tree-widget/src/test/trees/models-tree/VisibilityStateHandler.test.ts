@@ -13,18 +13,18 @@ import { VisibilityStateHandler } from "../../../components/trees/models-tree/in
 import { createFakeSinonViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
+import type { QueryProvider } from "../../../components/trees/models-tree/internal/QueryProvider";
 import type { ElementIdsCache } from "../../../components/trees/models-tree/internal/ElementIdsCache";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { QueryProvider } from "../../../components/trees/models-tree/internal/QueryProvider";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { VisibilityStatusRetrieverProps } from "../../../components/trees/models-tree/internal/VisibilityStateHandler";
 import type { VisibilityStatus } from "../../../tree-widget-react";
 import type { Visibility } from "../../../components/trees/models-tree/internal/Tooltip";
 interface SubjectModelIdsMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
-  subjectModels?: Map<Id64String, Array<{ id: Id64String; content?: string }>>;
+  subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64String[]>;
   categoryElements?: Map<Id64String, Id64String[]>;
   elementHierarchy?: Map<Id64String, Id64String[]>;
@@ -46,7 +46,7 @@ function createFakeQueryProvider(props?: SubjectModelIdsMockProps): QueryProvide
   props?.subjectsHierarchy?.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
 
   const modelRows: ElementRow[] = [];
-  props?.subjectModels?.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => modelRows.push({ id: modelInfo.id, parentId: subjectId })));
+  props?.subjectModels?.forEach((modelInfos, subjectId) => modelInfos.forEach((modelId) => modelRows.push({ id: modelId, parentId: subjectId })));
 
   const res: QueryProvider = {
     queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
@@ -91,11 +91,7 @@ interface VisibilityOverrides {
 class OverridableVisibilityStateHandler extends VisibilityStateHandler {
   private readonly _overrides?: VisibilityOverrides;
 
-  constructor(
-    props?: Partial<VisibilityStatusRetrieverProps> & {
-      overrides?: VisibilityOverrides;
-    },
-  ) {
+  constructor(props?: Partial<VisibilityStatusRetrieverProps> & { overrides?: VisibilityOverrides }) {
     const queryProvider = props?.queryProvider ?? createFakeQueryProvider();
     const subjectModelIdsCache = props?.subjectModelIdsCache ?? createSubjectModelIdsCache(queryProvider);
     super({
@@ -130,6 +126,10 @@ class OverridableVisibilityStateHandler extends VisibilityStateHandler {
     }
     return super.getElementDisplayStatus(elementId, hasChildren);
   }
+
+  public override changeCategoryState = sinon.fake(super.changeCategoryState.bind(this));
+
+  public override changeModelState = sinon.fake(super.changeModelState.bind(this));
 }
 
 describe.only("VisibilityStateHandler", () => {
@@ -198,8 +198,8 @@ describe.only("VisibilityStateHandler", () => {
         const queryProvider = createFakeQueryProvider({
           subjectsHierarchy: new Map([["0x0", subjectIds]]),
           subjectModels: new Map([
-            [subjectIds[0], [{ id: "0x3" }]],
-            [subjectIds[1], [{ id: "0x4" }]],
+            [subjectIds[0], ["0x3"]],
+            [subjectIds[1], ["0x4"]],
           ]),
         });
         const handler = new OverridableVisibilityStateHandler({
@@ -221,8 +221,8 @@ describe.only("VisibilityStateHandler", () => {
         const queryProvider = createFakeQueryProvider({
           subjectsHierarchy: new Map([["0x0", subjectIds]]),
           subjectModels: new Map([
-            [subjectIds[0], [{ id: "0x3" }]],
-            [subjectIds[1], [{ id: "0x4" }]],
+            [subjectIds[0], ["0x3"]],
+            [subjectIds[1], ["0x4"]],
           ]),
         });
         const handler = new OverridableVisibilityStateHandler({
@@ -244,8 +244,8 @@ describe.only("VisibilityStateHandler", () => {
         const queryProvider = createFakeQueryProvider({
           subjectsHierarchy: new Map([["0x0", subjectIds]]),
           subjectModels: new Map([
-            [subjectIds[0], [{ id: "0x3" }]],
-            [subjectIds[1], [{ id: "0x4" }]],
+            [subjectIds[0], ["0x3"]],
+            [subjectIds[1], ["0x4"]],
           ]),
         });
         const handler = new OverridableVisibilityStateHandler({
@@ -650,4 +650,126 @@ describe.only("VisibilityStateHandler", () => {
       });
     });
   });
+
+  describe("changeVisibilityStatus", () => {
+    it("does nothing if node is invalid", () => {
+      const node: TreeNodeItem = {
+        id: "",
+        label: PropertyRecord.fromString(""),
+      };
+
+      const provider = new OverridableVisibilityStateHandler();
+      expect(provider.changeVisibility(node, true)).to.eq(EMPTY);
+    });
+
+    describe("subject", () => {
+      describe("on", () => {
+        it("marks all models as visible", async () => {
+          const subjectIds = ["0x1", "0x2"];
+          const modelIds = [
+            ["0x3", "0x4"],
+            ["0x5", "0x6"],
+          ];
+          const node = createSubjectNode(subjectIds);
+          const spy = sinon.fake.resolves(undefined);
+          const provider = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
+            }),
+            viewport: createFakeSinonViewport({
+              addViewedModels: spy,
+            }),
+          });
+
+          await toPromise(provider.changeVisibility(node, true));
+          expect(spy).to.be.calledOnceWith(modelIds.flat());
+        });
+      });
+
+      describe("off", () => {
+        it("marks all models hidden", async () => {
+          const subjectIds = ["0x1", "0x2"];
+          const modelIds = [
+            ["0x3", "0x4"],
+            ["0x5", "0x6"],
+          ];
+          const node = createSubjectNode(subjectIds);
+          const provider = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
+            }),
+          });
+
+          await toPromise(provider.changeVisibility(node, false));
+          expect(provider.changeModelState).to.be.calledOnceWith(modelIds.flat(), false);
+        });
+      });
+    });
+
+    describe("model", () => {
+      function testCategoryStateChange(state: "visible" | "hidden") {
+        it(`marks all categories ${state}`, async () => {
+          const modelId = "0x1";
+          const categoryIds = ["0x2", "0x3", "0x4"];
+          const node = createModelNode(modelId);
+          const provider = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              modelCategories: new Map([[modelId, categoryIds]]),
+            }),
+          });
+          const visible = state === "visible";
+          await toPromise(provider.changeVisibility(node, visible));
+
+          expect(provider.changeCategoryState).to.have.callCount(categoryIds.length);
+          for (const categoryId of categoryIds) {
+            expect(provider.changeCategoryState).to.be.calledWith(categoryId, visible, visible);
+          }
+        });
+      }
+
+      describe("on", () => {
+        it("marks itself visible", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const spy = sinon.fake.resolves(undefined);
+          const provider = new OverridableVisibilityStateHandler({
+            viewport: createFakeSinonViewport({
+              addViewedModels: spy,
+            }),
+          });
+          await toPromise(provider.changeVisibility(node, true));
+          expect(spy).to.be.calledOnceWith(modelId);
+        });
+
+        testCategoryStateChange("visible");
+      });
+
+      describe("off", () => {
+        it("marks itself hidden", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const spy = sinon.fake.returns(true);
+          const provider = new OverridableVisibilityStateHandler({
+            viewport: createFakeSinonViewport({
+              changeModelDisplay: spy,
+            }),
+          });
+          await toPromise(provider.changeVisibility(node, false));
+          expect(spy).to.be.calledOnceWith(modelId, false);
+        });
+
+        testCategoryStateChange("hidden");
+      });
+    });
+  });
 });
+
+async function toPromise(obs: Observable<void>) {
+  return new Promise<void>((resolve, reject) => {
+    obs.subscribe({
+      next: resolve,
+      complete: resolve,
+      error: reject,
+    });
+  });
+}

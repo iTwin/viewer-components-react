@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { firstValueFrom, from, isObservable } from "rxjs";
+import { firstValueFrom, from, isObservable, mergeMap } from "rxjs";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -206,7 +206,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   protected async changeModelsVisibility(ids: Id64String[], visible: boolean) {
-    return toVoidPromise(this._visibilityStateHandler.changeModelsVisibility(ids, visible));
+    return toVoidPromise(this._visibilityStateHandler.changeModelState(ids, visible));
   }
 
   protected changeCategoryState(categoryId: Id64String, parentModelId: Id64String | undefined, on: boolean) {
@@ -217,17 +217,18 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     return toVoidPromise(this._visibilityStateHandler.changeElementGroupingNodeState(key, on));
   }
 
-  protected async changeElementState(id: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined, on: boolean, hasChildren?: boolean) {
-    return toVoidPromise(this._visibilityStateHandler.changeElementState(id, modelId, categoryId, on, hasChildren));
+  protected async changeElementState(
+    id: Id64String,
+    _modelId: Id64String | undefined,
+    _categoryId: Id64String | undefined,
+    on: boolean,
+    hasChildren?: boolean,
+  ) {
+    return toVoidPromise(this._visibilityStateHandler.changeElementState(id, on, hasChildren));
   }
 
-  protected async changeElementsState(
-    modelId: Id64String | undefined,
-    categoryId: Id64String | undefined,
-    elementIds: AsyncGenerator<Id64String>,
-    on: boolean,
-  ) {
-    return toVoidPromise(from(elementIds).pipe(this._visibilityStateHandler.changeElementsState(modelId, categoryId, on)));
+  protected async changeElementsState(elementIds: AsyncGenerator<Id64String>, on: boolean) {
+    return toVoidPromise(from(elementIds).pipe(mergeMap((id) => this._visibilityStateHandler.changeElementState(id, on))));
   }
 
   private onVisibilityChangeInternal() {

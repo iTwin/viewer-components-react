@@ -29,7 +29,7 @@ export function createElementIdsCache(iModel: IModelConnection, rulesetId: strin
 }
 
 // istanbul ignore next
-export class ElementIdsCacheImplementation {
+class ElementIdsCacheImplementation {
   private _assemblyElementIdsCache = new Map<string, Observable<string>>();
   private _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
 
