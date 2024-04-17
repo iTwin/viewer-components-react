@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added ability to track performance of `TreeWidget` component features. Requires `@itwin/presentation-components` version `5.1` or higher",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

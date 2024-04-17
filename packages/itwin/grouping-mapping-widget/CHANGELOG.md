@@ -1,8 +1,20 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 29 Feb 2024 19:46:34 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Apr 2024 15:50:19 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.25.0
+
+Wed, 17 Apr 2024 15:50:19 GMT
+
+### Minor changes
+
+- Switched to iTwinUI Lists component. ([#809](https://github.com:iTwin/viewer-components-react.git/pull/809))
+
+### Patches
+
+- Fixed isMounted returning false in certain situations. ([#814](https://github.com:iTwin/viewer-components-react.git/pull/814))
 
 ## 0.24.0
 
