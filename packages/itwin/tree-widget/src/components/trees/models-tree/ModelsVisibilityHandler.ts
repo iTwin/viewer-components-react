@@ -118,7 +118,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   protected async getSubjectNodeVisibility(ids: Id64String[], node: TreeNodeItem): Promise<VisibilityStatus> {
-    return firstValueFrom(this._visibilityStateHandler.getSubjectNodeVisibility(node, from(ids)));
+    return firstValueFrom(this._visibilityStateHandler.getSubjectNodeVisibilityStatus(node, from(ids)));
   }
 
   /**
@@ -133,7 +133,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   protected async getModelDisplayStatusAsync(id: Id64String): Promise<VisibilityStatus> {
-    return firstValueFrom(this._visibilityStateHandler.getModelDisplayStatus(id));
+    return firstValueFrom(this._visibilityStateHandler.getModelVisibilityStatus(id));
   }
 
   /**

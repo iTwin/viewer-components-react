@@ -79,11 +79,11 @@ export class VisibilityStateHandler {
 
     if (isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
-      return this.getSubjectNodeVisibility(node, from(nodeKey.instanceKeys).pipe(map((key) => key.id)));
+      return this.getSubjectNodeVisibilityStatus(node, from(nodeKey.instanceKeys).pipe(map((key) => key.id)));
     }
 
     if (isModelNode(node)) {
-      return this.getModelDisplayStatus(nodeKey.instanceKeys[0].id);
+      return this.getModelVisibilityStatus(nodeKey.instanceKeys[0].id);
     }
 
     if (isCategoryNode(node)) {
@@ -93,7 +93,7 @@ export class VisibilityStateHandler {
     return this.getElementDisplayStatus(nodeKey.instanceKeys[0].id);
   }
 
-  public getSubjectNodeVisibility(node: TreeNodeItem, subjectIds: Observable<Id64String>): Observable<VisibilityStatus> {
+  public getSubjectNodeVisibilityStatus(node: TreeNodeItem, subjectIds: Observable<Id64String>): Observable<VisibilityStatus> {
     if (!this._props.viewport.view.isSpatialView()) {
       return of(createVisibilityStatus("disabled", "subject.nonSpatialView"));
     }
@@ -106,7 +106,7 @@ export class VisibilityStateHandler {
         )
       : subjectIds.pipe(
           mergeMap((id) => this._props.subjectModelIdsCache.getSubjectModelIdObs(id)),
-          mergeMap((x) => this.getModelDisplayStatus(x)),
+          mergeMap((x) => this.getModelVisibilityStatus(x)),
         );
 
     return result.pipe(
@@ -119,7 +119,7 @@ export class VisibilityStateHandler {
     );
   }
 
-  public getModelDisplayStatus(modelId: Id64String): Observable<VisibilityStatus> {
+  public getModelVisibilityStatus(modelId: Id64String): Observable<VisibilityStatus> {
     if (!this._props.viewport.view.isSpatialView()) {
       return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
     }
@@ -428,8 +428,8 @@ export class VisibilityStateHandler {
 
   private isElementDisplayedByDefault(modelId: Id64String | undefined, categoryId: Id64String | undefined): Observable<boolean> {
     return and(
-      modelId ? this.getModelDisplayStatus(modelId).pipe(map((x) => x.state === "visible")) : of(false),
-      categoryId ? this.getModelDisplayStatus(categoryId).pipe(map((x) => x.state === "visible")) : of(false),
+      modelId ? this.getModelVisibilityStatus(modelId).pipe(map((x) => x.state === "visible")) : of(false),
+      categoryId ? this.getModelVisibilityStatus(categoryId).pipe(map((x) => x.state === "visible")) : of(false),
     );
   }
 

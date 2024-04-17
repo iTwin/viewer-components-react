@@ -98,12 +98,12 @@ class OverridableVisibilityStateHandler extends VisibilityStateHandler {
     this._overrides = props?.overrides;
   }
 
-  public override getModelDisplayStatus(modelId: string): Observable<VisibilityStatus> {
+  public override getModelVisibilityStatus(modelId: string): Observable<VisibilityStatus> {
     const override = this._overrides?.models?.get(modelId);
     if (override !== undefined) {
       return of({ state: override });
     }
-    return super.getModelDisplayStatus(modelId);
+    return super.getModelVisibilityStatus(modelId);
   }
 
   public override getCategoryDisplayStatus(categoryId: string, modelId: Id64String | undefined, hasChildren?: boolean): Observable<VisibilityStatus> {
