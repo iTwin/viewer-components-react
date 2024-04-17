@@ -8,12 +8,12 @@ import { EMPTY, firstValueFrom, from, map, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { ElementIdsCacheImplementation } from "../../../components/trees/models-tree/internal/ElementIdsCache";
 import { createSubjectModelIdsCache } from "../../../components/trees/models-tree/internal/SubjectModelIdsCache";
 import { VisibilityStateHandler } from "../../../components/trees/models-tree/internal/VisibilityStateHandler";
 import { createFakeSinonViewport, TestUtils } from "../../TestUtils";
-import { createCategoryNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
+import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
+import type { ElementIdsCache } from "../../../components/trees/models-tree/internal/ElementIdsCache";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -69,6 +69,15 @@ function createFakeQueryProvider(props?: SubjectModelIdsMockProps): QueryProvide
   return res;
 }
 
+function createFakeElementIdsCache(overrides?: Partial<ElementIdsCache>): ElementIdsCache {
+  return {
+    clear: sinon.fake(),
+    getAssemblyElementIds: sinon.fake.returns(EMPTY),
+    getGroupedElementIds: sinon.fake.returns(EMPTY),
+    ...overrides,
+  };
+}
+
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -92,7 +101,7 @@ class OverridableVisibilityStateHandler extends VisibilityStateHandler {
     super({
       queryProvider,
       subjectModelIdsCache,
-      elementIdsCache: props?.elementIdsCache ?? sinon.createStubInstance(ElementIdsCacheImplementation),
+      elementIdsCache: props?.elementIdsCache ?? createFakeElementIdsCache(),
       viewport: props?.viewport ?? createFakeSinonViewport(),
     });
     this._overrides = props?.overrides;
@@ -451,6 +460,21 @@ describe.only("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "hidden" });
         expect(viewport.view.viewsCategory).to.be.calledOnce;
       });
+
+      it("doesn't query children if known to have none", async () => {
+        const queryProvider = createFakeQueryProvider();
+        const handler = new OverridableVisibilityStateHandler({
+          queryProvider,
+          viewport: createFakeSinonViewport({
+            view: {
+              viewsCategory: sinon.fake.returns(true),
+            },
+          }),
+        });
+        const result = await firstValueFrom(handler.getCategoryDisplayStatus("0x1", undefined, false));
+        expect(result).to.include({ state: "visible" });
+        expect(queryProvider.queryCategoryElements).not.to.be.called;
+      });
     });
 
     describe("element", () => {
@@ -506,6 +530,16 @@ describe.only("VisibilityStateHandler", () => {
       });
 
       describe("no children", () => {
+        it("doesn't query children if known to have none", async () => {
+          const queryProvider = createFakeQueryProvider();
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+          });
+          const result = await firstValueFrom(handler.getElementDisplayStatus("0x1", false));
+          expect(result).to.include({ state: "visible" });
+          expect(queryProvider.queryElementChildren).not.to.be.called;
+        });
+
         it("returns 'visible' if present in the always drawn list", async () => {
           const elementId = "0x1";
           const node = createElementNode(undefined, undefined, false, elementId);
@@ -563,6 +597,56 @@ describe.only("VisibilityStateHandler", () => {
           const result = await firstValueFrom(handler.getVisibilityStatus(node));
           expect(result).to.include({ state: "visible" });
         });
+      });
+    });
+
+    describe("grouping node", () => {
+      it("returns 'visible' if all node elements are visible", async () => {
+        const elementIds = ["0x1", "0x2"];
+        const node = createElementClassGroupingNode(elementIds);
+        const spy = sinon.fake.returns(of({ elementIds: from(elementIds) }));
+        const handler = new OverridableVisibilityStateHandler({
+          elementIdsCache: createFakeElementIdsCache({ getGroupedElementIds: spy }),
+          overrides: {
+            elements: new Map(elementIds.map((x) => [x, "visible"])),
+          },
+        });
+        const result = await firstValueFrom(handler.getVisibilityStatus(node));
+        expect(result).to.include({ state: "visible" });
+        expect(spy).to.be.called.calledOnceWith(node.key);
+      });
+
+      it("returns 'hidden' if all node elements are hidden", async () => {
+        const elementIds = ["0x1", "0x2"];
+        const node = createElementClassGroupingNode(elementIds);
+        const spy = sinon.fake.returns(of({ elementIds: from(elementIds) }));
+        const handler = new OverridableVisibilityStateHandler({
+          elementIdsCache: createFakeElementIdsCache({ getGroupedElementIds: spy }),
+          overrides: {
+            elements: new Map(elementIds.map((x) => [x, "hidden"])),
+          },
+        });
+        const result = await firstValueFrom(handler.getVisibilityStatus(node));
+        expect(result).to.include({ state: "hidden" });
+        expect(spy).to.be.called.calledOnceWith(node.key);
+      });
+
+      it("returns 'partial' if some node elements are hidden", async () => {
+        const elementIds = ["0x1", "0x2"];
+        const node = createElementClassGroupingNode(elementIds);
+        const spy = sinon.fake.returns(of({ elementIds: from(elementIds) }));
+        const handler = new OverridableVisibilityStateHandler({
+          elementIdsCache: createFakeElementIdsCache({ getGroupedElementIds: spy }),
+          overrides: {
+            elements: new Map([
+              [elementIds[0], "visible"],
+              [elementIds[1], "hidden"],
+            ]),
+          },
+        });
+        const result = await firstValueFrom(handler.getVisibilityStatus(node));
+        expect(result).to.include({ state: "partial" });
+        expect(spy).to.be.called.calledOnceWith(node.key);
       });
     });
   });
