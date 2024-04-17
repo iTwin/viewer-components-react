@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 17 Apr 2024 15:50:19 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Apr 2024 17:54:44 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.25.1
+
+Wed, 17 Apr 2024 17:54:44 GMT
+
+### Patches
+
+- Fixed an issue where a passed in iModelConnection was not being used by the widget shell. ([#815](https://github.com/iTwin/viewer-components-react/pull/815))
 
 ## 0.25.0
 
