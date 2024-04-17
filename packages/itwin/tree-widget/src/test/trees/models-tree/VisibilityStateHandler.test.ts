@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { EMPTY, firstValueFrom, from, map, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { ElementIdsCacheImplementation } from "../../../components/trees/models-tree/internal/ElementIdsCache";
 import { createSubjectModelIdsCache } from "../../../components/trees/models-tree/internal/SubjectModelIdsCache";
 import { VisibilityStateHandler } from "../../../components/trees/models-tree/internal/VisibilityStateHandler";
@@ -164,7 +164,6 @@ describe.only("VisibilityStateHandler", () => {
         const viewport = createFakeSinonViewport({
           view: {
             isSpatialView: sinon.fake.returns(false),
-            viewsCategory: sinon.fake.returns(true),
           },
         });
         const handler = new OverridableVisibilityStateHandler({ viewport });
@@ -260,13 +259,29 @@ describe.only("VisibilityStateHandler", () => {
         const viewport = createFakeSinonViewport({
           view: {
             isSpatialView: sinon.fake.returns(false),
-            viewsCategory: sinon.fake.returns(true),
           },
         });
         const handler = new OverridableVisibilityStateHandler({ viewport });
         const result = await firstValueFrom(handler.getVisibilityStatus(node));
         expect(viewport.view.isSpatialView).to.be.called;
         expect(result).to.include({ state: "hidden", isDisabled: true });
+      });
+
+      it("returns 'hidden' when `viewport.view.viewsModel` returns false and doesn't query children", async () => {
+        const modelId = "0x1";
+        const node = createModelNode(modelId);
+        const queryProvider = createFakeQueryProvider();
+        const handler = new OverridableVisibilityStateHandler({
+          queryProvider,
+          viewport: createFakeSinonViewport({
+            view: {
+              viewsModel: sinon.fake.returns(false),
+            },
+          }),
+        });
+        const result = await firstValueFrom(handler.getVisibilityStatus(node));
+        expect(result).to.include({ state: "hidden" });
+        expect(queryProvider.queryModelCategories).not.to.be.called;
       });
 
       it("returns 'visible' when all categories are displayed", async () => {
@@ -325,6 +340,43 @@ describe.only("VisibilityStateHandler", () => {
     });
 
     describe("category", () => {
+      it("returns 'hidden' when `viewport.view.viewsCategory` returns false and doesn't query children", async () => {
+        const categoryId = "0x2";
+        const node = createCategoryNode(undefined, categoryId);
+        const queryProvider = createFakeQueryProvider();
+        const handler = new OverridableVisibilityStateHandler({
+          queryProvider,
+          viewport: createFakeSinonViewport({
+            view: {
+              viewsCategory: sinon.fake.returns(false),
+            },
+          }),
+        });
+        const result = await firstValueFrom(handler.getVisibilityStatus(node));
+        expect(result).to.include({ state: "hidden" });
+        expect(queryProvider.queryCategoryElements).not.to.be.called;
+      });
+
+      it("returns 'hidden' when there's a per model category override and doesn't query children", async () => {
+        const modelId = "0x1";
+        const categoryId = "0x2";
+        const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
+        const queryProvider = createFakeQueryProvider();
+        const getOverrideStub = sinon.fake.returns(PerModelCategoryVisibility.Override.Hide);
+        const handler = new OverridableVisibilityStateHandler({
+          queryProvider,
+          viewport: createFakeSinonViewport({
+            perModelCategoryVisibility: {
+              getOverride: getOverrideStub,
+            },
+          }),
+        });
+        const result = await firstValueFrom(handler.getVisibilityStatus(node));
+        expect(result).to.include({ state: "hidden" });
+        expect(getOverrideStub).to.be.calledOnceWith(modelId, categoryId);
+        expect(queryProvider.queryCategoryElements).not.to.be.called;
+      });
+
       it("returns 'visible' when all elements are displayed", async () => {
         const categoryId = "0x2";
         const elements = ["0x10", "0x20"];
