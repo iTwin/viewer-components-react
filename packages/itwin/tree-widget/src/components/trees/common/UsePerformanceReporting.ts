@@ -21,13 +21,14 @@ export interface UsePerformanceReportingResult {
 export function usePerformanceReporting(props: UsePerformanceReportingProps): UsePerformanceReportingResult {
   const { treeIdentifier, onPerformanceMeasured } = props;
 
-  const onNodeLoaded = ({ node, duration }: { node: string; duration: number }) => {
-    if (node === "root") {
-      onPerformanceMeasured?.(`${treeIdentifier}-initial-load`, duration);
-      return;
-    }
-    onPerformanceMeasured?.(`${treeIdentifier}-hierarchy-level-load`, duration);
-  };
+  if (!onPerformanceMeasured) {
+    return { onNodeLoaded: undefined };
+  }
 
-  return { onNodeLoaded: onPerformanceMeasured ? onNodeLoaded : undefined };
+  return {
+    onNodeLoaded: ({ node, duration }: { node: string; duration: number }) => {
+      const feature = `${treeIdentifier}-${node === "root" ? "initial-load" : "hierarchy-level-load"}`;
+      onPerformanceMeasured(feature, duration);
+    },
+  };
 }
