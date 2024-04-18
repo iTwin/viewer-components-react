@@ -111,7 +111,11 @@ export const GroupPropertyTable = ({
         propertyId,
       );
     },
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, groupId] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, groupId] });
+      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, groupId] });
+      await queryClient.invalidateQueries({ queryKey: ["customCalculations", iModelId, mappingId, groupId] });
+    },
   });
 
   return (

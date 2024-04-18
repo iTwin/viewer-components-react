@@ -53,7 +53,7 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefine
   { value: QuantityType.Monetary, label: "Monetary" },
   { value: QuantityType.Time, label: "Time" },
   { value: QuantityType.Volume, label: "Volume" },
-  { value: undefined, label: "No Quantity Type" }
+  { value: undefined, label: "No Quantity Type" },
 ];
 
 export const GroupPropertyAction = ({

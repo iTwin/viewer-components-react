@@ -114,7 +114,11 @@ export const CalculatedPropertyTable = ({
         propertyId,
       );
     },
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, groupId] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, groupId] });
+      await queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, groupId] });
+      await queryClient.invalidateQueries({ queryKey: ["customCalculations", iModelId, mappingId, groupId] });
+    },
   });
 
   return (
