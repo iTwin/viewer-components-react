@@ -24,6 +24,7 @@ export interface ElementIdsCache {
   getGroupedElementIds(groupingNodeKey: GroupingNodeKey): Observable<GroupedElementIds>;
 }
 
+// istanbul ignore next
 export function createElementIdsCache(iModel: IModelConnection, rulesetId: string) {
   return new ElementIdsCacheImplementation(iModel, rulesetId);
 }
@@ -66,6 +67,7 @@ class ElementIdsCacheImplementation {
   }
 }
 
+// istanbul ignore next
 function createInstanceIdsObs(imodel: IModelConnection, rulesetId: string, displayType: string, inputKeys: Keys): Observable<string> {
   return from(
     Presentation.presentation.getContentInstanceKeys({

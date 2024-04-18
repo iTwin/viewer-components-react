@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { StandardNodeTypes } from "@itwin/presentation-common";
-import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import { getNodeType } from "../../../components/trees/models-tree/NodeUtils";
+import { getNodeType } from "../../../../components/trees/models-tree/internal/NodeUtils";
+import { ModelsTreeNodeType } from "../../../../components/trees/models-tree/ModelsVisibilityHandler";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";

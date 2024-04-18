@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
+import classNames from "classnames";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
@@ -12,14 +13,13 @@ import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
+import { queryModelsForHeaderActions } from "./internal/Utils";
 import { ModelsTree } from "./ModelsTree";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
-import { queryModelsForHeaderActions } from "./Utils";
 
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { ModelsTreeProps } from "./ModelsTree";
-import classNames from "classnames";
 /**
  * Information about a single Model.
  * @public

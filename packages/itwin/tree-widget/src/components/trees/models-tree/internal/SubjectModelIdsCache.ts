@@ -7,13 +7,13 @@ import { EMPTY, expand, from, map, mergeMap, reduce, shareReplay } from "rxjs";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
-import type { QueryProvider } from "./QueryProvider";
+import type { IQueryProvider } from "./QueryProvider";
 
 export interface SubjectModelIdsCache {
   getSubjectModelIdObs(subjectId: Id64String): Observable<Id64String>;
 }
 
-export function createSubjectModelIdsCache(queryProvider: QueryProvider) {
+export function createSubjectModelIdsCache(queryProvider: IQueryProvider) {
   const cachedState = queryProvider.queryAllSubjects().pipe(
     reduce(
       (acc, subject) => {

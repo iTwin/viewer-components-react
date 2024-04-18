@@ -3,8 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { EMPTY, from, map } from "rxjs";
+import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { Id64 } from "@itwin/core-bentley";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
 import { Descriptor, PropertiesField, StandardNodeTypes } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType } from "@itwin/presentation-components";
@@ -12,7 +15,7 @@ import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNode
 
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import type {
   CategoryDescription,
   ClassInfo,
@@ -30,6 +33,85 @@ import type {
   TypeDescription,
 } from "@itwin/presentation-common";
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
+import type { IQueryProvider } from "../../components/trees/models-tree/internal/QueryProvider";
+import type { Viewport } from "../../components/trees/models-tree/internal/VisibilityStateHandler";
+import type { ViewState } from "@itwin/core-frontend";
+interface SubjectModelIdsMockProps {
+  subjectsHierarchy?: Map<Id64String, Id64String[]>;
+  subjectModels?: Map<Id64String, Id64String[]>;
+  modelCategories?: Map<Id64String, Id64String[]>;
+  categoryElements?: Map<Id64String, Id64String[]>;
+  elementHierarchy?: Map<Id64String, Id64String[]>;
+}
+
+interface SubjectsRow {
+  id: Id64String;
+  parentId?: Id64String;
+  targetPartitionId?: Id64String;
+}
+
+interface ElementRow {
+  id: Id64String;
+  parentId: Id64String;
+}
+
+export function createFakeQueryProvider(props?: SubjectModelIdsMockProps): IQueryProvider {
+  const subjectQueryRows: SubjectsRow[] = [];
+  props?.subjectsHierarchy?.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
+
+  const modelRows: ElementRow[] = [];
+  props?.subjectModels?.forEach((modelInfos, subjectId) => modelInfos.forEach((modelId) => modelRows.push({ id: modelId, parentId: subjectId })));
+
+  const res: IQueryProvider = {
+    queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
+    queryAllModels: sinon.fake.returns(from(modelRows)),
+    queryModelCategories: sinon.fake((x) => {
+      return from(props?.modelCategories?.get(x) ?? []);
+    }),
+    queryCategoryElements: sinon.fake((x) => {
+      return from(props?.categoryElements?.get(x) ?? []).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
+    }),
+    queryElementChildren: sinon.fake((x) => {
+      const children = props?.elementHierarchy?.get(x);
+      if (!children) {
+        return EMPTY;
+      }
+
+      return from(children).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
+    }),
+  };
+  return res;
+}
+
+export function createViewportStub(
+  props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
+    view?: Partial<ViewState>;
+    perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
+  },
+): Viewport {
+  return {
+    alwaysDrawn: undefined,
+    neverDrawn: undefined,
+    setAlwaysDrawn: sinon.stub(),
+    setNeverDrawn: sinon.stub(),
+    addViewedModels: sinon.stub<[Id64Arg]>().resolves(),
+    changeCategoryDisplay: sinon.stub(),
+    changeModelDisplay: sinon.stub<[Id64Arg, boolean], boolean>().returns(true),
+    isAlwaysDrawnExclusive: false,
+    ...props,
+    perModelCategoryVisibility: {
+      getOverride: sinon.stub().returns(PerModelCategoryVisibility.Override.None),
+      setOverride: sinon.fake(),
+      ...props?.perModelCategoryVisibility,
+    },
+    view: {
+      isSpatialView: sinon.fake.returns(true),
+      viewsCategory: sinon.fake.returns(true),
+      viewsModel: sinon.fake.returns(true),
+      ...props?.view,
+    },
+  };
+}
 
 export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: labelValue ?? "Node Label" });

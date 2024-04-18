@@ -27,7 +27,7 @@ import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } 
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
 import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { ModelInfo } from "../../../tree-widget-react";
-import type { QueryProvider } from "../../../components/trees/models-tree/internal/QueryProvider";
+import type { IQueryProvider } from "../../../components/trees/models-tree/internal/QueryProvider";
 describe("ModelsVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
@@ -80,14 +80,14 @@ describe("ModelsVisibilityHandler", () => {
     parentId: Id64String;
   }
 
-  function createFakeQueryProvider(props: SubjectModelIdsMockProps): QueryProvider {
+  function createFakeQueryProvider(props: SubjectModelIdsMockProps): IQueryProvider {
     const subjectQueryRows: SubjectsRow[] = [];
     props.subjectsHierarchy.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
 
     const elementQueryRows: ElementRow[] = [];
     props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => elementQueryRows.push({ id: modelInfo.id, parentId: subjectId })));
 
-    const res: QueryProvider = {
+    const res: IQueryProvider = {
       queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
       queryAllModels: sinon.fake.returns(from(elementQueryRows)),
       queryModelCategories: sinon.fake((x) => from(props.modelCategories?.get(x) ?? [])),

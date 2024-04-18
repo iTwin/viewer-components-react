@@ -14,7 +14,7 @@ import type { Observable } from "rxjs";
 /**
  * @internal
  */
-export interface QueryProvider {
+export interface IQueryProvider {
   queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>;
   queryAllModels(): Observable<{ id: Id64String; parentId: Id64String }>;
   queryModelCategories(id: Id64String): Observable<Id64String>;
@@ -22,8 +22,8 @@ export interface QueryProvider {
   queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }>;
 }
 
-// istanbul-ignore-next
-class QueryProviderImplementation implements QueryProvider {
+/* istanbul ignore next */
+class QueryProviderImplementation implements IQueryProvider {
   constructor(private readonly _iModel: IModelConnection) {}
 
   public queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }> {
@@ -60,19 +60,17 @@ class QueryProviderImplementation implements QueryProvider {
     return this.runQuery(query, [id], (row) => row.ecInstanceId);
   }
 
-  private get hasChildrenClause(): string {
-    return `--sql
-      (EXISTS (
-        SELECT 1
-        FROM (
-          SELECT Parent.Id ParentId FROM bis.GeometricElement3d
-          UNION ALL
-          SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
-        )
-        WHERE ParentId = this.ECInstanceId
-      )) AS HasChildren
-    `;
-  }
+  private readonly hasChildrenClause = /* sql */ `
+    (EXISTS (
+      SELECT 1
+      FROM (
+        SELECT Parent.Id ParentId FROM bis.GeometricElement3d
+        UNION ALL
+        SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
+      )
+      WHERE ParentId = this.ECInstanceId
+    )) AS HasChildren
+  `;
 
   public queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }> {
     const query = /* sql */ `
@@ -110,7 +108,7 @@ class QueryProviderImplementation implements QueryProvider {
 /**
  * @internal
  */
-export function createQueryProvider(iModel: IModelConnection): QueryProvider {
-  // istanbul-ignore-next
+/* istanbul ignore next */
+export function createQueryProvider(iModel: IModelConnection): IQueryProvider {
   return new QueryProviderImplementation(iModel);
 }

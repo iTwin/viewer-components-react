@@ -16,9 +16,9 @@ import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTre
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { createQueryProvider } from "./internal/QueryProvider";
 import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
+import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./internal/Utils";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler } from "./ModelsVisibilityHandler";
-import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";

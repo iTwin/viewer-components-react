@@ -10,8 +10,8 @@ import { IModelApp } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
+import { getNodeType } from "./internal/NodeUtils";
 import { ModelsTreeNodeType } from "./ModelsVisibilityHandler";
-import { getNodeType } from "./NodeUtils";
 
 import type { TreeNodeEventArgs } from "@itwin/components-react";
 export class ModelsTreeEventHandler extends VisibilityTreeEventHandler {

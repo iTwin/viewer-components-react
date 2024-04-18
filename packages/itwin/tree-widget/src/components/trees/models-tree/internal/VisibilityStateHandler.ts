@@ -7,12 +7,12 @@ import { concat, concatMap, defer, EMPTY, from, map, mergeAll, mergeMap, of, red
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
-import { reduceWhile } from "../../../utils/RxjsOperators";
-import { getCategoryParentModelId, isCategoryNode, isModelNode, isSubjectNode } from "../NodeUtils";
+import { reduceWhile } from "../../common/Rxjs";
+import { getCategoryParentModelId, isCategoryNode, isModelNode, isSubjectNode } from "./NodeUtils";
 import { createVisibilityStatus } from "./Tooltip";
 
 import type { Visibility } from "./Tooltip";
-import type { QueryProvider as QueryProvider } from "./QueryProvider";
+import type { IQueryProvider as IQueryProvider } from "./QueryProvider";
 import type { SubjectModelIdsCache } from "./SubjectModelIdsCache";
 import type { ElementIdsCache } from "./ElementIdsCache";
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
@@ -50,7 +50,7 @@ export interface VisibilityStatusRetrieverProps {
   viewport: Viewport;
   elementIdsCache: ElementIdsCache;
   subjectModelIdsCache: SubjectModelIdsCache;
-  queryProvider: QueryProvider;
+  queryProvider: IQueryProvider;
 }
 
 /** @internal */

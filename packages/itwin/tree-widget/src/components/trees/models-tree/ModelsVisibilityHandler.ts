@@ -8,21 +8,22 @@ import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
+import { toVoidPromise } from "../common/Rxjs";
+import { createCachingQueryProvider } from "./internal/CachingQueryProvider";
 import { createElementIdsCache } from "./internal/ElementIdsCache";
+import * as NodeUtils from "./internal/NodeUtils";
 import { createQueryProvider } from "./internal/QueryProvider";
 import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { VisibilityStateHandler } from "./internal/VisibilityStateHandler";
-import * as NodeUtils from "./NodeUtils";
 
 import type { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
-import type { QueryProvider } from "./internal/QueryProvider";
+import type { IQueryProvider } from "./internal/QueryProvider";
 import type { ECClassGroupingNodeKey, NodeKey } from "@itwin/presentation-common";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { Observable } from "rxjs";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 /**
  * Models tree node types.
@@ -53,7 +54,7 @@ export interface ModelsVisibilityHandlerProps {
   hierarchyAutoUpdateEnabled?: boolean;
   /** @internal */
   subjectModelIdsCache?: SubjectModelIdsCache;
-  queryProvider?: QueryProvider;
+  queryProvider?: IQueryProvider;
 }
 
 /**
@@ -69,7 +70,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
     const elementIdsCache = createElementIdsCache(this._props.viewport.iModel, this._props.rulesetId);
-    const queryProvider = this._props.queryProvider ?? createQueryProvider(this._props.viewport.iModel);
+    const queryProvider = this._props.queryProvider ?? createCachingQueryProvider(createQueryProvider(this._props.viewport.iModel));
     const subjectModelIdsCache = props.subjectModelIdsCache ?? createSubjectModelIdsCache(queryProvider);
     this._visibilityStateHandler = new VisibilityStateHandler({
       viewport: this._props.viewport,
@@ -318,15 +319,4 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
  */
 export function areAllModelsVisible(models: string[], viewport: Viewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
-}
-
-/** Same as `firstValueFrom` except it won't throw if the observable emits no values. */
-async function toVoidPromise(obs: Observable<void> | Observable<undefined>): Promise<void> {
-  return new Promise((resolve, reject) => {
-    obs.subscribe({
-      next: resolve,
-      complete: resolve,
-      error: reject,
-    });
-  });
 }

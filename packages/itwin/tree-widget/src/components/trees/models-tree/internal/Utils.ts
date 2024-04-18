@@ -7,11 +7,11 @@ import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common
 import type { IModelConnection } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 
-import type { ModelInfo } from "./ModelsTreeComponent";
+import type { ModelInfo } from "../ModelsTreeComponent";
 
 import type { ChildNodeSpecification, Node, Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
-import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
+import type { ModelsTreeHierarchyConfiguration } from "../ModelsTree";
 
 /** @internal */
 export type CreateRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping"> & {

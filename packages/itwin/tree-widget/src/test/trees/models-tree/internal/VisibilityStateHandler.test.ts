@@ -4,70 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { EMPTY, firstValueFrom, from, map, of } from "rxjs";
+import { EMPTY, firstValueFrom, from, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { createSubjectModelIdsCache } from "../../../components/trees/models-tree/internal/SubjectModelIdsCache";
-import { VisibilityStateHandler } from "../../../components/trees/models-tree/internal/VisibilityStateHandler";
-import { createFakeSinonViewport, TestUtils } from "../../TestUtils";
-import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
+import { createSubjectModelIdsCache } from "../../../../components/trees/models-tree/internal/SubjectModelIdsCache";
+import { VisibilityStateHandler } from "../../../../components/trees/models-tree/internal/VisibilityStateHandler";
+import { createFakeSinonViewport, TestUtils } from "../../../TestUtils";
+import {
+  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeQueryProvider, createModelNode, createSubjectNode,
+} from "../../Common";
 
-import type { QueryProvider } from "../../../components/trees/models-tree/internal/QueryProvider";
-import type { ElementIdsCache } from "../../../components/trees/models-tree/internal/ElementIdsCache";
+import type { ElementIdsCache } from "../../../../components/trees/models-tree/internal/ElementIdsCache";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { VisibilityStatusRetrieverProps } from "../../../components/trees/models-tree/internal/VisibilityStateHandler";
-import type { VisibilityStatus } from "../../../tree-widget-react";
-import type { Visibility } from "../../../components/trees/models-tree/internal/Tooltip";
-interface SubjectModelIdsMockProps {
-  subjectsHierarchy?: Map<Id64String, Id64String[]>;
-  subjectModels?: Map<Id64String, Id64String[]>;
-  modelCategories?: Map<Id64String, Id64String[]>;
-  categoryElements?: Map<Id64String, Id64String[]>;
-  elementHierarchy?: Map<Id64String, Id64String[]>;
-}
-
-interface SubjectsRow {
-  id: Id64String;
-  parentId?: Id64String;
-  targetPartitionId?: Id64String;
-}
-
-interface ElementRow {
-  id: Id64String;
-  parentId: Id64String;
-}
-
-function createFakeQueryProvider(props?: SubjectModelIdsMockProps): QueryProvider {
-  const subjectQueryRows: SubjectsRow[] = [];
-  props?.subjectsHierarchy?.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
-
-  const modelRows: ElementRow[] = [];
-  props?.subjectModels?.forEach((modelInfos, subjectId) => modelInfos.forEach((modelId) => modelRows.push({ id: modelId, parentId: subjectId })));
-
-  const res: QueryProvider = {
-    queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
-    queryAllModels: sinon.fake.returns(from(modelRows)),
-    queryModelCategories: sinon.fake((x) => {
-      return from(props?.modelCategories?.get(x) ?? []);
-    }),
-    queryCategoryElements: sinon.fake((x) => {
-      return from(props?.categoryElements?.get(x) ?? []).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
-    }),
-    queryElementChildren: sinon.fake((x) => {
-      const children = props?.elementHierarchy?.get(x);
-      if (!children) {
-        return EMPTY;
-      }
-
-      return from(children).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
-    }),
-  };
-  return res;
-}
+import type { VisibilityStatusRetrieverProps } from "../../../../components/trees/models-tree/internal/VisibilityStateHandler";
+import type { VisibilityStatus } from "../../../../tree-widget-react";
+import type { Visibility } from "../../../../components/trees/models-tree/internal/Tooltip";
 
 function createFakeElementIdsCache(overrides?: Partial<ElementIdsCache>): ElementIdsCache {
   return {
@@ -132,7 +87,7 @@ class OverridableVisibilityStateHandler extends VisibilityStateHandler {
   public override changeModelState = sinon.fake(super.changeModelState.bind(this));
 }
 
-describe.only("VisibilityStateHandler", () => {
+describe("VisibilityStateHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();

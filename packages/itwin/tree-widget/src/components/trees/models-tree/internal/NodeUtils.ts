@@ -5,7 +5,7 @@
 
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
-import { ModelsTreeNodeType } from "./ModelsVisibilityHandler";
+import { ModelsTreeNodeType } from "../ModelsVisibilityHandler";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
