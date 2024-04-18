@@ -195,7 +195,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   protected async getElementDisplayStatusAsync(elementId: Id64String): Promise<VisibilityStatus> {
-    return firstValueFrom(this._visibilityStateHandler.getElementDisplayStatus(elementId));
+    return (await firstValueFrom(this._visibilityStateHandler.getElementDisplayStatus(elementId))) ?? createVisibilityStatus("visible");
   }
 
   protected async changeSubjectNodeState(ids: Id64String[], node: TreeNodeItem, on: boolean) {

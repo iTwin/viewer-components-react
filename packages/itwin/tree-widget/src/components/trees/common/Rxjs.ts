@@ -66,3 +66,21 @@ export async function toVoidPromise(obs: Observable<void> | Observable<undefined
     });
   });
 }
+
+type ValueOrCallback<T> = T extends (...args: any[]) => any ? never : T | (() => T);
+
+/**
+ * Converts Observable<T | undefined> to Observable<T> using a callback for default values.
+ */
+export function unwrap<T>(valuerOrCb: ValueOrCallback<T>): OperatorFunction<T | undefined, T> {
+  return (obs) => {
+    return obs.pipe(
+      map((x) => {
+        if (x === undefined) {
+          return typeof valuerOrCb === "function" ? valuerOrCb() : valuerOrCb;
+        }
+        return x;
+      }),
+    );
+  };
+}

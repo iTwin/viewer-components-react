@@ -15,7 +15,6 @@ import { renderHook as renderHookRTL, render as renderRTL } from "@testing-libra
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
 
-import type { Id64Arg } from "@itwin/core-bentley";
 import type { PropsWithChildren, ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
@@ -140,15 +139,15 @@ export function createFakeSinonViewport(
   return {
     alwaysDrawn: undefined,
     neverDrawn: undefined,
-    setAlwaysDrawn: sinon.stub(),
-    setNeverDrawn: sinon.stub(),
-    addViewedModels: sinon.stub<[Id64Arg]>().resolves(),
-    changeCategoryDisplay: sinon.stub(),
-    changeModelDisplay: sinon.stub<[Id64Arg, boolean], boolean>().returns(true),
+    setAlwaysDrawn: sinon.fake(),
+    setNeverDrawn: sinon.fake(),
+    addViewedModels: sinon.fake.resolves(undefined),
+    changeCategoryDisplay: sinon.fake(),
+    changeModelDisplay: sinon.fake.returns(true),
     isAlwaysDrawnExclusive: false,
     ...props,
     perModelCategoryVisibility: {
-      getOverride: sinon.stub().returns(PerModelCategoryVisibility.Override.None),
+      getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
       setOverride: sinon.fake(),
       ...props?.perModelCategoryVisibility,
     },

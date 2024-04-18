@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatMap, defer, EMPTY, from, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
+import { concat, concatMap, defer, EMPTY, filter, from, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
@@ -90,7 +90,7 @@ export class VisibilityStateHandler {
       return this.getCategoryDisplayStatus(nodeKey.instanceKeys[0].id, getCategoryParentModelId(node));
     }
 
-    return this.getElementDisplayStatus(nodeKey.instanceKeys[0].id);
+    return this.getElementDisplayStatus(nodeKey.instanceKeys[0].id).pipe(map((x) => x ?? createVisibilityStatus("visible")));
   }
 
   public getSubjectNodeVisibilityStatus(node: TreeNodeItem, subjectIds: Observable<Id64String>): Observable<VisibilityStatus> {
@@ -124,10 +124,6 @@ export class VisibilityStateHandler {
       return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
     }
 
-    if (!this._props.viewport.view.viewsModel(modelId)) {
-      return of(createVisibilityStatus("hidden"));
-    }
-
     return this._props.queryProvider.queryModelCategories(modelId).pipe(
       mergeMap((categoryId) => this.getCategoryDisplayStatus(categoryId, modelId)),
       map((x) => x.state),
@@ -146,42 +142,37 @@ export class VisibilityStateHandler {
       : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
   }
 
-  private getDefaultCategoryVisibilityStatus(
-    categoryId: Id64String,
-    modelId: Id64String | undefined,
-    viewportVisibility: VisibilityStatus,
-  ): VisibilityStatus | undefined {
-    if (viewportVisibility?.state === "hidden") {
+  private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String | undefined): VisibilityStatus {
+    const viewportVisibility = this.getCategoryViewportVisibilityStatus(categoryId);
+    if (!modelId) {
       return viewportVisibility;
     }
 
-    if (modelId && this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId) === PerModelCategoryVisibility.Override.Hide) {
-      return createVisibilityStatus("hidden", "category.hiddenThroughPerModelOverride");
+    switch (this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId)) {
+      case PerModelCategoryVisibility.Override.Show:
+        return createVisibilityStatus("visible");
+      case PerModelCategoryVisibility.Override.Hide:
+        return createVisibilityStatus("hidden");
     }
 
-    return undefined;
+    return viewportVisibility;
   }
 
   public getCategoryDisplayStatus(categoryId: Id64String, modelId: Id64String | undefined, hasChildren?: boolean): Observable<VisibilityStatus> {
     return defer(() => {
-      const viewportVisibility = this.getCategoryViewportVisibilityStatus(categoryId);
-      const defaultVisibilityStatus = this.getDefaultCategoryVisibilityStatus(categoryId, modelId, viewportVisibility);
-      if (defaultVisibilityStatus) {
-        return of(defaultVisibilityStatus);
-      }
-
+      const defaultStatus = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
       if (hasChildren === false) {
-        return of(viewportVisibility);
+        return of(defaultStatus);
       }
 
       return this._props.queryProvider.queryCategoryElements(categoryId, modelId).pipe(
         mergeMap((x) => this.getElementDisplayStatus(x.id, x.hasChildren)),
-        map((x) => x.state),
+        map((x) => x?.state ?? defaultStatus.state),
         getVisibilityStatusFromChildren({
           visible: undefined,
           hidden: "category.allChildrenAreHidden",
           partial: "category.someChildrenAreHidden",
-          empty: viewportVisibility,
+          empty: () => defaultStatus,
         }),
       );
     });
@@ -191,7 +182,7 @@ export class VisibilityStateHandler {
     return this._props.elementIdsCache.getGroupedElementIds(key).pipe(
       mergeMap(({ elementIds }) => elementIds),
       mergeMap((x) => this.getElementDisplayStatus(x)),
-      map((x) => x.state),
+      map((x) => x?.state ?? "visible"),
       getVisibilityStatusFromChildren({
         visible: undefined,
         hidden: "element.allChildrenAreHidden",
@@ -200,37 +191,41 @@ export class VisibilityStateHandler {
     );
   }
 
-  public getElementDisplayStatus(elementId: Id64String, hasChildren?: boolean): Observable<VisibilityStatus> {
-    const getViewportVisibility = () => {
-      if (this._props.viewport.neverDrawn?.has(elementId)) {
-        return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
-      }
-
-      if (this._props.viewport.alwaysDrawn) {
-        if (this._props.viewport.alwaysDrawn.has(elementId)) {
-          return createVisibilityStatus("visible", "element.displayedThroughAlwaysDrawnList");
-        }
-
-        if (this._props.viewport.alwaysDrawn.size !== 0) {
-          return createVisibilityStatus("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
-        }
-      }
-
-      return createVisibilityStatus("visible");
-    };
-
-    if (hasChildren === false) {
-      return of(getViewportVisibility());
+  /**
+   * Returns element visibility status if it can affect parent's visibility.
+   */
+  private getElementOverriddenVisibility(id: Id64String): VisibilityStatus | undefined {
+    if (this._props.viewport.neverDrawn?.has(id)) {
+      return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
     }
 
-    return this._props.queryProvider.queryElementChildren(elementId).pipe(
+    if (this._props.viewport.alwaysDrawn) {
+      if (this._props.viewport.alwaysDrawn.has(id)) {
+        return createVisibilityStatus("visible", "element.displayedThroughAlwaysDrawnList");
+      }
+
+      if (this._props.viewport.alwaysDrawn.size !== 0) {
+        return createVisibilityStatus("hidden", "element.hiddenDueToOtherElementsExclusivelyAlwaysDrawn");
+      }
+    }
+
+    return undefined;
+  }
+
+  public getElementDisplayStatus(id: Id64String, hasChildren?: boolean): Observable<VisibilityStatus | undefined> {
+    if (hasChildren === false) {
+      return of(this.getElementOverriddenVisibility(id));
+    }
+
+    return this._props.queryProvider.queryElementChildren(id).pipe(
       mergeMap((x) => this.getElementDisplayStatus(x.id, x.hasChildren)),
+      filter((x): x is Exclude<typeof x, undefined> => !!x),
       map((x) => x.state),
       getVisibilityStatusFromChildren({
         visible: undefined,
         hidden: "element.allChildrenAreHidden",
         partial: "element.someChildrenAreHidden",
-        empty: getViewportVisibility,
+        empty: () => this.getElementOverriddenVisibility(id),
       }),
     );
   }
@@ -426,18 +421,18 @@ function getVisibilityFromChildren(obs: Observable<Visibility>): Observable<Visi
   );
 }
 
-function getVisibilityStatusFromChildren(
+function getVisibilityStatusFromChildren<TEmpty>(
   tooltipMap: { [key in Visibility]: string | undefined } & {
-    empty?: VisibilityStatus | (() => VisibilityStatus);
+    empty?: () => TEmpty;
   },
-): OperatorFunction<Visibility, VisibilityStatus> {
+): OperatorFunction<Visibility, VisibilityStatus | TEmpty> {
   return (obs) => {
     return getVisibilityFromChildren(obs).pipe(
       map((visibility) => {
         if (visibility === "empty") {
           const res = tooltipMap.empty;
           if (res) {
-            return typeof res === "function" ? res() : res;
+            return res();
           }
           visibility = "visible";
         }

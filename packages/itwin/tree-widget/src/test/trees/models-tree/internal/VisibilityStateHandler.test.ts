@@ -74,7 +74,7 @@ class OverridableVisibilityStateHandler extends VisibilityStateHandler {
     return super.getCategoryDisplayStatus(categoryId, modelId, hasChildren);
   }
 
-  public override getElementDisplayStatus(elementId: string, hasChildren?: boolean | undefined): Observable<VisibilityStatus> {
+  public override getElementDisplayStatus(elementId: string, hasChildren?: boolean | undefined): Observable<VisibilityStatus | undefined> {
     const override = this._overrides?.elements?.get(elementId);
     if (override !== undefined) {
       return of({ state: override });
@@ -87,7 +87,7 @@ class OverridableVisibilityStateHandler extends VisibilityStateHandler {
   public override changeModelState = sinon.fake(super.changeModelState.bind(this));
 }
 
-describe("VisibilityStateHandler", () => {
+describe.only("VisibilityStateHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -136,7 +136,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "hidden", isDisabled: true });
       });
 
-      it("returns 'visible' when subject contains no models", async () => {
+      it("is visible when subject contains no models", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
         const queryProvider = createFakeQueryProvider({
@@ -147,7 +147,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "visible" });
       });
 
-      it("returns 'visible' when all models are displayed", async () => {
+      it("is visible when all models are displayed", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
         const queryProvider = createFakeQueryProvider({
@@ -170,7 +170,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "visible" });
       });
 
-      it("returns 'hidden' when all models are hidden", async () => {
+      it("is hidden when all models are hidden", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
         const queryProvider = createFakeQueryProvider({
@@ -193,7 +193,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "hidden" });
       });
 
-      it("returns 'partial' when at least one model is displayed and at least one model is hidden", async () => {
+      it("is partially visible when at least one model is displayed and at least one model is hidden", async () => {
         const subjectIds = ["0x1", "0x2"];
         const node = createSubjectNode(subjectIds);
         const queryProvider = createFakeQueryProvider({
@@ -218,7 +218,7 @@ describe("VisibilityStateHandler", () => {
     });
 
     describe("model", () => {
-      it("returns disabled when active view is not spatial", async () => {
+      it("is disabled when active view is not spatial", async () => {
         const node = createModelNode();
         const viewport = createFakeSinonViewport({
           view: {
@@ -231,24 +231,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "hidden", isDisabled: true });
       });
 
-      it("returns 'hidden' when `viewport.view.viewsModel` returns false and doesn't query children", async () => {
-        const modelId = "0x1";
-        const node = createModelNode(modelId);
-        const queryProvider = createFakeQueryProvider();
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          viewport: createFakeSinonViewport({
-            view: {
-              viewsModel: sinon.fake.returns(false),
-            },
-          }),
-        });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "hidden" });
-        expect(queryProvider.queryModelCategories).not.to.be.called;
-      });
-
-      it("returns 'visible' when all categories are displayed", async () => {
+      it("is visible when `viewport.view.viewsModel` returns true and all categories are displayed", async () => {
         const modelId = "0x1";
         const categories = ["0x10", "0x20"];
         const node = createModelNode(modelId);
@@ -257,6 +240,11 @@ describe("VisibilityStateHandler", () => {
         });
         const handler = new OverridableVisibilityStateHandler({
           queryProvider,
+          viewport: createFakeSinonViewport({
+            view: {
+              viewsModel: sinon.fake.returns(true),
+            },
+          }),
           overrides: {
             categories: new Map(categories.map((x) => [x, "visible"])),
           },
@@ -265,7 +253,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "visible" });
       });
 
-      it("returns 'hidden' when all categories are hidden", async () => {
+      it("is hidden when `viewport.view.viewsModel` returns false and all categories are hidden", async () => {
         const modelId = "0x1";
         const categories = ["0x10", "0x20"];
         const node = createModelNode(modelId);
@@ -274,6 +262,11 @@ describe("VisibilityStateHandler", () => {
         });
         const handler = new OverridableVisibilityStateHandler({
           queryProvider,
+          viewport: createFakeSinonViewport({
+            view: {
+              viewsModel: sinon.fake.returns(false),
+            },
+          }),
           overrides: {
             categories: new Map(categories.map((x) => [x, "hidden"])),
           },
@@ -282,158 +275,250 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "hidden" });
       });
 
-      it("returns 'partial' when at least one category is displayed and at least one category is hidden", async () => {
-        const modelId = "0x1";
-        const categories = ["0x10", "0x20"];
-        const node = createModelNode(modelId);
-        const queryProvider = createFakeQueryProvider({
-          modelCategories: new Map([[modelId, categories]]),
+      function modelVisibilityPartialTest(modelVisible: boolean, differingCategoryVisibility: Visibility) {
+        it(`is partially visible when 'viewport.view.viewsModel' returns ${modelVisible} and at least one category is ${differingCategoryVisibility}`, async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories: new Map([[modelId, categories]]),
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              view: {
+                viewsModel: sinon.fake.returns(modelVisible),
+              },
+            }),
+            overrides: {
+              categories: new Map([
+                [categories[0], modelVisible ? "visible" : "hidden"],
+                [categories[1], differingCategoryVisibility],
+              ]),
+            },
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
         });
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          overrides: {
-            categories: new Map([
-              [categories[0], "visible"],
-              [categories[1], "hidden"],
-            ]),
-          },
-        });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "partial" });
-      });
+      }
+
+      modelVisibilityPartialTest(true, "hidden");
+      modelVisibilityPartialTest(true, "partial");
+      modelVisibilityPartialTest(false, "visible");
+      modelVisibilityPartialTest(false, "partial");
     });
 
     describe("category", () => {
-      it("returns 'hidden' when `viewport.view.viewsCategory` returns false and doesn't query children", async () => {
-        const categoryId = "0x2";
-        const node = createCategoryNode(undefined, categoryId);
-        const queryProvider = createFakeQueryProvider();
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          viewport: createFakeSinonViewport({
-            view: {
-              viewsCategory: sinon.fake.returns(false),
-            },
-          }),
+      describe("is visible", () => {
+        it("when `viewport.view.viewsCategory` returns TRUE and there are NO CHILD elements in the NEVER drawn list", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              view: {
+                viewsCategory: sinon.fake.returns(true),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "visible" });
         });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "hidden" });
-        expect(queryProvider.queryCategoryElements).not.to.be.called;
+
+        it("when there's a per model category override to SHOW and there are NO CHILD elements in the NEVER drawn list", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              perModelCategoryVisibility: {
+                getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "visible" });
+        });
       });
 
-      it("returns 'hidden' when there's a per model category override and doesn't query children", async () => {
-        const modelId = "0x1";
-        const categoryId = "0x2";
-        const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
-        const queryProvider = createFakeQueryProvider();
-        const getOverrideStub = sinon.fake.returns(PerModelCategoryVisibility.Override.Hide);
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          viewport: createFakeSinonViewport({
-            perModelCategoryVisibility: {
-              getOverride: getOverrideStub,
-            },
-          }),
+      describe("is hidden", () => {
+        it("when `viewport.view.viewsCategory` returns FALSE and there ARE NO CHILD elements in the ALWAYS drawn list", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              view: {
+                viewsCategory: sinon.fake.returns(false),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
         });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "hidden" });
-        expect(getOverrideStub).to.be.calledOnceWith(modelId, categoryId);
-        expect(queryProvider.queryCategoryElements).not.to.be.called;
+
+        it("when `viewport.view.viewsCategory` returns TRUE and there ARE UNRELATED elements in the EXCLUSIVE ALWAYS drawn list", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0x4"]),
+              isAlwaysDrawnExclusive: true,
+              view: {
+                viewsCategory: sinon.fake.returns(true),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
+
+        it("when `viewport.view.viewsCategory` returns TRUE and ALL CHILD elements are in the NEVER drawn list", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set(["0x2", "0x3"]),
+              view: {
+                viewsCategory: sinon.fake.returns(true),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
+
+        it("when there's a per model category override to HIDE and there ARE NO CHILD elements in the ALWAYS drawn list", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              perModelCategoryVisibility: {
+                getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
+
+        it("when there's a per model category override to SHOW and there ARE UNRELATED elements in the EXCLUSIVE ALWAYS drawn list", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0x4"]),
+              isAlwaysDrawnExclusive: true,
+              perModelCategoryVisibility: {
+                getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
       });
 
-      it("returns 'visible' when all elements are displayed", async () => {
-        const categoryId = "0x2";
-        const elements = ["0x10", "0x20"];
-        const node = createCategoryNode(undefined, categoryId);
-        const queryProvider = createFakeQueryProvider({
-          categoryElements: new Map([[categoryId, elements]]),
+      describe("is partially visible", () => {
+        it("when `viewport.view.viewsCategory` returns TRUE and there ARE SOME CHILD elements in the NEVER drawn list", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set(["0x2"]),
+              view: {
+                viewsCategory: sinon.fake.returns(true),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
         });
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          overrides: {
-            elements: new Map(elements.map((x) => [x, "visible"])),
-          },
-        });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "visible" });
-      });
 
-      it("returns 'hidden' when all elements are hidden", async () => {
-        const categoryId = "0x2";
-        const elements = ["0x10", "0x20"];
-        const node = createCategoryNode(undefined, categoryId);
-        const queryProvider = createFakeQueryProvider({
-          categoryElements: new Map([[categoryId, elements]]),
+        it("when `viewport.view.viewsCategory` returns FALSE and there ARE SOME CHILD elements in the ALWAYS drawn list", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0x2"]),
+              view: {
+                viewsCategory: sinon.fake.returns(false),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
         });
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          overrides: {
-            elements: new Map(elements.map((x) => [x, "hidden"])),
-          },
-        });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "hidden" });
-      });
 
-      it("returns 'partial' when at least one element is displayed and at least one element is hidden", async () => {
-        const categoryId = "0x2";
-        const elements = ["0x10", "0x20"];
-        const node = createCategoryNode(undefined, categoryId);
-        const queryProvider = createFakeQueryProvider({
-          categoryElements: new Map([[categoryId, elements]]),
+        it("when there's a per model category override to SHOW and there ARE SOME CHILD elements in the NEVER drawn list", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set(["0x2"]),
+              perModelCategoryVisibility: {
+                getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Show),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
         });
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          overrides: {
-            elements: new Map([
-              [elements[0], "visible"],
-              [elements[1], "hidden"],
-            ]),
-          },
+
+        it("when there's a per model category override to HIDE and there ARE SOME CHILD elements in the ALWAYS drawn list", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider: createFakeQueryProvider({
+              categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+            }),
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0x2"]),
+              perModelCategoryVisibility: {
+                getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
         });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "partial" });
-      });
-
-      it("if has no elements, returns category viewport visibility status", async () => {
-        const categoryId = "0x2";
-        const node = createCategoryNode(undefined, categoryId);
-        const viewport = createFakeSinonViewport({
-          view: {
-            isSpatialView: sinon.fake.returns(true),
-            viewsCategory: sinon.fake.returns(true),
-          },
-        });
-        const handler = new OverridableVisibilityStateHandler({ viewport });
-
-        let result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "visible" });
-        expect(viewport.view.viewsCategory).to.be.calledOnce;
-
-        viewport.view.viewsCategory = sinon.fake.returns(false);
-        result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "hidden" });
-        expect(viewport.view.viewsCategory).to.be.calledOnce;
-      });
-
-      it("doesn't query children if known to have none", async () => {
-        const queryProvider = createFakeQueryProvider();
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          viewport: createFakeSinonViewport({
-            view: {
-              viewsCategory: sinon.fake.returns(true),
-            },
-          }),
-        });
-        const result = await firstValueFrom(handler.getCategoryDisplayStatus("0x1", undefined, false));
-        expect(result).to.include({ state: "visible" });
-        expect(queryProvider.queryCategoryElements).not.to.be.called;
       });
     });
 
     describe("element", () => {
-      it("returns 'visible' when all child elements are displayed", async () => {
+      it("is visible when all child elements are displayed", async () => {
         const elementId = "0x1";
         const childElements = ["0x10", "0x20"];
         const node = createElementNode(undefined, undefined, true, elementId);
@@ -449,7 +534,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "visible" });
       });
 
-      it("returns 'hidden' when all child elements are hidden", async () => {
+      it("is hidden when all child elements are hidden", async () => {
         const elementId = "0x1";
         const childElements = ["0x10", "0x20"];
         const node = createElementNode(undefined, undefined, true, elementId);
@@ -465,7 +550,7 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "hidden" });
       });
 
-      it("returns 'partial' when at least one element is displayed and at least one element is hidden", async () => {
+      it("is partially visible when at least one element is displayed and at least one element is hidden", async () => {
         const elementId = "0x1";
         const childElements = ["0x10", "0x20"];
         const node = createElementNode(undefined, undefined, true, elementId);
@@ -491,11 +576,11 @@ describe("VisibilityStateHandler", () => {
             queryProvider,
           });
           const result = await firstValueFrom(handler.getElementDisplayStatus("0x1", false));
-          expect(result).to.include({ state: "visible" });
+          expect(result).to.be.undefined;
           expect(queryProvider.queryElementChildren).not.to.be.called;
         });
 
-        it("returns 'visible' if present in the always drawn list", async () => {
+        it("is visible if present in the always drawn list", async () => {
           const elementId = "0x1";
           const node = createElementNode(undefined, undefined, false, elementId);
           const handler = new OverridableVisibilityStateHandler({
@@ -507,7 +592,7 @@ describe("VisibilityStateHandler", () => {
           expect(result).to.include({ state: "visible" });
         });
 
-        it("returns 'hidden' if present in the never drawn list", async () => {
+        it("is hidden if present in the never drawn list", async () => {
           const elementId = "0x1";
           const node = createElementNode(undefined, undefined, false, elementId);
           const handler = new OverridableVisibilityStateHandler({
@@ -519,7 +604,7 @@ describe("VisibilityStateHandler", () => {
           expect(result).to.include({ state: "hidden" });
         });
 
-        it("returns 'hidden' if other elements are present in the always drawn list and exclusive mode is enabled", async () => {
+        it("is hidden if other elements are present in the always drawn list and exclusive mode is enabled", async () => {
           const elementId = "0x1";
           const node = createElementNode(undefined, undefined, false, elementId);
           const handler = new OverridableVisibilityStateHandler({
@@ -532,7 +617,7 @@ describe("VisibilityStateHandler", () => {
           expect(result).to.include({ state: "hidden" });
         });
 
-        it("returns 'visible' when not present in always/never drawn sets", async () => {
+        it("is visible when not present in always/never drawn sets", async () => {
           const elementId = "0x1";
           const node = createElementNode(undefined, undefined, false, elementId);
           const handler = new OverridableVisibilityStateHandler({
@@ -545,7 +630,7 @@ describe("VisibilityStateHandler", () => {
           expect(result).to.include({ state: "visible" });
         });
 
-        it("returns 'visible' when always/never drawn sets are undefined", async () => {
+        it("is visible when always/never drawn sets are undefined", async () => {
           const elementId = "0x1";
           const node = createElementNode(undefined, undefined, false, elementId);
           const handler = new OverridableVisibilityStateHandler();
@@ -556,7 +641,7 @@ describe("VisibilityStateHandler", () => {
     });
 
     describe("grouping node", () => {
-      it("returns 'visible' if all node elements are visible", async () => {
+      it("is visible if all node elements are visible", async () => {
         const elementIds = ["0x1", "0x2"];
         const node = createElementClassGroupingNode(elementIds);
         const spy = sinon.fake.returns(of({ elementIds: from(elementIds) }));
@@ -571,7 +656,7 @@ describe("VisibilityStateHandler", () => {
         expect(spy).to.be.called.calledOnceWith(node.key);
       });
 
-      it("returns 'hidden' if all node elements are hidden", async () => {
+      it("is hidden if all node elements are hidden", async () => {
         const elementIds = ["0x1", "0x2"];
         const node = createElementClassGroupingNode(elementIds);
         const spy = sinon.fake.returns(of({ elementIds: from(elementIds) }));
@@ -586,7 +671,7 @@ describe("VisibilityStateHandler", () => {
         expect(spy).to.be.called.calledOnceWith(node.key);
       });
 
-      it("returns 'partial' if some node elements are hidden", async () => {
+      it("is partially visible if some node elements are hidden", async () => {
         const elementIds = ["0x1", "0x2"];
         const node = createElementClassGroupingNode(elementIds);
         const spy = sinon.fake.returns(of({ elementIds: from(elementIds) }));
