@@ -105,6 +105,8 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
     categoryVisibilityHandler?: CategoryVisibilityHandler;
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
+    // @beta
+    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
     // @internal
     viewManager?: ViewManager;
 }
@@ -193,6 +195,8 @@ export type ExternalSourcesTreeComponentProps = Omit<ExternalSourcesTreeProps, "
 export interface ExternalSourcesTreeProps extends BaseTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
+    // @beta
+    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 // @beta
@@ -243,6 +247,8 @@ export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iMod
 export interface IModelContentTreeProps extends BaseTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
+    // @beta
+    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 // @public
@@ -327,6 +333,8 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
+    // @beta
+    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
 
@@ -410,6 +418,8 @@ export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 export interface SelectableTreeProps {
     // (undocumented)
     density?: "enlarged" | "default";
+    // (undocumented)
+    onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     // (undocumented)
     trees: TreeDefinition[];
 }
@@ -502,6 +512,8 @@ export type TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps;
 export interface TreeRenderProps {
     // (undocumented)
     density?: "enlarged" | "default";
+    // (undocumented)
+    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 // @public
@@ -525,6 +537,7 @@ export interface TreeWidgetOptions {
     defaultPanelSection?: StagePanelSection;
     defaultTreeWidgetPriority?: number;
     density?: "enlarged" | "default";
+    onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     trees?: TreeDefinition[];
 }
 

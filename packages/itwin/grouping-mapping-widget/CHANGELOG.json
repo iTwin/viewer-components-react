@@ -2,6 +2,44 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Wed, 17 Apr 2024 17:54:44 GMT",
+      "version": "0.25.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.25.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a0ce4845b2467849c12c2b8c27788df39d018368",
+            "comment": "Fixed an issue where a passed in iModelConnection was not being used by the widget shell."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 17 Apr 2024 15:50:19 GMT",
+      "version": "0.25.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.25.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "49672e0a0894f0785d4332af0649dac75b36f2c9",
+            "comment": "Fixed isMounted returning false in certain situations."
+          }
+        ],
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "25c6ff462c7aed053c9753354948da502ba0a1bd",
+            "comment": "Switched to iTwinUI Lists component."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 29 Feb 2024 19:46:34 GMT",
       "version": "0.24.0",
       "tag": "@itwin/grouping-mapping-widget_v0.24.0",

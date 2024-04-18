@@ -12,9 +12,11 @@ import { PresentationTree } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
+import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
@@ -58,6 +60,13 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
    * @beta
    */
   hierarchyLevelConfig?: HierarchyLevelConfig;
+  /**
+   * Callback that is invoked when performance of tracked feature is measured.
+   * @param featureId ID of the feature.
+   * @param elapsedTime Elapsed time of the feature.
+   * @beta
+   */
+  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 /**
@@ -78,6 +87,10 @@ export function CategoryTree(props: CategoryTreeProps) {
     },
     [onFilterApplied],
   );
+  const reporting = usePerformanceReporting({
+    treeIdentifier: CategoriesTreeComponent.id,
+    onPerformanceMeasured: props.onPerformanceMeasured,
+  });
   const state = useVisibilityTreeState({
     imodel: props.iModel,
     ruleset: RULESET_CATEGORIES,
@@ -88,6 +101,7 @@ export function CategoryTree(props: CategoryTreeProps) {
     onFilterChange,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
     enableHierarchyAutoUpdate: true,
+    onNodeLoaded: reporting.onNodeLoaded,
   });
 
   useEffect(() => {

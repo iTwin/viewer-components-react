@@ -113,7 +113,7 @@ const defaultQueryClient = new QueryClient({
 });
 
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
-  const activeIModelConntextion = useActiveIModelConnection();
+  const activeIModelConnection = useActiveIModelConnection();
   const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
   const groupsClientProp: IGroupsClient | ClientPrefix = props.groupsClient ?? props.prefix;
   const propertiesClientProp: IPropertiesClient | ClientPrefix = props.propertiesClient ?? props.prefix;
@@ -151,9 +151,9 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       prefix: props.prefix,
       iModelId: props.iModelId,
       getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
-      iModelConnection: props.iModelConnection ?? activeIModelConntextion,
+      iModelConnection: props.iModelConnection ?? activeIModelConnection,
     }));
-  }, [activeIModelConntextion, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
+  }, [activeIModelConnection, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(clientProp));

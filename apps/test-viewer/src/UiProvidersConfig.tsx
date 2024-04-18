@@ -88,6 +88,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionPredicate={() => true}
                     selectionMode={SelectionMode.Multiple}
                     hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
                     density={props.density}
                   />
                 ),
@@ -95,18 +96,34 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: CategoriesTreeComponent.id,
                 getLabel: CategoriesTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => <CategoriesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
+                render: (props: TreeRenderProps) => (
+                  <CategoriesTreeComponent
+                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    density={props.density}
+                  />
+                ),
               },
               {
                 id: IModelContentTreeComponent.id,
                 getLabel: IModelContentTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => <IModelContentTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />,
+                render: (props: TreeRenderProps) => (
+                  <IModelContentTreeComponent
+                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    density={props.density}
+                  />
+                ),
               },
               {
                 id: ExternalSourcesTreeComponent.id,
                 getLabel: ExternalSourcesTreeComponent.getLabel,
                 render: (props: TreeRenderProps) => (
-                  <ExternalSourcesTreeComponent hierarchyLevelConfig={{ isFilteringEnabled: true }} density={props.density} />
+                  <ExternalSourcesTreeComponent
+                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    density={props.density}
+                  />
                 ),
               },
             ];
@@ -221,5 +238,13 @@ const configuredUiItems = new Map<string, UiItem>([
 function TreeWidgetWithOptions(props: SelectableTreeProps) {
   const { density } = useViewerOptionsContext();
 
-  return <TreeWidgetComponent trees={props.trees} density={density} />;
+  return (
+    <TreeWidgetComponent
+      trees={props.trees}
+      density={density}
+      onPerformanceMeasured={(feature: string, elapsedTime: number) => {
+        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+      }}
+    />
+  );
 }

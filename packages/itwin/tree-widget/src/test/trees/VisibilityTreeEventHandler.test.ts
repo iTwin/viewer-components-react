@@ -10,20 +10,27 @@ import { MutableTreeModel, TreeModelSource } from "@itwin/components-react";
 import { BeEvent, using } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
+import { KeySet } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 import { waitFor } from "@testing-library/react";
 import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations, TestUtils } from "../TestUtils";
 import { createSimpleTreeModelNode } from "./Common";
 
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { SelectionChangesListener, SelectionHandler } from "@itwin/presentation-frontend";
 import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange } from "@itwin/components-react";
 import type { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { SelectionHandler } from "@itwin/presentation-frontend";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../../components/trees/VisibilityTreeEventHandler";
-
 describe("VisibilityTreeEventHandler", () => {
   const selectionHandlerStub = {
     getSelection: () => {},
   } as any as SelectionHandler;
+
+  const selectionManagerStub = {
+    selectionChange: { addListener: sinon.stub<[SelectionChangesListener, any], () => void>() },
+    getSelection: sinon.stub<[IModelConnection, number], Readonly<KeySet>>(),
+  };
 
   const testVisibilityStatus: VisibilityStatus = {
     state: "visible",
@@ -46,12 +53,20 @@ describe("VisibilityTreeEventHandler", () => {
     await TestUtils.initialize();
   });
 
+  beforeEach(() => {
+    selectionManagerStub.selectionChange.addListener.returns(() => {});
+    selectionManagerStub.getSelection.returns(new KeySet());
+    sinon.stub(Presentation, "selection").get(() => selectionManagerStub);
+  });
+
   after(async () => {
     TestUtils.terminate();
     await IModelApp.shutdown();
   });
 
   afterEach(() => {
+    selectionManagerStub.selectionChange.addListener.reset();
+    selectionManagerStub.getSelection.reset();
     changeVisibility.reset();
     onVisibilityChange.clear();
     getVisibilityStatus.resetHistory();
