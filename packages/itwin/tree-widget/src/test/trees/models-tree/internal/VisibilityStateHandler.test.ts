@@ -10,9 +10,10 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createSubjectModelIdsCache } from "../../../../components/trees/models-tree/internal/SubjectModelIdsCache";
 import { VisibilityStateHandler } from "../../../../components/trees/models-tree/internal/VisibilityStateHandler";
-import { createFakeSinonViewport, TestUtils } from "../../../TestUtils";
+import { TestUtils } from "../../../TestUtils";
 import {
-  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeQueryProvider, createModelNode, createSubjectNode,
+  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeQueryProvider, createFakeSinonViewport, createModelNode,
+  createSubjectNode,
 } from "../../Common";
 
 import type { ElementIdsCache } from "../../../../components/trees/models-tree/internal/ElementIdsCache";
@@ -87,7 +88,7 @@ class OverridableVisibilityStateHandler extends VisibilityStateHandler {
   public override changeModelState = sinon.fake(super.changeModelState.bind(this));
 }
 
-describe.only("VisibilityStateHandler", () => {
+describe("VisibilityStateHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -762,7 +763,7 @@ describe.only("VisibilityStateHandler", () => {
 
           expect(provider.changeCategoryState).to.have.callCount(categoryIds.length);
           for (const categoryId of categoryIds) {
-            expect(provider.changeCategoryState).to.be.calledWith(categoryId, visible, visible);
+            expect(provider.changeCategoryState).to.be.calledWith(categoryId, modelId, visible);
           }
         });
       }
@@ -771,14 +772,10 @@ describe.only("VisibilityStateHandler", () => {
         it("marks itself visible", async () => {
           const modelId = "0x1";
           const node = createModelNode(modelId);
-          const spy = sinon.fake.resolves(undefined);
-          const provider = new OverridableVisibilityStateHandler({
-            viewport: createFakeSinonViewport({
-              addViewedModels: spy,
-            }),
-          });
+          const viewport = createFakeSinonViewport();
+          const provider = new OverridableVisibilityStateHandler({ viewport });
           await toPromise(provider.changeVisibility(node, true));
-          expect(spy).to.be.calledOnceWith(modelId);
+          expect(viewport.addViewedModels).to.be.calledOnceWith(modelId);
         });
 
         testCategoryStateChange("visible");
@@ -788,17 +785,141 @@ describe.only("VisibilityStateHandler", () => {
         it("marks itself hidden", async () => {
           const modelId = "0x1";
           const node = createModelNode(modelId);
-          const spy = sinon.fake.returns(true);
-          const provider = new OverridableVisibilityStateHandler({
-            viewport: createFakeSinonViewport({
-              changeModelDisplay: spy,
-            }),
-          });
+          const viewport = createFakeSinonViewport();
+          const provider = new OverridableVisibilityStateHandler({ viewport });
           await toPromise(provider.changeVisibility(node, false));
-          expect(spy).to.be.calledOnceWith(modelId, false);
+          expect(viewport.changeModelDisplay).to.be.calledOnceWith(modelId, false);
         });
 
         testCategoryStateChange("hidden");
+      });
+    });
+
+    describe("element", () => {
+      describe("on", () => {
+        it("removes it from the never drawn list", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            neverDrawn: new Set([elementId]),
+          });
+          const provider = new OverridableVisibilityStateHandler({ viewport });
+          await toPromise(provider.changeVisibility(node, true));
+          expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
+        });
+
+        it("adds element to the always drawn list if model is hidden", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            view: {
+              viewsModel: sinon.fake.returns(false),
+            },
+          });
+          const provider = new OverridableVisibilityStateHandler({ viewport });
+          await toPromise(provider.changeVisibility(node, true));
+          expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
+        });
+
+        it("adds element to the always drawn list if category is hidden", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            view: {
+              viewsCategory: sinon.fake.returns(false),
+            },
+          });
+          const provider = new OverridableVisibilityStateHandler({ viewport });
+          await toPromise(provider.changeVisibility(node, true));
+          expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
+        });
+
+        it("adds element to the always drawn list if exclusive mode is enabled", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            isAlwaysDrawnExclusive: true,
+          });
+          const provider = new OverridableVisibilityStateHandler({
+            viewport,
+            overrides: {
+              models: new Map([[modelId, "hidden"]]),
+            },
+          });
+          await toPromise(provider.changeVisibility(node, true));
+          expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
+        });
+      });
+
+      describe("off", () => {
+        it("removes it from the always drawn list", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            alwaysDrawn: new Set([elementId]),
+          });
+          const provider = new OverridableVisibilityStateHandler({ viewport });
+          await toPromise(provider.changeVisibility(node, false));
+          expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
+        });
+
+        it("adds element to the never drawn list if model is visible", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            view: {
+              viewsModel: sinon.fake.returns(true),
+            },
+          });
+          const provider = new OverridableVisibilityStateHandler({ viewport });
+          await toPromise(provider.changeVisibility(node, false));
+          expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
+        });
+
+        it("doesn't add to never drawn if exclusive draw mode is enabled", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            alwaysDrawn: new Set([elementId]),
+            isAlwaysDrawnExclusive: true,
+            view: {
+              viewsModel: sinon.fake.returns(true),
+            },
+          });
+          const provider = new OverridableVisibilityStateHandler({ viewport });
+          await toPromise(provider.changeVisibility(node, false));
+          expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
+          expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
+        });
+
+        it("adds element to the never drawn list if category is visible", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const node = createElementNode(modelId, categoryId, false, elementId);
+          const viewport = createFakeSinonViewport({
+            view: {
+              viewsCategory: sinon.fake.returns(true),
+            },
+          });
+          const provider = new OverridableVisibilityStateHandler({ viewport });
+          await toPromise(provider.changeVisibility(node, false));
+          expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
+        });
       });
     });
   });

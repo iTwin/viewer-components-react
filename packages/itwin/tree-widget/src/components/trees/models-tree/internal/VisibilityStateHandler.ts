@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatMap, defer, EMPTY, filter, from, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
+import { concat, concatWith, defer, EMPTY, filter, from, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { reduceWhile } from "../../common/Rxjs";
-import { getCategoryParentModelId, isCategoryNode, isModelNode, isSubjectNode } from "./NodeUtils";
+import { getCategoryParentModelId, getElementCategoryId, getElementModelId, isCategoryNode, isModelNode, isSubjectNode } from "./NodeUtils";
 import { createVisibilityStatus } from "./Tooltip";
 
 import type { Visibility } from "./Tooltip";
@@ -258,7 +258,13 @@ export class VisibilityStateHandler {
       return EMPTY;
     }
 
-    return this.changeElementState(nodeKey.instanceKeys[0].id, on, node.hasChildren);
+    return this.changeElementState({
+      id: nodeKey.instanceKeys[0].id,
+      on,
+      modelId: getElementModelId(node),
+      categoryId: getElementCategoryId(node),
+      hasChildren: node.hasChildren,
+    });
   }
 
   public changeSubjectNodeState(ids: Observable<Id64String>, node: TreeNodeItem, on: boolean): Observable<void> {
@@ -341,8 +347,9 @@ export class VisibilityStateHandler {
 
   public changeElementGroupingNodeState(key: ECClassGroupingNodeKey, on: boolean): Observable<void> {
     return this._props.elementIdsCache.getGroupedElementIds(key).pipe(
-      mergeMap(({ elementIds }) => elementIds),
-      mergeMap((id) => this.changeElementState(id, on)),
+      mergeMap(({ modelId, categoryId, elementIds }) => {
+        return elementIds.pipe(mergeMap((id) => this.changeElementState({ id, on, modelId, categoryId })));
+      }),
     );
   }
 
@@ -350,33 +357,43 @@ export class VisibilityStateHandler {
    * Update visibility of an element and all it's child elements
    * by adding them to the always/never drawn list.
    */
-  public changeElementState(id: Id64String, on: boolean, hasChildren?: boolean): Observable<void> {
-    const result = of(id).pipe(this.changeElementStateNoChildren(on));
-    if (!hasChildren) {
-      return result;
-    }
-
-    return result.pipe(
-      concatMap(() => this._props.elementIdsCache.getAssemblyElementIds(id)),
-      this.changeElementStateNoChildren(on),
+  public changeElementState(props: {
+    id: Id64String;
+    modelId: Id64String | undefined;
+    categoryId: Id64String | undefined;
+    on: boolean;
+    hasChildren?: boolean;
+  }): Observable<void> {
+    const isDisplayedByDefault = this.getElementDefaultVisibility(props);
+    const { id, on, hasChildren } = props;
+    return of(id).pipe(
+      concatWith(hasChildren === false ? EMPTY : from(this._props.elementIdsCache.getAssemblyElementIds(id))),
+      this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }),
     );
   }
 
-  private changeElementStateNoChildren(on: boolean): OperatorFunction<string, void> {
+  private getElementDefaultVisibility({ modelId, categoryId }: { modelId: string | undefined; categoryId: string | undefined }): boolean {
+    return !!modelId && this._props.viewport.view.viewsModel(modelId) && !!categoryId && this._props.viewport.view.viewsCategory(categoryId);
+  }
+
+  private changeElementStateNoChildrenOperator(props: { on: boolean; isDisplayedByDefault: boolean }): OperatorFunction<string, void> {
     return (elementIds: Observable<string>) => {
-      const isHiddenDueToExclusiveAlwaysDrawnElements = this._props.viewport.isAlwaysDrawnExclusive && 0 !== this._props.viewport.alwaysDrawn?.size;
+      const { on, isDisplayedByDefault } = props;
+      const isAlwaysDrawnExclusive = this._props.viewport.isAlwaysDrawnExclusive;
       return elementIds.pipe(
         reduce(
           (acc, elementId) => {
             if (on) {
               acc.changedNeverDrawn ||= acc.neverDrawn.delete(elementId);
-              if (isHiddenDueToExclusiveAlwaysDrawnElements && !acc.alwaysDrawn.has(elementId)) {
+              // If exclusive mode is enabled, we must add the element to the always drawn list.
+              if ((!isDisplayedByDefault || isAlwaysDrawnExclusive) && !acc.alwaysDrawn.has(elementId)) {
                 acc.alwaysDrawn.add(elementId);
                 acc.changedAlwaysDrawn = true;
               }
             } else {
               acc.changedAlwaysDrawn ||= acc.alwaysDrawn.delete(elementId);
-              if (!isHiddenDueToExclusiveAlwaysDrawnElements && !acc.neverDrawn.has(elementId)) {
+              // If exclusive mode is enabled, we don't have to add the element to the never drawn list.
+              if (isDisplayedByDefault && !isAlwaysDrawnExclusive && !acc.neverDrawn.has(elementId)) {
                 acc.neverDrawn.add(elementId);
                 acc.changedNeverDrawn = true;
               }

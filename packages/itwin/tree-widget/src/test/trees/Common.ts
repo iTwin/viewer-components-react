@@ -343,3 +343,39 @@ function createPropertyRecord(value?: PropertyValue, description?: Partial<Prope
   };
   return new PropertyRecord(propertyValue, propertyDescription);
 }
+
+export function createFakeSinonViewport(
+  props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
+    view?: Partial<ViewState>;
+    perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
+  },
+): Viewport {
+  let alwaysDrawn = props?.alwaysDrawn;
+  let neverDrawn = props?.neverDrawn;
+  return {
+    addViewedModels: sinon.fake.resolves(undefined),
+    changeCategoryDisplay: sinon.fake(),
+    changeModelDisplay: sinon.fake.returns(true),
+    isAlwaysDrawnExclusive: false,
+    ...props,
+    get alwaysDrawn() {
+      return alwaysDrawn;
+    },
+    get neverDrawn() {
+      return neverDrawn;
+    },
+    setAlwaysDrawn: sinon.fake((x) => (alwaysDrawn = x)),
+    setNeverDrawn: sinon.fake((x) => (neverDrawn = x)),
+    perModelCategoryVisibility: {
+      getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
+      setOverride: sinon.fake(),
+      ...props?.perModelCategoryVisibility,
+    },
+    view: {
+      isSpatialView: sinon.fake.returns(true),
+      viewsCategory: sinon.fake.returns(true),
+      viewsModel: sinon.fake.returns(true),
+      ...props?.view,
+    },
+  };
+}

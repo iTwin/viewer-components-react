@@ -218,18 +218,20 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     return toVoidPromise(this._visibilityStateHandler.changeElementGroupingNodeState(key, on));
   }
 
-  protected async changeElementState(
-    id: Id64String,
-    _modelId: Id64String | undefined,
-    _categoryId: Id64String | undefined,
-    on: boolean,
-    hasChildren?: boolean,
-  ) {
-    return toVoidPromise(this._visibilityStateHandler.changeElementState(id, on, hasChildren));
+  protected async changeElementState(props: {
+    id: Id64String;
+    modelId: Id64String | undefined;
+    categoryId: Id64String | undefined;
+    on: boolean;
+    hasChildren?: boolean;
+  }) {
+    return toVoidPromise(this._visibilityStateHandler.changeElementState(props));
   }
 
   protected async changeElementsState(elementIds: AsyncGenerator<Id64String>, on: boolean) {
-    return toVoidPromise(from(elementIds).pipe(mergeMap((id) => this._visibilityStateHandler.changeElementState(id, on))));
+    return toVoidPromise(
+      from(elementIds).pipe(mergeMap((id) => this._visibilityStateHandler.changeElementState({ id, on, modelId: undefined, categoryId: undefined }))),
+    );
   }
 
   private onVisibilityChangeInternal() {
