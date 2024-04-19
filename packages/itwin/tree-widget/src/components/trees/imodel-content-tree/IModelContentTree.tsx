@@ -6,7 +6,9 @@
 import { SelectionMode } from "@itwin/components-react";
 import { PresentationTree, PresentationTreeNodeRenderer, usePresentationTreeState } from "@itwin/presentation-components";
 import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
+import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
+import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
@@ -26,6 +28,13 @@ export interface IModelContentTreeProps extends BaseTreeProps {
    * @beta
    */
   hierarchyLevelConfig?: HierarchyLevelConfig;
+  /**
+   * Reports performance of a feature.
+   * @param featureId ID of the feature.
+   * @param elapsedTime Elapsed time of the feature.
+   * @beta
+   */
+  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 /**
@@ -36,6 +45,11 @@ export interface IModelContentTreeProps extends BaseTreeProps {
 export const IModelContentTree = (props: IModelContentTreeProps) => {
   const { iModel, width, height, selectionMode, hierarchyLevelConfig } = props;
 
+  const reporting = usePerformanceReporting({
+    treeIdentifier: IModelContentTreeComponent.id,
+    onPerformanceMeasured: props.onPerformanceMeasured,
+  });
+
   const state = usePresentationTreeState({
     imodel: iModel,
     ruleset: RULESET_IMODEL_CONTENT,
@@ -44,6 +58,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
     customizeTreeNodeItem,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
     enableHierarchyAutoUpdate: true,
+    onNodeLoaded: reporting.onNodeLoaded,
   });
 
   const treeRendererProps = {

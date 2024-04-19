@@ -80,6 +80,7 @@ describe("CategoryTree", () => {
       rulesetVariablesMock = mocks.rulesetVariablesManager;
       sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
       sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
+      sinon.stub(Presentation, "localization").get(() => new EmptyLocalization());
 
       viewportMock = mockViewport();
       viewStateMock.setup((x) => x.is3d()).returns(() => true);
@@ -559,6 +560,91 @@ describe("CategoryTree", () => {
           );
 
           await waitFor(() => result.getByText("categoriesTree.noCategoryFound"));
+        });
+      });
+
+      describe("performance reporting", () => {
+        const onPerformanceMeasuredSpy = sinon.spy();
+        const imodelMock2 = moq.Mock.ofType<IModelConnection>();
+
+        beforeEach(() => {
+          onPerformanceMeasuredSpy.resetHistory();
+        });
+
+        it("reports initial load performance metric", async () => {
+          setupDataProvider([createSimpleTreeModelNode()]);
+
+          const { getByText } = render(
+            <CategoryTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              categories={categories}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+          expect(onPerformanceMeasuredSpy.callCount).to.be.eq(1);
+          expect(onPerformanceMeasuredSpy.getCall(0).calledWith("categories-tree-initial-load")).to.be.true;
+        });
+
+        it("reports initial load performance metric on iModel change", async () => {
+          setupDataProvider([createSimpleTreeModelNode()]);
+
+          const { getByText, rerender } = render(
+            <CategoryTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              categories={categories}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+
+          rerender(
+            <CategoryTree
+              {...sizeProps}
+              iModel={imodelMock2.object}
+              categories={categories}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+          expect(onPerformanceMeasuredSpy.callCount).to.be.eq(2);
+          expect(onPerformanceMeasuredSpy.getCall(0).calledWith("categories-tree-initial-load")).to.be.true;
+          expect(onPerformanceMeasuredSpy.getCall(1).calledWith("categories-tree-initial-load")).to.be.true;
+        });
+
+        it("reports hierarchy load performance metric", async () => {
+          const nodeItem = createPresentationTreeNodeItem({ hasChildren: true });
+          setupDataProvider([nodeItem]);
+
+          const { user, getByText, getByTestId } = render(
+            <CategoryTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              categories={categories}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+              onPerformanceMeasured={onPerformanceMeasuredSpy}
+            />,
+          );
+
+          await waitFor(() => getByText("Node Label"));
+          const expandButton = getByTestId("tree-node-expansion-toggle");
+          await user.click(expandButton);
+
+          expect(onPerformanceMeasuredSpy.callCount).to.be.eq(2);
+          expect(onPerformanceMeasuredSpy.getCall(0).calledWith("categories-tree-initial-load")).to.be.true;
+          expect(onPerformanceMeasuredSpy.getCall(1).calledWith("categories-tree-hierarchy-level-load")).to.be.true;
         });
       });
     });

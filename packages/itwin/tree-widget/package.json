@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -87,9 +87,9 @@
     "@itwin/imodel-components-react": "^4.10.0",
     "@itwin/presentation-backend": "^4.4.0",
     "@itwin/presentation-common": "^4.4.0",
-    "@itwin/presentation-components": "^5.0.0",
+    "@itwin/presentation-components": "^5.1.0",
     "@itwin/presentation-frontend": "^4.4.0",
-    "@itwin/presentation-testing": "^5.0.0",
+    "@itwin/presentation-testing": "^5.0.2",
     "@itwin/webgl-compatibility": "^4.4.0",
     "@playwright/test": "^1.41.2",
     "@testing-library/dom": "^9.3.3",

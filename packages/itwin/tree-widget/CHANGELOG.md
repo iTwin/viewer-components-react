@@ -1,8 +1,20 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 04 Apr 2024 14:19:35 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Apr 2024 15:50:19 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.1.0
+
+Wed, 17 Apr 2024 15:50:19 GMT
+
+### Minor changes
+
+- Added ability to track performance of `TreeWidget` component features. Requires `@itwin/presentation-components` version `5.1` or higher ([#813](https://github.com:iTwin/viewer-components-react.git/pull/813))
+
+### Patches
+
+- ModelsTree: Improved performance when changing visibility of multiple element nodes at the same time. ([#810](https://github.com:iTwin/viewer-components-react.git/pull/810))
 
 ## 2.0.2
 

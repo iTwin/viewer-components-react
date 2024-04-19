@@ -177,3 +177,49 @@ function MyWidget() {
   );
 }
 ```
+
+## Performance tracking
+
+Components from this package allows consumers to track performance of specific features.
+
+This can be achieved by passing `onPerformanceMeasured` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent` or `TreeWidgetUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+
+- `"{tree}-initial-load"` - time it takes to load initial nodes after the tree is created.
+- `"{tree}-hierarchy-level-load"` - time it takes to load children nodes when a node is expanded.
+
+Where `{tree}` specifies which tree component the feature is of.
+
+Example:
+
+```ts
+import { UiItemsManager } from "@itwin/appui-react";
+import { TreeWidgetUiItemsProvider, ModelsTreeComponent } from "@itwin/tree-widget-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({
+    defaultPanelLocation: StagePanelLocation.Left,
+    defaultPanelSection: StagePanelSection.End,
+    defaultTreeWidgetPriority: 1000,
+    onPerformanceMeasured={(feature, elapsedTime) => {
+      telemetryClient.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+    }},
+    trees: [{
+      id: ModelsTreeComponent.id,
+      getLabel: ModelsTreeComponent.getLabel,
+      render: (props) => <ModelsTreeComponent { ...props } />,
+    }];
+  })
+);
+```
+
+For individual tree components the `onPerformanceMeasured` callback should be supplied through props:
+
+```ts
+return (
+  <ModelsTreeComponent
+    onPerformanceMeasured={(feature, elapsedTime) => {
+      console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`)
+    }}
+  />
+);
+```

@@ -9,18 +9,18 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
+import { TreeSelector } from "./TreeSelector";
 
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
-import { TreeSelector } from "./TreeSelector";
-
 /**
  * Props for rendering trees
  * @public
  */
 export interface TreeRenderProps {
   density?: "enlarged" | "default";
+  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 /**
@@ -48,6 +48,7 @@ export interface TreeDefinition {
 export interface SelectableTreeProps {
   trees: TreeDefinition[];
   density?: "enlarged" | "default";
+  onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
 }
 
 /**
@@ -70,7 +71,7 @@ function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConn
 
   return (
     <div className="tree-widget-selectable-tree">
-      <TreeSelector {...getTreeSelectorProps(trees)} density={props.density} />
+      <TreeSelector {...getTreeSelectorProps(trees)} density={props.density} onPerformanceMeasured={props.onPerformanceMeasured} />
     </div>
   );
 }

@@ -4,20 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetUiItemsProvider.scss";
+import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
+import { SvgError } from "@itwin/itwinui-illustrations-react";
+import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
+import { SelectableTree } from "./SelectableTree";
 import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
 import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
+import { useTreeTransientState } from "./utils/UseTreeTransientState";
 
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { SelectableTreeProps, TreeDefinition } from "./SelectableTree";
 import type { FallbackProps } from "react-error-boundary";
-import { ErrorBoundary } from "react-error-boundary";
-import { SelectableTree } from "./SelectableTree";
-import { useTreeTransientState } from "./utils/UseTreeTransientState";
-import { Button, NonIdealState } from "@itwin/itwinui-react";
-import { SvgError } from "@itwin/itwinui-illustrations-react";
 /**
  * Parameters for creating a [[TreeWidgetUiItemsProvider]].
  * @public
@@ -33,6 +33,8 @@ export interface TreeWidgetOptions {
   trees?: TreeDefinition[];
   /** Modifies the density of the tree widget. `enlarged` widget contains larger content */
   density?: "enlarged" | "default";
+  /** Callback that is invoked when performance of tracked feature is measured. */
+  onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
 }
 
 /**
@@ -62,12 +64,12 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       {
         id: ModelsTreeComponent.id,
         getLabel: ModelsTreeComponent.getLabel,
-        render: (props) => <ModelsTreeComponent density={props.density} />,
+        render: (props) => <ModelsTreeComponent {...props} />,
       },
       {
         id: CategoriesTreeComponent.id,
         getLabel: CategoriesTreeComponent.getLabel,
-        render: (props) => <CategoriesTreeComponent density={props.density} />,
+        render: (props) => <CategoriesTreeComponent {...props} />,
       },
     ];
 
@@ -75,7 +77,13 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       {
         id: TreeWidgetId,
         label: TreeWidget.translate("treeview"),
-        content: <TreeWidgetComponent trees={trees} density={this._treeWidgetOptions?.density} />,
+        content: (
+          <TreeWidgetComponent
+            trees={trees}
+            density={this._treeWidgetOptions?.density}
+            onPerformanceMeasured={this._treeWidgetOptions?.onPerformanceMeasured}
+          />
+        ),
         icon: <SvgHierarchyTree />,
         priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
       },
