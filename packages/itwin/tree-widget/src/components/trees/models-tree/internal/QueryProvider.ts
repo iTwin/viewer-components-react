@@ -61,7 +61,7 @@ class QueryProviderImplementation implements IQueryProvider {
   }
 
   private readonly hasChildrenClause = /* sql */ `
-    (EXISTS (
+    IFNULL ((
       SELECT 1
       FROM (
         SELECT Parent.Id ParentId FROM bis.GeometricElement3d
@@ -69,7 +69,8 @@ class QueryProviderImplementation implements IQueryProvider {
         SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
       )
       WHERE ParentId = this.ECInstanceId
-    )) AS HasChildren
+      LIMIT 1
+    ), 0) AS HasChildren
   `;
 
   public queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }> {
@@ -81,7 +82,7 @@ class QueryProviderImplementation implements IQueryProvider {
         ${modelId && "AND this.Model.Id = :modelId"}
         AND this.Parent IS NULL
     `;
-    return this.runQuery(query, { categoryId: id, modelId }, (row) => ({ id: row.ecInstanceId, hasChildren: row.hasChildren }));
+    return this.runQuery(query, { categoryId: id, modelId }, (row) => ({ id: row.ecInstanceId, hasChildren: !!row.hasChildren }));
   }
 
   public queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }> {
@@ -90,7 +91,7 @@ class QueryProviderImplementation implements IQueryProvider {
       FROM bis.GeometricElement3d this
       WHERE this.Parent.Id = ?
     `;
-    return this.runQuery(query, [id], (row) => ({ id: row.ecInstanceId, hasChildren: row.hasChildren }));
+    return this.runQuery(query, [id], (row) => ({ id: row.ecInstanceId, hasChildren: !!row.hasChildren }));
   }
 
   private runQuery<TResult>(
