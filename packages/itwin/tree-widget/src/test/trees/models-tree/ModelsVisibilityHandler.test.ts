@@ -95,6 +95,7 @@ describe("ModelsVisibilityHandler", () => {
         return from(props.categoryElements?.get(x) ?? []).pipe(map((id) => ({ id, hasChildren: !!props.elementHierarchy?.get(id)?.length })));
       }),
       queryElementChildren: () => EMPTY,
+      queryModelElements: () => EMPTY,
     };
     return res;
   }

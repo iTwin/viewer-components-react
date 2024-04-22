@@ -6,7 +6,7 @@
 import { defer, from, map } from "rxjs";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { QueryRowProxy } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Observable } from "rxjs";
@@ -18,9 +18,12 @@ export interface IQueryProvider {
   queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>;
   queryAllModels(): Observable<{ id: Id64String; parentId: Id64String }>;
   queryModelCategories(id: Id64String): Observable<Id64String>;
+  queryModelElements(modelId: Id64String, elementIds?: Id64Array | Id64Set): Observable<Id64String>;
   queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }>;
   queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }>;
 }
+
+type QueryBindable = Id64String | Id64Array | Id64Set;
 
 /* istanbul ignore next */
 class QueryProviderImplementation implements IQueryProvider {
@@ -45,6 +48,7 @@ class QueryProviderImplementation implements IQueryProvider {
   }
 
   public queryModelCategories(id: Id64String): Observable<Id64String> {
+    const bindings = new Array<QueryBindable>();
     const query = /* sql */ `
       SELECT ECInstanceId
       FROM bis.SpatialCategory c
@@ -52,7 +56,7 @@ class QueryProviderImplementation implements IQueryProvider {
         SELECT 1
         FROM bis.GeometricElement3d e
         WHERE
-          e.Model.Id = ?
+          ${this.bind("e.model.id", id, bindings)}
           AND e.Category.Id = c.ECInstanceId
           AND e.Parent IS NULL
       )
@@ -60,47 +64,91 @@ class QueryProviderImplementation implements IQueryProvider {
     return this.runQuery(query, [id], (row) => row.ecInstanceId);
   }
 
-  private readonly hasChildrenClause = /* sql */ `
-    IFNULL ((
-      SELECT 1
-      FROM (
-        SELECT Parent.Id ParentId FROM bis.GeometricElement3d
-        UNION ALL
-        SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
-      )
-      WHERE ParentId = this.ECInstanceId
-      LIMIT 1
-    ), 0) AS HasChildren
-  `;
+  private createHasChildrenClause = (alias: string) => /* sql */ `
+  IFNULL ((
+    SELECT 1
+    FROM (
+      SELECT Parent.Id ParentId FROM bis.GeometricElement3d
+      UNION ALL
+      SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
+    )
+    WHERE ParentId = ${alias}.ECInstanceId
+    LIMIT 1
+  ), 0) AS HasChildren
+`;
 
   public queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }> {
+    const bindings = new Array<QueryBindable>();
     const query = /* sql */ `
-      SELECT ECInstanceId, ${this.hasChildrenClause}
-      FROM bis.GeometricElement3d this
+      SELECT ECInstanceId, ${this.createHasChildrenClause("e")}
+      FROM bis.GeometricElement3d e
       WHERE
-        this.Category.Id = :categoryId
-        ${modelId && "AND this.Model.Id = :modelId"}
-        AND this.Parent IS NULL
+        ${this.bind("e.ECInstanceId", id, bindings)}
+        ${modelId ? `AND ${this.bind("e.Model.Id", modelId, bindings)}` : ""}
+        AND e.Parent IS NULL
     `;
-    return this.runQuery(query, { categoryId: id, modelId }, (row) => ({ id: row.ecInstanceId, hasChildren: !!row.hasChildren }));
+    return this.runQuery(query, bindings, (row) => ({ id: row.ecInstanceId, hasChildren: !!row.hasChildren }));
   }
 
   public queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }> {
+    const bindings = new Array<QueryBindable>();
     const query = /* sql */ `
-      SELECT ECInstanceId, ${this.hasChildrenClause}
-      FROM bis.GeometricElement3d this
-      WHERE this.Parent.Id = ?
+      SELECT ECInstanceId, ${this.createHasChildrenClause("e")}
+      FROM bis.GeometricElement3d e
+      WHERE ${this.bind("e.Parent.Id", id, bindings)}
     `;
-    return this.runQuery(query, [id], (row) => ({ id: row.ecInstanceId, hasChildren: !!row.hasChildren }));
+    return this.runQuery(query, bindings, (row) => ({ id: row.ecInstanceId, hasChildren: !!row.hasChildren }));
   }
 
-  private runQuery<TResult>(
-    query: string,
-    bindings: Record<string, any> | Array<any> | undefined,
-    resultMapper: (row: QueryRowProxy) => TResult,
-  ): Observable<TResult> {
+  public queryModelElements(modelId: Id64String, elementIds?: Id64Array | Id64Set): Observable<Id64String> {
+    const bindings = new Array<QueryBindable>();
+    const query = /* sql */ `
+      SELECT ECInstanceId
+      FROM bis.GeometricElement3d e
+      WHERE
+        ${this.bind("e.Model.Id", modelId, bindings)}
+        ${elementIds ? `AND ${this.bind("e.ECInstanceId", elementIds, bindings)}` : ""}
+    `;
+    return this.runQuery(query, bindings, (row) => row.ecInstanceId);
+  }
+
+  private bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>) {
+    const MAX_ALLOWED_BINDINGS = 1000;
+
+    if (typeof value === "string") {
+      bindings.push(value);
+      return `${key} = ?`;
+    }
+
+    const length = Array.isArray(value) ? value.length : value.size;
+    if (length < MAX_ALLOWED_BINDINGS) {
+      bindings.push(...value);
+      return `${key} IN (${[...value].map(() => "?").join(",")})`;
+    }
+
+    bindings.push(value);
+    return `InVirtualSet(?, ${key})`;
+  }
+
+  private createBinder(bindings: Array<QueryBindable>): QueryBinder | undefined {
+    const binder = new QueryBinder();
+    bindings.forEach((x, idx) => {
+      idx++;
+      if (typeof x === "string") {
+        binder.bindId(idx, x);
+        return;
+      }
+
+      binder.bindIdSet(idx, Array.isArray(x) ? new Set(x) : x);
+    });
+    return binder;
+  }
+
+  private runQuery<TResult>(query: string, bindings: Array<QueryBindable> | undefined, resultMapper: (row: QueryRowProxy) => TResult): Observable<TResult> {
     return defer(() => {
-      const reader = this._iModel.createQueryReader(query, bindings && QueryBinder.from(bindings), { rowFormat: QueryRowFormat.UseJsPropertyNames });
+      const reader = this._iModel.createQueryReader(query, bindings && this.createBinder(bindings), {
+        rowFormat: QueryRowFormat.UseJsPropertyNames,
+      });
       return from(reader).pipe(map(resultMapper));
     });
   }

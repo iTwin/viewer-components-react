@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, from, map } from "rxjs";
+import { concatMap, EMPTY, filter, from, map } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { Id64 } from "@itwin/core-bentley";
@@ -78,6 +78,19 @@ export function createFakeQueryProvider(props?: SubjectModelIdsMockProps): IQuer
       }
 
       return from(children).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
+    }),
+    queryModelElements: sinon.fake((modelId, elementIds) => {
+      const result = from(props?.modelCategories?.get(modelId) ?? []).pipe(concatMap((x) => props?.categoryElements?.get(x) ?? []));
+
+      if (!elementIds) {
+        return result;
+      }
+
+      if (Array.isArray(elementIds)) {
+        return result.pipe(filter((x) => elementIds.includes(x)));
+      }
+
+      return result.pipe(filter((x) => elementIds.has(x)));
     }),
   };
   return res;

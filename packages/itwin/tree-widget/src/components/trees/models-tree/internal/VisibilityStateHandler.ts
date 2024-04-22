@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatWith, defer, EMPTY, filter, from, map, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
+import { concat, concatWith, defer, EMPTY, filter, from, map, merge, mergeAll, mergeMap, of, reduce, toArray } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
-import { reduceWhile } from "../../common/Rxjs";
+import { reduceWhile, toSet } from "../../common/Rxjs";
 import { getCategoryParentModelId, getElementCategoryId, getElementModelId, isCategoryNode, isModelNode, isSubjectNode } from "./NodeUtils";
 import { createVisibilityStatus } from "./Tooltip";
 
@@ -20,8 +20,8 @@ import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { Observable, OperatorFunction } from "rxjs";
 import type { Viewport as CoreViewport, ViewState } from "@itwin/core-frontend";
+import type { Observable, OperatorFunction } from "rxjs";
 
 /**
  * Limited version of core `Viewport` that is easier to instantiate in tests.
@@ -120,17 +120,91 @@ export class VisibilityStateHandler {
   }
 
   public getModelVisibilityStatus(modelId: Id64String): Observable<VisibilityStatus> {
-    if (!this._props.viewport.view.isSpatialView()) {
+    const viewport = this._props.viewport;
+    if (!viewport.view.isSpatialView()) {
       return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
     }
 
+    const modelVisible = viewport.view.viewsModel(modelId);
     return this._props.queryProvider.queryModelCategories(modelId).pipe(
-      mergeMap((categoryId) => this.getCategoryDisplayStatus(categoryId, modelId)),
+      map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
       map((x) => x.state),
       getVisibilityStatusFromChildren({
         visible: undefined,
         hidden: "model.allChildElementsHidden",
         partial: "model.someChildElementsHidden",
+      }),
+      mergeMap((visibilityByCategories) => {
+        // If model's viewport visibility and viewport visibility of child categories doesn't match,
+        // return visibility by child categories.
+        if (
+          visibilityByCategories.state === "partial" ||
+          (modelVisible && visibilityByCategories.state !== "visible") ||
+          (!modelVisible && visibilityByCategories.state !== "hidden")
+        ) {
+          return of(visibilityByCategories);
+        }
+
+        // We need to check if model's state is partially visible.
+        // Instead of recursively checking each element of each category,
+        // we only have to look at the always and never drawn lists.
+
+        const alwaysDrawn = viewport.alwaysDrawn;
+        const neverDrawn = viewport.neverDrawn;
+        if (!alwaysDrawn && !neverDrawn) {
+          return of(visibilityByCategories);
+        }
+
+        if (!modelVisible) {
+          return this.getAlwaysDrawnChildren(modelId).pipe(
+            map((ad) => {
+              // Model is hidden and there are no always drawn children => model is fully hidden.
+              if (!ad.size) {
+                return visibilityByCategories;
+              }
+
+              // Model is hidden and all children are always drawn => model is fully visible
+              if (ad.size === alwaysDrawn?.size) {
+                return createVisibilityStatus("visible");
+              }
+
+              return createVisibilityStatus("partial");
+            }),
+          );
+        }
+
+        return this.getNeverDrawnChildren(modelId).pipe(
+          mergeMap((nd) => {
+            // Model is visible but all children are in the never drawn list.
+            if (nd.size === neverDrawn?.size) {
+              return createVisibilityStatusObs("hidden");
+            }
+
+            // Some children are in the never drawn list.
+            if (nd.size) {
+              return createVisibilityStatusObs("partial");
+            }
+
+            if (!this._props.viewport.isAlwaysDrawnExclusive || !alwaysDrawn?.size) {
+              return of(visibilityByCategories);
+            }
+
+            return this.getAlwaysDrawnChildren(modelId).pipe(
+              toArray(),
+              map((alwaysDrawnChildren) => {
+                if (alwaysDrawnChildren.length === 0) {
+                  return createVisibilityStatus("hidden");
+                }
+
+                if (alwaysDrawnChildren.length === alwaysDrawn.size) {
+                  return visibilityByCategories;
+                }
+
+                return createVisibilityStatus("partial");
+              }),
+            );
+          }),
+        );
       }),
     );
   }
@@ -308,6 +382,8 @@ export class VisibilityStateHandler {
       return EMPTY;
     }
 
+    const viewport = this._props.viewport;
+
     return concat(
       defer(() => {
         if (visible) {
@@ -319,7 +395,40 @@ export class VisibilityStateHandler {
       }),
       (typeof ids === "string" ? of(ids) : from(ids)).pipe(
         mergeMap((modelId) => {
-          return this._props.queryProvider.queryModelCategories(modelId).pipe(map((categoryId) => this.changeCategoryState(categoryId, modelId, visible)));
+          const observables = new Array<Observable<void>>();
+
+          // Remove model's always drawn children.
+          if (viewport.alwaysDrawn?.size) {
+            observables.push(
+              this.getAlwaysDrawnChildren(modelId).pipe(
+                map((children) => {
+                  if (children.size) {
+                    viewport.setAlwaysDrawn(setDifference(viewport.alwaysDrawn!, children));
+                  }
+                }),
+              ),
+            );
+          }
+
+          // Remove model's never drawn children.
+          if (viewport.neverDrawn?.size) {
+            observables.push(
+              this.getNeverDrawnChildren(modelId).pipe(
+                map((children) => {
+                  if (children.size) {
+                    viewport.setNeverDrawn(setDifference(viewport.neverDrawn!, children));
+                  }
+                }),
+              ),
+            );
+          }
+
+          // Set visibility of all model's categories.
+          observables.push(
+            this._props.queryProvider.queryModelCategories(modelId).pipe(map((categoryId) => this.changeCategoryState(categoryId, modelId, visible))),
+          );
+
+          return merge(...observables);
         }),
       ),
     );
@@ -354,8 +463,7 @@ export class VisibilityStateHandler {
   }
 
   /**
-   * Update visibility of an element and all it's child elements
-   * by adding them to the always/never drawn list.
+   * Update visibility of an element and all its child elements by adding them to the always/never drawn list.
    */
   public changeElementState(props: {
     id: Id64String;
@@ -414,6 +522,16 @@ export class VisibilityStateHandler {
       );
     };
   }
+
+  private getAlwaysDrawnChildren(modelId: string) {
+    const alwaysDrawn = this._props.viewport.alwaysDrawn;
+    return (alwaysDrawn?.size ? this._props.queryProvider.queryModelElements(modelId, alwaysDrawn) : EMPTY).pipe(toSet());
+  }
+
+  private getNeverDrawnChildren(modelId: string) {
+    const neverDrawn = this._props.viewport.neverDrawn;
+    return (neverDrawn?.size ? this._props.queryProvider.queryModelElements(modelId, neverDrawn) : EMPTY).pipe(toSet());
+  }
 }
 
 const createVisibilityStatusObs = (status: Visibility | "disabled", tooltipStringId?: string) => of(createVisibilityStatus(status, tooltipStringId));
@@ -438,7 +556,7 @@ function getVisibilityFromChildren(obs: Observable<Visibility>): Observable<Visi
   );
 }
 
-function getVisibilityStatusFromChildren<TEmpty>(
+function getVisibilityStatusFromChildren<TEmpty = never>(
   tooltipMap: { [key in Visibility]: string | undefined } & {
     empty?: () => TEmpty;
   },
@@ -458,4 +576,10 @@ function getVisibilityStatusFromChildren<TEmpty>(
       }),
     );
   };
+}
+
+function setDifference<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
+  const result = new Set<T>();
+  lhs.forEach((x) => !rhs.has(x) && result.add(x));
+  return result;
 }

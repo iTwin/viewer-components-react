@@ -5,7 +5,7 @@
 
 import { shareReplay } from "rxjs";
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IQueryProvider } from "./QueryProvider";
 import type { Observable } from "rxjs";
 
@@ -85,5 +85,9 @@ class CachingQueryProviderImpl implements ICachingQueryProvider {
 
   public queryElementChildren(id: string): Observable<{ id: string; hasChildren: boolean }> {
     return this.getFromCacheOrInsert(id, this._elementChildrenCache, () => this._source.queryElementChildren(id));
+  }
+
+  public queryModelElements(modelId: Id64String, elementIds?: Id64Array | Id64Set): Observable<Id64String> {
+    return this._source.queryModelElements(modelId, elementIds);
   }
 }

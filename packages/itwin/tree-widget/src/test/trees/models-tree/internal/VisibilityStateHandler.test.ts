@@ -8,6 +8,7 @@ import { EMPTY, firstValueFrom, from, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
 import { createSubjectModelIdsCache } from "../../../../components/trees/models-tree/internal/SubjectModelIdsCache";
 import { VisibilityStateHandler } from "../../../../components/trees/models-tree/internal/VisibilityStateHandler";
 import { TestUtils } from "../../../TestUtils";
@@ -232,52 +233,49 @@ describe("VisibilityStateHandler", () => {
         expect(result).to.include({ state: "hidden", isDisabled: true });
       });
 
-      it("is visible when `viewport.view.viewsModel` returns true and all categories are displayed", async () => {
-        const modelId = "0x1";
-        const categories = ["0x10", "0x20"];
-        const node = createModelNode(modelId);
-        const queryProvider = createFakeQueryProvider({
-          modelCategories: new Map([[modelId, categories]]),
+      describe("visible", () => {
+        it("when `viewport.view.viewsModel` returns true and all categories are displayed", async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories: new Map([[modelId, categories]]),
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "visible" });
         });
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          viewport: createFakeSinonViewport({
-            view: {
-              viewsModel: sinon.fake.returns(true),
-            },
-          }),
-          overrides: {
-            categories: new Map(categories.map((x) => [x, "visible"])),
-          },
+
+        it("when `viewport.view.viewsModel` returns false but all child elements are in the always drawn list", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const modelCategories = new Map([[modelId, ["0x10", "0x20"]]]);
+          const categoryElements = new Map([
+            ["0x10", ["0x100", "0x200"]],
+            ["0x20", ["0x300", "0x400"]],
+          ]);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories,
+            categoryElements,
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set([...categoryElements.values()].flat()),
+              view: {
+                viewsModel: sinon.fake.returns(false),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "visible" });
         });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "visible" });
       });
 
-      it("is hidden when `viewport.view.viewsModel` returns false and all categories are hidden", async () => {
-        const modelId = "0x1";
-        const categories = ["0x10", "0x20"];
-        const node = createModelNode(modelId);
-        const queryProvider = createFakeQueryProvider({
-          modelCategories: new Map([[modelId, categories]]),
-        });
-        const handler = new OverridableVisibilityStateHandler({
-          queryProvider,
-          viewport: createFakeSinonViewport({
-            view: {
-              viewsModel: sinon.fake.returns(false),
-            },
-          }),
-          overrides: {
-            categories: new Map(categories.map((x) => [x, "hidden"])),
-          },
-        });
-        const result = await firstValueFrom(handler.getVisibilityStatus(node));
-        expect(result).to.include({ state: "hidden" });
-      });
-
-      function modelVisibilityPartialTest(modelVisible: boolean, differingCategoryVisibility: Visibility) {
-        it(`is partially visible when 'viewport.view.viewsModel' returns ${modelVisible} and at least one category is ${differingCategoryVisibility}`, async () => {
+      describe("hidden", () => {
+        it("when `viewport.view.viewsModel` returns false and all categories are hidden", async () => {
           const modelId = "0x1";
           const categories = ["0x10", "0x20"];
           const node = createModelNode(modelId);
@@ -288,25 +286,165 @@ describe("VisibilityStateHandler", () => {
             queryProvider,
             viewport: createFakeSinonViewport({
               view: {
-                viewsModel: sinon.fake.returns(modelVisible),
+                viewsModel: sinon.fake.returns(false),
+                viewsCategory: sinon.fake.returns(false),
               },
             }),
-            overrides: {
-              categories: new Map([
-                [categories[0], modelVisible ? "visible" : "hidden"],
-                [categories[1], differingCategoryVisibility],
-              ]),
-            },
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
+
+        it("when `viewport.view.viewsModel` returns true but all categories are hidden", async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories: new Map([[modelId, categories]]),
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              view: {
+                viewsModel: sinon.fake.returns(true),
+                viewsCategory: sinon.fake.returns(false),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
+
+        it("when `viewport.view.viewsModel` returns true but all nested child elements are in never drawn list", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const modelCategories = new Map([[modelId, ["0x10", "0x20"]]]);
+          const categoryElements = new Map([
+            ["0x10", ["0x100", "0x200"]],
+            ["0x20", ["0x300", "0x400"]],
+          ]);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories,
+            categoryElements,
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set([...categoryElements.values()].flat()),
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
+
+        it("when `viewport.view.viewsModel` returns true but none of the nested child elements are in exclusive drawn list", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const modelCategories = new Map([[modelId, ["0x10", "0x20"]]]);
+          const categoryElements = new Map([
+            ["0x10", ["0x100", "0x200"]],
+            ["0x20", ["0x300", "0x400"]],
+          ]);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories,
+            categoryElements,
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set([...categoryElements.values()].flat()),
+              isAlwaysDrawnExclusive: true,
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "hidden" });
+        });
+      });
+
+      describe("partially visible", () => {
+        it(`when 'viewport.view.viewsModel' returns true and at least one category is hidden`, async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories: new Map([[modelId, categories]]),
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              view: {
+                viewsModel: sinon.fake.returns(true),
+                viewsCategory: sinon.fake((id) => id === categories[0]),
+              },
+            }),
           });
           const result = await firstValueFrom(handler.getVisibilityStatus(node));
           expect(result).to.include({ state: "partial" });
         });
-      }
 
-      modelVisibilityPartialTest(true, "hidden");
-      modelVisibilityPartialTest(true, "partial");
-      modelVisibilityPartialTest(false, "visible");
-      modelVisibilityPartialTest(false, "partial");
+        it(`when 'viewport.view.viewsModel' returns FALSE and at least one category is VISIBLE`, async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories: new Map([[modelId, categories]]),
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              view: {
+                viewsModel: sinon.fake.returns(false),
+                viewsCategory: sinon.fake((id) => id === categories[0]),
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
+        });
+
+        it("when `viewport.view.viewsModel` returns true but some of the nested child elements are in never drawn list", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
+            categoryElements: new Map([
+              ["0x10", ["0x100", "0x200"]],
+              ["0x20", ["0x300", "0x400"]],
+            ]),
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set(["0x100"]),
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
+        });
+
+        it("when `viewport.view.viewsModel` returns false but some of the nested child elements are in the always drawn list", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const queryProvider = createFakeQueryProvider({
+            modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
+            categoryElements: new Map([
+              ["0x10", ["0x100", "0x200"]],
+              ["0x20", ["0x300", "0x400"]],
+            ]),
+          });
+          const handler = new OverridableVisibilityStateHandler({
+            queryProvider,
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0x100"]),
+              view: {
+                viewsModel: () => false,
+              },
+            }),
+          });
+          const result = await firstValueFrom(handler.getVisibilityStatus(node));
+          expect(result).to.include({ state: "partial" });
+        });
+      });
     });
 
     describe("category", () => {
@@ -722,7 +860,7 @@ describe("VisibilityStateHandler", () => {
             }),
           });
 
-          await toPromise(provider.changeVisibility(node, true));
+          await toVoidPromise(provider.changeVisibility(node, true));
           expect(spy).to.be.calledOnceWith(modelIds.flat());
         });
       });
@@ -741,7 +879,7 @@ describe("VisibilityStateHandler", () => {
             }),
           });
 
-          await toPromise(provider.changeVisibility(node, false));
+          await toVoidPromise(provider.changeVisibility(node, false));
           expect(provider.changeModelState).to.be.calledOnceWith(modelIds.flat(), false);
         });
       });
@@ -759,7 +897,7 @@ describe("VisibilityStateHandler", () => {
             }),
           });
           const visible = state === "visible";
-          await toPromise(provider.changeVisibility(node, visible));
+          await toVoidPromise(provider.changeVisibility(node, visible));
 
           expect(provider.changeCategoryState).to.have.callCount(categoryIds.length);
           for (const categoryId of categoryIds) {
@@ -774,7 +912,7 @@ describe("VisibilityStateHandler", () => {
           const node = createModelNode(modelId);
           const viewport = createFakeSinonViewport();
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, true));
+          await toVoidPromise(provider.changeVisibility(node, true));
           expect(viewport.addViewedModels).to.be.calledOnceWith(modelId);
         });
 
@@ -787,7 +925,7 @@ describe("VisibilityStateHandler", () => {
           const node = createModelNode(modelId);
           const viewport = createFakeSinonViewport();
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, false));
+          await toVoidPromise(provider.changeVisibility(node, false));
           expect(viewport.changeModelDisplay).to.be.calledOnceWith(modelId, false);
         });
 
@@ -806,7 +944,7 @@ describe("VisibilityStateHandler", () => {
             neverDrawn: new Set([elementId]),
           });
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, true));
+          await toVoidPromise(provider.changeVisibility(node, true));
           expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
         });
 
@@ -821,7 +959,7 @@ describe("VisibilityStateHandler", () => {
             },
           });
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, true));
+          await toVoidPromise(provider.changeVisibility(node, true));
           expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
         });
 
@@ -836,7 +974,7 @@ describe("VisibilityStateHandler", () => {
             },
           });
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, true));
+          await toVoidPromise(provider.changeVisibility(node, true));
           expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
         });
 
@@ -854,7 +992,7 @@ describe("VisibilityStateHandler", () => {
               models: new Map([[modelId, "hidden"]]),
             },
           });
-          await toPromise(provider.changeVisibility(node, true));
+          await toVoidPromise(provider.changeVisibility(node, true));
           expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
         });
       });
@@ -869,7 +1007,7 @@ describe("VisibilityStateHandler", () => {
             alwaysDrawn: new Set([elementId]),
           });
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, false));
+          await toVoidPromise(provider.changeVisibility(node, false));
           expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
         });
 
@@ -884,7 +1022,7 @@ describe("VisibilityStateHandler", () => {
             },
           });
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, false));
+          await toVoidPromise(provider.changeVisibility(node, false));
           expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
         });
 
@@ -901,7 +1039,7 @@ describe("VisibilityStateHandler", () => {
             },
           });
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, false));
+          await toVoidPromise(provider.changeVisibility(node, false));
           expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
           expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
         });
@@ -917,20 +1055,10 @@ describe("VisibilityStateHandler", () => {
             },
           });
           const provider = new OverridableVisibilityStateHandler({ viewport });
-          await toPromise(provider.changeVisibility(node, false));
+          await toVoidPromise(provider.changeVisibility(node, false));
           expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
         });
       });
     });
   });
 });
-
-async function toPromise(obs: Observable<void>) {
-  return new Promise<void>((resolve, reject) => {
-    obs.subscribe({
-      next: resolve,
-      complete: resolve,
-      error: reject,
-    });
-  });
-}

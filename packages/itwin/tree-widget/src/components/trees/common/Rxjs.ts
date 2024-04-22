@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, find, from, last, map, mergeMap, of, scan, takeWhile } from "rxjs";
+import { defaultIfEmpty, find, from, isEmpty, last, map, mergeMap, of, reduce, scan, takeWhile } from "rxjs";
 
 import type { Observable, ObservableInput, OperatorFunction } from "rxjs";
 
@@ -56,15 +56,14 @@ export function some<T>(predicate: (x: T) => boolean): OperatorFunction<T, boole
   };
 }
 
-/** Same as `firstValueFrom` except it won't throw if the observable emits no values. */
-export async function toVoidPromise(obs: Observable<void> | Observable<undefined>): Promise<void> {
-  return new Promise((resolve, reject) => {
-    obs.subscribe({
-      next: resolve,
-      complete: resolve,
-      error: reject,
-    });
-  });
+/** Opposite of `isEmpty`. */
+export function hasItems<T>(): OperatorFunction<T, boolean> {
+  return (obs) => {
+    return obs.pipe(
+      isEmpty(),
+      map((x) => !x),
+    );
+  };
 }
 
 type ValueOrCallback<T> = T extends (...args: any[]) => any ? never : T | (() => T);
@@ -83,4 +82,20 @@ export function unwrap<T>(valuerOrCb: ValueOrCallback<T>): OperatorFunction<T | 
       }),
     );
   };
+}
+
+/** Collects elements to a set. */
+export function toSet<T>(): OperatorFunction<T, Set<T>> {
+  return (obs) => obs.pipe(reduce((set, x) => set.add(x), new Set()));
+}
+
+/** Same as `firstValueFrom` except it won't throw if the observable emits no values. */
+export async function toVoidPromise(obs: Observable<void> | Observable<undefined>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    obs.subscribe({
+      next: resolve,
+      complete: resolve,
+      error: reject,
+    });
+  });
 }
