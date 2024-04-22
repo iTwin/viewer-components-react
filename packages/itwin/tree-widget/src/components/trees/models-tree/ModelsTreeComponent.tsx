@@ -13,13 +13,14 @@ import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
-import { ModelsTree } from "./ModelsTree";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
 import { queryModelsForHeaderActions } from "./Utils";
 
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
-import type { ModelsTreeProps } from "./ModelsTree";
+import { ModelsTree, type ModelsTreeProps } from "./ModelsTree";
+import classNames from "classnames";
+import { ExperimentalModelsTree } from "./experimental/ModelsTree";
 /**
  * Information about a single Model.
  * @public
@@ -57,6 +58,8 @@ export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" 
    * ```
    */
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
+
+  useExperimentalTree?: boolean;
 }
 
 /**
@@ -117,11 +120,17 @@ ModelsTreeComponent.id = "models-tree";
  */
 ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
 
-function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
+function ModelsTreeComponentImpl({
+  iModel,
+  viewport,
+  headerButtons,
+  useExperimentalTree,
+  ...treeProps
+}: ModelTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
-  const { viewport, iModel } = props;
+  const density = treeProps.density;
   const { searchOptions, filterString, onFilterApplied } = useTreeFilteringState();
-  const contentClassName = classNames("tree-widget-tree-content", props.density === "enlarged" && "enlarge");
+  const contentClassName = classNames("tree-widget-tree-content", density === "enlarged" && "enlarge");
 
   useEffect(() => {
     queryModelsForHeaderActions(iModel)
@@ -138,6 +147,23 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
     [filterString, searchOptions.activeMatchIndex],
   );
 
+  const renderTree = (height: number, width: number) => {
+    if (useExperimentalTree) {
+      return <ExperimentalModelsTree imodel={iModel} height={height} width={width} activeView={viewport} filter={filterInfo.filter} />;
+    }
+    return (
+      <ModelsTree
+        {...treeProps}
+        iModel={iModel}
+        activeView={viewport}
+        width={width}
+        height={height}
+        filterInfo={filterInfo}
+        onFilterApplied={onFilterApplied}
+      />
+    );
+  };
+
   return (
     <div className="tree-widget-tree-with-header">
       <TreeHeader
@@ -146,7 +172,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
         onSelectedChanged={searchOptions.onResultSelectedChanged}
         resultCount={searchOptions.matchedResultCount}
         selectedIndex={searchOptions.activeMatchIndex}
-        density={props.density}
+        density={density}
       >
         {props.headerButtons
           ? props.headerButtons.map((btn, index) => (
@@ -161,19 +187,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
             ]}
       </TreeHeader>
       <div className={contentClassName}>
-        <AutoSizer>
-          {({ width, height }) => (
-            <ModelsTree
-              {...props}
-              iModel={iModel}
-              activeView={viewport}
-              width={width}
-              height={height}
-              filterInfo={filterInfo}
-              onFilterApplied={onFilterApplied}
-            />
-          )}
-        </AutoSizer>
+        <AutoSizer>{({ width, height }) => renderTree(height, width)}</AutoSizer>
       </div>
     </div>
   );
