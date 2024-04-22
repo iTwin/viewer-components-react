@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "updated insights client to 0.10.1",
+  "comment": "Updated insights client to 0.10.1",
   "packageName": "@itwin/grouping-mapping-widget",
   "email": "141143406+julioalvahash@users.noreply.github.com",
   "dependentChangeType": "patch"
