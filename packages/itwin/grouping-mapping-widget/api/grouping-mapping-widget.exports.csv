@@ -1,0 +1,57 @@
+sep=;
+Release Tag;API Item
+public;CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel, }: CalculatedPropertyActionProps) => JSX.Element
+public;CalculatedPropertyActionProps
+public;CalculatedPropertyActionWithVisuals: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel, }: CalculatedPropertyActionWithVisualsProps) => JSX.Element
+public;CalculatedPropertyActionWithVisualsProps
+public;ClientPrefix = "" | "dev" | "qa" | undefined
+public;ContextCustomUI 
+public;ContextCustomUIProps
+public;createDefaultMappingClient: (prefix?: ClientPrefix) => IMappingsClient
+public;createMappingClient: (clientProp: IMappingsClient | ClientPrefix) => IMappingsClient
+public;CustomCalculationAction: ({ mappingId, groupId, customCalculation, onSaveSuccess, onClickCancel, }: CustomCalculationActionProps) => JSX.Element
+public;CustomCalculationActionProps
+public;DataType = "Number" | "String" | "Boolean"
+public;GetAccessTokenFn = () => Promise
+public;GroupAction: (props: GroupActionProps) => JSX.Element
+public;GroupActionProps
+public;GroupingCustomUI 
+public;GroupingCustomUIProps
+public;GroupingMappingApiConfig
+public;GroupingMappingApiConfigContext: React_2.Context
+public;GroupingMappingContext: (props: GroupingMappingContextProps) => JSX.Element
+public;GroupingMappingContextProps
+public;GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI
+public;GroupingMappingCustomUIType
+public;GroupingMappingProvider 
+public;GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel, }: GroupPropertyActionProps) => JSX.Element
+public;GroupPropertyActionProps
+public;GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView, }: GroupingCustomUIProps) => JSX.Element
+public;Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, }: GroupsProps) => JSX.Element
+public;GroupsOperationsProps
+public;GroupsProps
+public;GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, }: GroupsViewProps) => JSX.Element
+public;GroupsViewProps
+public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, ...rest }: GroupsVisualizationProps) => JSX.Element
+public;GroupsVisualizationProps 
+public;IResult
+public;ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery, }: GroupingCustomUIProps) => JSX.Element
+public;MappingAction: ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => JSX.Element
+public;MappingActionProps
+public;MappingClientContext: Context
+public;Mappings: (props: MappingsProps) => JSX.Element
+public;MappingsOperationsProps 
+public;MappingsProps
+public;MappingsView: ({ mappings, isLoading, extractionStatusData, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, isTogglingExtraction, onRefreshMappings, onRefreshExtractionStatus, onToggleExtraction, onDelete, showDeleteModal, setShowDeleteModal, displayStrings: userDisplayStrings, showImportModal, setShowImportModal, onClickAddMapping, onClickMappingTitle, onClickMappingModify, alert, }: MappingsViewProps) => JSX.Element
+public;MappingsViewProps
+public;PropertyMap
+public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, onClickAddCalculatedProperty, onClickModifyCalculatedProperty, onClickAddCustomCalculationProperty, onClickModifyCustomCalculation, hideGroupProps, hideCalculatedProps, hideCustomCalculationProps, }: PropertyMenuProps) => JSX.Element
+public;PropertyMenuProps
+public;PropertyMenuWithVisualization: ({ group, color, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
+public;PropertyMenuWithVisualizationProps 
+public;resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap): IResult
+public;SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView, }: GroupingCustomUIProps) => JSX.Element
+public;useGroupingMappingApiConfig: () => GroupingMappingApiConfig
+public;useGroupsOperations: ({ mappingId, }: GroupsOperationsProps) =>
+public;useMappingClient: () => IMappingsClient
+public;useMappingsOperations: ({ iModelId, getAccessToken, mappingClient }: MappingsOperationsProps) =>

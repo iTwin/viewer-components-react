@@ -1,0 +1,16 @@
+sep=;
+Release Tag;API Item
+public;Configuration
+public;EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken
+public;EC3Context: (props: EC3ContextProps) => JSX.Element
+public;EC3ContextProps = EC3ConfigProps &
+public;EC3Provider 
+public;EC3Token
+public;GetAccessTokenFn = () => Promise
+public;handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source?: string): void
+public;Label
+public;Material
+public;TemplateMenu: ({ template, onSaveSuccess, onClickCancel }: TemplateMenuProps) => JSX.Element
+public;TemplateMenuProps
+public;TemplateProps
+public;Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element
