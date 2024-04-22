@@ -42,7 +42,7 @@ export const useFetchExtractionStatus = ({
           iconMessage: "No extraction found.",
         };
       } else {
-        if (latestJobStatus?.state === ExtractionState.PartiallySucceeded || latestJobStatus?.state === ExtractionState.Failed) { // TODO: Check if this would entail `PartiallySucceeded` or `Failed`.
+        if (latestJobStatus?.state === ExtractionState.PartiallySucceeded || latestJobStatus?.state === ExtractionState.Failed) {
           const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
           extractionMessageData = logs.logs.filter((log) => log.message !== null).map((log) => ({
             date: log.dateTime,

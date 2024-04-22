@@ -49,7 +49,7 @@ export interface GroupingMappingContextProps {
   /**
    * A custom implementation of MappingClient.
    */
-  client?: IMappingsClient;
+  mappingsClient?: IMappingsClient;
   /**
    * A custom implementation of GroupsClient.
    */
@@ -114,11 +114,11 @@ const defaultQueryClient = new QueryClient({
 
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const activeIModelConnection = useActiveIModelConnection();
-  const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
+  const mappingsClientProp: IMappingsClient | ClientPrefix = props.mappingsClient ?? props.prefix;
   const groupsClientProp: IGroupsClient | ClientPrefix = props.groupsClient ?? props.prefix;
   const propertiesClientProp: IPropertiesClient | ClientPrefix = props.propertiesClient ?? props.prefix;
   const extractionClientProp: IExtractionClient | ClientPrefix = props.extractionClient ?? props.prefix;
-  const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
+  const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(mappingsClientProp));
   const [groupsClient, setGroupsClient] = useState<IGroupsClient>(createGroupsClient(groupsClientProp));
   const [propertiesClient, setPropertiesClient] = useState<IPropertiesClient>(createPropertiesClient(propertiesClientProp));
   const [extractionClient, setExtractionClient] = useState<IExtractionClient>(createExtractionClient(extractionClientProp));
@@ -156,8 +156,8 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   }, [activeIModelConnection, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
-    setMappingClient(createMappingClient(clientProp));
-  }, [clientProp]);
+    setMappingClient(createMappingClient(mappingsClientProp));
+  }, [mappingsClientProp]);
 
   useEffect(()=>{
     setGroupsClient(createGroupsClient(groupsClientProp));
