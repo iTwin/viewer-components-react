@@ -18,9 +18,11 @@ export interface IQueryProvider {
   queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>;
   queryAllModels(): Observable<{ id: Id64String; parentId: Id64String }>;
   queryModelCategories(id: Id64String): Observable<Id64String>;
+  queryModelElementsCount(modelId: Id64String): Observable<number>;
   queryModelElements(modelId: Id64String, elementIds?: Id64Array | Id64Set): Observable<Id64String>;
   queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }>;
   queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }>;
+  queryElementChildrenRecursive(id: Id64String, filter?: Id64Array | Id64Set): Observable<Id64String>;
 }
 
 type QueryBindable = Id64String | Id64Array | Id64Set;
@@ -83,7 +85,7 @@ class QueryProviderImplementation implements IQueryProvider {
       SELECT ECInstanceId, ${this.createHasChildrenClause("e")}
       FROM bis.GeometricElement3d e
       WHERE
-        ${this.bind("e.ECInstanceId", id, bindings)}
+        ${this.bind("e.Category.Id", id, bindings)}
         ${modelId ? `AND ${this.bind("e.Model.Id", modelId, bindings)}` : ""}
         AND e.Parent IS NULL
     `;
@@ -98,6 +100,38 @@ class QueryProviderImplementation implements IQueryProvider {
       WHERE ${this.bind("e.Parent.Id", id, bindings)}
     `;
     return this.runQuery(query, bindings, (row) => ({ id: row.ecInstanceId, hasChildren: !!row.hasChildren }));
+  }
+
+  public queryElementChildrenRecursive(id: Id64String, filter?: Id64Array | Id64Set): Observable<Id64String> {
+    const bindings = new Array<QueryBindable>();
+    const query = /* sql */ `
+      WITH RECURSIVE ChildElements(ECInstanceId) AS (
+        SELECT e.ECInstanceId
+        FROM bis.GeometricElement3d e
+        WHERE ${this.bind("e.Parent.Id", id, bindings)}
+
+        UNION ALL
+
+        SELECT e.ECInstanceId
+        FROM bis.GeometricElement3d e
+        JOIN ChildElements ce
+        ON e.Parent.Id = ce.ECInstanceId
+      )
+      SELECT ECInstanceId
+      FROM ChildElements e
+      ${filter ? `WHERE ${this.bind("e.ECInstanceId", filter, bindings)}` : ""}
+    `;
+    return this.runQuery(query, bindings, (row) => row.ecInstanceId);
+  }
+
+  public queryModelElementsCount(id: Id64String): Observable<number> {
+    const bindings = new Array<QueryBindable>();
+    const query = /* sql */ `
+      SELECT COUNT(*)
+      FROM bis.GeometricElement3d e
+      WHERE ${this.bind("e.Model.Id", id, bindings)}
+    `;
+    return this.runQuery(query, bindings, (row) => row[0]);
   }
 
   public queryModelElements(modelId: Id64String, elementIds?: Id64Array | Id64Set): Observable<Id64String> {

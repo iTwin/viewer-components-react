@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, filter, from, map } from "rxjs";
+import { concatMap, EMPTY, expand, filter, from, map, of, reduce } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { Id64 } from "@itwin/core-bentley";
@@ -15,7 +15,7 @@ import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNode
 
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import type { Id64String } from "@itwin/core-bentley";
 import type {
   CategoryDescription,
   ClassInfo,
@@ -62,6 +62,14 @@ export function createFakeQueryProvider(props?: SubjectModelIdsMockProps): IQuer
   const modelRows: ElementRow[] = [];
   props?.subjectModels?.forEach((modelInfos, subjectId) => modelInfos.forEach((modelId) => modelRows.push({ id: modelId, parentId: subjectId })));
 
+  const queryElementChildren = sinon.fake((id: string) => {
+    const children = props?.elementHierarchy?.get(id);
+    if (!children) {
+      return EMPTY;
+    }
+    return from(children).pipe(map((childId) => ({ id: childId, hasChildren: !!props?.elementHierarchy?.has(childId) })));
+  });
+
   const res: IQueryProvider = {
     queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
     queryAllModels: sinon.fake.returns(from(modelRows)),
@@ -71,14 +79,13 @@ export function createFakeQueryProvider(props?: SubjectModelIdsMockProps): IQuer
     queryCategoryElements: sinon.fake((x) => {
       return from(props?.categoryElements?.get(x) ?? []).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
     }),
-    queryElementChildren: sinon.fake((x) => {
-      const children = props?.elementHierarchy?.get(x);
-      if (!children) {
-        return EMPTY;
-      }
-
-      return from(children).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
-    }),
+    queryElementChildren,
+    queryElementChildrenRecursive: (parentId) => {
+      return from(queryElementChildren(parentId)).pipe(
+        expand(({ id, hasChildren }) => (hasChildren ? queryElementChildren(id) : EMPTY)),
+        map(({ id }) => id),
+      );
+    },
     queryModelElements: sinon.fake((modelId, elementIds) => {
       const result = from(props?.modelCategories?.get(modelId) ?? []).pipe(concatMap((x) => props?.categoryElements?.get(x) ?? []));
 
@@ -92,38 +99,19 @@ export function createFakeQueryProvider(props?: SubjectModelIdsMockProps): IQuer
 
       return result.pipe(filter((x) => elementIds.has(x)));
     }),
+    queryModelElementsCount: sinon.fake((modelId) => {
+      const categories = props?.modelCategories?.get(modelId);
+      if (!categories?.length) {
+        return of(0);
+      }
+
+      return from(categories).pipe(
+        map((x) => props?.categoryElements?.get(x)?.length ?? 0),
+        reduce((a, b) => a + b),
+      );
+    }),
   };
   return res;
-}
-
-export function createViewportStub(
-  props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
-    view?: Partial<ViewState>;
-    perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
-  },
-): Viewport {
-  return {
-    alwaysDrawn: undefined,
-    neverDrawn: undefined,
-    setAlwaysDrawn: sinon.stub(),
-    setNeverDrawn: sinon.stub(),
-    addViewedModels: sinon.stub<[Id64Arg]>().resolves(),
-    changeCategoryDisplay: sinon.stub(),
-    changeModelDisplay: sinon.stub<[Id64Arg, boolean], boolean>().returns(true),
-    isAlwaysDrawnExclusive: false,
-    ...props,
-    perModelCategoryVisibility: {
-      getOverride: sinon.stub().returns(PerModelCategoryVisibility.Override.None),
-      setOverride: sinon.fake(),
-      ...props?.perModelCategoryVisibility,
-    },
-    view: {
-      isSpatialView: sinon.fake.returns(true),
-      viewsCategory: sinon.fake.returns(true),
-      viewsModel: sinon.fake.returns(true),
-      ...props?.view,
-    },
-  };
 }
 
 export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
@@ -379,9 +367,12 @@ export function createFakeSinonViewport(
     },
     setAlwaysDrawn: sinon.fake((x) => (alwaysDrawn = x)),
     setNeverDrawn: sinon.fake((x) => (neverDrawn = x)),
+    clearAlwaysDrawn: sinon.fake(() => alwaysDrawn?.clear()),
+    clearNeverDrawn: sinon.fake(() => neverDrawn?.clear()),
     perModelCategoryVisibility: {
       getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
       setOverride: sinon.fake(),
+      clearOverrides: sinon.fake(),
       ...props?.perModelCategoryVisibility,
     },
     view: {

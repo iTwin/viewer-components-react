@@ -3,19 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { shareReplay } from "rxjs";
+import { EMPTY, expand, filter, map, shareReplay } from "rxjs";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { IQueryProvider } from "./QueryProvider";
 import type { Observable } from "rxjs";
 
-export interface ICachingQueryProvider extends IQueryProvider {
-  invalidateSubjectsCache(): void;
-  invalidateModelsCache(): void;
-  invalidateModelsCategoriesCache(id: Id64String | undefined): void;
-  invalidateCategoryElementsCache(id: Id64String | undefined): void;
-  invalidateElementChildrenCache(id: Id64String | undefined): void;
-}
+export type ICachingQueryProvider = IQueryProvider;
 
 export function createCachingQueryProvider(source: IQueryProvider) {
   return new CachingQueryProviderImpl(source);
@@ -29,34 +23,6 @@ class CachingQueryProviderImpl implements ICachingQueryProvider {
   private readonly _elementChildrenCache = new Map<string, Observable<{ id: Id64String; hasChildren: boolean }>>();
 
   constructor(private readonly _source: IQueryProvider) {}
-
-  public invalidateSubjectsCache(): void {
-    delete this._allSubjectsCache;
-  }
-
-  public invalidateModelsCache(): void {
-    delete this._allModelsCache;
-  }
-
-  private invalidateMapCache(key: string | undefined, cache: Map<string, unknown>) {
-    if (key) {
-      cache.delete(key);
-    } else {
-      cache.clear();
-    }
-  }
-
-  public invalidateModelsCategoriesCache(id: string | undefined): void {
-    this.invalidateMapCache(id, this._modelCategoriesCache);
-  }
-
-  public invalidateCategoryElementsCache(id: string | undefined): void {
-    this.invalidateMapCache(id, this._categoryElementsCache);
-  }
-
-  public invalidateElementChildrenCache(id: string | undefined): void {
-    this.invalidateMapCache(id, this._elementChildrenCache);
-  }
 
   public queryAllSubjects(): Observable<{ id: string; parentId?: string | undefined; targetPartitionId?: string | undefined }> {
     return (this._allSubjectsCache ??= this._source.queryAllSubjects().pipe(shareReplay()));
@@ -79,12 +45,35 @@ class CachingQueryProviderImpl implements ICachingQueryProvider {
     return this.getFromCacheOrInsert(id, this._modelCategoriesCache, () => this._source.queryModelCategories(id));
   }
 
+  public queryModelElementsCount(modelId: string): Observable<number> {
+    return this._source.queryModelElementsCount(modelId);
+  }
+
   public queryCategoryElements(id: string, modelId: string | undefined): Observable<{ id: string; hasChildren: boolean }> {
     return this.getFromCacheOrInsert(id, this._categoryElementsCache, () => this._source.queryCategoryElements(id, modelId));
   }
 
   public queryElementChildren(id: string): Observable<{ id: string; hasChildren: boolean }> {
     return this.getFromCacheOrInsert(id, this._elementChildrenCache, () => this._source.queryElementChildren(id));
+  }
+
+  public queryElementChildrenRecursive(parentId: string, idsFilter?: Id64Array | Id64Set | undefined): Observable<string> {
+    const isFilteredOut = (id: string) => {
+      if (!idsFilter) {
+        return false;
+      }
+      if (Array.isArray(idsFilter)) {
+        return idsFilter.includes(id);
+      }
+      return idsFilter.has(id);
+    };
+    return this.queryElementChildren(parentId).pipe(
+      filter(({ id }) => !isFilteredOut(id)),
+      expand(({ id, hasChildren }) => {
+        return hasChildren && !isFilteredOut(id) ? this.queryElementChildren(id) : EMPTY;
+      }),
+      map(({ id }) => id),
+    );
   }
 
   public queryModelElements(modelId: Id64String, elementIds?: Id64Array | Id64Set): Observable<Id64String> {

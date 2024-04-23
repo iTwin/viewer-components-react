@@ -93,7 +93,6 @@ export function toSet<T>(): OperatorFunction<T, Set<T>> {
 export async function toVoidPromise(obs: Observable<void> | Observable<undefined>): Promise<void> {
   return new Promise((resolve, reject) => {
     obs.subscribe({
-      next: resolve,
       complete: resolve,
       error: reject,
     });
