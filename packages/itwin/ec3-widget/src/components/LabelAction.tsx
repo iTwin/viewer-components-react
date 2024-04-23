@@ -102,7 +102,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
       setName(label.name);
       setItemName(label.elementNameColumn);
       setItemQuantity(label.elementQuantityColumn);
-      setMaterials(label.materials.map((x) => x)); // creating a copy of array, so original (in the parent) isn't modified
+      setMaterials([...label.materials]); // creating a copy of array, so original (in the parent) isn't modified
     } else {
       setItemName("UserLabel");
     }
