@@ -30,10 +30,10 @@ export const useFetchExtractionStatus = ({
       let extractionStatusIcon: ExtractionStatusData;
       let extractionMessageData: ExtractionMessageData[] = [];
 
-      const jobId = latestExtractionResult.value?.jobId;
+      const latestExtractionResultId = latestExtractionResult.value?.id;
       let latestJobStatus: ExtractionStatus|undefined;
-      if (jobId) {
-        latestJobStatus = await extractionClient.getExtractionStatus(accessToken, jobId);
+      if (latestExtractionResultId) {
+        latestJobStatus = await extractionClient.getExtractionStatus(accessToken, latestExtractionResultId);
       }
 
       if (latestExtractionResult.done) {
@@ -43,7 +43,7 @@ export const useFetchExtractionStatus = ({
         };
       } else {
         if (latestJobStatus?.state === ExtractionState.PartiallySucceeded || latestJobStatus?.state === ExtractionState.Failed) {
-          const logs = await extractionClient.getExtractionLogs(accessToken, jobId);
+          const logs = await extractionClient.getExtractionLogs(accessToken, latestExtractionResultId);
           extractionMessageData = logs.logs.filter((log) => log.message !== null).map((log) => ({
             date: log.dateTime,
             category: log.category,
