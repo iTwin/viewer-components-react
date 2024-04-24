@@ -22,7 +22,7 @@ import {
 import { ClassGroupingOption } from "../../../components/trees/common/Types";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/internal/Utils";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
-import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { ModelsTreeNodeType } from "../../../components/trees/models-tree/NodeUtils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 import {
@@ -99,6 +99,7 @@ describe("ModelsTree", () => {
       const visibilityHandlerMock = {
         onVisibilityChange: visibilityChangeEvent,
         setFilteredDataProvider: () => {},
+        // eslint-disable-next-line deprecation/deprecation
       } as unknown as ModelsVisibilityHandler;
 
       beforeEach(() => {

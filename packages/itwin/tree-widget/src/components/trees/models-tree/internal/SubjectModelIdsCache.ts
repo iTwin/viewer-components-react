@@ -3,17 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { EMPTY, expand, from, map, mergeMap, reduce, shareReplay } from "rxjs";
+import { EMPTY, expand, from, last, map, mergeMap, reduce, shareReplay } from "rxjs";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
-import type { IQueryProvider } from "./QueryProvider";
+import type { IQueryHandler } from "./QueryHandler";
 
 export interface SubjectModelIdsCache {
   getSubjectModelIdObs(subjectId: Id64String): Observable<Id64String>;
 }
 
-export function createSubjectModelIdsCache(queryProvider: IQueryProvider) {
+export function createSubjectModelIdsCache(queryProvider: IQueryHandler): SubjectModelIdsCache {
   const cachedState = queryProvider.queryAllSubjects().pipe(
     reduce(
       (acc, subject) => {
@@ -43,20 +43,22 @@ export function createSubjectModelIdsCache(queryProvider: IQueryProvider) {
         ),
       ),
     ),
+    map(({ subjectModels, subjectsHierarchy }) => ({ subjectModels, subjectsHierarchy })),
     shareReplay(),
   );
 
   return {
     getSubjectModelIdObs(subjectId: Id64String) {
       return cachedState.pipe(
-        map((state) => ({ ...state, modelIds: [...(state.subjectModels.get(subjectId) ?? [])], childSubjectId: subjectId })),
+        map((state) => ({ ...state, modelIds: new Array<string>(), subjectId })),
         expand((state) => {
-          const subjectModelIds = state.subjectModels.get(state.childSubjectId);
+          const subjectModelIds = state.subjectModels.get(state.subjectId);
           subjectModelIds && state.modelIds.push(...subjectModelIds);
 
-          const childSubjectIds = state.subjectsHierarchy.get(state.childSubjectId);
-          return childSubjectIds ? from(childSubjectIds).pipe(map((cs) => ({ ...state, childSubjectId: cs }))) : EMPTY;
+          const childSubjectIds = state.subjectsHierarchy.get(state.subjectId);
+          return childSubjectIds ? from(childSubjectIds).pipe(map((cs) => ({ ...state, subjectId: cs }))) : EMPTY;
         }),
+        last(),
         mergeMap(({ modelIds }) => modelIds),
       );
     },

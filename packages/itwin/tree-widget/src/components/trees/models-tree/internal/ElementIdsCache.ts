@@ -18,7 +18,7 @@ interface GroupedElementIds {
   elementIds: Observable<string>;
 }
 
-export interface ElementIdsCache {
+export interface IElementIdsCache {
   clear(): void;
   getAssemblyElementIds(assemblyId: Id64String): Observable<string>;
   getGroupedElementIds(groupingNodeKey: GroupingNodeKey): Observable<GroupedElementIds>;

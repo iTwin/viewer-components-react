@@ -15,21 +15,29 @@ import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { createQueryProvider } from "./internal/QueryProvider";
+import { createQueryHandler } from "./internal/QueryHandler";
 import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./internal/Utils";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler } from "./ModelsVisibilityHandler";
+import { NodeUtils } from "./NodeUtils";
 
+import type { ModelsTreeNodeType } from "./NodeUtils";
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
-import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
+import type { NodeKey, Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
-import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
+import type { ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
+
+/**
+ * Type definition of predicate used to decide if node can be selected
+ * @public
+ */
+export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
 
 /**
  * Props for configuring the hierarchy in [[ModelsTree]].
@@ -73,6 +81,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
   /**
    * Custom visibility handler.
    */
+  // eslint-disable-next-line deprecation/deprecation
   modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
   /**
    * Props for configuring hierarchy level.
@@ -250,9 +259,7 @@ function useTreeState({
     onFilterChange,
     selectionPredicate: useCallback(
       (node: TreeNodeItem) =>
-        !selectionPredicateRef.current || !isPresentationTreeNodeItem(node)
-          ? true
-          : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
+        !selectionPredicateRef.current || !isPresentationTreeNodeItem(node) ? true : selectionPredicateRef.current(node.key, NodeUtils.getNodeType(node)),
       [],
     ),
     eventHandler: eventHandlerFactory,
@@ -269,10 +276,12 @@ function useVisibilityHandler(
   rulesetId: string,
   iModel: IModelConnection,
   activeView: Viewport,
+  // eslint-disable-next-line deprecation/deprecation
   visibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler),
   hierarchyAutoUpdateEnabled?: boolean,
 ) {
-  const subjectModelIdsCache = useMemo(() => createSubjectModelIdsCache(createQueryProvider(iModel)), [iModel]);
+  const subjectModelIdsCache = useMemo(() => createSubjectModelIdsCache(createQueryHandler(iModel)), [iModel]);
+  // eslint-disable-next-line deprecation/deprecation
   const [state, setState] = useState<ModelsVisibilityHandler>();
 
   useEffect(() => {
@@ -280,6 +289,7 @@ function useVisibilityHandler(
       return;
     }
 
+    // eslint-disable-next-line deprecation/deprecation
     const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
       rulesetId,
       viewport: activeView,
@@ -287,6 +297,7 @@ function useVisibilityHandler(
       subjectModelIdsCache,
     };
 
+    // eslint-disable-next-line deprecation/deprecation
     const handler = visibilityHandler ? visibilityHandler(visibilityHandlerProps) : new ModelsVisibilityHandler(visibilityHandlerProps);
     setState(handler);
     return () => {

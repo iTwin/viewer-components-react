@@ -3,10 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, expand, filter, from, map, of, reduce } from "rxjs";
+import { concatMap, EMPTY, filter, from, map, of, reduce } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import { Id64 } from "@itwin/core-bentley";
+import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
 import { Descriptor, PropertiesField, StandardNodeTypes } from "@itwin/presentation-common";
@@ -33,15 +33,14 @@ import type {
   TypeDescription,
 } from "@itwin/presentation-common";
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { IQueryProvider } from "../../components/trees/models-tree/internal/QueryProvider";
-import type { Viewport } from "../../components/trees/models-tree/internal/VisibilityStateHandler";
-import type { ViewState } from "@itwin/core-frontend";
+import type { IQueryHandler } from "../../components/trees/models-tree/internal/QueryHandler";
+import type { Viewport, ViewState } from "@itwin/core-frontend";
+import type { IElementIdsCache } from "../../components/trees/models-tree/internal/ElementIdsCache";
 interface SubjectModelIdsMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
   subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64String[]>;
-  categoryElements?: Map<Id64String, Id64String[]>;
-  elementHierarchy?: Map<Id64String, Id64String[]>;
+  categoryElements?: Map<Id64String, Array<string | { id: string; hasChildren: boolean }>>;
 }
 
 interface SubjectsRow {
@@ -55,39 +54,31 @@ interface ElementRow {
   parentId: Id64String;
 }
 
-export function createFakeQueryProvider(props?: SubjectModelIdsMockProps): IQueryProvider {
+export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQueryHandler {
   const subjectQueryRows: SubjectsRow[] = [];
   props?.subjectsHierarchy?.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
 
   const modelRows: ElementRow[] = [];
   props?.subjectModels?.forEach((modelInfos, subjectId) => modelInfos.forEach((modelId) => modelRows.push({ id: modelId, parentId: subjectId })));
 
-  const queryElementChildren = sinon.fake((id: string) => {
-    const children = props?.elementHierarchy?.get(id);
-    if (!children) {
-      return EMPTY;
-    }
-    return from(children).pipe(map((childId) => ({ id: childId, hasChildren: !!props?.elementHierarchy?.has(childId) })));
-  });
-
-  const res: IQueryProvider = {
+  const res: IQueryHandler = {
     queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
     queryAllModels: sinon.fake.returns(from(modelRows)),
     queryModelCategories: sinon.fake((x) => {
       return from(props?.modelCategories?.get(x) ?? []);
     }),
     queryCategoryElements: sinon.fake((x) => {
-      return from(props?.categoryElements?.get(x) ?? []).pipe(map((id) => ({ id, hasChildren: !!props?.elementHierarchy?.get(id)?.length })));
-    }),
-    queryElementChildren,
-    queryElementChildrenRecursive: (parentId) => {
-      return from(queryElementChildren(parentId)).pipe(
-        expand(({ id, hasChildren }) => (hasChildren ? queryElementChildren(id) : EMPTY)),
-        map(({ id }) => id),
+      return from(props?.categoryElements?.get(x) ?? []).pipe(
+        map((el) => {
+          return typeof el === "string" ? { id: el, hasChildren: false } : el;
+        }),
       );
-    },
+    }),
     queryModelElements: sinon.fake((modelId, elementIds) => {
-      const result = from(props?.modelCategories?.get(modelId) ?? []).pipe(concatMap((x) => props?.categoryElements?.get(x) ?? []));
+      const result = from(props?.modelCategories?.get(modelId) ?? []).pipe(
+        concatMap((x) => props?.categoryElements?.get(x) ?? []),
+        map((x) => (typeof x === "string" ? x : x.id)),
+      );
 
       if (!elementIds) {
         return result;
@@ -218,14 +209,14 @@ export const createModelNode = (id?: Id64String): PresentationTreeNodeItem => ({
   },
 });
 
-export const createCategoryNode = (parentModelKey?: InstanceKey, id?: Id64String): PresentationTreeNodeItem => ({
+export const createCategoryNode = (parentModelKey?: InstanceKey | Id64String, id?: Id64String): PresentationTreeNodeItem => ({
   key: createKey("category", id ?? "category_id"),
   id: "category",
   parentId: "model",
   label: PropertyRecord.fromString("category"),
   extendedData: {
     isCategory: true,
-    modelId: parentModelKey ? parentModelKey.id : undefined,
+    modelId: parentModelKey ? (typeof parentModelKey === "string" ? parentModelKey : parentModelKey.id) : undefined,
   },
 });
 
@@ -353,11 +344,33 @@ export function createFakeSinonViewport(
 ): Viewport {
   let alwaysDrawn = props?.alwaysDrawn;
   let neverDrawn = props?.neverDrawn;
-  return {
+
+  // Stubs are defined as partial to ensure that the overrided implementation is compatible with original interfaces
+
+  const perModelCategoryVisibility: Partial<PerModelCategoryVisibility.Overrides> = {
+    getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
+    setOverride: sinon.fake(),
+    clearOverrides: sinon.fake(),
+    ...props?.perModelCategoryVisibility,
+  };
+
+  const view: Partial<ViewState> = {
+    isSpatialView: sinon.fake.returns(true),
+    viewsCategory: sinon.fake.returns(true),
+    viewsModel: sinon.fake.returns(true),
+    ...props?.view,
+  };
+
+  const result: Partial<Viewport> = {
     addViewedModels: sinon.fake.resolves(undefined),
     changeCategoryDisplay: sinon.fake(),
     changeModelDisplay: sinon.fake.returns(true),
     isAlwaysDrawnExclusive: false,
+    onViewedCategoriesPerModelChanged: new BeEvent(),
+    onViewedCategoriesChanged: new BeEvent(),
+    onViewedModelsChanged: new BeEvent(),
+    onAlwaysDrawnChanged: new BeEvent(),
+    onNeverDrawnChanged: new BeEvent(),
     ...props,
     get alwaysDrawn() {
       return alwaysDrawn;
@@ -369,17 +382,17 @@ export function createFakeSinonViewport(
     setNeverDrawn: sinon.fake((x) => (neverDrawn = x)),
     clearAlwaysDrawn: sinon.fake(() => alwaysDrawn?.clear()),
     clearNeverDrawn: sinon.fake(() => neverDrawn?.clear()),
-    perModelCategoryVisibility: {
-      getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
-      setOverride: sinon.fake(),
-      clearOverrides: sinon.fake(),
-      ...props?.perModelCategoryVisibility,
-    },
-    view: {
-      isSpatialView: sinon.fake.returns(true),
-      viewsCategory: sinon.fake.returns(true),
-      viewsModel: sinon.fake.returns(true),
-      ...props?.view,
-    },
+    perModelCategoryVisibility: perModelCategoryVisibility as PerModelCategoryVisibility.Overrides,
+    view: view as ViewState,
+  };
+
+  return result as Viewport;
+}
+export function createFakeElementIdsCache(overrides?: Partial<IElementIdsCache>): IElementIdsCache {
+  return {
+    clear: sinon.fake(),
+    getAssemblyElementIds: sinon.fake.returns(EMPTY),
+    getGroupedElementIds: sinon.fake.returns(EMPTY),
+    ...overrides,
   };
 }

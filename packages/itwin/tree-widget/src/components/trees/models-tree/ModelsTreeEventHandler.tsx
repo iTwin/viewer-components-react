@@ -10,8 +10,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
-import { getNodeType } from "./internal/NodeUtils";
-import { ModelsTreeNodeType } from "./ModelsVisibilityHandler";
+import { ModelsTreeNodeType, NodeUtils } from "./NodeUtils";
 
 import type { TreeNodeEventArgs } from "@itwin/components-react";
 export class ModelsTreeEventHandler extends VisibilityTreeEventHandler {
@@ -22,7 +21,7 @@ export class ModelsTreeEventHandler extends VisibilityTreeEventHandler {
     if (
       !node ||
       !isPresentationTreeNodeItem(node.item) ||
-      getNodeType(node.item) !== ModelsTreeNodeType.Element ||
+      NodeUtils.getNodeType(node.item) !== ModelsTreeNodeType.Element ||
       !NodeKey.isInstancesNodeKey(node.item.key)
     ) {
       return;

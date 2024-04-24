@@ -14,21 +14,19 @@ import type { Observable } from "rxjs";
 /**
  * @internal
  */
-export interface IQueryProvider {
+export interface IQueryHandler {
   queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>;
   queryAllModels(): Observable<{ id: Id64String; parentId: Id64String }>;
   queryModelCategories(id: Id64String): Observable<Id64String>;
   queryModelElementsCount(modelId: Id64String): Observable<number>;
   queryModelElements(modelId: Id64String, elementIds?: Id64Array | Id64Set): Observable<Id64String>;
   queryCategoryElements(id: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; hasChildren: boolean }>;
-  queryElementChildren(id: Id64String): Observable<{ id: Id64String; hasChildren: boolean }>;
-  queryElementChildrenRecursive(id: Id64String, filter?: Id64Array | Id64Set): Observable<Id64String>;
 }
 
 type QueryBindable = Id64String | Id64Array | Id64Set;
 
 /* istanbul ignore next */
-class QueryProviderImplementation implements IQueryProvider {
+class QueryHandlerImplementation implements IQueryHandler {
   constructor(private readonly _iModel: IModelConnection) {}
 
   public queryAllSubjects(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }> {
@@ -36,7 +34,7 @@ class QueryProviderImplementation implements IQueryProvider {
       SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
       FROM bis.Subject
     `;
-    return this.runQuery(query, undefined, (row) => ({ id: row.ecInstanceId, parentId: row.parentId, targetPartitionId: row.targetPartitionId }));
+    return this.runQuery(query, undefined, (row) => ({ id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId }));
   }
 
   public queryAllModels(): Observable<{ id: Id64String; parentId: Id64String }> {
@@ -192,6 +190,6 @@ class QueryProviderImplementation implements IQueryProvider {
  * @internal
  */
 /* istanbul ignore next */
-export function createQueryProvider(iModel: IModelConnection): IQueryProvider {
-  return new QueryProviderImplementation(iModel);
+export function createQueryHandler(iModel: IModelConnection): IQueryHandler {
+  return new QueryHandlerImplementation(iModel);
 }

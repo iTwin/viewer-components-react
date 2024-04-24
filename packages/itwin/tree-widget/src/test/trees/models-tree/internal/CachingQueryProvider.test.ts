@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import { firstValueFrom, from } from "rxjs";
 import sinon from "sinon";
-import { createCachingQueryProvider } from "../../../../components/trees/models-tree/internal/CachingQueryProvider";
+import { createCachingQueryHandler } from "../../../../components/trees/models-tree/internal/CachingQueryHandler";
 
 import type { Observable } from "rxjs";
-import type { IQueryProvider } from "../../../../components/trees/models-tree/internal/QueryProvider";
+import type { IQueryHandler } from "../../../../components/trees/models-tree/internal/QueryHandler";
 
-type SourceQueryProviderMock = { [key in keyof IQueryProvider]?: () => Observable<any> };
+type SourceQueryProviderMock = { [key in keyof IQueryHandler]?: () => Observable<any> };
 
 describe("CachingQueryProvider", () => {
   it("caches all subjects result", async () => {
@@ -15,7 +15,7 @@ describe("CachingQueryProvider", () => {
     const source: SourceQueryProviderMock = {
       queryAllSubjects: () => from(fakeFunction()),
     };
-    const cachedProvider = createCachingQueryProvider(source as unknown as IQueryProvider);
+    const cachedProvider = createCachingQueryHandler(source as unknown as IQueryHandler);
     let result = await firstValueFrom(cachedProvider.queryAllSubjects());
     expect(result).to.deep.eq(subject);
     expect(fakeFunction).to.be.calledOnce;
@@ -31,7 +31,7 @@ describe("CachingQueryProvider", () => {
     const source: SourceQueryProviderMock = {
       queryAllModels: () => from(fakeFunction()),
     };
-    const cachedProvider = createCachingQueryProvider(source as unknown as IQueryProvider);
+    const cachedProvider = createCachingQueryHandler(source as unknown as IQueryHandler);
     let result = await firstValueFrom(cachedProvider.queryAllModels());
     expect(result).to.deep.eq(model);
     expect(fakeFunction).to.be.calledOnce;
@@ -47,7 +47,7 @@ describe("CachingQueryProvider", () => {
     const source: SourceQueryProviderMock = {
       queryModelCategories: () => from(fakeFunction()),
     };
-    const cachedProvider = createCachingQueryProvider(source as unknown as IQueryProvider);
+    const cachedProvider = createCachingQueryHandler(source as unknown as IQueryHandler);
     let result = await firstValueFrom(cachedProvider.queryModelCategories("0x1"));
     expect(result).to.deep.eq(items);
     expect(fakeFunction).to.be.calledOnce;
@@ -63,28 +63,12 @@ describe("CachingQueryProvider", () => {
     const source: SourceQueryProviderMock = {
       queryCategoryElements: () => from(fakeFunction()),
     };
-    const cachedProvider = createCachingQueryProvider(source as unknown as IQueryProvider);
+    const cachedProvider = createCachingQueryHandler(source as unknown as IQueryHandler);
     let result = await firstValueFrom(cachedProvider.queryCategoryElements("0x1", "0x2"));
     expect(result).to.deep.eq(items);
     expect(fakeFunction).to.be.calledOnce;
 
     result = await firstValueFrom(cachedProvider.queryCategoryElements("0x1", "0x2"));
-    expect(result).to.deep.eq(items);
-    expect(fakeFunction).to.be.calledOnce;
-  });
-
-  it("caches element children result", async () => {
-    const items = ["0x1", "0x2"];
-    const fakeFunction = sinon.fake.resolves(items);
-    const source: SourceQueryProviderMock = {
-      queryElementChildren: () => from(fakeFunction()),
-    };
-    const cachedProvider = createCachingQueryProvider(source as unknown as IQueryProvider);
-    let result = await firstValueFrom(cachedProvider.queryElementChildren("0x1"));
-    expect(result).to.deep.eq(items);
-    expect(fakeFunction).to.be.calledOnce;
-
-    result = await firstValueFrom(cachedProvider.queryElementChildren("0x1"));
     expect(result).to.deep.eq(items);
     expect(fakeFunction).to.be.calledOnce;
   });
