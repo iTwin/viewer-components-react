@@ -71,13 +71,23 @@ export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer
 export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
   nodeRenderer: (props: PresentationTreeNodeRendererProps) => React.ReactNode;
+  onApplyFilterClick?: () => void;
+  onFilterClear?: () => void;
+  onFilterApplied?: () => void;
 }
 /**
  * Base tree renderer for trees with enabled hierarchy level filtering.
  * @beta
  */
-export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps) {
-  const { onClearFilterClick, onFilterClick, filterDialog } = useFilterablePresentationTree({ nodeLoader });
+export function FilterableTreeRenderer({
+  nodeRenderer,
+  nodeLoader,
+  onApplyFilterClick,
+  onFilterClear,
+  onFilterApplied,
+  ...restProps
+}: FilterableTreeRendererProps) {
+  const { onClearFilterClick, onFilterClick, filterDialog } = useFilterablePresentationTree({ nodeLoader, onFilterApplied });
 
   return (
     <div>
@@ -85,7 +95,17 @@ export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps 
         {...restProps}
         nodeLoader={nodeLoader}
         nodeRenderer={(props) => {
-          return nodeRenderer({ ...props, onClearFilterClick, onFilterClick });
+          return nodeRenderer({
+            ...props,
+            onFilterClick: (nodeId: string) => {
+              onApplyFilterClick?.();
+              onFilterClick(nodeId);
+            },
+            onClearFilterClick: (nodeId: string) => {
+              onFilterClear?.();
+              onClearFilterClick(nodeId);
+            },
+          });
         }}
       />
       {filterDialog}

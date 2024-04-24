@@ -12,6 +12,7 @@ import { PresentationTree } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
+import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
@@ -67,6 +68,12 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
    * @beta
    */
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+  /**
+   * Callback that is invoked when a tracked feature is used.
+   * @param featureId ID of the feature.
+   * @beta
+   */
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -76,7 +83,7 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
 export function CategoryTree(props: CategoryTreeProps) {
   // istanbul ignore next
   const viewManager = props.viewManager ?? IModelApp.viewManager;
-  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density, hierarchyLevelConfig } = props;
+  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density, hierarchyLevelConfig, onPerformanceMeasured, onFeatureUsed } = props;
 
   const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, activeView, allViewports, categoryVisibilityHandler);
   const onFilterChange = useCallback(
@@ -87,10 +94,13 @@ export function CategoryTree(props: CategoryTreeProps) {
     },
     [onFilterApplied],
   );
-  const reporting = usePerformanceReporting({
+
+  const { reportUsage } = useFeatureReporting({ treeIdentifier: CategoriesTreeComponent.id, onFeatureUsed });
+  const { onNodeLoaded } = usePerformanceReporting({
     treeIdentifier: CategoriesTreeComponent.id,
-    onPerformanceMeasured: props.onPerformanceMeasured,
+    onPerformanceMeasured,
   });
+
   const state = useVisibilityTreeState({
     imodel: props.iModel,
     ruleset: RULESET_CATEGORIES,
@@ -101,7 +111,8 @@ export function CategoryTree(props: CategoryTreeProps) {
     onFilterChange,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
     enableHierarchyAutoUpdate: true,
-    onNodeLoaded: reporting.onNodeLoaded,
+    onNodeLoaded,
+    reportUsage,
   });
 
   useEffect(() => {
@@ -149,6 +160,8 @@ export function CategoryTree(props: CategoryTreeProps) {
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
                   nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} />}
+                  onApplyFilterClick={() => reportUsage?.({ reportInteraction: true })}
+                  onFilterClear={() => reportUsage?.({ reportInteraction: true })}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)
@@ -171,7 +184,6 @@ function CategoriesTreeNodeRenderer(props: PresentationTreeNodeRendererProps & {
       isEnlarged={props.density === "enlarged"}
     />
   );
-
 }
 
 function useCategoryVisibilityHandler(

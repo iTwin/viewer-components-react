@@ -113,5 +113,23 @@ describe("ModelsTreeEventHandler", () => {
 
       expect(zoomSpy).to.be.called;
     });
+
+    it(`reports on zoom to node.`, async () => {
+      const { nodeLoader, modelSource } = setupTreeModel(["testId"], createElementNode());
+      modelSource.modifyModel = () => {};
+      const reportUsageSpy = sinon.spy();
+      const eventHandler = new ModelsTreeEventHandler({
+        visibilityHandler,
+        nodeLoader,
+        selectionHandler: selectionHandlerStub,
+        reportUsage: reportUsageSpy,
+      });
+
+      await using(eventHandler, async (_) => {
+        await eventHandler.onNodeDoubleClick({ nodeId: "testId" });
+      });
+
+      expect(reportUsageSpy).to.be.calledOnceWith({ featureId: "zoom-to-node", reportInteraction: false });
+    });
   });
 });

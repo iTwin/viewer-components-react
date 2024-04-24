@@ -8,35 +8,49 @@ import { join } from "path";
 import sanitize from "sanitize-filename";
 import sinon from "sinon";
 import * as moq from "typemoq";
-import { PropertyRecord } from "@itwin/appui-abstract";
+import { PropertyRecord, StandardTypeNames } from "@itwin/appui-abstract";
 import { PropertyFilterRuleOperator, SelectionMode } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { KeySet, LabelDefinition } from "@itwin/presentation-common";
+import { KeySet, LabelDefinition, PresentationError, PresentationStatus, PropertyValueFormat } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyBuilder,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { ClassGroupingOption } from "../../../components/trees/common/Types";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
-import { deepEquals, mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
+import { deepEquals, mockPresentationManager, mockViewport, render, stubDOMMatrix, TestUtils, waitFor } from "../../TestUtils";
 import {
-  createCategoryNode, createElementClassGroupingNode, createElementNode, createInfoNode, createKey, createModelNode, createPresentationTreeNodeItem,
-  createSimpleTreeModelNode, createSubjectNode, createTestContentDescriptor, createTestPropertiesContentField, createTestPropertyInfo,
+  createCategoryNode,
+  createElementClassGroupingNode,
+  createElementNode,
+  createInfoNode,
+  createKey,
+  createModelNode,
+  createPresentationTreeNodeItem,
+  createSimpleTreeModelNode,
+  createSubjectNode,
+  createTestContentDescriptor,
+  createTestPropertiesContentField,
+  createTestPropertyInfo,
 } from "../Common";
 
 import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import type { TreeNodeItem } from "@itwin/components-react";
+import type { DelayLoadedTreeNodeItem, PageOptions, TreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTree";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { SelectionManager } from "@itwin/presentation-frontend";
+import type { PresentationManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 describe("ModelsTree", () => {
   const sizeProps = { width: 200, height: 200 };
@@ -60,6 +74,8 @@ describe("ModelsTree", () => {
 
   describe("#unit", () => {
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
+    let presentationManagerMock: moq.IMock<PresentationManager>;
+    let getNodesStub: sinon.SinonStub<[parentNode?: TreeNodeItem | undefined, pageOptions?: PageOptions | undefined], Promise<DelayLoadedTreeNodeItem[]>>;
 
     beforeEach(() => {
       imodelMock.reset();
@@ -68,8 +84,9 @@ describe("ModelsTree", () => {
       sinon.stub(PresentationTreeDataProvider.prototype, "rulesetId").get(() => "");
       sinon.stub(PresentationTreeDataProvider.prototype, "dispose");
       sinon.stub(PresentationTreeDataProvider.prototype, "getFilteredNodePaths").resolves([]);
-      sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(0);
-      sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves([]);
+      sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(1);
+      getNodesStub = sinon.stub(PresentationTreeDataProvider.prototype, "getNodes");
+      getNodesStub.resolves([]);
 
       const selectionChangeEvent = new SelectionChangeEvent();
       selectionManagerMock.setup((x) => x.selectionChange).returns(() => selectionChangeEvent);
@@ -77,7 +94,8 @@ describe("ModelsTree", () => {
       selectionManagerMock.setup((x) => x.getSelection(imodelMock.object, moq.It.isAny())).returns(() => new KeySet());
 
       const mocks = mockPresentationManager();
-      sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
+      presentationManagerMock = mocks.presentationManager;
+      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
       sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
       sinon.stub(Presentation, "localization").get(() => new EmptyLocalization());
     });
@@ -237,6 +255,30 @@ describe("ModelsTree", () => {
         expect(visibilityHandlerMock.changeVisibility).to.be.calledOnce;
       });
 
+      it("reports when node visibility checkbox is clicked", async () => {
+        const node = createModelNode();
+        const onFeatureUsedSpy = sinon.spy();
+        visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
+        setupDataProvider([node]);
+        const { user, getByTestId } = render(
+          <ModelsTree
+            {...sizeProps}
+            iModel={imodelMock.object}
+            activeView={mockViewport().object}
+            onFeatureUsed={onFeatureUsedSpy}
+            modelsVisibilityHandler={visibilityHandlerMock}
+          />,
+        );
+
+        const renderedNode = await waitFor(() => getByTestId("tree-node"));
+        const visibilityCheckbox = renderedNode.querySelector("input"); // eslint-disable-line deprecation/deprecation
+        await user.click(visibilityCheckbox!);
+
+        expect(onFeatureUsedSpy).to.be.calledTwice;
+        expect(onFeatureUsedSpy).to.be.calledWith("use-models-tree");
+        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-visibility-change");
+      });
+
       it("respects `hierarchyConfig` prop", async () => {
         const createRulesetSpy = sinon.stub(modelsTreeUtils, "createRuleset").returns({
           id: "testRulesetId",
@@ -321,6 +363,8 @@ describe("ModelsTree", () => {
       });
 
       describe("hierarchy level filtering", () => {
+        stubDOMMatrix();
+
         beforeEach(() => {
           const localization = new EmptyLocalization();
           sinon.stub(Presentation, "localization").get(() => localization);
@@ -382,6 +426,25 @@ describe("ModelsTree", () => {
           await waitFor(() => expect(queryByText("filtering message")).to.not.be.null);
         });
 
+        it("reports when hierarchy limit exceeded", async () => {
+          const onFeatureUsedSpy = sinon.spy();
+          getNodesStub.restore();
+          presentationManagerMock.setup(async (x) => x.getNodesIterator(moq.It.isAny())).throws(new PresentationError(PresentationStatus.ResultSetTooLarge));
+
+          render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              activeView={mockViewport().object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true, sizeLimit: 0 }}
+              onFeatureUsed={onFeatureUsedSpy}
+            />,
+          );
+
+          await waitFor(() => expect(onFeatureUsedSpy).to.be.calledOnceWith("models-tree-hierarchy-level-size-limit-hit"));
+        });
+
         it("renders node with active filtering", async () => {
           const property = createTestPropertyInfo();
           const field = createTestPropertiesContentField({ properties: [{ property }] });
@@ -411,6 +474,131 @@ describe("ModelsTree", () => {
           );
 
           await waitFor(() => expect(queryByTitle("tree.clear-hierarchy-level-filter")).to.not.be.null);
+        });
+
+        it("reports when node visibility checkbox is clicked", async () => {
+          const node = createModelNode();
+          const onFeatureUsedSpy = sinon.spy();
+          visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
+          setupDataProvider([node]);
+          const { user, getByTestId } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              onFeatureUsed={onFeatureUsedSpy}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+            />,
+          );
+
+          const renderedNode = await waitFor(() => getByTestId("tree-node"));
+          const visibilityCheckbox = renderedNode.querySelector("input"); // eslint-disable-line deprecation/deprecation
+          await user.click(visibilityCheckbox!);
+
+          expect(onFeatureUsedSpy).to.be.calledTwice;
+          expect(onFeatureUsedSpy).to.be.calledWith("use-models-tree");
+          expect(onFeatureUsedSpy).to.be.calledWith("models-tree-visibility-change");
+        });
+
+        it("reports when hierarchy level filter is applied", async () => {
+          const property = createTestPropertyInfo({ name: "TestProperty", type: StandardTypeNames.Bool });
+          const propertyField = createTestPropertiesContentField({
+            properties: [{ property }],
+            name: property.name,
+            label: property.name,
+            type: { typeName: StandardTypeNames.Bool, valueFormat: PropertyValueFormat.Primitive },
+          });
+          const initialFilter: PresentationInstanceFilterInfo = {
+            filter: { field: propertyField, operator: "is-false" },
+            usedClasses: [],
+          };
+          const model = createModelNode();
+          model.hasChildren = true;
+          model.filtering = { descriptor: createTestContentDescriptor({ fields: [propertyField] }), active: initialFilter, ancestorFilters: [] };
+          const element = createElementNode(model.id);
+          const onFeatureUsedSpy = sinon.spy();
+          visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
+          setupDataProvider([model, element]);
+          const { baseElement, user, getByTitle } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              onFeatureUsed={onFeatureUsedSpy}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+            />,
+          );
+
+          const filterButton = await waitFor(() => getByTitle("tree.filter-hierarchy-level"));
+          await user.click(filterButton);
+
+          // open property selector
+          const propertySelector = await waitFor(() => baseElement.querySelector(".fb-property-name input"));
+          expect(propertySelector).to.not.be.null;
+          await user.click(propertySelector!);
+
+          // select property
+          await user.click(getByTitle(propertyField.label));
+
+          // wait until apply button is enabled
+          const applyButton = await waitFor(() => {
+            const button = baseElement.querySelector<HTMLInputElement>(".presentation-instance-filter-dialog-apply-button");
+            expect(button?.disabled).to.be.false;
+            return button;
+          });
+          await user.click(applyButton!);
+
+          // wait until dialog closes
+          await waitFor(() => {
+            expect(baseElement.querySelector(".presentation-instance-filter-dialog")).to.be.null;
+          });
+
+          expect(onFeatureUsedSpy).to.be.calledWith(`use-models-tree`);
+          expect(onFeatureUsedSpy).to.be.calledWith(`models-tree-hierarchy-level-filtering`);
+        });
+
+        it("reports when hierarchy level filter is cleared", async () => {
+          const property = createTestPropertyInfo({ name: "TestProperty", type: StandardTypeNames.Bool });
+          const propertyField = createTestPropertiesContentField({
+            properties: [{ property }],
+            name: property.name,
+            label: property.name,
+            type: { typeName: StandardTypeNames.Bool, valueFormat: PropertyValueFormat.Primitive },
+          });
+          const initialFilter: PresentationInstanceFilterInfo = {
+            filter: { field: propertyField, operator: "is-false" },
+            usedClasses: [],
+          };
+          const model = createModelNode();
+          model.hasChildren = true;
+          model.filtering = { descriptor: createTestContentDescriptor({ fields: [propertyField] }), active: initialFilter, ancestorFilters: [] };
+          const element = createElementNode(model.id);
+          const onFeatureUsedSpy = sinon.spy();
+          visibilityHandlerMock.getVisibilityStatus = async () => ({ state: "visible" });
+          setupDataProvider([model, element]);
+          const { user, getByTitle, queryAllByTitle } = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              onFeatureUsed={onFeatureUsedSpy}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+            />,
+          );
+
+          const clearFilterButton = await waitFor(() => getByTitle("tree.clear-hierarchy-level-filter"));
+          await user.click(clearFilterButton);
+
+          // wait until dialog closes
+          await waitFor(() => {
+            expect(queryAllByTitle(".tree.clear-hierarchy-level-filter")).to.be.empty;
+          });
+
+          expect(onFeatureUsedSpy).to.be.calledWith(`use-models-tree`);
+          expect(onFeatureUsedSpy).to.not.be.calledWith(`models-tree-hierarchy-level-filtering`);
         });
       });
 
@@ -652,6 +840,22 @@ describe("ModelsTree", () => {
           await result.findByText("filtered-node");
 
           expect(spy).to.be.calledOnce;
+        });
+
+        it("reports on filter applied", async () => {
+          const onFeatureUsedSpy = sinon.spy();
+          const result = render(
+            <ModelsTree
+              {...sizeProps}
+              iModel={imodelMock.object}
+              modelsVisibilityHandler={visibilityHandlerMock}
+              filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }}
+              activeView={mockViewport().object}
+              onFeatureUsed={onFeatureUsedSpy}
+            />,
+          );
+          await result.findByText("filtered-node");
+          expect(onFeatureUsedSpy).to.be.calledOnceWith("models-tree-filtering");
         });
       });
 

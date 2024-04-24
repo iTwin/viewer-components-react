@@ -92,13 +92,16 @@ describe("ExternalSourcesTree", () => {
         sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
       };
 
+      async function* createAsyncIterator<T>(values: T[]): AsyncIterableIterator<T> {
+        for (const value of values) {
+          yield value;
+        }
+      }
+
       function setupHierarchy(nodes: Node[]) {
         presentationManagerMock
-          .setup(async (x) => x.getNodesAndCount(moq.It.isAny()))
-          .returns(async () => ({
-            count: nodes.length,
-            nodes,
-          }));
+          .setup(async (x) => x.getNodesIterator(moq.It.isAny()))
+          .returns(async () => ({ total: nodes.length, items: createAsyncIterator(nodes) }));
       }
 
       it("should render hierarchy", async () => {
@@ -155,6 +158,27 @@ describe("ExternalSourcesTree", () => {
 
         const node = container.querySelector(".node-wrapper") as HTMLDivElement;
         expect(node.style.height).to.be.equal("43px");
+      });
+
+      it("reports on interaction", async () => {
+        const onFeaturedUsedSpy = sinon.spy();
+        setupDataProvider([createPresentationTreeNodeItem({ hasChildren: true })]);
+
+        const { user, getByText, getByTestId } = render(
+          <ExternalSourcesTree
+            {...sizeProps}
+            density={"enlarged"}
+            iModel={imodelMock.object}
+            hierarchyLevelConfig={{ isFilteringEnabled: true }}
+            onFeatureUsed={onFeaturedUsedSpy}
+          />,
+        );
+
+        await waitFor(() => getByText("Node Label"));
+        const expandButton = getByTestId("tree-node-expansion-toggle");
+        await user.click(expandButton);
+
+        await waitFor(() => expect(onFeaturedUsedSpy).to.be.calledOnceWith("use-external-sources-tree"));
       });
 
       describe("hierarchy level filtering", () => {

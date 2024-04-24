@@ -11,6 +11,7 @@ import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentatio
 import { TreeWidget } from "../../../TreeWidget";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
+import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
@@ -84,6 +85,12 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * @beta
    */
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+  /**
+   * Callback that is invoked when a tracked feature is used.
+   * @param featureId ID of the feature.
+   * @beta
+   */
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -93,8 +100,9 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
-  const { hierarchyLevelConfig, density, height, width, selectionMode } = props;
-  const state = useModelsTreeState(props);
+  const { hierarchyLevelConfig, density, height, width, selectionMode, onFeatureUsed } = props;
+  const { reportUsage } = useFeatureReporting({ treeIdentifier: ModelsTreeComponent.id, onFeatureUsed });
+  const state = useModelsTreeState({ ...props, reportUsage });
 
   const baseRendererProps = {
     contextMenuItems: props.contextMenuItems,
@@ -134,6 +142,9 @@ export function ModelsTree(props: ModelsTreeProps) {
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
                   nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
+                  onApplyFilterClick={() => reportUsage?.({ reportInteraction: true })}
+                  onFilterClear={() => reportUsage?.({ reportInteraction: true })}
+                  onFilterApplied={() => reportUsage?.({ featureId: "hierarchy-level-filtering", reportInteraction: true })}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)
@@ -160,7 +171,11 @@ function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { den
   );
 }
 
-function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {
+interface UseModelsTreeStateProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
+  reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
+}
+
+function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModelsTreeStateProps) {
   const rulesets = {
     general: useMemo(
       () =>
@@ -196,8 +211,9 @@ function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTre
   return filterInfo?.filter ? filteredTreeState : treeState;
 }
 
-interface UseTreeProps extends ModelsTreeProps {
+interface UseTreeProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
   ruleset: Ruleset;
+  reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
 }
 
 function useTreeState({
@@ -211,6 +227,7 @@ function useTreeState({
   onFilterApplied,
   hierarchyLevelConfig,
   onPerformanceMeasured,
+  reportUsage,
 }: UseTreeProps) {
   const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
@@ -220,18 +237,19 @@ function useTreeState({
 
   const onFilterChange = useCallback(
     (dataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => {
-      if (onFilterApplied && dataProvider && matchesCount !== undefined) {
-        onFilterApplied(dataProvider, matchesCount);
+      if (dataProvider && matchesCount !== undefined) {
+        reportUsage?.({ featureId: "filtering", reportInteraction: false });
+        onFilterApplied?.(dataProvider, matchesCount);
       }
 
       if (visibilityHandler) {
         visibilityHandler.setFilteredDataProvider(dataProvider);
       }
     },
-    [onFilterApplied, visibilityHandler],
+    [onFilterApplied, reportUsage, visibilityHandler],
   );
 
-  const reporting = usePerformanceReporting({
+  const { onNodeLoaded } = usePerformanceReporting({
     treeIdentifier: ModelsTreeComponent.id,
     onPerformanceMeasured,
   });
@@ -255,7 +273,9 @@ function useTreeState({
     ),
     eventHandler: eventHandlerFactory,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
-    onNodeLoaded: filterInfo ? undefined : reporting.onNodeLoaded,
+    onNodeLoaded: filterInfo ? undefined : onNodeLoaded,
+    reportUsage: filterInfo ? undefined : reportUsage,
+    onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
 }
 
