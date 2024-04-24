@@ -106,6 +106,8 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
     // @beta
+    onFeatureUsed?: (feature: string) => void;
+    // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
     // @internal
     viewManager?: ViewManager;
@@ -196,11 +198,13 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
     // @beta
+    onFeatureUsed?: (feature: string) => void;
+    // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 // @beta
-export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps): JSX.Element;
+export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, onApplyFilterClick, onFilterClear, onFilterApplied, ...restProps }: FilterableTreeRendererProps): JSX.Element;
 
 // @beta
 export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
@@ -208,6 +212,12 @@ export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "no
     nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
     // (undocumented)
     nodeRenderer: (props: PresentationTreeNodeRendererProps) => React.ReactNode;
+    // (undocumented)
+    onApplyFilterClick?: () => void;
+    // (undocumented)
+    onFilterApplied?: () => void;
+    // (undocumented)
+    onFilterClear?: () => void;
 }
 
 // @beta
@@ -247,6 +257,8 @@ export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iMod
 export interface IModelContentTreeProps extends BaseTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
+    // @beta
+    onFeatureUsed?: (feature: string) => void;
     // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
@@ -334,6 +346,8 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     hierarchyLevelConfig?: HierarchyLevelConfig;
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
     // @beta
+    onFeatureUsed?: (feature: string) => void;
+    // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
@@ -418,6 +432,8 @@ export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 export interface SelectableTreeProps {
     // (undocumented)
     density?: "enlarged" | "default";
+    // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     // (undocumented)
@@ -513,6 +529,8 @@ export interface TreeRenderProps {
     // (undocumented)
     density?: "enlarged" | "default";
     // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
+    // (undocumented)
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
@@ -537,6 +555,7 @@ export interface TreeWidgetOptions {
     defaultPanelSection?: StagePanelSection;
     defaultTreeWidgetPriority?: number;
     density?: "enlarged" | "default";
+    onFeatureUsed?: (feature: string) => void;
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     trees?: TreeDefinition[];
 }
@@ -593,10 +612,22 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     onSelectionModified({ modifications }: TreeSelectionModificationEventArgs): Subscription | undefined;
     // (undocumented)
     onSelectionReplaced({ replacements }: TreeSelectionReplacementEventArgs): Subscription | undefined;
+    // (undocumented)
+    protected _reportUsage?: (props: {
+        featureId?: string;
+        reportInteraction: boolean;
+    }) => void;
+    // (undocumented)
+    protected _treeIdentifier?: string;
 }
 
 // @public
 export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEventHandlerParams {
+    // (undocumented)
+    reportUsage?: (props: {
+        featureId?: string;
+        reportInteraction: boolean;
+    }) => void;
     // (undocumented)
     selectionPredicate?: VisibilityTreeSelectionPredicate;
     // (undocumented)

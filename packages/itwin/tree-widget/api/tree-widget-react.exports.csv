@@ -21,7 +21,7 @@ alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element | null
 alpha;ExternalSourcesTreeComponent:
 alpha;ExternalSourcesTreeComponentProps = Omit
 alpha;ExternalSourcesTreeProps 
-beta;FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps): JSX.Element
+beta;FilterableTreeRenderer({ nodeRenderer, nodeLoader, onApplyFilterClick, onFilterClear, onFilterApplied, ...restProps }: FilterableTreeRendererProps): JSX.Element
 beta;FilterableTreeRendererProps 
 beta;FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element
 beta;FilterableVisibilityTreeNodeRendererProps = Omit
