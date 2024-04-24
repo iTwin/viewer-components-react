@@ -45,7 +45,7 @@ function DebouncedSearchBox({ onSearchStringChange, onClose, onOpen, className }
 
     const timeoutId = setTimeout(() => {
       onSearchStringChangeRef.current(inputValue);
-    }, 25);
+    }, 500);
 
     return () => {
       clearTimeout(timeoutId);

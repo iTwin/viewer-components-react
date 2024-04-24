@@ -13,6 +13,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { InstanceSelectionProps } from "../../hooks/UseInstanceSelection";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
 
 describe("useInstanceSelection", () => {
   const imodel = {} as IModelConnection;
@@ -310,6 +311,74 @@ describe("useInstanceSelection", () => {
       expect(result.current.selectedKeys).to.have.lengthOf(1);
       expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
       expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+    });
+  });
+
+  describe("feature usage reporting", () => {
+    const initialProps: InstanceSelectionProps = {
+      imodel,
+    };
+
+    it("reports when navigates to parent", async () => {
+      const onFeatureUsedSpy = sinon.spy();
+      selectionManager.getSelection.returns(new KeySet([childKey]));
+
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>{children}</TelemetryContextProvider>
+      );
+      const { result } = renderHook(useInstanceSelection, { initialProps, wrapper });
+
+      await waitFor(() => {
+        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+      });
+
+      await act(async () => result.current.ancestorsNavigationProps.navigateUp());
+
+      await waitFor(() => {
+        expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
+      });
+
+      expect(onFeatureUsedSpy).to.be.calledOnceWith("ancestor-navigation");
+    });
+
+    it("reports when navigates down initial instance", async () => {
+      const onFeatureUsedSpy = sinon.spy();
+      selectionManager.getSelection.returns(new KeySet([childKey]));
+
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>{children}</TelemetryContextProvider>
+      );
+      const { result } = renderHook(useInstanceSelection, { initialProps, wrapper });
+
+      await waitFor(() => {
+        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
+      });
+
+      await act(async () => result.current.ancestorsNavigationProps.navigateUp());
+
+      await waitFor(() => {
+        expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.true;
+      });
+
+      expect(selectionManager.replaceSelection).to.be.calledOnceWith(
+        "Property Grid",
+        imodel,
+        sinon.match((keys: KeySet) => keys.has(parentKey)),
+      );
+      selectionManager.replaceSelection.resetHistory();
+      onFeatureUsedSpy.resetHistory();
+
+      act(() => result.current.ancestorsNavigationProps.navigateDown());
+
+      await waitFor(() => {
+        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
+        expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.false;
+      });
+
+      expect(onFeatureUsedSpy).to.be.calledOnceWith("ancestor-navigation");
     });
   });
 });

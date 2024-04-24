@@ -11,13 +11,15 @@ import { PropertyGridContent } from "../../components/PropertyGridContent";
 import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
-import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils";
+import { act, createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { ReactElement } from "react";
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyGridContentProps } from "../../components/PropertyGridContent";
+import { TelemetryContextProvider } from "../../property-grid-react";
+import { KeySet } from "@itwin/presentation-common";
 
 describe("<PropertyGridContent />", () => {
   before(() => {
@@ -215,6 +217,146 @@ describe("<PropertyGridContent />", () => {
       const [{ dataProvider, newValue }] = stub.args[0];
       expect(dataProvider).to.be.eq(provider);
       expect((newValue as PrimitiveValue).value).to.be.eq("Prop Value Updated");
+    });
+  });
+
+  describe("feature usage reporting", () => {
+    it("reports when filters properties according to search prompt", async () => {
+      const imodel = {} as IModelConnection;
+      const onFeatureUsedSpy = sinon.spy();
+
+      const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <PropertyGridContent dataProvider={provider} imodel={imodel} />
+        </TelemetryContextProvider>,
+      );
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.not.be.null;
+      });
+
+      const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+      await user.click(searchButton);
+
+      const searchTextInput = await waitFor(() => getByRole("searchbox"));
+      // input text that should match
+      await user.type(searchTextInput, "test prop");
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.be.null;
+      });
+      expect(onFeatureUsedSpy).to.be.calledWith("filter-properties");
+      onFeatureUsedSpy.resetHistory();
+
+      // clear input text
+      await user.clear(searchTextInput);
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.not.be.null;
+      });
+      expect(onFeatureUsedSpy).to.not.be.calledWith("filter-properties");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-disabled");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-enabled");
+    });
+
+    it("reports when search filter applied and data changes", async () => {
+      const imodel = {} as IModelConnection;
+      const onFeatureUsedSpy = sinon.spy();
+
+      const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <PropertyGridContent dataProvider={provider} imodel={imodel} />
+        </TelemetryContextProvider>,
+      );
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.not.be.null;
+      });
+
+      const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+      await user.click(searchButton);
+
+      const searchTextInput = await waitFor(() => getByRole("searchbox"));
+      // input text that should match
+      await user.type(searchTextInput, "test prop");
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.be.null;
+      });
+      expect(onFeatureUsedSpy).to.be.calledWith("filter-properties");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-disabled");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-enabled");
+
+      onFeatureUsedSpy.resetHistory();
+      provider.keys = new KeySet([{ className: "Class", id: "id" }]);
+      act(() => provider.onDataChanged.raiseEvent());
+
+      expect(onFeatureUsedSpy).to.be.calledWith("filter-properties");
+      expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-disabled");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-enabled");
+    });
+
+    it("reports when data changes and hide null values is enabled", async () => {
+      const imodel = {} as IModelConnection;
+      const onFeatureUsedSpy = sinon.spy();
+
+      const { user, queryByText, getByRole, getByText } = renderWithContext(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />
+        </TelemetryContextProvider>,
+      );
+
+      const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
+      await user.click(settingsButton);
+
+      const setting = await waitFor(() => getByText("settings.hide-null.label"));
+      await user.click(setting);
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.be.null;
+      });
+
+      onFeatureUsedSpy.resetHistory();
+      provider.keys = new KeySet([{ className: "Class", id: "id" }]);
+      act(() => provider.onDataChanged.raiseEvent());
+
+      expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-enabled");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-disabled");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("filter-properties");
+    });
+
+    it("does not report when data changes and no values are loaded", async () => {
+      const imodel = {} as IModelConnection;
+      const onFeatureUsedSpy = sinon.spy();
+
+      const { user, queryByText, getByRole, getByText } = renderWithContext(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />
+        </TelemetryContextProvider>,
+      );
+
+      const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
+      await user.click(settingsButton);
+
+      const setting = await waitFor(() => getByText("settings.hide-null.label"));
+      await user.click(setting);
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.be.null;
+      });
+
+      onFeatureUsedSpy.resetHistory();
+      act(() => provider.onDataChanged.raiseEvent());
+
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-enabled");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-disabled");
+      expect(onFeatureUsedSpy).to.not.be.calledWith("filter-properties");
     });
   });
 });

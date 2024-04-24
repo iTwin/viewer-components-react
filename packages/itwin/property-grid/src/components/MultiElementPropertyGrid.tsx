@@ -21,6 +21,8 @@ import type { ReactNode } from "react";
 import type { PropertyGridProps } from "./PropertyGrid";
 import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid";
 import type { InstanceKey } from "@itwin/presentation-common";
+import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -33,27 +35,32 @@ enum MultiElementPropertyContent {
  * @public
  */
 export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
-  /** Renders controls for ancestors navigation. If set to `undefined` ancestors navigation is disabled. */
+  /** Renders controls for ancestors navigation. If set to `undefined`, ancestors navigation is disabled. */
   ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
 }
 
 /**
  * Component that renders property grid for instances in `UnifiedSelection`.
- * - If multiple instances are selected list containing select instances can be opened that allows to check properties of specific instance.
- * - If single instance is selected navigation through it's ancestors can be enabled.
+ * - If multiple instances are selected, a list containing the selected instances can be opened that allows to check properties of a specific instance.
+ * - If a single instance is selected, navigation through its ancestors can be enabled.
  * @public
  */
 export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps) {
   const { selectedKeys, focusedInstanceKey, focusInstance, ancestorsNavigationProps } = useInstanceSelection({ imodel: props.imodel });
-
   const [content, setContent] = useState<MultiElementPropertyContent>(MultiElementPropertyContent.PropertyGrid);
+  const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
     // show standard property grid when selection changes
     return Presentation.selection.selectionChange.addListener(() => {
       setContent(MultiElementPropertyContent.PropertyGrid);
     });
-  }, []);
+  }, [setContent]);
+
+  useEffect(() => {
+    const feature = getFeatureFromContent(content, selectedKeys.length);
+    feature && onFeatureUsed?.(feature);
+  }, [selectedKeys, onFeatureUsed, content]);
 
   const openElementList = () => {
     setContent(MultiElementPropertyContent.ElementList);
@@ -195,4 +202,18 @@ function ElementsList(props: ElementListProps) {
   }
 
   return <ElementListComponent {...props} />;
+}
+
+function getFeatureFromContent(content: MultiElementPropertyContent, selectedCount: number): UsageTrackedFeatures | undefined {
+  switch (content) {
+    case MultiElementPropertyContent.PropertyGrid:
+      if (selectedCount <= 0) {
+        return undefined;
+      }
+      return selectedCount > 1 ? "multiple-elements" : "single-element";
+    case MultiElementPropertyContent.ElementList:
+      return "elements-list";
+    case MultiElementPropertyContent.SingleElementPropertyGrid:
+      return "single-element-from-list";
+  }
 }

@@ -5,7 +5,7 @@
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CompositeFilterType,
   CompositePropertyDataFilterer,
@@ -32,6 +32,7 @@ import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-re
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 
 /**
  * Arguments for the `onPropertyUpdated` callback.
@@ -93,12 +94,35 @@ export function PropertyGridContent({
 
   const [filterText, setFilterText] = useState<string>("");
   const { showNullValues } = useNullValueSettingContext();
+  const { onFeatureUsed } = useTelemetryContext();
   const filterer = useFilterer({ showNullValues, filterText });
+
+  const filterTextRef = useLatest(filterText);
+  const showNullValuesRef = useLatest(showNullValues);
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const handleResize = useCallback((w: number, h: number) => {
     setSize({ width: w, height: h });
   }, []);
+
+  const reportFilterFeature = useCallback(() => {
+    if (filterTextRef.current.length > 0) {
+      onFeatureUsed?.("filter-properties");
+    }
+  }, [onFeatureUsed, filterTextRef]);
+
+  useEffect(() => {
+    reportFilterFeature();
+  }, [filterText, reportFilterFeature]);
+
+  useEffect(() => {
+    return dataProvider.onDataChanged.addListener(() => {
+      if (!dataProvider.keys.isEmpty) {
+        onFeatureUsed?.(showNullValuesRef.current ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
+        reportFilterFeature();
+      }
+    });
+  }, [dataProvider, onFeatureUsed, showNullValuesRef, reportFilterFeature]);
 
   const settingsProps: SettingsDropdownMenuProps = {
     settingsMenuItems,
@@ -137,6 +161,15 @@ export function PropertyGridContent({
       {renderContextMenu()}
     </div>
   );
+}
+
+function useLatest<T>(value: T) {
+  const ref = useRef(value);
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref;
 }
 
 interface PropertyGridHeaderProps {
