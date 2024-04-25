@@ -23,6 +23,7 @@ import type {
   VirtualizedPropertyGridWithDataProviderProps,
 } from "@itwin/components-react";
 import type { IDisposable } from "@itwin/core-bentley";
+import { useLatest } from "../hooks/UseLatest";
 
 /**
  * Properties for rendering a `FilteringPropertyGrid`.
@@ -33,22 +34,25 @@ export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithD
   autoExpandChildCategories?: boolean;
   /** @internal */
   filterer: IPropertyDataFilterer;
+  /** Callback called when property data is loaded. */
+  onDataLoaded?: () => void;
 }
 
 /**
  * Creates a filtered data provider before rendering a `VirtualizedPropertyGridWithDataProvider`.
  * @internal
  */
-export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps) {
+export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, onDataLoaded, ...props }: FilteringPropertyGridProps) {
   const [filteringDataProvider, setFilteringDataProvider] = useState<AutoExpandingPropertyFilterDataProvider>();
+  const onDataLoadedRef = useLatest(onDataLoaded);
   useEffect(() => {
     const filteringProvider = new FilteringPropertyDataProvider(dataProvider, filterer);
-    const provider = new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
+    const provider = new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories, onDataLoadedRef.current);
     setFilteringDataProvider(provider);
     return () => {
       provider.dispose();
     };
-  }, [filterer, dataProvider, autoExpandChildCategories]);
+  }, [filterer, dataProvider, autoExpandChildCategories, onDataLoadedRef]);
 
   if (!filteringDataProvider) {
     return null;
@@ -111,13 +115,16 @@ class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider, 
   public onDataChanged = new PropertyDataChangeEvent();
   private _removeListener: () => void;
   private _autoExpandChildCategories = true;
+  private _onDataLoaded?: () => void;
 
   constructor(
     private _wrapped: FilteringPropertyDataProvider,
     autoExpandChildCategories?: boolean,
+    onDataLoaded?: () => void,
   ) {
     // istanbul ignore next
     this._removeListener = this._wrapped.onDataChanged.addListener(() => this.onDataChanged.raiseEvent());
+    this._onDataLoaded = onDataLoaded;
     if (undefined !== autoExpandChildCategories) {
       this._autoExpandChildCategories = autoExpandChildCategories;
     }
@@ -141,6 +148,7 @@ class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider, 
 
     const result = await this._wrapped.getData();
     expandCategories(result.categories);
+    this._onDataLoaded?.();
     return result;
   }
 }

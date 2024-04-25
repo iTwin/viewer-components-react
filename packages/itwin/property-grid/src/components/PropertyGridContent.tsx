@@ -5,7 +5,7 @@
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CompositeFilterType,
   CompositePropertyDataFilterer,
@@ -33,6 +33,7 @@ import type { IPresentationPropertyDataProvider } from "@itwin/presentation-comp
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
 import { useTelemetryContext } from "../hooks/UseTelemetryContext";
+import { useLatest } from "../hooks/UseLatest";
 
 /**
  * Arguments for the `onPropertyUpdated` callback.
@@ -96,33 +97,25 @@ export function PropertyGridContent({
   const { showNullValues } = useNullValueSettingContext();
   const { onFeatureUsed } = useTelemetryContext();
   const filterer = useFilterer({ showNullValues, filterText });
-
   const filterTextRef = useLatest(filterText);
-  const showNullValuesRef = useLatest(showNullValues);
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const handleResize = useCallback((w: number, h: number) => {
     setSize({ width: w, height: h });
   }, []);
 
-  const reportFilterFeature = useCallback(() => {
-    if (filterTextRef.current.length > 0) {
-      onFeatureUsed?.("filter-properties");
+  const reportThrottledFiltering = useThrottled(() => onFeatureUsed("filter-properties"), 1000);
+  const reportThrottledHideEmptyValuesFiltering = useThrottled(() => {
+    if (!dataProvider.keys.isEmpty) {
+      onFeatureUsed(showNullValues ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
     }
-  }, [onFeatureUsed, filterTextRef]);
+  }, 1000);
 
   useEffect(() => {
-    reportFilterFeature();
-  }, [filterText, reportFilterFeature]);
-
-  useEffect(() => {
-    return dataProvider.onDataChanged.addListener(() => {
-      if (!dataProvider.keys.isEmpty) {
-        onFeatureUsed?.(showNullValuesRef.current ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
-        reportFilterFeature();
-      }
-    });
-  }, [dataProvider, onFeatureUsed, showNullValuesRef, reportFilterFeature]);
+    if (filterTextRef.current.length > 0) {
+      onFeatureUsed("filter-properties");
+    }
+  }, [filterTextRef, dataProvider.keys, onFeatureUsed]);
 
   const settingsProps: SettingsDropdownMenuProps = {
     settingsMenuItems,
@@ -140,6 +133,7 @@ export function PropertyGridContent({
     width,
     height,
     onPropertyUpdated: onPropertyUpdated ? async (args, category) => onPropertyUpdated({ ...args, dataProvider }, category) : undefined,
+    onDataLoaded: reportThrottledHideEmptyValuesFiltering,
   };
 
   return (
@@ -150,6 +144,9 @@ export function PropertyGridContent({
         onBackButtonClick={onBackButton}
         settingsProps={settingsProps}
         onSearchTextChange={(searchText: string) => {
+          if (searchText.length > 0) {
+            reportThrottledFiltering();
+          }
           setFilterText(searchText);
         }}
       />
@@ -161,15 +158,6 @@ export function PropertyGridContent({
       {renderContextMenu()}
     </div>
   );
-}
-
-function useLatest<T>(value: T) {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref;
 }
 
 interface PropertyGridHeaderProps {
@@ -229,4 +217,21 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
   }, [defaultFilterers.nonEmpty, filterText, showNullValues]);
 
   return compositeFilterer;
+}
+
+function useThrottled(func: () => void, timeout: number) {
+  const [isThrottled, setIsThrottled] = useState(false);
+  const isThrottledRef = useLatest(isThrottled);
+  const funcRef = useLatest(func);
+
+  return () => {
+    if (isThrottledRef.current) {
+      return;
+    }
+    setIsThrottled(true);
+    funcRef.current?.();
+    setTimeout(() => {
+      setIsThrottled(false);
+    }, timeout);
+  };
 }
