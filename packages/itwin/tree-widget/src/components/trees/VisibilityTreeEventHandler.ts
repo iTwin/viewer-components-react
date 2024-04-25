@@ -23,6 +23,7 @@ import type {
   TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
 import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
+import type { UsageTrackedFeatures } from "./common/UseFeatureReporting";
 /**
  * Data structure that describes instance visibility status.
  * @public
@@ -62,7 +63,7 @@ export type VisibilityTreeSelectionPredicate = (node: TreeNodeItem) => boolean;
 export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEventHandlerParams {
   visibilityHandler: IVisibilityHandler;
   selectionPredicate?: VisibilityTreeSelectionPredicate;
-  reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 /**
@@ -75,7 +76,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   private _listeners = new Array<() => void>();
   private _isChangingVisibility: boolean;
   protected _treeIdentifier?: string;
-  protected _reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
+  protected _reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 
   constructor(params: VisibilityTreeEventHandlerParams) {
     super(params);

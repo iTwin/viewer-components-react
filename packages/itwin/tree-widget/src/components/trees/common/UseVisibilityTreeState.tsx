@@ -13,6 +13,7 @@ import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeEventHandlerProps, UsePresentationTreeStateProps } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityTreeEventHandlerParams, VisibilityTreeSelectionPredicate } from "../VisibilityTreeEventHandler";
 import type { VisibilityTreeFilterInfo } from "./Types";
+import type { UsageTrackedFeatures } from "./UseFeatureReporting";
 /**
  * Props for [[useVisibilityTreeState]] hook.
  * @beta
@@ -35,7 +36,7 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
   /** The limit for how many items should be loaded for a single hierarchy level. */
   hierarchyLevelSizeLimit?: number;
   /** Callback called when a feature is used. */
-  reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 /**

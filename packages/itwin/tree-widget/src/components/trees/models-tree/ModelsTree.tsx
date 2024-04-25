@@ -21,6 +21,7 @@ import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
+import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -172,7 +173,7 @@ function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { den
 }
 
 interface UseModelsTreeStateProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
-  reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModelsTreeStateProps) {
@@ -213,7 +214,7 @@ function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModels
 
 interface UseTreeProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
   ruleset: Ruleset;
-  reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 function useTreeState({

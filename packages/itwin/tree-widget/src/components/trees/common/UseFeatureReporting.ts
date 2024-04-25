@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 /** @internal */
 export interface UseFeatureReportingProps {
@@ -13,8 +13,14 @@ export interface UseFeatureReportingProps {
 
 /** @internal */
 export interface UseFeatureReportingResult {
-  reportUsage?: (props: { featureId?: string; reportInteraction: boolean }) => void;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
+
+/**
+ * Features that are tracked for usage.
+ * @internal
+ */
+export type UsageTrackedFeatures = "visibility-change" | "hierarchy-level-filtering" | "filtering" | "hierarchy-level-size-limit-hit" | "zoom-to-node";
 
 /**
  * Enables feature reporting for a tree component.
@@ -22,22 +28,23 @@ export interface UseFeatureReportingResult {
  */
 export function useFeatureReporting(props: UseFeatureReportingProps): UseFeatureReportingResult {
   const { treeIdentifier, onFeatureUsed } = props;
+  const onFeatureUsedRef = useRef(onFeatureUsed);
+
+  useEffect(() => {
+    onFeatureUsedRef.current = onFeatureUsed;
+  }, [onFeatureUsed]);
 
   const reportUsage = useCallback(
-    ({ featureId, reportInteraction }: { featureId?: string; reportInteraction: boolean }) => {
+    ({ featureId, reportInteraction }: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => {
       if (reportInteraction !== false) {
-        onFeatureUsed?.(`use-${treeIdentifier}`);
+        onFeatureUsedRef.current?.(`use-${treeIdentifier}`);
       }
       if (featureId) {
-        onFeatureUsed?.(`${treeIdentifier}-${featureId}`);
+        onFeatureUsedRef.current?.(`${treeIdentifier}-${featureId}`);
       }
     },
-    [treeIdentifier, onFeatureUsed],
+    [treeIdentifier, onFeatureUsedRef],
   );
-
-  if (!onFeatureUsed) {
-    return { reportUsage: undefined };
-  }
 
   return { reportUsage };
 }
