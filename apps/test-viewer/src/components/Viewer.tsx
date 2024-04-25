@@ -13,6 +13,7 @@ import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -61,6 +62,11 @@ function ViewerWithOptions() {
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
       theme="light"
+      backendConfiguration={{
+        defaultBackend: {
+          rpcInterfaces: [ECSchemaRpcInterface],
+        },
+      }}
     />
   );
 }

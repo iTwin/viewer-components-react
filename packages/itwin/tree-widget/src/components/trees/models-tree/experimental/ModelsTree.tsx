@@ -16,7 +16,7 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { ModelsTreeDefinition } from "@itwin/presentation-models-tree";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandlerNew";
+import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 import { VisibilityTree } from "./common/VisibilityTree";
 import { GetFilteredPathsProps, MetadataAccess } from "./common/UseHierarchyProvider";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";

@@ -17,10 +17,20 @@ import {
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps,
-  TreeWidget, TreeWidgetComponent,
+  CategoriesTreeComponent,
+  ExternalSourcesTreeComponent,
+  IModelContentTreeComponent,
+  ModelsTreeComponent,
+  SelectableTreeProps,
+  TreeRenderProps,
+  TreeWidget,
+  TreeWidgetComponent,
+  ExperimentalModelsTreeComponent,
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
+import { IModelConnection } from "@itwin/core-frontend";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -63,6 +73,12 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
   return baseUrl;
 };
 
+function getSchemaContext(imodel: IModelConnection): SchemaContext {
+  const schemas = new SchemaContext();
+  schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
+  return schemas;
+}
+
 interface UiItem {
   initialize: () => Promise<void>;
   createUiItemsProviders: () => UiItemsProvider[];
@@ -79,6 +95,23 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
+            const experimentalTrees = [
+              {
+                id: "experimental-models-tree",
+                getLabel: () => "Experimental Models Tree",
+                render: (props: TreeRenderProps) => (
+                  <ExperimentalModelsTreeComponent
+                    density={props.density}
+                    getSchemaContext={getSchemaContext}
+                    hierarchyLevelConfig={{
+                      isFilteringEnabled: true,
+                      sizeLimit: 10,
+                    }}
+                  />
+                ),
+              },
+            ];
+
             const trees = [
               {
                 id: ModelsTreeComponent.id,
@@ -134,11 +167,23 @@ const configuredUiItems = new Map<string, UiItem>([
             return [
               {
                 id: "tree-widget",
+                label: "Tree Widget",
                 content: <TreeWidgetWithOptions trees={trees} />,
                 layouts: {
                   standard: {
                     section: StagePanelSection.Start,
                     location: StagePanelLocation.Right,
+                  },
+                },
+              },
+              {
+                id: "experimental-tree-widget",
+                label: "Experimental Tree Widget",
+                content: <TreeWidgetWithOptions trees={experimentalTrees} />,
+                layouts: {
+                  standard: {
+                    section: StagePanelSection.Start,
+                    location: StagePanelLocation.Left,
                   },
                 },
               },
