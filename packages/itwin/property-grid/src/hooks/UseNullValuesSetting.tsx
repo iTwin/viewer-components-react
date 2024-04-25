@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { PropsWithChildren } from "react";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import { usePreferencesContext } from "../PropertyGridPreferencesContext";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 /**
  * Provides context for `Show\Hide Empty Values` setting.
@@ -25,18 +26,25 @@ export function NullValueSettingContext({ children }: PropsWithChildren<{}>) {
 export function useNullValueSetting() {
   const [showNullValues, setShowNullValues] = useState(true);
   const { getShowNullValuesPreference, setShowNullValuesPreference } = useNullValueStorage();
+  const { onFeatureUsed } = useTelemetryContext();
+  const firstReportRef = useRef(false);
 
   // Get value from preferences storage
   useEffect(() => {
     void (async () => {
       const res = await getShowNullValuesPreference();
+      if (!firstReportRef.current) {
+        onFeatureUsed(res ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
+        firstReportRef.current = true;
+      }
       setShowNullValues(res);
     })();
-  }, [getShowNullValuesPreference]);
+  }, [getShowNullValuesPreference, onFeatureUsed]);
 
   // Function for updating Hide / Show Empty Fields setting
   const updateShowNullValues = useCallback(
     async (value: boolean, options?: { persist?: boolean }) => {
+      onFeatureUsed(value ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
       setShowNullValues(value);
 
       // Persist hide/show value
@@ -44,7 +52,7 @@ export function useNullValueSetting() {
         await setShowNullValuesPreference(value);
       }
     },
-    [setShowNullValuesPreference],
+    [setShowNullValuesPreference, onFeatureUsed],
   );
 
   return {

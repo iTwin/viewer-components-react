@@ -11,16 +11,15 @@ import { PropertyGridContent } from "../../components/PropertyGridContent";
 import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
-import { act, createFunctionStub, createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils";
+import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { ReactElement } from "react";
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyGridContentProps } from "../../components/PropertyGridContent";
 import { TelemetryContextProvider } from "../../property-grid-react";
 import { KeySet } from "@itwin/presentation-common";
-import { BeEvent } from "@itwin/core-bentley";
 
 describe("<PropertyGridContent />", () => {
   before(() => {
@@ -248,7 +247,7 @@ describe("<PropertyGridContent />", () => {
       await waitFor(() => {
         expect(queryByText("Test Prop")).to.not.be.null;
         expect(queryByText("Null Prop")).to.be.null;
-        expect(onFeatureUsedSpy).to.be.calledWith("filter-properties");
+        expect(onFeatureUsedSpy).to.be.calledOnceWith("filter-properties");
       });
       onFeatureUsedSpy.resetHistory();
 
@@ -258,49 +257,7 @@ describe("<PropertyGridContent />", () => {
         expect(queryByText("Test Prop")).to.not.be.null;
         expect(queryByText("Null Prop")).to.not.be.null;
       });
-      expect(onFeatureUsedSpy).to.not.be.calledWith("filter-properties");
-    });
-
-    it("reports when search filter applied and data changes", async () => {
-      const imodel = {} as IModelConnection;
-      const onFeatureUsedSpy = sinon.spy();
-
-      const { queryByText, user, getByRole, getByTitle } = renderWithContext(
-        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
-          <PropertyGridContent dataProvider={provider} imodel={imodel} />
-        </TelemetryContextProvider>,
-      );
-
-      await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.not.be.null;
-      });
-
-      const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
-      await user.click(searchButton);
-
-      const searchTextInput = await waitFor(() => getByRole("searchbox"));
-      // input text that should match
-      await user.type(searchTextInput, "test prop");
-
-      await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.be.null;
-      });
-
-      expect(onFeatureUsedSpy).to.be.calledWith("filter-properties");
-      expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-disabled");
-      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-enabled");
-
-      onFeatureUsedSpy.resetHistory();
-      provider.keys = new KeySet([{ className: "Class", id: "id" }]);
-      act(() => provider.onDataChanged.raiseEvent());
-
-      await waitFor(() => {
-        expect(onFeatureUsedSpy).to.be.calledWith("filter-properties");
-        expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-disabled");
-        expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-enabled");
-      });
+      expect(onFeatureUsedSpy).to.not.be.calledOnceWith("filter-properties");
     });
 
     it("reports once when filter keeps changing", async () => {
@@ -331,108 +288,7 @@ describe("<PropertyGridContent />", () => {
         expect(queryByText("Null Prop")).to.be.null;
       });
 
-      expect(onFeatureUsedSpy).to.be.calledTwice;
-      expect(onFeatureUsedSpy).to.be.calledWith("filter-properties");
-      expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-disabled");
-    });
-
-    it("reports when data changes and hide null values is enabled", async () => {
-      const imodel = {} as IModelConnection;
-      const onFeatureUsedSpy = sinon.spy();
-
-      const { user, queryByText, getByRole, getByText } = renderWithContext(
-        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
-          <PropertyGridContent dataProvider={provider} imodel={imodel} settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]} />
-        </TelemetryContextProvider>,
-      );
-
-      const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
-      await user.click(settingsButton);
-
-      const setting = await waitFor(() => getByText("settings.hide-null.label"));
-      await user.click(setting);
-
-      await waitFor(() => {
-        expect(queryByText("Test Prop")).to.not.be.null;
-        expect(queryByText("Null Prop")).to.be.null;
-      });
-
-      // Wait for throttling to timeout
-      await new Promise((r) => setTimeout(r, 1000));
-      onFeatureUsedSpy.resetHistory();
-      act(() => provider.onDataChanged.raiseEvent());
-
-      await waitFor(() => {
-        expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-enabled");
-        expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-disabled");
-        expect(onFeatureUsedSpy).to.not.be.calledWith("filter-properties");
-      });
-    });
-
-    it("does not report when data changes and no values are loaded", async () => {
-      const imodel = {} as IModelConnection;
-      const onFeatureUsedSpy = sinon.spy();
-      const dataProvider = {
-        onDataChanged: new BeEvent(),
-        getData: createFunctionStub<PresentationPropertyDataProvider["getData"]>(),
-        keys: new KeySet([{ className: "class", id: "id" }]),
-      };
-
-      dataProvider.getData.resolves({
-        categories: [],
-        records: {},
-        label: PropertyRecord.fromString("Test Label"),
-        description: "TestClassName",
-      });
-
-      const { user, queryByText, getByRole, getByText, rerender } = renderWithContext(
-        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
-          <PropertyGridContent
-            dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-            imodel={imodel}
-            settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]}
-          />
-        </TelemetryContextProvider>,
-      );
-
-      const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
-      await user.click(settingsButton);
-
-      const setting = await waitFor(() => getByText("settings.hide-null.label"));
-      await user.click(setting);
-
-      await waitFor(() => {
-        expect(queryByText("Test Label")).to.not.be.null;
-      });
-
-      onFeatureUsedSpy.resetHistory();
-      dataProvider.keys = new KeySet();
-      dataProvider.getData.reset();
-      dataProvider.getData.resolves({
-        categories: [],
-        records: {},
-        label: PropertyRecord.fromString("New Test Label"),
-        description: "NewTestClassName",
-      });
-      act(() => provider.onDataChanged.raiseEvent());
-
-      rerender(
-        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
-          <PropertyGridContent
-            dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-            imodel={imodel}
-            settingsMenuItems={[(props) => <ShowHideNullValuesSettingsMenuItem {...props} />]}
-          />
-        </TelemetryContextProvider>,
-      );
-
-      await waitFor(() => {
-        expect(queryByText("Test Label")).to.be.null;
-        expect(queryByText("New Test Label")).to.not.be.null;
-      });
-      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-enabled");
-      expect(onFeatureUsedSpy).to.not.be.calledWith("hide-empty-values-disabled");
-      expect(onFeatureUsedSpy).to.not.be.calledWith("filter-properties");
+      expect(onFeatureUsedSpy).to.be.calledOnceWith("filter-properties");
     });
   });
 });

@@ -60,7 +60,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
     return Presentation.selection.selectionChange.addListener(() => {
       setContent(MultiElementPropertyContent.PropertyGrid);
     });
-  }, [setContent]);
+  }, []);
 
   const openElementList = () => {
     onFeatureUsed("elements-list");

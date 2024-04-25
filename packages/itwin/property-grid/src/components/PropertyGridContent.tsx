@@ -5,7 +5,7 @@
 
 import "./PropertyGridContent.scss";
 import classnames from "classnames";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   CompositeFilterType,
   CompositePropertyDataFilterer,
@@ -97,7 +97,6 @@ export function PropertyGridContent({
   const { showNullValues } = useNullValueSettingContext();
   const { onFeatureUsed } = useTelemetryContext();
   const filterer = useFilterer({ showNullValues, filterText });
-  const filterTextRef = useLatest(filterText);
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const handleResize = useCallback((w: number, h: number) => {
@@ -105,17 +104,6 @@ export function PropertyGridContent({
   }, []);
 
   const reportThrottledFiltering = useThrottled(() => onFeatureUsed("filter-properties"), 1000);
-  const reportThrottledHideEmptyValuesFiltering = useThrottled(() => {
-    if (!dataProvider.keys.isEmpty) {
-      onFeatureUsed(showNullValues ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
-    }
-  }, 1000);
-
-  useEffect(() => {
-    if (filterTextRef.current.length > 0) {
-      onFeatureUsed("filter-properties");
-    }
-  }, [filterTextRef, dataProvider.keys, onFeatureUsed]);
 
   const settingsProps: SettingsDropdownMenuProps = {
     settingsMenuItems,
@@ -133,7 +121,6 @@ export function PropertyGridContent({
     width,
     height,
     onPropertyUpdated: onPropertyUpdated ? async (args, category) => onPropertyUpdated({ ...args, dataProvider }, category) : undefined,
-    onDataLoaded: reportThrottledHideEmptyValuesFiltering,
   };
 
   return (
@@ -220,18 +207,17 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
 }
 
 function useThrottled(func: () => void, timeout: number) {
-  const [isThrottled, setIsThrottled] = useState(false);
-  const isThrottledRef = useLatest(isThrottled);
+  const isThrottledRef = useLatest(false);
   const funcRef = useLatest(func);
 
   return () => {
     if (isThrottledRef.current) {
       return;
     }
-    setIsThrottled(true);
+    isThrottledRef.current = true;
     funcRef.current?.();
     setTimeout(() => {
-      setIsThrottled(false);
+      isThrottledRef.current = false;
     }, timeout);
   };
 }

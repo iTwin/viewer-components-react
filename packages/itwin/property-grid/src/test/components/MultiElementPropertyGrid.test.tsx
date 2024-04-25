@@ -9,7 +9,8 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import userEvents from "@testing-library/user-event";
-import { AncestorsNavigationControls, MultiElementPropertyGrid, PropertyGridManager, TelemetryContextProvider } from "../../property-grid-react";
+import { AncestorsNavigationControls, MultiElementPropertyGrid, PropertyGridManager } from "../../property-grid-react";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
 import {
   act,
   createPropertyRecord,

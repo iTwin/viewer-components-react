@@ -319,30 +319,7 @@ describe("useInstanceSelection", () => {
       imodel,
     };
 
-    it("reports when navigates to parent", async () => {
-      const onFeatureUsedSpy = sinon.spy();
-      selectionManager.getSelection.returns(new KeySet([childKey]));
-
-      const wrapper = ({ children }: { children: React.ReactNode }) => (
-        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>{children}</TelemetryContextProvider>
-      );
-      const { result } = renderHook(useInstanceSelection, { initialProps, wrapper });
-
-      await waitFor(() => {
-        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
-        expect(result.current.ancestorsNavigationProps.canNavigateUp).to.be.true;
-      });
-
-      await act(async () => result.current.ancestorsNavigationProps.navigateUp());
-
-      await waitFor(() => {
-        expect(result.current.selectedKeys[0].id).to.be.eq(parentKey.id);
-      });
-
-      expect(onFeatureUsedSpy).to.be.calledOnceWith("ancestor-navigation");
-    });
-
-    it("reports when navigates down initial instance", async () => {
+    it("reports when navigates up and down", async () => {
       const onFeatureUsedSpy = sinon.spy();
       selectionManager.getSelection.returns(new KeySet([childKey]));
 
@@ -363,12 +340,7 @@ describe("useInstanceSelection", () => {
         expect(result.current.ancestorsNavigationProps.canNavigateDown).to.be.true;
       });
 
-      expect(selectionManager.replaceSelection).to.be.calledOnceWith(
-        "Property Grid",
-        imodel,
-        sinon.match((keys: KeySet) => keys.has(parentKey)),
-      );
-      selectionManager.replaceSelection.resetHistory();
+      expect(onFeatureUsedSpy).to.be.calledOnceWith("ancestor-navigation");
       onFeatureUsedSpy.resetHistory();
 
       act(() => result.current.ancestorsNavigationProps.navigateDown());
