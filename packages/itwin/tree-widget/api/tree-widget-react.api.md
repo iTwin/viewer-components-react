@@ -204,20 +204,23 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
 }
 
 // @beta
-export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, onApplyFilterClick, onFilterClear, onFilterApplied, reportUsage, ...restProps }: FilterableTreeRendererProps): JSX.Element;
+export interface FilterableTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
+    // (undocumented)
+    reportUsage?: (props: {
+        featureId?: UsageTrackedFeatures;
+        reportInteraction: boolean;
+    }) => void;
+}
+
+// @beta
+export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, reportUsage, ...restProps }: FilterableTreeRendererProps): JSX.Element;
 
 // @beta
 export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
     // (undocumented)
     nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
     // (undocumented)
-    nodeRenderer: (props: PresentationTreeNodeRendererProps) => React.ReactNode;
-    // (undocumented)
-    onApplyFilterClick?: () => void;
-    // (undocumented)
-    onFilterApplied?: () => void;
-    // (undocumented)
-    onFilterClear?: () => void;
+    nodeRenderer: (props: FilterableTreeNodeRendererProps) => React.ReactNode;
     // (undocumented)
     reportUsage?: (props: {
         featureId?: UsageTrackedFeatures;
@@ -617,8 +620,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     onSelectionModified({ modifications }: TreeSelectionModificationEventArgs): Subscription | undefined;
     // (undocumented)
     onSelectionReplaced({ replacements }: TreeSelectionReplacementEventArgs): Subscription | undefined;
-    // (undocumented)
-    protected _treeIdentifier?: string;
 }
 
 // @public

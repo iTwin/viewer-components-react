@@ -17,11 +17,11 @@ import type { TreeNodeEventArgs } from "@itwin/components-react";
 import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
 
 export interface ModelsTreeEventHandlerProps extends VisibilityTreeEventHandlerParams {
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 export class ModelsTreeEventHandler extends VisibilityTreeEventHandler {
-  private _reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  private _reportUsage: (props: { featureId: "zoom-to-node"; reportInteraction: false }) => void;
 
   constructor(props: ModelsTreeEventHandlerProps) {
     super(props);
@@ -45,6 +45,6 @@ export class ModelsTreeEventHandler extends VisibilityTreeEventHandler {
 
     await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
 
-    this._reportUsage?.({ featureId: "zoom-to-node", reportInteraction: false });
+    this._reportUsage({ featureId: "zoom-to-node", reportInteraction: false });
   }
 }

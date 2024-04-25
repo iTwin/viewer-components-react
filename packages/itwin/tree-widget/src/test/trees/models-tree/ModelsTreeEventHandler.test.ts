@@ -20,6 +20,7 @@ import type { IVisibilityHandler, VisibilityChangeListener } from "../../../comp
 import type { AbstractTreeNodeLoaderWithProvider } from "@itwin/components-react";
 import type { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { SelectionChangesListener, SelectionHandler } from "@itwin/presentation-frontend";
+import type { UsageTrackedFeatures } from "../../../components/trees/common/UseFeatureReporting";
 describe("ModelsTreeEventHandler", () => {
   const selectionHandlerStub = {
     getSelection: () => {},
@@ -77,8 +78,11 @@ describe("ModelsTreeEventHandler", () => {
     return { modelSource, nodeLoader: nodeLoaderStub };
   }
 
-  function createHandler(nodeLoader: AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider>): ModelsTreeEventHandler {
-    return new ModelsTreeEventHandler({ visibilityHandler, nodeLoader, selectionHandler: selectionHandlerStub });
+  function createHandler(
+    nodeLoader: AbstractTreeNodeLoaderWithProvider<PresentationTreeDataProvider>,
+    reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void,
+  ): ModelsTreeEventHandler {
+    return new ModelsTreeEventHandler({ visibilityHandler, nodeLoader, selectionHandler: selectionHandlerStub, reportUsage: reportUsage ?? (() => {}) });
   }
 
   describe("onNodeDoubleClick", () => {
@@ -118,12 +122,7 @@ describe("ModelsTreeEventHandler", () => {
       const { nodeLoader, modelSource } = setupTreeModel(["testId"], createElementNode());
       modelSource.modifyModel = () => {};
       const reportUsageSpy = sinon.spy();
-      const eventHandler = new ModelsTreeEventHandler({
-        visibilityHandler,
-        nodeLoader,
-        selectionHandler: selectionHandlerStub,
-        reportUsage: reportUsageSpy,
-      });
+      const eventHandler = createHandler(nodeLoader, reportUsageSpy);
 
       await using(eventHandler, async (_) => {
         await eventHandler.onNodeDoubleClick({ nodeId: "testId" });

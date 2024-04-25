@@ -20,10 +20,10 @@ import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, Vis
 import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
-import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
+import type { FilterableTreeNodeRendererProps } from "../common/TreeRenderer";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
-import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
+import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
 const PAGING_SIZE = 20;
@@ -121,6 +121,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   }, [activeView]);
 
   const baseRendererProps = {
+    reportUsage,
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
     density: props.density,
@@ -128,7 +129,7 @@ export function CategoryTree(props: CategoryTreeProps) {
       iconsEnabled: false,
       descriptionEnabled: true,
       levelOffset: 10,
-      onVisibilityToggled: () => reportUsage?.({ featureId: "visibility-change", reportInteraction: true }),
+      onVisibilityToggled: () => reportUsage({ featureId: "visibility-change", reportInteraction: true }),
     },
   };
 
@@ -161,8 +162,7 @@ export function CategoryTree(props: CategoryTreeProps) {
                   {...rendererProps}
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
-                  nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} reportUsage={reportUsage} />}
-                  reportUsage={reportUsage}
+                  nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} />}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)
@@ -175,9 +175,8 @@ export function CategoryTree(props: CategoryTreeProps) {
   );
 }
 
-interface CategoriesTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
+interface CategoriesTreeNodeRendererProps extends FilterableTreeNodeRendererProps {
   density?: "default" | "enlarged";
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 function CategoriesTreeNodeRenderer(props: CategoriesTreeNodeRendererProps) {

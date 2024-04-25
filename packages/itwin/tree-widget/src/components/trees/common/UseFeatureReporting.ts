@@ -13,7 +13,7 @@ export interface UseFeatureReportingProps {
 
 /** @internal */
 export interface UseFeatureReportingResult {
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 /**
@@ -43,7 +43,7 @@ export function useFeatureReporting(props: UseFeatureReportingProps): UseFeature
         onFeatureUsedRef.current?.(`${treeIdentifier}-${featureId}`);
       }
     },
-    [treeIdentifier, onFeatureUsedRef],
+    [treeIdentifier],
   );
 
   return { reportUsage };

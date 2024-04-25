@@ -10,13 +10,13 @@ import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
-import type { DescriptorSource, Field, RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
 import { Descriptor } from "@itwin/presentation-common";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
 import { createTestCategoryDescription, createTestSelectClassInfo } from "./trees/Common";
 
+import type { DescriptorSource, Field, RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
 import type { PropsWithChildren, ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
@@ -185,6 +185,12 @@ export function stubDOMMatrix() {
       value: domMatrix,
     });
   });
+}
+
+export async function* createAsyncIterator<T>(values: T[]): AsyncIterableIterator<T> {
+  for (const value of values) {
+    yield value;
+  }
 }
 
 function createWrapper(wrapper?: React.JSXElementConstructor<{ children: React.ReactElement }>, disableStrictMode?: boolean) {

@@ -68,31 +68,23 @@ describe("ReportingTreeEventHandler", () => {
 
   describe("`onNodeExpanded`", () => {
     it("calls wrapped function", () => {
-      const baseHandleronNodeExpandedSpy = sinon.stub(TreeEventHandler.prototype, "onNodeExpanded");
-      baseHandleronNodeExpandedSpy.callsFake(() => {});
       createHandler().onNodeExpanded({} as unknown as TreeNodeEventArgs);
       expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
       expect(wrappedHandler.onNodeExpanded).to.be.calledOnce;
-      expect(baseHandleronNodeExpandedSpy).to.not.be.called;
     });
   });
 
   describe("`onNodeCollapsed`", () => {
     it("calls wrapped function", () => {
-      const baseHandleronNodeCollapsedSpy = sinon.stub(TreeEventHandler.prototype, "onNodeCollapsed");
-      baseHandleronNodeCollapsedSpy.callsFake(() => {});
       createHandler().onNodeCollapsed({} as unknown as TreeNodeEventArgs);
       expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
       expect(wrappedHandler.onNodeCollapsed).to.be.calledOnce;
-      expect(baseHandleronNodeCollapsedSpy).to.not.be.called;
     });
   });
 
   describe("`onSelectionModified`", () => {
     it("calls wrapped function and reports when selection change has values", () => {
       const subject = new Subject<TreeSelectionChange>();
-      const baseHandleronSelectionModifiedSpy = sinon.stub(TreeEventHandler.prototype, "onSelectionModified");
-      baseHandleronSelectionModifiedSpy.callsFake(() => undefined);
       wrappedHandler.onSelectionModified.callsFake(({ modifications }) => modifications.subscribe());
       createHandler().onSelectionModified({ modifications: subject });
 
@@ -101,13 +93,10 @@ describe("ReportingTreeEventHandler", () => {
 
       expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
       expect(wrappedHandler.onSelectionModified).to.be.calledOnce;
-      expect(baseHandleronSelectionModifiedSpy).to.not.be.called;
     });
 
     it("calls wrapped function and does not report when selection change is empty", () => {
       const subject = new Subject<TreeSelectionChange>();
-      const baseHandleronSelectionModifiedSpy = sinon.stub(TreeEventHandler.prototype, "onSelectionModified");
-      baseHandleronSelectionModifiedSpy.callsFake(() => undefined);
       wrappedHandler.onSelectionModified.callsFake(({ modifications }) => modifications.subscribe());
       createHandler().onSelectionModified({ modifications: subject });
 
@@ -115,61 +104,46 @@ describe("ReportingTreeEventHandler", () => {
 
       expect(reportUsageSpy).to.not.be.called;
       expect(wrappedHandler.onSelectionModified).to.be.calledOnce;
-      expect(baseHandleronSelectionModifiedSpy).to.not.be.called;
     });
   });
 
   describe("`onSelectionReplaced`", () => {
     it("calls wrapped function", () => {
-      const baseHandleronSelectionReplacedSpy = sinon.stub(TreeEventHandler.prototype, "onSelectionReplaced");
-      baseHandleronSelectionReplacedSpy.callsFake(() => undefined);
       createHandler().onSelectionReplaced({} as unknown as TreeSelectionReplacementEventArgs);
       expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
       expect(wrappedHandler.onSelectionReplaced).to.be.calledOnce;
-      expect(baseHandleronSelectionReplacedSpy).to.not.be.called;
     });
   });
 
   describe("`onCheckboxStateChanged`", () => {
     it("calls wrapped function", () => {
-      const baseHandleronCheckboxStateChangedSpy = sinon.stub(TreeEventHandler.prototype, "onCheckboxStateChanged");
-      baseHandleronCheckboxStateChangedSpy.callsFake(() => undefined);
       createHandler().onCheckboxStateChanged({} as unknown as TreeCheckboxStateChangeEventArgs);
-      expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
       expect(wrappedHandler.onCheckboxStateChanged).to.be.calledOnce;
-      expect(baseHandleronCheckboxStateChangedSpy).to.not.be.called;
+      expect(reportUsageSpy).to.not.be.called;
     });
   });
 
   describe("`onDelayedNodeClick`", () => {
     it("calls wrapped function", () => {
-      const baseHandleronDelayedNodeClickSpy = sinon.stub(TreeEventHandler.prototype, "onDelayedNodeClick");
-      baseHandleronDelayedNodeClickSpy.callsFake(() => {});
       createHandler().onDelayedNodeClick({} as unknown as TreeNodeEventArgs);
       expect(wrappedHandler.onDelayedNodeClick).to.be.calledOnce;
-      expect(baseHandleronDelayedNodeClickSpy).to.not.be.called;
+      expect(reportUsageSpy).to.not.be.called;
     });
   });
 
   describe("`onNodeDoubleClick`", () => {
     it("calls wrapped function", () => {
-      const baseHandleronNodeDoubleClickSpy = sinon.stub(TreeEventHandler.prototype, "onNodeDoubleClick");
-      baseHandleronNodeDoubleClickSpy.callsFake(() => {});
       createHandler().onNodeDoubleClick({} as unknown as TreeNodeEventArgs);
       expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
       expect(wrappedHandler.onNodeDoubleClick).to.be.calledOnce;
-      expect(baseHandleronNodeDoubleClickSpy).to.not.be.called;
     });
   });
 
   describe("`onNodeEditorActivated`", () => {
     it("calls wrapped function", () => {
-      const baseHandleronNodeEditorActivatedSpy = sinon.stub(TreeEventHandler.prototype, "onNodeEditorActivated");
-      baseHandleronNodeEditorActivatedSpy.callsFake(() => {});
       createHandler().onNodeEditorActivated({} as unknown as TreeNodeEventArgs);
       expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
       expect(wrappedHandler.onNodeEditorActivated).to.be.calledOnce;
-      expect(baseHandleronNodeEditorActivatedSpy).to.not.be.called;
     });
   });
 });

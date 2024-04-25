@@ -14,31 +14,15 @@ import { LabelDefinition } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel,
-  HierarchyBuilder,
-  HierarchyCacheMode,
-  initialize as initializePresentationTesting,
-  terminate as terminatePresentationTesting,
+  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../tree-widget-react";
 import {
-  addDocument,
-  addDrawingCategory,
-  addDrawingGraphic,
-  addGroup,
-  addModel,
-  addPartition,
-  addPhysicalObject,
-  addSpatialCategory,
-  addSubject,
+  addDocument, addDrawingCategory, addDrawingGraphic, addGroup, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubject,
 } from "../../IModelUtils";
-import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
+import { createAsyncIterator, mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 import {
-  createInfoNode,
-  createPresentationTreeNodeItem,
-  createSimpleTreeModelNode,
-  createTestContentDescriptor,
-  createTestPropertiesContentField,
+  createInfoNode, createPresentationTreeNodeItem, createSimpleTreeModelNode, createTestContentDescriptor, createTestPropertiesContentField,
   createTestPropertyInfo,
 } from "../Common";
 
@@ -89,12 +73,6 @@ describe("IModelContentTree", () => {
         (PresentationTreeDataProvider.prototype.getNodes as any).restore && (PresentationTreeDataProvider.prototype.getNodes as any).restore();
         sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves(nodes);
       };
-
-      async function* createAsyncIterator<T>(values: T[]): AsyncIterableIterator<T> {
-        for (const value of values) {
-          yield value;
-        }
-      }
 
       function setupHierarchy(nodes: Node[]) {
         presentationManagerMock

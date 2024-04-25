@@ -73,7 +73,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   private _selectionPredicate?: VisibilityTreeSelectionPredicate;
   private _listeners = new Array<() => void>();
   private _isChangingVisibility: boolean;
-  protected _treeIdentifier?: string;
 
   constructor(params: VisibilityTreeEventHandlerParams) {
     super(params);

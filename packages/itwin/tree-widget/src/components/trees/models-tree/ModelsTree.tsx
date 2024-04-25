@@ -21,12 +21,13 @@ import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
+import type { FilterableTreeNodeRendererProps } from "../common/TreeRenderer";
 import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
+import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
@@ -106,6 +107,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   const state = useModelsTreeState({ ...props, reportUsage });
 
   const baseRendererProps = {
+    reportUsage,
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
     density: props.density,
@@ -114,7 +116,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       descriptionEnabled: false,
       levelOffset: 10,
       disableRootNodeCollapse: true,
-      onVisibilityToggled: () => reportUsage?.({ featureId: "visibility-change", reportInteraction: true }),
+      onVisibilityToggled: () => reportUsage({ featureId: "visibility-change", reportInteraction: true }),
     },
   };
 
@@ -143,8 +145,7 @@ export function ModelsTree(props: ModelsTreeProps) {
                   {...rendererProps}
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
-                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} reportUsage={reportUsage} />}
-                  reportUsage={reportUsage}
+                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)
@@ -158,9 +159,8 @@ export function ModelsTree(props: ModelsTreeProps) {
   );
 }
 
-interface ModelsTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
+interface ModelsTreeNodeRendererProps extends FilterableTreeNodeRendererProps {
   density?: "default" | "enlarged";
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 function ModelsTreeNodeRenderer(props: ModelsTreeNodeRendererProps) {
@@ -178,7 +178,7 @@ function ModelsTreeNodeRenderer(props: ModelsTreeNodeRendererProps) {
 }
 
 interface UseModelsTreeStateProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModelsTreeStateProps) {
@@ -219,7 +219,7 @@ function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModels
 
 interface UseTreeProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
   ruleset: Ruleset;
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 function useTreeState({
@@ -244,7 +244,7 @@ function useTreeState({
   const onFilterChange = useCallback(
     (dataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => {
       if (dataProvider && matchesCount !== undefined) {
-        reportUsage?.({ featureId: "filtering", reportInteraction: false });
+        reportUsage({ featureId: "filtering", reportInteraction: false });
         onFilterApplied?.(dataProvider, matchesCount);
       }
 
@@ -288,7 +288,7 @@ function useTreeState({
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
     onNodeLoaded: filterInfo ? undefined : onNodeLoaded,
     reportUsage: filterInfo ? undefined : reportUsage,
-    onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
+    onHierarchyLimitExceeded: () => reportUsage({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
 }
 

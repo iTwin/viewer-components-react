@@ -18,12 +18,12 @@ import type { IPresentationTreeDataProvider } from "@itwin/presentation-componen
 export interface ReportingTreeEventHandlerProps {
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
   eventHandler: TreeEventHandler;
-  reportUsage?: (props: { reportInteraction: boolean }) => void;
+  reportUsage: (props: { reportInteraction: boolean }) => void;
 }
 
 export class ReportingTreeEventHandler extends TreeEventHandler {
   protected _eventHandler: TreeEventHandler;
-  protected _reportUsage?: (props: { reportInteraction: boolean }) => void;
+  protected _reportUsage: (props: { reportInteraction: boolean }) => void;
 
   constructor(props: ReportingTreeEventHandlerProps) {
     super({ modelSource: props.nodeLoader.modelSource, nodeLoader: props.nodeLoader });
@@ -37,12 +37,12 @@ export class ReportingTreeEventHandler extends TreeEventHandler {
   }
 
   public override onNodeExpanded(props: TreeNodeEventArgs) {
-    this._reportUsage?.({ reportInteraction: true });
+    this._reportUsage({ reportInteraction: true });
     this._eventHandler.onNodeExpanded(props);
   }
 
   public override onNodeCollapsed(props: TreeNodeEventArgs) {
-    this._reportUsage?.({ reportInteraction: true });
+    this._reportUsage({ reportInteraction: true });
     this._eventHandler.onNodeCollapsed(props);
   }
 
@@ -54,7 +54,7 @@ export class ReportingTreeEventHandler extends TreeEventHandler {
         next: () => (emittedValues = true),
         finalize: () => {
           if (emittedValues) {
-            this._reportUsage?.({ reportInteraction: true });
+            this._reportUsage({ reportInteraction: true });
           }
         },
       }),
@@ -64,12 +64,11 @@ export class ReportingTreeEventHandler extends TreeEventHandler {
   }
 
   public override onSelectionReplaced(props: TreeSelectionReplacementEventArgs) {
-    this._reportUsage?.({ reportInteraction: true });
+    this._reportUsage({ reportInteraction: true });
     return this._eventHandler.onSelectionReplaced(props);
   }
 
   public override onCheckboxStateChanged(props: TreeCheckboxStateChangeEventArgs) {
-    this._reportUsage?.({ reportInteraction: true });
     return this._eventHandler.onCheckboxStateChanged(props);
   }
 
@@ -78,12 +77,12 @@ export class ReportingTreeEventHandler extends TreeEventHandler {
   }
 
   public override onNodeDoubleClick(props: TreeNodeEventArgs) {
-    this._reportUsage?.({ reportInteraction: true });
+    this._reportUsage({ reportInteraction: true });
     this._eventHandler.onNodeDoubleClick(props);
   }
 
   public override onNodeEditorActivated(props: TreeNodeEventArgs) {
-    this._reportUsage?.({ reportInteraction: true });
+    this._reportUsage({ reportInteraction: true });
     this._eventHandler.onNodeEditorActivated(props);
   }
 }

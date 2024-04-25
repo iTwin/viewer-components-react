@@ -66,35 +66,33 @@ export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer
 }
 
 /**
+ * Props for [[FilterableTreeRenderer]] node renderer.
+ * @beta
+ */
+export interface FilterableTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+}
+
+/**
  * Props for [[FilterableTreeRenderer]] component.
  * @beta
  */
 export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
-  nodeRenderer: (props: PresentationTreeNodeRendererProps) => React.ReactNode;
-  onApplyFilterClick?: () => void;
-  onFilterClear?: () => void;
-  onFilterApplied?: () => void;
+  nodeRenderer: (props: FilterableTreeNodeRendererProps) => React.ReactNode;
   reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 /**
  * Base tree renderer for trees with enabled hierarchy level filtering.
  * @beta
  */
-export function FilterableTreeRenderer({
-  nodeRenderer,
-  nodeLoader,
-  onApplyFilterClick,
-  onFilterClear,
-  onFilterApplied,
-  reportUsage,
-  ...restProps
-}: FilterableTreeRendererProps) {
-  const onFilterAppliedWithReporting = () => {
-    reportUsage?.({ featureId: "hierarchy-level-filtering", reportInteraction: true });
-    onFilterApplied?.();
-  };
-  const { onClearFilterClick, onFilterClick, filterDialog } = useFilterablePresentationTree({ nodeLoader, onFilterApplied: onFilterAppliedWithReporting });
+export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, reportUsage, ...restProps }: FilterableTreeRendererProps) {
+  const { onClearFilterClick, onFilterClick, filterDialog } = useFilterablePresentationTree({
+    nodeLoader,
+    onFilterApplied: () => {
+      reportUsage?.({ featureId: "hierarchy-level-filtering", reportInteraction: true });
+    },
+  });
 
   return (
     <div>
@@ -104,14 +102,13 @@ export function FilterableTreeRenderer({
         nodeRenderer={(props) => {
           return nodeRenderer({
             ...props,
+            reportUsage,
             onFilterClick: (nodeId: string) => {
               reportUsage?.({ reportInteraction: true });
-              onApplyFilterClick?.();
               onFilterClick(nodeId);
             },
             onClearFilterClick: (nodeId: string) => {
               reportUsage?.({ reportInteraction: true });
-              onFilterClear?.();
               onClearFilterClick(nodeId);
             },
           });
