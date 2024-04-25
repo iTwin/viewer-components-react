@@ -33,7 +33,7 @@ export const useFetchExtractionStatus = ({
       const latestExtractionResultId = latestExtractionResult.value?.id;
       let latestJobStatus: ExtractionStatus|undefined;
       if (latestExtractionResultId) {
-        latestJobStatus = await extractionClient.getExtractionStatus(accessToken, latestExtractionResultId);
+        latestJobStatus = latestExtractionResult.value;
       }
 
       if (latestExtractionResult.done) {
@@ -62,7 +62,7 @@ export const useFetchExtractionStatus = ({
         }
       }
 
-      return { extractionStatusIcon, extractionMessageData, latestExtractionResult, latestJobStatus };
+      return { extractionStatusIcon, extractionMessageData, latestExtractionResult};
     },
   });
 };

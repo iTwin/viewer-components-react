@@ -46,7 +46,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     if(initialStateExtractionFlag && isMappingsFetched && isExtractionStatusFetched && mappings && extractionStatus && !mappingIdJobInfo.size){
       const newMappingIdJobInfo = new Map<string, string>();
       const latestExtractionResultId = extractionStatus.latestExtractionResult.value?.id;
-      const state = extractionStatus.latestJobStatus?.state;
+      const state = extractionStatus.latestExtractionResult.value?.state;
       if((state === ExtractionState.Failed || state === ExtractionState.Succeeded || state === ExtractionState.PartiallySucceeded)) return;
       !!latestExtractionResultId && mappings.forEach((mapping) => {
         const mappingId = mapping.id;
