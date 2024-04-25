@@ -29,6 +29,10 @@ import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+/**
+ * Props for the {@link CalculatedPropertyActionWithVisuals} component.
+ * @public
+ */
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
   group: Group;
@@ -37,6 +41,10 @@ export interface CalculatedPropertyActionWithVisualsProps {
   onClickCancel?: () => void;
 }
 
+/**
+ * Component to create or update a calculated property with visualizations.
+ * @public
+ */
 export const CalculatedPropertyActionWithVisuals = ({
   mappingId,
   group,
