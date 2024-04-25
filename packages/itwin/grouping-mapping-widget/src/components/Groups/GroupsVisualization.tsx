@@ -47,7 +47,7 @@ export interface GroupsVisualizationProps extends GroupsProps {
 /**
  * Component to visualize groups and their elements.
  * @public
-*/
+ */
 export const GroupsVisualization = ({
   emphasizeElements = true,
   isNonEmphasizedSelectable = false,
