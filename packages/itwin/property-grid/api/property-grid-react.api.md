@@ -75,13 +75,14 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
 }
 
 // @internal
-export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element | null;
+export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, onDataLoaded, ...props }: FilteringPropertyGridProps): JSX.Element | null;
 
 // @public
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
     autoExpandChildCategories?: boolean;
     // @internal (undocumented)
     filterer: IPropertyDataFilterer;
+    onDataLoaded?: () => void;
 }
 
 // @public

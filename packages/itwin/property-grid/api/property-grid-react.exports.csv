@@ -9,7 +9,7 @@ public;CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuI
 public;DataProviderProps
 public;DefaultContextMenuItemProps 
 public;FavoritePropertiesContextMenuItemProps 
-internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element | null
+internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, onDataLoaded, ...props }: FilteringPropertyGridProps): JSX.Element | null
 public;FilteringPropertyGridProps 
 public;IModelAppUserPreferencesStorage 
 internal;InstanceSelectionProps
