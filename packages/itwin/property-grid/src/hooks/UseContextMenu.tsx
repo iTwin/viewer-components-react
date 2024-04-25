@@ -205,7 +205,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
     const items = contextMenuItems.map((item, index) => <Fragment key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Fragment>);
 
-    onFeatureUsed?.("context-menu");
+    onFeatureUsed("context-menu");
     setContextMenu({
       position: { x: args.event.clientX, y: args.event.clientY },
       menuItems: items,

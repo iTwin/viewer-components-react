@@ -102,7 +102,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
       return;
     }
 
-    onFeatureUsed?.("ancestor-navigation");
+    onFeatureUsed("ancestor-navigation");
     const selectedKey = selectedKeys[0];
     updateStateImmediate((prev) => ({ ...prev, canNavigateUp: false }));
 
@@ -138,7 +138,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
     // select the current instance key
     Presentation.selection.replaceSelection(PropertyGridSelectionScope, imodel, [currentKey]);
 
-    onFeatureUsed?.("ancestor-navigation");
+    onFeatureUsed("ancestor-navigation");
     updateStateImmediate(() => ({
       selectedKeys: [currentKey],
       previousKeys: newPreviousKeys,

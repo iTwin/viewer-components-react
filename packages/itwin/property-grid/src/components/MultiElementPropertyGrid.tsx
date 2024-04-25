@@ -51,18 +51,19 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
   const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
+    const feature = featureFromSelectedCount(selectedKeys.length);
+    feature && onFeatureUsed(feature);
+  }, [selectedKeys, onFeatureUsed]);
+
+  useEffect(() => {
     // show standard property grid when selection changes
     return Presentation.selection.selectionChange.addListener(() => {
       setContent(MultiElementPropertyContent.PropertyGrid);
     });
   }, [setContent]);
 
-  useEffect(() => {
-    const feature = getFeatureFromContent(content, selectedKeys.length);
-    feature && onFeatureUsed?.(feature);
-  }, [selectedKeys, onFeatureUsed, content]);
-
   const openElementList = () => {
+    onFeatureUsed("elements-list");
     setContent(MultiElementPropertyContent.ElementList);
   };
 
@@ -85,9 +86,12 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
       imodel={props.imodel}
       instanceKeys={selectedKeys}
       onBack={() => {
+        const feature = featureFromSelectedCount(selectedKeys.length);
+        feature && onFeatureUsed(feature);
         setContent(MultiElementPropertyContent.PropertyGrid);
       }}
       onSelect={(instanceKey: InstanceKey) => {
+        onFeatureUsed("single-element-from-list");
         setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
         focusInstance(instanceKey);
       }}
@@ -98,6 +102,7 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
       {...props}
       instanceKey={focusedInstanceKey}
       onBackButton={() => {
+        onFeatureUsed("elements-list");
         setContent(MultiElementPropertyContent.ElementList);
       }}
       className={classnames("property-grid-react-single-element-property-grid", props.className)}
@@ -204,16 +209,9 @@ function ElementsList(props: ElementListProps) {
   return <ElementListComponent {...props} />;
 }
 
-function getFeatureFromContent(content: MultiElementPropertyContent, selectedCount: number): UsageTrackedFeatures | undefined {
-  switch (content) {
-    case MultiElementPropertyContent.PropertyGrid:
-      if (selectedCount <= 0) {
-        return undefined;
-      }
-      return selectedCount > 1 ? "multiple-elements" : "single-element";
-    case MultiElementPropertyContent.ElementList:
-      return "elements-list";
-    case MultiElementPropertyContent.SingleElementPropertyGrid:
-      return "single-element-from-list";
+function featureFromSelectedCount(count: number): UsageTrackedFeatures | undefined {
+  if (count <= 0) {
+    return undefined;
   }
+  return count === 1 ? "single-element" : "multiple-elements";
 }
