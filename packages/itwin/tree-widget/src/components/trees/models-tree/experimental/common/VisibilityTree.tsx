@@ -4,24 +4,30 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IModelConnection } from "@itwin/core-frontend";
-import { UseHierarchyProviderProps, useHierarchyProvider } from "./UseHierarchyProvider";
-import { UseNodesVisibilityProps, useHierarchyVisibility } from "./UseHierarchyVisibility";
+import { useHierarchyProvider } from "./UseHierarchyProvider";
+import { useHierarchyVisibility } from "./UseHierarchyVisibility";
 import { useHierarchyFiltering } from "./UseHierarchyFiltering";
 import { PresentationHierarchyNode, useTree } from "@itwin/presentation-hierarchies-react";
 import { Flex, ProgressRadial } from "@itwin/itwinui-react";
 import { VisibilityTreeRenderer } from "./VisibilityTreeRenderer";
 import { ReactElement } from "react";
 
-interface BaseProps {
+interface VisibilityTreeOwnProps {
   imodel: IModelConnection;
   height: number;
   width: number;
   filter: string;
+  defaultHierarchyLevelSizeLimit: number;
   getIcon?: (node: PresentationHierarchyNode) => ReactElement | undefined;
+  density?: "default" | "enlarged";
 }
 
-type Props = BaseProps & UseHierarchyProviderProps & UseNodesVisibilityProps;
+type UseHierarchyProviderProps = Parameters<typeof useHierarchyProvider>[0];
+type UseNodesVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
 
+type VisibilityTreeProps = VisibilityTreeOwnProps & UseHierarchyProviderProps & UseNodesVisibilityProps;
+
+/** @internal */
 export function VisibilityTree({
   imodel,
   height,
@@ -33,7 +39,9 @@ export function VisibilityTree({
   getHierarchyDefinitionsProvider,
   visibilityHandlerFactory,
   filter,
-}: Props) {
+  defaultHierarchyLevelSizeLimit,
+  density,
+}: VisibilityTreeProps) {
   const { hierarchyProvider, isFiltering } = useHierarchyProvider({
     queryExecutor,
     metadataProvider,
@@ -42,7 +50,7 @@ export function VisibilityTree({
     getFilteredPaths,
   });
 
-  const { rootNodes, getHierarchyLevelFilteringOptions, isLoading, ...treeProps } = useTree({ hierarchyProvider });
+  const { rootNodes, getHierarchyLevelFilteringOptions, isLoading, reloadTree, ...treeProps } = useTree({ hierarchyProvider });
 
   const nodesVisibility = useHierarchyVisibility({ visibilityHandlerFactory });
   const { filteringDialog, onFilterClick } = useHierarchyFiltering({
@@ -50,6 +58,7 @@ export function VisibilityTree({
     hierarchyProvider,
     getHierarchyLevelFilteringOptions,
     setHierarchyLevelFilter: treeProps.setHierarchyLevelFilter,
+    defaultHierarchyLevelSizeLimit,
   });
 
   const renderContent = () => {
@@ -63,7 +72,14 @@ export function VisibilityTree({
 
     return (
       <div style={{ height, overflow: "auto" }}>
-        <VisibilityTreeRenderer rootNodes={rootNodes} {...treeProps} {...nodesVisibility} onFilterClick={onFilterClick} getIcon={getIcon} />
+        <VisibilityTreeRenderer
+          rootNodes={rootNodes}
+          {...treeProps}
+          {...nodesVisibility}
+          onFilterClick={onFilterClick}
+          getIcon={getIcon}
+          size={density === "enlarged" ? "default" : "small"}
+        />
         {filteringDialog}
       </div>
     );

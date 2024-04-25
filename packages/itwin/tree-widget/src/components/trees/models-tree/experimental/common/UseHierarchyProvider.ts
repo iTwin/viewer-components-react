@@ -13,21 +13,24 @@ import {
 } from "@itwin/presentation-hierarchies";
 import { useCallback, useEffect, useState } from "react";
 
+/** @internal */
 export interface MetadataAccess {
   queryExecutor: ILimitingECSqlQueryExecutor;
   metadataProvider: ReturnType<typeof createMetadataProvider>;
 }
 
+/** @internal */
 export interface GetFilteredPathsProps extends MetadataAccess {
   filter: string;
 }
 
-export interface UseHierarchyProviderProps extends MetadataAccess {
+interface UseHierarchyProviderProps extends MetadataAccess {
   filter: string;
   getHierarchyDefinitionsProvider: (props: MetadataAccess) => IHierarchyLevelDefinitionsFactory;
   getFilteredPaths?: (props: GetFilteredPathsProps) => Promise<HierarchyNodeIdentifiersPath[]>;
 }
 
+/** @internal */
 export function useHierarchyProvider({
   queryExecutor,
   metadataProvider,

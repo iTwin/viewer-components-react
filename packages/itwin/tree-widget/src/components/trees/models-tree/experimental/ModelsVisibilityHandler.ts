@@ -21,19 +21,17 @@ interface ExperimentalModelsVisibilityHandlerProps {
   viewport: Viewport;
 }
 
-/**
- * @alpha
- */
+/** @internal */
 export class ExperimentalModelsVisibilityHandler {
   private _viewport: Viewport;
   private _pendingVisibilityChange: any | undefined;
-  private _subjectModelIdsCache: SubjectModelIdsCacheNew;
+  private _subjectModelIdsCache: SubjectModelIdsCache;
   private _elementIdsCache: ElementIdsCache;
   private _listeners = new Array<() => void>();
 
   constructor(props: ExperimentalModelsVisibilityHandlerProps) {
     this._viewport = props.viewport;
-    this._subjectModelIdsCache = new SubjectModelIdsCacheNew(props.viewport.iModel);
+    this._subjectModelIdsCache = new SubjectModelIdsCache(props.viewport.iModel);
     this._elementIdsCache = new ElementIdsCache(props.viewport.iModel);
     this._listeners.push(this._viewport.onViewedCategoriesPerModelChanged.addListener(() => this.onVisibilityChangeInternal()));
     this._listeners.push(this._viewport.onViewedCategoriesChanged.addListener(() => this.onVisibilityChangeInternal()));
@@ -383,7 +381,7 @@ export class ExperimentalModelsVisibilityHandler {
   }
 }
 
-class SubjectModelIdsCacheNew {
+class SubjectModelIdsCache {
   private _imodel: IModelConnection;
   private _subjectsHierarchy: Map<Id64String, Id64String[]> | undefined;
   private _subjectModels: Map<Id64String, Id64String[]> | undefined;

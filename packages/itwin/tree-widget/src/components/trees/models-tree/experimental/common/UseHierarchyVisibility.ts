@@ -17,7 +17,7 @@ interface HierarchyVisibilityHandler {
   dispose: () => void;
 }
 
-export interface UseNodesVisibilityProps {
+interface UseNodesVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
 
@@ -26,6 +26,7 @@ interface UseHierarchyVisibilityResult {
   getCheckboxStatus: (node: PresentationHierarchyNode) => VisibilityStatus;
 }
 
+/** @internal */
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseNodesVisibilityProps): UseHierarchyVisibilityResult {
   const statusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus }>());
   const [state, setState] = useState({

@@ -10,12 +10,13 @@ import { Checkbox } from "@itwin/itwinui-react";
 
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;
 
-type Props = TreeNodeRendererProps & {
+type VisibilityTreeNodeRendererProps = TreeNodeRendererProps & {
   onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
   getCheckboxStatus: (node: PresentationHierarchyNode) => VisibilityStatus;
 };
 
-export function VisibilityTreeNodeRenderer({ onCheckboxClicked, getCheckboxStatus, ...restProps }: Props) {
+/** @internal */
+export function VisibilityTreeNodeRenderer({ onCheckboxClicked, getCheckboxStatus, ...restProps }: VisibilityTreeNodeRendererProps) {
   const renderCheckbox = () => {
     const node = restProps.node;
     if (!isPresentationHierarchyNode(node)) {
