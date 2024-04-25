@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { PropsWithChildren } from "react";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import { usePreferencesContext } from "../PropertyGridPreferencesContext";
 import { useTelemetryContext } from "./UseTelemetryContext";
@@ -27,16 +27,12 @@ export function useNullValueSetting() {
   const [showNullValues, setShowNullValues] = useState(true);
   const { getShowNullValuesPreference, setShowNullValuesPreference } = useNullValueStorage();
   const { onFeatureUsed } = useTelemetryContext();
-  const firstReportRef = useRef(false);
 
   // Get value from preferences storage
   useEffect(() => {
     void (async () => {
       const res = await getShowNullValuesPreference();
-      if (!firstReportRef.current) {
-        onFeatureUsed(res ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
-        firstReportRef.current = true;
-      }
+      onFeatureUsed(res ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
       setShowNullValues(res);
     })();
   }, [getShowNullValuesPreference, onFeatureUsed]);
