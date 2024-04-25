@@ -127,6 +127,7 @@ export function CategoryTree(props: CategoryTreeProps) {
       iconsEnabled: false,
       descriptionEnabled: true,
       levelOffset: 10,
+      onVisibilityToggled: () => reportUsage?.({ featureId: "visibility-change", reportInteraction: true }),
     },
   };
 
@@ -160,8 +161,7 @@ export function CategoryTree(props: CategoryTreeProps) {
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
                   nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} />}
-                  onApplyFilterClick={() => reportUsage?.({ reportInteraction: true })}
-                  onFilterClear={() => reportUsage?.({ reportInteraction: true })}
+                  reportUsage={reportUsage}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)

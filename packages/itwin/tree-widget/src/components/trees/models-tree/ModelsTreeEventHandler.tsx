@@ -12,9 +12,22 @@ import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { ModelsTreeNodeType, ModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 
+import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { TreeNodeEventArgs } from "@itwin/components-react";
+import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
+
+export interface ModelsTreeEventHandlerProps extends VisibilityTreeEventHandlerParams {
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+}
 
 export class ModelsTreeEventHandler extends VisibilityTreeEventHandler {
+  private _reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+
+  constructor(props: ModelsTreeEventHandlerProps) {
+    super(props);
+    this._reportUsage = props.reportUsage;
+  }
+
   public override async onNodeDoubleClick({ nodeId }: TreeNodeEventArgs) {
     const model = this.modelSource.getModel();
     const node = model.getNode(nodeId);

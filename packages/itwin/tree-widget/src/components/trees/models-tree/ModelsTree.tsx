@@ -114,6 +114,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       descriptionEnabled: false,
       levelOffset: 10,
       disableRootNodeCollapse: true,
+      onVisibilityToggled: () => reportUsage?.({ featureId: "visibility-change", reportInteraction: true }),
     },
   };
 
@@ -143,9 +144,7 @@ export function ModelsTree(props: ModelsTreeProps) {
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
                   nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
-                  onApplyFilterClick={() => reportUsage?.({ reportInteraction: true })}
-                  onFilterClear={() => reportUsage?.({ reportInteraction: true })}
-                  onFilterApplied={() => reportUsage?.({ featureId: "hierarchy-level-filtering", reportInteraction: true })}
+                  reportUsage={reportUsage}
                 />
               )
             : createVisibilityTreeRenderer(baseRendererProps)
@@ -255,6 +254,13 @@ function useTreeState({
     onPerformanceMeasured,
   });
 
+  const eventHandlerFactory = useCallback(
+    (handlerProps: VisibilityTreeEventHandlerParams) => {
+      return new ModelsTreeEventHandler({ ...handlerProps, reportUsage });
+    },
+    [reportUsage],
+  );
+
   return useVisibilityTreeState({
     imodel: iModel,
     ruleset,
@@ -278,10 +284,6 @@ function useTreeState({
     reportUsage: filterInfo ? undefined : reportUsage,
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
-}
-
-function eventHandlerFactory(props: VisibilityTreeEventHandlerParams) {
-  return new ModelsTreeEventHandler(props);
 }
 
 function useVisibilityHandler(

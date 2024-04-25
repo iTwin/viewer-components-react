@@ -14,6 +14,7 @@ import type { IPresentationTreeDataProvider, PresentationTreeNodeRendererProps }
 import type { AbstractTreeNodeLoaderWithProvider, TreeRendererProps as ComponentsTreeRendererProps } from "@itwin/components-react";
 import type { TreeNodeRendererProps } from "./TreeNodeRenderer";
 import type { TreeContextMenuProps } from "./ContextMenu";
+import type { UsageTrackedFeatures } from "./UseFeatureReporting";
 /**
  * Base props for [[TreeRenderer]] component.
  * @public
@@ -74,6 +75,7 @@ export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "no
   onApplyFilterClick?: () => void;
   onFilterClear?: () => void;
   onFilterApplied?: () => void;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 /**
  * Base tree renderer for trees with enabled hierarchy level filtering.
@@ -85,9 +87,14 @@ export function FilterableTreeRenderer({
   onApplyFilterClick,
   onFilterClear,
   onFilterApplied,
+  reportUsage,
   ...restProps
 }: FilterableTreeRendererProps) {
-  const { onClearFilterClick, onFilterClick, filterDialog } = useFilterablePresentationTree({ nodeLoader, onFilterApplied });
+  const onFilterAppliedWithReporting = () => {
+    reportUsage?.({ featureId: "hierarchy-level-filtering", reportInteraction: true });
+    onFilterApplied?.();
+  };
+  const { onClearFilterClick, onFilterClick, filterDialog } = useFilterablePresentationTree({ nodeLoader, onFilterApplied: onFilterAppliedWithReporting });
 
   return (
     <div>
@@ -98,10 +105,12 @@ export function FilterableTreeRenderer({
           return nodeRenderer({
             ...props,
             onFilterClick: (nodeId: string) => {
+              reportUsage?.({ reportInteraction: true });
               onApplyFilterClick?.();
               onFilterClick(nodeId);
             },
             onClearFilterClick: (nodeId: string) => {
+              reportUsage?.({ reportInteraction: true });
               onFilterClear?.();
               onClearFilterClick(nodeId);
             },

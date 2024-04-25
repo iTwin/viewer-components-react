@@ -23,7 +23,6 @@ import type {
   TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
 import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
-import type { UsageTrackedFeatures } from "./common/UseFeatureReporting";
 /**
  * Data structure that describes instance visibility status.
  * @public
@@ -63,7 +62,6 @@ export type VisibilityTreeSelectionPredicate = (node: TreeNodeItem) => boolean;
 export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEventHandlerParams {
   visibilityHandler: IVisibilityHandler;
   selectionPredicate?: VisibilityTreeSelectionPredicate;
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 /**
@@ -76,13 +74,11 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   private _listeners = new Array<() => void>();
   private _isChangingVisibility: boolean;
   protected _treeIdentifier?: string;
-  protected _reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 
   constructor(params: VisibilityTreeEventHandlerParams) {
     super(params);
     this._visibilityHandler = params.visibilityHandler;
     this._selectionPredicate = params.selectionPredicate;
-    this._reportUsage = params.reportUsage;
     this._isChangingVisibility = false;
     this._listeners.push(
       this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => {
@@ -138,7 +134,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   public override onCheckboxStateChanged(event: TreeCheckboxStateChangeEventArgs) {
-    this._reportUsage?.({ featureId: "visibility-change", reportInteraction: false });
     const handleStateChanged = () => {
       this._isChangingVisibility = false;
       void this.updateCheckboxes();

@@ -66,7 +66,6 @@ export function useVisibilityTreeState({
         nodeLoader: params.nodeLoader,
         visibilityHandler,
         selectionPredicate,
-        reportUsage,
       };
 
       const handler = eventHandler ? eventHandler(eventHandlerProps) : new VisibilityTreeEventHandler(eventHandlerProps);

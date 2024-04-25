@@ -149,7 +149,9 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
         density={props.density}
       >
         {props.headerButtons
-          ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels })}</Fragment>)
+          ? props.headerButtons.map((btn, index) => (
+              <Fragment key={index}>{btn({ viewport, models: availableModels, density: props.density, onFeatureUsed: props.onFeatureUsed })}</Fragment>
+            ))
           : [
               <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
               <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,

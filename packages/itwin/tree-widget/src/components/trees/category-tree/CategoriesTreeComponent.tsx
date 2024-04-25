@@ -130,7 +130,11 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
         density={props.density}
       >
         {props.headerButtons
-          ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport: props.viewport, categories, filteredCategories })}</Fragment>)
+          ? props.headerButtons.map((btn, index) => (
+              <Fragment key={index}>
+                {btn({ viewport: props.viewport, categories, filteredCategories, density: props.density, onFeatureUsed: props.onFeatureUsed })}
+              </Fragment>
+            ))
           : [
               <ShowAllButton
                 viewport={props.viewport}
