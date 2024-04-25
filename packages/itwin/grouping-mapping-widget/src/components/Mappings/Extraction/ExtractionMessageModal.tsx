@@ -65,7 +65,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   // useQueries to fetch all group names
   const groupQueriesResults = useQueries({
     queries: Array.from(extractionInfo.values()).map(({ mappingId }) => ({
-      queryKey: ["groups", mappingId],
+      queryKey: ["mapping", "groups", mappingId],
       queryFn: async () => {
         const groups = await fetchGroups(mappingId, groupingMappingApiConfig.getAccessToken, groupsClient);
         // Return both mappingId and groups in the result
