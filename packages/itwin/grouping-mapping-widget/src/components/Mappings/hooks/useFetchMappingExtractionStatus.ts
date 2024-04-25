@@ -42,6 +42,7 @@ export const fetchMappingStatus = async (
       case ExtractionState.Queued:
         return { mappingId, finalExtractionStateValue: ExtractionStates.Queued};
       case ExtractionState.Succeeded:
+      case ExtractionState.PartiallySucceeded:
         return { mappingId, finalExtractionStateValue: ExtractionStates.Succeeded};
       default:
         return { mappingId, finalExtractionStateValue: ExtractionStates.None};
