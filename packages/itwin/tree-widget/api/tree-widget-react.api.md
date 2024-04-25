@@ -125,13 +125,13 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     // (undocumented)
     enableSubCategory(key: string, enabled: boolean): void;
     // (undocumented)
-    getCategoryVisibility(id: string): "visible" | "hidden";
+    getCategoryVisibility(id: string): "hidden" | "visible";
     // (undocumented)
     static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey): string;
     // (undocumented)
     getParent(key: string): CategoryInfo | undefined;
     // (undocumented)
-    getSubCategoryVisibility(id: string): "visible" | "hidden";
+    getSubCategoryVisibility(id: string): "hidden" | "visible";
     // (undocumented)
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus;
     // (undocumented)
@@ -166,7 +166,7 @@ export interface ContextMenuItemProps {
 }
 
 // @public
-export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
+export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
 
 // @public
 export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element;
@@ -204,7 +204,7 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
 }
 
 // @beta
-export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, onApplyFilterClick, onFilterClear, onFilterApplied, ...restProps }: FilterableTreeRendererProps): JSX.Element;
+export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, onApplyFilterClick, onFilterClear, onFilterApplied, reportUsage, ...restProps }: FilterableTreeRendererProps): JSX.Element;
 
 // @beta
 export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
@@ -218,10 +218,15 @@ export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "no
     onFilterApplied?: () => void;
     // (undocumented)
     onFilterClear?: () => void;
+    // (undocumented)
+    reportUsage?: (props: {
+        featureId?: UsageTrackedFeatures;
+        reportInteraction: boolean;
+    }) => void;
 }
 
 // @beta
-export function FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element;
+export function FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, onVisibilityToggled, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element;
 
 // @beta
 export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & VisibilityTreeNodeRendererProps;
@@ -613,21 +618,11 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     // (undocumented)
     onSelectionReplaced({ replacements }: TreeSelectionReplacementEventArgs): Subscription | undefined;
     // (undocumented)
-    protected _reportUsage?: (props: {
-        featureId?: string;
-        reportInteraction: boolean;
-    }) => void;
-    // (undocumented)
     protected _treeIdentifier?: string;
 }
 
 // @public
 export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEventHandlerParams {
-    // (undocumented)
-    reportUsage?: (props: {
-        featureId?: string;
-        reportInteraction: boolean;
-    }) => void;
     // (undocumented)
     selectionPredicate?: VisibilityTreeSelectionPredicate;
     // (undocumented)
@@ -643,7 +638,7 @@ export interface VisibilityTreeFilterInfo {
 }
 
 // @public
-export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps): JSX.Element;
+export function VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProps): JSX.Element;
 
 // @public
 export interface VisibilityTreeNodeRendererProps {
@@ -652,6 +647,7 @@ export interface VisibilityTreeNodeRendererProps {
     iconsEnabled: boolean;
     isEnlarged?: boolean;
     levelOffset?: number;
+    onVisibilityToggled?: (enabled: boolean) => void;
 }
 
 // @public

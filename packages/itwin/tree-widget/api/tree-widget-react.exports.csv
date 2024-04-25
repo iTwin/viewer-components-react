@@ -13,7 +13,7 @@ public;CategoryVisibilityHandler
 public;CategoryVisibilityHandlerParams
 public;ClassGroupingOption
 public;ContextMenuItemProps
-public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element
+public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element
 public;createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element
 public;DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): React.JSX.Element
 public;DefaultLabelRendererProps
@@ -21,9 +21,9 @@ alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element | null
 alpha;ExternalSourcesTreeComponent:
 alpha;ExternalSourcesTreeComponentProps = Omit
 alpha;ExternalSourcesTreeProps 
-beta;FilterableTreeRenderer({ nodeRenderer, nodeLoader, onApplyFilterClick, onFilterClear, onFilterApplied, ...restProps }: FilterableTreeRendererProps): JSX.Element
+beta;FilterableTreeRenderer({ nodeRenderer, nodeLoader, onApplyFilterClick, onFilterClear, onFilterApplied, reportUsage, ...restProps }: FilterableTreeRendererProps): JSX.Element
 beta;FilterableTreeRendererProps 
-beta;FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element
+beta;FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, onVisibilityToggled, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element
 beta;FilterableVisibilityTreeNodeRendererProps = Omit
 public;hideAllCategories(categories: string[], viewport: Viewport): Promise
 public;hideAllModels(models: string[], viewport: Viewport): Promise
@@ -85,7 +85,7 @@ public;VisibilityStatus
 public;VisibilityTreeEventHandler 
 public;VisibilityTreeEventHandlerParams 
 public;VisibilityTreeFilterInfo
-public;VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps): JSX.Element
+public;VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProps): JSX.Element
 public;VisibilityTreeNodeRendererProps
 public;VisibilityTreeNoFilteredData(props: VisibilityTreeNoFilteredDataProps): JSX.Element
 public;VisibilityTreeNoFilteredDataProps
