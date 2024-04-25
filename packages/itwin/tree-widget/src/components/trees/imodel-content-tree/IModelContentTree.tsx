@@ -5,7 +5,7 @@
 
 
 import { useCallback } from "react";
-import { SelectionMode } from "@itwin/components-react";
+import { SelectionMode, TreeEventHandler } from "@itwin/components-react";
 import { PresentationTree, PresentationTreeNodeRenderer, usePresentationTreeState } from "@itwin/presentation-components";
 import { ReportingTreeEventHandler } from "../common/ReportingTreeEventHandler";
 import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
@@ -64,8 +64,11 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
 
   const eventHandlerFactory = useCallback(
     (handlerProps: PresentationTreeEventHandlerProps) => {
+      const nodeLoader = handlerProps.nodeLoader;
+      const eventHandler = new TreeEventHandler({ modelSource: nodeLoader.modelSource, nodeLoader });
       return new ReportingTreeEventHandler({
-        nodeLoader: handlerProps.nodeLoader,
+        nodeLoader,
+        eventHandler,
         reportUsage,
       });
     },
