@@ -208,14 +208,13 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
 
 function useThrottled(func: () => void, timeout: number) {
   const isThrottledRef = useLatest(false);
-  const funcRef = useLatest(func);
 
   return () => {
     if (isThrottledRef.current) {
       return;
     }
     isThrottledRef.current = true;
-    funcRef.current?.();
+    func();
     setTimeout(() => {
       isThrottledRef.current = false;
     }, timeout);
