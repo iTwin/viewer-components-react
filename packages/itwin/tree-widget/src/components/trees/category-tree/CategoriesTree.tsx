@@ -20,6 +20,7 @@ import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, Vis
 import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
+import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
@@ -160,7 +161,7 @@ export function CategoryTree(props: CategoryTreeProps) {
                   {...rendererProps}
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
-                  nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} />}
+                  nodeRenderer={(nodeProps) => <CategoriesTreeNodeRenderer {...nodeProps} density={density} reportUsage={reportUsage} />}
                   reportUsage={reportUsage}
                 />
               )
@@ -174,7 +175,12 @@ export function CategoryTree(props: CategoryTreeProps) {
   );
 }
 
-function CategoriesTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
+interface CategoriesTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
+  density?: "default" | "enlarged";
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+}
+
+function CategoriesTreeNodeRenderer(props: CategoriesTreeNodeRendererProps) {
   return (
     <FilterableVisibilityTreeNodeRenderer
       {...props}
@@ -182,6 +188,7 @@ function CategoriesTreeNodeRenderer(props: PresentationTreeNodeRendererProps & {
       descriptionEnabled={true}
       levelOffset={10}
       isEnlarged={props.density === "enlarged"}
+      onVisibilityToggled={() => props.reportUsage?.({ featureId: "visibility-change", reportInteraction: true })}
     />
   );
 }

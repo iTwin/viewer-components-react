@@ -143,7 +143,7 @@ export function ModelsTree(props: ModelsTreeProps) {
                   {...rendererProps}
                   {...baseRendererProps}
                   nodeLoader={state.nodeLoader}
-                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
+                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} reportUsage={reportUsage} />}
                   reportUsage={reportUsage}
                 />
               )
@@ -158,7 +158,12 @@ export function ModelsTree(props: ModelsTreeProps) {
   );
 }
 
-function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
+interface ModelsTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
+  density?: "default" | "enlarged";
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+}
+
+function ModelsTreeNodeRenderer(props: ModelsTreeNodeRendererProps) {
   return (
     <FilterableVisibilityTreeNodeRenderer
       {...props}
@@ -167,6 +172,7 @@ function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { den
       levelOffset={10}
       disableRootNodeCollapse={true}
       isEnlarged={props.density === "enlarged"}
+      onVisibilityToggled={() => props.reportUsage?.({ featureId: "visibility-change", reportInteraction: true })}
     />
   );
 }
