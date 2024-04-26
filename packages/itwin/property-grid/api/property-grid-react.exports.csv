@@ -22,7 +22,7 @@ internal;NullValueSettingContextValue
 public;PerformanceTrackedFeatures = "properties-load" | "elements-list-load"
 public;PreferencesStorage
 public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null
-public;PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, ...props }: PropertyGridComponentProps): JSX.Element | null
+public;PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, onFeatureUsed, ...props }: PropertyGridComponentProps): JSX.Element | null
 public;PropertyGridComponentProps 
 internal;PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, onPropertyUpdated, ...props }: PropertyGridContentProps): JSX.Element
 public;PropertyGridContentBaseProps 
@@ -48,7 +48,7 @@ internal;SHOWNULL_KEY = "showNullValues"
 public;SingleElementDataProviderProps 
 public;SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element | null
 public;SingleElementPropertyGridProps = Omit
-public;TelemetryContextProvider({ onPerformanceMeasured, children }: PropsWithChildren
+public;TelemetryContextProvider({ onPerformanceMeasured, onFeatureUsed, children }: PropsWithChildren
 internal;UseContentMenuProps 
 internal;useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps):
 internal;useDataProvider({ imodel, createDataProvider }: DataProviderProps &

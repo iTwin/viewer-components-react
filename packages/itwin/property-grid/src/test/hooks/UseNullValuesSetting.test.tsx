@@ -11,7 +11,8 @@ import { createFunctionStub, render, waitFor } from "../TestUtils";
 
 import type { ReactNode } from "react";
 import type { PreferencesContextProviderProps } from "../../PropertyGridPreferencesContext";
-import type { PreferencesStorage } from "../../property-grid-react";
+import { type PreferencesStorage, TelemetryContextProvider } from "../../property-grid-react";
+import sinon from "sinon";
 
 function renderWithContext(element: ReactNode, contextProps: Partial<PreferencesContextProviderProps>) {
   return render(<PreferencesContextProvider {...contextProps}>{element}</PreferencesContextProvider>);
@@ -81,5 +82,44 @@ describe("useNullValuesSetting", () => {
       await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
       expect(storage.set).to.be.calledWith("showNullValues", JSON.stringify(true));
     });
+  });
+
+  describe("feature usage reporting", () => {
+    it("reports initial value", async () => {
+      const onFeatureUsedSpy = sinon.spy();
+      storage.get.resolves(JSON.stringify(false));
+
+      const { getByRole } = renderWithContext(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <TestComponent />
+        </TelemetryContextProvider>,
+        { storage },
+      );
+
+      await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+      expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-enabled");
+    });
+  });
+
+  it("reports when updates value", async () => {
+    const onFeatureUsedSpy = sinon.spy();
+    const { getByRole } = renderWithContext(
+      <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+        <TestComponent />
+      </TelemetryContextProvider>,
+      { storage },
+    );
+
+    const hideButton = await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
+    await userEvents.click(hideButton);
+
+    await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+    expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-enabled");
+
+    const showButton = await waitFor(() => getByRole("button", { name: "Show Null Values" }));
+    await userEvents.click(showButton);
+
+    await waitFor(() => getByRole("button", { name: "Hide Null Values" }));
+    expect(onFeatureUsedSpy).to.be.calledWith("hide-empty-values-disabled");
   });
 });

@@ -166,6 +166,9 @@ const configuredUiItems = new Map<string, UiItem>([
             onPerformanceMeasured: (feature, elapsedTime) => {
               console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
             },
+            onFeatureUsed: (feature) => {
+              console.log(`PropertyGrid [${feature}] used`);
+            },
           },
         }),
       ],

@@ -253,8 +253,8 @@ Components from this package allows consumers to track performance of specific f
 
 This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
 
-* `"properties-load"` - time it takes to load properties data after selection changes.
-* `"elements-list-load"` - time it takes to populate elements list when multiple elements are selected.
+- `"properties-load"` - time it takes to load properties data after selection changes.
+- `"elements-list-load"` - time it takes to populate elements list when multiple elements are selected.
 
 Example:
 
@@ -275,6 +275,48 @@ return (
   <TelemetryContextProvider
     onPerformanceMeasured={(feature, elapsedTime) => {
       telemetryClient.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+    }}
+  >
+    <PropertyGrid />
+  </TelemetryContextProvider>
+);
+```
+
+## Usage tracking
+
+Components from this package allows consumers to track the usage of specific features.
+
+This can be achieved by passing `onFeatureUsed` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and as the component is being used. List of tracked features:
+
+- `"single-element"` - when properties of a single element are shown.
+- `"multiple-elements"` - when merged properties of multiple elements are shown.
+- `"elements-list"` - when element list is shown.
+- `"single-element-from-list"` - when properties are shown for a single element selected from the element list.
+- `"ancestor-navigation"` - when elements' hierarchy is traversed using ancestor navigation buttons.
+- `"context-menu"` - when context menu for a property is opened.
+- `"hide-empty-values-enabled"` - when property values are loaded with "hide empty values" setting enabled.
+- `"hide-empty-values-disabled"` - when property values are loaded with "hide empty values" setting disabled.
+- `"filter-properties"` - when properties are filtered or selection changes while a filter is applied.
+
+Example:
+
+```ts
+new PropertyGridUiItemsProvider({
+  propertyGridProps: {
+    onFeatureUsed: (feature) => {
+      telemetryClient.log(`PropertyGrid [${feature}] used`);
+    },
+  },
+});
+```
+
+To track usage of individual components when using them directly, rather than through `PropertyGridUiItemsProvider`, the `onFeatureUsed` callback should be supplied through `TelemetryContextProvider`:
+
+```ts
+return (
+  <TelemetryContextProvider
+    onFeatureUsed={(feature) => {
+      telemetryClient.log(`PropertyGrid [${feature}] used`);
     }}
   >
     <PropertyGrid />

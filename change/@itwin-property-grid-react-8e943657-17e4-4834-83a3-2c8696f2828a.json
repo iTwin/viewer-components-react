@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added ability to track usage of `PropertyWidget` features.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "33428304+jasdom@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
