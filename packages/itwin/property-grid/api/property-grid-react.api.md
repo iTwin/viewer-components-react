@@ -151,10 +151,11 @@ export interface PreferencesStorage {
 export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element | null;
 
 // @public
-export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, ...props }: PropertyGridComponentProps): JSX.Element | null;
+export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, onFeatureUsed, ...props }: PropertyGridComponentProps): JSX.Element | null;
 
 // @public
 export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
+    onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
     onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
     preferencesStorage?: PreferencesStorage;
 }
@@ -286,7 +287,7 @@ export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...
 export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider" | "dataRenderer"> & SingleElementDataProviderProps;
 
 // @public
-export function TelemetryContextProvider({ onPerformanceMeasured, children }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
+export function TelemetryContextProvider({ onPerformanceMeasured, onFeatureUsed, children }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
 
 // @internal
 export interface UseContentMenuProps extends ContextMenuProps {

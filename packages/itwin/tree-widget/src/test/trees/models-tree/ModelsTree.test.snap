@@ -39,6 +39,10 @@ Array [
               "isCategory": true,
               "modelId": "0x11",
             },
+            "filtering": Object {
+              "ancestorFilters": Array [],
+              "descriptor": [Function],
+            },
             "hasChildren": true,
             "label": PropertyRecord {
               "property": Object {
@@ -80,6 +84,10 @@ Array [
     "extendedData": Object {
       "icon": "icon-imodel-hollow-2",
       "isSubject": true,
+    },
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
     },
     "hasChildren": true,
     "label": PropertyRecord {
@@ -139,6 +147,10 @@ Array [
                   "groupIcon": "icon-ec-class",
                   "icon": "icon-item",
                 },
+                "filtering": Object {
+                  "ancestorFilters": Array [],
+                  "descriptor": [Function],
+                },
                 "hasChildren": true,
                 "label": PropertyRecord {
                   "property": Object {
@@ -158,6 +170,10 @@ Array [
               "icon": "icon-layers",
               "isCategory": true,
               "modelId": "0x11",
+            },
+            "filtering": Object {
+              "ancestorFilters": Array [],
+              "descriptor": [Function],
             },
             "hasChildren": true,
             "label": PropertyRecord {
@@ -200,6 +216,10 @@ Array [
     "extendedData": Object {
       "icon": "icon-imodel-hollow-2",
       "isSubject": true,
+    },
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
     },
     "hasChildren": true,
     "label": PropertyRecord {
@@ -257,6 +277,10 @@ Array [
               "isCategory": true,
               "modelId": "0x11",
             },
+            "filtering": Object {
+              "ancestorFilters": Array [],
+              "descriptor": [Function],
+            },
             "hasChildren": true,
             "label": PropertyRecord {
               "property": Object {
@@ -298,6 +322,10 @@ Array [
     "extendedData": Object {
       "icon": "icon-imodel-hollow-2",
       "isSubject": true,
+    },
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
     },
     "hasChildren": true,
     "label": PropertyRecord {
@@ -707,7 +735,9 @@ Array [
 `;
 
 exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
-<body>
+<body
+  style=""
+>
   <div
     id="core-global-context-menu-root"
   />

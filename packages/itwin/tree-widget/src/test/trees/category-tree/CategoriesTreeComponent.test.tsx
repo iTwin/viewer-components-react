@@ -250,6 +250,16 @@ describe("<CategoriesTreeComponent />", () => {
         await user.click(button);
         expect(showAllSpy).to.be.calledWith(["FilteredCategoryId"], vpMock.object);
       });
+
+      it("report on click", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <CategoriesTreeComponent.ShowAllButton categories={categories} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("categories-tree-showall");
+      });
     });
 
     describe("<HideAllButton />", () => {
@@ -270,6 +280,16 @@ describe("<CategoriesTreeComponent />", () => {
         await user.click(button);
         expect(hideAllSpy).to.be.calledWith(["FilteredCategoryId"], vpMock.object);
       });
+
+      it("reports on click", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <CategoriesTreeComponent.HideAllButton categories={categories} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("categories-tree-hideall");
+      });
     });
 
     describe("<InvertAllButton />", () => {
@@ -289,6 +309,16 @@ describe("<CategoriesTreeComponent />", () => {
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(invertAllSpy).to.be.calledWith(filteredCategories, vpMock.object);
+      });
+
+      it("reports on click", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <CategoriesTreeComponent.InvertAllButton categories={categories} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("categories-tree-invert");
       });
     });
   });

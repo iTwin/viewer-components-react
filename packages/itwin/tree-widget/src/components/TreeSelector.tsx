@@ -29,6 +29,7 @@ export interface TreeSelectorProps {
   trees: TreeContentDefinition[];
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -50,10 +51,13 @@ export function TreeSelector(props: TreeSelectorProps) {
       <div className="presentation-components-tree-selector-content-header">
         {options.length > 0 && (
           <Select
-            onChange={setSelectedContentId}
             options={options}
             value={selectedContent.id}
             size={isEnlarged ? "large" : "small"}
+            onChange={(treeId: string) => {
+              props.onFeatureUsed?.(`choose-${treeId}`);
+              setSelectedContentId(treeId);
+            }}
             itemRenderer={(option, itemProps) => (
               <MenuItem {...option} isSelected={itemProps.isSelected} size={isEnlarged ? "large" : "default"}>
                 {option.label}
@@ -63,7 +67,7 @@ export function TreeSelector(props: TreeSelectorProps) {
         )}
       </div>
       <div className="presentation-components-tree-selector-content-wrapper">
-        {selectedContent?.render({ density: props.density, onPerformanceMeasured: props.onPerformanceMeasured })}
+        {selectedContent?.render({ density: props.density, onPerformanceMeasured: props.onPerformanceMeasured, onFeatureUsed: props.onFeatureUsed })}
       </div>
     </div>
   );
