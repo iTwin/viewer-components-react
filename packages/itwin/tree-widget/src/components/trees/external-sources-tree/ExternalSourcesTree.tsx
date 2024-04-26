@@ -6,9 +6,7 @@
 import "../VisibilityTreeBase.scss";
 import { useCallback } from "react";
 import { SelectionMode } from "@itwin/components-react";
-import {
-  PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState,
-} from "@itwin/presentation-components";
+import { PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState } from "@itwin/presentation-components";
 import { ReportingTreeEventHandler } from "../common/ReportingTreeEventHandler";
 import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
 import { useFeatureReporting } from "../common/UseFeatureReporting";

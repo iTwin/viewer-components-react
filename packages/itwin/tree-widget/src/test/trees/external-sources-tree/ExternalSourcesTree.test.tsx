@@ -15,12 +15,20 @@ import { KeySet, LabelDefinition } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyBuilder,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { ExternalSourcesTree, RULESET_EXTERNAL_SOURCES } from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
 import { createAsyncIterator, mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 import {
-  createInfoNode, createPresentationTreeNodeItem, createSimpleTreeModelNode, createTestContentDescriptor, createTestPropertiesContentField,
+  createInfoNode,
+  createPresentationTreeNodeItem,
+  createSimpleTreeModelNode,
+  createTestContentDescriptor,
+  createTestPropertiesContentField,
   createTestPropertyInfo,
 } from "../Common";
 
