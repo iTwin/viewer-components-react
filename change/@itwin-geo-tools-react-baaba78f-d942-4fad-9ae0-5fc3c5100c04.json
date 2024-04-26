@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "updated packages @itwin/appui-react, @itwin/components-react, and @itwin/core-react. the css style  uicore-autosuggest__input was also updated.",
+  "packageName": "@itwin/geo-tools-react",
+  "email": "Etame.Kandy@bentley.com",
+  "dependentChangeType": "patch"
+}
