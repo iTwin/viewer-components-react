@@ -115,6 +115,19 @@
       "outFiles": [
         "${workspaceFolder}/packages/itwin/map-layers/lib/**/*.js"
       ]
+    },
+    {
+      "name": "Tests: geo-tools",
+      "cwd": "${workspaceFolder}/packages/itwin/geo-tools",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "test"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/itwin/geo-tools/lib/**/*.js"
+      ]
     }
   ]
 }

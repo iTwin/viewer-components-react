@@ -5,17 +5,18 @@
 
 import { expect } from "chai";
 import { mount } from "enzyme";
-import { fireEvent, render } from "@testing-library/react";
 import * as React from "react";
 import * as sinon from "sinon";
+import { stubObject } from "ts-sinon";
+import { SpecialKey } from "@itwin/appui-abstract";
+import { EmptyLocalization } from "@itwin/core-common";
+import { MockRender } from "@itwin/core-frontend";
+import { Point2d, Range2d } from "@itwin/core-geometry";
+import { fireEvent, render } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { BingAddressProvider } from "../AddressProvider";
 import { GeoAddressSearch, IModelGeoView } from "../geo-tools";
 import TestUtils from "./TestUtils";
-import { stubObject } from "ts-sinon";
-import { Point2d, Range2d } from "@itwin/core-geometry";
-import { SpecialKey } from "@itwin/appui-abstract";
-import { MockRender } from "@itwin/core-frontend";
-import { EmptyLocalization } from "@itwin/core-common";
 
 describe("GeoAddressSearch", () => {
 
@@ -32,6 +33,7 @@ describe("GeoAddressSearch", () => {
   before(async () => {
     await MockRender.App.startup({localization: new EmptyLocalization()});
     await TestUtils.initializeGeoTools();
+    window.HTMLElement.prototype.scrollIntoView = sinon.stub();
   });
 
   beforeEach(() => {
@@ -53,7 +55,6 @@ describe("GeoAddressSearch", () => {
     locateAddressStub.restore();
     getFrustumLonLatBBoxStub.restore();
     providerStub.getAddresses.reset();
-
   });
   after(async () => {
     TestUtils.terminateUiComponents();
@@ -63,7 +64,8 @@ describe("GeoAddressSearch", () => {
   it("renders", () => {
     const wrapper = mount(<GeoAddressSearch />);
 
-    expect(wrapper.find("input[type='text']").length).to.eq(1);
+    const input = wrapper.find("input");
+    expect(input.length).to.eq(1);
     wrapper.unmount();
   });
 
@@ -74,7 +76,7 @@ describe("GeoAddressSearch", () => {
     const geoAddrSearch = wrapper.find(GeoAddressSearch);
     expect(geoAddrSearch.length).to.eq(1);
 
-    const input = geoAddrSearch.find("input[type='text']");
+    const input = geoAddrSearch.find("input");
     expect(input.length).to.eq(1);
 
     expect(providerStub.getAddresses.called).to.be.false;
@@ -113,22 +115,28 @@ describe("GeoAddressSearch", () => {
     wrapper.unmount();
   });
 
-  it("should support getSuggestions prop", async () => {
+  it("should populated the suggested list", async () => {
     const { container } = render(<div><GeoAddressSearch provider={providerStub} /></div>);
 
     const input = container.querySelector("input");
     expect(input).not.to.be.null;
 
     const inputNode: HTMLElement = input!;
+
     fireEvent.focusIn(inputNode);
     fireEvent.change(inputNode, { target: { value: "abc" } });
     await TestUtils.flushAsyncOperations();
 
-    const li = container.querySelectorAll("li");
-    expect(li).not.to.be.null;
-    expect(li?.length).to.eq(1);
+    const listId = input!.attributes.getNamedItem("aria-controls")?.value;
+    expect(listId).not.to.be.null;
 
-    fireEvent.click(li[0]);
+    const list = document.querySelector(`#${listId}`) as HTMLElement;
+    expect(list).not.to.be.null;
+    expect(list.children.length).to.eq(1);
+
+    fireEvent.click(list.children[0]);
+    await TestUtils.flushAsyncOperations();
+
     locateAddressStub.calledOnce.should.true;
   });
 
@@ -138,7 +146,7 @@ describe("GeoAddressSearch", () => {
     const geoAddrSearch = wrapper.find(GeoAddressSearch);
     expect(geoAddrSearch.length).to.eq(1);
 
-    const input = geoAddrSearch.find("input[type='text']");
+    const input = geoAddrSearch.find("input");
     expect(input.length).to.eq(1);
 
     // Enter should do nothing if no input value
@@ -150,7 +158,11 @@ describe("GeoAddressSearch", () => {
     wrapper.update();
 
     // Enter should invoke locateAddress
-    input.simulate("keydown", { key: SpecialKey.Enter });
+    await userEvent.keyboard("{ArrowDown}");
+    await userEvent.keyboard("{Enter}");
+
+    await TestUtils.flushAsyncOperations();
+
     locateAddressStub.calledOnce.should.true;
 
     wrapper.unmount();
@@ -162,7 +174,7 @@ describe("GeoAddressSearch", () => {
     const geoAddrSearch = wrapper.find(GeoAddressSearch);
     expect(geoAddrSearch.length).to.eq(1);
 
-    const input = geoAddrSearch.find("input[type='text']");
+    const input = geoAddrSearch.find("input");
     expect(input.length).to.eq(1);
 
     input.simulate("change", { target: { value: "addrLine1" } });

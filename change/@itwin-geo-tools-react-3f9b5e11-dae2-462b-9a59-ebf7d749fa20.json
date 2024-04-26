@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Use ComboBox from itwinui-react instead of AutoSuggest for geo-tools package as the AutoSuggest component crashes in Electron and is no longer maintained",
+  "packageName": "@itwin/geo-tools-react",
+  "email": "Ashar.Ghani@bentley.com",
+  "dependentChangeType": "patch"
+}

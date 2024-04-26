@@ -39,8 +39,7 @@
     "test": "mocha \"./lib/cjs/test/**/*.test.js\""
   },
   "dependencies": {
-    "i18next": "^10.2.2",
-    "react-autosuggest": "^10.1.0"
+    "i18next": "^10.2.2"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
@@ -61,16 +60,18 @@
     "@itwin/imodel-components-react": "^4.0.1",
     "@itwin/itwinui-icons-react": "^2.1.0",
     "@itwin/eslint-plugin": "^4.0.0-dev.38",
+    "@itwin/itwinui-react": "^3.9.1",
     "@itwin/webgl-compatibility": "^4.0.0",
+    "@testing-library/dom": "^8.13.0",
     "@testing-library/react": "^8.0.1",
     "@testing-library/react-hooks": "^3.2.1",
+    "@testing-library/user-event": "^14.5.1",
     "@types/chai": "^4.1.4",
     "@types/enzyme": "3.9.3",
     "@types/i18next": "^8.4.2",
     "@types/mocha": "^10.0.6",
     "@types/node": "^14.14.20",
     "@types/react": "^17.0.19",
-    "@types/react-autosuggest": "10.1.2",
     "@types/react-dom": "^17.0.9",
     "@types/sinon": "^17.0.2",
     "@types/sinon-chai": "^3.2.12",
@@ -112,6 +113,7 @@
     "@itwin/core-frontend": "^4.0.0",
     "@itwin/core-geometry": "^4.0.0",
     "@itwin/core-react": "^4.0.0",
+    "@itwin/itwinui-react": "^3.9.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "redux": "^4.1.0"
