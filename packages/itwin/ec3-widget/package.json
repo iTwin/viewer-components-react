@@ -33,6 +33,7 @@
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "cover": "npm test -- --coverage",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
+    "extract-api": "betools extract-api --entry=ec3-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",

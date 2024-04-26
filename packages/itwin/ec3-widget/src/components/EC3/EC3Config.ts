@@ -52,6 +52,10 @@ export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
   getEC3AccessToken: GetAccessTokenFn;
 };
 
+/**
+ * EC3 Config Props
+ * @beta
+ */
 export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken;
 
 export const getDefaultEC3Uri = (ec3Uri?: string) => {
