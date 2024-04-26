@@ -5,22 +5,26 @@
 
 
 .geotools-geoaddresssearch__container {
-  width: 300px
+  width: 300px;
+
+  ._iui3-end-icon {
+    display: none; // we don't want the dropdown arrow icon to be shown
+  }
 }
 
 .geotools-geoaddresssearch__button {
   background-color: transparent;
   position: absolute;
-  top: 6px;
-  right: 5px;
+  top: 0.8rem;
+  right: 0.5rem;
   border: none;
   z-index: 1;   // Make it display over the input
 }
 
 .geotools-geoaddresssearch__autosuggest {
   width: 100%;
-  .uicore-autosuggest__input {
-    padding: 1.3px 30px 1.3px 5px;    //right padding avoid input text to be overlaid with the button
+  #iui-geoAddressSearch-input-cb {
+    padding: 0.2rem 2.2rem 0.2rem 0.5rem;    //right padding avoid input text to be overlaid with the button
   }
 }
 
