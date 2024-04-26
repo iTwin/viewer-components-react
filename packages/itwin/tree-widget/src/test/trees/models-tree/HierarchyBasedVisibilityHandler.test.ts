@@ -11,30 +11,39 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import {
-  buildTestIModel, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
-import { createHierarchyBasedVisibilityHandler } from "../../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
-import { createElementIdsCache } from "../../../../components/trees/models-tree/internal/ElementIdsCache";
-import { createQueryHandler } from "../../../../components/trees/models-tree/internal/QueryHandler";
-import { createVisibilityStatus } from "../../../../components/trees/models-tree/internal/Tooltip";
-import { createRuleset } from "../../../../components/trees/models-tree/internal/Utils";
-import { addModel, addPartition, addPhysicalObject, addSpatialCategory } from "../../../IModelUtils";
-import { TestUtils } from "../../../TestUtils";
+import { toVoidPromise } from "../../../components/trees/common/Rxjs";
+import { createHierarchyBasedVisibilityHandler } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
+import { createElementIdsCache } from "../../../components/trees/models-tree/internal/ElementIdsCache";
+import { createQueryHandler } from "../../../components/trees/models-tree/internal/QueryHandler";
+import { createVisibilityStatus } from "../../../components/trees/models-tree/internal/Tooltip";
+import { createRuleset } from "../../../components/trees/models-tree/internal/Utils";
+import { addModel, addPartition, addPhysicalObject, addSpatialCategory } from "../../IModelUtils";
+import { TestUtils } from "../../TestUtils";
 import {
-  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeElementIdsCache, createFakeQueryHandler, createFakeSinonViewport,
-  createModelNode, createSubjectNode,
-} from "../../Common";
+  createCategoryNode,
+  createElementClassGroupingNode,
+  createElementNode,
+  createFakeElementIdsCache,
+  createFakeQueryHandler,
+  createFakeSinonViewport,
+  createModelNode,
+  createSubjectNode,
+} from "../Common";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { VisibilityHandlerOverrides } from "../../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
-import type { Visibility } from "../../../../components/trees/models-tree/internal/Tooltip";
-import type { IQueryHandler } from "../../../../components/trees/models-tree/internal/QueryHandler";
-import type { IElementIdsCache } from "../../../../components/trees/models-tree/internal/ElementIdsCache";
+import type { VisibilityHandlerOverrides } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
+import type { Visibility } from "../../../components/trees/models-tree/internal/Tooltip";
+import type { IQueryHandler } from "../../../components/trees/models-tree/internal/QueryHandler";
+import type { IElementIdsCache } from "../../../components/trees/models-tree/internal/ElementIdsCache";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { IVisibilityHandler } from "../../../../tree-widget-react";
+import type { IVisibilityHandler } from "../../../tree-widget-react";
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
