@@ -17,6 +17,7 @@ import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { createHierarchyBasedVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
+import { createCachingQueryHandler } from "./internal/CachingQueryHandler";
 import { createElementIdsCache } from "./internal/ElementIdsCache";
 import { createQueryHandler } from "./internal/QueryHandler";
 import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
@@ -112,6 +113,12 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * @beta
    */
   onFeatureUsed?: (feature: string) => void;
+
+  /**
+   * Whether to create hierarchy based visibility handler by default.
+   * @deprecated in 3.x. When legacy visibility handler is removed, this option will also be removed.
+   */
+  hierarchyBased?: boolean;
 }
 
 /**
@@ -134,7 +141,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       iconsEnabled: true,
       descriptionEnabled: false,
       levelOffset: 10,
-      disableRootNodeCollapse: true,
+      disableRootNodeCollapse: false,
       onVisibilityToggled: () => reportUsage({ featureId: "visibility-change", reportInteraction: true }),
     },
   };
@@ -247,20 +254,15 @@ interface UseVisibilityHandlerProps {
   activeView: Viewport;
   hierarchyAutoUpdateEnabled?: boolean;
   legacyHandler?: UseTreeProps["modelsVisibilityHandler"];
-}
-
-interface UseVisibilityHandlerProps {
-  rulesetId: string;
-  iModel: IModelConnection;
-  activeView: Viewport;
-  hierarchyAutoUpdateEnabled?: boolean;
-  legacyHandler?: UseTreeProps["modelsVisibilityHandler"];
+  hierarchyBasedHandler?: UseTreeProps["hierarchyBasedVisibilityHandler"];
 }
 
 function useTreeState({
   // eslint-disable-next-line deprecation/deprecation
   modelsVisibilityHandler,
   hierarchyBasedVisibilityHandler,
+  // eslint-disable-next-line deprecation/deprecation
+  hierarchyBased,
   activeView,
   selectionPredicate,
   hierarchyConfig,
@@ -280,6 +282,7 @@ function useTreeState({
   const legacyVisibilityHandler = useLegacyVisibilityHandler({
     ...commonHandlerProps,
     legacyHandler: modelsVisibilityHandler,
+    hierarchyBasedHandler: hierarchyBasedVisibilityHandler,
     hierarchyAutoUpdateEnabled: true,
   });
 
@@ -333,7 +336,7 @@ function useTreeState({
     appendChildrenCountForGroupingNodes: hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts,
     enableHierarchyAutoUpdate: true,
     customizeTreeNodeItem,
-    visibilityHandler: legacyVisibilityHandler ?? hierarchyVisibilityHandler,
+    visibilityHandler: hierarchyBased ? hierarchyVisibilityHandler : legacyVisibilityHandler,
     filterInfo,
     onFilterChange,
     selectionPredicate: useCallback(
@@ -349,14 +352,21 @@ function useTreeState({
   });
 }
 
-function useLegacyVisibilityHandler({ legacyHandler, rulesetId, activeView, hierarchyAutoUpdateEnabled, iModel }: UseVisibilityHandlerProps) {
+function useLegacyVisibilityHandler({
+  legacyHandler,
+  hierarchyBasedHandler,
+  rulesetId,
+  activeView,
+  hierarchyAutoUpdateEnabled,
+  iModel,
+}: UseVisibilityHandlerProps) {
   const subjectModelIdsCache = useMemo(() => createSubjectModelIdsCache(createQueryHandler(iModel)), [iModel]);
   // eslint-disable-next-line deprecation/deprecation
   const [state, setState] = useState<ModelsVisibilityHandler>();
 
   useEffect(() => {
     // eslint-disable-next-line deprecation/deprecation
-    if (legacyHandler && typeof legacyHandler !== "function") {
+    if (hierarchyBasedHandler || (legacyHandler && typeof legacyHandler !== "function")) {
       return;
     }
 
@@ -374,7 +384,7 @@ function useLegacyVisibilityHandler({ legacyHandler, rulesetId, activeView, hier
     return () => {
       handler.dispose();
     };
-  }, [rulesetId, activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache, legacyHandler]);
+  }, [rulesetId, activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache, legacyHandler, hierarchyBasedHandler]);
 
   return legacyHandler && typeof legacyHandler !== "function" ? legacyHandler : state;
 }
@@ -390,7 +400,7 @@ function useHierarchyBasedVisibilityHandler({
   hierarchyBasedHandler?: UseTreeProps["hierarchyBasedVisibilityHandler"];
 }) {
   const [state, setState] = useState<IHierarchyBasedVisibilityHandler>();
-  const queryHandler = useMemo(() => createQueryHandler(iModel), [iModel]);
+  const queryHandler = useMemo(() => createCachingQueryHandler(createQueryHandler(iModel)), [iModel]);
   const subjectModelIdsCache = useMemo(() => createSubjectModelIdsCache(createQueryHandler(iModel)), [iModel]);
   const elementIdsCache = useMemo(() => createElementIdsCache(iModel, rulesetId), [iModel, rulesetId]);
 
