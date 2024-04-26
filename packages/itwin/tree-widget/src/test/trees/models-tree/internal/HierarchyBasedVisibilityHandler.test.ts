@@ -5,14 +5,15 @@
 
 import { expect } from "chai";
 import path from "path";
-import { from, of } from "rxjs";
+import { filter, from, map, mergeMap, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { ColorDef, IModel, RenderMode } from "@itwin/core-common";
+import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import {
   buildTestIModel, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
+import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
 import { createHierarchyBasedVisibilityHandler } from "../../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
 import { createElementIdsCache } from "../../../../components/trees/models-tree/internal/ElementIdsCache";
 import { createQueryHandler } from "../../../../components/trees/models-tree/internal/QueryHandler";
@@ -25,50 +26,50 @@ import {
   createModelNode, createSubjectNode,
 } from "../../Common";
 
+import type { Id64String } from "@itwin/core-bentley";
 import type { VisibilityHandlerOverrides } from "../../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
 import type { Visibility } from "../../../../components/trees/models-tree/internal/Tooltip";
 import type { IQueryHandler } from "../../../../components/trees/models-tree/internal/QueryHandler";
 import type { IElementIdsCache } from "../../../../components/trees/models-tree/internal/ElementIdsCache";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { Id64String } from "@itwin/core-bentley";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
+import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IVisibilityHandler } from "../../../../tree-widget-react";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
   elements?: Map<Id64String, Visibility>;
 }
 
-export function createVisibilityHandlerWrapper(props?: {
+function createVisibilityHandlerWrapper(props?: {
   overrides?: VisibilityOverrides;
   queryHandler?: IQueryHandler;
   elementIdsCache?: IElementIdsCache;
   viewport?: Viewport;
 }) {
   const queryHandler = props?.queryHandler ?? createFakeQueryHandler();
-  const overrides: VisibilityHandlerOverrides | undefined = {
+  const overrides: VisibilityHandlerOverrides = {
     getModelDisplayStatus:
       props?.overrides?.models &&
-      (async ({ id }, original) => {
+      (async ({ id, originalImplementation }) => {
         const res = props.overrides!.models!.get(id);
-        return res ? createVisibilityStatus(res) : original();
+        return res ? createVisibilityStatus(res) : originalImplementation();
       }),
     getCategoryDisplayStatus:
       props?.overrides?.categories &&
-      (async ({ categoryId }, original) => {
+      (async ({ categoryId, originalImplementation }) => {
         const res = props.overrides!.categories!.get(categoryId);
-        return res ? createVisibilityStatus(res) : original();
+        return res ? createVisibilityStatus(res) : originalImplementation();
       }),
     getElementDisplayStatus:
       props?.overrides?.elements &&
-      (async ({ id }, original) => {
+      (async ({ id, originalImplementation }) => {
         const res = props.overrides!.elements!.get(id);
-        return res ? createVisibilityStatus(res) : original();
+        return res ? createVisibilityStatus(res) : originalImplementation();
       }),
-    changeCategoryState: sinon.fake(async (_, original) => original()),
-    changeModelState: sinon.fake(async (_, original) => original()),
+    changeCategoryState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
+    changeModelState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
+    changeElementState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
   };
 
   return {
@@ -118,6 +119,22 @@ describe("VisibilityStateHandler", () => {
     });
 
     describe("subject", () => {
+      it("can be overridden", async () => {
+        const overrides = {
+          getSubjectNodeVisibility: sinon.fake.resolves(createVisibilityStatus("visible")),
+        };
+        const handler = createHierarchyBasedVisibilityHandler({
+          elementIdsCache: createFakeElementIdsCache(),
+          queryHandler: createFakeQueryHandler(),
+          viewport: createFakeSinonViewport(),
+          overrides,
+        });
+
+        const status = await handler.getVisibilityStatus(createSubjectNode());
+        expect(status.state).to.eq("visible");
+        expect(overrides.getSubjectNodeVisibility).to.be.called;
+      });
+
       it("returns disabled when active view is not spatial", async () => {
         const node = createSubjectNode();
         const viewport = createFakeSinonViewport({
@@ -210,6 +227,30 @@ describe("VisibilityStateHandler", () => {
         const result = await handler.getVisibilityStatus(node);
         expect(result).to.include({ state: "partial" });
       });
+
+      describe("filtered", () => {
+        it("uses filtered data provider", async () => {
+          const { handler } = createVisibilityHandlerWrapper({
+            overrides: {
+              elements: new Map([
+                ["0x10", "visible"],
+                ["0x20", "visible"],
+              ]),
+            },
+          });
+          const filteredDataProvider = {
+            nodeMatchesFilter: sinon.fake.returns(false),
+            getNodes: sinon.fake.resolves([createElementNode(undefined, undefined, false, "0x10"), createElementNode(undefined, undefined, false, "0x20")]),
+          } as unknown as IFilteredPresentationTreeDataProvider;
+          handler.filteredDataProvider = filteredDataProvider;
+
+          const node = createSubjectNode(["0x1", "0x2"]);
+          const visibility = await handler.getVisibilityStatus(node);
+          expect(visibility.state).to.eq("visible");
+          expect(filteredDataProvider.nodeMatchesFilter).to.be.called;
+          expect(filteredDataProvider.getNodes).to.be.called;
+        });
+      });
     });
 
     describe("model", () => {
@@ -236,6 +277,49 @@ describe("VisibilityStateHandler", () => {
           });
           const { handler } = createVisibilityHandlerWrapper({
             queryHandler,
+          });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "visible" });
+        });
+
+        it("when `viewport.view.viewsModel` returns true and all elements are in the exclusive always drawn list", async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryHandler = createFakeQueryHandler({
+            modelCategories: new Map([[modelId, categories]]),
+            categoryElements: new Map([
+              ["0x10", ["0x100", "0x200"]],
+              ["0x20", ["0x300", "0x400"]],
+            ]),
+          });
+          const { handler } = createVisibilityHandlerWrapper({
+            queryHandler,
+            viewport: createFakeSinonViewport({
+              isAlwaysDrawnExclusive: true,
+              alwaysDrawn: new Set(["0x100", "0x200", "0x300", "0x400"]),
+            }),
+          });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "visible" });
+        });
+
+        it("when `viewport.view.viewsModel` returns true when always drawn list is empty", async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryHandler = createFakeQueryHandler({
+            modelCategories: new Map([[modelId, categories]]),
+            categoryElements: new Map([
+              ["0x10", ["0x100", "0x200"]],
+              ["0x20", ["0x300", "0x400"]],
+            ]),
+          });
+          const { handler } = createVisibilityHandlerWrapper({
+            queryHandler,
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(),
+            }),
           });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
@@ -281,6 +365,27 @@ describe("VisibilityStateHandler", () => {
               view: {
                 viewsModel: sinon.fake.returns(false),
                 viewsCategory: sinon.fake.returns(false),
+              },
+            }),
+          });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "hidden" });
+        });
+
+        it("when `viewport.view.viewsModel` returns false and all categories visible but no elements are in always drawn list", async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelNode(modelId);
+          const queryHandler = createFakeQueryHandler({
+            modelCategories: new Map([[modelId, categories]]),
+          });
+          const { handler } = createVisibilityHandlerWrapper({
+            queryHandler,
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0xfff"]),
+              view: {
+                viewsModel: sinon.fake.returns(false),
+                viewsCategory: sinon.fake.returns(true),
               },
             }),
           });
@@ -415,6 +520,27 @@ describe("VisibilityStateHandler", () => {
           expect(result).to.include({ state: "partial" });
         });
 
+        it("when `viewport.view.viewsModel` returns true but some of the nested child elements are not in the exclusive always drawn list", async () => {
+          const modelId = "0x1";
+          const node = createModelNode(modelId);
+          const queryHandler = createFakeQueryHandler({
+            modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
+            categoryElements: new Map([
+              ["0x10", ["0x100", "0x200"]],
+              ["0x20", ["0x300", "0x400"]],
+            ]),
+          });
+          const { handler } = createVisibilityHandlerWrapper({
+            queryHandler,
+            viewport: createFakeSinonViewport({
+              isAlwaysDrawnExclusive: true,
+              alwaysDrawn: new Set(["0x100"]),
+            }),
+          });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "partial" });
+        });
+
         it("when `viewport.view.viewsModel` returns false but some of the nested child elements are in the always drawn list", async () => {
           const modelId = "0x1";
           const node = createModelNode(modelId);
@@ -441,6 +567,22 @@ describe("VisibilityStateHandler", () => {
     });
 
     describe("category", () => {
+      it("can be overridden", async () => {
+        const overrides: VisibilityHandlerOverrides = {
+          getCategoryDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
+        };
+        const handler = createHierarchyBasedVisibilityHandler({
+          elementIdsCache: createFakeElementIdsCache(),
+          queryHandler: createFakeQueryHandler(),
+          viewport: createFakeSinonViewport(),
+          overrides,
+        });
+
+        const status = await handler.getVisibilityStatus(createCategoryNode());
+        expect(status.state).to.eq("visible");
+        expect(overrides.getCategoryDisplayStatus).to.be.called;
+      });
+
       describe("is visible", () => {
         it("when `viewport.view.viewsCategory` returns TRUE and there are NO CHILD elements in the NEVER drawn list", async () => {
           const categoryId = "0x2";
@@ -649,7 +791,15 @@ describe("VisibilityStateHandler", () => {
       });
     });
 
-    describe("element", () => {
+    describe("element", async () => {
+      it("is disabled when has no category or model", async () => {
+        const { handler } = createVisibilityHandlerWrapper();
+        let result = await handler.getVisibilityStatus(createElementNode());
+        expect(result.isDisabled).to.be.true;
+        result = await handler.getVisibilityStatus(createElementNode("0x1"));
+        expect(result.isDisabled).to.be.true;
+      });
+
       it("is visible when its category and all child elements are displayed", async () => {
         const modelId = "0x1";
         const categoryId = "0x2";
@@ -776,6 +926,22 @@ describe("VisibilityStateHandler", () => {
     });
 
     describe("grouping node", () => {
+      it("can be overridden", async () => {
+        const overrides: VisibilityHandlerOverrides = {
+          getElementGroupingNodeDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
+        };
+        const handler = createHierarchyBasedVisibilityHandler({
+          elementIdsCache: createFakeElementIdsCache(),
+          queryHandler: createFakeQueryHandler(),
+          viewport: createFakeSinonViewport(),
+          overrides,
+        });
+
+        const status = await handler.getVisibilityStatus(createElementClassGroupingNode([]));
+        expect(status.state).to.eq("visible");
+        expect(overrides.getElementGroupingNodeDisplayStatus).to.be.called;
+      });
+
       it("is visible if all node elements are visible", async () => {
         const elementIds = ["0x1", "0x2"];
         const node = createElementClassGroupingNode(elementIds);
@@ -828,6 +994,21 @@ describe("VisibilityStateHandler", () => {
 
   describe("changeVisibilityStatus", () => {
     describe("subject", () => {
+      it("can be overridden", async () => {
+        const overrides: VisibilityHandlerOverrides = {
+          changeSubjectNodeState: sinon.fake.resolves(undefined),
+        };
+        const handler = createHierarchyBasedVisibilityHandler({
+          elementIdsCache: createFakeElementIdsCache(),
+          queryHandler: createFakeQueryHandler(),
+          viewport: createFakeSinonViewport(),
+          overrides,
+        });
+
+        await handler.changeVisibility(createSubjectNode(["0x1"]), true);
+        expect(overrides.changeSubjectNodeState).to.be.called;
+      });
+
       describe("on", () => {
         it("marks all models as visible", async () => {
           const subjectIds = ["0x1", "0x2"];
@@ -865,6 +1046,23 @@ describe("VisibilityStateHandler", () => {
 
           await handler.changeVisibility(node, false);
           expect(overrides.changeModelState).to.be.calledOnceWith(sinon.match({ ids: sinon.match.set.deepEquals(new Set(modelIds.flat())), on: false }));
+        });
+      });
+
+      describe("filtered", () => {
+        it("uses filtered data provider", async () => {
+          const { handler } = createVisibilityHandlerWrapper();
+          const filteredDataProvider = {
+            nodeMatchesFilter: sinon.fake.returns(false),
+            getNodes: sinon.fake.resolves([createElementNode(undefined, undefined, false, "0x10"), createElementNode(undefined, undefined, false, "0x20")]),
+          } as unknown as IFilteredPresentationTreeDataProvider;
+          handler.filteredDataProvider = filteredDataProvider;
+
+          const node = createSubjectNode(["0x1", "0x2"]);
+          await handler.changeVisibility(node, false);
+
+          expect(filteredDataProvider.nodeMatchesFilter).to.be.called;
+          expect(filteredDataProvider.getNodes).to.be.called;
         });
       });
     });
@@ -966,7 +1164,90 @@ describe("VisibilityStateHandler", () => {
       });
     });
 
+    describe("category", () => {
+      it("can be overridden", async () => {
+        const overrides: VisibilityHandlerOverrides = {
+          changeCategoryState: sinon.fake.resolves(undefined),
+        };
+        const handler = createHierarchyBasedVisibilityHandler({
+          elementIdsCache: createFakeElementIdsCache(),
+          queryHandler: createFakeQueryHandler(),
+          viewport: createFakeSinonViewport(),
+          overrides,
+        });
+
+        await handler.changeVisibility(createCategoryNode(), true);
+        expect(overrides.changeCategoryState).to.be.called;
+      });
+
+      describe("on", () => {
+        it("calls change category display if has no model", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const viewport = createFakeSinonViewport();
+          const { handler } = createVisibilityHandlerWrapper({ viewport });
+          await handler.changeVisibility(node, true);
+          expect(viewport.changeCategoryDisplay).to.be.calledWith(categoryId, true, true);
+        });
+
+        it("removes HIDE override if model is shown", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryNode(modelId, categoryId);
+          const viewport = createFakeSinonViewport({
+            viewsModel: sinon.fake.returns(false),
+            perModelCategoryVisibility: {
+              getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
+            },
+          });
+          const { handler } = createVisibilityHandlerWrapper({ viewport });
+
+          await handler.changeVisibility(node, true);
+          expect(viewport.perModelCategoryVisibility.setOverride).to.be.calledWith(modelId, categoryId, PerModelCategoryVisibility.Override.None);
+        });
+      });
+
+      describe("off", () => {
+        it("calls change category display if has no model", async () => {
+          const categoryId = "0x2";
+          const node = createCategoryNode(undefined, categoryId);
+          const viewport = createFakeSinonViewport();
+          const { handler } = createVisibilityHandlerWrapper({ viewport });
+          await handler.changeVisibility(node, false);
+          expect(viewport.changeCategoryDisplay).to.be.calledWith(categoryId, false, sinon.match.any);
+        });
+
+        it("sets HIDE override if model is visible", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryNode(modelId, categoryId);
+          const viewport = createFakeSinonViewport({
+            viewsModel: sinon.fake.returns(true),
+          });
+          const { handler } = createVisibilityHandlerWrapper({ viewport });
+
+          await handler.changeVisibility(node, false);
+          expect(viewport.perModelCategoryVisibility.setOverride).to.be.calledWith(modelId, categoryId, PerModelCategoryVisibility.Override.Hide);
+        });
+      });
+    });
+
     describe("element", () => {
+      it("can be overridden", async () => {
+        const overrides: VisibilityHandlerOverrides = {
+          changeElementState: sinon.fake.resolves(undefined),
+        };
+        const handler = createHierarchyBasedVisibilityHandler({
+          elementIdsCache: createFakeElementIdsCache(),
+          queryHandler: createFakeQueryHandler(),
+          viewport: createFakeSinonViewport(),
+          overrides,
+        });
+
+        await handler.changeVisibility(createElementNode(), true);
+        expect(overrides.changeElementState).to.be.called;
+      });
+
       describe("on", () => {
         it("removes it from the never drawn list", async () => {
           const modelId = "0x1";
@@ -1028,6 +1309,29 @@ describe("VisibilityStateHandler", () => {
           await handler.changeVisibility(node, true);
           expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
         });
+
+        it("applies same change to all child elements", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const childElements = ["0x4", "0x5", "0x6"];
+          const elementIdsCache = createFakeElementIdsCache({
+            getAssemblyElementIds: sinon.fake.returns(from(childElements)),
+          });
+          const viewport = createFakeSinonViewport({
+            view: {
+              viewsModel: () => false,
+            },
+          });
+          const { handler } = createVisibilityHandlerWrapper({
+            elementIdsCache,
+            viewport,
+          });
+
+          await handler.changeVisibility(createElementNode(modelId, categoryId, undefined, elementId), true);
+          expect(elementIdsCache.getAssemblyElementIds).to.be.called;
+          expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId, ...childElements]));
+        });
       });
 
       describe("off", () => {
@@ -1049,11 +1353,7 @@ describe("VisibilityStateHandler", () => {
           const categoryId = "0x2";
           const elementId = "0x3";
           const node = createElementNode(modelId, categoryId, false, elementId);
-          const viewport = createFakeSinonViewport({
-            view: {
-              viewsModel: sinon.fake.returns(true),
-            },
-          });
+          const viewport = createFakeSinonViewport();
           const { handler } = createVisibilityHandlerWrapper({ viewport });
           await handler.changeVisibility(node, false);
           expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
@@ -1082,14 +1382,29 @@ describe("VisibilityStateHandler", () => {
           const categoryId = "0x2";
           const elementId = "0x3";
           const node = createElementNode(modelId, categoryId, false, elementId);
-          const viewport = createFakeSinonViewport({
-            view: {
-              viewsCategory: sinon.fake.returns(true),
-            },
-          });
+          const viewport = createFakeSinonViewport();
           const { handler } = createVisibilityHandlerWrapper({ viewport });
           await handler.changeVisibility(node, false);
           expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
+        });
+
+        it("applies same change to all child elements", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementId = "0x3";
+          const childElements = ["0x4", "0x5", "0x6"];
+          const elementIdsCache = createFakeElementIdsCache({
+            getAssemblyElementIds: sinon.fake.returns(from(childElements)),
+          });
+          const viewport = createFakeSinonViewport();
+          const { handler } = createVisibilityHandlerWrapper({
+            elementIdsCache,
+            viewport,
+          });
+
+          await handler.changeVisibility(createElementNode(modelId, categoryId, undefined, elementId), false);
+          expect(elementIdsCache.getAssemblyElementIds).to.be.called;
+          expect(viewport.neverDrawn).to.deep.eq(new Set([elementId, ...childElements]));
         });
       });
     });
@@ -1097,8 +1412,10 @@ describe("VisibilityStateHandler", () => {
 
   describe("#integration", () => {
     let iModel: IModelConnection;
-    let modelId: Id64String;
-    const categories = new Map<Id64String, Id64String[]>();
+    let firstModelId: Id64String;
+    let otherModelId: Id64String;
+    const models = new Map<Id64String, Set<Id64String>>();
+    const categories = new Map<Id64String, Set<Id64String>>();
 
     before(async () => {
       await initializePresentationTesting({
@@ -1117,22 +1434,38 @@ describe("VisibilityStateHandler", () => {
 
       // eslint-disable-next-line deprecation/deprecation
       iModel = await buildTestIModel("CategoriesTree3d", async (builder) => {
-        const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
-        modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-        for (let i = 0; i < 2; ++i) {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, `Test SpatialCategory ${i}`);
-          const elements = new Array<string>();
-          for (let j = 0; j < 10; ++j) {
-            const element = addPhysicalObject(builder, modelId, category);
-            elements.push(element);
+        const partitions = [
+          addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel 1"),
+          addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel 2"),
+        ];
+        for (let modelIdx = 0; modelIdx < 2; ++modelIdx) {
+          const partitionId = partitions[modelIdx];
+          const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
+          const modelCategories = new Set<string>();
+
+          for (let categoryIdx = 0; categoryIdx < 2; ++categoryIdx) {
+            const categoryId = addSpatialCategory(builder, IModel.dictionaryId, `Test SpatialCategory ${modelIdx}_${categoryIdx}`);
+            modelCategories.add(categoryId);
+
+            const elements = new Set<string>();
+            for (let elementIdx = 0; elementIdx < 10; ++elementIdx) {
+              const code = new Code({ scope: partitionId, spec: "", value: `${categoryIdx}_${elementIdx}` });
+              const element = addPhysicalObject(builder, modelId, categoryId, code);
+              elements.add(element);
+            }
+
+            categories.set(categoryId, elements);
           }
-          categories.set(category, elements);
+
+          models.set(modelId, modelCategories);
         }
+
+        [firstModelId, otherModelId] = [...models.keys()];
       });
     });
 
     after(async () => {
-      await iModel.close();
+      await iModel?.close();
       await terminatePresentationTesting();
     });
 
@@ -1153,17 +1486,33 @@ describe("VisibilityStateHandler", () => {
       });
     });
 
-    async function assertModelVisibility(viewportVisibility: boolean, handlerVisibility: Visibility) {
-      expect(viewport.view.viewsModel(modelId)).to.eq(viewportVisibility, "Model has unexpected viewport visibility");
-      const status = await handler.getVisibilityStatus(createModelNode(modelId));
-      expect(status.state).to.eq(handlerVisibility, "Model has unexpected visibility in the handler");
+    function filterMatches(id: string, idsFilter: undefined | string | ((id: string) => boolean)) {
+      if (!idsFilter) {
+        return true;
+      }
+      if (typeof idsFilter === "string") {
+        return id === idsFilter;
+      }
+      return idsFilter(id);
+    }
+
+    async function assertModelVisibility(props: { viewportVisibility: boolean; handlerVisibility: Visibility; modelId?: Id64String }) {
+      const modelIds = props.modelId ? [props.modelId] : [...models.keys()];
+      await Promise.all(
+        modelIds.map(async (id) => {
+          expect(viewport.view.viewsModel(id)).to.eq(props.viewportVisibility, "Model has unexpected viewport visibility");
+          const status = await handler.getVisibilityStatus(createModelNode(id));
+          expect(status.state).to.eq(props.handlerVisibility, "Model has unexpected visibility in the handler");
+        }),
+      );
     }
 
     async function assertCategoryVisibility(props: {
       viewportVisibility: boolean;
       perModelVisibilityOverride?: boolean;
       handlerVisibility: Visibility;
-      categoryIdFilter?: (id: Id64String) => boolean;
+      modelIdFilter?: string | ((id: string) => boolean);
+      categoryIdFilter?: string | ((id: string) => boolean);
     }) {
       const expectedOverride =
         props.perModelVisibilityOverride === undefined
@@ -1182,38 +1531,53 @@ describe("VisibilityStateHandler", () => {
         }
       };
 
-      const categoryIds = [...categories.keys()].filter((id) => !props.categoryIdFilter || props.categoryIdFilter(id));
-      await Promise.all(
-        categoryIds.map(async (categoryId) => {
-          expect(viewport.view.viewsCategory(categoryId)).to.eq(props.viewportVisibility, `Category has unexpected viewport visibility`);
-          const actualOverride = viewport.perModelCategoryVisibility.getOverride(modelId, categoryId);
-          expect(actualOverride).to.eq(
-            expectedOverride,
-            `
-            Category has unexpected per model visibility override.
-            Expected ${overrideToString(expectedOverride)}, actual: ${overrideToString(actualOverride)}
-          `,
+      const obs = from(models).pipe(
+        filter(([id]) => filterMatches(id, props.modelIdFilter)),
+        mergeMap(([modelId, categoryIds]) => {
+          return from(categoryIds).pipe(
+            filter((id) => filterMatches(id, props.categoryIdFilter)),
+            mergeMap(async (categoryId) => {
+              expect(viewport.view.viewsCategory(categoryId)).to.eq(props.viewportVisibility, `Category has unexpected viewport visibility`);
+              const actualOverride = viewport.perModelCategoryVisibility.getOverride(firstModelId, categoryId);
+              expect(actualOverride).to.eq(
+                expectedOverride,
+                `
+                Category has unexpected per model visibility override.
+                Expected ${overrideToString(expectedOverride)}, actual: ${overrideToString(actualOverride)}
+              `,
+              );
+
+              const status = await handler.getVisibilityStatus(createCategoryNode({ id: modelId, className: "BisCore.PhysicalModel" }, categoryId));
+              expect(status.state).to.eq(props.handlerVisibility, `Category has unexpected visibility in the handler`);
+            }),
           );
-
-          const status = await handler.getVisibilityStatus(createCategoryNode({ id: modelId, className: "BisCore.PhysicalModel" }, categoryId));
-          expect(status.state).to.eq(props.handlerVisibility, `Category has unexpected visibility in the handler`);
         }),
       );
+      return toVoidPromise(obs);
     }
 
-    async function assertElementVisibility(categoryId: string, elementId: string, visibility: Visibility) {
-      const status = await handler.getVisibilityStatus(createElementNode(modelId, categoryId, undefined, elementId));
-      expect(status?.state).to.eq(visibility, "Element has unexpected visibility");
-    }
-
-    async function assertElementsVisibility(visibility: Visibility, categoryId?: Id64String) {
-      const categoryIds = categoryId ? [categoryId] : [...categories.keys()];
-      await Promise.all(
-        categoryIds.map(async (cat) => {
-          const elementIds = categories.get(cat)!;
-          await Promise.all(elementIds.map(async (elementId) => assertElementVisibility(cat, elementId, visibility)));
+    async function assertElementsVisibility(props: {
+      modelIdFilter?: string | ((id: string) => boolean);
+      categoryIdFilter?: string | ((id: string) => boolean);
+      elementIdFilter?: string | ((id: string) => boolean);
+      visibility: Visibility;
+    }) {
+      const obs = from(models).pipe(
+        filter(([id]) => filterMatches(id, props.modelIdFilter)),
+        mergeMap(([modelId, categoryIds]) => {
+          return from(categoryIds).pipe(
+            filter((id) => filterMatches(id, props.categoryIdFilter)),
+            mergeMap((categoryId) => {
+              return from(categories.get(categoryId)!).pipe(
+                filter((id) => filterMatches(id, props.elementIdFilter)),
+                mergeMap(async (elementId) => handler.getVisibilityStatus(createElementNode(modelId, categoryId, undefined, elementId))),
+                map((x) => expect(x.state).to.eq(props.visibility, "Element has unexpected visibility")),
+              );
+            }),
+          );
         }),
       );
+      return toVoidPromise(obs);
     }
 
     describe("subject", () => {
@@ -1225,9 +1589,9 @@ describe("VisibilityStateHandler", () => {
         await handler.changeVisibility(node, true);
         await Promise.all([
           expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "visible" }),
-          assertModelVisibility(true, "visible"),
+          assertModelVisibility({ viewportVisibility: true, handlerVisibility: "visible" }),
           assertCategoryVisibility({ viewportVisibility: true, handlerVisibility: "visible" }),
-          assertElementsVisibility("visible"),
+          assertElementsVisibility({ visibility: "visible" }),
         ]);
       });
 
@@ -1235,103 +1599,166 @@ describe("VisibilityStateHandler", () => {
         await handler.changeVisibility(node, false);
         await Promise.all([
           expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "hidden" }),
-          assertModelVisibility(false, "hidden"),
+          assertModelVisibility({ viewportVisibility: false, handlerVisibility: "hidden" }),
           assertCategoryVisibility({ viewportVisibility: false, handlerVisibility: "hidden" }),
-          assertElementsVisibility("hidden"),
+          assertElementsVisibility({ visibility: "hidden" }),
         ]);
       });
     });
 
     describe("model", () => {
       it("showing it makes it, all its categories and elements visible", async () => {
-        await handler.changeVisibility(createModelNode(modelId), true);
+        await handler.changeVisibility(createModelNode(firstModelId), true);
+        const modelIdFilter = (id: string) => id === firstModelId;
         await Promise.all([
-          assertModelVisibility(true, "visible"),
-          assertCategoryVisibility({ viewportVisibility: true, handlerVisibility: "visible" }),
-          assertElementsVisibility("visible"),
+          assertModelVisibility({ viewportVisibility: true, handlerVisibility: "visible", modelId: firstModelId }),
+          assertCategoryVisibility({ viewportVisibility: true, handlerVisibility: "visible", modelIdFilter }),
+          assertElementsVisibility({ visibility: "visible", modelIdFilter }),
         ]);
       });
 
       it("hiding it makes it, all its categories and elements hidden", async () => {
-        await handler.changeVisibility(createModelNode(modelId), false);
+        await handler.changeVisibility(createModelNode(firstModelId), false);
+        const modelIdFilter = (id: string) => id === firstModelId;
         await Promise.all([
-          assertModelVisibility(false, "hidden"),
-          assertCategoryVisibility({ viewportVisibility: false, handlerVisibility: "hidden" }),
-          assertElementsVisibility("hidden"),
+          assertModelVisibility({ viewportVisibility: false, handlerVisibility: "hidden" }),
+          assertCategoryVisibility({ viewportVisibility: false, handlerVisibility: "hidden", modelIdFilter }),
+          assertElementsVisibility({ visibility: "hidden", modelIdFilter }),
+        ]);
+      });
+
+      it("gets hidden when elements from other model are added to the exclusive always drawn list", async () => {
+        await handler.changeVisibility(createModelNode(firstModelId), true);
+        await handler.changeVisibility(createModelNode(otherModelId), true);
+
+        const categoryId = getFirstValue(models.get(otherModelId)!.values());
+        const element = getFirstValue(categories.get(categoryId)!.values());
+        viewport.setAlwaysDrawn(new Set([element]), true);
+
+        await Promise.all([
+          assertModelVisibility({ modelId: firstModelId, viewportVisibility: true, handlerVisibility: "hidden" }),
+          assertModelVisibility({ modelId: otherModelId, viewportVisibility: true, handlerVisibility: "partial" }),
+          assertCategoryVisibility({ categoryIdFilter: (id) => id === categoryId, viewportVisibility: true, handlerVisibility: "partial" }),
         ]);
       });
     });
 
     describe("category", () => {
+      let modelId: Id64String;
       let categoryId: Id64String;
 
       before(() => {
-        [categoryId] = [...categories.keys()];
+        modelId = firstModelId;
+        categoryId = getFirstValue(models.get(modelId)!.values());
       });
 
-      it("showing it makes it and its elements visible, and model partially visible", async () => {
+      it("if model is hidden, showing category makes its model visible in the viewport and only that category visible", async () => {
         await handler.changeVisibility(createModelNode(modelId), false);
         await handler.changeVisibility(createCategoryNode(modelId, categoryId), true);
+        const categoryIdFilter = (id: string) => id === categoryId;
         await Promise.all([
-          // Model stays "hidden" in the viewport but should have a category visibility override
-          assertModelVisibility(false, "partial"),
+          assertModelVisibility({
+            modelId,
+            viewportVisibility: true,
+            handlerVisibility: "partial",
+          }),
           assertCategoryVisibility({
-            categoryIdFilter: (id) => id === categoryId,
-            viewportVisibility: false,
-            perModelVisibilityOverride: true,
+            categoryIdFilter,
+            viewportVisibility: true,
             handlerVisibility: "visible",
           }),
-          assertElementsVisibility("visible", categoryId),
+          assertCategoryVisibility({
+            modelIdFilter: (id) => id === modelId,
+            categoryIdFilter: (id) => id !== categoryId,
+            viewportVisibility: false,
+            handlerVisibility: "hidden",
+          }),
+          assertElementsVisibility({ visibility: "visible", categoryIdFilter }),
         ]);
       });
 
-      it("hiding it makes it and its elements hidden, and model partially visible", async () => {
+      it("if model is visible, hiding category makes only that category hidden and model partially visible", async () => {
         await handler.changeVisibility(createModelNode(modelId), true);
         await handler.changeVisibility(createCategoryNode(modelId, categoryId), false);
         await Promise.all([
-          // Model stays "visible" in the viewport but should have a category visibility override
-          assertModelVisibility(true, "partial"),
+          assertModelVisibility({
+            modelId,
+            viewportVisibility: true,
+            handlerVisibility: "partial",
+          }),
           assertCategoryVisibility({
-            categoryIdFilter: (id) => id === categoryId,
+            categoryIdFilter: categoryId,
             viewportVisibility: true,
             perModelVisibilityOverride: false,
             handlerVisibility: "hidden",
           }),
-          assertElementsVisibility("hidden", categoryId),
+          assertCategoryVisibility({
+            modelIdFilter: modelId,
+            categoryIdFilter: (id) => id !== categoryId,
+            viewportVisibility: true,
+            handlerVisibility: "visible",
+          }),
+          assertElementsVisibility({
+            categoryIdFilter: categoryId,
+            visibility: "hidden",
+          }),
+          assertElementsVisibility({
+            modelIdFilter: modelId,
+            categoryIdFilter: (id) => id !== categoryId,
+            visibility: "visible",
+          }),
         ]);
       });
     });
 
     describe("element", () => {
+      let modelId: string;
       let categoryId: string;
       let elementId: string;
 
       before(() => {
-        const firstEntry = [...categories.entries()][0];
-        categoryId = firstEntry[0];
-        elementId = firstEntry[1][0];
+        modelId = firstModelId;
+        categoryId = getFirstValue(models.get(modelId)!.values());
+        elementId = getFirstValue(categories.get(categoryId)!.values());
       });
 
-      it("showing it makes model and category partial", async () => {
-        await handler.changeVisibility(createModelNode(modelId), false);
-        await handler.changeVisibility(createElementNode(modelId, categoryId, false, elementId), true);
+      it("if model is hidden, showing element makes model and category visible in the viewport", async () => {
+        await handler.changeVisibility(createModelNode(firstModelId), false);
+        const elementNode = createElementNode(firstModelId, categoryId, false, elementId);
+        await handler.changeVisibility(elementNode, true);
         await Promise.all([
-          assertModelVisibility(false, "partial"),
+          expect(handler.getVisibilityStatus(elementNode)).to.eventually.include({ state: "visible" }),
+          assertModelVisibility({
+            modelId,
+            viewportVisibility: true,
+            handlerVisibility: "partial",
+          }),
           assertCategoryVisibility({
-            categoryIdFilter: (id) => id === categoryId,
+            categoryIdFilter: categoryId,
             viewportVisibility: false,
             handlerVisibility: "partial",
+          }),
+          assertCategoryVisibility({
+            modelIdFilter: modelId,
+            categoryIdFilter: (id) => id !== categoryId,
+            viewportVisibility: false,
+            handlerVisibility: "hidden",
+          }),
+          assertElementsVisibility({
+            modelIdFilter: modelId,
+            categoryIdFilter: categoryId,
+            visibility: "hidden",
           }),
         ]);
       });
 
-      it("hiding it makes model and category partial", async () => {
-        await handler.changeVisibility(createModelNode(modelId), true);
-        await handler.changeVisibility(createElementNode(modelId, categoryId, false, elementId), false);
+      it("if model is visible, hiding element makes model and category partially visible", async () => {
+        await handler.changeVisibility(createModelNode(firstModelId), true);
+        await handler.changeVisibility(createElementNode(firstModelId, categoryId, false, elementId), false);
         await Promise.all([
-          assertModelVisibility(true, "partial"),
+          assertModelVisibility({ modelId, viewportVisibility: true, handlerVisibility: "partial" }),
           assertCategoryVisibility({
-            categoryIdFilter: (id) => id === categoryId,
+            categoryIdFilter: categoryId,
             viewportVisibility: true,
             handlerVisibility: "partial",
           }),
@@ -1363,4 +1790,12 @@ function createBlankViewState(iModel: IModelConnection) {
   });
 
   return viewState;
+}
+
+function getFirstValue<T>(iterator: Iterator<T>): T {
+  const iterResult = iterator.next();
+  if (iterResult.done) {
+    throw new Error("Iterator is empty");
+  }
+  return iterResult.value;
 }

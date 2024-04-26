@@ -396,3 +396,26 @@ export function createFakeElementIdsCache(overrides?: Partial<IElementIdsCache>)
     ...overrides,
   };
 }
+
+export interface StubbedFactoryFunction<T> {
+  stub(customImplementation?: () => T): sinon.SinonSpy<[], T>;
+  reset(): void;
+}
+
+/**
+ * Replaces a function in a module with a custom stub.
+ * This is helpful for scenarios when there's no way to tell if an object factory has been called.
+ */
+export function stubFactoryFunction<T>(modulePath: string, functionName: string, defaultImplementation: () => T): StubbedFactoryFunction<T> {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _module = require(modulePath);
+  const originalFunc = _module[functionName];
+  return {
+    stub(impl?: () => T) {
+      return (_module[functionName] = sinon.fake(impl ?? defaultImplementation));
+    },
+    reset() {
+      _module[functionName] = originalFunc;
+    },
+  };
+}

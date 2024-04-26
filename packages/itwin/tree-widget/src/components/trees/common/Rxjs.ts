@@ -90,10 +90,10 @@ export function toSet<T>(): OperatorFunction<T, Set<T>> {
 }
 
 /** Same as `firstValueFrom` except it won't throw if the observable emits no values. */
-export async function toVoidPromise(obs: Observable<void | undefined | never>): Promise<void> {
-  return new Promise((resolve, reject) => {
+export async function toVoidPromise(obs: Observable<any>): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
     obs.subscribe({
-      complete: resolve,
+      complete: () => resolve(),
       error: reject,
     });
   });

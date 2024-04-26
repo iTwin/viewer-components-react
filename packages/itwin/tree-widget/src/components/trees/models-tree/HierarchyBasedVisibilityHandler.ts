@@ -3,16 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatWith, defer, EMPTY, filter, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
+import { concat, concatAll, concatWith, defer, EMPTY, filter, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
+import { Presentation } from "@itwin/presentation-frontend";
 import { reduceWhile, toSet, toVoidPromise } from "../common/Rxjs";
+import { isVisibilityHandler } from "../VisibilityTreeEventHandler";
 import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import { NodeUtils } from "./NodeUtils";
 
+import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
@@ -21,10 +25,8 @@ import type { IQueryHandler as IQueryHandler } from "./internal/QueryHandler";
 import type { IElementIdsCache } from "./internal/ElementIdsCache";
 import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
-import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Observable, OperatorFunction } from "rxjs";
-
 interface GetCategoryStatusProps {
   categoryId: Id64String;
   modelId: Id64String | undefined;
@@ -48,52 +50,93 @@ interface ChangeElementStateProps {
 interface ChangeModelStateProps {
   ids: Id64Arg;
   on: boolean;
-  categoriesFilter?: (id: Id64String) => boolean;
 }
 
-type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult ? (props: TProps, originalImpl: () => TResult) => TResult : never;
+type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
+  ? TProps & {
+      /** A callback that produces the value from the original implementation. */
+      readonly originalImplementation: () => TResult;
+      /**
+       * Reference to the hierarchy based handler.
+       * @note Calling `getVisibility` or `changeVisibility` of this object invokes the overridden implementation as well.
+       */
+      readonly handler: IHierarchyBasedVisibilityHandler;
+    }
+  : never;
 
+type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
+
+/**
+ * @public
+ */
 export interface VisibilityHandlerOverrides {
-  getSubjectNodeVisibility?: OverriddenMethodProps<(props: { node: TreeNodeItem; ids: Id64Set }) => Promise<VisibilityStatus>>;
-  getModelDisplayStatus?: OverriddenMethodProps<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
-  getCategoryDisplayStatus?: OverriddenMethodProps<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
-  getElementGroupingNodeDisplayStatus?: OverriddenMethodProps<(props: { key: ECClassGroupingNodeKey }) => Promise<VisibilityStatus>>;
-  getElementDisplayStatus?: OverriddenMethodProps<(props: { id: Id64String; hasChildren?: boolean }) => Promise<VisibilityStatus | undefined>>;
+  getSubjectNodeVisibility?: OverriddenMethod<(props: { node: TreeNodeItem; ids: Id64Set }) => Promise<VisibilityStatus>>;
+  getModelDisplayStatus?: OverriddenMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
+  getCategoryDisplayStatus?: OverriddenMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
+  getElementGroupingNodeDisplayStatus?: OverriddenMethod<(props: { key: ECClassGroupingNodeKey }) => Promise<VisibilityStatus>>;
+  getElementDisplayStatus?: OverriddenMethod<(props: { id: Id64String; hasChildren?: boolean }) => Promise<VisibilityStatus | undefined>>;
 
-  changeSubjectNodeState?: OverriddenMethodProps<(props: { node: TreeNodeItem; ids: Id64Set; on: boolean }) => Promise<void>>;
-  /**
-   * Should change model visibility and also for all it's categories.
-   * If categories filter is specified, then only those category IDs should be affected.
-   */
-  changeModelState?: OverriddenMethodProps<(props: ChangeModelStateProps) => Promise<void>>;
-  changeCategoryState?: OverriddenMethodProps<(props: ChangeCategoryStateProps) => Promise<void>>;
-  changeElementGroupingNodeState?: OverriddenMethodProps<(props: { key: ECClassGroupingNodeKey; on: boolean }) => Promise<void>>;
-  changeElementState?: OverriddenMethodProps<(props: ChangeElementStateProps) => Promise<void>>;
+  changeSubjectNodeState?: OverriddenMethod<(props: { node: TreeNodeItem; ids: Id64Set; on: boolean }) => Promise<void>>;
+  changeModelState?: OverriddenMethod<(props: ChangeModelStateProps) => Promise<void>>;
+  changeCategoryState?: OverriddenMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
+  changeElementGroupingNodeState?: OverriddenMethod<(props: { key: ECClassGroupingNodeKey; on: boolean }) => Promise<void>>;
+  changeElementState?: OverriddenMethod<(props: ChangeElementStateProps) => Promise<void>>;
 }
 
+/**
+ * @public
+ */
 export interface HierarchyBasedVisibilityHandlerProps {
   viewport: Viewport;
   elementIdsCache: IElementIdsCache;
   queryHandler: IQueryHandler;
   overrides?: VisibilityHandlerOverrides;
+  hierarchyAutoUpdateEnabled?: boolean;
+  /** @internal */
+  subjectModelIdsCache?: SubjectModelIdsCache;
 }
 
-export type IHierarchyBasedVisibilityHandler = IVisibilityHandler;
+/**
+ * @public
+ */
+export interface IHierarchyBasedVisibilityHandler extends IVisibilityHandler {
+  filteredDataProvider?: IFilteredPresentationTreeDataProvider;
+  isHierarchyBased: true;
+}
 
+/**
+ * @alpha
+ */
+// istanbul ignore next
+export function isHierarchyBasedVisibilityHandler(obj: any): obj is IHierarchyBasedVisibilityHandler {
+  return isVisibilityHandler(obj) && (obj as any).isHierarchyBased === true;
+}
+
+/** @public */
 export function createHierarchyBasedVisibilityHandler(props: HierarchyBasedVisibilityHandlerProps): IHierarchyBasedVisibilityHandler {
   return new VisibilityHandlerImplementation(props);
 }
 
 class VisibilityHandlerImplementation implements IVisibilityHandler {
+  public filteredDataProvider?: IFilteredPresentationTreeDataProvider;
+  public readonly isHierarchyBased = true;
   private readonly _subjectModelIdsCache: SubjectModelIdsCache;
   private readonly _eventListener: IVisibilityChangeEventListener;
   private _removePresentationHierarchyListener?: () => void;
 
   constructor(private readonly _props: HierarchyBasedVisibilityHandlerProps) {
-    this._subjectModelIdsCache = createSubjectModelIdsCache(_props.queryHandler);
+    this._subjectModelIdsCache = _props.subjectModelIdsCache ?? createSubjectModelIdsCache(_props.queryHandler);
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
+    // istanbul ignore if
+    if (this._props.hierarchyAutoUpdateEnabled) {
+      // eslint-disable-next-line @itwin/no-internal
+      this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(
+        /* istanbul ignore next */ () => this._props.elementIdsCache.clear(),
+      );
+    }
   }
 
+  // istanbul ignore next
   public get onVisibilityChange() {
     return this._eventListener.onVisibilityChange;
   }
@@ -106,6 +149,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return toVoidPromise(this.changeVisibilityObs(node, shouldDisplay));
   }
 
+  // istanbul ignore next
   public dispose(): void {
     this._eventListener.dispose();
     this._removePresentationHierarchyListener?.();
@@ -162,9 +206,19 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         return of(createVisibilityStatus("disabled", "subject.nonSpatialView"));
       }
 
-      return subjectIds.pipe(
-        mergeMap((id) => this._subjectModelIdsCache.getSubjectModelIdObs(id)),
-        mergeMap((x) => this.getModelVisibilityStatus(x)),
+      const provider = this.filteredDataProvider;
+      const childStatuses =
+        provider && !provider.nodeMatchesFilter(node)
+          ? from(provider.getNodes(node)).pipe(
+              concatAll(),
+              mergeMap((filteredNode) => this.getVisibilityStatusObs(filteredNode)),
+            )
+          : subjectIds.pipe(
+              mergeMap((id) => this._subjectModelIdsCache.getSubjectModelIdObs(id)),
+              mergeMap((x) => this.getModelVisibilityStatus(x)),
+            );
+
+      return childStatuses.pipe(
         map((x) => x.state),
         getVisibilityStatusFromChildren({
           visible: "subject.allModelsVisible",
@@ -178,7 +232,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return ovr
       ? subjectIds.pipe(
           toSet(),
-          mergeMap(async (ids) => ovr({ node, ids }, async () => firstValueFrom(result))),
+          mergeMap(async (ids) => ovr(this.createOverrideProps({ node, ids }, result))),
         )
       : result;
   }
@@ -186,7 +240,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private getModelVisibilityStatus(modelId: Id64String): Observable<VisibilityStatus> {
     const result = defer(() => this.getModelVisibilityStatusImpl(modelId));
     const ovr = this._props.overrides?.getModelDisplayStatus;
-    return ovr ? from(ovr({ id: modelId }, async () => firstValueFrom(result))) : result;
+    return ovr ? from(ovr(this.createOverrideProps({ id: modelId }, result))) : result;
   }
 
   private getModelVisibilityStatusImpl(modelId: Id64String): Observable<VisibilityStatus> {
@@ -229,7 +283,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
             mergeMap((ad) => {
               // Model is hidden and there are no always drawn children => model is fully hidden.
               if (!ad.size) {
-                return createVisibilityStatusObs(visibilityByCategories);
+                return createVisibilityStatusObs("hidden");
               }
 
               return this._props.queryHandler
@@ -255,7 +309,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
             }
 
             if (!this._props.viewport.isAlwaysDrawnExclusive || !alwaysDrawn?.size) {
-              return createVisibilityStatusObs(visibilityByCategories);
+              return createVisibilityStatusObs("visible");
             }
 
             return this.getAlwaysDrawnChildren(modelId).pipe(
@@ -267,7 +321,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
                 // All children in exclusive always drawn set => model is visible
                 if (alwaysDrawnChildren.size === totalCount) {
-                  return createVisibilityStatus(visibilityByCategories);
+                  return createVisibilityStatus("visible");
                 }
 
                 return createVisibilityStatus("partial");
@@ -321,7 +375,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     });
 
     const ovr = this._props.overrides?.getCategoryDisplayStatus;
-    return ovr ? from(ovr(props, async () => firstValueFrom(result))) : result;
+    return ovr ? from(ovr(this.createOverrideProps(props, result))) : result;
   }
 
   private getElementGroupingNodeDisplayStatus(key: ECClassGroupingNodeKey): Observable<VisibilityStatus> {
@@ -339,7 +393,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     );
 
     const ovr = this._props.overrides?.getElementGroupingNodeDisplayStatus;
-    return ovr ? from(ovr({ key }, async () => firstValueFrom(result))) : result;
+    return ovr ? from(ovr(this.createOverrideProps({ key }, result))) : result;
   }
 
   /**
@@ -383,7 +437,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     });
 
     const ovr = this._props.overrides?.getElementDisplayStatus;
-    return ovr ? from(ovr({ id, hasChildren }, async () => firstValueFrom(result))) : result;
+    return ovr ? from(ovr(this.createOverrideProps({ id, hasChildren }, result))) : result;
   }
 
   /** Changes visibility of the items represented by the tree node. */
@@ -428,13 +482,23 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
   private changeSubjectNodeState(ids: Observable<Id64String>, node: TreeNodeItem, on: boolean): Observable<void> {
     const result = defer(() => {
+      // istanbul ignore if
       if (!this._props.viewport.view.isSpatialView()) {
         return EMPTY;
       }
+
+      const provider = this.filteredDataProvider;
+      if (provider && !provider.nodeMatchesFilter(node)) {
+        return from(provider.getNodes(node)).pipe(
+          concatAll(),
+          mergeMap((filteredNode) => this.changeVisibilityObs(filteredNode, on)),
+        );
+      }
+
       return ids.pipe(
-        mergeMap((x) => this._subjectModelIdsCache.getSubjectModelIdObs(x)),
+        mergeMap((id) => this._subjectModelIdsCache.getSubjectModelIdObs(id)),
         toSet(),
-        mergeMap((modelId) => this.changeModelState({ ids: modelId, on })),
+        mergeMap((modelIds) => this.changeModelState({ ids: modelIds, on })),
       );
     });
 
@@ -442,7 +506,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return ovr
       ? ids.pipe(
           toSet(),
-          mergeMap(async (idSet) => ovr({ ids: idSet, node, on }, async () => firstValueFrom(result))),
+          mergeMap(async (idSet) => ovr(this.createVoidOverrideProps({ ids: idSet, node, on }, result))),
         )
       : result;
   }
@@ -450,10 +514,10 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private changeModelState(props: ChangeModelStateProps): Observable<void> {
     const result = this.changeModelStateImpl(props);
     const ovr = this._props.overrides?.changeModelState;
-    return ovr ? from(ovr(props, async () => toVoidPromise(result))) : result;
+    return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
   }
 
-  private changeModelStateImpl({ ids: ids, on: visible, categoriesFilter }: ChangeModelStateProps): Observable<void> {
+  private changeModelStateImpl({ ids, on }: ChangeModelStateProps): Observable<void> {
     const viewport = this._props.viewport;
     if (!viewport.view.isSpatialView()) {
       return EMPTY;
@@ -462,7 +526,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return concat(
       defer(() => {
         viewport.perModelCategoryVisibility.clearOverrides(ids);
-        if (visible) {
+        if (on) {
           return from(viewport.addViewedModels(ids));
         }
 
@@ -483,9 +547,8 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
           observables.push(
             this._props.queryHandler.queryModelCategories(modelId).pipe(
-              filter((id) => !categoriesFilter || categoriesFilter(id)),
               toSet(),
-              map((categories) => viewport.changeCategoryDisplay(categories, visible, true)),
+              map((categories) => viewport.changeCategoryDisplay(categories, on, true)),
             ),
           );
           return observables.length ? merge(...observables) : EMPTY;
@@ -520,7 +583,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     });
 
     const ovr = this._props.overrides?.changeCategoryState;
-    return ovr ? from(ovr(props, async () => toVoidPromise(result))) : result;
+    return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
   }
 
   private changeElementGroupingNodeState(key: ECClassGroupingNodeKey, on: boolean): Observable<void> {
@@ -533,7 +596,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     });
 
     const ovr = this._props.overrides?.changeElementGroupingNodeState;
-    return ovr ? from(ovr({ key, on }, async () => toVoidPromise(result))) : result;
+    return ovr ? from(ovr(this.createVoidOverrideProps({ key, on }, result))) : result;
   }
 
   /**
@@ -557,7 +620,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     });
 
     const ovr = this._props.overrides?.changeElementState;
-    return ovr ? from(ovr(props, async () => toVoidPromise(result))) : result;
+    return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
   }
 
   private changeElementStateNoChildrenOperator(props: { on: boolean; isDisplayedByDefault: boolean }): OperatorFunction<string, void> {
@@ -629,6 +692,29 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         }
       }),
     );
+  }
+
+  private createVoidOverrideProps<TProps>(props: TProps, obs: Observable<void>): OverriddenMethodProps<(props: TProps) => Promise<void>> {
+    return {
+      ...props,
+      originalImplementation: async () => toVoidPromise(obs),
+      handler: this,
+    };
+  }
+
+  private createOverrideProps<TProps, TObservable extends Observable<any>>(
+    props: TProps,
+    obs: TObservable,
+  ): TObservable extends Observable<infer T> ? OverriddenMethodProps<(props: TProps) => Promise<T>> : never;
+  private createOverrideProps<TProps, TObservable extends Observable<unknown>>(
+    props: TProps,
+    obs: TObservable,
+  ): OverriddenMethodProps<(props: TProps) => Promise<unknown>> {
+    return {
+      ...props,
+      originalImplementation: async () => firstValueFrom(obs),
+      handler: this,
+    };
   }
 }
 

@@ -5,6 +5,7 @@
 
 import { expect } from "chai";
 import { join } from "path";
+import { act } from "react-dom/test-utils";
 import sanitize from "sanitize-filename";
 import sinon from "sinon";
 import * as moq from "typemoq";
@@ -26,18 +27,23 @@ import { ModelsTreeNodeType } from "../../../components/trees/models-tree/NodeUt
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 import {
-  createCategoryNode, createElementClassGroupingNode, createElementNode, createInfoNode, createKey, createModelNode, createPresentationTreeNodeItem,
-  createSimpleTreeModelNode, createSubjectNode, createTestContentDescriptor, createTestPropertiesContentField, createTestPropertyInfo,
+  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeElementIdsCache, createInfoNode, createKey, createModelNode,
+  createPresentationTreeNodeItem, createSimpleTreeModelNode, createSubjectNode, createTestContentDescriptor, createTestPropertiesContentField,
+  createTestPropertyInfo, stubFactoryFunction,
 } from "../Common";
 
+import type { StubbedFactoryFunction } from "../Common";
+import type { IHierarchyBasedVisibilityHandler } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
+import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
-import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTree";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
+import type { IElementIdsCache } from "../../../components/trees/models-tree/internal/ElementIdsCache";
+
 describe("ModelsTree", () => {
   const sizeProps = { width: 200, height: 200 };
 
@@ -766,6 +772,93 @@ describe("ModelsTree", () => {
           await waitFor(() => getByText("modelTree.noModelFound"));
 
           expect(onPerformanceMeasuredSpy.callCount).to.be.eq(0);
+        });
+      });
+
+      describe("Hierarchy based visibility", () => {
+        function createFakeProvider() {
+          return {
+            getVisibilityStatus: sinon.fake(),
+            changeVisibilityStatus: sinon.fake(),
+            dispose: sinon.fake(),
+            onVisibilityChange: new BeEvent(),
+            isHierarchyBased: true,
+          } as unknown as IHierarchyBasedVisibilityHandler;
+        }
+
+        let createHierarchyBasedHandlerStub: StubbedFactoryFunction<IHierarchyBasedVisibilityHandler>;
+        let createElementIdsCacheStub: StubbedFactoryFunction<IElementIdsCache>;
+
+        before(() => {
+          createHierarchyBasedHandlerStub = stubFactoryFunction(
+            `${__dirname}/../../../components/trees/models-tree/HierarchyBasedVisibilityHandler`,
+            "createHierarchyBasedVisibilityHandler",
+            createFakeProvider,
+          );
+          createElementIdsCacheStub = stubFactoryFunction(
+            `${__dirname}/../../../components/trees/models-tree/internal/ElementIdsCache`,
+            "createElementIdsCache",
+            () => createFakeElementIdsCache(),
+          );
+        });
+
+        afterEach(() => {
+          createHierarchyBasedHandlerStub.reset();
+          createElementIdsCacheStub.reset();
+        });
+
+        it("doesn't create hierarchy based handler if legacy one is provided", async () => {
+          // eslint-disable-next-line deprecation/deprecation
+          const handlerMock = {
+            onVisibilityChange: new BeEvent(),
+            setFilteredDataProvider: sinon.fake(),
+            // eslint-disable-next-line deprecation/deprecation
+          } as unknown as ModelsVisibilityHandler;
+          const customFactorySpy = sinon.fake.returns({} as unknown as IHierarchyBasedVisibilityHandler);
+          const originalFactoryStub = createHierarchyBasedHandlerStub.stub();
+          await act(() =>
+            render(
+              <ModelsTree
+                {...sizeProps}
+                iModel={imodelMock.object}
+                activeView={mockViewport().object}
+                modelsVisibilityHandler={handlerMock}
+                hierarchyBasedVisibilityHandler={customFactorySpy}
+              />,
+            ),
+          );
+          expect(customFactorySpy).not.to.be.called;
+          expect(originalFactoryStub).not.to.be.called;
+        });
+
+        it("uses the provided custom handler or creates from a factory", async () => {
+          const fakeCustomFactory = sinon.fake.returns(createFakeProvider());
+          const originalFactoryStub = createHierarchyBasedHandlerStub.stub();
+
+          await act(() =>
+            render(
+              <ModelsTree
+                {...sizeProps}
+                iModel={imodelMock.object}
+                activeView={mockViewport().object}
+                hierarchyBasedVisibilityHandler={createFakeProvider()}
+              />,
+            ),
+          );
+          expect(originalFactoryStub).not.to.be.called;
+
+          await act(() =>
+            render(
+              <ModelsTree {...sizeProps} iModel={imodelMock.object} activeView={mockViewport().object} hierarchyBasedVisibilityHandler={fakeCustomFactory} />,
+            ),
+          );
+          expect(fakeCustomFactory).to.be.called;
+          expect(originalFactoryStub).not.to.be.called;
+
+          fakeCustomFactory.resetHistory();
+          await act(() => render(<ModelsTree {...sizeProps} iModel={imodelMock.object} activeView={mockViewport().object} />));
+          expect(fakeCustomFactory).not.to.be.called;
+          expect(originalFactoryStub).to.be.called;
         });
       });
     });

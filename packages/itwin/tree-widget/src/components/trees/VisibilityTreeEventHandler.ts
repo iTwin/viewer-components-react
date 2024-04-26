@@ -7,11 +7,12 @@
  */
 
 import { endWith, from, ignoreElements, map, mergeMap, Observable } from "rxjs";
+import { BeEvent } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
 import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
 
-import type { BeEvent, IDisposable } from "@itwin/core-bentley";
+import type { IDisposable } from "@itwin/core-bentley";
 import type {
   CheckBoxInfo,
   CheckboxStateChange,
@@ -47,6 +48,19 @@ export interface IVisibilityHandler extends IDisposable {
   getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
   changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void>;
   onVisibilityChange: BeEvent<VisibilityChangeListener>;
+}
+
+/**
+ * @alpha
+ */
+export function isVisibilityHandler(obj: any): obj is IVisibilityHandler {
+  return (
+    typeof obj === "object" &&
+    typeof obj.getVisibilityStatus === "function" &&
+    typeof obj.changeVisibility === "function" &&
+    typeof obj.dispose === "function" &&
+    obj.onVisibilityChange instanceof BeEvent
+  );
 }
 
 /**
