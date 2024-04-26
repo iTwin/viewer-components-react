@@ -21,6 +21,7 @@ import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
 export interface TreeRenderProps {
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -49,6 +50,7 @@ export interface SelectableTreeProps {
   trees: TreeDefinition[];
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -71,7 +73,12 @@ function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConn
 
   return (
     <div className="tree-widget-selectable-tree">
-      <TreeSelector {...getTreeSelectorProps(trees)} density={props.density} onPerformanceMeasured={props.onPerformanceMeasured} />
+      <TreeSelector
+        {...getTreeSelectorProps(trees)}
+        density={props.density}
+        onPerformanceMeasured={props.onPerformanceMeasured}
+        onFeatureUsed={props.onFeatureUsed}
+      />
     </div>
   );
 }

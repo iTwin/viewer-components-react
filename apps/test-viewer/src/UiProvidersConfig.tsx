@@ -89,6 +89,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionMode={SelectionMode.Multiple}
                     hierarchyLevelConfig={{ isFilteringEnabled: true }}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                     density={props.density}
                   />
                 ),
@@ -100,6 +101,7 @@ const configuredUiItems = new Map<string, UiItem>([
                   <CategoriesTreeComponent
                     hierarchyLevelConfig={{ isFilteringEnabled: true }}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                     density={props.density}
                   />
                 ),
@@ -111,6 +113,7 @@ const configuredUiItems = new Map<string, UiItem>([
                   <IModelContentTreeComponent
                     hierarchyLevelConfig={{ isFilteringEnabled: true }}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                     density={props.density}
                   />
                 ),
@@ -122,6 +125,7 @@ const configuredUiItems = new Map<string, UiItem>([
                   <ExternalSourcesTreeComponent
                     hierarchyLevelConfig={{ isFilteringEnabled: true }}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                     density={props.density}
                   />
                 ),
@@ -161,6 +165,9 @@ const configuredUiItems = new Map<string, UiItem>([
             settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
             onPerformanceMeasured: (feature, elapsedTime) => {
               console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+            },
+            onFeatureUsed: (feature) => {
+              console.log(`PropertyGrid [${feature}] used`);
             },
           },
         }),
@@ -244,6 +251,9 @@ function TreeWidgetWithOptions(props: SelectableTreeProps) {
       density={density}
       onPerformanceMeasured={(feature: string, elapsedTime: number) => {
         console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+      }}
+      onFeatureUsed={(feature: string) => {
+        console.log(`TreeWidget [${feature}] used`);
       }}
     />
   );
