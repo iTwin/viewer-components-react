@@ -6,7 +6,7 @@
 import { Tree } from "@itwin/itwinui-react";
 import { PresentationHierarchyNode, PresentationTreeNode, createTreeNode } from "@itwin/presentation-hierarchies-react";
 import { ComponentPropsWithoutRef, useCallback } from "react";
-import { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
+import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import { VisibilityTreeNodeRenderer } from "./VisibilityTreeNodeRenderer";
 
 type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;

@@ -14,14 +14,14 @@ import {
 } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, HierarchyProvider, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
-import { HierarchyLevelFilteringOptions } from "@itwin/presentation-hierarchies-react";
+import { HierarchyLevelConfiguration } from "@itwin/presentation-hierarchies-react";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { useCallback, useMemo, useState } from "react";
 
 interface UseHierarchyFilteringProps {
   imodel: IModelConnection;
   setHierarchyLevelFilter: (nodeId: string, filter: GenericInstanceFilter | undefined) => void;
-  getHierarchyLevelFilteringOptions: (nodeId: string) => HierarchyLevelFilteringOptions | undefined;
+  getHierarchyLevelConfiguration: (nodeId: string) => HierarchyLevelConfiguration | undefined;
   defaultHierarchyLevelSizeLimit: number;
   hierarchyProvider?: HierarchyProvider;
 }
@@ -32,15 +32,15 @@ export function useHierarchyFiltering({
   hierarchyProvider,
   defaultHierarchyLevelSizeLimit,
   setHierarchyLevelFilter,
-  getHierarchyLevelFilteringOptions,
+  getHierarchyLevelConfiguration,
 }: UseHierarchyFilteringProps) {
-  const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string; options: HierarchyLevelFilteringOptions }>();
+  const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string; configuration: HierarchyLevelConfiguration }>();
   const onFilterClick = useCallback(
     (nodeId: string) => {
-      const options = getHierarchyLevelFilteringOptions(nodeId);
-      setFilteringOptions(options ? { nodeId, options } : undefined);
+      const configuration = getHierarchyLevelConfiguration(nodeId);
+      setFilteringOptions(configuration ? { nodeId, configuration } : undefined);
     },
-    [getHierarchyLevelFilteringOptions],
+    [getHierarchyLevelConfiguration],
   );
 
   const propertiesSource = useMemo<(() => Promise<PresentationInstanceFilterPropertiesSource>) | undefined>(() => {
@@ -49,7 +49,7 @@ export function useHierarchyFiltering({
     }
 
     return async () => {
-      const inputKeys = await collectInstanceKeys(hierarchyProvider.getNodeInstanceKeys({ parentNode: filteringOptions.options.hierarchyNode }));
+      const inputKeys = await collectInstanceKeys(hierarchyProvider.getNodeInstanceKeys({ parentNode: filteringOptions.configuration.hierarchyNode }));
       if (inputKeys.length === 0) {
         throw new Error("Hierarchy level is empty - unable to create content descriptor.");
       }
@@ -81,7 +81,7 @@ export function useHierarchyFiltering({
   }, [filteringOptions, imodel, hierarchyProvider]);
 
   const getInitialFilter = useMemo(() => {
-    const currentFilter = filteringOptions?.options.currentFilter;
+    const currentFilter = filteringOptions?.configuration.currentFilter;
     if (!currentFilter) {
       return undefined;
     }
@@ -113,7 +113,7 @@ export function useHierarchyFiltering({
         return (
           <MatchingInstancesCount
             filter={filter}
-            hierarchyLevelOptions={filteringOptions.options}
+            hierarchyLevelConfiguration={filteringOptions.configuration}
             hierarchyProvider={hierarchyProvider}
             defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit}
           />
@@ -130,21 +130,21 @@ export function useHierarchyFiltering({
 
 interface MatchingInstancesCountProps {
   filter: PresentationInstanceFilterInfo;
-  hierarchyLevelOptions: HierarchyLevelFilteringOptions;
+  hierarchyLevelConfiguration: HierarchyLevelConfiguration;
   hierarchyProvider: HierarchyProvider;
   defaultHierarchyLevelSizeLimit: number;
 }
 
-function MatchingInstancesCount({ filter, hierarchyProvider, defaultHierarchyLevelSizeLimit, hierarchyLevelOptions }: MatchingInstancesCountProps) {
+function MatchingInstancesCount({ filter, hierarchyProvider, defaultHierarchyLevelSizeLimit, hierarchyLevelConfiguration }: MatchingInstancesCountProps) {
   const { value } = useDebouncedAsyncValue(
     useCallback(async () => {
       const instanceFilter = toGenericFilter(filter);
       try {
         const instanceKeys = await collectInstanceKeys(
           hierarchyProvider.getNodeInstanceKeys({
-            parentNode: hierarchyLevelOptions.hierarchyNode,
+            parentNode: hierarchyLevelConfiguration.hierarchyNode,
             instanceFilter: instanceFilter,
-            hierarchyLevelSizeLimit: hierarchyLevelOptions.hierarchyLevelSizeLimit ?? defaultHierarchyLevelSizeLimit,
+            hierarchyLevelSizeLimit: hierarchyLevelConfiguration.hierarchyLevelSizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
         return `Current filter matching instances count: ${instanceKeys.length}`;
@@ -155,7 +155,7 @@ function MatchingInstancesCount({ filter, hierarchyProvider, defaultHierarchyLev
       }
 
       return undefined;
-    }, [filter, hierarchyLevelOptions, hierarchyProvider]),
+    }, [filter, hierarchyLevelConfiguration, hierarchyProvider]),
   );
   if (!value) {
     return null;

@@ -5,7 +5,15 @@
 
 import { ComponentPropsWithoutRef, Fragment, useState } from "react";
 import { ExperimentalModelsTree } from "./ModelsTree";
-import { HideAllButton, InvertButton, ModelsTreeHeaderButtonProps, ShowAllButton, View2DButton, View3DButton, useAvailableModels } from "../ModelsTreeButtons";
+import {
+  HideAllButton,
+  InvertButton,
+  ModelsTreeHeaderButtonProps,
+  ShowAllButton,
+  View2DButton,
+  View3DButton,
+  useAvailableModels,
+} from "../../models-tree/ModelsTreeButtons";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { TreeHeader } from "../../../tree-header/TreeHeader";

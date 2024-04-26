@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
+import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import { BeEvent } from "@itwin/core-bentley";
 import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { MutableRefObject, useEffect, useRef, useState } from "react";

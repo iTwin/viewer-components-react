@@ -50,13 +50,13 @@ export function VisibilityTree({
     getFilteredPaths,
   });
 
-  const { rootNodes, getHierarchyLevelFilteringOptions, isLoading, reloadTree, ...treeProps } = useTree({ hierarchyProvider });
+  const { rootNodes, getHierarchyLevelConfiguration, isLoading, reloadTree, ...treeProps } = useTree({ hierarchyProvider });
 
   const nodesVisibility = useHierarchyVisibility({ visibilityHandlerFactory });
   const { filteringDialog, onFilterClick } = useHierarchyFiltering({
     imodel,
     hierarchyProvider,
-    getHierarchyLevelFilteringOptions,
+    getHierarchyLevelConfiguration,
     setHierarchyLevelFilter: treeProps.setHierarchyLevelFilter,
     defaultHierarchyLevelSizeLimit,
   });

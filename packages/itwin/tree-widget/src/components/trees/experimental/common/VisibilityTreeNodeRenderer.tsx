@@ -5,7 +5,7 @@
 
 import { PresentationHierarchyNode, TreeNodeRenderer, isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { ComponentPropsWithoutRef } from "react";
-import { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
+import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import { Checkbox } from "@itwin/itwinui-react";
 
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;

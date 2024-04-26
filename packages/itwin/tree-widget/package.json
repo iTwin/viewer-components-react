@@ -64,7 +64,6 @@
     "@itwin/presentation-core-interop": "workspace:*",
     "@itwin/presentation-hierarchies": "workspace:*",
     "@itwin/presentation-hierarchies-react": "workspace:*",
-    "@itwin/presentation-models-tree": "workspace:*",
     "@itwin/presentation-shared": "workspace:*",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",

@@ -14,13 +14,13 @@ import {
 } from "@itwin/presentation-hierarchies";
 import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import { ModelsTreeDefinition } from "@itwin/presentation-models-tree";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
-import { VisibilityTree } from "./common/VisibilityTree";
-import { GetFilteredPathsProps, MetadataAccess } from "./common/UseHierarchyProvider";
+import { VisibilityTree } from "../common/VisibilityTree";
+import { GetFilteredPathsProps, MetadataAccess } from "../common/UseHierarchyProvider";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { HierarchyLevelConfig } from "../../common/Types";
+import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 interface ExperimentalModelsTreeProps {
   imodel: IModelConnection;
@@ -34,7 +34,16 @@ interface ExperimentalModelsTreeProps {
 }
 
 /** @internal */
-export function ExperimentalModelsTree({ imodel, getSchemaContext, height, width, activeView, filter, density, hierarchyLevelConfig }: ExperimentalModelsTreeProps) {
+export function ExperimentalModelsTree({
+  imodel,
+  getSchemaContext,
+  height,
+  width,
+  activeView,
+  filter,
+  density,
+  hierarchyLevelConfig,
+}: ExperimentalModelsTreeProps) {
   const [metadata, setMetadata] = useState<MetadataAccess>();
   const hierarchyLevelSizeLimit = hierarchyLevelConfig?.sizeLimit ?? 1000;
 
