@@ -44,7 +44,6 @@
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
-    "@itwin/appui-layout-react": "^4.0.1",
     "@itwin/appui-react": "^4.10.0",
     "@itwin/build-tools": "^4.0.0",
     "@itwin/components-react": "^4.10.0",
@@ -58,7 +57,7 @@
     "@itwin/core-quantity": "^4.0.0",
     "@itwin/core-react": "^4.10.0",
     "@itwin/core-telemetry": "^4.0.0",
-    "@itwin/imodel-components-react": "^4.0.1",
+    "@itwin/imodel-components-react": "^4.10.0",
     "@itwin/itwinui-icons-react": "^2.1.0",
     "@itwin/eslint-plugin": "^4.0.0-dev.38",
     "@itwin/webgl-compatibility": "^4.0.0",
