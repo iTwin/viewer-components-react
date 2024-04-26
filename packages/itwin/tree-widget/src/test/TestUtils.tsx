@@ -5,20 +5,23 @@
 
 import deepEqual from "deep-equal";
 import { createElement, Fragment, StrictMode } from "react";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
+import { Descriptor } from "@itwin/presentation-common";
 import { renderHook as renderHookRTL, render as renderRTL } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { TreeWidget } from "../TreeWidget";
+import { createTestCategoryDescription, createTestSelectClassInfo } from "./trees/Common";
 
 import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
+import type { DescriptorSource, Field, RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
 import type { PropsWithChildren, ReactElement } from "react";
 import type { RenderHookOptions, RenderHookResult, RenderOptions, RenderResult } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
-import type { RegisteredRuleset, Ruleset, VariableValue } from "@itwin/presentation-common";
 export class TestUtils {
   private static _initialized = false;
 
@@ -153,6 +156,41 @@ export function createResolvablePromise<T>() {
     resolve = resolvePromise;
   });
   return { promise, resolve };
+}
+
+export function createTestContentDescriptor(props: Partial<DescriptorSource> & { fields: Field[] }) {
+  return new Descriptor({
+    connectionId: "",
+    displayType: "",
+    contentFlags: 0,
+    selectClasses: [createTestSelectClassInfo()],
+    categories: [createTestCategoryDescription()],
+    ...props,
+  });
+}
+
+export function stubDOMMatrix() {
+  const domMatrix = global.DOMMatrix;
+
+  before(() => {
+    Object.defineProperty(global, "DOMMatrix", {
+      writable: true,
+      value: sinon.fake(() => ({ m41: 0, m42: 0 })),
+    });
+  });
+
+  after(() => {
+    Object.defineProperty(global, "DOMGlobal", {
+      writable: true,
+      value: domMatrix,
+    });
+  });
+}
+
+export async function* createAsyncIterator<T>(values: T[]): AsyncIterableIterator<T> {
+  for (const value of values) {
+    yield value;
+  }
 }
 
 function createWrapper(wrapper?: React.JSXElementConstructor<{ children: React.ReactElement }>, disableStrictMode?: boolean) {

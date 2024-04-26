@@ -17,6 +17,7 @@ import type { CommonProps } from "@itwin/core-react";
 export interface TreeHeaderButtonProps {
   viewport: Viewport;
   density?: "default" | "enlarged";
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /** @internal */

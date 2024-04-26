@@ -63,6 +63,10 @@ export interface VisibilityTreeNodeRendererProps {
    * Is `false` by default
    */
   isEnlarged?: boolean;
+  /**
+   * Callback called when visibility is toggled using a checkbox.
+   */
+  onVisibilityToggled?: (enabled: boolean) => void;
 }
 
 /**
@@ -84,6 +88,7 @@ export function createVisibilityTreeNodeRenderer({
   disableRootNodeCollapse = false,
   descriptionEnabled,
   iconsEnabled,
+  onVisibilityToggled,
 }: VisibilityTreeNodeRendererProps) {
   return function VisibilityTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
     const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? EXPANSION_TOGGLE_WIDTH : 0);
@@ -93,7 +98,7 @@ export function createVisibilityTreeNodeRenderer({
         node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }} // if we want to disable TreeNodeRenderer style calculations for tree nodes, we need to override these values.
         checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
           <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
-            <VisibilityTreeNodeCheckbox {...checkboxProps} />
+            <VisibilityTreeNodeCheckbox {...checkboxProps} onVisibilityToggled={onVisibilityToggled} />
           </div>
         )}
         descriptionEnabled={descriptionEnabled}
@@ -108,17 +113,25 @@ export function createVisibilityTreeNodeRenderer({
   };
 }
 
+interface VisibilityTreeNodeCheckboxProps extends NodeCheckboxRenderProps {
+  onVisibilityToggled?: (enabled: boolean) => void;
+}
+
 /**
  * Checkbox renderer that renders an eye.
  * @public
  */
-export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
+export function VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProps) {
   return (
     <Checkbox
       className="visibility-tree-checkbox"
       variant="eyeball"
       checked={props.checked}
-      onChange={(e) => props.onChange(e.currentTarget.checked)}
+      onChange={(e) => {
+        props.onVisibilityToggled?.(e.currentTarget.checked);
+        props.onChange(e.currentTarget.checked);
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
       onClick={props.onClick}
       disabled={props.disabled}
       title={props.title}
@@ -141,6 +154,7 @@ export function FilterableVisibilityTreeNodeRenderer({
   disableRootNodeCollapse,
   descriptionEnabled,
   isEnlarged,
+  onVisibilityToggled,
   ...restProps
 }: FilterableVisibilityTreeNodeRendererProps) {
   const expansionToggleWidth = isEnlarged ? EXPANDED_EXPANSION_TOGGLE_WIDTH : EXPANSION_TOGGLE_WIDTH;
@@ -151,7 +165,7 @@ export function FilterableVisibilityTreeNodeRenderer({
       {...restProps}
       checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
         <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
-          <VisibilityTreeNodeCheckbox {...checkboxProps} />
+          <VisibilityTreeNodeCheckbox {...checkboxProps} onVisibilityToggled={onVisibilityToggled} />
         </div>
       )}
       descriptionEnabled={descriptionEnabled}

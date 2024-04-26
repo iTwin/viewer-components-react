@@ -24,6 +24,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { MouseEvent } from "react";
 import type { ContextMenuItemProps, UseContentMenuProps } from "../../hooks/UseContextMenu";
+import { TelemetryContextProvider } from "../../property-grid-react";
 
 describe("useContextMenu", () => {
   const imodel = {} as IModelConnection;
@@ -149,6 +150,27 @@ describe("useContextMenu", () => {
 
     // wait for item to disappear
     await waitFor(() => expect(queryByText("Test Item")).to.be.null);
+  });
+
+  describe("feature usage reporting", () => {
+    it("reports when context menu opens", async () => {
+      const onFeatureUsedSpy = sinon.spy();
+      const { getByText } = render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <TestComponent
+            imodel={imodel}
+            dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
+            contextMenuItems={[() => <div>Test Item</div>]}
+          />
+        </TelemetryContextProvider>,
+      );
+
+      const openButton = await waitFor(() => getByText("Open Menu"));
+      await userEvents.click(openButton);
+
+      await waitFor(() => getByText("Test Item"));
+      expect(onFeatureUsedSpy).to.be.calledOnceWith("context-menu");
+    });
   });
 });
 

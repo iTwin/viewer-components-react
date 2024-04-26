@@ -15,6 +15,7 @@ import type { Field } from "@itwin/presentation-common";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 /**
  * Props for single context menu item.
@@ -193,6 +194,7 @@ interface ContextMenuDefinition {
  */
 export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps) {
   const [contextMenu, setContextMenu] = useState<ContextMenuDefinition>();
+  const { onFeatureUsed } = useTelemetryContext();
 
   const onPropertyContextMenu = async (args: PropertyGridContextMenuArgs) => {
     args.event.persist();
@@ -203,6 +205,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
     const items = contextMenuItems.map((item, index) => <Fragment key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Fragment>);
 
+    onFeatureUsed("context-menu");
     setContextMenu({
       position: { x: args.event.clientX, y: args.event.clientY },
       menuItems: items,
