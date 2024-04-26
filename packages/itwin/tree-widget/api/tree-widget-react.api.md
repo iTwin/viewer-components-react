@@ -106,6 +106,8 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
     // @beta
+    onFeatureUsed?: (feature: string) => void;
+    // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
     // @internal
     viewManager?: ViewManager;
@@ -164,7 +166,7 @@ export interface ContextMenuItemProps {
 }
 
 // @public
-export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
+export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
 
 // @public
 export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element;
@@ -196,22 +198,38 @@ export interface ExternalSourcesTreeProps extends BaseTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
     // @beta
+    onFeatureUsed?: (feature: string) => void;
+    // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
 // @beta
-export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, ...restProps }: FilterableTreeRendererProps): JSX.Element;
+export interface FilterableTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
+    // (undocumented)
+    reportUsage?: (props: {
+        featureId?: UsageTrackedFeatures;
+        reportInteraction: boolean;
+    }) => void;
+}
+
+// @beta
+export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, reportUsage, ...restProps }: FilterableTreeRendererProps): JSX.Element;
 
 // @beta
 export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
     // (undocumented)
     nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
     // (undocumented)
-    nodeRenderer: (props: PresentationTreeNodeRendererProps) => React.ReactNode;
+    nodeRenderer: (props: FilterableTreeNodeRendererProps) => React.ReactNode;
+    // (undocumented)
+    reportUsage?: (props: {
+        featureId?: UsageTrackedFeatures;
+        reportInteraction: boolean;
+    }) => void;
 }
 
 // @beta
-export function FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element;
+export function FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, onVisibilityToggled, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element;
 
 // @beta
 export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & VisibilityTreeNodeRendererProps;
@@ -247,6 +265,8 @@ export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iMod
 export interface IModelContentTreeProps extends BaseTreeProps {
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
+    // @beta
+    onFeatureUsed?: (feature: string) => void;
     // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
@@ -334,6 +354,8 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     hierarchyLevelConfig?: HierarchyLevelConfig;
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
     // @beta
+    onFeatureUsed?: (feature: string) => void;
+    // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
     selectionPredicate?: ModelsTreeSelectionPredicate;
 }
@@ -418,6 +440,8 @@ export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 export interface SelectableTreeProps {
     // (undocumented)
     density?: "enlarged" | "default";
+    // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
     // (undocumented)
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     // (undocumented)
@@ -513,6 +537,8 @@ export interface TreeRenderProps {
     // (undocumented)
     density?: "enlarged" | "default";
     // (undocumented)
+    onFeatureUsed?: (feature: string) => void;
+    // (undocumented)
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
 }
 
@@ -537,6 +563,7 @@ export interface TreeWidgetOptions {
     defaultPanelSection?: StagePanelSection;
     defaultTreeWidgetPriority?: number;
     density?: "enlarged" | "default";
+    onFeatureUsed?: (feature: string) => void;
     onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
     trees?: TreeDefinition[];
 }
@@ -612,7 +639,7 @@ export interface VisibilityTreeFilterInfo {
 }
 
 // @public
-export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps): JSX.Element;
+export function VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProps): JSX.Element;
 
 // @public
 export interface VisibilityTreeNodeRendererProps {
@@ -621,6 +648,7 @@ export interface VisibilityTreeNodeRendererProps {
     iconsEnabled: boolean;
     isEnlarged?: boolean;
     levelOffset?: number;
+    onVisibilityToggled?: (enabled: boolean) => void;
 }
 
 // @public

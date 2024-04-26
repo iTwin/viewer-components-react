@@ -7,12 +7,12 @@ import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
 import * as moq from "typemoq";
-import { PropertyRecord } from "@itwin/appui-abstract";
+import { PropertyRecord, StandardTypeNames } from "@itwin/appui-abstract";
 import { PropertyFilterRuleOperator } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-common";
+import { KeySet, LabelDefinition, PropertyValueFormat, StandardNodeTypes } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
@@ -25,9 +25,11 @@ import {
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory } from "../../IModelUtils";
-import { mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
+import { mockPresentationManager, mockViewport, render, stubDOMMatrix, TestUtils, waitFor } from "../../TestUtils";
 import {
+  createElementNode,
   createInfoNode,
+  createModelNode,
   createPresentationTreeNodeItem,
   createSimpleTreeModelNode,
   createTestContentDescriptor,
@@ -257,6 +259,30 @@ describe("CategoryTree", () => {
         await waitFor(() => expect(disposeSpy).to.be.called);
       });
 
+      it("reports when node visibility checkbox is clicked", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
+        resetVisibilityHandlerMock();
+        visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "visible", isDisabled: false }));
+        const { user, getByTestId } = render(
+          <CategoryTree
+            {...sizeProps}
+            categories={categories}
+            iModel={imodelMock.object}
+            activeView={mockViewport().object}
+            onFeatureUsed={onFeatureUsedSpy}
+            categoryVisibilityHandler={visibilityHandler.object}
+          />,
+        );
+        const node = await waitFor(() => getByTestId("tree-node"));
+        const visibilityCheckbox = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
+        await user.click(visibilityCheckbox!);
+
+        expect(onFeatureUsedSpy).to.be.calledTwice;
+        expect(onFeatureUsedSpy).to.be.calledWith("use-categories-tree");
+        expect(onFeatureUsedSpy).to.be.calledWith("categories-tree-visibility-change");
+      });
+
       describe("categories", () => {
         it("disables category when enabled category checkbox is unchecked", async () => {
           setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
@@ -313,6 +339,8 @@ describe("CategoryTree", () => {
       });
 
       describe("hierarchy level filtering", () => {
+        stubDOMMatrix();
+
         beforeEach(() => {
           const localization = new EmptyLocalization();
           sinon.stub(Presentation, "localization").get(() => localization);
@@ -403,6 +431,133 @@ describe("CategoryTree", () => {
           );
 
           await waitFor(() => expect(queryByTitle("tree.clear-hierarchy-level-filter")).to.not.be.null);
+        });
+
+        it("reports when node visibility checkbox is clicked", async () => {
+          const onFeatureUsedSpy = sinon.spy();
+          setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
+          resetVisibilityHandlerMock();
+          visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "visible", isDisabled: false }));
+          const { user, getByTestId } = render(
+            <CategoryTree
+              {...sizeProps}
+              categories={categories}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              onFeatureUsed={onFeatureUsedSpy}
+              categoryVisibilityHandler={visibilityHandler.object}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+            />,
+          );
+          const node = await waitFor(() => getByTestId("tree-node"));
+          const visibilityCheckbox = node.querySelector("input"); // eslint-disable-line deprecation/deprecation
+          await user.click(visibilityCheckbox!);
+
+          expect(onFeatureUsedSpy).to.be.calledTwice;
+          expect(onFeatureUsedSpy).to.be.calledWith("use-categories-tree");
+          expect(onFeatureUsedSpy).to.be.calledWith("categories-tree-visibility-change");
+        });
+
+        it("reports when hierarchy level filter is applied", async () => {
+          const property = createTestPropertyInfo({ name: "TestProperty", type: StandardTypeNames.Bool });
+          const propertyField = createTestPropertiesContentField({
+            properties: [{ property }],
+            name: property.name,
+            label: property.name,
+            type: { typeName: StandardTypeNames.Bool, valueFormat: PropertyValueFormat.Primitive },
+          });
+          const initialFilter: PresentationInstanceFilterInfo = {
+            filter: { field: propertyField, operator: "is-false" },
+            usedClasses: [],
+          };
+          const model = createModelNode();
+          model.hasChildren = true;
+          model.filtering = { descriptor: createTestContentDescriptor({ fields: [propertyField] }), active: initialFilter, ancestorFilters: [] };
+          const element = createElementNode(model.id);
+          const onFeatureUsedSpy = sinon.spy();
+          resetVisibilityHandlerMock();
+          visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "visible", isDisabled: false }));
+          setupDataProvider([model, element]);
+          const { baseElement, user, getByTitle } = render(
+            <CategoryTree
+              {...sizeProps}
+              categories={categories}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              categoryVisibilityHandler={visibilityHandler.object}
+              onFeatureUsed={onFeatureUsedSpy}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+            />,
+          );
+
+          const filterButton = await waitFor(() => getByTitle("tree.filter-hierarchy-level"));
+          await user.click(filterButton);
+
+          // open property selector
+          const propertySelector = await waitFor(() => baseElement.querySelector(".fb-property-name input"));
+          expect(propertySelector).to.not.be.null;
+          await user.click(propertySelector!);
+
+          // select property
+          await user.click(getByTitle(propertyField.label));
+
+          // wait until apply button is enabled
+          const applyButton = await waitFor(() => {
+            const button = baseElement.querySelector<HTMLInputElement>(".presentation-instance-filter-dialog-apply-button");
+            expect(button?.disabled).to.be.false;
+            return button;
+          });
+          await user.click(applyButton!);
+
+          // wait until dialog closes
+          await waitFor(() => {
+            expect(baseElement.querySelector(".presentation-instance-filter-dialog")).to.be.null;
+          });
+
+          expect(onFeatureUsedSpy).to.be.calledWith(`use-categories-tree`);
+        });
+
+        it("reports when hierarchy level filter is cleared", async () => {
+          const property = createTestPropertyInfo({ name: "TestProperty", type: StandardTypeNames.Bool });
+          const propertyField = createTestPropertiesContentField({
+            properties: [{ property }],
+            name: property.name,
+            label: property.name,
+            type: { typeName: StandardTypeNames.Bool, valueFormat: PropertyValueFormat.Primitive },
+          });
+          const initialFilter: PresentationInstanceFilterInfo = {
+            filter: { field: propertyField, operator: "is-false" },
+            usedClasses: [],
+          };
+          const model = createModelNode();
+          model.hasChildren = true;
+          model.filtering = { descriptor: createTestContentDescriptor({ fields: [propertyField] }), active: initialFilter, ancestorFilters: [] };
+          const element = createElementNode(model.id);
+          const onFeatureUsedSpy = sinon.spy();
+          resetVisibilityHandlerMock();
+          visibilityHandler.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "visible", isDisabled: false }));
+          setupDataProvider([model, element]);
+          const { user, getByTitle, queryAllByTitle } = render(
+            <CategoryTree
+              {...sizeProps}
+              categories={categories}
+              iModel={imodelMock.object}
+              activeView={mockViewport().object}
+              categoryVisibilityHandler={visibilityHandler.object}
+              onFeatureUsed={onFeatureUsedSpy}
+              hierarchyLevelConfig={{ isFilteringEnabled: true }}
+            />,
+          );
+
+          const clearFilterButton = await waitFor(() => getByTitle("tree.clear-hierarchy-level-filter"));
+          await user.click(clearFilterButton);
+
+          // wait until dialog closes
+          await waitFor(() => {
+            expect(queryAllByTitle(".tree.clear-hierarchy-level-filter")).to.be.empty;
+          });
+
+          expect(onFeatureUsedSpy).to.be.calledWith(`use-categories-tree`);
         });
       });
 

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
+import classNames from "classnames";
 import { Fragment, useEffect, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -22,8 +23,6 @@ import type { IPresentationTreeDataProvider } from "@itwin/presentation-componen
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { CategoryTreeProps } from "./CategoriesTree";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";
-import classNames from "classnames";
-
 /**
  * Props that get passed to [[CategoriesTreeComponent]] header button renderer.
  * @see CategoriesTreeComponentProps.headerButtons
@@ -131,7 +130,11 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
         density={props.density}
       >
         {props.headerButtons
-          ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport: props.viewport, categories, filteredCategories })}</Fragment>)
+          ? props.headerButtons.map((btn, index) => (
+              <Fragment key={index}>
+                {btn({ viewport: props.viewport, categories, filteredCategories, density: props.density, onFeatureUsed: props.onFeatureUsed })}
+              </Fragment>
+            ))
           : [
               <ShowAllButton
                 viewport={props.viewport}
@@ -139,6 +142,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
                 filteredCategories={filteredCategories}
                 key="show-all-btn"
                 density={props.density}
+                onFeatureUsed={props.onFeatureUsed}
               />,
               <HideAllButton
                 viewport={props.viewport}
@@ -146,6 +150,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
                 filteredCategories={filteredCategories}
                 key="hide-all-btn"
                 density={props.density}
+                onFeatureUsed={props.onFeatureUsed}
               />,
               <InvertAllButton
                 viewport={props.viewport}
@@ -153,6 +158,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
                 filteredCategories={filteredCategories}
                 key="invert-all-btn"
                 density={props.density}
+                onFeatureUsed={props.onFeatureUsed}
               />,
             ]}
       </TreeHeader>
@@ -199,12 +205,13 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={() =>
+      onClick={() => {
+        props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-showall`);
         void showAllCategories(
           (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
           props.viewport,
-        )
-      }
+        );
+      }}
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -217,12 +224,13 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={() =>
+      onClick={() => {
+        props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-hideall`);
         void hideAllCategories(
           (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
           props.viewport,
-        )
-      }
+        );
+      }}
     >
       <SvgVisibilityHide />
     </IconButton>
@@ -235,7 +243,10 @@ function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       title={TreeWidget.translate("invert")}
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      onClick={() => void invertAllCategories(props.filteredCategories ?? props.categories, props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-invert`);
+        void invertAllCategories(props.filteredCategories ?? props.categories, props.viewport);
+      }}
     >
       <SvgVisibilityHalf />
     </IconButton>
