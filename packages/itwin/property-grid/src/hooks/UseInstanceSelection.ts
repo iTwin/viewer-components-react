@@ -10,6 +10,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey, KeySet } from "@itwin/presentation-common";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 const PropertyGridSelectionScope = "Property Grid";
 
@@ -51,6 +52,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
     focusedInstanceKey: undefined,
   });
   const { selectedKeys, previousKeys, canNavigateUp, focusedInstanceKey } = state;
+  const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
     const onSelectionChange = async (eventSource?: string) => {
@@ -100,6 +102,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
       return;
     }
 
+    onFeatureUsed("ancestor-navigation");
     const selectedKey = selectedKeys[0];
     updateStateImmediate((prev) => ({ ...prev, canNavigateUp: false }));
 
@@ -135,6 +138,7 @@ export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
     // select the current instance key
     Presentation.selection.replaceSelection(PropertyGridSelectionScope, imodel, [currentKey]);
 
+    onFeatureUsed("ancestor-navigation");
     updateStateImmediate(() => ({
       selectedKeys: [currentKey],
       previousKeys: newPreviousKeys,

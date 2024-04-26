@@ -8,7 +8,7 @@ import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid"
 import { TelemetryContextProvider } from "./hooks/UseTelemetryContext";
 import { PreferencesContextProvider } from "./PropertyGridPreferencesContext";
 
-import type { PerformanceTrackedFeatures } from "./hooks/UseTelemetryContext";
+import type { PerformanceTrackedFeatures, UsageTrackedFeatures } from "./hooks/UseTelemetryContext";
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid";
 import type { PreferencesStorage } from "./api/PreferencesStorage";
 /**
@@ -26,20 +26,25 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
    * Callback that is invoked when performance of tracked feature is measured.
    */
   onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
+
+  /**
+   * Callback that is invoked when a tracked feature is used.
+   */
+  onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
 }
 
 /**
  * Component that renders `MultiElementPropertyGrid` if there is active iModel connection.
  * @public
  */
-export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, ...props }: PropertyGridComponentProps) {
+export function PropertyGridComponent({ preferencesStorage, onPerformanceMeasured, onFeatureUsed, ...props }: PropertyGridComponentProps) {
   const imodel = useActiveIModelConnection();
   if (!imodel) {
     return null;
   }
 
   return (
-    <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasured}>
+    <TelemetryContextProvider onPerformanceMeasured={onPerformanceMeasured} onFeatureUsed={onFeatureUsed}>
       <PreferencesContextProvider storage={preferencesStorage}>
         <MultiElementPropertyGrid {...props} imodel={imodel} />
       </PreferencesContextProvider>
