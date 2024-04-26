@@ -3,14 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, Observable as RxjsObservable, tap } from "rxjs";
+
 import { TreeEventHandler } from "@itwin/components-react";
 
 import type {
   AbstractTreeNodeLoaderWithProvider,
   TreeCheckboxStateChangeEventArgs,
   TreeNodeEventArgs,
-  TreeSelectionChange,
   TreeSelectionModificationEventArgs,
   TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
@@ -47,20 +46,8 @@ export class ReportingTreeEventHandler extends TreeEventHandler {
   }
 
   public override onSelectionModified(props: TreeSelectionModificationEventArgs) {
-    let emittedValues = false;
-    const rxjsObservable = new RxjsObservable<TreeSelectionChange>((subscriber) => props.modifications.subscribe(subscriber));
-    const tracked = rxjsObservable.pipe(
-      tap({
-        next: () => (emittedValues = true),
-        finalize: () => {
-          if (emittedValues) {
-            this._reportUsage({ reportInteraction: true });
-          }
-        },
-      }),
-      concatMap(() => rxjsObservable),
-    );
-    return this._eventHandler.onSelectionModified({ modifications: tracked });
+    this._reportUsage({ reportInteraction: true });
+    return this._eventHandler.onSelectionModified(props);
   }
 
   public override onSelectionReplaced(props: TreeSelectionReplacementEventArgs) {

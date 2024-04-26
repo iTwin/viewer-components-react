@@ -164,7 +164,7 @@ describe("ExternalSourcesTree", () => {
         const expandButton = getByTestId("tree-node-expansion-toggle");
         await user.click(expandButton);
 
-        await waitFor(() => expect(onFeaturedUsedSpy).to.be.calledOnceWith("use-external-sources-tree"));
+        await waitFor(() => expect(onFeaturedUsedSpy).to.be.calledWith("use-external-sources-tree"));
       });
 
       describe("hierarchy level filtering", () => {

@@ -132,7 +132,7 @@ describe("IModelContentTree", () => {
         const expandButton = getByTestId("tree-node-expansion-toggle");
         await user.click(expandButton);
 
-        await waitFor(() => expect(onFeaturedUsedSpy).to.be.calledOnceWith("use-imodel-content-tree"));
+        await waitFor(() => expect(onFeaturedUsedSpy).to.be.calledWith("use-imodel-content-tree"));
       });
 
       describe("hierarchy level filtering", () => {

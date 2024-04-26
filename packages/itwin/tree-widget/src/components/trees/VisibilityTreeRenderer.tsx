@@ -131,6 +131,7 @@ export function VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProp
         props.onVisibilityToggled?.(e.currentTarget.checked);
         props.onChange(e.currentTarget.checked);
       }}
+      onMouseDown={(e) => e.stopPropagation()}
       onClick={props.onClick}
       disabled={props.disabled}
       title={props.title}

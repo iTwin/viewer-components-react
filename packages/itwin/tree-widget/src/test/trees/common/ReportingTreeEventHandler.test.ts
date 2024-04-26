@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { Subject } from "rxjs";
 import sinon from "sinon";
 import { TreeEventHandler } from "@itwin/components-react";
 import { ReportingTreeEventHandler } from "../../../components/trees/common/ReportingTreeEventHandler";
@@ -14,7 +13,6 @@ import type {
   Subscription,
   TreeCheckboxStateChangeEventArgs,
   TreeNodeEventArgs,
-  TreeSelectionChange,
   TreeSelectionModificationEventArgs,
   TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
@@ -83,26 +81,9 @@ describe("ReportingTreeEventHandler", () => {
   });
 
   describe("`onSelectionModified`", () => {
-    it("calls wrapped function and reports when selection change has values", () => {
-      const subject = new Subject<TreeSelectionChange>();
-      wrappedHandler.onSelectionModified.callsFake(({ modifications }) => modifications.subscribe());
-      createHandler().onSelectionModified({ modifications: subject });
-
-      subject.next({} as unknown as TreeSelectionChange);
-      subject.complete();
-
+    it("calls wrapped function", () => {
+      createHandler().onSelectionModified({} as unknown as TreeSelectionModificationEventArgs);
       expect(reportUsageSpy).to.be.calledOnceWith({ reportInteraction: true });
-      expect(wrappedHandler.onSelectionModified).to.be.calledOnce;
-    });
-
-    it("calls wrapped function and does not report when selection change is empty", () => {
-      const subject = new Subject<TreeSelectionChange>();
-      wrappedHandler.onSelectionModified.callsFake(({ modifications }) => modifications.subscribe());
-      createHandler().onSelectionModified({ modifications: subject });
-
-      subject.complete();
-
-      expect(reportUsageSpy).to.not.be.called;
       expect(wrappedHandler.onSelectionModified).to.be.calledOnce;
     });
   });
