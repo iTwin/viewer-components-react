@@ -17,8 +17,15 @@ import * as React from "react";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import ReportsContainer from "./components/ReportsContainer";
 
+/**
+ * @public
+ */
 export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
 
+/**
+ * Reports Config Widget UI Provider
+ * @public
+ */
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";
   private readonly _getAccessToken?: () => Promise<AccessToken>;
