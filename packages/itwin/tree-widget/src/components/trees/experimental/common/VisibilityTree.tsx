@@ -32,8 +32,7 @@ export function VisibilityTree({
   imodel,
   height,
   width,
-  queryExecutor,
-  metadataProvider,
+  imodelAccess,
   getIcon,
   getFilteredPaths,
   getHierarchyDefinitionsProvider,
@@ -43,8 +42,7 @@ export function VisibilityTree({
   density,
 }: VisibilityTreeProps) {
   const { hierarchyProvider, isFiltering } = useHierarchyProvider({
-    queryExecutor,
-    metadataProvider,
+    imodelAccess,
     filter,
     getHierarchyDefinitionsProvider,
     getFilteredPaths,

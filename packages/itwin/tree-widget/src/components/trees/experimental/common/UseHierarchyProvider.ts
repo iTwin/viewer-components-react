@@ -4,40 +4,33 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useDebouncedAsyncValue } from "@itwin/components-react";
-import { createMetadataProvider } from "@itwin/presentation-core-interop";
 import {
   HierarchyNodeIdentifiersPath,
   HierarchyProvider,
   IHierarchyLevelDefinitionsFactory,
   ILimitingECSqlQueryExecutor,
 } from "@itwin/presentation-hierarchies";
+import { IECClassHierarchyInspector, IECMetadataProvider } from "@itwin/presentation-shared";
 import { useCallback, useEffect, useState } from "react";
 
 /** @internal */
-export interface MetadataAccess {
-  queryExecutor: ILimitingECSqlQueryExecutor;
-  metadataProvider: ReturnType<typeof createMetadataProvider>;
-}
+export type IModelAccess = IECMetadataProvider & ILimitingECSqlQueryExecutor & IECClassHierarchyInspector;
 
 /** @internal */
-export interface GetFilteredPathsProps extends MetadataAccess {
+export interface GetFilteredPathsProps {
+  imodelAccess: IModelAccess;
   filter: string;
 }
 
-interface UseHierarchyProviderProps extends MetadataAccess {
+interface UseHierarchyProviderProps {
   filter: string;
-  getHierarchyDefinitionsProvider: (props: MetadataAccess) => IHierarchyLevelDefinitionsFactory;
+  imodelAccess: IModelAccess;
+  getHierarchyDefinitionsProvider: (props: { imodelAccess: IModelAccess }) => IHierarchyLevelDefinitionsFactory;
   getFilteredPaths?: (props: GetFilteredPathsProps) => Promise<HierarchyNodeIdentifiersPath[]>;
 }
 
 /** @internal */
-export function useHierarchyProvider({
-  queryExecutor,
-  metadataProvider,
-  filter,
-  getHierarchyDefinitionsProvider,
-  getFilteredPaths,
-}: UseHierarchyProviderProps) {
+export function useHierarchyProvider({ imodelAccess, filter, getHierarchyDefinitionsProvider, getFilteredPaths }: UseHierarchyProviderProps) {
   const [hierarchyProvider, setHierarchyProvider] = useState<HierarchyProvider>();
   const [isFiltering, setIsFiltering] = useState(false);
 
@@ -50,20 +43,18 @@ export function useHierarchyProvider({
 
       setIsFiltering(true);
       return await getFilteredPaths({
-        metadataProvider: metadataProvider,
-        queryExecutor: queryExecutor,
+        imodelAccess,
         filter,
       });
-    }, [metadataProvider, queryExecutor, setIsFiltering, filter]),
+    }, [imodelAccess, setIsFiltering, filter]),
   );
 
   useEffect(() => {
     setIsFiltering(false);
     setHierarchyProvider(
       new HierarchyProvider({
-        metadataProvider: metadataProvider,
-        queryExecutor: queryExecutor,
-        hierarchyDefinition: getHierarchyDefinitionsProvider({ queryExecutor, metadataProvider }),
+        imodelAccess,
+        hierarchyDefinition: getHierarchyDefinitionsProvider({ imodelAccess }),
         filtering: filteredPaths
           ? {
               paths: filteredPaths,
@@ -71,7 +62,7 @@ export function useHierarchyProvider({
           : undefined,
       }),
     );
-  }, [queryExecutor, metadataProvider, filteredPaths, getHierarchyDefinitionsProvider]);
+  }, [imodelAccess, filteredPaths, getHierarchyDefinitionsProvider]);
 
   return { hierarchyProvider, isFiltering };
 }

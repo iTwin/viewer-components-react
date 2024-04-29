@@ -14,17 +14,19 @@ import {
 } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, HierarchyProvider, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
-import { HierarchyLevelConfiguration } from "@itwin/presentation-hierarchies-react";
+import { HierarchyLevelConfiguration, useTree } from "@itwin/presentation-hierarchies-react";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { useCallback, useMemo, useState } from "react";
 
-interface UseHierarchyFilteringProps {
+type UseTreeResult = ReturnType<typeof useTree>;
+
+interface UseHierarchyFilteringOwnProps {
   imodel: IModelConnection;
-  setHierarchyLevelFilter: (nodeId: string, filter: GenericInstanceFilter | undefined) => void;
-  getHierarchyLevelConfiguration: (nodeId: string) => HierarchyLevelConfiguration | undefined;
-  defaultHierarchyLevelSizeLimit: number;
   hierarchyProvider?: HierarchyProvider;
+  defaultHierarchyLevelSizeLimit: number;
 }
+
+type UseHierarchyFilteringProps = UseHierarchyFilteringOwnProps & Pick<UseTreeResult, "setHierarchyLevelFilter" | "getHierarchyLevelConfiguration">;
 
 /** @internal */
 export function useHierarchyFiltering({
@@ -34,9 +36,9 @@ export function useHierarchyFiltering({
   setHierarchyLevelFilter,
   getHierarchyLevelConfiguration,
 }: UseHierarchyFilteringProps) {
-  const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string; configuration: HierarchyLevelConfiguration }>();
+  const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string | undefined; configuration: HierarchyLevelConfiguration }>();
   const onFilterClick = useCallback(
-    (nodeId: string) => {
+    (nodeId: string | undefined) => {
       const configuration = getHierarchyLevelConfiguration(nodeId);
       setFilteringOptions(configuration ? { nodeId, configuration } : undefined);
     },

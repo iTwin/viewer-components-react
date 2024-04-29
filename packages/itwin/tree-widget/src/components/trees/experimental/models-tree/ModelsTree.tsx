@@ -17,7 +17,7 @@ import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 import { VisibilityTree } from "../common/VisibilityTree";
-import { GetFilteredPathsProps, MetadataAccess } from "../common/UseHierarchyProvider";
+import { GetFilteredPathsProps, IModelAccess } from "../common/UseHierarchyProvider";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { HierarchyLevelConfig } from "../../common/Types";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
@@ -44,13 +44,15 @@ export function ExperimentalModelsTree({
   density,
   hierarchyLevelConfig,
 }: ExperimentalModelsTreeProps) {
-  const [metadata, setMetadata] = useState<MetadataAccess>();
+  const [imodelAccess, setImodelAccess] = useState<IModelAccess>();
   const hierarchyLevelSizeLimit = hierarchyLevelConfig?.sizeLimit ?? 1000;
 
   useEffect(() => {
-    setMetadata({
-      queryExecutor: createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), hierarchyLevelSizeLimit),
-      metadataProvider: createMetadataProvider(getSchemaContext(imodel)),
+    const metadataProvider = createMetadataProvider(getSchemaContext(imodel));
+    setImodelAccess({
+      ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), hierarchyLevelSizeLimit),
+      ...metadataProvider,
+      ...createCachingECClassHierarchyInspector({ metadataProvider }),
     });
   }, [imodel, getSchemaContext, hierarchyLevelSizeLimit]);
 
@@ -69,14 +71,13 @@ export function ExperimentalModelsTree({
     [hierarchyLevelConfig?.isFilteringEnabled],
   );
 
-  if (!metadata) {
+  if (!imodelAccess) {
     return null;
   }
 
   return (
     <VisibilityTree
-      metadataProvider={metadata.metadataProvider}
-      queryExecutor={metadata.queryExecutor}
+      imodelAccess={imodelAccess}
       filter={filter}
       height={height}
       width={width}
@@ -92,8 +93,8 @@ export function ExperimentalModelsTree({
 }
 
 function createDefinitionsProviderFactory(enableHierarchyFiltering?: boolean) {
-  return ({ metadataProvider }: MetadataAccess): IHierarchyLevelDefinitionsFactory => {
-    const modelsTreeDefinition = new ModelsTreeDefinition({ metadataProvider });
+  return (props: { imodelAccess: IModelAccess }): IHierarchyLevelDefinitionsFactory => {
+    const modelsTreeDefinition = new ModelsTreeDefinition(props);
     return {
       defineHierarchyLevel: (props) => modelsTreeDefinition.defineHierarchyLevel(props),
       postProcessNode: async (node) => {
@@ -110,10 +111,9 @@ function createDefinitionsProviderFactory(enableHierarchyFiltering?: boolean) {
   };
 }
 
-function getFilteredNodePaths({ metadataProvider, queryExecutor, filter }: GetFilteredPathsProps): Promise<HierarchyNodeIdentifiersPath[]> {
+function getFilteredNodePaths({ imodelAccess, filter }: GetFilteredPathsProps): Promise<HierarchyNodeIdentifiersPath[]> {
   return ModelsTreeDefinition.createInstanceKeyPaths({
-    classHierarchyInspector: createCachingECClassHierarchyInspector({ metadataProvider }),
-    queryExecutor,
+    imodelAccess,
     label: filter,
   });
 }
