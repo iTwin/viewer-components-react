@@ -6,13 +6,14 @@
 import { useCallback, useEffect } from "react";
 import { usePresentationTreeState } from "@itwin/presentation-components";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
+import { ReportingTreeEventHandler } from "./ReportingTreeEventHandler";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeEventHandlerProps, UsePresentationTreeStateProps } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityTreeEventHandlerParams, VisibilityTreeSelectionPredicate } from "../VisibilityTreeEventHandler";
 import type { VisibilityTreeFilterInfo } from "./Types";
-
+import type { UsageTrackedFeatures } from "./UseFeatureReporting";
 /**
  * Props for [[useVisibilityTreeState]] hook.
  * @beta
@@ -34,6 +35,8 @@ export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeSta
   eventHandler?: (props: VisibilityTreeEventHandlerParams) => VisibilityTreeEventHandler;
   /** The limit for how many items should be loaded for a single hierarchy level. */
   hierarchyLevelSizeLimit?: number;
+  /** Callback called when a feature is used. */
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 /**
@@ -50,6 +53,7 @@ export function useVisibilityTreeState({
   visibilityHandler,
   selectionPredicate,
   eventHandler,
+  reportUsage,
   ...props
 }: UseVisibilityTreeStateProps) {
   const eventHandlerFactory = useCallback(
@@ -64,9 +68,10 @@ export function useVisibilityTreeState({
         selectionPredicate,
       };
 
-      return eventHandler ? eventHandler(eventHandlerProps) : new VisibilityTreeEventHandler(eventHandlerProps);
+      const handler = eventHandler ? eventHandler(eventHandlerProps) : new VisibilityTreeEventHandler(eventHandlerProps);
+      return reportUsage ? new ReportingTreeEventHandler({ eventHandler: handler, reportUsage, nodeLoader: eventHandlerProps.nodeLoader }) : handler;
     },
-    [visibilityHandler, selectionPredicate, eventHandler],
+    [visibilityHandler, selectionPredicate, eventHandler, reportUsage],
   );
 
   const treeState = usePresentationTreeState({

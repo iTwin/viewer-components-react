@@ -32,6 +32,8 @@ import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-re
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext";
+import { useLatest } from "../hooks/UseLatest";
 
 /**
  * Arguments for the `onPropertyUpdated` callback.
@@ -93,12 +95,15 @@ export function PropertyGridContent({
 
   const [filterText, setFilterText] = useState<string>("");
   const { showNullValues } = useNullValueSettingContext();
+  const { onFeatureUsed } = useTelemetryContext();
   const filterer = useFilterer({ showNullValues, filterText });
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const handleResize = useCallback((w: number, h: number) => {
     setSize({ width: w, height: h });
   }, []);
+
+  const reportThrottledFiltering = useThrottled(() => onFeatureUsed("filter-properties"), 1000);
 
   const settingsProps: SettingsDropdownMenuProps = {
     settingsMenuItems,
@@ -126,6 +131,9 @@ export function PropertyGridContent({
         onBackButtonClick={onBackButton}
         settingsProps={settingsProps}
         onSearchTextChange={(searchText: string) => {
+          if (searchText.length > 0) {
+            reportThrottledFiltering();
+          }
           setFilterText(searchText);
         }}
       />
@@ -196,4 +204,19 @@ function useFilterer({ showNullValues, filterText }: UseFiltererProps) {
   }, [defaultFilterers.nonEmpty, filterText, showNullValues]);
 
   return compositeFilterer;
+}
+
+function useThrottled(func: () => void, timeout: number) {
+  const isThrottledRef = useLatest(false);
+
+  return () => {
+    if (isThrottledRef.current) {
+      return;
+    }
+    isThrottledRef.current = true;
+    func();
+    setTimeout(() => {
+      isThrottledRef.current = false;
+    }, timeout);
+  };
 }

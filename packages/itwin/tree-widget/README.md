@@ -223,3 +223,62 @@ return (
   />
 );
 ```
+
+## Usage tracking
+
+Components from this package allows consumers to track the usage of specific features.
+
+This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent` or `TreeWidgetUiItemsProvider`. The function is invoked with feature id as the component is being used. List of tracked features:
+
+- `"choose-{tree}"` - when a tree is selected in the tree selector.
+- `"use-{tree}"` - when an interaction with a tree hierarchy happens.
+- `"{tree}-visibility-change"` - when visibility is toggled using an "eye" button.
+- `"models-tree-showall"` - when "Show All" button is used in `ModelsTreeComponent`.
+- `"models-tree-hideall"` - when "Hide All" button is used in `ModelsTreeComponent`.
+- `"models-tree-invert"` - when "Invert" button is used in `ModelsTreeComponent`.
+- `"models-tree-view2d"` - when "Toggle 2D Views" button is used in `ModelsTreeComponent`.
+- `"models-tree-view3d"` - when "Toggle 3D Views" button is used in `ModelsTreeComponent`.
+- `"models-tree-zoom-to-node"` - when node is zoomed to in `ModelsTree`.
+- `"models-tree-filtering"` - when a filter is applied in `ModelsTree`.
+- `"models-tree-hierarchy-level-filtering"` - when a hierarchy level filter is applied in `ModelsTree`.
+- `"models-tree-hierarchy-level-size-limit-hit"` - when hierarchy limit is exceeded while loading nodes in `ModelsTree`.
+- `"categories-tree-showall"` - when "Show All" button is used in `CategoriesTreeComponent`.
+- `"categories-tree-hideall"` - when "Hide All" button is used in `CategoriesTreeComponent`.
+- `"categories-tree-invert"` - when "Invert" button is used in `CategoriesTreeComponent`.
+
+Where `{tree}` specifies which tree component the feature is of.
+
+Example:
+
+```ts
+import { UiItemsManager } from "@itwin/appui-react";
+import { TreeWidgetUiItemsProvider, ModelsTreeComponent } from "@itwin/tree-widget-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({
+    defaultPanelLocation: StagePanelLocation.Left,
+    defaultPanelSection: StagePanelSection.End,
+    defaultTreeWidgetPriority: 1000,
+    onFeatureUsed={(feature) => {
+      telemetryClient.log(`TreeWidget [${feature}] used`);
+    }},
+    trees: [{
+      id: ModelsTreeComponent.id,
+      getLabel: ModelsTreeComponent.getLabel,
+      render: (props) => <ModelsTreeComponent { ...props } />,
+    }];
+  })
+);
+```
+
+For individual tree components the `onFeatureUsed` callback should be supplied through props:
+
+```ts
+return (
+  <ModelsTreeComponent
+    onFeatureUsed={(feature) => {
+      console.log(`TreeWidget [${feature}] used`)
+    }}
+  />
+);
+```

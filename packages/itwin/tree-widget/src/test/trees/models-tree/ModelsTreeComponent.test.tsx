@@ -162,6 +162,16 @@ describe("<ModelsTreeComponent />", () => {
         await user.click(button);
         expect(showAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
       });
+
+      it("reports when clicked", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <ModelsTreeComponent.ShowAllButton models={models} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-showall");
+      });
     });
 
     describe("<HideAllButton />", () => {
@@ -172,6 +182,16 @@ describe("<ModelsTreeComponent />", () => {
         await user.click(button);
         expect(hideAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
       });
+
+      it("reports when clicked", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <ModelsTreeComponent.HideAllButton models={models} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-hideall");
+      });
     });
 
     describe("<InvertAllButton />", () => {
@@ -181,6 +201,16 @@ describe("<ModelsTreeComponent />", () => {
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
         expect(invertAllSpy).to.be.calledWith(["testModelId1", "testModelId2"], vpMock.object);
+      });
+
+      it("reports when clicked", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <ModelsTreeComponent.InvertButton models={models} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-invert");
       });
     });
 
@@ -242,6 +272,21 @@ describe("<ModelsTreeComponent />", () => {
 
         await waitFor(() => expect(areAllModelsVisibleSpy).to.be.called);
       });
+
+      it("reports when clicked", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <ModelsTreeComponent.View2DButton
+            models={[{ id: "modelTestId", isPlanProjection: true }]}
+            viewport={mockViewport().object}
+            density="enlarged"
+            onFeatureUsed={onFeatureUsedSpy}
+          />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view2d");
+      });
     });
 
     describe("<View3DButton />", () => {
@@ -301,6 +346,21 @@ describe("<ModelsTreeComponent />", () => {
         });
 
         await waitFor(() => expect(areAllModelsVisibleSpy).to.be.called);
+      });
+
+      it("reports when clicked", async () => {
+        const onFeatureUsedSpy = sinon.spy();
+        const { user, getByRole } = render(
+          <ModelsTreeComponent.View3DButton
+            models={[{ id: "modelTestId", isPlanProjection: false }]}
+            viewport={mockViewport().object}
+            density="enlarged"
+            onFeatureUsed={onFeatureUsedSpy}
+          />,
+        );
+        const button = await waitFor(() => getByRole("button"));
+        await user.click(button);
+        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view3d");
       });
     });
   });

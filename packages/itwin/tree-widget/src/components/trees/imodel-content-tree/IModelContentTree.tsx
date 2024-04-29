@@ -3,13 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { SelectionMode } from "@itwin/components-react";
+import { useCallback } from "react";
+import { SelectionMode, TreeEventHandler } from "@itwin/components-react";
 import { PresentationTree, PresentationTreeNodeRenderer, usePresentationTreeState } from "@itwin/presentation-components";
+import { ReportingTreeEventHandler } from "../common/ReportingTreeEventHandler";
 import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
+import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 
+import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
 /**
@@ -35,6 +39,12 @@ export interface IModelContentTreeProps extends BaseTreeProps {
    * @beta
    */
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+  /**
+   * Callback that is invoked when a tracked feature is used.
+   * @param featureId ID of the feature.
+   * @beta
+   */
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -43,12 +53,26 @@ export interface IModelContentTreeProps extends BaseTreeProps {
  * @public
  */
 export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, width, height, selectionMode, hierarchyLevelConfig } = props;
+  const { iModel, width, height, selectionMode, hierarchyLevelConfig, onFeatureUsed } = props;
 
-  const reporting = usePerformanceReporting({
+  const { reportUsage } = useFeatureReporting({ treeIdentifier: IModelContentTreeComponent.id, onFeatureUsed });
+  const { onNodeLoaded } = usePerformanceReporting({
     treeIdentifier: IModelContentTreeComponent.id,
     onPerformanceMeasured: props.onPerformanceMeasured,
   });
+
+  const eventHandlerFactory = useCallback(
+    (handlerProps: PresentationTreeEventHandlerProps) => {
+      const nodeLoader = handlerProps.nodeLoader;
+      const eventHandler = new TreeEventHandler({ modelSource: nodeLoader.modelSource, nodeLoader });
+      return new ReportingTreeEventHandler({
+        nodeLoader,
+        eventHandler,
+        reportUsage,
+      });
+    },
+    [reportUsage],
+  );
 
   const state = usePresentationTreeState({
     imodel: iModel,
@@ -58,7 +82,8 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
     customizeTreeNodeItem,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
     enableHierarchyAutoUpdate: true,
-    onNodeLoaded: reporting.onNodeLoaded,
+    onNodeLoaded,
+    eventHandlerFactory,
   });
 
   const treeRendererProps = {

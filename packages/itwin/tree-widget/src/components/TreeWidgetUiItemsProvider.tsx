@@ -35,6 +35,8 @@ export interface TreeWidgetOptions {
   density?: "enlarged" | "default";
   /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
+  /** Callback that is invoked when a tracked feature is used. */
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -82,6 +84,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
             trees={trees}
             density={this._treeWidgetOptions?.density}
             onPerformanceMeasured={this._treeWidgetOptions?.onPerformanceMeasured}
+            onFeatureUsed={this._treeWidgetOptions?.onFeatureUsed}
           />
         ),
         icon: <SvgHierarchyTree />,
