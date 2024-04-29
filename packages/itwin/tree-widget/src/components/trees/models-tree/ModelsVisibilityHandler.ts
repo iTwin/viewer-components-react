@@ -10,13 +10,12 @@ import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { eachValueFrom } from "./internal/EachValueFrom";
-import { createElementIdsCache } from "./internal/ElementIdsCache";
 import { createQueryHandler } from "./internal/QueryHandler";
-import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { createTooltip } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import { NodeUtils } from "./NodeUtils";
 
+import type { IQueryHandler } from "./internal/QueryHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -24,8 +23,6 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { ECClassGroupingNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEventHandler";
-import type { SubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
-import type { IElementIdsCache } from "./internal/ElementIdsCache";
 
 /**
  * Props for [[ModelsVisibilityHandler]]
@@ -36,8 +33,7 @@ export interface ModelsVisibilityHandlerProps {
   rulesetId: string;
   viewport: Viewport;
   hierarchyAutoUpdateEnabled?: boolean;
-  /** @internal */
-  subjectModelIdsCache?: SubjectModelIdsCache;
+  queryHandler?: IQueryHandler;
 }
 
 /**
@@ -47,23 +43,21 @@ export interface ModelsVisibilityHandlerProps {
  */
 export class ModelsVisibilityHandler implements IVisibilityHandler {
   // eslint-disable-next-line deprecation/deprecation
-  private _props: ModelsVisibilityHandlerProps;
-  private _subjectModelIdsCache: SubjectModelIdsCache;
+  private readonly _props: ModelsVisibilityHandlerProps;
+  private readonly _queryHandler: IQueryHandler;
+  private readonly _eventListener: IVisibilityChangeEventListener;
   private _filteredDataProvider?: IFilteredPresentationTreeDataProvider;
-  private _elementIdsCache: IElementIdsCache;
-  private _eventListener: IVisibilityChangeEventListener;
   private _removePresentationHierarchyListener?: () => void;
 
   // eslint-disable-next-line deprecation/deprecation
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
-    this._subjectModelIdsCache = props.subjectModelIdsCache ?? createSubjectModelIdsCache(createQueryHandler(this._props.viewport.iModel));
-    this._elementIdsCache = createElementIdsCache(this._props.viewport.iModel, this._props.rulesetId);
+    this._queryHandler = props.queryHandler ?? createQueryHandler(this._props.viewport.iModel, this._props.rulesetId);
     this._eventListener = createVisibilityChangeEventListener(this._props.viewport);
     if (this._props.hierarchyAutoUpdateEnabled) {
       // eslint-disable-next-line @itwin/no-internal
       this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(
-        /* istanbul ignore next */ () => this._elementIdsCache.clear(),
+        /* istanbul ignore next */ () => this._queryHandler.invalidateCache(),
       );
     }
   }
@@ -354,7 +348,10 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return;
     }
 
-    for await (const childId of this.getAssemblyElementIds(id).getElementIds()) {
+    if (!modelId || !categoryId) {
+      return;
+    }
+    for await (const childId of this.getAssemblyElementIds(id, modelId, categoryId).getElementIds()) {
       this.changeElementStateInternal(childId, on, isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements);
     }
   }
@@ -425,7 +422,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   private async getSubjectModelIds(subjectIds: Id64String[]): Promise<Id64Array> {
     return firstValueFrom(
       from(subjectIds).pipe(
-        mergeMap((subjectId) => this._subjectModelIdsCache.getSubjectModelIdObs(subjectId)),
+        mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId)),
         toArray(),
       ),
     );
@@ -435,8 +432,8 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
    * Wrapper for element IDs cache access which allows for easier stubbing in tests.
    */
   // istanbul ignore next
-  private getAssemblyElementIds(id: string) {
-    const elementIds = this._elementIdsCache.getAssemblyElementIds(id);
+  private getAssemblyElementIds(elementId: string, modelId: string, categoryId: string) {
+    const elementIds = this._queryHandler.queryElementChildren({ elementId, modelId, categoryId });
     return {
       async *getElementIds() {
         for await (const item of eachValueFrom(elementIds)) {
@@ -452,7 +449,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   // istanbul ignore next
   private async getGroupedElementIds(groupingNodeKey: GroupingNodeKey) {
     return firstValueFrom(
-      this._elementIdsCache.getGroupedElementIds(groupingNodeKey).pipe(
+      this._queryHandler.queryGroupingNodeChildren(groupingNodeKey).pipe(
         map((x) => {
           return {
             ...x,

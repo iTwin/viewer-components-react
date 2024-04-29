@@ -27,9 +27,9 @@ import { ModelsTreeNodeType } from "../../../components/trees/models-tree/NodeUt
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, render, stubDOMMatrix, TestUtils, waitFor } from "../../TestUtils";
 import {
-  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeElementIdsCache, createInfoNode, createKey, createModelNode,
-  createPresentationTreeNodeItem, createSimpleTreeModelNode, createSubjectNode, createTestContentDescriptor, createTestPropertiesContentField,
-  createTestPropertyInfo, stubFactoryFunction,
+  createCategoryNode, createElementClassGroupingNode, createElementNode, createInfoNode, createKey, createModelNode, createPresentationTreeNodeItem,
+  createSimpleTreeModelNode, createSubjectNode, createTestContentDescriptor, createTestPropertiesContentField, createTestPropertyInfo,
+  stubFactoryFunction,
 } from "../Common";
 
 import type { StubbedFactoryFunction } from "../Common";
@@ -42,7 +42,6 @@ import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { PresentationManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import type { IElementIdsCache } from "../../../components/trees/models-tree/internal/ElementIdsCache";
 
 describe("ModelsTree", () => {
   const sizeProps = { width: 200, height: 200 };
@@ -977,7 +976,6 @@ describe("ModelsTree", () => {
         }
 
         let createHierarchyBasedHandlerStub: StubbedFactoryFunction<IHierarchyBasedVisibilityHandler>;
-        let createElementIdsCacheStub: StubbedFactoryFunction<IElementIdsCache>;
 
         before(() => {
           createHierarchyBasedHandlerStub = stubFactoryFunction(
@@ -985,16 +983,10 @@ describe("ModelsTree", () => {
             "createHierarchyBasedVisibilityHandler",
             createFakeProvider,
           );
-          createElementIdsCacheStub = stubFactoryFunction(
-            `${__dirname}/../../../components/trees/models-tree/internal/ElementIdsCache`,
-            "createElementIdsCache",
-            () => createFakeElementIdsCache(),
-          );
         });
 
         afterEach(() => {
           createHierarchyBasedHandlerStub.reset();
-          createElementIdsCacheStub.reset();
         });
 
         it("doesn't create hierarchy based handler if legacy one is provided", async () => {

@@ -17,10 +17,7 @@ import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { createHierarchyBasedVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
-import { createCachingQueryHandler } from "./internal/CachingQueryHandler";
-import { createElementIdsCache } from "./internal/ElementIdsCache";
 import { createQueryHandler } from "./internal/QueryHandler";
-import { createSubjectModelIdsCache } from "./internal/SubjectModelIdsCache";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./internal/Utils";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
@@ -360,7 +357,7 @@ function useLegacyVisibilityHandler({
   hierarchyAutoUpdateEnabled,
   iModel,
 }: UseVisibilityHandlerProps) {
-  const subjectModelIdsCache = useMemo(() => createSubjectModelIdsCache(createQueryHandler(iModel)), [iModel]);
+  const subjectModelIdsCache = useMemo(() => createQueryHandler(iModel, rulesetId), [iModel, rulesetId]);
   // eslint-disable-next-line deprecation/deprecation
   const [state, setState] = useState<ModelsVisibilityHandler>();
 
@@ -375,7 +372,6 @@ function useLegacyVisibilityHandler({
       rulesetId,
       viewport: activeView,
       hierarchyAutoUpdateEnabled,
-      subjectModelIdsCache,
     };
 
     // eslint-disable-next-line deprecation/deprecation
@@ -400,9 +396,7 @@ function useHierarchyBasedVisibilityHandler({
   hierarchyBasedHandler?: UseTreeProps["hierarchyBasedVisibilityHandler"];
 }) {
   const [state, setState] = useState<IHierarchyBasedVisibilityHandler>();
-  const queryHandler = useMemo(() => createCachingQueryHandler(createQueryHandler(iModel)), [iModel]);
-  const subjectModelIdsCache = useMemo(() => createSubjectModelIdsCache(createQueryHandler(iModel)), [iModel]);
-  const elementIdsCache = useMemo(() => createElementIdsCache(iModel, rulesetId), [iModel, rulesetId]);
+  const queryHandler = useMemo(() => createQueryHandler(iModel, rulesetId), [iModel, rulesetId]);
 
   useEffect(() => {
     if (legacyHandler || (hierarchyBasedHandler && typeof hierarchyBasedHandler !== "function")) {
@@ -411,8 +405,6 @@ function useHierarchyBasedVisibilityHandler({
 
     const visibilityHandlerProps: HierarchyBasedVisibilityHandlerProps = {
       viewport: activeView,
-      subjectModelIdsCache,
-      elementIdsCache,
       queryHandler,
       hierarchyAutoUpdateEnabled,
     };
@@ -422,7 +414,7 @@ function useHierarchyBasedVisibilityHandler({
     return () => {
       handler.dispose();
     };
-  }, [rulesetId, activeView, hierarchyAutoUpdateEnabled, queryHandler, subjectModelIdsCache, elementIdsCache, legacyHandler, hierarchyBasedHandler]);
+  }, [activeView, hierarchyAutoUpdateEnabled, queryHandler, legacyHandler, hierarchyBasedHandler]);
 
   if (legacyHandler) {
     return undefined;

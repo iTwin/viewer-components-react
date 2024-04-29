@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, EMPTY, filter, from, map, of, reduce } from "rxjs";
+import { concatMap, concatWith, EMPTY, filter, from, map, of, reduce } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
@@ -25,6 +25,7 @@ import type {
   EditorDescription,
   Field,
   InstanceKey,
+  NodeKey,
   PrimitiveTypeDescription,
   Property,
   PropertyInfo,
@@ -35,50 +36,33 @@ import type {
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IQueryHandler } from "../../components/trees/models-tree/internal/QueryHandler";
 import type { Viewport, ViewState } from "@itwin/core-frontend";
-import type { IElementIdsCache } from "../../components/trees/models-tree/internal/ElementIdsCache";
+
 interface SubjectModelIdsMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
   subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64String[]>;
-  categoryElements?: Map<Id64String, Array<string | { id: string; hasChildren: boolean }>>;
-}
-
-interface SubjectsRow {
-  id: Id64String;
-  parentId?: Id64String;
-  targetPartitionId?: Id64String;
-}
-
-interface ElementRow {
-  id: Id64String;
-  parentId: Id64String;
+  categoryElements?: Map<Id64String, Array<Id64String>>;
+  elementChildren?: Map<Id64String, Array<Id64String>>;
+  groupingNodeChildren?: Map<NodeKey, { modelId: string; categoryId: string; elementIds: Array<string> }>;
 }
 
 export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQueryHandler {
-  const subjectQueryRows: SubjectsRow[] = [];
-  props?.subjectsHierarchy?.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
-
-  const modelRows: ElementRow[] = [];
-  props?.subjectModels?.forEach((modelInfos, subjectId) => modelInfos.forEach((modelId) => modelRows.push({ id: modelId, parentId: subjectId })));
-
   const res: IQueryHandler = {
-    queryAllSubjects: sinon.fake.returns(from(subjectQueryRows)),
-    queryAllModels: sinon.fake.returns(from(modelRows)),
+    invalidateCache: sinon.fake(),
+    querySubjectModels: sinon.fake((subjectId) => {
+      return of(subjectId).pipe(
+        concatWith(from(props?.subjectsHierarchy?.get(subjectId) ?? [])),
+        concatMap((id) => props?.subjectModels?.get(id) ?? []),
+      );
+    }),
     queryModelCategories: sinon.fake((x) => {
       return from(props?.modelCategories?.get(x) ?? []);
     }),
     queryCategoryElements: sinon.fake((x) => {
-      return from(props?.categoryElements?.get(x) ?? []).pipe(
-        map((el) => {
-          return typeof el === "string" ? { id: el, hasChildren: false } : el;
-        }),
-      );
+      return from(props?.categoryElements?.get(x) ?? []);
     }),
     queryModelElements: sinon.fake((modelId, elementIds) => {
-      const result = from(props?.modelCategories?.get(modelId) ?? []).pipe(
-        concatMap((x) => props?.categoryElements?.get(x) ?? []),
-        map((x) => (typeof x === "string" ? x : x.id)),
-      );
+      const result = from(props?.modelCategories?.get(modelId) ?? []).pipe(concatMap((x) => props?.categoryElements?.get(x) ?? []));
 
       if (!elementIds) {
         return result;
@@ -100,6 +84,16 @@ export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQuery
         map((x) => props?.categoryElements?.get(x)?.length ?? 0),
         reduce((a, b) => a + b),
       );
+    }),
+    queryElementChildren: sinon.fake(({ elementId }) => from(props?.elementChildren?.get(elementId) ?? [])),
+    queryGroupingNodeChildren: sinon.fake((node) => {
+      const groupingInfo = props?.groupingNodeChildren?.get(node);
+      return groupingInfo
+        ? of({
+            ...groupingInfo,
+            elementIds: from(groupingInfo.elementIds),
+          })
+        : of({ modelId: "", categoryId: "", elementIds: EMPTY });
     }),
   };
   return res;
@@ -387,14 +381,6 @@ export function createFakeSinonViewport(
   };
 
   return result as Viewport;
-}
-export function createFakeElementIdsCache(overrides?: Partial<IElementIdsCache>): IElementIdsCache {
-  return {
-    clear: sinon.fake(),
-    getAssemblyElementIds: sinon.fake.returns(EMPTY),
-    getGroupedElementIds: sinon.fake.returns(EMPTY),
-    ...overrides,
-  };
 }
 
 export interface StubbedFactoryFunction<T> {
