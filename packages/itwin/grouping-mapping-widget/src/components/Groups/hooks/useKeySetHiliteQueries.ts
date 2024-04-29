@@ -31,7 +31,7 @@ export const createQueryForHiliteIdsAndKeyset = (group: Group | GroupMinimal, iM
   meta: { errorCode:TErrCodes.QUERY_HILITE_FETCH_FAILED, message: `Failed to resolve ${group.groupName}.` },
 });
 
-export const useGroupKeySetQuery = (group: Group, iModelConnection: IModelConnection, enabled: boolean) => {
+export const useGroupKeySetQuery = (group: Group | GroupMinimal, iModelConnection: IModelConnection, enabled: boolean) => {
   const query = useMemo(() => createQueryForHiliteIdsAndKeyset(group, iModelConnection, enabled), [enabled, group, iModelConnection]);
 
   return useQuery<QueryResults>(query);

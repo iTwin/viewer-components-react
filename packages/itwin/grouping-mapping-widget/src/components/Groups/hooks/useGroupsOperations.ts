@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useState } from "react";
-import type { Group } from "@itwin/insights-client";
+import type { Group, GroupMinimal } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { ContextCustomUI, GroupingCustomUI } from "../../customUI/GroupingMappingCustomUI";
 import { GroupingMappingCustomUIType } from "../../customUI/GroupingMappingCustomUI";
@@ -32,11 +32,11 @@ export const useGroupsOperations = ({
     useGroupingMappingCustomUI().customUIs.filter(
       (p) => p.type === GroupingMappingCustomUIType.Context
     ) as ContextCustomUI[];
-  const [showDeleteModal, setShowDeleteModal] = useState<Group | undefined>(
+  const [showDeleteModal, setShowDeleteModal] = useState<Group | GroupMinimal | undefined>(
     undefined
   );
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const [activeOverlapInfoPanelGroup, setActiveOverlapInfoPanelGroup] = useState<Group | undefined>(undefined);
+  const [activeOverlapInfoPanelGroup, setActiveOverlapInfoPanelGroup] = useState<Group | GroupMinimal | undefined>(undefined);
   const queryClient = useQueryClient();
 
   const { data: groups, isLoading } = useFetchGroups(mappingId, getAccessToken, groupsClient);
@@ -47,7 +47,7 @@ export const useGroupsOperations = ({
 
   const deleteGroupMutation = useMutation(
     {
-      mutationFn: async (group: Group) => {
+      mutationFn: async (group: Group | GroupMinimal) => {
         const accessToken = await getAccessToken();
         await groupsClient.deleteGroup(accessToken, mappingId, group.id);
       },
@@ -55,7 +55,7 @@ export const useGroupsOperations = ({
     }
   );
 
-  const onDeleteGroup = async (group: Group) => {
+  const onDeleteGroup = async (group: Group | GroupMinimal) => {
     deleteGroupMutation.mutate(group);
   };
 

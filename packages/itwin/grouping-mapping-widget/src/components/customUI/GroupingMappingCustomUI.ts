@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { Group, GroupMinimal, Mapping } from "@itwin/insights-client";
 import type { ReactElement } from "react";
 
 export enum GroupingMappingCustomUIType {
@@ -48,7 +48,7 @@ export interface ContextCustomUI extends IGroupingMappingCustomUI {
   /**
    * Callback function for context custom UI menu item click event.
    */
-  onClick?: (group: Group, mapping: Mapping, iModelId: string) => void;
+  onClick?: (group: Group | GroupMinimal, mapping: Mapping, iModelId: string) => void;
 }
 
 /**

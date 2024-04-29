@@ -19,6 +19,7 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
   Group,
+  GroupMinimal,
   Property,
   PropertyModify,
 } from "@itwin/insights-client";
@@ -39,7 +40,7 @@ import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
-  group: Group;
+  group: Group | GroupMinimal;
   groupProperty?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;

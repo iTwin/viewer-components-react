@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type {
   Group,
+  GroupMinimal,
   Mapping,
   Property,
 } from "@itwin/insights-client";
@@ -45,7 +46,7 @@ export interface Route {
 }
 export interface GroupingRouteFields {
   mapping?: Mapping;
-  group?: Group;
+  group?: Group | GroupMinimal;
   property?: Property;
   calculatedProperty?: Property;
   customCalculation?: Property;

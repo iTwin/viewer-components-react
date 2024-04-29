@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group } from "@itwin/insights-client";
+import type { Group, GroupMinimal } from "@itwin/insights-client";
 import { SvgDelete, SvgEdit, SvgInfo, SvgMore } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
@@ -13,11 +13,11 @@ import "./GroupMenuActions.scss";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 
 export interface GroupMenuActionsProps extends Omit<GroupsProps, "onClickAddGroup" | "onClickGroupTitle"> {
-  group: Group;
+  group: Group | GroupMinimal;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
-  setShowDeleteModal: (showDeleteModal: Group) => void;
-  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group) => void;
+  setShowDeleteModal: (showDeleteModal: Group | GroupMinimal) => void;
+  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group | GroupMinimal) => void;
 }
 
 export const GroupMenuActions = ({
@@ -34,7 +34,7 @@ export const GroupMenuActions = ({
 }: GroupMenuActionsProps) => {
   const { iModelId } = useGroupingMappingApiConfig();
   const { showGroupColor } = useGroupHilitedElementsContext();
-  const onModify = useCallback(async (group: Group, type: string) => {
+  const onModify = useCallback(async (group: Group | GroupMinimal, type: string) => {
     if (!onClickGroupModify) return;
     onClickGroupModify(group, type);
   }, [onClickGroupModify]);

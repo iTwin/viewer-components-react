@@ -23,7 +23,7 @@ import { visualizeElements, zoomToElements } from "../../../common/viewerUtils";
 import "./CalculatedPropertyActionWithVisuals.scss";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { DataType } from "@itwin/insights-client";
-import type { CalculatedPropertyType, Group , Property} from "@itwin/insights-client";
+import type { CalculatedPropertyType, Group , GroupMinimal, Property} from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -31,7 +31,7 @@ import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
-  group: Group;
+  group: Group | GroupMinimal;
   calculatedProperty?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;

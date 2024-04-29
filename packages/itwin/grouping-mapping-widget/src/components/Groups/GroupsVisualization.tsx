@@ -191,14 +191,14 @@ export const GroupsVisualization = ({
   );
 
   const hideSingleGroupWrapper = useCallback(
-    (groupToHide: Group) => {
+    (groupToHide: Group | GroupMinimal) => {
       hideGroupConsideringOverlaps(overlappedElementsMetadata.overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
     },
     [hiddenGroupsIds, overlappedElementsMetadata.overlappedElementGroupPairs]
   );
 
   const showGroup = useCallback(
-    (viewGroup: Group) => {
+    (viewGroup: Group | GroupMinimal) => {
       if (!groups) return;
       clearHiddenElements();
 
@@ -235,7 +235,7 @@ export const GroupsVisualization = ({
   ]);
 
   const onModify = useCallback(
-    (group: Group, type: string) => {
+    (group: Group | GroupMinimal, type: string) => {
       if (!onClickGroupModify) return;
       if (group.id && hiddenGroupsIds.has(group.id)) {
         showGroup(group);
