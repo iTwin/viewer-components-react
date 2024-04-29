@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 17 Apr 2024 15:50:19 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.2.0
+
+Mon, 29 Apr 2024 14:59:26 GMT
+
+### Minor changes
+
+- Added ability to track usage of `TreeWidget` features. ([#820](https://github.com/iTwin/viewer-components-react/pull/820))
 
 ## 2.1.0
 

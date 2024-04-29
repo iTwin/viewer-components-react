@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Mon, 29 Apr 2024 14:59:26 GMT",
+      "version": "0.25.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.25.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "761f0523ea76a2d0a239fd435be5723cf0ba8c1c",
+            "comment": "Fixed a bad caching problem when opening the group with the extraction issue after opening extraction logs."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 17 Apr 2024 17:54:44 GMT",
       "version": "0.25.1",
       "tag": "@itwin/grouping-mapping-widget_v0.25.1",
