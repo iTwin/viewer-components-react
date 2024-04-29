@@ -18,6 +18,8 @@ import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyGridContentProps } from "../../components/PropertyGridContent";
+import { TelemetryContextProvider } from "../../property-grid-react";
+import { KeySet } from "@itwin/presentation-common";
 
 describe("<PropertyGridContent />", () => {
   before(() => {
@@ -30,6 +32,7 @@ describe("<PropertyGridContent />", () => {
   });
 
   const provider = {
+    keys: new KeySet([{ className: "class", id: "id" }]),
     onDataChanged: new PropertyDataChangeEvent(),
     getData: async () => {
       return {
@@ -215,6 +218,77 @@ describe("<PropertyGridContent />", () => {
       const [{ dataProvider, newValue }] = stub.args[0];
       expect(dataProvider).to.be.eq(provider);
       expect((newValue as PrimitiveValue).value).to.be.eq("Prop Value Updated");
+    });
+  });
+
+  describe("feature usage reporting", () => {
+    it("reports when filters properties according to search prompt", async () => {
+      const imodel = {} as IModelConnection;
+      const onFeatureUsedSpy = sinon.spy();
+
+      const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <PropertyGridContent dataProvider={provider} imodel={imodel} />
+        </TelemetryContextProvider>,
+      );
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.not.be.null;
+      });
+
+      const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+      await user.click(searchButton);
+
+      const searchTextInput = await waitFor(() => getByRole("searchbox"));
+      // input text that should match
+      await user.type(searchTextInput, "test prop");
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.be.null;
+        expect(onFeatureUsedSpy).to.be.calledOnceWith("filter-properties");
+      });
+      onFeatureUsedSpy.resetHistory();
+
+      // clear input text
+      await user.clear(searchTextInput);
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.not.be.null;
+      });
+      expect(onFeatureUsedSpy).to.not.be.calledOnceWith("filter-properties");
+    });
+
+    it("reports once when filter keeps changing", async () => {
+      const imodel = {} as IModelConnection;
+      const onFeatureUsedSpy = sinon.spy();
+
+      const { queryByText, user, getByRole, getByTitle } = renderWithContext(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <PropertyGridContent dataProvider={provider} imodel={imodel} />
+        </TelemetryContextProvider>,
+      );
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.not.be.null;
+      });
+
+      const searchButton = await waitFor(() => getByTitle(PropertyGridManager.translate("search-bar.open")));
+      await user.click(searchButton);
+
+      const searchTextInput = await waitFor(() => getByRole("searchbox"));
+      // input text that should match
+      await user.type(searchTextInput, "test ");
+      await user.type(searchTextInput, "prop");
+
+      await waitFor(() => {
+        expect(queryByText("Test Prop")).to.not.be.null;
+        expect(queryByText("Null Prop")).to.be.null;
+      });
+
+      expect(onFeatureUsedSpy).to.be.calledOnceWith("filter-properties");
     });
   });
 });

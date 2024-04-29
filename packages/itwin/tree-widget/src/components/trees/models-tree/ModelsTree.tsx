@@ -11,6 +11,7 @@ import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentatio
 import { TreeWidget } from "../../../TreeWidget";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
+import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
@@ -20,11 +21,13 @@ import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
+import type { FilterableTreeNodeRendererProps } from "../common/TreeRenderer";
+import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
 import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
+import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
@@ -84,6 +87,12 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * @beta
    */
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+  /**
+   * Callback that is invoked when a tracked feature is used.
+   * @param featureId ID of the feature.
+   * @beta
+   */
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -93,10 +102,12 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
-  const { hierarchyLevelConfig, density, height, width, selectionMode } = props;
-  const state = useModelsTreeState(props);
+  const { hierarchyLevelConfig, density, height, width, selectionMode, onFeatureUsed } = props;
+  const { reportUsage } = useFeatureReporting({ treeIdentifier: ModelsTreeComponent.id, onFeatureUsed });
+  const state = useModelsTreeState({ ...props, reportUsage });
 
   const baseRendererProps = {
+    reportUsage,
     contextMenuItems: props.contextMenuItems,
     nodeLabelRenderer: props.nodeLabelRenderer,
     density: props.density,
@@ -105,6 +116,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       descriptionEnabled: false,
       levelOffset: 10,
       disableRootNodeCollapse: true,
+      onVisibilityToggled: () => reportUsage({ featureId: "visibility-change", reportInteraction: true }),
     },
   };
 
@@ -147,7 +159,11 @@ export function ModelsTree(props: ModelsTreeProps) {
   );
 }
 
-function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { density?: "default" | "enlarged" }) {
+interface ModelsTreeNodeRendererProps extends FilterableTreeNodeRendererProps {
+  density?: "default" | "enlarged";
+}
+
+function ModelsTreeNodeRenderer(props: ModelsTreeNodeRendererProps) {
   return (
     <FilterableVisibilityTreeNodeRenderer
       {...props}
@@ -156,11 +172,16 @@ function ModelsTreeNodeRenderer(props: PresentationTreeNodeRendererProps & { den
       levelOffset={10}
       disableRootNodeCollapse={true}
       isEnlarged={props.density === "enlarged"}
+      onVisibilityToggled={() => props.reportUsage?.({ featureId: "visibility-change", reportInteraction: true })}
     />
   );
 }
 
-function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTreeProps) {
+interface UseModelsTreeStateProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+}
+
+function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModelsTreeStateProps) {
   const rulesets = {
     general: useMemo(
       () =>
@@ -196,8 +217,9 @@ function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: ModelsTre
   return filterInfo?.filter ? filteredTreeState : treeState;
 }
 
-interface UseTreeProps extends ModelsTreeProps {
+interface UseTreeProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
   ruleset: Ruleset;
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 function useTreeState({
@@ -211,6 +233,7 @@ function useTreeState({
   onFilterApplied,
   hierarchyLevelConfig,
   onPerformanceMeasured,
+  reportUsage,
 }: UseTreeProps) {
   const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
@@ -220,21 +243,29 @@ function useTreeState({
 
   const onFilterChange = useCallback(
     (dataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => {
-      if (onFilterApplied && dataProvider && matchesCount !== undefined) {
-        onFilterApplied(dataProvider, matchesCount);
+      if (dataProvider && matchesCount !== undefined) {
+        reportUsage({ featureId: "filtering", reportInteraction: false });
+        onFilterApplied?.(dataProvider, matchesCount);
       }
 
       if (visibilityHandler) {
         visibilityHandler.setFilteredDataProvider(dataProvider);
       }
     },
-    [onFilterApplied, visibilityHandler],
+    [onFilterApplied, reportUsage, visibilityHandler],
   );
 
-  const reporting = usePerformanceReporting({
+  const { onNodeLoaded } = usePerformanceReporting({
     treeIdentifier: ModelsTreeComponent.id,
     onPerformanceMeasured,
   });
+
+  const eventHandlerFactory = useCallback(
+    (handlerProps: VisibilityTreeEventHandlerParams) => {
+      return new ModelsTreeEventHandler({ ...handlerProps, reportUsage });
+    },
+    [reportUsage],
+  );
 
   return useVisibilityTreeState({
     imodel: iModel,
@@ -255,12 +286,10 @@ function useTreeState({
     ),
     eventHandler: eventHandlerFactory,
     hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
-    onNodeLoaded: filterInfo ? undefined : reporting.onNodeLoaded,
+    onNodeLoaded: filterInfo ? undefined : onNodeLoaded,
+    reportUsage: filterInfo ? undefined : reportUsage,
+    onHierarchyLimitExceeded: () => reportUsage({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
-}
-
-function eventHandlerFactory(props: VisibilityTreeEventHandlerParams) {
-  return new ModelsTreeEventHandler(props);
 }
 
 function useVisibilityHandler(

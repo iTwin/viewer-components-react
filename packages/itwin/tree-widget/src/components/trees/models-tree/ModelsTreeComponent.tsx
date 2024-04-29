@@ -149,13 +149,15 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
         density={props.density}
       >
         {props.headerButtons
-          ? props.headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels })}</Fragment>)
+          ? props.headerButtons.map((btn, index) => (
+              <Fragment key={index}>{btn({ viewport, models: availableModels, density: props.density, onFeatureUsed: props.onFeatureUsed })}</Fragment>
+            ))
           : [
-              <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={props.density} />,
-              <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={props.density} />,
-              <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={props.density} />,
-              <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={props.density} />,
-              <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={props.density} />,
+              <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
             ]}
       </TreeHeader>
       <div className={contentClassName}>
@@ -183,12 +185,13 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={() =>
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-showall`);
         void showAllModels(
           props.models.map((model) => model.id),
           props.viewport,
-        )
-      }
+        );
+      }}
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -201,12 +204,13 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={() =>
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-hideall`);
         void hideAllModels(
           props.models.map((model) => model.id),
           props.viewport,
-        )
-      }
+        );
+      }}
     >
       <SvgVisibilityHide />
     </IconButton>
@@ -219,12 +223,13 @@ function InvertButton(props: ModelsTreeHeaderButtonProps) {
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("invert")}
-      onClick={() =>
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-invert`);
         void invertAllModels(
           props.models.map((model) => model.id),
           props.viewport,
-        )
-      }
+        );
+      }}
     >
       <SvgVisibilityHalf />
     </IconButton>
@@ -248,7 +253,10 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
-      onClick={() => void toggleModels(models2d, is2dToggleActive, props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-view2d`);
+        void toggleModels(models2d, is2dToggleActive, props.viewport);
+      }}
       disabled={models2d.length === 0}
       endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
@@ -274,7 +282,10 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
-      onClick={() => void toggleModels(models3d, is3dToggleActive, props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-view3d`);
+        void toggleModels(models3d, is3dToggleActive, props.viewport);
+      }}
       disabled={models3d.length === 0}
       endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >

@@ -14,7 +14,13 @@ import { StandardNodeTypes } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
-  areAllModelsVisible, hideAllModels, invertAllModels, ModelsTreeNodeType, ModelsVisibilityHandler, showAllModels, toggleModels,
+  areAllModelsVisible,
+  hideAllModels,
+  invertAllModels,
+  ModelsTreeNodeType,
+  ModelsVisibilityHandler,
+  showAllModels,
+  toggleModels,
 } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";

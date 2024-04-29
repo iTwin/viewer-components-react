@@ -186,6 +186,10 @@ Array [
                   },
                 ],
                 "description": "The generic:PhysicalObject class is used for bis:PhysicalElements which cannot be further classified. More-specific bis:PhysicalElement subclasses should be used wherever possible.",
+                "filtering": Object {
+                  "ancestorFilters": Array [],
+                  "descriptor": [Function],
+                },
                 "hasChildren": true,
                 "icon": "icon-ec-class",
                 "label": PropertyRecord {
@@ -202,6 +206,10 @@ Array [
                 },
               },
             ],
+            "filtering": Object {
+              "ancestorFilters": Array [],
+              "descriptor": [Function],
+            },
             "hasChildren": true,
             "icon": "icon-layers",
             "label": PropertyRecord {
@@ -238,6 +246,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -397,6 +409,10 @@ Array [
                   },
                 ],
                 "description": "The generic:PhysicalObject class is used for bis:PhysicalElements which cannot be further classified. More-specific bis:PhysicalElement subclasses should be used wherever possible.",
+                "filtering": Object {
+                  "ancestorFilters": Array [],
+                  "descriptor": [Function],
+                },
                 "hasChildren": true,
                 "icon": "icon-ec-class",
                 "label": PropertyRecord {
@@ -413,6 +429,10 @@ Array [
                 },
               },
             ],
+            "filtering": Object {
+              "ancestorFilters": Array [],
+              "descriptor": [Function],
+            },
             "hasChildren": true,
             "icon": "icon-layers",
             "label": PropertyRecord {
@@ -449,6 +469,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -601,6 +625,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -773,6 +801,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -879,6 +911,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -1116,6 +1152,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -1279,6 +1319,10 @@ Array [
                           },
                         ],
                         "description": "bis:DrawingGraphic is a bis:GraphicalElement2d used to persist graphics for use in drawings.",
+                        "filtering": Object {
+                          "ancestorFilters": Array [],
+                          "descriptor": [Function],
+                        },
                         "hasChildren": true,
                         "icon": "icon-ec-class",
                         "label": PropertyRecord {
@@ -1295,6 +1339,10 @@ Array [
                         },
                       },
                     ],
+                    "filtering": Object {
+                      "ancestorFilters": Array [],
+                      "descriptor": [Function],
+                    },
                     "hasChildren": true,
                     "icon": "icon-layers",
                     "label": PropertyRecord {
@@ -1372,6 +1420,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -1479,6 +1531,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -1638,6 +1694,10 @@ Array [
                   },
                 ],
                 "description": "The generic:PhysicalObject class is used for bis:PhysicalElements which cannot be further classified. More-specific bis:PhysicalElement subclasses should be used wherever possible.",
+                "filtering": Object {
+                  "ancestorFilters": Array [],
+                  "descriptor": [Function],
+                },
                 "hasChildren": true,
                 "icon": "icon-ec-class",
                 "label": PropertyRecord {
@@ -1654,6 +1714,10 @@ Array [
                 },
               },
             ],
+            "filtering": Object {
+              "ancestorFilters": Array [],
+              "descriptor": [Function],
+            },
             "hasChildren": true,
             "icon": "icon-layers",
             "label": PropertyRecord {
@@ -1690,6 +1754,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -1752,6 +1820,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {
@@ -1776,6 +1848,10 @@ Array [
     "autoExpand": true,
     "children": Array [
       Object {
+        "filtering": Object {
+          "ancestorFilters": Array [],
+          "descriptor": [Function],
+        },
         "icon": "icon-folder",
         "label": PropertyRecord {
           "property": Object {
@@ -1793,6 +1869,10 @@ Array [
       Object {
         "children": Array [
           Object {
+            "filtering": Object {
+              "ancestorFilters": Array [],
+              "descriptor": [Function],
+            },
             "icon": "icon-folder",
             "label": PropertyRecord {
               "property": Object {
@@ -1808,6 +1888,10 @@ Array [
             },
           },
         ],
+        "filtering": Object {
+          "ancestorFilters": Array [],
+          "descriptor": [Function],
+        },
         "hasChildren": true,
         "icon": "icon-folder",
         "label": PropertyRecord {
@@ -1843,6 +1927,10 @@ Array [
         },
       },
     ],
+    "filtering": Object {
+      "ancestorFilters": Array [],
+      "descriptor": [Function],
+    },
     "hasChildren": true,
     "icon": "icon-imodel-hollow-2",
     "label": PropertyRecord {

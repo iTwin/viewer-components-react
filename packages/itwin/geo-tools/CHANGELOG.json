@@ -2,6 +2,21 @@
   "name": "@itwin/geo-tools-react",
   "entries": [
     {
+      "date": "Mon, 29 Apr 2024 14:59:26 GMT",
+      "version": "5.1.0",
+      "tag": "@itwin/geo-tools-react_v5.1.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Etame.Kandy@bentley.com",
+            "package": "@itwin/geo-tools-react",
+            "commit": "157cbb4fce7c6caa043f51ff483e2a49a0bfa709",
+            "comment": "updated packages @itwin/appui-react, @itwin/components-react, and @itwin/core-react. the css style  uicore-autosuggest__input was also updated."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.0",
       "tag": "@itwin/geo-tools-react_v5.0.0",
       "date": "Tue, 06 Jun 2023 10:57:06 GMT",
