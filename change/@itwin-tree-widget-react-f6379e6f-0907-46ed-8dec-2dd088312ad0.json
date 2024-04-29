@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added ability to track usage of `TreeWidget` features.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

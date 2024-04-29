@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Mon, 29 Apr 2024 14:59:26 GMT",
+      "version": "1.8.0",
+      "tag": "@itwin/property-grid-react_v1.8.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "13277d690686eadfd18cc88f10b1e121c8eed530",
+            "comment": "Added ability to track usage of `PropertyWidget` features."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 17 Apr 2024 15:50:19 GMT",
       "version": "1.7.0",
       "tag": "@itwin/property-grid-react_v1.7.0",

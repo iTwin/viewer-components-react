@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 17 Apr 2024 17:54:44 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.25.2
+
+Mon, 29 Apr 2024 14:59:26 GMT
+
+### Patches
+
+- Fixed a bad caching problem when opening the group with the extraction issue after opening extraction logs. ([#821](https://github.com/iTwin/viewer-components-react/pull/821))
 
 ## 0.25.1
 
