@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group } from "@itwin/insights-client";
+import type { Group, GroupMinimal } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { OverlappedElementGroupPairs } from "../context/GroupHilitedElementsContext";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
@@ -137,7 +137,7 @@ export const GroupsVisualization = ({
   }, [groupQueries, isGroupsQueriesReady, groups]);
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
-    (groups: Group[]) =>
+    (groups: Group[] | GroupMinimal[]) =>
       hiliteIds.filter((id) => groups.some((group) => group.id === id.groupId)).flatMap((id) => id.elementIds),
     [hiliteIds]
   );
@@ -203,7 +203,7 @@ export const GroupsVisualization = ({
       clearHiddenElements();
 
       // hide group Ids filter
-      const newHiddenGroups: Group[] = groups.filter((g) => hiddenGroupsIds.has(g.id) && g.id !== viewGroup.id);
+      const newHiddenGroups: Group[] | GroupMinimal[] = groups.filter((g) => hiddenGroupsIds.has(g.id) && g.id !== viewGroup.id);
 
       // view group Ids filter
       const viewGroups = groups.filter((g) => !hiddenGroupsIds.has(g.id) || g.id === viewGroup.id);

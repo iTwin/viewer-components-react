@@ -13,7 +13,7 @@ export const fetchGroups = async (
   groupsClient: IGroupsClient
 )=> {
   const accessToken = await getAccessToken();
-  const groupsList = await groupsClient.getGroups(accessToken, mappingId, PreferReturn.Representation);
+  const groupsList = await groupsClient.getGroups(accessToken, mappingId, PreferReturn.Minimal);
   return groupsList.groups;
 };
 

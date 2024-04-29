@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { Group } from "@itwin/insights-client";
+import type { Group, GroupMinimal } from "@itwin/insights-client";
 import type { KeySet } from "@itwin/presentation-common";
 import type { UseQueryOptions } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
@@ -23,7 +23,7 @@ export interface QueryResults {
 
 type TQueries = UseQueryOptions<QueryResults>[];
 
-export const createQueryForHiliteIdsAndKeyset = (group: Group, iModelConnection: IModelConnection, enabled: boolean) => ({
+export const createQueryForHiliteIdsAndKeyset = (group: Group | GroupMinimal, iModelConnection: IModelConnection, enabled: boolean) => ({
   queryKey: ["group", "hiliteids", group.query],
   queryFn: async () => getHiliteIdsAndKeysetFromGroup(iModelConnection, group),
   enabled,
@@ -37,7 +37,7 @@ export const useGroupKeySetQuery = (group: Group, iModelConnection: IModelConnec
   return useQuery<QueryResults>(query);
 };
 
-export const useKeySetHiliteQueries = (groups: Group[], enabled: boolean, iModelConnection: IModelConnection) => {
+export const useKeySetHiliteQueries = (groups: Group[] | GroupMinimal[], enabled: boolean, iModelConnection: IModelConnection) => {
   const queries = useMemo(() => groups.map((group) => createQueryForHiliteIdsAndKeyset(group, iModelConnection, enabled)),
     [groups, iModelConnection, enabled]);
 

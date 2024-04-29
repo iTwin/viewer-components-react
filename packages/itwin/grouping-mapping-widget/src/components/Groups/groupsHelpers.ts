@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { FeatureOverrideType } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { Group } from "@itwin/insights-client";
+import type { Group, GroupMinimal } from "@itwin/insights-client";
 import type { OverlappedElementGroupPairs, OverlappedInfo } from "../context/GroupHilitedElementsContext";
 import { clearEmphasizedOverriddenElements, clearHiddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements } from "../../common/viewerUtils";
 
@@ -107,7 +107,7 @@ export const visualizeGroupColors = async (
 
 export const getHiliteIdsAndKeysetFromGroup = async (
   iModelConnection: IModelConnection,
-  group: Group,
+  group: Group | GroupMinimal,
 ) => {
   const query = group.query;
   const result = await getHiliteIds(query, iModelConnection);
