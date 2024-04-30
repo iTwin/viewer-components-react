@@ -56,7 +56,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
       onClick={() => {
-        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-showall`);
+        props.onFeatureUsed?.("showall");
         void showAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -76,7 +76,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
       onClick={() => {
-        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-hideall`);
+        props.onFeatureUsed?.("hideall");
         void hideAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -96,7 +96,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("invert")}
       onClick={() => {
-        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-invert`);
+        props.onFeatureUsed?.("invert");
         void invertAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -127,7 +127,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
       onClick={() => {
-        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-view2d`);
+        props.onFeatureUsed?.("view2d");
         void toggleModels(models2d, is2dToggleActive, props.viewport);
       }}
       disabled={models2d.length === 0}
@@ -157,7 +157,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
       onClick={() => {
-        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-view3d`);
+        props.onFeatureUsed?.("view3d");
         void toggleModels(models3d, is3dToggleActive, props.viewport);
       }}
       disabled={models3d.length === 0}

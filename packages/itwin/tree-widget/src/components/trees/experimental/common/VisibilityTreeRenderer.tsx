@@ -61,5 +61,5 @@ export function VisibilityTreeRenderer({
 
   const getNode = useCallback<TreeProps<PresentationTreeNode>["getNode"]>((node) => createTreeNode(node, isNodeSelected), [isNodeSelected]);
 
-  return <Tree<PresentationTreeNode> {...props} data={rootNodes} nodeRenderer={nodeRenderer} getNode={getNode} />;
+  return <Tree<PresentationTreeNode> {...props} data={rootNodes} nodeRenderer={nodeRenderer} getNode={getNode} enableVirtualization={true} />;
 }

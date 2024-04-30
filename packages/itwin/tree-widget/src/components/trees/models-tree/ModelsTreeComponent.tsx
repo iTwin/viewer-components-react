@@ -5,7 +5,7 @@
 
 import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useMemo } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
@@ -14,7 +14,6 @@ import { AutoSizer } from "../../utils/AutoSizer";
 
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { ModelsTree, type ModelsTreeProps } from "./ModelsTree";
-import classNames from "classnames";
 import { HideAllButton, InvertButton, ModelsTreeHeaderButtonProps, ShowAllButton, View2DButton, View3DButton, useAvailableModels } from "./ModelsTreeButtons";
 
 /**
@@ -111,6 +110,12 @@ function ModelsTreeComponentImpl({
     [filterString, searchOptions.activeMatchIndex],
   );
 
+  const onModelsTreeFeatureUsed = (feature: string) => {
+    if (treeProps.onFeatureUsed) {
+      treeProps.onFeatureUsed(`${ModelsTreeComponent.id}-${feature}`);
+    }
+  };
+
   return (
     <div className="tree-widget-tree-with-header">
       <TreeHeader
@@ -121,16 +126,46 @@ function ModelsTreeComponentImpl({
         selectedIndex={searchOptions.activeMatchIndex}
         density={density}
       >
-        {props.headerButtons
-          ? props.headerButtons.map((btn, index) => (
-              <Fragment key={index}>{btn({ viewport, models: availableModels, density: props.density, onFeatureUsed: props.onFeatureUsed })}</Fragment>
+        {headerButtons
+          ? headerButtons.map((btn, index) => (
+              <Fragment key={index}>{btn({ viewport, models: availableModels, density: treeProps.density, onFeatureUsed: onModelsTreeFeatureUsed })}</Fragment>
             ))
           : [
-              <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
-              <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
-              <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
-              <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
-              <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <ShowAllButton
+                viewport={viewport}
+                models={availableModels}
+                key="show-all-btn"
+                density={treeProps.density}
+                onFeatureUsed={onModelsTreeFeatureUsed}
+              />,
+              <HideAllButton
+                viewport={viewport}
+                models={availableModels}
+                key="hide-all-btn"
+                density={treeProps.density}
+                onFeatureUsed={onModelsTreeFeatureUsed}
+              />,
+              <InvertButton
+                viewport={viewport}
+                models={availableModels}
+                key="invert-all-btn"
+                density={treeProps.density}
+                onFeatureUsed={onModelsTreeFeatureUsed}
+              />,
+              <View2DButton
+                viewport={viewport}
+                models={availableModels}
+                key="view-2d-btn"
+                density={treeProps.density}
+                onFeatureUsed={onModelsTreeFeatureUsed}
+              />,
+              <View3DButton
+                viewport={viewport}
+                models={availableModels}
+                key="view-3d-btn"
+                density={treeProps.density}
+                onFeatureUsed={onModelsTreeFeatureUsed}
+              />,
             ]}
       </TreeHeader>
       <div className={contentClassName}>
