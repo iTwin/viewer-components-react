@@ -47,12 +47,8 @@ export const PropertyMenu = ({
   const queryClient = useQueryClient();
 
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
   const refreshGroupProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
-  const refreshCalculatedProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
-  const refreshCustomCalculations = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
 
   return (
     <div className='gmw-property-menu-wrapper'>
@@ -74,9 +70,9 @@ export const PropertyMenu = ({
           groupId={groupId}
           onClickAdd={onClickAddCalculatedProperty}
           onClickModify={onClickModifyCalculatedProperty}
-          isLoading={isLoadingCalculatedProperties}
-          calculatedProperties={calculatedProperties ? calculatedProperties.properties : []}
-          refresh={refreshCalculatedProperties}
+          isLoading={isLoadingGroupProperties}
+          calculatedProperties={groupProperties ? groupProperties.properties : []}
+          refresh={refreshGroupProperties}
         />
       )}
       {!hideCustomCalculationProps && (
@@ -85,9 +81,9 @@ export const PropertyMenu = ({
           groupId={groupId}
           onClickAdd={onClickAddCustomCalculationProperty}
           onClickModify={onClickModifyCustomCalculation}
-          isLoading={isLoadingCustomCalculations}
-          customCalculations={customCalculationProperties ? customCalculationProperties.properties : []}
-          refresh={refreshCustomCalculations}
+          isLoading={isLoadingGroupProperties}
+          customCalculations={groupProperties ? groupProperties.properties : []}
+          refresh={refreshGroupProperties}
         />
       )}
     </div>
