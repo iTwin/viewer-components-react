@@ -6,10 +6,6 @@
 
 .geotools-geoaddresssearch__container {
   width: 300px;
-
-  ._iui3-end-icon {
-    display: none; // we don't want the dropdown arrow icon to be shown
-  }
 }
 
 .geotools-geoaddresssearch__button {
@@ -23,8 +19,5 @@
 
 .geotools-geoaddresssearch__autosuggest {
   width: 100%;
-  #iui-geoAddressSearch-input-cb {
-    padding: 0.2rem 2.2rem 0.2rem 0.5rem;    //right padding avoid input text to be overlaid with the button
-  }
+  padding: 0.2rem 2.2rem 0.2rem 0.5rem;    //right padding avoid input text to be overlaid with the button
 }
-

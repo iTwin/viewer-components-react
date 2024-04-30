@@ -27,7 +27,6 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const [selectedOption, setSelectedOption] = React.useState("");
   const [options, setOptions] = React.useState<SelectOption<string>[]>([]);
   const [inputValue, setInputValue] = React.useState("");
-  const [isComboBoxMenuOpen, setIsComboBoxMenuOpen] = React.useState(false);
 
   // `React.useMemo' is used avoid creating new object on each render cycle
   const addressProvider = React.useMemo(() => (props.provider ?? new BingAddressProvider()), [props.provider]);
@@ -90,7 +89,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     // and we handle the logic to browse to the selected address from the onChange handler. If there are no options populated, and then we
     // handle the logic to browse to the address from the onKeyDown handler since for some user input the address provider may not return any
     // suggestions, for example if the user enters lat long coordinates, but we still want to allow them to browse to the entered coordinates.
-    if (event.key === "Enter" && event.currentTarget.value !== "" && !isComboBoxMenuOpen) {
+    if (event.key === "Enter" && event.currentTarget.value !== "" && options.length === 0) {
       onSuggestionSelected(event.currentTarget.value);
 
       event.stopPropagation();
@@ -101,12 +100,29 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     }
   };
 
+  React.useEffect(() => {
+    let isObsolete = false;
+
+    const updateOptionsOnInputChange = async (): Promise<void> => {
+      const newOptions = await getOptionsForInputValue(inputValue);
+
+      // prevent raceConditions by setting isObsolete on remount (due to inputValue changing) and only updating options if not obsolete
+      if (!isObsolete) {
+        setOptions(newOptions);
+      }
+    };
+
+    void updateOptionsOnInputChange();
+
+    return () => {
+      isObsolete = true;
+    };
+  }, [inputValue, getOptionsForInputValue]);
+
   const onInputValueChange = React.useCallback(async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const newInputValue = event.target.value;
     setInputValue(newInputValue);
-    const newOptions = await getOptionsForInputValue(newInputValue);
-    setOptions(newOptions);
-  }, [getOptionsForInputValue]);
+  }, []);
 
   /* We don't want to use the default filtering logic of the ComboBox since we suggest new select options from the Address Provider
   as the user types the input, so we return the options as is */
@@ -136,13 +152,12 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
           endIconProps={{
             disabled: true,
           }}
-          onShow={() => setIsComboBoxMenuOpen(true)}
-          onHide={() => setIsComboBoxMenuOpen(false)}
           value={selectedOption}
           options={options}
           onChange={onSuggestionSelected}
           multiple={false}
           filterFunction={filterFunction}
+          enableVirtualization={true}
           emptyStateMessage={<></>} // We don't want to show the empty state message
         />
       </div>

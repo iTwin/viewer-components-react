@@ -105,7 +105,7 @@ describe("GeoAddressSearch", () => {
       return Range2d.createArray([Point2d.create(0, 0), Point2d.create(1, 1)]);
     });
 
-    input.simulate("change", { target: { value: "sample Addr" } });
+    input.simulate("change", { target: { value: "sample Address" } });
     await TestUtils.flushAsyncOperations();
     wrapper.update();
 
