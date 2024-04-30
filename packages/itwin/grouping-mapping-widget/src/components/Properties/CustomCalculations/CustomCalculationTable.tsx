@@ -114,8 +114,6 @@ export const CustomCalculationTable = ({
       );
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["customCalculations", iModelId, mappingId, groupId] });
-      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, groupId] });
       await queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, groupId] });
     },
   });

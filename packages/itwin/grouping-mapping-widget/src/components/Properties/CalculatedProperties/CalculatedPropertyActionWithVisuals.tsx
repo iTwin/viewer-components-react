@@ -132,7 +132,7 @@ export const CalculatedPropertyActionWithVisuals = ({
       );
   }, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] });
+      await queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] });
       onSaveSuccess();
       setPropertyName("");
       setType(undefined);

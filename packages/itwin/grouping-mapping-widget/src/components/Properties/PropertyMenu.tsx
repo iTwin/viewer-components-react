@@ -10,8 +10,6 @@ import type { Group, GroupMinimal, Mapping, Property } from "@itwin/insights-cli
 import { CalculatedPropertyTable } from "./CalculatedProperties/CalculatedPropertyTable";
 import { CustomCalculationTable } from "./CustomCalculations/CustomCalculationTable";
 import { useGroupPropertiesQuery } from "./hooks/useGroupPropertiesQuery";
-import { useCalculatedPropertiesQuery } from "./hooks/useCalculatedPropertiesQuery";
-import { useCustomCalculationsQuery } from "./hooks/useCustomCalculationsQuery";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../context/PropertiesClientContext";
 
@@ -49,12 +47,12 @@ export const PropertyMenu = ({
   const queryClient = useQueryClient();
 
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useCalculatedPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useCustomCalculationsQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
   const refreshGroupProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
-  const refreshCalculatedProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
-  const refreshCustomCalculations = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["customCalculations", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
+  const refreshCalculatedProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
+  const refreshCustomCalculations = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
 
   return (
     <div className='gmw-property-menu-wrapper'>
