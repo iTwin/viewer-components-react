@@ -391,12 +391,10 @@ function useHierarchyBasedVisibilityHandler({
   rulesetId,
   activeView,
   hierarchyAutoUpdateEnabled,
-  iModel,
 }: UseVisibilityHandlerProps & {
   hierarchyBasedHandler?: UseTreeProps["hierarchyBasedVisibilityHandler"];
 }) {
   const [state, setState] = useState<IHierarchyBasedVisibilityHandler>();
-  const queryHandler = useMemo(() => createQueryHandler(iModel, rulesetId), [iModel, rulesetId]);
 
   useEffect(() => {
     if (legacyHandler || (hierarchyBasedHandler && typeof hierarchyBasedHandler !== "function")) {
@@ -404,8 +402,8 @@ function useHierarchyBasedVisibilityHandler({
     }
 
     const visibilityHandlerProps: HierarchyBasedVisibilityHandlerProps = {
+      rulesetId,
       viewport: activeView,
-      queryHandler,
       hierarchyAutoUpdateEnabled,
     };
 
@@ -414,7 +412,7 @@ function useHierarchyBasedVisibilityHandler({
     return () => {
       handler.dispose();
     };
-  }, [activeView, hierarchyAutoUpdateEnabled, queryHandler, legacyHandler, hierarchyBasedHandler]);
+  }, [activeView, hierarchyAutoUpdateEnabled, legacyHandler, hierarchyBasedHandler, rulesetId]);
 
   if (legacyHandler) {
     return undefined;

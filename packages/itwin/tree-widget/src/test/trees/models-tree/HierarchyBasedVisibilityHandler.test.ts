@@ -15,16 +15,16 @@ import {
 } from "@itwin/presentation-testing";
 import { toVoidPromise } from "../../../components/trees/common/Rxjs";
 import { createHierarchyBasedVisibilityHandler } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
-import { createQueryHandler } from "../../../components/trees/models-tree/internal/QueryHandler";
 import { createVisibilityStatus } from "../../../components/trees/models-tree/internal/Tooltip";
-import { createRuleset } from "../../../components/trees/models-tree/internal/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory } from "../../IModelUtils";
 import { TestUtils } from "../../TestUtils";
 import {
   createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeQueryHandler, createFakeSinonViewport, createModelNode,
-  createSubjectNode,
+  createSubjectNode, stubFactoryFunction,
 } from "../Common";
 
+import type {
+  StubbedFactoryFunction } from "../Common";
 import type { Id64String } from "@itwin/core-bentley";
 import type { VisibilityHandlerOverrides } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
 import type { Visibility } from "../../../components/trees/models-tree/internal/Tooltip";
@@ -39,52 +39,59 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: IQueryHandler; viewport?: Viewport }) {
-  const queryHandler = props?.queryHandler ?? createFakeQueryHandler();
-  const overrides: VisibilityHandlerOverrides = {
-    getModelDisplayStatus:
-      props?.overrides?.models &&
-      (async ({ id, originalImplementation }) => {
-        const res = props.overrides!.models!.get(id);
-        return res ? createVisibilityStatus(res) : originalImplementation();
-      }),
-    getCategoryDisplayStatus:
-      props?.overrides?.categories &&
-      (async ({ categoryId, originalImplementation }) => {
-        const res = props.overrides!.categories!.get(categoryId);
-        return res ? createVisibilityStatus(res) : originalImplementation();
-      }),
-    getElementDisplayStatus:
-      props?.overrides?.elements &&
-      (async ({ elementId, originalImplementation }) => {
-        const res = props.overrides!.elements!.get(elementId);
-        return res ? createVisibilityStatus(res) : originalImplementation();
-      }),
-    changeCategoryState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-    changeModelState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-    changeElementState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
-  };
+describe("VisibilityStateHandler", () => {
+  let queryHandlerStub: StubbedFactoryFunction<IQueryHandler>;
 
-  return {
-    handler: createHierarchyBasedVisibilityHandler({
-      queryHandler,
-      viewport: props?.viewport ?? createFakeSinonViewport(),
+  function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: IQueryHandler; viewport?: Viewport }) {
+    const queryHandler = props?.queryHandler ?? createFakeQueryHandler();
+    const overrides: VisibilityHandlerOverrides = {
+      getModelDisplayStatus:
+        props?.overrides?.models &&
+        (async ({ id, originalImplementation }) => {
+          const res = props.overrides!.models!.get(id);
+          return res ? createVisibilityStatus(res) : originalImplementation();
+        }),
+      getCategoryDisplayStatus:
+        props?.overrides?.categories &&
+        (async ({ categoryId, originalImplementation }) => {
+          const res = props.overrides!.categories!.get(categoryId);
+          return res ? createVisibilityStatus(res) : originalImplementation();
+        }),
+      getElementDisplayStatus:
+        props?.overrides?.elements &&
+        (async ({ elementId, originalImplementation }) => {
+          const res = props.overrides!.elements!.get(elementId);
+          return res ? createVisibilityStatus(res) : originalImplementation();
+        }),
+      changeCategoryState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
+      changeModelState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
+      changeElementState: sinon.fake(async ({ originalImplementation }) => originalImplementation()),
+    };
+
+    props?.queryHandler && queryHandlerStub.stub(() => queryHandler);
+    return {
+      handler: createHierarchyBasedVisibilityHandler({
+        rulesetId: "",
+        viewport: props?.viewport ?? createFakeSinonViewport(),
+        overrides,
+      }),
       overrides,
-    }),
-    overrides,
-  };
-}
+    };
+  }
 
-describe.only("VisibilityStateHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
+    queryHandlerStub = stubFactoryFunction(`${__dirname}/../../../components/trees/models-tree/internal/QueryHandler`, "createQueryHandler", () => createFakeQueryHandler());
   });
 
   after(async () => {
     TestUtils.terminate();
     await IModelApp.shutdown();
   });
+
+  beforeEach(() => queryHandlerStub.stub());
+  afterEach(() => queryHandlerStub.reset());
 
   describe("getVisibilityStatus", () => {
     it("returns disabled when node is not an instance node", async () => {
@@ -116,7 +123,7 @@ describe.only("VisibilityStateHandler", () => {
           getSubjectNodeVisibility: sinon.fake.resolves(createVisibilityStatus("visible")),
         };
         const handler = createHierarchyBasedVisibilityHandler({
-          queryHandler: createFakeQueryHandler(),
+          rulesetId: "",
           viewport: createFakeSinonViewport(),
           overrides,
         });
@@ -563,7 +570,7 @@ describe.only("VisibilityStateHandler", () => {
           getCategoryDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
         };
         const handler = createHierarchyBasedVisibilityHandler({
-          queryHandler: createFakeQueryHandler(),
+          rulesetId: "",
           viewport: createFakeSinonViewport(),
           overrides,
         });
@@ -920,7 +927,7 @@ describe.only("VisibilityStateHandler", () => {
           getElementGroupingNodeDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
         };
         const handler = createHierarchyBasedVisibilityHandler({
-          queryHandler: createFakeQueryHandler(),
+          rulesetId: "",
           viewport: createFakeSinonViewport(),
           overrides,
         });
@@ -993,7 +1000,7 @@ describe.only("VisibilityStateHandler", () => {
           changeSubjectNodeState: sinon.fake.resolves(undefined),
         };
         const handler = createHierarchyBasedVisibilityHandler({
-          queryHandler: createFakeQueryHandler(),
+          rulesetId: "",
           viewport: createFakeSinonViewport(),
           overrides,
         });
@@ -1174,7 +1181,7 @@ describe.only("VisibilityStateHandler", () => {
           changeCategoryState: sinon.fake.resolves(undefined),
         };
         const handler = createHierarchyBasedVisibilityHandler({
-          queryHandler: createFakeQueryHandler(),
+          rulesetId: "",
           viewport: createFakeSinonViewport(),
           overrides,
         });
@@ -1244,7 +1251,7 @@ describe.only("VisibilityStateHandler", () => {
           changeElementState: sinon.fake.resolves(undefined),
         };
         const handler = createHierarchyBasedVisibilityHandler({
-          queryHandler: createFakeQueryHandler(),
+          rulesetId: "",
           viewport: createFakeSinonViewport(),
           overrides,
         });
@@ -1479,16 +1486,14 @@ describe.only("VisibilityStateHandler", () => {
 
     let viewport: Viewport;
     let handler: IVisibilityHandler;
-    let queryProvider: IQueryHandler;
 
     beforeEach(() => {
-      queryProvider = createQueryHandler(iModel, createRuleset({}).id);
       viewport = OffScreenViewport.create({
         view: createBlankViewState(iModel),
         viewRect: new ViewRect(),
       });
       handler = createHierarchyBasedVisibilityHandler({
-        queryHandler: queryProvider,
+        rulesetId: "",
         viewport,
       });
     });
@@ -1715,7 +1720,7 @@ describe.only("VisibilityStateHandler", () => {
       });
     });
 
-    describe.only("element", () => {
+    describe("element", () => {
       let modelId: string;
       let categoryId: string;
       let elementId: string;
@@ -1775,13 +1780,13 @@ describe.only("VisibilityStateHandler", () => {
           // All other categories of the model should remain visible
           assertCategoryVisibility({
             modelIdFilter: modelId,
-            categoryIdFilter: id => id !== categoryId,
+            categoryIdFilter: (id) => id !== categoryId,
             perModelVisibilityOverride: true,
             handlerVisibility: "visible",
           }),
           // All other categories should be hidden
           assertCategoryVisibility({
-            modelIdFilter: id => id !== modelId,
+            modelIdFilter: (id) => id !== modelId,
             handlerVisibility: "hidden",
           }),
           // Selected element should hidden

@@ -9,6 +9,7 @@ import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { reduceWhile, toSet, toVoidPromise } from "../common/Rxjs";
+import { createQueryHandler } from "./internal/QueryHandler";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import { NodeUtils } from "./NodeUtils";
@@ -87,7 +88,7 @@ export interface VisibilityHandlerOverrides {
  */
 export interface HierarchyBasedVisibilityHandlerProps {
   viewport: Viewport;
-  queryHandler: IQueryHandler;
+  rulesetId: string;
   overrides?: VisibilityHandlerOverrides;
   hierarchyAutoUpdateEnabled?: boolean;
 }
@@ -108,15 +109,17 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   public filteredDataProvider?: IFilteredPresentationTreeDataProvider;
   public readonly isHierarchyBased = true;
   private readonly _eventListener: IVisibilityChangeEventListener;
+  private readonly _queryHandler: IQueryHandler;
   private _removePresentationHierarchyListener?: () => void;
 
   constructor(private readonly _props: HierarchyBasedVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
+    this._queryHandler = createQueryHandler(this._props.viewport.iModel, this._props.rulesetId);
     // istanbul ignore if
     if (this._props.hierarchyAutoUpdateEnabled) {
       // eslint-disable-next-line @itwin/no-internal
       this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(() => {
-        this._props.queryHandler.invalidateCache();
+        this._queryHandler.invalidateCache();
       });
     }
   }
@@ -198,7 +201,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
               mergeMap((filteredNode) => this.getVisibilityStatusObs(filteredNode)),
             )
           : subjectIds.pipe(
-              mergeMap((id) => this._props.queryHandler.querySubjectModels(id)),
+              mergeMap((id) => this._queryHandler.querySubjectModels(id)),
               mergeMap((x) => this.getModelVisibilityStatus(x)),
             );
 
@@ -233,7 +236,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
     }
 
-    return this._props.queryHandler.queryModelCategories(modelId).pipe(
+    return this._queryHandler.queryModelCategories(modelId).pipe(
       map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
       map((x) => x.state),
       getVisibilityFromChildren,
@@ -270,7 +273,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
                 return createVisibilityStatusObs("hidden");
               }
 
-              return this._props.queryHandler
+              return this._queryHandler
                 .queryModelElementsCount(modelId)
                 .pipe(map((count) => createVisibilityStatus(ad.size === count ? "visible" : "partial")));
             }),
@@ -279,7 +282,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
         return forkJoin({
           neverDrawnChildren: this.getNeverDrawnChildren(modelId),
-          totalCount: this._props.queryHandler.queryModelElementsCount(modelId),
+          totalCount: this._queryHandler.queryModelElementsCount(modelId),
         }).pipe(
           mergeMap(({ neverDrawnChildren, totalCount }) => {
             // Model is visible but all children are in the never drawn list.
@@ -346,7 +349,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         return of(defaultStatus);
       }
 
-      return this._props.queryHandler.queryCategoryElements(props.categoryId, props.modelId).pipe(
+      return this._queryHandler.queryCategoryElements(props.categoryId, props.modelId).pipe(
         map((id) => this.getElementOverriddenVisibility(id)?.state ?? defaultStatus.state),
         getVisibilityStatusFromChildren({
           visible: undefined,
@@ -363,7 +366,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
   private getElementGroupingNodeDisplayStatus(key: ECClassGroupingNodeKey): Observable<VisibilityStatus> {
     const result = defer(() =>
-      this._props.queryHandler.queryGroupingNodeChildren(key).pipe(
+      this._queryHandler.queryGroupingNodeChildren(key).pipe(
         mergeMap(({ modelId, categoryId, elementIds }) => {
           return elementIds.pipe(mergeMap((elementId) => this.getElementDisplayStatus({ categoryId, modelId, elementId, hasChildren: false })));
         }),
@@ -424,7 +427,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         return of(this.getElementDefaultVisibility(props));
       }
 
-      return this._props.queryHandler.queryElementChildren(props).pipe(
+      return this._queryHandler.queryElementChildren(props).pipe(
         map((x) => this.getElementOverriddenVisibility(x)?.state),
         filter((x): x is Exclude<typeof x, undefined> => !!x),
         getVisibilityStatusFromChildren({
@@ -502,7 +505,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       }
 
       return ids.pipe(
-        mergeMap((id) => this._props.queryHandler.querySubjectModels(id)),
+        mergeMap((id) => this._queryHandler.querySubjectModels(id)),
         toSet(),
         mergeMap((modelIds) => this.changeModelState({ ids: modelIds, on })),
       );
@@ -552,7 +555,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
           }
 
           observables.push(
-            this._props.queryHandler.queryModelCategories(modelId).pipe(mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on }))),
+            this._queryHandler.queryModelCategories(modelId).pipe(mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on }))),
           );
           return observables.length ? merge(...observables) : EMPTY;
         }),
@@ -595,7 +598,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
    */
   private changeElementGroupingNodeState(key: ECClassGroupingNodeKey, on: boolean): Observable<void> {
     const result = defer(() => {
-      return this._props.queryHandler.queryGroupingNodeChildren(key).pipe(
+      return this._queryHandler.queryGroupingNodeChildren(key).pipe(
         mergeMap(({ modelId, categoryId, elementIds }) => {
           return elementIds.pipe(mergeMap((elementId) => this.changeElementState({ elementId, on, modelId, categoryId })));
         }),
@@ -620,7 +623,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return of(elementId).pipe(
-            concatWith(hasChildren === false ? EMPTY : from(this._props.queryHandler.queryElementChildren(props))),
+            concatWith(hasChildren === false ? EMPTY : from(this._queryHandler.queryElementChildren(props))),
             this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }),
           );
         }),
@@ -672,7 +675,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
   private getAlwaysDrawnChildren(modelId: string): Observable<Id64Set> {
     const alwaysDrawn = this._props.viewport.alwaysDrawn;
-    return (alwaysDrawn?.size ? this._props.queryHandler.queryModelElements(modelId, alwaysDrawn) : EMPTY).pipe(toSet());
+    return (alwaysDrawn?.size ? this._queryHandler.queryModelElements(modelId, alwaysDrawn) : EMPTY).pipe(toSet());
   }
 
   private clearAlwaysDrawnChildren(modelId: string): Observable<void> {
@@ -688,7 +691,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
   private getNeverDrawnChildren(modelId: string) {
     const neverDrawn = this._props.viewport.neverDrawn;
-    return (neverDrawn?.size ? this._props.queryHandler.queryModelElements(modelId, neverDrawn) : EMPTY).pipe(toSet());
+    return (neverDrawn?.size ? this._queryHandler.queryModelElements(modelId, neverDrawn) : EMPTY).pipe(toSet());
   }
 
   private clearNeverDrawnChildren(modelId: string): Observable<void> {
