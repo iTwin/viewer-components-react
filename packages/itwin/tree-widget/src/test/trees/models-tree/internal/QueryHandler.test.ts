@@ -1,17 +1,22 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
 import { expect } from "chai";
 import { firstValueFrom, toArray } from "rxjs";
 import sinon from "sinon";
 import { createQueryHandler } from "../../../../components/trees/models-tree/internal/QueryHandler";
 
 import type { Observable } from "rxjs";
-import type { ECSqlReader } from "@itwin/core-common";
+import type { ECSqlReader, QueryBinder } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("QueryHandler", () => {
-  function createIModelMock(queryMock: (query: string) => any[] | undefined) {
+  function createIModelMock(queryMock: (query: string, binder: QueryBinder) => any[] | undefined) {
     return {
-      createQueryReader: sinon.fake(async function* (query: string): AsyncIterableIterator<any> {
-        const result = queryMock(query);
+      createQueryReader: sinon.fake(async function* (query: string, binder: QueryBinder): AsyncIterableIterator<any> {
+        const result = queryMock(query, binder);
         if (!result) {
           return undefined;
         }
@@ -87,30 +92,48 @@ describe("QueryHandler", () => {
 
   it("caches model elements", async () => {
     const modelId = "0x1";
-    const items = ["0x10", "0x20"];
-    const stub = sinon.fake.returns(items.map((id) => ({ id })));
+    const stub = sinon.fake((query: string) => {
+      if (query.includes("FROM bis.SpatialCategory")) {
+        return [{ id: "0x10" }];
+      }
+      if (query.includes("JOIN ChildElements")) {
+        return [{ id: "0x100" }, { id: "0x200" }];
+      }
+      return undefined;
+    });
     const handler = createQueryHandler(createIModelMock(stub), "");
     let result = await collect(handler.queryModelElements(modelId));
-    expect(result).to.deep.eq(items);
-    expect(stub).to.be.calledOnce;
+
+    const elements = ["0x100", "0x200"];
+    expect(result).to.deep.eq(elements);
+    expect(stub).to.be.calledTwice;
 
     result = await collect(handler.queryModelElements(modelId));
-    expect(result).to.deep.eq(items);
-    expect(stub).to.be.calledOnce;
+    expect(result).to.deep.eq(elements);
+    expect(stub).to.be.calledTwice;
   });
 
-  it("reuses model elements result for elements count queries", async () => {
+  it("uses model elements cache for getting elements count", async () => {
     const modelId = "0x1";
-    const items = ["0x10", "0x20"];
-    const stub = sinon.fake.returns(items.map((id) => ({ id })));
+    const stub = sinon.fake((query: string) => {
+      if (query.includes("FROM bis.SpatialCategory")) {
+        return [{ id: "0x10" }];
+      }
+      if (query.includes("JOIN ChildElements")) {
+        return [{ id: "0x100" }, { id: "0x200" }];
+      }
+      return undefined;
+    });
     const handler = createQueryHandler(createIModelMock(stub), "");
     const result = await collect(handler.queryModelElements(modelId));
-    expect(result).to.deep.eq(items);
-    expect(stub).to.be.calledOnce;
+
+    const elements = ["0x100", "0x200"];
+    expect(result).to.deep.eq(elements);
+    expect(stub).to.be.calledTwice;
 
     const count = await firstValueFrom(handler.queryModelElementsCount(modelId));
-    expect(count).to.eq(items.length);
-    expect(stub).to.be.calledOnce;
+    expect(count).to.deep.eq(elements.length);
+    expect(stub).to.be.calledTwice;
   });
 
   it("caches category recursive elements", async () => {
@@ -176,13 +199,18 @@ describe("QueryHandler", () => {
 
     let elementId = "0x100";
     result = await collect(handler.queryElementChildren({ elementId, categoryId, modelId }));
-    expect(result.sort()).to.deep.eq(categoryElementsHierarchy.get("0x100")!);
     expect(stub).to.be.calledOnce;
+    expect(result.sort()).to.deep.eq(categoryElementsHierarchy.get("0x100")!);
 
     elementId = "0x10";
     result = await collect(handler.queryElementChildren({ elementId, categoryId, modelId }));
-    expect(result.sort()).to.deep.eq(allElements.filter((x) => x !== elementId));
     expect(stub).to.be.calledOnce;
+    expect(result.sort()).to.deep.eq(allElements.filter((x) => x !== elementId));
+
+    elementId = "0x400";
+    result = await collect(handler.queryElementChildren({ elementId, categoryId, modelId }));
+    expect(stub).to.be.calledOnce;
+    expect(result).to.be.empty;
   });
 });
 
