@@ -2,23 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .ec3w {
   &-signin {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-bottom: 4 * $iui-baseline;
-    padding-top: 2 * $iui-baseline;
+    padding-bottom: calc(4 * var(--iui-size-s));
+    padding-top: calc(2 * var(--iui-size-s));
 
     &-icon {
-      width: 2 * $iui-icons-3xl;
-      height: 1 * $iui-icons-3xl;
+      width: calc(2 * var(--iui-size-2xl));
+      height: calc(1 * var(--iui-size-2xl));
     }
 
     &-prompt {
-      margin: $iui-l 0;
+      margin: var(--iui-size-l) 0;
       font-size: medium;
       display: flex;
       flex-direction: column;
@@ -31,11 +30,11 @@
 
     &-input {
       width: 100%;
-      margin: $iui-xs 0;
+      margin: var(--iui-size-2xs) 0;
     }
 
     &-button-container {
-      margin: $iui-sm 0;
+      margin: var(--iui-size-s) 0;
     }
 
     &-button {
@@ -43,7 +42,7 @@
     }
 
     &-error {
-      height: $iui-xl;
+      height: var(--iui-size-xl);
       font-size: small;
     }
 
@@ -54,7 +53,7 @@
   }
 
   &-report-button {
-    margin: $iui-l;
+    margin: var(--iui-size-xl);
     text-decoration: none;
 
     :hover {
@@ -63,15 +62,15 @@
   }
 
   &-status-text {
-    margin: $iui-s;
+    margin: var(--iui-size-xs);
   }
 
   &-progress-radial-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: $iui-l;
-    height: $iui-3xl;
+    margin: var(--iui-size-l);
+    height: var(--iui-size-3xl);
     place-content: space-evenly;
     text-align: center;
   }
@@ -80,8 +79,8 @@
     display: flex;
     flex-direction: column;
     text-align: center;
-    margin: $iui-l;
-    height: $iui-3xl;
+    margin: var(--iui-size-l);
+    height: var(--iui-size-3xl);
     place-content: space-evenly;
   }
 }

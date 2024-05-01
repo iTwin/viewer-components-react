@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./TreeHeader.scss";
 import classnames from "classnames";
@@ -16,6 +16,8 @@ import type { CommonProps } from "@itwin/core-react";
 /** @internal */
 export interface TreeHeaderButtonProps {
   viewport: Viewport;
+  density?: "default" | "enlarged";
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /** @internal */
@@ -32,26 +34,30 @@ export interface TreeHeaderProps extends CommonProps {
   onSelectedChanged: (index: number) => void;
   /** Header buttons */
   children?: React.ReactNode;
+  /** Modifies the density of tree header. `enlarged` header contains larger content */
+  density?: "default" | "enlarged";
 }
 
 /** @internal */
 export function TreeHeader(props: TreeHeaderProps) {
-  const { onFilterStart, onFilterClear, resultCount, selectedIndex, onSelectedChanged, children, className } = props;
+  const { onFilterStart, onFilterClear, resultCount, selectedIndex, onSelectedChanged, children, density, className } = props;
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const isEnlarged = density === "enlarged";
   return (
-    <div className={classnames("tree-widget-tree-header", className)}>
-      <HeaderButtons contracted={isSearchOpen}>
+    <div className={classnames("tree-widget-tree-header", className, isEnlarged && "enlarge")}>
+      <HeaderButtons contracted={isSearchOpen} isEnlarged={isEnlarged}>
         {children}
       </HeaderButtons>
       <DebouncedSearchBox
         isOpened={isSearchOpen}
         onOpen={() => setIsSearchOpen(true)}
         onClose={() => setIsSearchOpen(false)}
-        onChange={(value) => value ? onFilterStart(value) : onFilterClear()}
+        onChange={(value) => (value ? onFilterStart(value) : onFilterClear())}
         delay={500}
         selectedResultIndex={selectedIndex}
         resultCount={resultCount}
         onSelectedResultChanged={onSelectedChanged}
+        size={isEnlarged ? "large" : "small"}
       />
     </div>
   );
@@ -66,9 +72,20 @@ interface DebouncedSearchBoxProps {
   selectedResultIndex?: number;
   resultCount?: number;
   onSelectedResultChanged: (index: number) => void;
+  size?: "large" | "small";
 }
 
-function DebouncedSearchBox({ isOpened, selectedResultIndex, resultCount, onSelectedResultChanged, onChange, onOpen, onClose, delay }: DebouncedSearchBoxProps) {
+function DebouncedSearchBox({
+  isOpened,
+  selectedResultIndex,
+  resultCount,
+  onSelectedResultChanged,
+  onChange,
+  onOpen,
+  onClose,
+  delay,
+  size,
+}: DebouncedSearchBoxProps) {
   const [inputValue, setInputValue] = useState<string>("");
   const onChangeRef = useRef(onChange);
   // save latest `onChange` reference into `useRef` to avoid restarting timeout when `onChange` reference changes.
@@ -89,52 +106,41 @@ function DebouncedSearchBox({ isOpened, selectedResultIndex, resultCount, onSele
     };
   }, [inputValue, delay]);
 
-  return <SearchBox
-    expandable
-    onExpand={onOpen}
-    onCollapse={onClose}
-    className={classnames("tree-widget-search-box", !isOpened && "contracted")}
-  >
-    <SearchBox.CollapsedState>
-      <SearchBox.ExpandButton
-        title={TreeWidget.translate("searchBox.searchForSomething")}
-        aria-label={TreeWidget.translate("searchBox.open")}
-        size="small"
-      />
-    </SearchBox.CollapsedState>
-    <SearchBox.ExpandedState >
-      <SearchBox.Input
-        placeholder={TreeWidget.translate("searchBox.search")}
-        onChange={(e) => setInputValue(e.currentTarget.value)}
-        className="search-input"
-      />
-      <SearchResultStepper
-        selectedIndex={selectedResultIndex}
-        total={resultCount}
-        onStep={onSelectedResultChanged}
-      />
-      <SearchBox.CollapseButton
-        onClick={() => {
-          setInputValue("");
-          onClose();
-        }}
-        size="small"
-        aria-label={TreeWidget.translate("searchBox.close")}
-      />
-    </SearchBox.ExpandedState>
-  </SearchBox>;
+  return (
+    <SearchBox expandable onExpand={onOpen} onCollapse={onClose} size={size} className={classnames("tree-widget-search-box", !isOpened && "contracted")}>
+      <SearchBox.CollapsedState>
+        <SearchBox.ExpandButton
+          title={TreeWidget.translate("searchBox.searchForSomething")}
+          aria-label={TreeWidget.translate("searchBox.open")}
+          size={size}
+          styleType="borderless"
+        />
+      </SearchBox.CollapsedState>
+      <SearchBox.ExpandedState>
+        <SearchBox.Input placeholder={TreeWidget.translate("searchBox.search")} onChange={(e) => setInputValue(e.currentTarget.value)} />
+        <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} size={size} />
+        <SearchBox.CollapseButton
+          onClick={() => {
+            setInputValue("");
+            onClose();
+          }}
+          size={size}
+          aria-label={TreeWidget.translate("searchBox.close")}
+        />
+      </SearchBox.ExpandedState>
+    </SearchBox>
+  );
 }
 
 interface HeaderButtonsProps {
   contracted: boolean;
   children?: React.ReactNode;
+  isEnlarged?: boolean;
 }
 
 function HeaderButtons(props: HeaderButtonsProps) {
-  const className = classnames(
-    "button-container",
-    props.contracted && "contracted",
-  );
+  const className = classnames("button-container", props.contracted && "contracted");
+  const dropdownClassName = classnames("dropdown-item", props.isEnlarged && "enlarge");
 
   return (
     <ButtonGroup
@@ -143,12 +149,16 @@ function HeaderButtons(props: HeaderButtonsProps) {
         <DropdownMenu
           menuItems={() =>
             Children.toArray(props.children)
-              .slice(overflowStart === 0 ? overflowStart : overflowStart - 1)
-              .map((btn, index) => <li key={index} className="dropdown-item" role="menuitem">{btn}</li>)
+              .slice(overflowStart)
+              .map((btn, index) => (
+                <li key={index} className={dropdownClassName} role="menuitem">
+                  {btn}
+                </li>
+              ))
           }
           className="tree-header-button-dropdown-container"
         >
-          <IconButton styleType="borderless" size="small">
+          <IconButton title={TreeWidget.translate("dropdownMore")} styleType="borderless" size={props.isEnlarged ? undefined : "small"}>
             <SvgMore />
           </IconButton>
         </DropdownMenu>
@@ -163,12 +173,14 @@ interface SearchResultStepperProps {
   total?: number;
   onStep: (newIndex: number) => void;
   selectedIndex?: number;
+  size?: "large" | "small";
 }
 
 function SearchResultStepper(props: SearchResultStepperProps) {
   const { selectedIndex = 1, total, onStep } = props;
-  if (!total)
+  if (!total) {
     return null;
+  }
 
   return (
     <>
@@ -176,20 +188,22 @@ function SearchResultStepper(props: SearchResultStepperProps) {
       <Divider orientation="vertical" />
       <SearchBox.Button
         title={TreeWidget.translate("searchBox.previous")}
-        size="small"
+        size={props.size}
         onClick={() => {
-          if (selectedIndex > 1)
+          if (selectedIndex > 1) {
             onStep(selectedIndex - 1);
+          }
         }}
       >
         <SvgCaretUpSmall />
       </SearchBox.Button>
       <SearchBox.Button
         title={TreeWidget.translate("searchBox.next")}
-        size="small"
+        size={props.size}
         onClick={() => {
-          if (selectedIndex < total)
+          if (selectedIndex < total) {
             onStep(selectedIndex + 1);
+          }
         }}
       >
         <SvgCaretDownSmall />

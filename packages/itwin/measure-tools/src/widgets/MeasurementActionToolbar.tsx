@@ -8,7 +8,7 @@ import type { XAndY } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import { RelativePosition } from "@itwin/appui-abstract";
 import type { ItemProps, ToolbarActionItem } from "@itwin/appui-react";
-import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
+import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarItemUtilities } from "@itwin/appui-react";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import type { Measurement, MeasurementPickContext } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
@@ -319,11 +319,15 @@ export class MeasurementActionToolbar {
     // Ensure a previous toolbar was closed out
     this.closeToolbar(false);
 
-    if (this._filterHandler && !this._filterHandler(measurements))
+    const measurementsForActions = measurements.filter((m) => m.allowActions);
+    if (measurementsForActions.length === 0)
+      return false;
+
+    if (this._filterHandler && !this._filterHandler(measurementsForActions))
       return false;
 
     // Query all action items...if have none, do not show the toolbar
-    const itemList = this.buildActionList(measurements);
+    const itemList = this.buildActionList(measurementsForActions);
     if (itemList.length === 0)
       return false;
 
@@ -334,7 +338,7 @@ export class MeasurementActionToolbar {
     // Show toolbar
     const realOffset = (offset !== undefined) ? offset : Point2d.createZero();
     const realRelPosition = (relativePosition !== undefined) ? relativePosition : RelativePosition.Top;
-    CursorPopupManager.open(this._lastPopupId, this.buildToolbar(measurements, itemList), screenPoint, realOffset, realRelPosition);
+    CursorPopupManager.open(this._lastPopupId, this.buildToolbar(measurementsForActions, itemList), screenPoint, realOffset, realRelPosition);
 
     FeatureTracking.notifyFeature(MeasureToolsFeatures.MeasurementActionsToolbar_Open);
 
@@ -438,11 +442,7 @@ export class MeasurementActionToolbar {
       itemDef.measurements = measurements;
       return ToolbarItemUtilities.createActionItem(itemDef.id, index * 10, itemDef.iconSpec, itemDef.label, itemDef.execute);
     });
-    return <PopupToolbar
-      items={toolItems}
-      usage={ToolbarUsage.ContentManipulation}
-      orientation={ToolbarOrientation.Horizontal}
-    />;
+    return <PopupToolbar items={toolItems} onClose={() => MeasurementActionToolbar.closeToolbar(true)}/>;
   }
 }
 

@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Fieldset, LabeledInput, LabeledSelect, Small } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
@@ -10,17 +10,18 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import "./LabelAction.scss";
-import type { Configuration, Label as EC3Label, Material } from "./EC3/Template";
+import type { Configuration } from "./EC3/Template";
 import { DropdownTile } from "./DropdrownTile";
 import React from "react";
 import { ReportTableSelector } from "./ReportTableSelector";
 import SimpleReactValidator from "simple-react-validator";
 import { DeleteModal } from "./DeleteModal";
 import { LabelActionPanel } from "./LabelActionPanel";
+import type { EC3ConfigurationLabel, EC3ConfigurationMaterial } from "@itwin/insights-client";
 
 export interface LabelActionProps {
   template: Configuration;
-  label: EC3Label | undefined;
+  label?: EC3ConfigurationLabel;
   onClose: () => Promise<void>;
   setTemplate: (sel: Configuration) => void;
 }
@@ -30,21 +31,21 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
   const [name, setName] = useState<string>(label?.name ?? "");
   const [itemName, setItemName] = useState<string>(label?.elementNameColumn ?? "UserLabel");
   const [itemQuantity, setItemQuantity] = useState<string>(label?.elementQuantityColumn ?? "");
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | undefined>();
+  const [selectedMaterial, setSelectedMaterial] = useState<EC3ConfigurationMaterial | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [materials, setMaterials] = useState<Material[]>(label?.materials.map((x) => { return { nameColumn: x.nameColumn }; }) ?? [{ nameColumn: undefined }]);
+  const [materials, setMaterials] = useState<(EC3ConfigurationMaterial | undefined)[]>(label?.materials ?? [undefined]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [availableStringColumns, setStringColumns] = useState<string[]>([]);
   const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
   const validator = new SimpleReactValidator();
 
   const onSave = async () => {
-    const selectedLabel: EC3Label = {
+    const selectedLabel: EC3ConfigurationLabel = {
       reportTable,
       name,
       elementNameColumn: itemName,
       elementQuantityColumn: itemQuantity,
-      materials,
+      materials: materials.filter((material): material is EC3ConfigurationMaterial => material !== undefined),
     };
 
     if (label) {
@@ -71,7 +72,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
 
   const getStringColumnOptions = ((material: string | undefined) => {
     const options = stringColumnOptions
-      .filter((x) => !materials.some((m) => m.nameColumn === x.label))
+      .filter((x) => !materials.some((m) => m?.nameColumn === x.label))
       .filter((x) => x.label !== itemName);
 
     if (material)
@@ -92,12 +93,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
   }, [availableNumericalColumns, itemQuantity]);
 
   const addPair = (() => {
-    const pair: Material = {
-      nameColumn: undefined,
-    };
-    const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn }; });
-    newMaterials.push(pair);
-    setMaterials(newMaterials);
+    setMaterials((oldMaterials) => [...oldMaterials, undefined]);
   });
 
   useEffect(() => {
@@ -106,7 +102,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
       setName(label.name);
       setItemName(label.elementNameColumn);
       setItemQuantity(label.elementQuantityColumn);
-      setMaterials(label.materials.map((x) => { return { nameColumn: x.nameColumn }; })); // creating a copy of array, so original (in the parent) isn't modified
+      setMaterials([...label.materials]); // creating a copy of array, so original (in the parent) isn't modified
     } else {
       setItemName("UserLabel");
     }
@@ -114,7 +110,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
 
   const onChangeCallback = useCallback(async (table: string, numCols: string[], strCols: string[]) => {
     if (table !== reportTable) {
-      setMaterials([{ nameColumn: undefined }]);
+      setMaterials([undefined]);
       setName(table);
     }
     setReportTable(table);
@@ -126,9 +122,9 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
     <>
       <div className='ec3w-label-details-container' data-testid="ec3-label-action">
         <Fieldset legend='Assembly' className='ec3w-label-details'>
-          <Small className='ec3w-label-field-legend'>
+          <Text variant="small" className='ec3w-label-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
 
           <ReportTableSelector
             selectedReportTable={reportTable}
@@ -183,7 +179,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
               startIcon={<SvgAdd />}
               onClick={addPair}
               styleType="default"
-              disabled={isLoading || reportTable === "" || materials.filter((x) => x.nameColumn === undefined).length > 0}
+              disabled={isLoading || reportTable === "" || materials.some((material) => material === undefined)}
             >
               Add Material
             </Button>
@@ -192,15 +188,15 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
                 key={index}
                 required={index === 0}
                 disabled={reportTable === ""}
-                stringColumnOptions={getStringColumnOptions(material.nameColumn)}
-                materialValue={material.nameColumn ?? ""}
+                stringColumnOptions={getStringColumnOptions(material?.nameColumn)}
+                materialValue={material?.nameColumn ?? ""}
                 onMaterialChange={async (value) => {
-                  const newPairs = materials.map((x) => { return { nameColumn: x.nameColumn }; });
-                  newPairs.forEach((p) => {
-                    if (p.nameColumn === material.nameColumn)
-                      p.nameColumn = value;
+                  setMaterials((oldMaterials) => {
+                    const newPairs = oldMaterials.map((oldMaterial) =>
+                      oldMaterial?.nameColumn === material?.nameColumn ? { nameColumn: value } : oldMaterial
+                    );
+                    return newPairs;
                   });
-                  setMaterials(newPairs);
                 }}
                 actionGroup={
                   <div className="actions">
@@ -229,7 +225,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          setMaterials(materials.filter((x) => x.nameColumn !== selectedMaterial?.nameColumn));
+          setMaterials(materials.filter((x) => x?.nameColumn !== selectedMaterial?.nameColumn));
         }}
         refresh={async () => { }}
       />
@@ -237,7 +233,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
       <LabelActionPanel
         isSavingDisabled={
           !validator.allValid() ||
-          materials.filter((x) => x.nameColumn === undefined).length > 0 ||
+          materials.filter((x) => x?.nameColumn === undefined).length > 0 ||
           itemQuantity === "" ||
           itemName === ""
         }

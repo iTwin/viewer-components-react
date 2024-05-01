@@ -44,6 +44,7 @@ export const SearchBar = ({
           <IconButton
             onClick={() => setSearchBarClosing(true)}
             styleType="borderless"
+            title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ClearSearch")}
           >
             <SvgCloseSmall />
           </IconButton>
@@ -55,7 +56,11 @@ export const SearchBar = ({
       />
     </div>
   ) : (
-    <IconButton styleType="borderless" data-testid="rcw-search-button" onClick={() => setSearchBarOpened(true)}>
+    <IconButton
+      styleType="borderless"
+      data-testid="rcw-search-button"
+      title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:SearchReport")}
+      onClick={() => setSearchBarOpened(true)}>
       <SvgSearch />
     </IconButton>
   );

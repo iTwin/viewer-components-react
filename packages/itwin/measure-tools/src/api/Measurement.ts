@@ -187,7 +187,7 @@ export class MeasurementPickContext {
   public static create(hitDetail: HitDetail, ev?: BeButtonEvent): MeasurementPickContext {
     if (!ev) {
       ev = new BeButtonEvent();
-      IModelApp.toolAdmin.currentInputState.toEventFromLastDataPoint(ev);
+      IModelApp.toolAdmin.fillEventFromLastDataButton(ev);
     }
 
     return new MeasurementPickContext(hitDetail.sourceId, hitDetail, ev);
@@ -201,7 +201,7 @@ export class MeasurementPickContext {
   public static createFromSourceId(geomId: string, ev?: BeButtonEvent): MeasurementPickContext {
     if (!ev) {
       ev = new BeButtonEvent();
-      IModelApp.toolAdmin.currentInputState.toEventFromLastDataPoint(ev);
+      IModelApp.toolAdmin.fillEventFromLastDataButton(ev);
     }
 
     return new MeasurementPickContext(geomId, undefined, ev);
@@ -398,6 +398,9 @@ export abstract class Measurement {
       this.onDisplayLabelsToggled();
     }
   }
+
+  /** Communicates to the action toolbar this measurement wants to participate in actions. */
+  public get allowActions(): boolean { return true; }
 
   /** Protected constructor */
   protected constructor() {

@@ -6,10 +6,9 @@ import { useEffect, useMemo, useState } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Select } from "@itwin/itwinui-react";
 import { Fieldset, LabeledInput } from "@itwin/itwinui-react";
-import type { Report } from "@itwin/insights-client";
+import type { EC3ConfigurationLabel, Report } from "@itwin/insights-client";
 import { handleSelectChange } from "./utils";
-import type { Configuration, Label as EC3Label } from "./EC3/Template";
-import { convertConfigurationCreate, convertConfigurationUpdate } from "./EC3/Template";
+import type { Configuration } from "./EC3/Template";
 import { LabelTile } from "./LabelTile";
 import { handleInputChange } from "./utils";
 import {
@@ -19,7 +18,6 @@ import {
 
 import {
   Button,
-  Surface,
   Text,
   toaster,
 } from "@itwin/itwinui-react";
@@ -45,7 +43,7 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
-  const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
+  const [selectedLabel, setSelectedLabel] = useState<EC3ConfigurationLabel | undefined>();
   const [previouslySelectedReport, setPreviouslySelectedReport] = useState<string>();
   const [availableReports, setReports] = useState<Report[]>([]);
   const configurationsClient = useApiContext().ec3ConfigurationsClient;
@@ -61,9 +59,12 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
     try {
       const token = await getAccessToken();
       if (childTemplate.id) {
-        await configurationsClient.updateConfiguration(token, childTemplate.id, convertConfigurationUpdate(childTemplate));
-      } else {
-        await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
+        await configurationsClient.updateConfiguration(token, childTemplate.id, childTemplate);
+      } else if (childTemplate.reportId) {
+        await configurationsClient.createConfiguration(token, {
+          ...childTemplate,
+          reportId: childTemplate.reportId,
+        });
       }
 
       toaster.positive("Saved successfully!");
@@ -186,10 +187,10 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
           </div>
         </Fieldset>
         <Fieldset legend='Assemblies' className='ec3w-template-details'>
-          <Surface className="ec3w-labels-container">
+          <div className="ec3w-labels-container">
             <Button
               data-testid="ec3-add-assembly-button"
-              styleType="default"
+              styleType="high-visibility"
               startIcon={<SvgAdd />}
               onClick={() => { setSelectedLabel(undefined); setShowLabelActionModal(true); }}
               disabled={!childTemplate.reportId}
@@ -218,7 +219,7 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
                     />
                   ))}
             </div>
-          </Surface>
+          </div>
         </Fieldset>
       </div>
       <TemplateActionPanel

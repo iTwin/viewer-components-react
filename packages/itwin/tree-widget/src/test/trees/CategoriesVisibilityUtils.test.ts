@@ -1,15 +1,15 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
+import { expect } from "chai";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { SubCategoryAppearance } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
 import { TestUtils } from "../TestUtils";
-import { expect } from "chai";
 
 import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
@@ -17,8 +17,7 @@ import type { Id64String } from "@itwin/core-bentley";
 
 describe("CategoryVisibilityUtils", () => {
   before(async () => {
-    // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-    await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
+    await NoRenderApp.startup();
     await TestUtils.initialize();
   });
 
@@ -48,24 +47,24 @@ describe("CategoryVisibilityUtils", () => {
 
   const categoryId = "CategoryId";
   const subCategoryId = "SubCategoryId";
-  const categoriesInfo = new Map(
-    [[
+  const categoriesInfo = new Map([
+    [
       categoryId,
       {
         id: categoryId,
-        subCategories: new Map(
-          [[
+        subCategories: new Map([
+          [
             subCategoryId,
             {
               id: subCategoryId,
               categoryId,
               appearance: new SubCategoryAppearance(),
             },
-          ]]
-        ),
+          ],
+        ]),
       },
-    ]]
-  );
+    ],
+  ]);
 
   beforeEach(() => {
     imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReaderMock.object);
@@ -77,8 +76,7 @@ describe("CategoryVisibilityUtils", () => {
     selectedViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
     perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => [][Symbol.iterator]());
     viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
-    // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-    viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+    viewStateMock.setup((x) => x.is3d()).returns(() => true);
   });
 
   afterEach(() => {
@@ -107,7 +105,11 @@ describe("CategoryVisibilityUtils", () => {
 
     it("calls enableCategory with false when forAllViewports is undefined", async () => {
       const selectedViewMock1 = moq.Mock.ofType<ScreenViewport>();
-      viewManagerMock.setup((x) => x[Symbol.iterator]()).returns(function*() { yield selectedViewMock1.object; });
+      viewManagerMock
+        .setup((x) => x[Symbol.iterator]())
+        .returns(function* () {
+          yield selectedViewMock1.object;
+        });
       await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object);
       selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.once());
       selectedViewMock1.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.never());
@@ -149,8 +151,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("enables category in all viewports", async () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       otherViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
@@ -164,8 +165,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("disables category in all viewports", async () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       otherViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
@@ -179,8 +179,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("does not change category if viewport and selected view has different types", async () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => false); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => false);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       otherViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
@@ -213,8 +212,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("enables subCategory in all viewports", () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       mockViewManagerForEachViewport(otherViewMock.object);
@@ -227,8 +225,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("disables subCategory in all viewports", () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => true);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       mockViewManagerForEachViewport(otherViewMock.object);
@@ -241,8 +238,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("does not change subCategory state if viewport and selectedView has different types", () => {
       viewStateMock.reset();
-      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
-      viewStateMock.setup((x) => x.is3d()).returns(() => false); // eslint-disable-line @itwin/no-internal
+      viewStateMock.setup((x) => x.is3d()).returns(() => false);
       const otherViewMock = moq.Mock.ofType<Viewport>();
       otherViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
       mockViewManagerForEachViewport(otherViewMock.object);
@@ -256,15 +252,15 @@ describe("CategoryVisibilityUtils", () => {
 
   describe("loadCategoriesFromViewport", () => {
     it("loadCategoriesFromViewport sets subCategories as undefined when subCategories size is 0", async () => {
-      const categoryInfoWithoutSubcategories: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map(
-        [[
+      const categoryInfoWithoutSubcategories: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map([
+        [
           categoryId,
           {
             id: categoryId,
             subCategories: new Map(),
           },
-        ]]
-      );
+        ],
+      ]);
       queryReaderMock.reset();
       categoriesMock.reset();
       queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: "CategoryWithoutSubcategories" }]);

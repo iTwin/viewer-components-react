@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .rcw-extraction-status {
   align-items: center;
@@ -10,10 +9,10 @@
   display: flex;
 
   .rcw-status-icon {
-    width: $iui-icons-default;
-    height: $iui-icons-default;
+    width: var(--iui-size-m);
+    height: var(--iui-size-m);
     align-items: center;
-    margin: auto $iui-xs * 3;
+    margin: auto calc(var(--iui-size-2xs) * 3);
     display: flex;
   }
 }
@@ -22,11 +21,11 @@
   align-items: center;
   height: 38px;
   display: flex;
-  margin: auto $iui-xs * 3;
+  margin: auto calc(var(--iui-size-2xs) * 3);
 
   .rcw-status-icon {
-    width: $iui-icons-default;
-    height: $iui-icons-default;
+    width: var(--iui-size-m);
+    height: var(--iui-size-m);
   }
 }
 

@@ -1,10 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import classNames from "classnames";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
@@ -14,12 +15,11 @@ import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { ModelsTree } from "./ModelsTree";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
+import { queryModelsForHeaderActions } from "./Utils";
 
-import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { ModelsTreeProps } from "./ModelsTree";
-
 /**
  * Information about a single Model.
  * @public
@@ -43,14 +43,7 @@ export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
  * Props for [[ModelsTreeComponent]].
  * @public
  */
-export interface ModelTreeComponentProps extends Omit<ModelsTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
-> {
+export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -75,12 +68,11 @@ export const ModelsTreeComponent = (props: ModelTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
-  if (!iModel || !viewport)
+  if (!iModel || !viewport) {
     return null;
+  }
 
-  return (
-    <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
-  );
+  return <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
 };
 
 /**
@@ -125,33 +117,26 @@ ModelsTreeComponent.id = "models-tree";
  */
 ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
 
-function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
+function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
-
   const { viewport, iModel } = props;
-
   const { searchOptions, filterString, onFilterApplied } = useTreeFilteringState();
-
-  const queryModels = useCallback(async (): Promise<ModelInfo[]> => {
-    const queryParams: ModelQueryParams = {
-      from: "BisCore.GeometricModel3d",
-      wantPrivate: false,
-    };
-    const modelProps = await iModel.models.queryProps(queryParams);
-    return modelProps
-      .map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection }))
-      .filter(({ id }) => id) as ModelInfo[];
-  }, [iModel]);
+  const contentClassName = classNames("tree-widget-tree-content", props.density === "enlarged" && "enlarge");
 
   useEffect(() => {
-    queryModels()
+    queryModelsForHeaderActions(iModel)
       .then((modelInfos: ModelInfo[]) => {
         setAvailableModels(modelInfos);
       })
       .catch((_e) => {
         setAvailableModels([]);
       });
-  }, [queryModels]);
+  }, [iModel]);
+
+  const filterInfo = useMemo(
+    () => ({ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }),
+    [filterString, searchOptions.activeMatchIndex],
+  );
 
   return (
     <div className="tree-widget-tree-with-header">
@@ -161,24 +146,21 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
         onSelectedChanged={searchOptions.onResultSelectedChanged}
         resultCount={searchOptions.matchedResultCount}
         selectedIndex={searchOptions.activeMatchIndex}
+        density={props.density}
       >
         {props.headerButtons
-          ? props.headerButtons.map(
-            (btn, index) =>
-              <Fragment key={index}>
-                {btn({ viewport, models: availableModels })}
-              </Fragment>
-          )
+          ? props.headerButtons.map((btn, index) => (
+              <Fragment key={index}>{btn({ viewport, models: availableModels, density: props.density, onFeatureUsed: props.onFeatureUsed })}</Fragment>
+            ))
           : [
-            <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" />,
-            <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" />,
-            <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" />,
-            <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" />,
-            <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" />,
-          ]
-        }
+              <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+              <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={props.density} onFeatureUsed={props.onFeatureUsed} />,
+            ]}
       </TreeHeader>
-      <div className="tree-widget-tree-content">
+      <div className={contentClassName}>
         <AutoSizer>
           {({ width, height }) => (
             <ModelsTree
@@ -187,7 +169,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
               activeView={viewport}
               width={width}
               height={height}
-              filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
+              filterInfo={filterInfo}
               onFilterApplied={onFilterApplied}
             />
           )}
@@ -200,10 +182,16 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={() => void showAllModels(props.models.map((model) => model.id), props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-showall`);
+        void showAllModels(
+          props.models.map((model) => model.id),
+          props.viewport,
+        );
+      }}
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -213,10 +201,16 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={() => void hideAllModels(props.models.map((model) => model.id), props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-hideall`);
+        void hideAllModels(
+          props.models.map((model) => model.id),
+          props.viewport,
+        );
+      }}
     >
       <SvgVisibilityHide />
     </IconButton>
@@ -226,10 +220,16 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
-      size="small"
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("invert")}
-      onClick={() => void invertAllModels(props.models.map((model) => model.id), props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-invert`);
+        void invertAllModels(
+          props.models.map((model) => model.id),
+          props.viewport,
+        );
+      }}
     >
       <SvgVisibilityHalf />
     </IconButton>
@@ -250,10 +250,13 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
-      size="small"
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
-      onClick={() => void toggleModels(models2d, is2dToggleActive, props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-view2d`);
+        void toggleModels(models2d, is2dToggleActive, props.viewport);
+      }}
       disabled={models2d.length === 0}
       endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
@@ -276,10 +279,13 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   return (
     <Button
-      size="small"
+      size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
-      onClick={() => void toggleModels(models3d, is3dToggleActive, props.viewport)}
+      onClick={() => {
+        props.onFeatureUsed?.(`${ModelsTreeComponent.id}-view3d`);
+        void toggleModels(models3d, is3dToggleActive, props.viewport);
+      }}
       disabled={models3d.length === 0}
       endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >

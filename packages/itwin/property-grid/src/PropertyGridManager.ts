@@ -1,12 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-import { UiError } from "@itwin/appui-abstract";
+import { BentleyError, BentleyStatus, type Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-
-import type { Localization } from "@itwin/core-common";
 import type { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
@@ -21,7 +19,7 @@ export class PropertyGridManager {
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n?: Localization, ): Promise<void> {
+  public static async initialize(i18n?: Localization): Promise<void> {
     if (PropertyGridManager._initialized) {
       return;
     }
@@ -43,7 +41,7 @@ export class PropertyGridManager {
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): Localization {
     if (!PropertyGridManager._i18n) {
-      throw new UiError("property-grid-react.PropertyGridManager", "PropertyGridManager not initialized");
+      throw new BentleyError(BentleyStatus.ERROR, "PropertyGridManager not initialized");
     }
     return PropertyGridManager._i18n;
   }

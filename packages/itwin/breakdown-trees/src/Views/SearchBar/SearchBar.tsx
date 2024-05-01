@@ -76,15 +76,15 @@ export class SearchBar extends React.PureComponent<SearchBarProps, SearchBarStat
             this._searchBox.current.focus();
         }, 100); // timeout allows the search bar animation to complete!
     });
-  }
+  };
 
   private _onCloseDropdown = () => {
     this.setState({ showDropdown: false });
-  }
+  };
 
   private _onToggleDropdown = () => {
     this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
-  }
+  };
 
   public render() {
     const { value, alignment, valueChangedDelay, placeholder, enableGrouping, title } = this.props;

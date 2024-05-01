@@ -1,0 +1,24 @@
+steps:
+  # 1. Configure node
+  - task: NodeTool@0
+    displayName: "Use Node $(NodeVersion)"
+    inputs:
+      versionSpec: "$(NodeVersion)"
+
+  - task: Npm@1
+    displayName: install pnpm ^8.11.0
+    inputs:
+      command: "custom"
+      customCommand: "install -g pnpm@^8.11.0"
+
+  - script: pnpm install --frozen-lockfile
+    displayName: pnpm install
+
+  - script: pnpm audit --registry=https://registry.npmjs.org --audit-level=high --production
+    displayName: Audit
+
+  # - script: pnpm exec prettier . --check
+  #   displayName: Check formatting
+
+  - script: pnpm exec lage lint extract-api cover --grouped
+    displayName: Build, Lint, Cover and check for unexpected API changes

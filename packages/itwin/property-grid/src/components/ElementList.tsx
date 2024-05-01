@@ -1,19 +1,20 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./ElementList.scss";
 import classnames from "classnames";
 import * as React from "react";
 import { MenuItem, Text } from "@itwin/itwinui-react";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
+import { trackTime } from "../common/TimeTracker";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { Header } from "./Header";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-
 /**
  * Props for `ElementList` component.
  * @internal
@@ -27,51 +28,77 @@ export interface ElementListProps {
 }
 
 /**
+ * Props for data that is needed for displaying an element in a list.
+ * @internal
+ */
+interface RowElementData {
+  label: string;
+  instanceKey: InstanceKey;
+}
+
+/**
  * Shows a list of elements to inspect properties for.
  * @internal
  */
-export function ElementList({
-  imodel,
-  instanceKeys,
-  onBack,
-  onSelect,
-  className,
-}: ElementListProps) {
-  const [data, setData] = React.useState<string[]>();
-
+export function ElementList({ imodel, instanceKeys, onBack, onSelect, className }: ElementListProps) {
+  const [data, setData] = React.useState<RowElementData[]>();
   const labelsProvider: PresentationLabelsProvider = React.useMemo(() => new PresentationLabelsProvider({ imodel }), [imodel]);
 
-  React.useEffect(() => {
-    const createLabels = async () => {
-      const labels = await getLabels(labelsProvider, instanceKeys);
-      setData(labels);
-    };
+  const { onPerformanceMeasured } = useTelemetryContext();
 
-    void createLabels();
-  }, [labelsProvider, instanceKeys]);
+  React.useEffect(() => {
+    const { finish, dispose } = trackTime(instanceKeys.length > 0, (elapsedTime) => {
+      onPerformanceMeasured("elements-list-load", elapsedTime);
+    });
+
+    void (async () => {
+      const sortedRowElementData = await getSortedLabelInstanceKeyPairs(labelsProvider, instanceKeys);
+      finish();
+      setData(sortedRowElementData);
+    })();
+
+    return dispose;
+  }, [labelsProvider, instanceKeys, onPerformanceMeasured]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 
   return (
     <div className={classnames("property-grid-react-element-list", className)}>
-      <Header onBackButtonClick={onBack}>
-        <Text className="property-grid-react-element-list-title" variant="leading">{title}</Text>
-      </Header>
+      <Header
+        onBackButtonClick={onBack}
+        title={
+          <Text className="property-grid-react-element-list-title" variant="leading">
+            {title}
+          </Text>
+        }
+      />
       <div className="property-grid-react-element-list-container" role="list">
-        {data?.map((label, index) => (
+        {data?.map((dataItem, index) => (
           <MenuItem
             key={index}
             role="listitem"
             onClick={() => {
-              onSelect(instanceKeys[index]);
+              onSelect(dataItem.instanceKey);
             }}
           >
-            {label}
+            {dataItem.label}
           </MenuItem>
         ))}
       </div>
     </div>
   );
+}
+
+/** Queries labels and orders Label-InstanceKey pairs in ascending order */
+async function getSortedLabelInstanceKeyPairs(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<RowElementData[]> {
+  const labels = await getLabels(labelsProvider, instanceKeys);
+  const labelKeyPairs: RowElementData[] = [];
+
+  labels.forEach((label, index) => {
+    labelKeyPairs.push({ label, instanceKey: instanceKeys[index] });
+  });
+
+  return labels.map((label, index) => ({ label, instanceKey: instanceKeys[index] })).sort((a, b) => a.label.localeCompare(b.label));
 }
 
 /** Gets labels from presentation layer, chunks up requests if necessary */

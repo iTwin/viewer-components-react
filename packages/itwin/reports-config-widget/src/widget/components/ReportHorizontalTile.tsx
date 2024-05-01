@@ -111,7 +111,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
               </MenuItem>,
             ].flat()}
           >
-            <IconButton styleType="borderless">
+            <IconButton styleType="borderless" title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportOptions")}>
               <SvgMore />
             </IconButton>
           </DropdownMenu>

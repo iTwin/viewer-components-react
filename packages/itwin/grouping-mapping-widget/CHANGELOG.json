@@ -2,6 +2,376 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Mon, 29 Apr 2024 14:59:26 GMT",
+      "version": "0.25.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.25.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "761f0523ea76a2d0a239fd435be5723cf0ba8c1c",
+            "comment": "Fixed a bad caching problem when opening the group with the extraction issue after opening extraction logs."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 17 Apr 2024 17:54:44 GMT",
+      "version": "0.25.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.25.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a0ce4845b2467849c12c2b8c27788df39d018368",
+            "comment": "Fixed an issue where a passed in iModelConnection was not being used by the widget shell."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 17 Apr 2024 15:50:19 GMT",
+      "version": "0.25.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.25.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "49672e0a0894f0785d4332af0649dac75b36f2c9",
+            "comment": "Fixed isMounted returning false in certain situations."
+          }
+        ],
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "25c6ff462c7aed053c9753354948da502ba0a1bd",
+            "comment": "Switched to iTwinUI Lists component."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 29 Feb 2024 19:46:34 GMT",
+      "version": "0.24.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.24.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "3dfed20b3f7f63c6173227d1e5ab5084a41f55cc",
+            "comment": "Property related components have been refactored to use react-query."
+          },
+          {
+            "author": "smmr-dn@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "37e4951e862a099a576e8209b155770bb8cdd5f7",
+            "comment": "Added feature to trigger extraction and show extraction status on mapping UI."
+          }
+        ],
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "91246414fa3b871ec4d95734e2166a3d7b6c44c9",
+            "comment": "Fixed an issue where the list of properties would disappear if window was too small."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "368b4c6ada7b362cad0472b4b6d758ca6af774ea",
+            "comment": "Fixed an issue where duplicate properties would be listed in group properties generation."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "70625a9c78d34e5c47f94af1a59a5f1fe031e1eb",
+            "comment": "Fixed an issue where extraction status would go out of bounds when trying to find the group name in extraction logs."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "8a9e86e84aa5aa3380e30cdba9419640391ac72e",
+            "comment": "Fixed an issue where job id's were potentially undefined."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "b24a225e739a7c007af521338a032112705b4674",
+            "comment": "Fixed an issue where visualized groups were not rehidden after going back into the Groups view."
+          }
+        ],
+        "none": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a1d6a48e53c2270fe209dd1359776de0c046863a",
+            "comment": "Select properties modal moved to its own file."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 02 Feb 2024 00:04:15 GMT",
+      "version": "0.23.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.23.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a0c5d1c10689446ebd10fb192b5205168e87bebb",
+            "comment": "Fixed an issue where hidden elements would not reappear when the group for those elements was deleted and group color was disabled."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "46077de8d6019d696ebf6d722b29e475ca1c1878",
+            "comment": "Fixed iModel selection not populating in Import Mappings."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "ec2db4b168ad7e06a931e2289a4b0e769d1642e8",
+            "comment": "Fixed form validation not running when creating a group."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 29 Jan 2024 21:37:20 GMT",
+      "version": "0.23.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.23.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "d1bff484dd03f5ec61f85fcb52893e4d0755912c",
+            "comment": "Presentation is now correctly localized."
+          }
+        ],
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "2d1cd72ecbc3c9b3919e46fb49541b287d5a4c1e",
+            "comment": "Groups related components have been refactored to use react-query."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.22.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.22.0",
+      "date": "Mon, 18 Dec 2023 18:31:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Mapping related components have been refactored to use react-query."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Added new functions for Custom Calculations in FormulaFunctionProvider.ts"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.21.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.21.1",
+      "date": "Fri, 01 Dec 2023 13:46:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed extraction error message not showing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.21.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.21.0",
+      "date": "Fri, 10 Nov 2023 14:46:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "iTwin.js minimum version bumped to 4.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.20.1",
+      "date": "Tue, 07 Nov 2023 13:43:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Kept extraction status data consistent when navigating through Mapping and Group components."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.20.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.20.0",
+      "date": "Thu, 26 Oct 2023 13:09:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "New visualization logic to distinctly highlight elements that overlap across multiple groups"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Removed iModelId and replaced MappingId and GroupId with names in log messages."
+          },
+          {
+            "comment": "Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.19.2",
+      "date": "Mon, 02 Oct 2023 20:32:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changed filter radio buttons to checkboxes"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.19.1",
+      "date": "Fri, 29 Sep 2023 20:08:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added a formula parser for indexof in Custom Calculation properties."
+          },
+          {
+            "comment": "Added an icon and modal to expose extraction log messages."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.19.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.19.0",
+      "date": "Tue, 19 Sep 2023 14:55:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enabled query experimental features e.g '$->'."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Added the `GroupsViews` component: a reusable, state-agnostic UI component for managing Groups."
+          },
+          {
+            "comment": "Renamed Groupings component to Groups for consistency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.18.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.18.1",
+      "date": "Thu, 24 Aug 2023 21:32:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added missing state to restore missing import mapping button to default UI."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.18.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.18.0",
+      "date": "Thu, 17 Aug 2023 14:42:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added a Progress bar when Color By Group"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Added the `MappingsView` component: a reusable, state-agnostic UI component for managing Mappings."
+          },
+          {
+            "comment": "Typescript version bump to ^4.5.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.5",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.5",
+      "date": "Wed, 02 Aug 2023 12:11:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Modified operator validation delay time and behavior"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.4",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.4",
+      "date": "Wed, 26 Jul 2023 21:49:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Adds an informational icon that the user can hover over to learn about custom calculation formulas. Also adds a placeholder to the formula Textarea with an example formula."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.3",
+      "date": "Mon, 24 Jul 2023 17:26:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added tooltips to buttons."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.17.2",
+      "date": "Thu, 20 Jul 2023 20:15:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Made Selected Items section expand by default"
+          },
+          {
+            "comment": "Made group creation options fully shown when there is space"
+          },
+          {
+            "comment": "Fixed unicode bug to meet OData simple identifier requirement"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.1",
       "tag": "@itwin/grouping-mapping-widget_v0.17.1",
       "date": "Tue, 18 Jul 2023 14:40:24 GMT",

@@ -16,9 +16,7 @@
           "classes": [
             {
               "schemaName": "BisCore",
-              "classNames": [
-                "ExternalSource"
-              ],
+              "classNames": ["ExternalSource"],
               "arePolymorphic": false
             }
           ],

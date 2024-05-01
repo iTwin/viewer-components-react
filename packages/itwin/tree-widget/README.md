@@ -71,7 +71,7 @@ While we expect this package to be mostly used with [AppUI](https://github.com/i
   - `createVisibilityTreeRenderer` returns a tree renderer that renders nodes with "eye" checkboxes. Its building blocks:
     - `createVisibilityTreeNodeRenderer`
     - `VisibilityTreeNodeCheckbox`
-  - `useVisibilityTreeFiltering` is used to filter the hierarchy.
+  - `useVisibilityTreeState` is used to create and manage tree state.
   - `VisibilityTreeNoFilteredData` is used to render a "no results" when filtering.
   - `VisibilityTreeEventHandler` is an extension of [UnifiedSelectionTreeEventHandler](https://www.itwinjs.org/reference/presentation-components/tree/unifiedselectiontreeeventhandler/), that additionally handles checkbox events and calls provided `IVisibilityHandler` to get/set display of the elements in the hierarchy.
   - `useTreeTransientState` is used to persist tree scroll position when tree is used in [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) widget.
@@ -176,4 +176,109 @@ function MyWidget() {
     <IModelContentTreeComponent />
   );
 }
+```
+
+## Performance tracking
+
+Components from this package allows consumers to track performance of specific features.
+
+This can be achieved by passing `onPerformanceMeasured` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent` or `TreeWidgetUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+
+- `"{tree}-initial-load"` - time it takes to load initial nodes after the tree is created.
+- `"{tree}-hierarchy-level-load"` - time it takes to load children nodes when a node is expanded.
+
+Where `{tree}` specifies which tree component the feature is of.
+
+Example:
+
+```ts
+import { UiItemsManager } from "@itwin/appui-react";
+import { TreeWidgetUiItemsProvider, ModelsTreeComponent } from "@itwin/tree-widget-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({
+    defaultPanelLocation: StagePanelLocation.Left,
+    defaultPanelSection: StagePanelSection.End,
+    defaultTreeWidgetPriority: 1000,
+    onPerformanceMeasured={(feature, elapsedTime) => {
+      telemetryClient.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+    }},
+    trees: [{
+      id: ModelsTreeComponent.id,
+      getLabel: ModelsTreeComponent.getLabel,
+      render: (props) => <ModelsTreeComponent { ...props } />,
+    }];
+  })
+);
+```
+
+For individual tree components the `onPerformanceMeasured` callback should be supplied through props:
+
+```ts
+return (
+  <ModelsTreeComponent
+    onPerformanceMeasured={(feature, elapsedTime) => {
+      console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`)
+    }}
+  />
+);
+```
+
+## Usage tracking
+
+Components from this package allows consumers to track the usage of specific features.
+
+This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent` or `TreeWidgetUiItemsProvider`. The function is invoked with feature id as the component is being used. List of tracked features:
+
+- `"choose-{tree}"` - when a tree is selected in the tree selector.
+- `"use-{tree}"` - when an interaction with a tree hierarchy happens.
+- `"{tree}-visibility-change"` - when visibility is toggled using an "eye" button.
+- `"models-tree-showall"` - when "Show All" button is used in `ModelsTreeComponent`.
+- `"models-tree-hideall"` - when "Hide All" button is used in `ModelsTreeComponent`.
+- `"models-tree-invert"` - when "Invert" button is used in `ModelsTreeComponent`.
+- `"models-tree-view2d"` - when "Toggle 2D Views" button is used in `ModelsTreeComponent`.
+- `"models-tree-view3d"` - when "Toggle 3D Views" button is used in `ModelsTreeComponent`.
+- `"models-tree-zoom-to-node"` - when node is zoomed to in `ModelsTree`.
+- `"models-tree-filtering"` - when a filter is applied in `ModelsTree`.
+- `"models-tree-hierarchy-level-filtering"` - when a hierarchy level filter is applied in `ModelsTree`.
+- `"models-tree-hierarchy-level-size-limit-hit"` - when hierarchy limit is exceeded while loading nodes in `ModelsTree`.
+- `"categories-tree-showall"` - when "Show All" button is used in `CategoriesTreeComponent`.
+- `"categories-tree-hideall"` - when "Hide All" button is used in `CategoriesTreeComponent`.
+- `"categories-tree-invert"` - when "Invert" button is used in `CategoriesTreeComponent`.
+
+Where `{tree}` specifies which tree component the feature is of.
+
+Example:
+
+```ts
+import { UiItemsManager } from "@itwin/appui-react";
+import { TreeWidgetUiItemsProvider, ModelsTreeComponent } from "@itwin/tree-widget-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({
+    defaultPanelLocation: StagePanelLocation.Left,
+    defaultPanelSection: StagePanelSection.End,
+    defaultTreeWidgetPriority: 1000,
+    onFeatureUsed={(feature) => {
+      telemetryClient.log(`TreeWidget [${feature}] used`);
+    }},
+    trees: [{
+      id: ModelsTreeComponent.id,
+      getLabel: ModelsTreeComponent.getLabel,
+      render: (props) => <ModelsTreeComponent { ...props } />,
+    }];
+  })
+);
+```
+
+For individual tree components the `onFeatureUsed` callback should be supplied through props:
+
+```ts
+return (
+  <ModelsTreeComponent
+    onFeatureUsed={(feature) => {
+      console.log(`TreeWidget [${feature}] used`)
+    }}
+  />
+);
 ```

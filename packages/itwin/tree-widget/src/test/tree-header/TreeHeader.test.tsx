@@ -1,17 +1,16 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { Button } from "@itwin/itwinui-react";
-import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import { TreeHeader } from "../../components/tree-header/TreeHeader";
 import { TreeWidget } from "../../TreeWidget";
-import { stubCancelAnimationFrame } from "../TestUtils";
+import { render, stubCancelAnimationFrame, waitFor } from "../TestUtils";
 
 import type { TreeHeaderProps } from "../../components/tree-header/TreeHeader";
 
@@ -32,12 +31,30 @@ describe("<TreeHeader />", () => {
     TreeWidget.terminate();
   });
 
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it("renders `enlarged` header", async () => {
+    sinon.stub(HTMLElement.prototype, "scrollWidth").get(() => 200);
+    sinon.stub(HTMLElement.prototype, "offsetWidth").get(() => 32);
+
+    const { container } = render(
+      <TreeHeader {...defaultProps} density="enlarged">
+        <Button>Button1</Button>
+        <Button>Button2</Button>
+      </TreeHeader>,
+    );
+
+    await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null);
+  });
+
   it("renders supplied buttons", async () => {
     const { queryByRole } = render(
       <TreeHeader {...defaultProps}>
         <Button>Button1</Button>
         <Button>Button2</Button>
-      </TreeHeader>
+      </TreeHeader>,
     );
 
     await waitFor(() => {
@@ -54,7 +71,7 @@ describe("<TreeHeader />", () => {
       <TreeHeader {...defaultProps}>
         <Button>Button1</Button>
         <Button>Button2</Button>
-      </TreeHeader>
+      </TreeHeader>,
     );
 
     expect(queryByRole("button", { name: "Button1" })).to.be.null;
@@ -70,7 +87,7 @@ describe("<TreeHeader />", () => {
         <Button>Button1</Button>
         <Button>Button2</Button>
         <Button>Button3</Button>
-      </TreeHeader>
+      </TreeHeader>,
     );
 
     expect(queryByRole("button", { name: "Button1" })).to.not.be.null;
@@ -79,10 +96,24 @@ describe("<TreeHeader />", () => {
   });
 
   describe("search box", () => {
+    it("renders search box", async () => {
+      const { getByRole } = render(<TreeHeader {...defaultProps} selectedIndex={5} resultCount={10} />);
+
+      const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
+      expect(openButton).to.not.be.null;
+      await userEvents.click(openButton);
+
+      const closeButton = getByRole("button", { name: TreeWidget.translate("searchBox.close") });
+      const nextButton = getByRole("button", { name: TreeWidget.translate("searchBox.next") });
+      const previousButton = getByRole("button", { name: TreeWidget.translate("searchBox.previous") });
+
+      expect(closeButton).to.not.be.null;
+      expect(nextButton).to.not.be.null;
+      expect(previousButton).to.not.be.null;
+    });
+
     it("opens and closes search box", async () => {
-      const { getByRole, queryByRole } = render(
-        <TreeHeader {...defaultProps} />
-      );
+      const { getByRole, queryByRole } = render(<TreeHeader {...defaultProps} />);
 
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
@@ -97,12 +128,7 @@ describe("<TreeHeader />", () => {
 
     it("invokes 'onFilterStart' when text is entered", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
-        <TreeHeader
-          {...defaultProps}
-          onFilterStart={spy}
-        />
-      );
+      const { getByRole } = render(<TreeHeader {...defaultProps} onFilterStart={spy} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 
@@ -114,13 +140,7 @@ describe("<TreeHeader />", () => {
     it("invokes 'onFilterClear' when search box is cleared", async () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
-      const { getByRole } = render(
-        <TreeHeader
-          {...defaultProps}
-          onFilterStart={filterStartSpy}
-          onFilterClear={filterClearSpy}
-        />
-      );
+      const { getByRole } = render(<TreeHeader {...defaultProps} onFilterStart={filterStartSpy} onFilterClear={filterClearSpy} />);
       filterClearSpy.resetHistory();
 
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
@@ -137,13 +157,7 @@ describe("<TreeHeader />", () => {
     it("invokes 'onFilterClear' when search box is closed", async () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
-      const { getByRole } = render(
-        <TreeHeader
-          {...defaultProps}
-          onFilterStart={filterStartSpy}
-          onFilterClear={filterClearSpy}
-        />
-      );
+      const { getByRole } = render(<TreeHeader {...defaultProps} onFilterStart={filterStartSpy} onFilterClear={filterClearSpy} />);
       filterClearSpy.resetHistory();
 
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
@@ -158,13 +172,7 @@ describe("<TreeHeader />", () => {
     });
 
     it("renders matches selector", async () => {
-      const { getByRole, queryByText } = render(
-        <TreeHeader
-          {...defaultProps}
-          resultCount={10}
-          selectedIndex={5}
-        />
-      );
+      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} resultCount={10} selectedIndex={5} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 
@@ -172,12 +180,7 @@ describe("<TreeHeader />", () => {
     });
 
     it("defaults to first match if `selectedIndex` is `undefined`", async () => {
-      const { getByRole, queryByText } = render(
-        <TreeHeader
-          {...defaultProps}
-          resultCount={10}
-        />
-      );
+      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} resultCount={10} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 
@@ -185,14 +188,7 @@ describe("<TreeHeader />", () => {
     });
     it("invokes `onSelectedChanged` when 'Next' button is clicked", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
-        <TreeHeader
-          {...defaultProps}
-          onSelectedChanged={spy}
-          selectedIndex={5}
-          resultCount={10}
-        />
-      );
+      const { getByRole } = render(<TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={5} resultCount={10} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 
@@ -203,14 +199,7 @@ describe("<TreeHeader />", () => {
 
     it("does not invoke `onSelectedChanged` when 'Next' button is clicked on last index", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
-        <TreeHeader
-          {...defaultProps}
-          onSelectedChanged={spy}
-          selectedIndex={10}
-          resultCount={10}
-        />
-      );
+      const { getByRole } = render(<TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={10} resultCount={10} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 
@@ -221,14 +210,7 @@ describe("<TreeHeader />", () => {
 
     it("invokes `onSelectedChanged` when 'Previous' button is clicked", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
-        <TreeHeader
-          {...defaultProps}
-          onSelectedChanged={spy}
-          selectedIndex={5}
-          resultCount={10}
-        />
-      );
+      const { getByRole } = render(<TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={5} resultCount={10} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 
@@ -239,14 +221,7 @@ describe("<TreeHeader />", () => {
 
     it("does not invoke `onSelectedChanged` when 'Previous' button is clicked on first index", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(
-        <TreeHeader
-          {...defaultProps}
-          onSelectedChanged={spy}
-          selectedIndex={1}
-          resultCount={10}
-        />
-      );
+      const { getByRole } = render(<TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={1} resultCount={10} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 

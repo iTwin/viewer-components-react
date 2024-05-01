@@ -7,7 +7,7 @@ import { FieldDescriptorType, PropertiesField } from "@itwin/presentation-common
 import type { FieldDescriptor, RelationshipPath, StrippedRelatedClassInfo } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { assert } from "chai";
-import { QueryBuilder } from "../widget/components/QueryBuilder";
+import { QueryBuilder } from "../components/Groups/QueryBuilder/QueryBuilder";
 import { MockFactory } from "./MockFactory";
 import type { StubbedType } from "./MockFactory";
 import type { OperationTestData, PropertiesTestData, PropertyRecordTestData, QueryBuilderTestData } from "./QueryBuilderTestData";

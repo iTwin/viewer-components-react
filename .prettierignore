@@ -1,0 +1,21 @@
+# Ignore artifacts
+change
+lib
+
+# Ignore auto-generated files
+CHANGELOG.md
+CHANGELOG.json
+
+# Ignore vscode settings
+.vscode
+
+# Ignore pnpm files
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+# Ignore configs and pipelines
+.pipelines
+.github
+
+# Ignore extracted api definitions
+api

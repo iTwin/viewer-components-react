@@ -1,0 +1,4 @@
+packages:
+  - "packages/itwin/*"
+  - "!packages/itwin/breakdown-trees"
+  - "apps/test-viewer"

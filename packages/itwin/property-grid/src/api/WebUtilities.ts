@@ -54,7 +54,7 @@ const copyToClipboardWin = (info: string) => {
 };
 
 const copyToClipboardiOS = (info: string) => {
-  const el: HTMLTextAreaElement = document.createElement(
+  const el: HTMLTextAreaElement = document.createElement( // eslint-disable-line deprecation/deprecation
     "textArea"
   ) as HTMLTextAreaElement;
   el.value = info;

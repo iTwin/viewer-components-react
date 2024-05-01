@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  AbstractWidgetProps,
   UiItemsProvider,
-} from "@itwin/appui-abstract";
+  Widget,
+} from "@itwin/appui-react";
 import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-} from "@itwin/appui-abstract";
+} from "@itwin/appui-react";
 import type { AccessToken } from "@itwin/core-bentley";
 
 import * as React from "react";
@@ -37,26 +37,19 @@ export class ReportsConfigProvider implements UiItemsProvider {
     stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection
-  ): ReadonlyArray<AbstractWidgetProps> {
-    const widgets: AbstractWidgetProps[] = [];
+  ): ReadonlyArray<Widget> {
+    const widgets: Widget[] = [];
     if (
       location === StagePanelLocation.Left &&
       section === StagePanelSection.Start &&
       stageUsage === StageUsage.General
     ) {
-      const ReportsWidget: AbstractWidgetProps = {
+      const ReportsWidget: Widget = {
         id: "reports-config-widget",
         label: ReportsConfigWidget.localization.getLocalizedString(
           "ReportsConfigWidget:ReportsConfig"
         ),
-        getWidgetContent: () => {
-          return (
-            <ReportsContainer
-              getAccessToken={this._getAccessToken}
-              baseUrl={this._baseUrl}
-            />
-          );
-        },
+        content: <ReportsContainer getAccessToken={this._getAccessToken} baseUrl={this._baseUrl} />,
       };
 
       widgets.push(ReportsWidget);

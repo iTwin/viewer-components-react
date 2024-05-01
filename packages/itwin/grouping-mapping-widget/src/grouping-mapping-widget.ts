@@ -3,30 +3,34 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
-export * from "./widget/GroupingMappingWidget";
+export * from "./WidgetShell/GroupingMappingWidget";
 
 /** Interfaces for providing custom MappingClient and API configuration */
-export { createDefaultMappingClient, createMappingClient, MappingClientContext, useMappingClient } from "./widget/components/context/MappingClientContext";
-export { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig, GroupingMappingApiConfigContext, useGroupingMappingApiConfig } from "./widget/components/context/GroupingApiConfigContext";
+export { createDefaultMappingClient, createMappingClient, MappingClientContext, useMappingClient } from "./components/context/MappingClientContext";
+export { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig, GroupingMappingApiConfigContext, useGroupingMappingApiConfig } from "./components/context/GroupingApiConfigContext";
 export * from "@itwin/insights-client";
 
 /** Internal components for custom UIs */
-export { Mappings, MappingsProps } from "./widget/components/Mapping";
-export { MappingAction, MappingActionProps } from "./widget/components/MappingAction";
-export { GroupingMappingContext, GroupingMappingContextProps } from "./widget/components/GroupingMappingContext";
-export { Groupings, GroupingProps } from "./widget/components/Grouping";
-export { GroupsVisualization, GroupsVisualizationProps } from "./widget/components/GroupsVisualization";
-export { GroupAction, GroupActionProps } from "./widget/components/GroupAction";
-export { PropertyMenu, PropertyMenuProps } from "./widget/components/PropertyMenu";
-export { PropertyMenuWithVisualization, PropertyMenuWithVisualizationProps } from "./widget/components/PropertyMenuWithVisualization";
-export { GroupPropertyAction, GroupPropertyActionProps } from "./widget/components/GroupPropertyAction";
-export { CalculatedPropertyAction, CalculatedPropertyActionProps } from "./widget/components/CalculatedPropertyAction";
-export { CalculatedPropertyActionWithVisuals, CalculatedPropertyActionWithVisualsProps } from "./widget/components/CalculatedPropertyActionWithVisuals";
-export { CustomCalculationAction, CustomCalculationActionProps } from "./widget/components/CustomCalculationAction";
-export { SearchGroupingCustomUI } from "./widget/components/customUI/SearchGroupingCustomUI";
-export { ManualGroupingCustomUI } from "./widget/components/customUI/ManualGroupingCustomUI";
-export { GroupQueryBuilderCustomUI } from "./widget/components/customUI/GroupQueryBuilderCustomUI";
-export { GroupingMappingCustomUI, GroupingMappingCustomUIType, ContextCustomUI, GroupingCustomUI, GroupingCustomUIProps, ContextCustomUIProps } from "./widget/components/customUI/GroupingMappingCustomUI";
+export { Mappings, MappingsProps } from "./components/Mappings/Mappings";
+export { useMappingsOperations, MappingsOperationsProps } from "./components/Mappings/hooks/useMappingsOperations";
+export { MappingAction, MappingActionProps } from "./components/Mappings/Editing/MappingAction";
+export { MappingsView, MappingsViewProps } from "./components/Mappings/MappingsView";
+export { useGroupsOperations, GroupsOperationsProps } from "./components/Groups/hooks/useGroupsOperations";
+export { GroupsView, GroupsViewProps } from "./components/Groups/GroupsView";
+export { GroupingMappingContext, GroupingMappingContextProps } from "./components/GroupingMappingContext";
+export { Groups, GroupsProps } from "./components/Groups/Groups";
+export { GroupsVisualization, GroupsVisualizationProps } from "./components/Groups/GroupsVisualization";
+export { GroupAction, GroupActionProps } from "./components/Groups/Editing/GroupAction";
+export { PropertyMenu, PropertyMenuProps } from "./components/Properties/PropertyMenu";
+export { PropertyMenuWithVisualization, PropertyMenuWithVisualizationProps } from "./components/Properties/PropertyMenuWithVisualization";
+export { GroupPropertyAction, GroupPropertyActionProps } from "./components/Properties/GroupProperties/GroupPropertyAction";
+export { CalculatedPropertyAction, CalculatedPropertyActionProps } from "./components/Properties/CalculatedProperties/CalculatedPropertyAction";
+export { CalculatedPropertyActionWithVisuals, CalculatedPropertyActionWithVisualsProps } from "./components/Properties/CalculatedProperties/CalculatedPropertyActionWithVisuals";
+export { CustomCalculationAction, CustomCalculationActionProps } from "./components/Properties/CustomCalculations/CustomCalculationAction";
+export { SearchGroupingCustomUI } from "./components/customUI/SearchGroupingCustomUI";
+export { ManualGroupingCustomUI } from "./components/customUI/ManualGroupingCustomUI";
+export { GroupQueryBuilderCustomUI } from "./components/customUI/GroupQueryBuilderCustomUI";
+export { GroupingMappingCustomUI, GroupingMappingCustomUIType, ContextCustomUI, GroupingCustomUI, GroupingCustomUIProps, ContextCustomUIProps } from "./components/customUI/GroupingMappingCustomUI";
 
 /** Formula DataType resolver */
 export { resolveFormulaDataType } from "./formula/FormulaDataTypeResolver";

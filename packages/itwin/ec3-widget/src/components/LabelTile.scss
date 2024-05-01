@@ -2,14 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .ec3w-label-tile-container {
   display: flex;
   justify-content: space-between;
   border-radius: 5px;
-  background-color: var(--iui-color-background-2);
-  height: $iui-baseline * 4;
+  background-color: var(--iui-color-background-backdrop);
+  height: calc(var(--iui-size-s) * 4);
   padding: 5.5px 8px;
 
   .ec3w-body {
@@ -29,14 +28,14 @@
     margin-left: 0;
     align-self: center;
     min-width: 36px;
-    margin-right: $iui-xs;
+    margin-right: var(--iui-size-2xs);
     flex-shrink: 0;
   }
 
   .ec3w-delete-icon {
     margin-left: 0;
     align-self: center;
-    min-width: $iui-l;
+    min-width: var(--iui-size-l);
     cursor: pointer;
   }
 }

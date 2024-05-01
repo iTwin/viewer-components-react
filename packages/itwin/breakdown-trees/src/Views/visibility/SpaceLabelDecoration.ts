@@ -45,7 +45,7 @@ export class SpaceLabelDecoration {
 
     this._onClick(ev, this);
     return true;
-  }
+  };
 
   public hide() {
     this._textMarker.visibility = TextMarker.Visibility.Hidden;

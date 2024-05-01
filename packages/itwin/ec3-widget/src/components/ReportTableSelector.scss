@@ -2,13 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .ec3w-dropdown-select-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: $iui-s;
+  gap: var(--iui-size-xs);
 
   .ec3w-dropdown-select-combo-box {
     display: flex;

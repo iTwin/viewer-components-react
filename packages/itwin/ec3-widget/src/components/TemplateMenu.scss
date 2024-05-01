@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .ec3w-template-details-container {
   overflow-x: auto;
@@ -11,8 +10,9 @@
   .ec3w-template-details {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
-    margin-bottom: $iui-baseline;
+    min-width: 0;
+    gap: var(--iui-size-s);
+    margin-bottom: var(--iui-size-s);
   }
 }
 
@@ -20,7 +20,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: $iui-s;
+  gap: var(--iui-size-xs);
 
   .ec3w-report-select-combo-box {
     display: flex;
@@ -48,7 +48,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: $iui-baseline;
-  padding: $iui-baseline $iui-m;
+  gap: var(--iui-size-s);
+  padding: var(--iui-size-s) var(--iui-size-m);
   height: 100%;
 }

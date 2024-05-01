@@ -1,0 +1,15 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.gmw-custom-calculation-action-container {
+  overflow-x: auto;
+  height: 100%;
+
+  .gmw-details-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--iui-size-s);
+  }
+}

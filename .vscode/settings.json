@@ -1,51 +1,36 @@
-// Place your settings in this file to overwrite default and user settings.
 {
+  "editor.insertSpaces": true,
   "editor.tabSize": 2,
+  "editor.trimAutoWhitespace": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "search.exclude": {
-    "**/node_modules": true,
-    "**/.nyc_output": true,
-    "**/common/temp": true,
-    "**/.rush": true
+  "editor.codeActionsOnSave": [
+    "source.fixAll"
+  ],
+
+  "files.associations": {
+    ".nycrc": "json",
   },
   "files.exclude": {
-    "**/.nyc_output": true,
-    "**/.rush": true,
-    "**/*.build.log": true,
-    "**/*.build.error.log": true,
+    "**/coverage": true,
     "**/node_modules": true,
-    "**/out": true,
     "**/lib": true,
-    "common/temp": true
+    "**/build": true
   },
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
-  "files.associations": {
-    "*.snap": "javascript",
-    ".nycrc": "json",
-    "certa.json": "jsonc"
+
+  "[markdown]": {
+    "editor.tabSize": 4,
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-  ],
-  "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
-  ],
-  "eslint.options": {
-    "configFile": "./package.json",
-    "useEslintrc": false,
-    "resolvePluginsRelativeTo": "./node_modules/@itwin/eslint-plugin"
-  },
-  "importSorter.importStringConfiguration.quoteMark": "double",
-  "importSorter.generalConfiguration.sortImportsInDirectory": false,
-  "importSorter.generalConfiguration.sortOnBeforeSave": false,
-  "importSorter.importStringConfiguration.trailingComma": "multiLine",
+
   "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 150,
+  "importSorter.importStringConfiguration.quoteMark": "double",
   "importSorter.importStringConfiguration.tabSize": 2,
+  "importSorter.importStringConfiguration.trailingComma": "multiLine",
+  "importSorter.generalConfiguration.sortOnBeforeSave": true,
+  "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 0,
   "importSorter.sortConfiguration.removeUnusedImports": true,
   "importSorter.sortConfiguration.customOrderingRules.rules": [
     {
@@ -67,12 +52,10 @@
       "orderLevel": 30
     }
   ],
-  "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 0,
-  "eslint.format.enable": true,
-  "eslint.lintTask.enable": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.markdownlint": true, // first run the markdown linter
-    "editor.action.fixAll": true, // Run the default formatter before eslint, it handles whitespace better
-    "source.fixAll.eslint": true // then run ESLint auto-fix
-  }
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "editor.formatOnSaveMode": "modifications"
 }

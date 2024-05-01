@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   Button,
-  Leading,
   MiddleTextTruncation,
   Modal,
   ModalButtonBar,
   ModalContent,
+  Text,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
@@ -54,11 +54,11 @@ export const DeleteModal = ({
     >
       <ModalContent>
         <div className="rcw-delete-modal-body-text">
-          <Leading>
+          <Text variant='leading'>
             {ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:AreYouSureYouWantToDelete"
             )}
-          </Leading>
+          </Text>
           <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
         </div>
       </ModalContent>

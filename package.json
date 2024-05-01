@@ -1,0 +1,29 @@
+{
+  "name": "viewer-components-react",
+  "private": true,
+  "repository": {
+    "url": "https://github.com/iTwin/viewer-components-react.git"
+  },
+  "scripts": {
+    "build": "lage build --grouped",
+    "cover": "lage cover --grouped --continue",
+    "test": "lage test --grouped --continue",
+    "test:e2e": "lage test:e2e --grouped --continue",
+    "lint": "lage lint --grouped --continue",
+    "clean": "lage clean --grouped --continue",
+    "extract-api": "lage extract-api --grouped --continue",
+    "check": "beachball check",
+    "check:dev": "beachball check --config beachball.config.dev.js",
+    "change": "beachball change --no-commit",
+    "change:dev": "beachball change --config beachball.config.dev.js --no-commit",
+    "publish": "beachball publish --new",
+    "bump": "beachball bump",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "beachball": "^2.39.0",
+    "lage": "^2.7.11",
+    "prettier": "^3.2.4"
+  }
+}

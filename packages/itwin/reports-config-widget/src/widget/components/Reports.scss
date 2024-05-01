@@ -2,39 +2,39 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .rcw-reports-list-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: $iui-baseline $iui-m;
   min-height: 0;
 
   .rcw-toolbar {
     display: flex;
     justify-content: space-between;
-    gap: $iui-s;
-    border-bottom: 1px solid var(--iui-color-background-4);
-    padding-bottom: $iui-baseline;
+    gap: var(--iui-size-xs);
+    border-bottom: 1px solid var(--iui-color-border-subtle);
+    padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
-  }
 
-  .rcw-search-bar-container {
-    flex-basis: $iui-3xl;
-    flex-shrink: 1;
-    flex-grow: 1;
+    .rcw-search-bar-container {
+      flex-shrink: 1;
+      flex-grow: 0;
+      display: flex;
+    }
+
+    .rcw-button-spacing {
+      display: flex;
+      gap: var(--iui-size-xs);
+    }
   }
 
   .rcw-reports-list {
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
-    gap: 7.5px;
-    margin-top: 7.5px;
+    gap: var(--iui-size-xs);
+    margin-top: var(--iui-size-xs);
   }
 }
 
-.rcw-button-container {
-  display: flex;
-}

@@ -101,14 +101,14 @@ export class Popup extends React.Component<PopupProps, PopupState> {
     }
 
     this._onClose();
-  }
+  };
 
   private _onEsc = (event: KeyboardEvent): void => {
     // Esc key
     if (event.key === "Escape") {
       this._onClose();
     }
-  }
+  };
 
   private _onShow() {
     if (this.state.isShown) {

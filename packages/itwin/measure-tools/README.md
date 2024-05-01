@@ -1,4 +1,4 @@
-# @bentley/measure-tools-react
+# @itwin/measure-tools-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
@@ -65,33 +65,25 @@ Below is an example of registering a custom action, it toggles the display style
 ```typescript
 // Test faded style by adding an action button that toggles default / faded style
 // If not all of them are faded, set the remaining to faded. Else, back to default.
-MeasurementActionToolbar.addActionProvider(
-  (measurements: Measurement[], actionItemList: MeasurementActionItemDef[]) => {
-    actionItemList.push(
-      new MeasurementActionItemDef({
-        id: "faded-toggle",
-        iconSpec: "icon-palette",
-        label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.faded"),
-        tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.faded"),
-        execute: (args: Measurement[]) => {
-          const notAllFaded = args.some(
-            (m) => m.style !== WellKnownMeasurementStyle.Faded
-          );
-          args.forEach((m) => {
-            if (notAllFaded && m.style !== WellKnownMeasurementStyle.Faded)
-              m.style = WellKnownMeasurementStyle.Faded;
-            else if (m.style !== WellKnownMeasurementStyle.Default)
-              m.style = WellKnownMeasurementStyle.Default;
-          });
+MeasurementActionToolbar.addActionProvider((measurements: Measurement[], actionItemList: MeasurementActionItemDef[]) => {
+  actionItemList.push(
+    new MeasurementActionItemDef({
+      id: "faded-toggle",
+      iconSpec: "icon-palette",
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.faded"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.faded"),
+      execute: (args: Measurement[]) => {
+        const notAllFaded = args.some((m) => m.style !== WellKnownMeasurementStyle.Faded);
+        args.forEach((m) => {
+          m.style = notAllFaded ? WellKnownMeasurementStyle.faded : WellKnownMeasurementStyle.Default;
+        });
 
-          Measurement.invalidateDecorationsForAll(args);
-          MeasurementUIEvents.notifyMeasurementsChanged();
-        },
-      })
-    );
-  },
-  100
-);
+        Measurement.invalidateDecorationsForAll(args);
+        MeasurementUIEvents.notifyMeasurementsChanged();
+      },
+    })
+  );
+}, 100);
 ```
 
 ![Measurement Action Toolbar](https://github.com/imodeljs/viewer-components-react/blob/master/packages/measure-tools/docs/images/MTDocs-ActionToolbar_CustomAction.gif?raw=true)

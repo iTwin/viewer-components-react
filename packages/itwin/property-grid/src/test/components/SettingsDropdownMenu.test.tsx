@@ -1,17 +1,16 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
-import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import { SettingsDropdownMenu, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext, SHOWNULL_KEY } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext";
-import { createFunctionStub } from "../TestUtils";
+import { createFunctionStub, render, waitFor } from "../TestUtils";
 
 import type { ReactElement } from "react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
@@ -37,16 +36,18 @@ describe("<SettingsDropdownMenu />", () => {
       <SettingsDropdownMenu
         dataProvider={{} as IPresentationPropertyDataProvider}
         settingsMenuItems={[
-          ({ close }) => <button
-            onClick={() => {
-              spy();
-              close();
-            }}
-          >
-          Test Setting
-          </button>,
+          ({ close }) => (
+            <button
+              onClick={() => {
+                spy();
+                close();
+              }}
+            >
+              Test Setting
+            </button>
+          ),
         ]}
-      />
+      />,
     );
 
     const dropdownButton = getByRole("button", { name: "settings.label" });
@@ -61,16 +62,18 @@ describe("<SettingsDropdownMenu />", () => {
       <SettingsDropdownMenu
         dataProvider={{} as IPresentationPropertyDataProvider}
         settingsMenuItems={[
-          ({ close }) => <button
-            onClick={() => {
-              spy();
-              close();
-            }}
-          >
-          Test Setting
-          </button>,
+          ({ close }) => (
+            <button
+              onClick={() => {
+                spy();
+                close();
+              }}
+            >
+              Test Setting
+            </button>
+          ),
         ]}
-      />
+      />,
     );
 
     const dropdownButton = getByRole("button", { name: "settings.label" });
@@ -85,7 +88,7 @@ describe("<SettingsDropdownMenu />", () => {
 });
 
 describe("Default settings", () => {
-  const storage ={
+  const storage = {
     get: createFunctionStub<PreferencesStorage["get"]>(),
     set: createFunctionStub<PreferencesStorage["set"]>(),
   };
@@ -93,10 +96,8 @@ describe("Default settings", () => {
   function renderWithContext(ui: ReactElement) {
     return render(
       <PreferencesContextProvider storage={storage}>
-        <NullValueSettingContext>
-          {ui}
-        </NullValueSettingContext>
-      </PreferencesContextProvider>
+        <NullValueSettingContext>{ui}</NullValueSettingContext>
+      </PreferencesContextProvider>,
     );
   }
 
@@ -125,12 +126,12 @@ describe("Default settings", () => {
     });
 
     it("renders", async () => {
-      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
+      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
       await waitFor(() => expect(queryByText("settings.hide-null.label")).to.not.be.null);
     });
 
     it("does not persist new value by default", async () => {
-      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
       const item = await waitFor(() => getByText("settings.hide-null.label"));
       await userEvents.click(item);
 
@@ -156,12 +157,12 @@ describe("Default settings", () => {
     });
 
     it("renders", async () => {
-      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
+      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
       await waitFor(() => expect(queryByText("settings.show-null.label")).to.not.be.null);
     });
 
     it("does not persist new value by default", async () => {
-      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} />);
       const item = await waitFor(() => getByText("settings.show-null.label"));
       await userEvents.click(item);
 

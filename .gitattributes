@@ -1,14 +1,14 @@
-# Don't allow people to merge changes to these generated files, because the result
-# may be invalid.  You need to run "rush update" again.
-pnpm-lock.yaml               merge=binary
-shrinkwrap.yaml              merge=binary
-npm-shrinkwrap.json          merge=binary
-yarn.lock                    merge=binary
+# Convert all line endings for files detected as text to lf to avoid OS specific
+# line endings showing up in git diffs
+*                            text=auto
 
-# Rush's JSON config files use JavaScript-style code comments.  The rule below prevents pedantic
-# syntax highlighters such as GitHub's from highlighting these comments as errors.  Your text editor
-# may also require a special configuration to allow comments in JSON.
-#
-# For more information, see this issue: https://github.com/Microsoft/web-build-tools/issues/1088
-#
-*.json                       linguist-language=JSON-with-Comments
+# Ensure these file types use the correct OS specific line endings
+*.bat                        eol=crlf
+*.sh                         eol=lf
+
+# Don't allow people to merge changes to these generated files, because the result
+# may be invalid.  You need to run "pnpm install" again.
+pnpm-lock.yaml               merge=binary
+
+CHANGELOG.json text eol=lf
+CHANGELOG.md text eol=lf

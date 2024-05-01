@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { ScreenViewport } from "@itwin/core-frontend";
-import { ContextMenu, ContextMenuItem } from "@itwin/core-react";
-import { Button, Slider } from "@itwin/itwinui-react";
+import { DropdownMenu, IconButton, MenuItem, Slider } from "@itwin/itwinui-react";
 import "./MapLayerManager.scss";
 import { StyleMapLayerSettings } from "../Interfaces";
 import { MapLayersUI } from "../../mapLayers";
+import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 
 interface MapLayerSettingsMenuProps {
   mapLayerSettings: StyleMapLayerSettings;
@@ -19,8 +19,6 @@ interface MapLayerSettingsMenuProps {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, activeViewport, disabled }: MapLayerSettingsMenuProps) {
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const settingsRef = React.useRef<HTMLButtonElement>(null);
   const [labelDetach] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.Detach"));
   const [labelZoomToLayer] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:LayerMenu.ZoomToLayer"));
   const [hasRangeData, setHasRangeData] = React.useState<boolean | undefined>();
@@ -38,23 +36,13 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
     fetchRangeData(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }, [activeViewport, mapLayerSettings]);
 
-  const onSettingsClick = React.useCallback(() => {
-    setIsSettingsOpen((prev) => !prev);
-  }, [setIsSettingsOpen]);
-
-  const handleCloseSetting = React.useCallback(() => {
-    setIsSettingsOpen(false);
-  }, [setIsSettingsOpen]);
-
   const handleRemoveLayer = React.useCallback(() => {
-    setIsSettingsOpen(false);
     onMenuItemSelection("delete", mapLayerSettings);
-  }, [setIsSettingsOpen, onMenuItemSelection, mapLayerSettings]);
+  }, [onMenuItemSelection, mapLayerSettings]);
 
   const handleZoomToLayer = React.useCallback(() => {
-    setIsSettingsOpen(false);
     onMenuItemSelection("zoom-to-layer", mapLayerSettings);
-  }, [setIsSettingsOpen, onMenuItemSelection, mapLayerSettings]);
+  }, [onMenuItemSelection, mapLayerSettings]);
 
   const applyTransparencyChange = React.useCallback((value: number) => {
     if (activeViewport) {
@@ -82,18 +70,21 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
     }
   }, [transparency, applyTransparencyChange]);
 
+  const dropdownMenuItems = () => [
+    <MenuItem disabled={!hasRangeData} key={0} onClick={() => handleZoomToLayer()}>{labelZoomToLayer}</MenuItem>,
+    <MenuItem key={1} onClick={() => handleRemoveLayer()}>{labelDetach}</MenuItem>,
+    <MenuItem key={2} >
+      <Slider className="map-manager-item-dropdown-slider" min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
+    </MenuItem>,
+  ];
+
   return (
     <>
-      <Button disabled={disabled} size="small" styleType="borderless" data-testid="map-layer-settings" className="map-layer-settings icon icon-more-vertical-2" ref={settingsRef} onClick={onSettingsClick} ></Button>
-      <ContextMenu opened={isSettingsOpen && (undefined !== hasRangeData)} onOutsideClick={handleCloseSetting} >
-        <div className="map-manager-item-menu" >
-          <ContextMenuItem hideIconContainer={true} key={0} className={hasRangeData ? "" : "core-context-menu-disabled"} onSelect={handleZoomToLayer}>{labelZoomToLayer}</ContextMenuItem>
-          <ContextMenuItem hideIconContainer={true} key={1} onSelect={handleRemoveLayer}>{labelDetach}</ContextMenuItem>
-          <ContextMenuItem hideIconContainer={true} key={2} >
-            <Slider min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
-          </ContextMenuItem>
-        </div>
-      </ContextMenu>
+      <DropdownMenu placement="auto-start" menuItems={dropdownMenuItems} disabled={disabled} >
+        <IconButton size="small" styleType="borderless">
+          <SvgMoreVertical />
+        </IconButton>
+      </DropdownMenu>
     </>
   );
 }

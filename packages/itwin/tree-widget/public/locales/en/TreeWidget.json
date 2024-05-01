@@ -6,13 +6,16 @@
   "toggle3DViews": "Toggle 3D Views",
   "label2D": "2D",
   "label3D": "3D",
-  "learnMore": "Learn more",
+  "dropdownMore": "More",
   "models": "Models",
   "categories": "Categories",
   "imodelContent": "iModel Content",
   "externalSources": "External Sources",
   "treeview": "Tree View",
   "noTrees": "There are no trees available for this iModel.",
+  "error": "Error",
+  "retry": "Retry",
+  "generic-error-description": "An error occurred while loading tree content.",
   "categoriesTree": {
     "noCategoryFound": "No category found.",
     "noMatchingCategoryNames": "There are no category names matching your search."

@@ -13,38 +13,34 @@
 /apps/test-viewer  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 
 /packages/itwin/property-grid  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
-/common/changes/@itwin/property-grid-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
-/common/api/summary/property-grid-react.exports.csv @itwin/itwinjs-core-presentation
-/common/api/property-grid-react.api.md @itwin/itwinjs-core-presentation
+/change/@itwin-property-grid-react*  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 
-/common/api/summary/tree-widget-react.exports.csv @itwin/itwinjs-core-presentation
-/common/api/tree-widget-react.api.md @itwin/itwinjs-core-presentation
 /packages/itwin/tree-widget  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
-/common/changes/@itwin/tree-widget-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/change/@itwin-tree-widget-react*  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 
 /packages/itwin/measure-tools  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
-/common/changes/@itwin/measure-tools-react  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
+/change/@itwin-measure-tools-react*  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 
-/packages/itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1 @bingjiez @MindaugasButkus
-/common/changes/@itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1 @bingjiez @MindaugasButkus
+/packages/itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/change/@itwin-grouping-mapping-widget*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
-/packages/itwin/one-click-lca-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
-/common/changes/@itwin/one-click-lca-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
+/packages/itwin/one-click-lca-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/change/@itwin-one-click-lca-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
-/packages/itwin/reports-config-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
-/common/changes/@itwin/reports-config-widget-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
+/packages/itwin/reports-config-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/change/@itwin-reports-config-widget-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
-/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @DanishMehmood-bit
-/common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @DanishMehmood-bit
+/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @DanishMehmood-bit
+/change/@itwin-breakdown-trees-react*  @itwin/viewer-components-reviewers @DanishMehmood-bit
 
 /packages/itwin/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
-/common/changes/@itwin/geo-tools-react  @itwin/viewer-components-reviewers @mdastous-bentley
+/change/@itwin-geo-tools-react*  @itwin/viewer-components-reviewers @mdastous-bentley
 
 /packages/itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
-/common/changes/@itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
+/change/@itwin-imodel-react-hooks*  @itwin/viewer-components-reviewers @michaelbelousov
 
-/packages/itwin/ec3-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
-/common/changes/@itwin/ec3-widget-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
+/packages/itwin/ec3-widget  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
+/change/@itwin-ec3-widget-react*  @itwin/viewer-components-reviewers @itwin/insights-and-reporting-platform
 
 /packages/itwin/map-layers  @itwin/viewer-components-reviewers @mdastous-bentley @eringram
-/common/changes/@itwin/map-layers  @itwin/viewer-components-reviewers @mdastous-bentley @eringram
+/change/@itwin-map-layers*  @itwin/viewer-components-reviewers @mdastous-bentley @eringram

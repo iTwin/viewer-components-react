@@ -26,6 +26,8 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
 
   React.useEffect(() => {
     const updateIsGeoLocated = () => setIsGeoLocated(!!activeViewport?.iModel.isGeoLocated);
+    // call immediately in case the activeViewport changes after its iModel.onEcefLocationChanged has already emitted
+    updateIsGeoLocated();
     return activeViewport?.iModel.onEcefLocationChanged.addListener(updateIsGeoLocated);
   }, [activeViewport?.iModel]);
 

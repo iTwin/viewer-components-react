@@ -5,7 +5,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { faker } from "@faker-js/faker";
-import { GroupingMappingCustomUIType, Groupings } from "../grouping-mapping-widget";
+import { GroupingMappingCustomUIType, Groups } from "../grouping-mapping-widget";
 import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
 import type { IModelConnection, ViewManager } from "@itwin/core-frontend";
@@ -74,14 +74,19 @@ jest.mock("@itwin/core-frontend", () => ({
   },
 }));
 
-jest.mock("../widget/components/context/MappingClientContext", () => ({
-  ...jest.requireActual("../widget/components/context/MappingClientContext"),
+jest.mock("../components/context/MappingClientContext", () => ({
+  ...jest.requireActual("../components/context/MappingClientContext"),
   useMappingClient: () => mappingClientMock.object,
+}));
+
+jest.mock("../common/utils", () => ({
+  ...jest.requireActual("../common/utils"),
+  enableExperimentalFeatures: jest.fn,
 }));
 
 const mockGroups = groupsFactory();
 
-describe("Groupings View", () => {
+describe("Groups View", () => {
   beforeEach(async () => {
     connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
     connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
@@ -103,7 +108,7 @@ describe("Groupings View", () => {
     // Act
     const user = userEvent.setup();
     render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={jest.fn()}
         onClickGroupModify={jest.fn()}
@@ -117,7 +122,7 @@ describe("Groupings View", () => {
     // Assert
 
     // Should have the correct random mockGroups.groups count listed
-    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    const horizontalTiles = screen.getAllByTestId("group-list-item");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
     horizontalTiles.forEach((horizontalTile, index) => {
@@ -160,7 +165,7 @@ describe("Groupings View", () => {
 
     // Act
     const { user } = render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={jest.fn()}
         onClickGroupModify={jest.fn()}
@@ -227,7 +232,7 @@ describe("Groupings View", () => {
 
     // Act
     const { user } = render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={jest.fn()}
         onClickGroupModify={jest.fn()}
@@ -242,7 +247,7 @@ describe("Groupings View", () => {
     // Assert
 
     // Should have the right group number
-    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    const horizontalTiles = screen.getAllByTestId("group-list-item");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
     // Click on first group more icon
@@ -287,7 +292,7 @@ describe("Groupings View", () => {
 
     // Act
     const { user } = render(
-      <Groupings
+      <Groups
         mapping={mockMapping}
         onClickAddGroup={onClickAddGroup}
         onClickGroupModify={jest.fn()}
@@ -317,7 +322,7 @@ describe("Groupings View", () => {
     expect(onClickAddGroup).toBeCalledWith(mockGroupingUI.name);
 
     // Check the group tile number
-    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    const horizontalTiles = screen.getAllByTestId("group-list-item");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
     // Click on first group more icon

@@ -6,22 +6,22 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { screen } from "@testing-library/react";
 import * as moq from "typemoq";
-import type { IOdataClient, ODataTable } from "@itwin/insights-client";
+import type { EC3ConfigurationLabel, EC3ConfigurationMaterial, IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { getComboboxOptions, getInputOptions, renderWithContext, simulateClick, simulateCombobox, simulateInput } from "./test-utils";
 import { LabelAction } from "../components/LabelAction";
-import type { Configuration, Label, Material } from "../components/EC3/Template";
+import type { Configuration } from "../components/EC3/Template";
 
 const oDataClient = moq.Mock.ofType<IOdataClient>();
 
 describe("LabelAction", () => {
   const reportId = faker.datatype.uuid();
 
-  const material: Material = {
+  const material: EC3ConfigurationMaterial = {
     nameColumn: "material_0",
   };
 
-  const label: Label = {
+  const label: EC3ConfigurationLabel = {
     reportTable: "table_0",
     name: "label",
     elementNameColumn: "string_column_0",
@@ -124,15 +124,15 @@ describe("LabelAction", () => {
     const elementQuantityInput = screen.getByTestId("ec3-element-quantity-select");
     const dropdownTileInput = screen.getByTestId("ec3-dropdown-tile-select");
 
-    expect(elementInput.querySelector(".iui-disabled")).toBeInTheDocument();
-    expect(elementQuantityInput.querySelector(".iui-disabled")).toBeInTheDocument();
-    expect(dropdownTileInput.querySelector(".iui-disabled")).toBeInTheDocument();
+    expect(elementInput.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
+    expect(elementQuantityInput.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
+    expect(dropdownTileInput.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
 
     await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_0");
 
-    expect(elementInput.querySelector(".iui-disabled")).toBeNull();
-    expect(elementQuantityInput.querySelector(".iui-disabled")).toBeNull();
-    expect(dropdownTileInput.querySelector(".iui-disabled")).toBeNull();
+    expect(elementInput.querySelector('[aria-disabled="true"]')).toBeNull();
+    expect(elementQuantityInput.querySelector('[aria-disabled="true"]')).toBeNull();
+    expect(dropdownTileInput.querySelector('[aria-disabled="true"]')).toBeNull();
   });
 
   it("String colunms appear in the element select, number collumns in the quantity select", async () => {
@@ -183,7 +183,7 @@ describe("LabelAction", () => {
     expect(reportTableInput.value).toEqual(label.reportTable);
     expect(elementInput).toHaveTextContent(label.elementNameColumn);
     expect(elementQuantityInput).toHaveTextContent(label.elementQuantityColumn);
-    expect(dropdownTileInput).toHaveTextContent(material.nameColumn!);
+    expect(dropdownTileInput).toHaveTextContent(material.nameColumn);
   });
 
   it("Filling out required fields enables add material and save buttons", async () => {

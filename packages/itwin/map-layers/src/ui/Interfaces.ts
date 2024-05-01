@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { BeEvent } from "@itwin/core-bentley";
-import {  MapSubLayerProps } from "@itwin/core-common";
+import { BaseMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
 import { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
 
 export interface StyleMapLayerSettings {
   /** Name */
   name: string;
-  /** source (i.URL for ImageMapLayerSettings or modelId for ModelMapLayerSettings) */
+  /** source (i.URL for ImageMapLayerSettings or modelId for ModelMapLayerSettings)  */
   source: string;
   /** Controls visibility of layer */
   visible: boolean;
@@ -28,6 +28,8 @@ export interface StyleMapLayerSettings {
   showSubLayers: boolean;
   /** Some format can publish only a single layer at a time (i.e WMTS) */
   provider?: MapLayerImageryProvider;
+
+  selected: boolean;
 }
 
 export interface MapTypesOptions {
@@ -39,6 +41,12 @@ export interface MapLayerOptions {
   hideExternalMapLayers?: boolean;
   fetchPublicMapLayerSources?: boolean;
   mapTypeOptions?: MapTypesOptions;
+
+  /** Optional list of base map-layers to display in the base map select control */
+  baseMapLayers?: BaseMapLayerSettings[];
+
+  /** Optionally show the user preferences storage options(i.e. iTwin vs iModel).  Defaults to false */
+  showUserPreferencesStorageOptions?: boolean;
 }
 
 export interface MapFeatureInfoPropertyGridOptions {
@@ -48,13 +56,18 @@ export interface MapFeatureInfoPropertyGridOptions {
 export type MapHitEvent = BeEvent<(hit: HitDetail) => void>;
 
 export interface MapFeatureInfoOptions {
-  /**
-   * HitDetail Event whenever the map is clicked.
-   * Typically the HitDetail object is provided by ElementLocateManager.doLocate.
-   * Every time this event is raised, FeatureInfoWidget will attempt to retrieve data from MapLayerImageryProviders.
-   */
-  onMapHit: MapHitEvent;
   disableDefaultFeatureInfoTool?: boolean;
   showLoadProgressAnimation?: boolean;
   propertyGridOptions?: MapFeatureInfoPropertyGridOptions;
+}
+
+export interface CustomParamItem {
+  name: string;
+  key: string;
+  value: string;
+  secret: boolean;
+}
+
+export interface CustomParamsMappingItem {
+  customParamNames: string[];
 }

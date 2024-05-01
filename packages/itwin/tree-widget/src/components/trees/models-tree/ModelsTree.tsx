@@ -1,26 +1,35 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import { useCallback, useEffect, useMemo } from "react";
-import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
-import { useDisposable } from "@itwin/core-react";
-import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import classNames from "classnames";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SelectionMode } from "@itwin/components-react";
+import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { ClassGroupingOption } from "../Common";
-import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
-import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { FilterableTreeRenderer } from "../common/TreeRenderer";
+import { ClassGroupingOption } from "../common/Types";
+import { useFeatureReporting } from "../common/UseFeatureReporting";
+import { usePerformanceReporting } from "../common/UsePerformanceReporting";
+import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
+import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
+import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { ModelsTreeComponent } from "./ModelsTreeComponent";
+import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
-import { createRuleset, createSearchRuleset, customizeModelsTreeNodeItem } from "./Utils";
+import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
+import type { FilterableTreeNodeRendererProps } from "../common/TreeRenderer";
+import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
+import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
+import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
-import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps } from "../Common";
-import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
-
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
+import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
 
 /**
@@ -35,10 +44,12 @@ export interface ModelsTreeHierarchyConfiguration {
    * Defaults to `bis.GeometricElement3d`. It's expected for the given class to derive from it.
    */
   elementClassSpecification?: SingleSchemaClassSpecification;
+  /** Should the tree show models without elements. */
+  showEmptyModels?: boolean;
 }
 
 /**
- * Props for [[ModelsTree]] component
+ * Props for [[ModelsTree]] component.
  * @public
  */
 export interface ModelsTreeProps extends BaseFilterableTreeProps {
@@ -57,12 +68,31 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
   /**
    * Auto-update the hierarchy when data in the iModel changes.
    * @alpha
+   * @deprecated in 2.0.1. It does not have any effect, auto update is always on.
    */
   enableHierarchyAutoUpdate?: boolean;
   /**
    * Custom visibility handler.
    */
-  modelsVisibilityHandler?: ModelsVisibilityHandler;
+  modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
+  /**
+   * Props for configuring hierarchy level.
+   * @beta
+   */
+  hierarchyLevelConfig?: HierarchyLevelConfig;
+  /**
+   * Reports performance of a feature.
+   * @param featureId ID of the feature.
+   * @param elapsedTime Elapsed time of the feature.
+   * @beta
+   */
+  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+  /**
+   * Callback that is invoked when a tracked feature is used.
+   * @param featureId ID of the feature.
+   * @beta
+   */
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -72,130 +102,226 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
  * @public
  */
 export function ModelsTree(props: ModelsTreeProps) {
-  const { nodeLoader, onItemsRendered } = useModelsTreeNodeLoader(props);
-  const { filteredNodeLoader, isFiltering, nodeHighlightingProps } = useVisibilityTreeFiltering(nodeLoader, props.filterInfo, props.onFilterApplied);
-  const filterApplied = filteredNodeLoader !== nodeLoader;
+  const { hierarchyLevelConfig, density, height, width, selectionMode, onFeatureUsed } = props;
+  const { reportUsage } = useFeatureReporting({ treeIdentifier: ModelsTreeComponent.id, onFeatureUsed });
+  const state = useModelsTreeState({ ...props, reportUsage });
 
-  const { activeView, modelsVisibilityHandler, selectionPredicate } = props;
-
-  const visibilityHandler = useVisibilityHandler(
-    nodeLoader.dataProvider.rulesetId,
-    props.iModel,
-    activeView,
-    modelsVisibilityHandler,
-    getFilteredDataProvider(filteredNodeLoader.dataProvider),
-    props.enableHierarchyAutoUpdate);
-  const eventHandler = useDisposable(useCallback(() => new VisibilityTreeEventHandler({
-    nodeLoader: filteredNodeLoader,
-    visibilityHandler,
-    selectionPredicate: (node) => !selectionPredicate || !isPresentationTreeNodeItem(node) ? true : selectionPredicate(node.key, ModelsVisibilityHandler.getNodeType(node)),
-  }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
-
-  const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = createVisibilityTreeRenderer({
+  const baseRendererProps = {
+    reportUsage,
+    contextMenuItems: props.contextMenuItems,
+    nodeLabelRenderer: props.nodeLabelRenderer,
+    density: props.density,
     nodeRendererProps: {
       iconsEnabled: true,
       descriptionEnabled: false,
       levelOffset: 10,
       disableRootNodeCollapse: true,
+      onVisibilityToggled: () => reportUsage({ featureId: "visibility-change", reportInteraction: true }),
     },
-  });
-
-  const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
+  };
 
   // istanbul ignore next
   const noFilteredDataRenderer = useCallback(() => {
-    return <VisibilityTreeNoFilteredData
-      title={TreeWidget.translate("modelTree.noModelFound")}
-      message={TreeWidget.translate("modelTree.noMatchingModelNames")}
-    />;
+    return (
+      <VisibilityTreeNoFilteredData title={TreeWidget.translate("modelTree.noModelFound")} message={TreeWidget.translate("modelTree.noMatchingModelNames")} />
+    );
   }, []);
 
+  if (!state) {
+    return null;
+  }
+
+  const isFilterApplied = state.filteringResult?.filteredProvider !== undefined;
+  const overlay = state.filteringResult?.isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
   return (
-    <div className="tree-widget-visibility-tree-base">
-      <ControlledTree
-        nodeLoader={filteredNodeLoader}
-        model={treeModel}
-        selectionMode={props.selectionMode || SelectionMode.None}
-        eventsHandler={eventHandler}
-        treeRenderer={treeRenderer}
-        nodeHighlightingProps={nodeHighlightingProps}
-        noDataRenderer={filterApplied ? noFilteredDataRenderer : undefined}
-        onItemsRendered={onItemsRendered}
-        width={props.width}
-        height={props.height}
+    <div className={classNames("tree-widget-visibility-tree-base", "tree-widget-tree-container")}>
+      <PresentationTree
+        state={state}
+        selectionMode={selectionMode || SelectionMode.None}
+        treeRenderer={
+          hierarchyLevelConfig?.isFilteringEnabled
+            ? (rendererProps) => (
+                <FilterableTreeRenderer
+                  {...rendererProps}
+                  {...baseRendererProps}
+                  nodeLoader={state.nodeLoader}
+                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
+                />
+              )
+            : createVisibilityTreeRenderer(baseRendererProps)
+        }
+        noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
+        width={width}
+        height={height}
       />
       {overlay}
     </div>
   );
 }
 
-function useModelsTreeNodeLoader(props: ModelsTreeProps) {
+interface ModelsTreeNodeRendererProps extends FilterableTreeNodeRendererProps {
+  density?: "default" | "enlarged";
+}
+
+function ModelsTreeNodeRenderer(props: ModelsTreeNodeRendererProps) {
+  return (
+    <FilterableVisibilityTreeNodeRenderer
+      {...props}
+      iconsEnabled={true}
+      descriptionEnabled={false}
+      levelOffset={10}
+      disableRootNodeCollapse={true}
+      isEnlarged={props.density === "enlarged"}
+      onVisibilityToggled={() => props.reportUsage?.({ featureId: "visibility-change", reportInteraction: true })}
+    />
+  );
+}
+
+interface UseModelsTreeStateProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+}
+
+function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModelsTreeStateProps) {
   const rulesets = {
-    general: useMemo(() => createRuleset({
-      enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
-      elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-    }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification]),
-    search: useMemo(() => createSearchRuleset({
-      elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-    }), [props.hierarchyConfig?.elementClassSpecification]),
+    general: useMemo(
+      () =>
+        createRuleset({
+          enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
+          elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
+          showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+        }),
+      [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels],
+    ),
+    search: useMemo(
+      () =>
+        createSearchRuleset({
+          elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
+          showEmptyModels: props.hierarchyConfig?.showEmptyModels,
+        }),
+      [props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels],
+    ),
   };
 
-  const { nodeLoader, onItemsRendered } = usePresentationTreeNodeLoader({
-    imodel: props.iModel,
+  const treeState = useTreeState({
+    ...props,
     ruleset: rulesets.general,
-    appendChildrenCountForGroupingNodes: (props.hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
-    pagingSize: PAGING_SIZE,
-    enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
-    customizeTreeNodeItem: customizeModelsTreeNodeItem,
   });
-  const { nodeLoader: searchNodeLoader, onItemsRendered: onSearchItemsRendered } = usePresentationTreeNodeLoader({
-    imodel: props.iModel,
+
+  const filteredTreeState = useTreeState({
+    ...props,
     ruleset: rulesets.search,
-    pagingSize: PAGING_SIZE,
-    enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
-    customizeTreeNodeItem: customizeModelsTreeNodeItem,
+    filterInfo,
+    onFilterApplied,
   });
 
-  const activeNodeLoader = props.filterInfo?.filter ? searchNodeLoader : nodeLoader;
-  const activeItemsRenderedCallback = props.filterInfo?.filter ? onSearchItemsRendered : onItemsRendered;
+  return filterInfo?.filter ? filteredTreeState : treeState;
+}
 
-  return {
-    nodeLoader: activeNodeLoader,
-    onItemsRendered: activeItemsRenderedCallback,
-  };
+interface UseTreeProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
+  ruleset: Ruleset;
+  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+}
+
+function useTreeState({
+  modelsVisibilityHandler,
+  activeView,
+  selectionPredicate,
+  hierarchyConfig,
+  iModel,
+  ruleset,
+  filterInfo,
+  onFilterApplied,
+  hierarchyLevelConfig,
+  onPerformanceMeasured,
+  reportUsage,
+}: UseTreeProps) {
+  const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
+  const selectionPredicateRef = useRef(selectionPredicate);
+  useEffect(() => {
+    selectionPredicateRef.current = selectionPredicate;
+  }, [selectionPredicate]);
+
+  const onFilterChange = useCallback(
+    (dataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => {
+      if (dataProvider && matchesCount !== undefined) {
+        reportUsage({ featureId: "filtering", reportInteraction: false });
+        onFilterApplied?.(dataProvider, matchesCount);
+      }
+
+      if (visibilityHandler) {
+        visibilityHandler.setFilteredDataProvider(dataProvider);
+      }
+    },
+    [onFilterApplied, reportUsage, visibilityHandler],
+  );
+
+  const { onNodeLoaded } = usePerformanceReporting({
+    treeIdentifier: ModelsTreeComponent.id,
+    onPerformanceMeasured,
+  });
+
+  const eventHandlerFactory = useCallback(
+    (handlerProps: VisibilityTreeEventHandlerParams) => {
+      return new ModelsTreeEventHandler({ ...handlerProps, reportUsage });
+    },
+    [reportUsage],
+  );
+
+  return useVisibilityTreeState({
+    imodel: iModel,
+    ruleset,
+    pagingSize: PAGING_SIZE,
+    appendChildrenCountForGroupingNodes: hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts,
+    enableHierarchyAutoUpdate: true,
+    customizeTreeNodeItem,
+    visibilityHandler,
+    filterInfo,
+    onFilterChange,
+    selectionPredicate: useCallback(
+      (node: TreeNodeItem) =>
+        !selectionPredicateRef.current || !isPresentationTreeNodeItem(node)
+          ? true
+          : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
+      [],
+    ),
+    eventHandler: eventHandlerFactory,
+    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
+    onNodeLoaded: filterInfo ? undefined : onNodeLoaded,
+    reportUsage: filterInfo ? undefined : reportUsage,
+    onHierarchyLimitExceeded: () => reportUsage({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
+  });
 }
 
 function useVisibilityHandler(
   rulesetId: string,
   iModel: IModelConnection,
   activeView: Viewport,
-  visibilityHandler?: ModelsVisibilityHandler,
-  filteredDataProvider?: IFilteredPresentationTreeDataProvider,
+  visibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler),
   hierarchyAutoUpdateEnabled?: boolean,
 ) {
   const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
-
-  const defaultVisibilityHandler = useDisposable(useCallback(
-    () =>
-      new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache }),
-    [rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled])
-  );
-
-  const handler = visibilityHandler ?? defaultVisibilityHandler;
+  const [state, setState] = useState<ModelsVisibilityHandler>();
 
   useEffect(() => {
-    handler && handler.setFilteredDataProvider(filteredDataProvider);
-  }, [handler, filteredDataProvider]);
+    if (visibilityHandler && typeof visibilityHandler !== "function") {
+      return;
+    }
 
-  return handler;
+    const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
+      rulesetId,
+      viewport: activeView,
+      hierarchyAutoUpdateEnabled,
+      subjectModelIdsCache,
+    };
+
+    const handler = visibilityHandler ? visibilityHandler(visibilityHandlerProps) : new ModelsVisibilityHandler(visibilityHandlerProps);
+    setState(handler);
+    return () => {
+      handler.dispose();
+    };
+  }, [rulesetId, activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache, visibilityHandler]);
+
+  return visibilityHandler && typeof visibilityHandler !== "function" ? visibilityHandler : state;
 }
 
-const isFilteredDataProvider = (dataProvider: IPresentationTreeDataProvider | IFilteredPresentationTreeDataProvider): dataProvider is IFilteredPresentationTreeDataProvider => {
-  const filteredProvider = dataProvider as IFilteredPresentationTreeDataProvider;
-  return filteredProvider.nodeMatchesFilter !== undefined && filteredProvider.getActiveMatch !== undefined && filteredProvider.countFilteringResults !== undefined;
-};
-
-const getFilteredDataProvider = (dataProvider: IPresentationTreeDataProvider | IFilteredPresentationTreeDataProvider): IFilteredPresentationTreeDataProvider | undefined => {
-  return isFilteredDataProvider(dataProvider) ? dataProvider : undefined;
-};
+const customizeTreeNodeItem = combineTreeNodeItemCustomizations([addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, addModelsTreeNodeItemIcons]);

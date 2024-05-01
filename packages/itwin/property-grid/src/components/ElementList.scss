@@ -16,5 +16,9 @@
 
   .property-grid-react-element-list-container {
     overflow: auto;
+
+    li:nth-child(odd) {
+      background-color: var(--iui-color-background-zebra);
+    }
   }
 }

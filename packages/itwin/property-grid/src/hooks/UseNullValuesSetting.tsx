@@ -1,12 +1,13 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import type { PropsWithChildren } from "react";
-import { createContext , useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import { usePreferencesContext } from "../PropertyGridPreferencesContext";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 /**
  * Provides context for `Show\Hide Empty Values` setting.
@@ -15,9 +16,7 @@ import { usePreferencesContext } from "../PropertyGridPreferencesContext";
 export function NullValueSettingContext({ children }: PropsWithChildren<{}>) {
   const { showNullValues, setShowNullValues } = useNullValueSetting();
 
-  return <nullValueSettingContext.Provider value={{ showNullValues, setShowNullValues }}>
-    {children}
-  </nullValueSettingContext.Provider>;
+  return <nullValueSettingContext.Provider value={{ showNullValues, setShowNullValues }}>{children}</nullValueSettingContext.Provider>;
 }
 
 /**
@@ -27,24 +26,30 @@ export function NullValueSettingContext({ children }: PropsWithChildren<{}>) {
 export function useNullValueSetting() {
   const [showNullValues, setShowNullValues] = useState(true);
   const { getShowNullValuesPreference, setShowNullValuesPreference } = useNullValueStorage();
+  const { onFeatureUsed } = useTelemetryContext();
 
   // Get value from preferences storage
   useEffect(() => {
     void (async () => {
       const res = await getShowNullValuesPreference();
+      onFeatureUsed(res ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
       setShowNullValues(res);
     })();
-  }, [getShowNullValuesPreference]);
+  }, [getShowNullValuesPreference, onFeatureUsed]);
 
   // Function for updating Hide / Show Empty Fields setting
-  const updateShowNullValues = useCallback(async (value: boolean, options?: { persist?: boolean }) => {
-    setShowNullValues(value);
+  const updateShowNullValues = useCallback(
+    async (value: boolean, options?: { persist?: boolean }) => {
+      onFeatureUsed(value ? "hide-empty-values-disabled" : "hide-empty-values-enabled");
+      setShowNullValues(value);
 
-    // Persist hide/show value
-    if (options && options.persist) {
-      await setShowNullValuesPreference(value);
-    }
-  }, [setShowNullValuesPreference]);
+      // Persist hide/show value
+      if (options && options.persist) {
+        await setShowNullValuesPreference(value);
+      }
+    },
+    [setShowNullValuesPreference, onFeatureUsed],
+  );
 
   return {
     showNullValues,
@@ -67,9 +72,12 @@ function useNullValueStorage() {
     return true;
   }, [storage]);
 
-  const setShowNullValuesPreference = useCallback(async (value: boolean) => {
-    await storage.set(SHOWNULL_KEY, JSON.stringify(value));
-  }, [storage]);
+  const setShowNullValuesPreference = useCallback(
+    async (value: boolean) => {
+      await storage.set(SHOWNULL_KEY, JSON.stringify(value));
+    },
+    [storage],
+  );
 
   return {
     getShowNullValuesPreference,

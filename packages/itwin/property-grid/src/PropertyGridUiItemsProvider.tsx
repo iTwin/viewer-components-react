@@ -1,19 +1,23 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGridUiItemsProvider.scss";
 import { useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { StagePanelLocation, StagePanelSection, StageUsage, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
 import { Id64 } from "@itwin/core-bentley";
 import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
+import { SvgError } from "@itwin/itwinui-illustrations-react";
+import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { Key } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientState";
 import { PropertyGridComponent } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
 
+import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent";
 
@@ -45,7 +49,7 @@ export interface PropertyGridUiItemsProviderProps {
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 
-  constructor(private _props: PropertyGridUiItemsProviderProps = {}) { }
+  constructor(private _props: PropertyGridUiItemsProviderProps = {}) {}
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
     const { defaultPanelLocation, defaultPanelSection, defaultPanelWidgetPriority, propertyGridProps } = this._props;
@@ -56,14 +60,16 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       return [];
     }
 
-    return [{
-      id: PropertyGridWidgetId,
-      label: PropertyGridManager.translate("widget-label"),
-      content: <PropertyGridWidget {...propertyGridProps} />,
-      defaultState: WidgetState.Hidden,
-      icon: <SvgInfoCircular />,
-      priority: defaultPanelWidgetPriority,
-    }];
+    return [
+      {
+        id: PropertyGridWidgetId,
+        label: PropertyGridManager.translate("widget-label"),
+        content: <PropertyGridWidget {...propertyGridProps} />,
+        defaultState: WidgetState.Hidden,
+        icon: <SvgInfoCircular />,
+        priority: defaultPanelWidgetPriority,
+      },
+    ];
   }
 }
 
@@ -79,13 +85,40 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
 
     return Presentation.selection.selectionChange.addListener((args) => {
       const selection = Presentation.selection.getSelection(args.imodel);
-      // show property grid widget if there are at least one node or valid instance selected.
-      const show = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
-      widgetDef.setWidgetState(show ? WidgetState.Open : WidgetState.Hidden);
+      // hide grid widget if there are no nodes or valid instances selected.
+      const hasSelectedElements = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
+
+      if (!hasSelectedElements) {
+        widgetDef.setWidgetState(WidgetState.Hidden);
+        return;
+      }
+
+      if (widgetDef.state === WidgetState.Hidden) {
+        widgetDef.setWidgetState(WidgetState.Open);
+      }
     });
   }, [widgetDef]);
 
-  return <div ref={ref} className="property-grid-widget">
-    <PropertyGridComponent {...props} />
-  </div>;
+  return (
+    <div ref={ref} className="property-grid-widget">
+      <ErrorBoundary FallbackComponent={ErrorState}>
+        <PropertyGridComponent {...props} />
+      </ErrorBoundary>
+    </div>
+  );
+}
+
+function ErrorState({ resetErrorBoundary }: FallbackProps) {
+  return (
+    <NonIdealState
+      svg={<SvgError />}
+      heading={PropertyGridManager.translate("error")}
+      description={PropertyGridManager.translate("generic-error-description")}
+      actions={
+        <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>
+          {PropertyGridManager.translate("retry")}
+        </Button>
+      }
+    />
+  );
 }

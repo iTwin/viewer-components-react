@@ -1,10 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { Fragment, useState } from "react";
-import { assert } from "@itwin/core-bentley";
 import { ContextMenuItem as CoreContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
@@ -16,6 +15,7 @@ import type { Field } from "@itwin/presentation-common";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 /**
  * Props for single context menu item.
@@ -59,20 +59,30 @@ export interface PropertyGridContextMenuItemProps {
  * @public
  */
 export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>) {
-  return <CoreContextMenuItem
-    key={id}
-    onSelect={onSelect}
-    title={title}
-  >
-    {children}
-  </CoreContextMenuItem>;
+  return (
+    <CoreContextMenuItem key={id} onSelect={onSelect} title={title}>
+      {children}
+    </CoreContextMenuItem>
+  );
+}
+
+/**
+ * Props for default context menu items.
+ * @public
+ */
+export interface DefaultContextMenuItemProps extends ContextMenuItemProps {
+  /**
+   * Callback that is invoked when context menu item is clicked. `defaultAction` argument passed to
+   * this callback can be invoked to persist default behavior or omitted to completely override it.
+   */
+  onSelect?: (defaultAction: () => Promise<void>) => Promise<void>;
 }
 
 /**
  * Props for `Add/Remove` favorite properties context menu items.
  * @public
  */
-export interface FavoritePropertiesContextMenuItemProps extends ContextMenuItemProps {
+export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMenuItemProps {
   /** Scope in which favorite property should be stored. Defaults to `FavoritePropertiesScope.IModel`. */
   scope?: FavoritePropertiesScope;
 }
@@ -81,18 +91,24 @@ export interface FavoritePropertiesContextMenuItemProps extends ContextMenuItemP
  * Renders `Add to Favorite` context menu item if property field is not favorite. Otherwise renders nothing.
  * @public
  */
-export function AddFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
+export function AddFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
   if (!field || Presentation.favoriteProperties.has(field, imodel, currentScope)) {
     return null;
   }
 
+  const defaultAction = async () => Presentation.favoriteProperties.add(field, imodel, currentScope);
+
   return (
     <PropertyGridContextMenuItem
       id="add-favorite"
       onSelect={async () => {
-        assert(field !== undefined);
-        await Presentation.favoriteProperties.add(field, imodel, currentScope);
+        if (onSelect) {
+          await onSelect(defaultAction);
+          return;
+        }
+
+        await defaultAction();
       }}
       title={PropertyGridManager.translate("context-menu.add-favorite.description")}
     >
@@ -105,18 +121,24 @@ export function AddFavoritePropertyContextMenuItem({ field, imodel, scope }: Fav
  * Renders `Remove from Favorite` context menu item if property field is favorite. Otherwise renders nothing.
  * @public
  */
-export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
+export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
   if (!field || !Presentation.favoriteProperties.has(field, imodel, currentScope)) {
     return null;
   }
 
+  const defaultAction = async () => Presentation.favoriteProperties.remove(field, imodel, currentScope);
+
   return (
     <PropertyGridContextMenuItem
       id="remove-favorite"
       onSelect={async () => {
-        assert(field !== undefined);
-        await Presentation.favoriteProperties.remove(field, imodel, currentScope);
+        if (onSelect) {
+          await onSelect(defaultAction);
+          return;
+        }
+
+        await defaultAction();
       }}
       title={PropertyGridManager.translate("context-menu.remove-favorite.description")}
     >
@@ -129,12 +151,21 @@ export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope }: 
  * Renders `Copy Text` context menu item.
  * @public
  */
-export function CopyPropertyTextContextMenuItem({ record }: ContextMenuItemProps) {
+export function CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps) {
+  const defaultAction = async () => {
+    record.description && copyToClipboard(record.description);
+  };
+
   return (
     <PropertyGridContextMenuItem
       id="copy-text"
       onSelect={async () => {
-        record.description && copyToClipboard(record.description);
+        if (onSelect) {
+          await onSelect(defaultAction);
+          return;
+        }
+
+        await defaultAction();
       }}
       title={PropertyGridManager.translate("context-menu.copy-text.description")}
     >
@@ -153,7 +184,7 @@ export interface UseContentMenuProps extends ContextMenuProps {
 }
 
 interface ContextMenuDefinition {
-  position: { x: number, y: number };
+  position: { x: number; y: number };
   menuItems: ReactNode[];
 }
 
@@ -163,6 +194,7 @@ interface ContextMenuDefinition {
  */
 export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps) {
   const [contextMenu, setContextMenu] = useState<ContextMenuDefinition>();
+  const { onFeatureUsed } = useTelemetryContext();
 
   const onPropertyContextMenu = async (args: PropertyGridContextMenuArgs) => {
     args.event.persist();
@@ -173,6 +205,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
     const items = contextMenuItems.map((item, index) => <Fragment key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Fragment>);
 
+    onFeatureUsed("context-menu");
     setContextMenu({
       position: { x: args.event.clientX, y: args.event.clientY },
       menuItems: items,

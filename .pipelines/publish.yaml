@@ -1,0 +1,42 @@
+parameters:
+  - name: dev
+    type: boolean
+    default: false
+    displayName: "Publish pre-release versions"
+  - name: noPublish
+    type: boolean
+    default: false
+    displayName: "Only bump versions without publishing"
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  - group: "Caleb - iTwin GitHub Token"
+  - name: REPO_URL
+    value: github.com/iTwin/viewer-components-react
+  - name: NodeVersion
+    value: 18.16.0
+
+steps:
+  - checkout: self
+    fetchDepth: 0 # Fetch all history (required by beachball to look at history)
+
+  - template: templates/build-steps.yaml
+
+  - script: |
+      git config --global user.email imodeljs-admin@users.noreply.github.com
+      git config --global user.name imodeljs-admin
+      git remote set-url origin "https://$(GITHUBTOKEN)@$(REPO_URL)"
+      pnpm run publish --message "applying package updates" --token $NPM_AUTH_TOKEN --branch $branchName $beachballConfig $publishOptions
+    displayName: "Publish packages"
+    env:
+      NPM_AUTH_TOKEN: $(npmToken)
+      branchName: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', 'origin/') }}
+      ${{ if eq(parameters.dev, true) }}:
+        beachballConfig: "--config beachball.config.dev.js --keep-change-files"
+      ${{ if eq(parameters.noPublish, true) }}:
+        publishOptions: "--no-publish"

@@ -2,6 +2,66 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.14.2",
+      "tag": "@itwin/measure-tools-react_v0.14.2",
+      "date": "Thu, 05 Oct 2023 18:48:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clean up files delivered"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.14.1",
+      "tag": "@itwin/measure-tools-react_v0.14.1",
+      "date": "Tue, 22 Aug 2023 14:39:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix measurement action toolbar to close for scroll/click outside"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.14.0",
+      "tag": "@itwin/measure-tools-react_v0.14.0",
+      "date": "Thu, 17 Aug 2023 14:42:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Switch to Toolbar instead of ToolbarComposer for Measure Actions toolbar"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.0",
+      "tag": "@itwin/measure-tools-react_v0.13.0",
+      "date": "Mon, 24 Jul 2023 17:26:29 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added allowActions property to Measurement base class to let measurements to opt out of the popup action toolbar. Fixed up internal usage of currentInputState with (soon to be) public APIs"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.2",
+      "tag": "@itwin/measure-tools-react_v0.12.2",
+      "date": "Thu, 20 Jul 2023 20:15:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add listeners for unit system changes when starting decorator"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.1",
       "tag": "@itwin/measure-tools-react_v0.12.1",
       "date": "Fri, 23 Jun 2023 15:11:15 GMT",

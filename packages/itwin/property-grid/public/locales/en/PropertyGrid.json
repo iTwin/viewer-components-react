@@ -1,5 +1,8 @@
 {
   "widget-label": "Properties",
+  "error": "Error",
+  "retry": "Retry",
+  "generic-error-description": "An error occurred while loading properties.",
   "element-list": {
     "title": "Selected Elements"
   },
@@ -7,6 +10,11 @@
     "navigateUp": "Navigate Up",
     "navigateDown": "Navigate Down",
     "back": "Back"
+  },
+  "search-bar": {
+    "open": "Open search bar",
+    "close": "Close search bar",
+    "placeholder": "Search"
   },
   "selection": {
     "too-many-elements-selected": "Too many elements selected",

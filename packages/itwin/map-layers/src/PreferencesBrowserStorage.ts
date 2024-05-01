@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { ITwinIdArg, PreferenceArg, PreferenceKeyArg, UserPreferencesAccess } from "@itwin/core-frontend";
+import { BrowserStorage } from "./BrowserStorage";
 
 /** Index signature holding preferences content
  *
@@ -53,73 +54,26 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
   }
 
   private static getPreferenceKey(arg: PreferenceKeyArg) {
-    const nsStr = arg.namespace ? `${arg.namespace}.` : "";
-    return `${nsStr}${arg.key}`;
-  }
-
-  private loadFromStorage(arg: PreferenceKeyArg & ITwinIdArg) {
-    const storage = window.localStorage;
-
-    let map: KeyContentProps = {};
-    const itemStr = storage.getItem(this.getStorageItemKey(arg));
-    if (itemStr === null) {
-      return undefined;
+    if (arg.key) {
+      const nsStr = arg.namespace ? `${arg.namespace}.` : "";
+      return `${nsStr}${arg.key}`;
     }
-    if (!itemStr || itemStr === "{}")
-      return map;
 
-    map = JSON.parse(itemStr);
-    return map;
+    return "";
   }
 
   public async get(arg: PreferenceKeyArg & ITwinIdArg) {
-    const map = this.loadFromStorage(arg);
-    if (map === undefined)
-      return undefined;
-
-    if (arg.key) {
-      if (!Object.keys(map).includes(arg.key))
-        return undefined;
-
-      const nsStr = arg.namespace ? `${arg.namespace}.` : "";
-      const prefKey = `${nsStr}${arg.key}`;
-      return [map[prefKey]];
-    } else {  // No key provided, return all objects
-      const values = [];
-      for (const [_key, value] of Object.entries(map))
-        values.push(value);
-      return values;
-    }
+    const storage = new BrowserStorage<KeyContentProps>({itemKeyName: this.getStorageItemKey(arg)});
+    return storage.get(PreferencesBrowserStorage.getPreferenceKey(arg));
   }
 
   public async delete(arg: PreferenceKeyArg & ITwinIdArg) {
-    const map = this.loadFromStorage(arg);
-    if (map === undefined) {
-      if (this._options?.throwOnDeleteMissingKey)
-        throw new Error("Could not find key from storage.");
-      else
-        return;
-    }
-
-    const prefKey = PreferencesBrowserStorage.getPreferenceKey(arg);
-    if (!Object.keys(map).includes(prefKey)) {
-      if (this._options?.throwOnDeleteMissingKey)
-        throw Error("Could not find key from storage.");
-      else
-        return;
-    }
-    delete map[prefKey];
-    window.localStorage.setItem(this.getStorageItemKey(arg), JSON.stringify(map));
+    const storage = new BrowserStorage<KeyContentProps>({itemKeyName: this.getStorageItemKey(arg)});
+    storage.delete(PreferencesBrowserStorage.getPreferenceKey(arg));
   }
 
   public async save(arg: PreferenceArg & ITwinIdArg) {
-    let map = this.loadFromStorage(arg);
-    if (map === undefined)
-      map = {};
-
-    map[PreferencesBrowserStorage.getPreferenceKey(arg)] = arg.content;
-
-    const itemValue = JSON.stringify(map);
-    window.localStorage.setItem(this.getStorageItemKey(arg), itemValue);
+    const storage = new BrowserStorage<KeyContentProps>({itemKeyName: this.getStorageItemKey(arg)});
+    storage.save(PreferencesBrowserStorage.getPreferenceKey(arg), arg.content);
   }
 }

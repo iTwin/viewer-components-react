@@ -2,6 +2,288 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Thu, 04 Apr 2024 14:19:35 GMT",
+      "version": "5.4.3",
+      "tag": "@itwin/map-layers_v5.4.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "01c1b960d7d32da1ec69f559c6149770fce56d51",
+            "comment": "Clear MapFeatureInfo Widget when active tool changes"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 11 Mar 2024 18:18:16 GMT",
+      "version": "5.4.2",
+      "tag": "@itwin/map-layers_v5.4.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "1bf42345a8e7bc8408b354493dc3398f0ffb85e8",
+            "comment": "Fixed `supportTileUrl` option that would not be honored in some cases"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 06 Mar 2024 15:24:33 GMT",
+      "version": "5.4.1",
+      "tag": "@itwin/map-layers_v5.4.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "18479809216a681f901f884e67db6c8c04787615",
+            "comment": "Added @itwin\\map-layers-formats to peerDependencies"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 29 Feb 2024 19:46:34 GMT",
+      "version": "5.4.0",
+      "tag": "@itwin/map-layers_v5.4.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "5a2cf9d2f64d2338e884b4ccbe4f4d257e95edb1",
+            "comment": "Improved warning message when an incompatible map-layer type is provided."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "fc3504a3b691cdf97c695cc3d18e02c7cde5d3df",
+            "comment": "Moved @itwin/itwinui-react to direct dependencies"
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "5ba336b59cd8cb1cf0f03ac4f79c655e0045af35",
+            "comment": "Hide User Preferences Options to store at the iTwin/iModel scope."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "56ccf3c964674f8d9d1194d49006b150280fc80c",
+            "comment": "Added @itwin/itwinui-react to peer dependencies"
+          }
+        ],
+        "minor": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "05815f4e7587b2e42227194574abf4ee49fbce4e",
+            "comment": "Support for custom query parameters."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 07 Feb 2024 21:16:44 GMT",
+      "version": "5.3.1",
+      "tag": "@itwin/map-layers_v5.3.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "0b8ac8d861a34e4acdf21f86c34ee9e577088fa5",
+            "comment": "Fix map feature info widget tech preview badge"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 06 Feb 2024 13:45:21 GMT",
+      "version": "5.3.0",
+      "tag": "@itwin/map-layers_v5.3.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "78499205ff7183061bf5d5cbdd546a47e267b946",
+            "comment": "Add option to show tech preview badge on MapFeatureInfoTool/Widget"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 29 Jan 2024 21:37:20 GMT",
+      "version": "5.2.7",
+      "tag": "@itwin/map-layers_v5.2.7",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "2d199e72efdd7836dc148b4c6933f67702fcc8ab",
+            "comment": "Make sure the Feature Info Widget is reopened every time selection change occurs."
+          },
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "05de91bf6d34cfe29f1df5b640a114346d9b5eee",
+            "comment": "Fixed an issue that would prevent the display of Feature Info properties."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 18 Jan 2024 15:05:39 GMT",
+      "version": "5.2.6",
+      "tag": "@itwin/map-layers_v5.2.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "828c75e8f6bab9b78278ea27c9d0a8bac9fd3d8e",
+            "comment": "Fix issue where two instances of 'Aerial Imagery with labels' are visible in map layers widget"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.5",
+      "tag": "@itwin/map-layers_v5.2.5",
+      "date": "Mon, 18 Dec 2023 18:31:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "ensure the isGeolocated runs when active viewport changes even if the onEcefLocationChanged has already fired"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.4",
+      "tag": "@itwin/map-layers_v5.2.4",
+      "date": "Tue, 07 Nov 2023 13:43:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix UI refresh issues after a saved view is applied."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.3",
+      "tag": "@itwin/map-layers_v5.2.3",
+      "date": "Thu, 26 Oct 2023 13:09:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed base map translation issues"
+          },
+          {
+            "comment": "Fix warning message after a failed attempt to provide credentials"
+          },
+          {
+            "comment": "Fix an issue in the 'Add New Layer' dialog where invalid credentials warning would not appear after a first invalid attempt."
+          },
+          {
+            "comment": "Make the MapFeatureInfo Widget appear only when results are available."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.2",
+      "tag": "@itwin/map-layers_v5.2.2",
+      "date": "Thu, 05 Oct 2023 18:48:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Several UI fixes and fine tuning."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.1",
+      "tag": "@itwin/map-layers_v5.2.1",
+      "date": "Mon, 02 Oct 2023 20:32:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Restore settings icon that got incorrectly removed"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.0",
+      "tag": "@itwin/map-layers_v5.2.0",
+      "date": "Fri, 29 Sep 2023 20:08:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updated Feature Selection UI to consume new itwin.js API"
+          }
+        ],
+        "none": [
+          {
+            "comment": "Improved UI to better control the state of multiple map layers in a single operation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.2",
+      "tag": "@itwin/map-layers_v5.1.2",
+      "date": "Tue, 12 Sep 2023 14:07:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removed deep import of icons"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.1",
+      "tag": "@itwin/map-layers_v5.1.1",
+      "date": "Fri, 28 Jul 2023 18:31:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix baseMap visibility not retained when switching to another style. Also fixed typos localized strings."
+          },
+          {
+            "comment": "Fixed maplayer context menu not opening at the right position."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.0",
+      "tag": "@itwin/map-layers_v5.1.0",
+      "date": "Wed, 26 Jul 2023 21:49:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "New UI that allow creating multiple layers from sources supporting single layer per request."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fixvarious display issues with MapLayer widget"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.0",
       "tag": "@itwin/map-layers_v5.0.0",
       "date": "Tue, 06 Jun 2023 10:57:06 GMT",

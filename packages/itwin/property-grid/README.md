@@ -131,7 +131,7 @@ When the user right clicks on a specific property, a context menu is displayed i
 
 ### Favorite properties
 
-The package delivers two context menu item components for adding  properties to and removing them from favorite properties list: `AddFavoritePropertyContextMenuItem` and `RemoveFavoritePropertyContextMenuItem`. When selected element contains at least one favorite property, a new "Favorite" category is rendered at the top:
+The package delivers two context menu item components for adding properties to and removing them from favorite properties list: `AddFavoritePropertyContextMenuItem` and `RemoveFavoritePropertyContextMenuItem`. When selected element contains at least one favorite property, a new "Favorite" category is rendered at the top:
 
 ![Favorite properties](./media/favorite-properties.png)
 
@@ -156,7 +156,7 @@ function ExampleContextMenuItem(props: ContextMenuItemProps) {
     <PropertyGridContextMenuItem
       id="example"
       onSelect={async () => {
-        console.log(`Selected property: ${props.record.property.displayLabel}`)
+        console.log(`Selected property: ${props.record.property.displayLabel}`);
       }}
     >
       Click me!
@@ -170,11 +170,9 @@ Provide it to the widget:
 ```ts
 new PropertyGridUiItemsProvider({
   propertyGridProps: {
-    contextMenuItems: [
-      (props) => <ExampleContextMenuItem {...props} />,
-    ],
+    contextMenuItems: [(props) => <ExampleContextMenuItem {...props} />],
   },
-})
+});
 ```
 
 Result:
@@ -224,13 +222,104 @@ Provide it to the widget:
 ```ts
 new PropertyGridUiItemsProvider({
   propertyGridProps: {
-    settingsMenuItems: [
-      (props) => <ExampleSettingsMenuItem />,
-    ],
+    settingsMenuItems: [(props) => <ExampleSettingsMenuItem />],
   },
-})
+});
 ```
 
 Result:
 
 ![Custom settings menu item](./media/custom-settings-menu-item.png)
+
+## Property filtering
+
+Property grid allows its users to filter out properties of an element based on text input.
+
+When an item is selected, click the magnifying glass button and notice the search bar expand.
+
+| Search bar closed                        | Search bar opened                                     |
+| ---------------------------------------- | ----------------------------------------------------- |
+| ![Search bar closed](./media/widget.png) | ![Search bar opened](./media/search-bar-expanded.png) |
+
+One can type into the search bar and notice how properties are automatically filtered based on the search bar input:
+
+![Widget search bar expanded](./media/search-bar-filtering.png)
+
+Note that when the search bar is closed, the filter is discarded and all properties are visible again.
+
+## Performance tracking
+
+Components from this package allows consumers to track performance of specific features.
+
+This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+
+- `"properties-load"` - time it takes to load properties data after selection changes.
+- `"elements-list-load"` - time it takes to populate elements list when multiple elements are selected.
+
+Example:
+
+```ts
+new PropertyGridUiItemsProvider({
+  propertyGridProps: {
+    onPerformanceMeasured: (feature, elapsedTime) => {
+      telemetryClient.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+    },
+  },
+});
+```
+
+To track performance of individual components when using them directly, rather than through `PropertyGridUiItemsProvider`, the `onPerformanceMeasured` callback should be supplied through `TelemetryContextProvider`:
+
+```ts
+return (
+  <TelemetryContextProvider
+    onPerformanceMeasured={(feature, elapsedTime) => {
+      telemetryClient.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+    }}
+  >
+    <PropertyGrid />
+  </TelemetryContextProvider>
+);
+```
+
+## Usage tracking
+
+Components from this package allows consumers to track the usage of specific features.
+
+This can be achieved by passing `onFeatureUsed` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and as the component is being used. List of tracked features:
+
+- `"single-element"` - when properties of a single element are shown.
+- `"multiple-elements"` - when merged properties of multiple elements are shown.
+- `"elements-list"` - when element list is shown.
+- `"single-element-from-list"` - when properties are shown for a single element selected from the element list.
+- `"ancestor-navigation"` - when elements' hierarchy is traversed using ancestor navigation buttons.
+- `"context-menu"` - when context menu for a property is opened.
+- `"hide-empty-values-enabled"` - when property values are loaded with "hide empty values" setting enabled.
+- `"hide-empty-values-disabled"` - when property values are loaded with "hide empty values" setting disabled.
+- `"filter-properties"` - when properties are filtered or selection changes while a filter is applied.
+
+Example:
+
+```ts
+new PropertyGridUiItemsProvider({
+  propertyGridProps: {
+    onFeatureUsed: (feature) => {
+      telemetryClient.log(`PropertyGrid [${feature}] used`);
+    },
+  },
+});
+```
+
+To track usage of individual components when using them directly, rather than through `PropertyGridUiItemsProvider`, the `onFeatureUsed` callback should be supplied through `TelemetryContextProvider`:
+
+```ts
+return (
+  <TelemetryContextProvider
+    onFeatureUsed={(feature) => {
+      telemetryClient.log(`PropertyGrid [${feature}] used`);
+    }}
+  >
+    <PropertyGrid />
+  </TelemetryContextProvider>
+);
+```

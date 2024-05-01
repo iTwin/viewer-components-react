@@ -3,11 +3,27 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.property-grid-widget-container {
+.property-grid-react-container {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
+
+  .property-grid-react-data {
+    height: 100%;
+    overflow: hidden auto;
+  }
+
+  .property-grid-header-title {
+    width: 100%;
+    overflow: hidden;
+
+    .property-grid-header-title-text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
 }
 
 .property-grid-react-panel-label-and-class {

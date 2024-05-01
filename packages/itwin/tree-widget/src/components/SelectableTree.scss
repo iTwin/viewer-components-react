@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-variables";
 
 .tree-widget-selectable-tree {
   padding: var(--iui-size-xs);
@@ -11,20 +10,4 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-
-  .components-selectable-content {
-    flex: 1;
-    overflow: hidden;
-  }
-
-  .components-selectable-content-header {
-    padding-bottom: var(--iui-size-2xs);
-  }
-
-  .components-selectable-content-wrapper {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    height: 100%;
-  }
 }

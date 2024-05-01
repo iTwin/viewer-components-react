@@ -1,0 +1,17 @@
+steps:
+  - task: NodeTool@0
+    displayName: "Use Node 18.16.0"
+    inputs:
+      versionSpec: 18.16.0
+
+  - task: Npm@1
+    displayName: install pnpm ^8.11.0
+    inputs:
+      command: "custom"
+      customCommand: "install -g pnpm@^8.11.0"
+
+  - script: pnpm install
+    displayName: pnpm install
+
+  - script: pnpm check && pnpm check:dev
+    displayName: Check change files

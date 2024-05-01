@@ -122,7 +122,7 @@ describe("Templates", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    const button = screen.getByText("Create Template");
+    const button = screen.getByText("New");
     await simulateClick(button);
     expect(onClickCreate).toBeCalled();
   });

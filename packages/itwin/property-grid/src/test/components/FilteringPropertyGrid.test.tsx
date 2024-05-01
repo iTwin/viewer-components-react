@@ -1,14 +1,13 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
-import { render, waitFor } from "@testing-library/react";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "../../property-grid-react";
-import { createPropertyRecord } from "../TestUtils";
+import { createPropertyRecord, render, waitFor } from "../TestUtils";
 
 import type { IPropertyDataProvider } from "@itwin/components-react";
 
@@ -17,24 +16,37 @@ describe("<FilteringPropertyGrid />", () => {
     onDataChanged: new PropertyDataChangeEvent(),
     getData: async () => {
       return {
-        categories: [{
-          expand: true,
-          label: "Test Category",
-          name: "test-category",
-          childCategories: [{
-            expand: false,
-            label: "Child Category",
-            name: "child-category",
-          }],
-        }],
+        categories: [
+          {
+            expand: true,
+            label: "Test Category",
+            name: "test-category",
+            childCategories: [
+              {
+                expand: false,
+                label: "Child Category",
+                name: "child-category",
+              },
+            ],
+          },
+        ],
         label: PropertyRecord.fromString("Test Instance"),
         records: {
           ["test-category"]: [
-            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Non-null Value", displayValue: "Non-null Value" }, { name: "test-prop1", displayLabel: "Non-null Prop" }),
-            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined }, { name: "test-prop2", displayLabel: "Null Prop" }),
+            createPropertyRecord(
+              { valueFormat: PropertyValueFormat.Primitive, value: "Non-null Value", displayValue: "Non-null Value" },
+              { name: "test-prop1", displayLabel: "Non-null Prop" },
+            ),
+            createPropertyRecord(
+              { valueFormat: PropertyValueFormat.Primitive, value: undefined, displayValue: undefined },
+              { name: "test-prop2", displayLabel: "Null Prop" },
+            ),
           ],
           ["child-category"]: [
-            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Child Value", displayValue: "Child Value" }, { name: "child-prop1", displayLabel: "Child Prop" }),
+            createPropertyRecord(
+              { valueFormat: PropertyValueFormat.Primitive, value: "Child Value", displayValue: "Child Value" },
+              { name: "child-prop1", displayLabel: "Child Prop" },
+            ),
           ],
         },
       };
@@ -44,14 +56,7 @@ describe("<FilteringPropertyGrid />", () => {
   it("renders with `NoopPropertyDataFilterer`", async () => {
     const filterer = new NoopPropertyDataFilterer();
 
-    const { getByText, queryByText } = render(
-      <FilteringPropertyGrid
-        height={100}
-        width={100}
-        filterer={filterer}
-        dataProvider={provider}
-      />
-    );
+    const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} />);
 
     await waitFor(() => getByText("Non-null Prop"));
     expect(queryByText("Null Prop")).to.not.be.null;
@@ -60,14 +65,7 @@ describe("<FilteringPropertyGrid />", () => {
   it("auto expands child categories by default", async () => {
     const filterer = new NoopPropertyDataFilterer();
 
-    const { getByText, queryByText } = render(
-      <FilteringPropertyGrid
-        height={100}
-        width={100}
-        filterer={filterer}
-        dataProvider={provider}
-      />
-    );
+    const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} />);
 
     await waitFor(() => getByText("Non-null Prop"));
     expect(queryByText("Null Prop")).to.not.be.null;
@@ -78,13 +76,7 @@ describe("<FilteringPropertyGrid />", () => {
     const filterer = new NoopPropertyDataFilterer();
 
     const { getByText, queryByText } = render(
-      <FilteringPropertyGrid
-        height={100}
-        width={100}
-        filterer={filterer}
-        dataProvider={provider}
-        autoExpandChildCategories={false}
-      />
+      <FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} autoExpandChildCategories={false} />,
     );
 
     await waitFor(() => getByText("Non-null Prop"));
@@ -96,14 +88,7 @@ describe("<FilteringPropertyGrid />", () => {
     it("filters out `null` primitive properties", async () => {
       const filterer = new NonEmptyValuesPropertyDataFilterer();
 
-      const { getByText, queryByText } = render(
-        <FilteringPropertyGrid
-          height={100}
-          width={100}
-          filterer={filterer}
-          dataProvider={provider}
-        />
-      );
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={provider} />);
 
       await waitFor(() => getByText("Non-null Prop"));
       expect(queryByText("Null Prop")).to.be.null;
@@ -115,11 +100,13 @@ describe("<FilteringPropertyGrid />", () => {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
           return {
-            categories: [{
-              expand: true,
-              label: "Test Category",
-              name: "test-category",
-            }],
+            categories: [
+              {
+                expand: true,
+                label: "Test Category",
+                name: "test-category",
+              },
+            ],
             label: PropertyRecord.fromString("Test Instance"),
             records: {
               ["test-category"]: [
@@ -128,15 +115,21 @@ describe("<FilteringPropertyGrid />", () => {
                     valueFormat: PropertyValueFormat.Array,
                     itemsTypeName: "string",
                     items: [
-                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Non-Empty Item 1" }),
-                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Non-Empty Item 2" }),
+                      createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" },
+                        { name: "item-prop-1", displayLabel: "Non-Empty Item 1" },
+                      ),
+                      createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" },
+                        { name: "item-prop-2", displayLabel: "Non-Empty Item 2" },
+                      ),
                     ],
                   },
-                  { name: "test-prop1", displayLabel: "Non-Empty Array Prop" }
+                  { name: "test-prop1", displayLabel: "Non-Empty Array Prop" },
                 ),
                 createPropertyRecord(
                   { valueFormat: PropertyValueFormat.Array, itemsTypeName: "string", items: [] },
-                  { name: "test-prop2", displayLabel: "Empty Array Prop" }
+                  { name: "test-prop2", displayLabel: "Empty Array Prop" },
                 ),
               ],
             },
@@ -144,14 +137,7 @@ describe("<FilteringPropertyGrid />", () => {
         },
       } as IPropertyDataProvider;
 
-      const { getByText, queryByText } = render(
-        <FilteringPropertyGrid
-          height={100}
-          width={100}
-          filterer={filterer}
-          dataProvider={dataProvider}
-        />
-      );
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText(/^Non-Empty Array Prop/));
       expect(queryByText(/^Empty Array Prop/)).to.be.null;
@@ -163,11 +149,13 @@ describe("<FilteringPropertyGrid />", () => {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
           return {
-            categories: [{
-              expand: true,
-              label: "Test Category",
-              name: "test-category",
-            }],
+            categories: [
+              {
+                expand: true,
+                label: "Test Category",
+                name: "test-category",
+              },
+            ],
             label: PropertyRecord.fromString("Test Instance"),
             records: {
               ["test-category"]: [
@@ -176,11 +164,17 @@ describe("<FilteringPropertyGrid />", () => {
                     valueFormat: PropertyValueFormat.Array,
                     itemsTypeName: "string",
                     items: [
-                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Non-Empty Item 1" }),
-                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Non-Empty Item 2" }),
+                      createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" },
+                        { name: "item-prop-1", displayLabel: "Non-Empty Item 1" },
+                      ),
+                      createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" },
+                        { name: "item-prop-2", displayLabel: "Non-Empty Item 2" },
+                      ),
                     ],
                   },
-                  { name: "test-prop1", displayLabel: "Non-Empty Array Prop" }
+                  { name: "test-prop1", displayLabel: "Non-Empty Array Prop" },
                 ),
                 createPropertyRecord(
                   {
@@ -191,7 +185,7 @@ describe("<FilteringPropertyGrid />", () => {
                       createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive }, { name: "item-prop-2", displayLabel: "Empty Item 2" }),
                     ],
                   },
-                  { name: "test-prop2", displayLabel: "Empty Array Prop" }
+                  { name: "test-prop2", displayLabel: "Empty Array Prop" },
                 ),
               ],
             },
@@ -199,14 +193,7 @@ describe("<FilteringPropertyGrid />", () => {
         },
       } as IPropertyDataProvider;
 
-      const { getByText, queryByText } = render(
-        <FilteringPropertyGrid
-          height={100}
-          width={100}
-          filterer={filterer}
-          dataProvider={dataProvider}
-        />
-      );
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText(/^Non-Empty Array Prop/));
       expect(queryByText(/^Empty Array Prop/)).to.be.null;
@@ -218,11 +205,13 @@ describe("<FilteringPropertyGrid />", () => {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
           return {
-            categories: [{
-              expand: true,
-              label: "Test Category",
-              name: "test-category",
-            }],
+            categories: [
+              {
+                expand: true,
+                label: "Test Category",
+                name: "test-category",
+              },
+            ],
             label: PropertyRecord.fromString("Test Instance"),
             records: {
               ["test-category"]: [
@@ -230,30 +219,26 @@ describe("<FilteringPropertyGrid />", () => {
                   {
                     valueFormat: PropertyValueFormat.Struct,
                     members: {
-                      member1: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Member Prop 1" }),
-                      member2: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Member Prop 2" }),
+                      member1: createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" },
+                        { name: "item-prop-1", displayLabel: "Member Prop 1" },
+                      ),
+                      member2: createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" },
+                        { name: "item-prop-2", displayLabel: "Member Prop 2" },
+                      ),
                     },
                   },
-                  { name: "test-prop1", displayLabel: "Non-Empty Struct Prop" }
+                  { name: "test-prop1", displayLabel: "Non-Empty Struct Prop" },
                 ),
-                createPropertyRecord(
-                  { valueFormat: PropertyValueFormat.Struct, members: {} },
-                  { name: "test-prop2", displayLabel: "Empty Struct Prop" }
-                ),
+                createPropertyRecord({ valueFormat: PropertyValueFormat.Struct, members: {} }, { name: "test-prop2", displayLabel: "Empty Struct Prop" }),
               ],
             },
           };
         },
       } as IPropertyDataProvider;
 
-      const { getByText, queryByText } = render(
-        <FilteringPropertyGrid
-          height={100}
-          width={100}
-          filterer={filterer}
-          dataProvider={dataProvider}
-        />
-      );
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText("Non-Empty Struct Prop"));
       expect(queryByText("Empty Struct Prop")).to.be.null;
@@ -265,11 +250,13 @@ describe("<FilteringPropertyGrid />", () => {
         onDataChanged: new PropertyDataChangeEvent(),
         getData: async () => {
           return {
-            categories: [{
-              expand: true,
-              label: "Test Category",
-              name: "test-category",
-            }],
+            categories: [
+              {
+                expand: true,
+                label: "Test Category",
+                name: "test-category",
+              },
+            ],
             label: PropertyRecord.fromString("Test Instance"),
             records: {
               ["test-category"]: [
@@ -277,21 +264,33 @@ describe("<FilteringPropertyGrid />", () => {
                   {
                     valueFormat: PropertyValueFormat.Struct,
                     members: {
-                      member1: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Member Prop 1" }),
-                      member2: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Member Prop 2" }),
+                      member1: createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" },
+                        { name: "item-prop-1", displayLabel: "Member Prop 1" },
+                      ),
+                      member2: createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" },
+                        { name: "item-prop-2", displayLabel: "Member Prop 2" },
+                      ),
                     },
                   },
-                  { name: "test-prop1", displayLabel: "Non-Empty Struct Prop" }
+                  { name: "test-prop1", displayLabel: "Non-Empty Struct Prop" },
                 ),
                 createPropertyRecord(
                   {
                     valueFormat: PropertyValueFormat.Struct,
                     members: {
-                      emptyMember1: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive }, { name: "empty-prop-1", displayLabel: "Empty Member 1" }),
-                      emptyMember2: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive }, { name: "empty-prop-2", displayLabel: "Empty Member 2" }),
+                      emptyMember1: createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive },
+                        { name: "empty-prop-1", displayLabel: "Empty Member 1" },
+                      ),
+                      emptyMember2: createPropertyRecord(
+                        { valueFormat: PropertyValueFormat.Primitive },
+                        { name: "empty-prop-2", displayLabel: "Empty Member 2" },
+                      ),
                     },
                   },
-                  { name: "test-prop2", displayLabel: "Empty Struct Prop" }
+                  { name: "test-prop2", displayLabel: "Empty Struct Prop" },
                 ),
               ],
             },
@@ -299,14 +298,7 @@ describe("<FilteringPropertyGrid />", () => {
         },
       } as IPropertyDataProvider;
 
-      const { getByText, queryByText } = render(
-        <FilteringPropertyGrid
-          height={100}
-          width={100}
-          filterer={filterer}
-          dataProvider={dataProvider}
-        />
-      );
+      const { getByText, queryByText } = render(<FilteringPropertyGrid height={100} width={100} filterer={filterer} dataProvider={dataProvider} />);
 
       await waitFor(() => getByText("Non-Empty Struct Prop"));
       expect(queryByText("Empty Struct Prop")).to.be.null;

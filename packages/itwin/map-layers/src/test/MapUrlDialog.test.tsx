@@ -3,18 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { ImageMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
-import { DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NotifyMessageDetails, OutputMessagePriority, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
-import { Select } from "@itwin/itwinui-react";
 import { assert, expect } from "chai";
 import * as enzyme from "enzyme";
-import * as React from "react";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
+import { ImageMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
+import {
+  DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NotifyMessageDetails,
+  OutputMessagePriority, ScreenViewport, ViewState3d,
+} from "@itwin/core-frontend";
+import { Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../mapLayers";
-import { MapUrlDialog } from "../ui/widget/MapUrlDialog";
+import { MapUrlDialog, SourceState } from "../ui/widget/MapUrlDialog";
 import { AccessClientMock, TokenEndpointMock } from "./AccessClientMock";
 import { TestUtils } from "./TestUtils";
+import * as React from "react";
 
 describe("MapUrlDialog", () => {
   const sandbox = sinon.createSandbox();
@@ -22,6 +25,7 @@ describe("MapUrlDialog", () => {
   const viewMock = moq.Mock.ofType<ViewState3d>();
   const displayStyleMock = moq.Mock.ofType<DisplayStyle3dState>();
   const imodelMock = moq.Mock.ofType<IModelConnection>();
+  const defaultNumberOfInput = 2;
 
   const getSampleLayerSettings = (formatId: string, fakeCredentials: boolean) => {
     const sampleWmsSubLayers: MapSubLayerProps[] = [{ name: "subLayer1" }, { name: "subLayer2" }];
@@ -48,7 +52,6 @@ describe("MapUrlDialog", () => {
   const testAddAuthLayer = async (isOAuth: boolean, format: string) => {
 
     const sampleLayerSettings = getSampleLayerSettings(format, true);
-    const spyMessage = sandbox.spy(IModelApp.notifications, "outputMessage");
     let endPoint: MapLayerTokenEndpoint | undefined;
     if (isOAuth) {
       endPoint = new TokenEndpointMock();
@@ -60,19 +63,20 @@ describe("MapUrlDialog", () => {
       });
     });
 
-    const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
-    const layerTypeSelect = component.find(Select);
+    const spyOnOkResult= sandbox.fake();
+    const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
+    const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange(format);
 
     // First, lets fill the 'Name' and 'URL' fields
     const allInputs = component.find("input");
-    expect(allInputs.length).to.equals(2);
+    expect(allInputs.length).to.equals(defaultNumberOfInput);
     allInputs.at(0).simulate("change", { target: { value: sampleLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleLayerSettings?.url } });
 
     // We need to click the 'Ok' button a first time to trigger the layer source
     // validation and make the credentials fields appear
-    let okButton = component.find(".core-dialog-buttons").childAt(0);
+    let okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 
@@ -81,7 +85,7 @@ describe("MapUrlDialog", () => {
     component.update();
     if (!isOAuth) {
       const allInputs2 = component.find("input");
-      expect(allInputs2.length).to.equals(4);
+      expect(allInputs2.length).to.equals(defaultNumberOfInput + 2);
 
       // Fill the credentials fields
       allInputs2.at(2).simulate("change", { target: { value: sampleLayerSettings?.userName } });
@@ -96,8 +100,8 @@ describe("MapUrlDialog", () => {
       });
     });
 
-    // By cliking the 'ok' button we expect the layer to be added to the display style
-    okButton = component.find(".core-dialog-buttons").childAt(0);
+    // By clicking the 'ok' button we expect the layer to be added to the display style
+    okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 
@@ -107,10 +111,20 @@ describe("MapUrlDialog", () => {
       assert.fail("Invalid layer settings");
 
     if (!isOAuth) {
+      // Make sure credentials are returned part of the source object
+      const firstCallArgs = spyOnOkResult.args[0];
+      expect(firstCallArgs[0].source.userName).to.equals(sampleLayerSettings.userName);
+      expect(firstCallArgs[0].source.password).to.equals(sampleLayerSettings.password);
+    }
+
+    /*
+    TODO: Move this in AttachLayerPanel
+    if (!isOAuth) {
       displayStyleMock.verify((x) => x.attachMapLayer({settings: sampleLayerSettings, mapLayerIndex: {index: -1, isOverlay: false}}), moq.Times.once());
 
       spyMessage.calledWithExactly(new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached"));
     }
+    */
     component.unmount();
   };
 
@@ -145,17 +159,17 @@ describe("MapUrlDialog", () => {
 
   });
 
-  const mockModalUrlDialogOk = () => {
+  const mockModalUrlDialogOk = (_result?: SourceState) => {
   };
 
   it("renders", () => {
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
     const allInputs = component.find("input");
 
-    expect(allInputs.length).to.equals(2);
+    expect(allInputs.length).to.equals(defaultNumberOfInput);
 
     const layerTypeSelect = component.find(Select);
-    expect(layerTypeSelect.length).to.equals(1);
+    expect(layerTypeSelect.length).to.equals(2);
 
     const allButtons = component.find("button");
     expect(allButtons.length).to.equals(3);
@@ -165,31 +179,35 @@ describe("MapUrlDialog", () => {
 
   it("attach a valid WMS layer (with sublayers)", async () => {
     const sampleWmsLayerSettings = getSampleLayerSettings("WMS", false);
+    if (!sampleWmsLayerSettings)
+      assert.fail("Invalid layer settings");
 
     const spyMessage = sandbox.spy(IModelApp.notifications, "outputMessage");
+    const spyOnOkResult= sandbox.fake();
 
     sandbox.stub(MapLayerSource.prototype, "validateSource").callsFake(async function (_ignoreCache?: boolean) {
       return Promise.resolve({ status: MapLayerSourceStatus.Valid, subLayers: sampleWmsLayerSettings.subLayers });
     });
 
-    const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
-    const layerTypeSelect = component.find(Select);
+    const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
+    const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange("WMS");
 
     const allInputs = component.find("input");
-    expect(allInputs.length).to.equals(2);
+    expect(allInputs.length).to.equals(defaultNumberOfInput);
     allInputs.at(0).simulate("change", { target: { value: sampleWmsLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleWmsLayerSettings?.url } });
 
-    const okButton = component.find(".core-dialog-buttons").childAt(0);
+    const okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 
     await TestUtils.flushAsyncOperations();
 
-    if (!sampleWmsLayerSettings)
-      assert.fail("Invalid layer settings");
-    displayStyleMock.verify((x) => x.attachMapLayer({settings: sampleWmsLayerSettings, mapLayerIndex: {index: -1, isOverlay: false}}), moq.Times.once());
+    expect(spyOnOkResult.calledOnce).to.be.true;
+    const firstCallArgs = spyOnOkResult.args[0];
+    expect(firstCallArgs[0].source.name).to.equals(sampleWmsLayerSettings.name);
+    expect(firstCallArgs[0].validation.subLayers.length).to.equals(sampleWmsLayerSettings.subLayers.length);
 
     spyMessage.calledWithExactly(new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached"));
 
@@ -214,19 +232,31 @@ describe("MapUrlDialog", () => {
   });
 
   it("should not display user preferences options if iTwinConfig is undefined ", () => {
-
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
     const allRadios = component.find('input[type="radio"]');
-    expect(allRadios.length).to.equals(0);
+    expect(allRadios.length).equals(0);
+    allRadios.forEach((radio) => {expect(radio.props().disabled).to.be.true;});
   });
 
-  it("should display user preferences options if iTwinConfig is defined ", () => {
+  it("should not display user preferences options if iTwinConfig is defined but the option is OFF ", () => {
     sandbox.stub(MapLayersUI, "iTwinConfig").get(() => ({
       get: undefined,
       save: undefined,
       delete: undefined,
     }));
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
+    const allRadios = component.find('input[type="radio"]');
+    expect(allRadios.length).equals(0);
+    allRadios.forEach((radio) => {expect(radio.props().disabled).to.be.true;});
+  });
+
+  it("should display user preferences options if iTwinConfig is defined AND option is ON", () => {
+    sandbox.stub(MapLayersUI, "iTwinConfig").get(() => ({
+      get: undefined,
+      save: undefined,
+      delete: undefined,
+    }));
+    const component = enzyme.mount(<MapUrlDialog mapLayerOptions={{showUserPreferencesStorageOptions: true}} activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
     const allRadios= component.find('input[type="radio"]');
     expect(allRadios.length).to.equals(2);
   });
@@ -243,33 +273,32 @@ describe("MapUrlDialog", () => {
       url: "https://server/MapServer",
     });
 
-    const spyMessage = sandbox.spy(IModelApp.notifications, "outputMessage");
-
     sandbox.stub(MapLayerSource.prototype, "validateSource").callsFake(async function (_ignoreCache?: boolean) {
       return Promise.resolve({ status: MapLayerSourceStatus.Valid, subLayers: sampleLayerSettings.subLayers });
     });
 
     const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={mockModalUrlDialogOk} />);
-    const layerTypeSelect = component.find(Select);
+    const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange("WMS");
 
     const allInputs = component.find("input");
-    expect(allInputs.length).to.equals(2);
+    expect(allInputs.length).to.equals(defaultNumberOfInput);
     allInputs.at(0).simulate("change", { target: { value: sampleLayerSettings?.name } });
     allInputs.at(1).simulate("change", { target: { value: sampleLayerSettings?.url } });
 
-    const okButton = component.find(".core-dialog-buttons").childAt(0);
+    const okButton = component.find(".map-layer-features-footer-button").at(0);
     expect(okButton.length).to.equals(1);
     okButton.simulate("click");
 
     await TestUtils.flushAsyncOperations();
 
-    // Check that single sub-layer visibility has been forced to true (was initially false)
-    const cloned = ImageMapLayerSettings.fromJSON({...sampleLayerSettings.toJSON(), subLayers:  [{ name: "subLayer1", visible: true }]});
+    // TODO: Move this in AttachLayerPanel
+    // // Check that single sub-layer visibility has been forced to true (was initially false)
+    // const cloned = ImageMapLayerSettings.fromJSON({...sampleLayerSettings.toJSON(), subLayers:  [{ name: "subLayer1", visible: true }]});
 
-    displayStyleMock.verify((x) => x.attachMapLayer({settings: cloned, mapLayerIndex: {index: -1, isOverlay: false}}), moq.Times.once());
+    // displayStyleMock.verify((x) => x.attachMapLayer({settings: cloned, mapLayerIndex: {index: -1, isOverlay: false}}), moq.Times.once());
 
-    spyMessage.calledWithExactly(new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached"));
+    // spyMessage.calledWithExactly(new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached"));
 
     component.unmount();
   });

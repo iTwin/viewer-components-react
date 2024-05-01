@@ -1,6 +1,195 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 18 Jul 2023 14:40:24 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 0.25.2
+
+Mon, 29 Apr 2024 14:59:26 GMT
+
+### Patches
+
+- Fixed a bad caching problem when opening the group with the extraction issue after opening extraction logs. ([#821](https://github.com/iTwin/viewer-components-react/pull/821))
+
+## 0.25.1
+
+Wed, 17 Apr 2024 17:54:44 GMT
+
+### Patches
+
+- Fixed an issue where a passed in iModelConnection was not being used by the widget shell. ([#815](https://github.com/iTwin/viewer-components-react/pull/815))
+
+## 0.25.0
+
+Wed, 17 Apr 2024 15:50:19 GMT
+
+### Minor changes
+
+- Switched to iTwinUI Lists component. ([#809](https://github.com:iTwin/viewer-components-react.git/pull/809))
+
+### Patches
+
+- Fixed isMounted returning false in certain situations. ([#814](https://github.com:iTwin/viewer-components-react.git/pull/814))
+
+## 0.24.0
+
+Thu, 29 Feb 2024 19:46:34 GMT
+
+### Minor changes
+
+- Property related components have been refactored to use react-query. ([#776](https://github.com/iTwin/viewer-components-react/pull/776))
+- Added feature to trigger extraction and show extraction status on mapping UI. ([#733](https://github.com/iTwin/viewer-components-react/pull/733))
+
+### Patches
+
+- Fixed an issue where the list of properties would disappear if window was too small. ([#784](https://github.com/iTwin/viewer-components-react/pull/784))
+- Fixed an issue where duplicate properties would be listed in group properties generation. ([#778](https://github.com/iTwin/viewer-components-react/pull/778))
+- Fixed an issue where extraction status would go out of bounds when trying to find the group name in extraction logs. ([#768](https://github.com/iTwin/viewer-components-react/pull/768))
+- Fixed an issue where job id's were potentially undefined. ([#777](https://github.com/iTwin/viewer-components-react/pull/777))
+- Fixed an issue where visualized groups were not rehidden after going back into the Groups view. ([#783](https://github.com/iTwin/viewer-components-react/pull/783))
+
+## 0.23.1
+
+Fri, 02 Feb 2024 00:04:15 GMT
+
+### Patches
+
+- Fixed an issue where hidden elements would not reappear when the group for those elements was deleted and group color was disabled. ([#753](https://github.com/iTwin/viewer-components-react/pull/753))
+- Fixed iModel selection not populating in Import Mappings. ([#755](https://github.com/iTwin/viewer-components-react/pull/755))
+- Fixed form validation not running when creating a group. ([#748](https://github.com/iTwin/viewer-components-react/pull/748))
+
+## 0.23.0
+
+Mon, 29 Jan 2024 21:37:20 GMT
+
+### Minor changes
+
+- Groups related components have been refactored to use react-query. ([#739](https://github.com/iTwin/viewer-components-react/pull/739))
+
+### Patches
+
+- Presentation is now correctly localized. ([#745](https://github.com/iTwin/viewer-components-react/pull/745))
+
+## 0.22.0
+Mon, 18 Dec 2023 18:31:01 GMT
+
+### Minor changes
+
+- Mapping related components have been refactored to use react-query.
+
+### Patches
+
+- Added new functions for Custom Calculations in FormulaFunctionProvider.ts
+
+## 0.21.1
+Fri, 01 Dec 2023 13:46:38 GMT
+
+### Patches
+
+- Fixed extraction error message not showing.
+
+## 0.21.0
+Fri, 10 Nov 2023 14:46:30 GMT
+
+### Minor changes
+
+- iTwin.js minimum version bumped to 4.1
+
+## 0.20.1
+Tue, 07 Nov 2023 13:43:31 GMT
+
+### Patches
+
+- Kept extraction status data consistent when navigating through Mapping and Group components.
+
+## 0.20.0
+Thu, 26 Oct 2023 13:09:22 GMT
+
+### Minor changes
+
+- New visualization logic to distinctly highlight elements that overlap across multiple groups
+
+### Patches
+
+- Removed iModelId and replaced MappingId and GroupId with names in log messages.
+- Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log.
+
+## 0.19.2
+Mon, 02 Oct 2023 20:32:55 GMT
+
+### Patches
+
+- Changed filter radio buttons to checkboxes
+
+## 0.19.1
+Fri, 29 Sep 2023 20:08:20 GMT
+
+### Patches
+
+- Added a formula parser for indexof in Custom Calculation properties.
+- Added an icon and modal to expose extraction log messages.
+
+## 0.19.0
+Tue, 19 Sep 2023 14:55:43 GMT
+
+### Minor changes
+
+- Added the `GroupsViews` component: a reusable, state-agnostic UI component for managing Groups.
+- Renamed Groupings component to Groups for consistency.
+
+### Patches
+
+- Enabled query experimental features e.g '$->'.
+
+## 0.18.1
+Thu, 24 Aug 2023 21:32:34 GMT
+
+### Patches
+
+- Added missing state to restore missing import mapping button to default UI.
+
+## 0.18.0
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Minor changes
+
+- Added the `MappingsView` component: a reusable, state-agnostic UI component for managing Mappings.
+- Typescript version bump to ^4.5.0
+
+### Patches
+
+- Added a Progress bar when Color By Group
+
+## 0.17.5
+Wed, 02 Aug 2023 12:11:30 GMT
+
+### Patches
+
+- Modified operator validation delay time and behavior
+
+## 0.17.4
+Wed, 26 Jul 2023 21:49:07 GMT
+
+### Patches
+
+- Adds an informational icon that the user can hover over to learn about custom calculation formulas. Also adds a placeholder to the formula Textarea with an example formula.
+
+## 0.17.3
+Mon, 24 Jul 2023 17:26:29 GMT
+
+### Patches
+
+- Added tooltips to buttons.
+
+## 0.17.2
+Thu, 20 Jul 2023 20:15:04 GMT
+
+### Patches
+
+- Made Selected Items section expand by default
+- Made group creation options fully shown when there is space
+- Fixed unicode bug to meet OData simple identifier requirement
 
 ## 0.17.1
 Tue, 18 Jul 2023 14:40:24 GMT
@@ -381,4 +570,3 @@ Fri, 04 Feb 2022 00:43:35 GMT
 ### Minor changes
 
 - ADDED: Grouping and Mapping Widget first commit to the VCR repository. This is a UI Provider that interfaces with the iTwin Reporting Platform APIs.
-

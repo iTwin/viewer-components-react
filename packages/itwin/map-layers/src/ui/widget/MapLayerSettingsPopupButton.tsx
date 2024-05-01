@@ -5,12 +5,13 @@
 
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
-import { Popup, WebFontIcon } from "@itwin/core-react";
+import { Popup } from "@itwin/core-react";
 import { MapManagerSettings } from "./MapManagerSettings";
 
 import "./MapLayerSettingsPopupButton.scss";
 import { MapLayersUI } from "../../mapLayers";
-import { Button } from "@itwin/itwinui-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { SvgSettings } from "@itwin/itwinui-icons-react";
 export interface MapLayerSettingsPopupButtonProps {
   disabled?: boolean;
 }
@@ -68,10 +69,11 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
 
   return (
     <>
-      <Button disabled={props.disabled} styleType="borderless" title={buttonTooltip} className="maplayers-settings-popup-button" onClick={togglePopupDisplay} ref={buttonRef}>
-        <WebFontIcon iconName="icon-settings" />
-      </Button>
+      <IconButton disabled={props.disabled} styleType="borderless" title={buttonTooltip} className="maplayers-settings-popup-button" onClick={togglePopupDisplay} ref={buttonRef}>
+        <SvgSettings/>
+      </IconButton>
       <Popup
+        className="maplayers-settings-popup"
         isOpen={isSettingsOpen}
         position={RelativePosition.BottomRight}
         onClose={handleCloseSetting}

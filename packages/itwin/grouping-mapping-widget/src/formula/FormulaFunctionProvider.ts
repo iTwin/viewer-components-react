@@ -125,6 +125,7 @@ function getNumericalFunction(name: string): FormulaFunction | undefined {
     case "tan": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
     case "tanh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
     case "trunc": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "tonumber": return { argumentCountBounds: [1, 1], expectedArguments: [{ canBeAny: true }], returnType: "Number" };
     default: return undefined;
   }
 }
@@ -136,11 +137,13 @@ function getStringFunction(name: string): FormulaFunction | undefined {
     case "padend": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "String" }], returnType: "String" };
     case "padstart": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "String" }], returnType: "String" };
     case "substring": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "Number" }], returnType: "String" };
+    case "indexof": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "String" }, { dataType: "Number" }], returnType: "Number" };
     case "tolowercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
     case "touppercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
     case "trim": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
     case "trimend": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
     case "trimstart": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
+    case "tostring": return { argumentCountBounds: [1, 1], expectedArguments: [{ canBeAny: true }], returnType: "String" };
     default: return undefined;
   }
 }
@@ -160,9 +163,17 @@ function getConditionalFunction(name: string): FormulaFunction | undefined {
   }
 }
 
+function getBooleanFunction(name: string): FormulaFunction | undefined {
+  switch (name) {
+    case "isin": return { argumentCountBounds: [2, -1], expectedArguments: [{ canBeAny: true }, { canBeAny: true }], typesMatchFromIndex: 0, returnType: "Boolean"};
+    case "toboolean": return { argumentCountBounds: [1, 1], expectedArguments: [{ canBeAny: true }], returnType: "Boolean"};
+    default: return undefined;
+  }
+}
+
 export function getFunction(name: string): FormulaFunction | undefined {
   const nameLowerCase = name.toLowerCase();
-  return getNumericalFunction(nameLowerCase) || getStringFunction(nameLowerCase) || getConditionalFunction(nameLowerCase);
+  return getNumericalFunction(nameLowerCase) || getStringFunction(nameLowerCase) || getConditionalFunction(nameLowerCase) || getBooleanFunction(nameLowerCase);
 }
 
 export function isFunction(name: string): boolean {

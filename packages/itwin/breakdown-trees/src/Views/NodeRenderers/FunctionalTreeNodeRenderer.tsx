@@ -140,7 +140,7 @@ export class TreeNodeWrapper extends React.Component<TreeNodeWrapperProps, { row
 
   private _hideContextMenu = () => {
     this.setState({ rowContextMenu: undefined });
-  }
+  };
 
   public render() {
     const node = this.props.node;

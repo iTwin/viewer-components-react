@@ -27,7 +27,7 @@ const fetchIModels = async (
   const accessToken = await getAccessToken();
   const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
   const getiModelListParams: GetIModelListParams = {
-    urlParams: { projectId: iTwinId },
+    urlParams: { iTwinId },
     authorization,
   };
   const iModels = await toArray(

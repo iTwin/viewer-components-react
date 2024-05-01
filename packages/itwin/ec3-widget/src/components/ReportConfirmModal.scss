@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .ec3w-delete-modal-body-text {
   display: flex;
@@ -15,5 +14,5 @@
 }
 
 .ec3w-loading-delete {
-  margin-right: $iui-s;
+  margin-right: var(--iui-size-xs);
 }

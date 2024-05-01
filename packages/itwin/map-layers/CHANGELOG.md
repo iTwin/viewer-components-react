@@ -1,6 +1,151 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Tue, 06 Jun 2023 10:57:06 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Apr 2024 14:19:35 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 5.4.3
+
+Thu, 04 Apr 2024 14:19:35 GMT
+
+### Patches
+
+- Clear MapFeatureInfo Widget when active tool changes ([#803](https://github.com/iTwin/viewer-components-react/pull/803))
+
+## 5.4.2
+
+Mon, 11 Mar 2024 18:18:16 GMT
+
+### Patches
+
+- Fixed `supportTileUrl` option that would not be honored in some cases ([#796](https://github.com/iTwin/viewer-components-react/pull/796))
+
+## 5.4.1
+
+Wed, 06 Mar 2024 15:24:33 GMT
+
+### Patches
+
+- Added @itwin\map-layers-formats to peerDependencies ([#785](https://github.com/iTwin/viewer-components-react/pull/785))
+
+## 5.4.0
+
+Thu, 29 Feb 2024 19:46:34 GMT
+
+### Minor changes
+
+- Support for custom query parameters. ([#705](https://github.com/iTwin/viewer-components-react/pull/705))
+
+### Patches
+
+- Improved warning message when an incompatible map-layer type is provided. ([#760](https://github.com/iTwin/viewer-components-react/pull/760))
+- Moved @itwin/itwinui-react to direct dependencies ([#772](https://github.com/iTwin/viewer-components-react/pull/772))
+- Hide User Preferences Options to store at the iTwin/iModel scope. ([#756](https://github.com/iTwin/viewer-components-react/pull/756))
+- Added @itwin/itwinui-react to peer dependencies ([#767](https://github.com/iTwin/viewer-components-react/pull/767))
+
+## 5.3.1
+
+Wed, 07 Feb 2024 21:16:44 GMT
+
+### Patches
+
+- Fix map feature info widget tech preview badge ([#759](https://github.com/iTwin/viewer-components-react/pull/759))
+
+## 5.3.0
+
+Tue, 06 Feb 2024 13:45:21 GMT
+
+### Minor changes
+
+- Add option to show tech preview badge on MapFeatureInfoTool/Widget ([#757](https://github.com/iTwin/viewer-components-react/pull/757))
+
+## 5.2.7
+
+Mon, 29 Jan 2024 21:37:20 GMT
+
+### Patches
+
+- Make sure the Feature Info Widget is reopened every time selection change occurs. ([#746](https://github.com/iTwin/viewer-components-react/pull/746))
+- Fixed an issue that would prevent the display of Feature Info properties. ([#742](https://github.com/iTwin/viewer-components-react/pull/742))
+
+## 5.2.6
+
+Thu, 18 Jan 2024 15:05:39 GMT
+
+### Patches
+
+- Fix issue where two instances of 'Aerial Imagery with labels' are visible in map layers widget ([#731](https://github.com/iTwin/viewer-components-react/pull/731))
+
+## 5.2.5
+Mon, 18 Dec 2023 18:31:01 GMT
+
+### Patches
+
+- ensure the isGeolocated runs when active viewport changes even if the onEcefLocationChanged has already fired
+
+## 5.2.4
+Tue, 07 Nov 2023 13:43:31 GMT
+
+### Patches
+
+- Fix UI refresh issues after a saved view is applied.
+
+## 5.2.3
+Thu, 26 Oct 2023 13:09:22 GMT
+
+### Patches
+
+- Fixed base map translation issues
+- Fix warning message after a failed attempt to provide credentials
+- Fix an issue in the 'Add New Layer' dialog where invalid credentials warning would not appear after a first invalid attempt.
+- Make the MapFeatureInfo Widget appear only when results are available.
+
+## 5.2.2
+Thu, 05 Oct 2023 18:48:11 GMT
+
+### Patches
+
+- Several UI fixes and fine tuning.
+
+## 5.2.1
+Mon, 02 Oct 2023 20:32:55 GMT
+
+### Patches
+
+- Restore settings icon that got incorrectly removed
+
+## 5.2.0
+Fri, 29 Sep 2023 20:08:20 GMT
+
+### Minor changes
+
+- Updated Feature Selection UI to consume new itwin.js API
+
+## 5.1.2
+Tue, 12 Sep 2023 14:07:42 GMT
+
+### Patches
+
+- Removed deep import of icons
+
+## 5.1.1
+Fri, 28 Jul 2023 18:31:57 GMT
+
+### Patches
+
+- Fix baseMap visibility not retained when switching to another style. Also fixed typos localized strings.
+- Fixed maplayer context menu not opening at the right position.
+
+## 5.1.0
+Wed, 26 Jul 2023 21:49:07 GMT
+
+### Minor changes
+
+- New UI that allow creating multiple layers from sources supporting single layer per request.
+
+### Patches
+
+- Fixvarious display issues with MapLayer widget
 
 ## 5.0.0
 Tue, 06 Jun 2023 10:57:06 GMT
@@ -751,4 +896,3 @@ _Version update only_
 Tue, 28 Jul 2020 16:26:24 GMT
 
 _Initial release_
-

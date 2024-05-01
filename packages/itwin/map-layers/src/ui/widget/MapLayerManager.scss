@@ -68,10 +68,8 @@ $default-font-size: --iui-font-size-1;
     padding: 10px;
   }
 
-  .map-manager-underlays,
-  .map-manager-overlays {
+  .map-manager-layers {
     display: flex;
-    align-content: center;
 
     .map-manager-attach-layer-button {
       margin-left: auto;
@@ -104,13 +102,14 @@ $default-font-size: --iui-font-size-1;
     margin-top: 0;
   }
 
-  .map-manager-overlays-label {
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .map-manager-underlays-label {
-    display: block;
+  .map-manager-layers-label {
+    // display: block;
+    flex: 1 1;
+    text-overflow: ellipsis;
+    /* Required for text-overflow to do anything */
+    white-space: nowrap;
+    overflow: hidden;
+    margin-left: 2px;
     margin-bottom: 4px;
   }
 
@@ -218,6 +217,39 @@ $default-font-size: --iui-font-size-1;
   }
 }
 
+.map-manager-layer-action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 2.5em;
+  width: 100%;
+  padding-right: 4px;
+  border-bottom: #ccc;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+  margin-bottom: 1em;
+  background-color: $buic-background-1;
+}
+
+.map-manager-layer-action-unlink-button {
+  margin-right: 2px;
+}
+
+.map-manager-layer-action-buttons-inside-separator {
+  border-left-width: thin;
+  border-left-style: solid;
+  border-left-color: #ccc;
+  margin-left: 10px;
+  padding-left: 5px;
+}
+
+.map-manager-basemap-visibility {
+  margin: 0 2px;
+}
+
+.map-manager-visibility-icon {
+  padding-top: 0.5ex;
+}
 .map-manager-source-item {
   display: flex;
   justify-content: flex-start;
@@ -225,9 +257,6 @@ $default-font-size: --iui-font-size-1;
   height: 2.5em;
   width: 100%;
   padding-right: 4px;
-  border-width: 0 0 1px 0;
-  border-style: solid;
-  border-color: $uicore-gray-a;
   background-color: $buic-background-1;
 
   .map-manager-item-label {
@@ -241,15 +270,11 @@ $default-font-size: --iui-font-size-1;
 
   .map-manager-item-label-disabled {
     @extend .map-manager-item-label;
-    color: $buic-foreground-muted;
+    color: var(--iui-color-text-disabled);
   }
 
   .map-manager-item-transparency {
     margin-right: 6px;
-  }
-
-  .map-manager-item-visibility {
-    margin: 0 2px;
   }
 
   .map-layer-settings {
@@ -259,13 +284,8 @@ $default-font-size: --iui-font-size-1;
   .map-layer-source-item-warnMessage-icon {
     background-color: transparent;
     border: none;
-    color: $buic-foreground-warning;
+    color: var(--iui-color-icon-warning);
     background-color: transparent;
-
-    &:hover {
-      color: $hovered-icon-color;
-    }
-
     &:focus {
       outline: none;
       box-shadow: rgba(var(--iui-color-border-accent), var(--iui-opacity-4)) 0px 0px 0px 2px;
@@ -273,14 +293,17 @@ $default-font-size: --iui-font-size-1;
   }
 }
 
+.map-manager-item-dropdown-slider {
+  /* Make the slider a little bit wider, otherwise its quite small in the dropdown menu*/
+  width: 100px;
+}
 
 .map-manager-item-sub-layer-container {
   @include uicore-z-index(dialog-popup);
 }
 
 .map-manager-sublayer-panel {
-  width: 400px;
-  height: 400px;
+  width: 400px;     // Ideally I would let the popup's content drives the width, unfortunately without an explicit width, the popup location is not consistent.
   color: $buic-foreground-body;
   font-size: $default-font-size;
   padding: 4px;

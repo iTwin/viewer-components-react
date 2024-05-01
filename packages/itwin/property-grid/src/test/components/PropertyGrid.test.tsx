@@ -1,15 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { render, waitFor } from "@testing-library/react";
 import { PropertyGrid, PropertyGridManager } from "../../property-grid-react";
-import { createPropertyRecord, stubFavoriteProperties, stubPresentation, stubSelectionManager } from "../TestUtils";
+import { createPropertyRecord, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 
@@ -29,7 +28,10 @@ describe("<PropertyGrid />", () => {
         label: PropertyRecord.fromString("Test Instance"),
         records: {
           ["test-category"]: [
-            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" }, { name: "test-prop", displayLabel: "Test Prop" }),
+            createPropertyRecord(
+              { valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" },
+              { name: "test-prop", displayLabel: "Test Prop" },
+            ),
           ],
         },
       };
@@ -44,26 +46,32 @@ describe("<PropertyGrid />", () => {
     const imodel = {} as IModelConnection;
     selectionManager.getSelection.returns(new KeySet());
 
-    const { getByText } = render(
-      <PropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText } = render(<PropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("Test Prop"));
   });
 
   it("renders info message when too many elements selected", async () => {
     const imodel = {} as IModelConnection;
-    const keys = Array(500).fill(0).map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
+    const keys = Array(500)
+      .fill(0)
+      .map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
     selectionManager.getSelection.returns(new KeySet(keys));
 
-    const { getByText } = render(
-      <PropertyGrid
-        imodel={imodel}
-      />
-    );
+    const { getByText } = render(<PropertyGrid imodel={imodel} />);
 
     await waitFor(() => getByText("selection.too-many-elements-selected"));
+  });
+
+  it("renders header controls when too many elements selected", async () => {
+    const imodel = {} as IModelConnection;
+    const keys = Array(500)
+      .fill(0)
+      .map((_, i) => ({ id: `0x${i}`, className: "TestClass" }));
+    selectionManager.getSelection.returns(new KeySet(keys));
+
+    const { getByText } = render(<PropertyGrid imodel={imodel} headerControls={[<div key={1}>TestControl</div>]} />);
+
+    await waitFor(() => getByText("TestControl"));
   });
 });

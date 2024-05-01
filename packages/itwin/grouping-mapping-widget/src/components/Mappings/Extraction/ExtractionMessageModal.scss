@@ -1,0 +1,19 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.gmw-timestamp-icon {
+  display: flex;
+  gap: var(--iui-size-xs);
+  align-items: center;
+}
+
+.gmw-message-modal-container {
+  max-height: 75vh;
+}
+
+.gmw-extraction-message-table-container {
+  width: 45vw;
+  max-height: 50vh;
+}

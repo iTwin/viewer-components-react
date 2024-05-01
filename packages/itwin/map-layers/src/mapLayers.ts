@@ -2,10 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Localization } from "@itwin/core-common";
+import { Localization, TranslationOptions } from "@itwin/core-common";
 import { IModelApp, UserPreferencesAccess } from "@itwin/core-frontend";
-// import { MapLayersUiItemsProvider } from "./ui/MapLayersUiItemsProvider";
-// import { FeatureInfoUiItemsProvider } from "./ui/FeatureInfoUiItemsProvider";
 
 export interface MapLayersConfig {
   localization?: Localization;
@@ -48,5 +46,9 @@ export class MapLayersUI {
   /** The internationalization service namespace. */
   public static get localizationNamespace(): string {
     return MapLayersUI._defaultNs;
+  }
+
+  public static translate(key: string | string[], options?: TranslationOptions): string {
+    return MapLayersUI.localization.getLocalizedString(key, {...options, ns: MapLayersUI._defaultNs});
   }
 }

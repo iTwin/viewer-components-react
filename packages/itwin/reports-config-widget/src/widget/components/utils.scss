@@ -2,20 +2,28 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
-@import "~@itwin/itwinui-css/scss/button/index";
 
 .rcw-widget-header-container {
   display: flex;
-  margin-bottom: $iui-baseline;
-  align-items: center;
+  margin-bottom: calc(var(--iui-size-s) * 2);
+
+  .rcw-chevron {
+    cursor: pointer;
+    align-self: center;
+    margin-right: var(--iui-size-xs);
+  }
+
+  .rcw-chevron-disabled {
+    fill: var(--iui-color-icon-muted);
+    cursor: not-allowed;
+    align-self: center;
+    margin-right: var(--iui-size-xs);
+  }
 
   .rcw-title {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    margin-bottom: 3px;
   }
 }
 
@@ -29,11 +37,11 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: $iui-baseline;
+  gap: var(--iui-size-s);
   height: 100%;
 }
 
 .rcw-skeleton-block {
-  height: $iui-baseline * 3;
+  height: calc(var(--iui-size-s) * 3);
   width: 100%;
 }

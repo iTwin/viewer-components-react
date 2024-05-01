@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { Fragment } from "react";
 import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
@@ -50,13 +50,11 @@ export interface PropertyGridSettingsMenuItemProps {
  * @public
  */
 export function PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren<PropertyGridSettingsMenuItemProps>) {
-  return <MenuItem
-    key={id}
-    onClick={onClick}
-    title={title}
-  >
-    {children}
-  </MenuItem>;
+  return (
+    <MenuItem key={id} onClick={onClick} title={title}>
+      {children}
+    </MenuItem>
+  );
 }
 
 /**
@@ -76,7 +74,9 @@ export function ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideN
   const { showNullValues, setShowNullValues } = useNullValueSettingContext();
 
   const label = showNullValues ? PropertyGridManager.translate("settings.hide-null.label") : PropertyGridManager.translate("settings.show-null.label");
-  const description = showNullValues ? PropertyGridManager.translate("settings.hide-null.description") : PropertyGridManager.translate("settings.show-null.description");
+  const description = showNullValues
+    ? PropertyGridManager.translate("settings.hide-null.description")
+    : PropertyGridManager.translate("settings.show-null.description");
 
   return (
     <PropertyGridSettingsMenuItem
@@ -111,9 +111,11 @@ export function SettingsDropdownMenu({ settingsMenuItems, dataProvider }: Settin
 
   const menuItems = (close: () => void) => settingsMenuItems.map((item, index) => <Fragment key={index}>{item({ dataProvider, close })}</Fragment>);
 
-  return <DropdownMenu menuItems={menuItems}>
-    <IconButton styleType="borderless" size="small" title={PropertyGridManager.translate("settings.label")}>
-      <SvgMoreVertical />
-    </IconButton>
-  </DropdownMenu>;
+  return (
+    <DropdownMenu menuItems={menuItems}>
+      <IconButton styleType="borderless" title={PropertyGridManager.translate("settings.label")}>
+        <SvgMoreVertical />
+      </IconButton>
+    </DropdownMenu>
+  );
 }

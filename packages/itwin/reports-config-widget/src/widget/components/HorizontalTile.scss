@@ -2,18 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
-
 .rcw-horizontal-tile {
   &-container {
     display: flex;
     justify-content: space-between;
     border-radius: 5px;
-    background-color: var(--iui-color-background-2);
-    height: $iui-baseline * 4;
-    min-height: 44px;
-    padding: 5.5px $iui-s;
+    background-color: var(--iui-color-background-backdrop);
+    min-height: calc(var(--iui-size-s) * 5);
+    padding: 5.5px var(--iui-size-xs);
 
     .rcw-body-container {
       display: flex;
@@ -38,18 +34,16 @@
       align-self: center;
       min-width: 36px;
       flex-shrink: 0;
-      display: flex;
+      margin-right: var(--iui-size-2xs);
     }
   }
 
   &-selected {
-    @include themed {
-      border: 1px solid t(iui-color-foreground-primary);
-      background: linear-gradient(
-          rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6)),
-          rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6))
-        ),
-        linear-gradient(t(iui-color-background-1), t(iui-color-background-1));
-    }
+    border: 1px solid var(--iui-color-border-accent);
+    background: linear-gradient(
+        rgba(var(--iui-color-accent-hsl), var(--iui-opacity-6)),
+        rgba(var(--iui-color-accent-hsl), var(--iui-opacity-6))
+      ),
+      linear-gradient(var(--iui-color-background), var(--iui-color-background));
   }
 }

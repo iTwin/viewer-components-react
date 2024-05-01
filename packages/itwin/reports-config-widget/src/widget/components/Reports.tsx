@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { SvgAdd, SvgPlay, SvgRefresh } from "@itwin/itwinui-icons-react";
-import { Button, IconButton, Surface } from "@itwin/itwinui-react";
+import { Button, IconButton } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
 import {
@@ -121,28 +121,31 @@ export const Reports = ({
 
   return (
     <>
-      <Surface className="rcw-reports-list-container">
+      <div className="rcw-reports-list-container">
         <div className="rcw-toolbar">
-          {onClickAddReport && (
-            <Button
-              startIcon={<SvgAdd />}
-              onClick={onClickAddReport}
-              styleType="high-visibility"
-            >
-              {ReportsConfigWidget.localization.getLocalizedString(
-                "ReportsConfigWidget:New"
-              )}
-            </Button>
-          )}
-          <IconButton
-            title={ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:UpdateDatasets"
+          <div className="rcw-button-spacing">
+            {onClickAddReport && (
+              <Button
+                startIcon={<SvgAdd />}
+                onClick={onClickAddReport}
+                styleType="high-visibility"
+                title="New Report"
+              >
+                {ReportsConfigWidget.localization.getLocalizedString(
+                  "ReportsConfigWidget:New"
+                )}
+              </Button>
             )}
-            onClick={updateDatasets}
-            disabled={selectedReportIds.length === 0}
-          >
-            <SvgPlay />
-          </IconButton>
+            <IconButton
+              title={ReportsConfigWidget.localization.getLocalizedString(
+                "ReportsConfigWidget:UpdateDatasets"
+              )}
+              onClick={updateDatasets}
+              disabled={selectedReportIds.length === 0}
+            >
+              <SvgPlay />
+            </IconButton>
+          </div>
           <div
             className="rcw-search-bar-container"
             data-testid="rcw-search-bar"
@@ -202,7 +205,7 @@ export const Reports = ({
             ))}
           </div>
         )}
-      </Surface>
+      </div>
       <DeleteModal
         entityName={showDeleteModal?.displayName}
         onClose={() => setShowDeleteModal(undefined)}

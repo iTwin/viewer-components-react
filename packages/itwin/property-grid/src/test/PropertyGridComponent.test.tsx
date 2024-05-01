@@ -1,13 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { render, waitFor } from "@testing-library/react";
+import { IModelApp } from "@itwin/core-frontend";
+import { render, waitFor } from "./TestUtils";
 import * as multiElementPropertyGrid from "../components/MultiElementPropertyGrid";
 import { PropertyGridComponent } from "../PropertyGridComponent";
 
@@ -18,12 +19,16 @@ describe("PropertyGridComponent", () => {
     isBlankConnection: () => true,
     selectionSet: {
       onChanged: new BeEvent(),
+      elements: { size: 0 },
     },
   } as IModelConnection;
 
   before(async () => {
-    await UiFramework.initialize(undefined);
+    sinon.stub(IModelApp, "viewManager").get(() => ({
+      onSelectedViewportChanged: new BeEvent(),
+    }));
     sinon.stub(multiElementPropertyGrid, "MultiElementPropertyGrid").returns(<>MultiElementPropertyGrid</>);
+    await UiFramework.initialize(undefined);
   });
 
   after(() => {

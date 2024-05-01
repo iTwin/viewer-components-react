@@ -4,11 +4,24 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { StagePanelLocation, StagePanelSection, StageUsage, ToolbarHelper, ToolbarItem, ToolbarOrientation, ToolbarUsage, UiItemsProvider, WidgetState } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage, ToolbarHelper, ToolbarItem, ToolbarOrientation, ToolbarUsage, ToolItemDef, UiItemsProvider, WidgetState } from "@itwin/appui-react";
 import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
 import { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersUI } from "../mapLayers";
-import { DefaultMapFeatureInfoTool, getDefaultMapFeatureInfoToolItemDef } from "./MapFeatureInfoTool";
+import { IModelApp } from "@itwin/core-frontend";
+import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
+import { SvgMapInfo } from "@itwin/itwinui-icons-react";
+import { BadgeType } from "@itwin/appui-abstract";
+
+export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
+  new ToolItemDef({
+    toolId: MapFeatureInfoTool.toolId,
+    iconSpec: <SvgMapInfo/>,
+    label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
+    description: () => MapFeatureInfoTool.description,
+    execute: async () => { await IModelApp.tools.run(MapFeatureInfoTool.toolId); },
+    badgeType: BadgeType.TechnicalPreview,
+  });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-disable-line deprecation/deprecation
   public readonly id = "FeatureInfoUiItemsProvider";
@@ -28,9 +41,8 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
       toolbarUsage === ToolbarUsage.ContentManipulation &&
       toolbarOrientation === ToolbarOrientation.Vertical
     ) {
-      DefaultMapFeatureInfoTool.register(MapLayersUI.localizationNamespace);
       return [
-        ToolbarHelper.createToolbarItemFromItemDef(60, getDefaultMapFeatureInfoToolItemDef()),
+        ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef()),
       ];
     }
 
@@ -45,9 +57,10 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
       widgets.push({
         id: FeatureInfoUiItemsProvider.widgetId,
         label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
-        icon: "icon-map",
+        icon: <SvgMapInfo/>,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
-        defaultState: WidgetState.Closed,
+        defaultState: WidgetState.Hidden,
+        badge: BadgeType.TechnicalPreview,
       });
     }
 

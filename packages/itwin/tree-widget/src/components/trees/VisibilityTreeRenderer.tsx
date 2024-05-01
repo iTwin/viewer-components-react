@@ -1,32 +1,36 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-import { useEffect } from "react";
-import { TreeImageLoader, TreeNodeRenderer, TreeRenderer } from "@itwin/components-react";
-import { Checkbox } from "@itwin/itwinui-react";
-import { useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
 import classNames from "classnames";
+import { useEffect } from "react";
+import { TreeImageLoader, TreeNodeRenderer } from "@itwin/components-react";
+import { Checkbox } from "@itwin/itwinui-react";
+import { PresentationTreeNodeRenderer, useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
+import { TreeRenderer } from "./common/TreeRenderer";
 
-import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
 import type { NodeCheckboxRenderProps } from "@itwin/core-react";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { VisibilityTreeFilterInfo } from "./Common";
-
+import type { TreeRendererBaseProps, TreeRendererProps } from "./common/TreeRenderer";
+import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps } from "@itwin/components-react";
+import type { IPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
+import type { VisibilityTreeFilterInfo } from "./common/Types";
 /**
- * This constant is taken from `@itwin/core-react`.
+ * These constants are taken from `@itwin/core-react`.
  * Defines the size in pixels of the expansion toggle.
  * It is used to keep same hierarchy nodes with children and nodes without children in the same line.
  * @note This value applies only to the leaf nodes.
  */
 const EXPANSION_TOGGLE_WIDTH = 24;
+const EXPANDED_EXPANSION_TOGGLE_WIDTH = 42;
+
+const imageLoader = new TreeImageLoader();
 
 /**
  * Props for visibility tree renderer.
  * @public
  */
-export interface VisibilityTreeRendererProps {
+export interface VisibilityTreeRendererProps extends TreeRendererBaseProps {
   /** Props for single node renderer. */
   nodeRendererProps: VisibilityTreeNodeRendererProps;
 }
@@ -54,30 +58,38 @@ export interface VisibilityTreeNodeRendererProps {
    * Defaults to `false`.
    */
   disableRootNodeCollapse?: boolean;
+  /**
+   * Specifies whether the nodes should be enlarged (less dense and larger content).
+   * Is `false` by default
+   */
+  isEnlarged?: boolean;
+  /**
+   * Callback called when visibility is toggled using a checkbox.
+   */
+  onVisibilityToggled?: (enabled: boolean) => void;
 }
 
 /**
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
  * @public
  */
-export function createVisibilityTreeRenderer({ nodeRendererProps }: VisibilityTreeRendererProps) {
-  return function VisibilityTreeRenderer(props: TreeRendererProps) {
-    return (
-      <TreeRenderer
-        {...props}
-        nodeRenderer={createVisibilityTreeNodeRenderer(nodeRendererProps)}
-      />
-    );
+export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps) {
+  return function VisibilityTreeRenderer(treeProps: TreeRendererProps) {
+    return <TreeRenderer {...treeProps} {...restProps} nodeRenderer={createVisibilityTreeNodeRenderer(nodeRendererProps)} />;
   };
 }
-
-const imageLoader = new TreeImageLoader();
 
 /**
  * Creates node renderer which renders node with eye checkbox.
  * @public
  */
-export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeNodeRendererProps) {
+export function createVisibilityTreeNodeRenderer({
+  levelOffset = 20,
+  disableRootNodeCollapse = false,
+  descriptionEnabled,
+  iconsEnabled,
+  onVisibilityToggled,
+}: VisibilityTreeNodeRendererProps) {
   return function VisibilityTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
     const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? EXPANSION_TOGGLE_WIDTH : 0);
     return (
@@ -86,56 +98,109 @@ export function createVisibilityTreeNodeRenderer({ levelOffset = 20, disableRoot
         node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }} // if we want to disable TreeNodeRenderer style calculations for tree nodes, we need to override these values.
         checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
           <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
-            <VisibilityTreeNodeCheckbox { ...checkboxProps }/>
+            <VisibilityTreeNodeCheckbox {...checkboxProps} onVisibilityToggled={onVisibilityToggled} />
           </div>
         )}
         descriptionEnabled={descriptionEnabled}
         imageLoader={iconsEnabled ? imageLoader : undefined}
-        className={classNames("with-checkbox", (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander", treeNodeProps.className)}
+        className={classNames(
+          "with-checkbox",
+          (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander",
+          treeNodeProps.className,
+        )}
       />
     );
   };
+}
+
+interface VisibilityTreeNodeCheckboxProps extends NodeCheckboxRenderProps {
+  onVisibilityToggled?: (enabled: boolean) => void;
 }
 
 /**
  * Checkbox renderer that renders an eye.
  * @public
  */
-export function VisibilityTreeNodeCheckbox(props: NodeCheckboxRenderProps) {
-  return <Checkbox
-    className="visibility-tree-checkbox"
-    variant="eyeball"
-    checked={props.checked}
-    onChange={(e) => props.onChange(e.currentTarget.checked)}
-    disabled={props.disabled}
-    title={props.title}
-  />;
+export function VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProps) {
+  return (
+    <Checkbox
+      className="visibility-tree-checkbox"
+      variant="eyeball"
+      checked={props.checked}
+      onChange={(e) => {
+        props.onVisibilityToggled?.(e.currentTarget.checked);
+        props.onChange(e.currentTarget.checked);
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={props.onClick}
+      disabled={props.disabled}
+      title={props.title}
+    />
+  );
+}
+
+/**
+ * Props for [[FilterableVisibilityTreeNodeRenderer]].
+ * @beta
+ */
+export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & VisibilityTreeNodeRendererProps;
+
+/**
+ * Creates node renderer which renders node with eye checkbox and hierarchy level filtering actions.
+ * @beta
+ */
+export function FilterableVisibilityTreeNodeRenderer({
+  levelOffset = 20,
+  disableRootNodeCollapse,
+  descriptionEnabled,
+  isEnlarged,
+  onVisibilityToggled,
+  ...restProps
+}: FilterableVisibilityTreeNodeRendererProps) {
+  const expansionToggleWidth = isEnlarged ? EXPANDED_EXPANSION_TOGGLE_WIDTH : EXPANSION_TOGGLE_WIDTH;
+  const nodeOffset = restProps.node.depth * levelOffset + (restProps.node.numChildren === 0 ? expansionToggleWidth : 0);
+
+  return (
+    <PresentationTreeNodeRenderer
+      {...restProps}
+      checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
+        <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
+          <VisibilityTreeNodeCheckbox {...checkboxProps} onVisibilityToggled={onVisibilityToggled} />
+        </div>
+      )}
+      descriptionEnabled={descriptionEnabled}
+      imageLoader={imageLoader}
+      className={classNames(
+        "with-checkbox",
+        (restProps.node.numChildren === 0 || (disableRootNodeCollapse && restProps.node.parentId === undefined)) && "disable-expander",
+      )}
+    />
+  );
 }
 
 /**
  * Filters data provider used in supplied node loader and invokes onFilterApplied when filtering is completed.
  * @public
+ * @deprecated in 2.0.0. Use [[useVisibilityTree]] instead.
  */
+// istanbul ignore next
 export function useVisibilityTreeFiltering(
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>,
   filterInfo?: VisibilityTreeFilterInfo,
   onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void,
 ) {
   const { filter, activeMatchIndex } = filterInfo ?? { filter: undefined, activeMatchIndex: undefined };
-  const {
-    filteredNodeLoader,
-    isFiltering,
-    matchesCount,
-    nodeHighlightingProps,
-  } = useControlledPresentationTreeFiltering({ nodeLoader, filter, activeMatchIndex });
+  const { filteredNodeLoader, isFiltering, matchesCount, nodeHighlightingProps } = useControlledPresentationTreeFiltering({
+    nodeLoader,
+    filter,
+    activeMatchIndex,
+  });
 
-  useEffect(
-    () => {
-      if (filter && matchesCount !== undefined && filteredNodeLoader !== nodeLoader)
-        onFilterApplied && onFilterApplied(filteredNodeLoader.dataProvider, matchesCount);
-    },
-    [filter, matchesCount, nodeLoader, filteredNodeLoader, onFilterApplied],
-  );
+  useEffect(() => {
+    if (filter && matchesCount !== undefined && filteredNodeLoader !== nodeLoader) {
+      onFilterApplied && onFilterApplied(filteredNodeLoader.dataProvider, matchesCount);
+    }
+  }, [filter, matchesCount, nodeLoader, filteredNodeLoader, onFilterApplied]);
 
   return { filteredNodeLoader, isFiltering, nodeHighlightingProps };
 }

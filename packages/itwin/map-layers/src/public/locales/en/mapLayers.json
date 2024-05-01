@@ -4,13 +4,52 @@
     "Close": "Close source map layers pop-up"
   },
   "Basemap": {
-    "BaseLayer": "Base:",
+    "BaseLayer": "Base",
     "BaseMapPanelTitle": "Map Layers",
     "ColorFill": "Solid Fill Color",
-    "SelectBaseMap": "Select Map for base layer"
+    "SelectBaseMap": "Select base layer"
   },
   "ColorDialog": {
     "Title": "Specify Base Color"
+  },
+  "Dialog":
+  {
+    "Add" : "Add",
+    "Cancel" : "Cancel",
+    "Edit" : "Edit"
+  },
+  "SelectFeaturesDialog":
+  {
+    "AllOn": "Select All",
+    "AllOff": "Select None"
+  },
+  "CustomParamEditDialog":
+  {
+    "DialogTitleAdd": "Add custom query parameter",
+    "DialogTitleEdit": "Edit custom query parameter",
+    "NameExists": "Name already exists",
+    "ParamKeyLabel": "Key",
+    "ParamNameLabel": "Name",
+    "ParamValueLabel": "Value",
+    "ParamValueNonPrivateMessage": "Value should not contain sensitive data",
+    "PrivateToggleTooltip": "Private query parameters won't be saved part of the iTwin",
+    "PrivateToggleLabel": "Keep query parameter private"
+  },
+  "CustomParamSelect":
+  {
+    "DisabledTitle": "Custom query parameter can be configured in the advanced settings"
+  },
+  "CustomParamSettings":
+  {
+    "DeleteButtonTitle": "Delete custom parameter",
+    "EditButtonTitle": "Edit custom parameter",
+    "SectionLabel": "Custom parameters"
+  },
+  "MapLayerActionButtons": {
+    "ShowAllLabel": "Show all",
+    "HideAllLabel": "Hide all",
+    "InvertAllLabel": "Invert visibility",
+    "DetachSelectedLabel": "Detach selected map layers"
   },
   "CustomAttach": {
     "LayerWithUrlExistsOverwriting": "Map layer with URL: {{url}} already exists. Updating name from {{oldName}} to {{newName}}.",
@@ -18,12 +57,13 @@
     "LayerExistsOverwriting": "Map layer {{layer}} already exists, overwriting info for that layer.",
     "LayerExistsAsITwinSetting": "Map layer {{layer}} already exists as a iTwin setting. Cannot overwrite with a model setting!",
     "AddCustomLayerButtonLabel": "Add Layer",
-    "AttachCustomLayer": "Attach New Layer",
+    "AttachCustomLayer": "Add New Layer",
     "AttacheInfo": "Map layer attached from URL:",
     "Custom": "New",
+    "CustomParamsLabel": "Custom Query Parameters",
     "LoadingMapSources": "Loading Map Sources",
     "EditCustomLayer": "Edit Layer",
-    "EditLayerDefButtonTitle": "Edit Layer Definition",
+    "EditLayerDefButtonTitle": "Edit layer definition",
     "ErrorLoadingLayers": "Error retrieving map layers stored in the settings service",
     "ErrorRetrieveUserModel": "Could not get saved Map Layers for user by model: {{errorMessage}}",
     "ErrorRetrieveUserITwin": "Could not get saved Map Layers for user by iTwin: {{errorMessage}}",
@@ -36,18 +76,21 @@
     "ExternalLoginWaiting": "Waiting for external login process to complete...",
     "InvalidCredentials": "Invalid credentials provided",
     "InvalidCoordinateSystem": "Map layer geographic coordinate system is not supported",
+    "InvalidType": "Invalid Type",
     "MissingCredentials": "This layer requires credentials to be provided",
     "Name": "Name",
     "NameInputPlaceHolder": "Enter Map Name",
+    "NoLayersSelected": "Please select at least one layer",
     "RemoveLayerDefButtonTitle": "Delete layer definition",
     "RemoveLayerDefDialogMessage": "Are you sure you want to delete {{layerName}} ?",
     "RemoveLayerDefDialogTitle": "Delete layer definition",
     "RemoveLayerDefError": "Could not delete map layer definition: {{layerName}}",
     "RemoveLayerDefSuccess": "Successfully deleted map layer definition: {{layerName}}",
     "SearchPlaceholder": "Search...",
+    "SelectLayersToCreate": "Select Layers To Add",
     "StoreOnModelSettings": "Store on Model Settings",
     "StoreOnITwinSettings": "Store on iTwin Settings",
-    "TechPreviewBadgeTooltip": "Technology preview",
+    "TooManyLayersSelected": "{{layerCount}} layers selected; performance may be affected.",
     "Type": "Type",
     "URL": "URL",
     "UrlInputPlaceHolder": "Enter Map Source URL",
@@ -60,13 +103,17 @@
     "Username": "Username",
     "UsernameRequired": "Username required"
   },
+  "Labels" : {
+    "TechPreviewBadgeTooltip": "Technology preview"
+  },
   "Messages": {
     "NotSupported": "No active viewport or geo-located iModel available.",
     "NoRangeDefined": "No range is defined for Map Layer",
     "Start": "Map Layers Extension Loaded",
-    "MapLayerAttached": "Map layer {{sourceName}} attached from URL: {{sourceUrl}}",
+    "MapLayerAttached": "Map layer {{sourceName}} attached",
+    "MapLayersAttached": "Map layers ({{layerNames}}) attached",
     "MapLayerAttachedRequiresAuth": "Map layer {{sourceName}} attached, but requires credentials to be provided",
-    "MapLayerAttachError": "Error '{{error}}' occurred attaching MapLayer from URL: {{sourceUrl}}",
+    "MapLayerAttachError": "Error '{{error}}' occurred attaching MapLayer '{{sourceName}}'",
     "MapLayerAttachMissingViewOrSource": "Missing view or source",
     "MapLayerEditError": "Failed to edit '{{layerName}}'",
     "MapLayerLayerSettingsConversionError": "Conversion to layer settings failed",
@@ -119,11 +166,19 @@
     "AllOn": "Turn on all Sub-layers",
     "AllOff": "Turn off all Sub-layers",
     "Hide": "Hide Sub-layers",
+    "NoResults": "No Results",
     "NoSubLayers": "No Sub-layers Available",
     "SearchPlaceholder": "Search...",
     "Show": "Show Sub-layers"
   },
   "TransparencyPopup": {
     "SetTransparency": "Set transparency"
+  },
+  "WellKnownBaseMaps" : {
+    "BingProvider" : {
+      "Aerial" : "Bing Maps: Aerial Imagery",
+      "Hybrid" : "Bing Maps: Aerial Imagery with labels",
+      "Street" : "Bing Maps: Streets"
+    }
   }
 }

@@ -1,6 +1,30 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Tue, 23 May 2023 13:16:11 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Jan 2024 21:37:20 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 0.5.0
+
+Mon, 29 Jan 2024 21:37:20 GMT
+
+### Minor changes
+
+- Updated iModels client ([#747](https://github.com/iTwin/viewer-components-react/pull/747))
+
+## 0.4.0
+Thu, 17 Aug 2023 14:42:37 GMT
+
+### Minor changes
+
+- Typescript version bump to ^4.5.0
+- Migrated UI items for iTwin UI 2.x and iTwinJS 4.x upgrade.
+
+### Patches
+
+- Removed trash icon in tile if update dataset is queued
+- Moved toolbar icons to the right
+- Changed update dataset icon
 
 ## 0.3.0
 Tue, 23 May 2023 13:16:11 GMT
@@ -92,4 +116,3 @@ Tue, 14 Jun 2022 16:01:06 GMT
 ### Patches
 
 - Initial release of the reports config widget for Reporting Platform
-

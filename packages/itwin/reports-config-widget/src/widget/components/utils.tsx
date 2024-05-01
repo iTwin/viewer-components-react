@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import {
-  IconButton,
+  Icon,
   ProgressRadial,
   Text,
   toaster,
@@ -27,13 +27,14 @@ export const WidgetHeader = ({
   return (
     <div className="rcw-widget-header-container">
       {returnFn && (
-        <IconButton
-          onClick={returnFn}
-          disabled={disabled}
-          styleType="borderless"
+        <Icon
+          className={`${disabled ? "rcw-chevron-disabled" : "rcw-chevron"}`}
+          onClick={disabled ? undefined : returnFn}
+          size="large"
+          title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Back")}
         >
           <SvgChevronLeft />
-        </IconButton>
+        </Icon>
       )}
       <Text className="rcw-title" variant="title">
         {title}

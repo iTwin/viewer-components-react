@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  AbstractWidgetProps,
   UiItemsProvider,
-} from "@itwin/appui-abstract";
+  Widget,
+} from "@itwin/appui-react";
 import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-} from "@itwin/appui-abstract";
+} from "@itwin/appui-react";
 import OneClickLCA from "../components/OneClickLCA";
 import React from "react";
 
@@ -22,19 +22,17 @@ export class OneClickLCAProvider implements UiItemsProvider {
     stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection
-  ): ReadonlyArray<AbstractWidgetProps> {
-    const widgets: AbstractWidgetProps[] = [];
+  ): ReadonlyArray<Widget> {
+    const widgets: Widget[] = [];
     if (
       location === StagePanelLocation.Left &&
       section === StagePanelSection.Start &&
       stageUsage === StageUsage.General
     ) {
-      const OneClickLCAWidget: AbstractWidgetProps = {
+      const OneClickLCAWidget: Widget = {
         id: "OneClickLCAWidget",
         label: "One Click LCA",
-        getWidgetContent() {
-          return <OneClickLCA />;
-        },
+        content: <OneClickLCA/>,
       };
 
       widgets.push(OneClickLCAWidget);

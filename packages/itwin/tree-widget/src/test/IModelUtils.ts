@@ -1,15 +1,29 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { CategoryProps, GeometricElement3dProps, PhysicalElementProps, RelatedElementProps, SubCategoryProps } from "@itwin/core-common";
+import type {
+  CategoryProps,
+  GeometricElement3dProps,
+  InformationPartitionElementProps,
+  ModelProps,
+  PhysicalElementProps,
+  RelatedElementProps,
+  SubCategoryProps,
+  SubjectProps,
+} from "@itwin/core-common";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
-export function addSubject(builder: TestIModelBuilder, name: string, parentId = IModel.rootSubjectId) {
+export function addSubject<TSubjectProps extends SubjectProps>(
+  builder: TestIModelBuilder,
+  name: string,
+  parentId = IModel.rootSubjectId,
+  subjectProps?: Partial<TSubjectProps>,
+) {
   const parentProps: RelatedElementProps = {
     relClassName: "BisCore:SubjectOwnsSubjects",
     id: parentId,
@@ -19,10 +33,17 @@ export function addSubject(builder: TestIModelBuilder, name: string, parentId = 
     model: IModel.repositoryModelId,
     parent: parentProps,
     code: builder.createCode(parentId, BisCodeSpec.subject, name),
+    ...subjectProps,
   });
 }
 
-export function addPartition(builder: TestIModelBuilder, classFullName: string, name: string, parentId = IModel.rootSubjectId) {
+export function addPartition<TPartitionProps extends InformationPartitionElementProps>(
+  builder: TestIModelBuilder,
+  classFullName: string,
+  name: string,
+  parentId = IModel.rootSubjectId,
+  partitionProps?: Partial<TPartitionProps>,
+) {
   const parentProps: RelatedElementProps = {
     relClassName: "BisCore:SubjectOwnsPartitionElements",
     id: parentId,
@@ -32,14 +53,20 @@ export function addPartition(builder: TestIModelBuilder, classFullName: string, 
     model: IModel.repositoryModelId,
     parent: parentProps,
     code: builder.createCode(parentId, BisCodeSpec.informationPartitionElement, name),
+    ...partitionProps,
   });
 }
 
-export function addModel(builder: TestIModelBuilder, classFullName: string, partitionId: string) {
+export function addModel<TModelProps extends ModelProps>(
+  builder: TestIModelBuilder,
+  classFullName: string,
+  modeledElementId: string,
+  modelProps?: Partial<TModelProps>,
+) {
   return builder.insertModel({
-    modeledElement: { relClassName: "BisCore:ModelModelsElement", id: partitionId },
+    modeledElement: { relClassName: "BisCore:ModelModelsElement", id: modeledElementId },
     classFullName,
-    isPrivate: false,
+    ...modelProps,
   });
 }
 

@@ -1,6 +1,16 @@
 # Change Log - @itwin/geo-tools-react
 
-This log was last generated on Tue, 06 Jun 2023 10:57:06 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 5.1.0
+
+Mon, 29 Apr 2024 14:59:26 GMT
+
+### Minor changes
+
+- updated packages @itwin/appui-react, @itwin/components-react, and @itwin/core-react. the css style  uicore-autosuggest__input was also updated. ([#822](https://github.com/iTwin/viewer-components-react/pull/822))
 
 ## 5.0.0
 Tue, 06 Jun 2023 10:57:06 GMT
@@ -86,4 +96,3 @@ Thu, 19 Nov 2020 19:53:35 GMT
 ### Minor changes
 
 - First version of geo-tools-react
-

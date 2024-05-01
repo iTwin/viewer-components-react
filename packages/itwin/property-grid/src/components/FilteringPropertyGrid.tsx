@@ -1,17 +1,27 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-import { useCallback } from "react";
+import { useEffect, useState } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
-  FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
+  FilteredType,
+  FilteringPropertyDataProvider,
+  PropertyDataChangeEvent,
+  PropertyRecordDataFiltererBase,
+  VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
-import { useDisposable } from "@itwin/core-react";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { IPropertyDataFilterer, IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataFilterResult, VirtualizedPropertyGridWithDataProviderProps } from "@itwin/components-react";
+import type {
+  IPropertyDataFilterer,
+  IPropertyDataProvider,
+  PropertyCategory,
+  PropertyData,
+  PropertyDataFilterResult,
+  VirtualizedPropertyGridWithDataProviderProps,
+} from "@itwin/components-react";
 import type { IDisposable } from "@itwin/core-bentley";
 
 /**
@@ -19,8 +29,10 @@ import type { IDisposable } from "@itwin/core-bentley";
  * @public
  */
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
-  filterer: IPropertyDataFilterer;
+  /** Specifies whether child categories should be auto expanded or not. */
   autoExpandChildCategories?: boolean;
+  /** @internal */
+  filterer: IPropertyDataFilterer;
 }
 
 /**
@@ -28,21 +40,23 @@ export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithD
  * @internal
  */
 export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps) {
-  const filteringDataProvider = useDisposable(useCallback(
-    () => {
-      const filteringProvider = new FilteringPropertyDataProvider(dataProvider, filterer);
-      return new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
-    },
-    [filterer, dataProvider, autoExpandChildCategories]
-  ));
+  const [filteringDataProvider, setFilteringDataProvider] = useState<AutoExpandingPropertyFilterDataProvider>();
+  useEffect(() => {
+    const filteringProvider = new FilteringPropertyDataProvider(dataProvider, filterer);
+    const provider = new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
+    setFilteringDataProvider(provider);
+    return () => {
+      provider.dispose();
+    };
+  }, [filterer, dataProvider, autoExpandChildCategories]);
+
+  if (!filteringDataProvider) {
+    return null;
+  }
 
   // in order to allow resize values column fully we need to override default width reserved for action buttons.
   // istanbul ignore next
-  const actionButtonWidth = props.actionButtonWidth !== undefined
-    ? props.actionButtonWidth
-    : props.actionButtonRenderers !== undefined
-      ? undefined
-      : 0;
+  const actionButtonWidth = props.actionButtonWidth !== undefined ? props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
 
   return (
     <>
@@ -79,9 +93,7 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
   public get isActive() {
     return true;
   }
-  public async recordMatchesFilter(
-    node: PropertyRecord
-  ): Promise<PropertyDataFilterResult> {
+  public async recordMatchesFilter(node: PropertyRecord): Promise<PropertyDataFilterResult> {
     if (node.value.valueFormat !== PropertyValueFormat.Primitive) {
       return {
         matchesFilter: false,

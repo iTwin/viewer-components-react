@@ -1,0 +1,14 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.gmw-overlap-information {
+    max-width: 100%;
+    width: 100%;
+    .gmw-information-body {
+      textarea {
+        resize: vertical;
+      }
+    }
+  }

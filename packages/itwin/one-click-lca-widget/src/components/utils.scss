@@ -2,29 +2,21 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
-@import "~@itwin/itwinui-css/scss/button/index";
-
 .oclca-widget-header-container {
   display: flex;
-  margin-bottom: $iui-baseline * 3;
+  margin-bottom: calc(var(--iui-size-s) * 3);
   .oclca-chevron {
-    @include iui-icons-large();
     cursor: pointer;
     align-self: center;
-    margin-right: $iui-s;
+    margin-right: var(--iui-size-xs);
   }
 
   .oclca-chevron-disabled {
-    @include iui-icons-large();
-    @include themed {
-      fill: t(iui-icons-color-actionable-disabled);
-    }
+    fill: var(--iui-color-icon-disabled);
     cursor: not-allowed;
 
     align-self: center;
-    margin-right: $iui-s;
+    margin-right: var(--iui-size-xs);
   }
 
   .oclca-title {

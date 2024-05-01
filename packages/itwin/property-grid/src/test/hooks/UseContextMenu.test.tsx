@@ -1,28 +1,30 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
 import sinon from "sinon";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { Field, PropertyValueFormat as PresentationPropertyValueFormat } from "@itwin/presentation-common";
 import { FavoritePropertiesScope } from "@itwin/presentation-frontend";
-import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import * as webUtilities from "../../api/WebUtilities";
 import {
   AddFavoritePropertyContextMenuItem,
   CopyPropertyTextContextMenuItem,
-  PropertyGridContextMenuItem, RemoveFavoritePropertyContextMenuItem, useContextMenu,
+  PropertyGridContextMenuItem,
+  RemoveFavoritePropertyContextMenuItem,
+  useContextMenu,
 } from "../../hooks/UseContextMenu";
 import { PropertyGridManager } from "../../PropertyGridManager";
-import { createFunctionStub, createPropertyRecord, stubFavoriteProperties } from "../TestUtils";
+import { createFunctionStub, createPropertyRecord, render, stubFavoriteProperties, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { MouseEvent } from "react";
 import type { ContextMenuItemProps, UseContentMenuProps } from "../../hooks/UseContextMenu";
+import { TelemetryContextProvider } from "../../property-grid-react";
 
 describe("useContextMenu", () => {
   const imodel = {} as IModelConnection;
@@ -33,11 +35,19 @@ describe("useContextMenu", () => {
 
   function TestComponent(props: UseContentMenuProps) {
     const { renderContextMenu, onPropertyContextMenu } = useContextMenu(props);
-    return <>
-      <div>Outside</div>
-      <button onClick={async () => onPropertyContextMenu({ event: { clientX: 10, clientY: 10, persist: () => {} } as unknown as MouseEvent, propertyRecord: record })}>Open Menu</button>
-      {renderContextMenu()}
-    </>;
+    return (
+      <>
+        <div>Outside</div>
+        <button
+          onClick={async () =>
+            onPropertyContextMenu({ event: { clientX: 10, clientY: 10, persist: () => {} } as unknown as MouseEvent, propertyRecord: record })
+          }
+        >
+          Open Menu
+        </button>
+        {renderContextMenu()}
+      </>
+    );
   }
 
   it("opens context menu", async () => {
@@ -46,7 +56,7 @@ describe("useContextMenu", () => {
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
         contextMenuItems={[() => <div>Test Item</div>]}
-      />
+      />,
     );
 
     const openButton = await waitFor(() => getByText("Open Menu"));
@@ -56,12 +66,7 @@ describe("useContextMenu", () => {
   });
 
   it("doesn't open context menu if there are no items", async () => {
-    const { getByText, queryByRole } = render(
-      <TestComponent
-        imodel={imodel}
-        dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-      />
-    );
+    const { getByText, queryByRole } = render(<TestComponent imodel={imodel} dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider} />);
 
     const openButton = await waitFor(() => getByText("Open Menu"));
     await userEvents.click(openButton);
@@ -75,8 +80,14 @@ describe("useContextMenu", () => {
       <TestComponent
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-        contextMenuItems={[() => <PropertyGridContextMenuItem id="test-item" onSelect={selectStub}>Test Item</PropertyGridContextMenuItem>]}
-      />
+        contextMenuItems={[
+          () => (
+            <PropertyGridContextMenuItem id="test-item" onSelect={selectStub}>
+              Test Item
+            </PropertyGridContextMenuItem>
+          ),
+        ]}
+      />,
     );
 
     // open menu
@@ -100,7 +111,7 @@ describe("useContextMenu", () => {
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
         contextMenuItems={[() => <div>Test Item</div>]}
-      />
+      />,
     );
 
     // open menu
@@ -123,7 +134,7 @@ describe("useContextMenu", () => {
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
         contextMenuItems={[() => <div>Test Item</div>]}
-      />
+      />,
     );
 
     // open menu
@@ -139,6 +150,27 @@ describe("useContextMenu", () => {
 
     // wait for item to disappear
     await waitFor(() => expect(queryByText("Test Item")).to.be.null);
+  });
+
+  describe("feature usage reporting", () => {
+    it("reports when context menu opens", async () => {
+      const onFeatureUsedSpy = sinon.spy();
+      const { getByText } = render(
+        <TelemetryContextProvider onFeatureUsed={onFeatureUsedSpy}>
+          <TestComponent
+            imodel={imodel}
+            dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
+            contextMenuItems={[() => <div>Test Item</div>]}
+          />
+        </TelemetryContextProvider>,
+      );
+
+      const openButton = await waitFor(() => getByText("Open Menu"));
+      await userEvents.click(openButton);
+
+      await waitFor(() => getByText("Test Item"));
+      expect(onFeatureUsedSpy).to.be.calledOnceWith("context-menu");
+    });
   });
 });
 
@@ -174,64 +206,84 @@ describe("Default context menu items", () => {
   describe("AddFavoritePropertyContextMenuItem", () => {
     it("renders item with non-favorite property", () => {
       favoritesManager.has.returns(false);
-      const { queryByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { queryByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       expect(queryByText("context-menu.add-favorite.label"));
     });
 
     it("renders nothing if property is favorite", () => {
       favoritesManager.has.returns(true);
-      const { container } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { container } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       expect(container.children).to.have.lengthOf(0);
     });
 
     it("calls `Presentation.favorites.add` with default scope", async () => {
       favoritesManager.has.returns(false);
-      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} />);
       const item = getByText("context-menu.add-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
+      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.IModel));
     });
 
     it("calls `Presentation.favorites.add` with specified scope", async () => {
       favoritesManager.has.returns(false);
-      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin} />);
       const item = getByText("context-menu.add-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
+      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.ITwin));
+    });
+
+    it("calls custom `onSelect` handler", async () => {
+      favoritesManager.has.returns(false);
+      const spy = sinon.spy();
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} onSelect={spy} />);
+      const item = getByText("context-menu.add-favorite.label");
+      await userEvents.click(item);
+
+      expect(spy).to.be.calledOnce;
     });
   });
 
   describe("RemoveFavoritePropertyContextMenuItem", () => {
     it("renders item with favorite property", () => {
       favoritesManager.has.returns(true);
-      const { queryByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { queryByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
       expect(queryByText("context-menu.remove-favorite.label"));
     });
 
     it("renders nothing if property is not favorite", () => {
       favoritesManager.has.returns(false);
-      const { container } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { container } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
       expect(container.children).to.have.lengthOf(0);
     });
 
     it("calls `Presentation.favorites.remove` with default scope", async () => {
       favoritesManager.has.returns(true);
-      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} />);
       const item = getByText("context-menu.remove-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
+      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.IModel));
     });
 
     it("calls `Presentation.favorites.remove` with specified scope", async () => {
       favoritesManager.has.returns(true);
-      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin} />);
       const item = getByText("context-menu.remove-favorite.label");
       await userEvents.click(item);
 
-      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
+      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel, FavoritePropertiesScope.ITwin));
+    });
+
+    it("calls custom `onSelect` handler", async () => {
+      favoritesManager.has.returns(true);
+      const spy = sinon.spy();
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} onSelect={spy} />);
+      const item = getByText("context-menu.remove-favorite.label");
+      await userEvents.click(item);
+
+      expect(spy).to.be.calledOnce;
     });
   });
 
@@ -249,6 +301,16 @@ describe("Default context menu items", () => {
       await userEvents.click(item);
 
       expect(copyStub).to.be.calledOnceWithExactly(record.description);
+    });
+
+    it("calls custom `onSelect` handler", async () => {
+      const spy = sinon.stub();
+      const { getByText } = render(<CopyPropertyTextContextMenuItem {...itemProps} onSelect={spy} />);
+      const item = getByText("context-menu.copy-text.label");
+
+      await userEvents.click(item);
+
+      expect(spy).to.be.calledOnce;
     });
   });
 });
@@ -269,7 +331,7 @@ function createField() {
       valueFormat: PresentationPropertyValueFormat.Primitive,
     },
     false,
-    0
+    0,
   );
 }
 

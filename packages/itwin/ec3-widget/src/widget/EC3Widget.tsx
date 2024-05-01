@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  AbstractWidgetProps,
   UiItemsProvider,
-} from "@itwin/appui-abstract";
+  Widget,
+} from "@itwin/appui-react";
 import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-} from "@itwin/appui-abstract";
+} from "@itwin/appui-react";
 import React from "react";
 import type { EC3WidgetProps } from "../components/EC3Widget";
 import { EC3Widget } from "../components/EC3Widget";
@@ -26,19 +26,17 @@ export class EC3Provider implements UiItemsProvider {
     stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection
-  ): ReadonlyArray<AbstractWidgetProps> {
-    const widgets: AbstractWidgetProps[] = [];
+  ): ReadonlyArray<Widget> {
+    const widgets: Widget[] = [];
     if (
       location === StagePanelLocation.Left &&
       section === StagePanelSection.Start &&
       stageUsage === StageUsage.General
     ) {
-      const newEC3Widget: AbstractWidgetProps = {
+      const newEC3Widget: Widget = {
         id: "EC3Widget",
         label: "EC3",
-        getWidgetContent: () => {
-          return <EC3Widget {...this._props} />;
-        },
+        content: <EC3Widget {...this._props} />,
       };
 
       widgets.push(newEC3Widget);

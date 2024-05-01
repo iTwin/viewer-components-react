@@ -2,13 +2,385 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Mon, 29 Apr 2024 14:59:26 GMT",
+      "version": "1.8.0",
+      "tag": "@itwin/property-grid-react_v1.8.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "13277d690686eadfd18cc88f10b1e121c8eed530",
+            "comment": "Added ability to track usage of `PropertyWidget` features."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Wed, 17 Apr 2024 15:50:19 GMT",
+      "version": "1.7.0",
+      "tag": "@itwin/property-grid-react_v1.7.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "9d296a06dd2e2290364692e02b109e9ac591a5e9",
+            "comment": "Added ability to track performance of `PropertyGrid` component features."
+          }
+        ],
+        "none": [
+          {
+            "author": "yato333@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "3ce3db62689abb58d25f59b0528f4b793d6c4c0c",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 04 Apr 2024 14:19:35 GMT",
+      "version": "1.6.1",
+      "tag": "@itwin/property-grid-react_v1.6.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "36b1bb4329de32956d9f9d8b5f85482d523a820c",
+            "comment": "Removed border appearing around search button."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 07 Mar 2024 13:37:08 GMT",
+      "version": "1.6.0",
+      "tag": "@itwin/property-grid-react_v1.6.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "3c1a00bdefa4a14b705d3649094e6ccecd959a8a",
+            "comment": "Added support for `@itwin/presentation-components` version `5.x`."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "3c1a00bdefa4a14b705d3649094e6ccecd959a8a",
+            "comment": "Bumped `@itwin/itwinui-react` dependency version to `3.x`"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 29 Feb 2024 19:46:34 GMT",
+      "version": "1.5.2",
+      "tag": "@itwin/property-grid-react_v1.5.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "911590990e83fcc671e304f5fdfebe09daacd844",
+            "comment": "Fixed property widget being focused in a panel when there are more widgets and selection changes"
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "a06e10d377e8a8cbfa08309cd77dd77a4bfda624",
+            "comment": ""
+          },
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "5430c6c2536dfd9b5be8ff52bd58929f448d2e02",
+            "comment": "Bump `itwinjs-core` dev dependencies to `4.4.0`"
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "716aad28ddec9197a763e52eb03262e51f6c827e",
+            "comment": ""
+          },
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "4cffea73db2a9c1f723f04a0d575644b3da04433",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 06 Feb 2024 13:45:21 GMT",
+      "version": "1.5.1",
+      "tag": "@itwin/property-grid-react_v1.5.1",
+      "comments": {
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "80abe6949242d39712ff62b33a2990ed75712649",
+            "comment": "Bump `itwinjs-core` dev dependencies to `4.4.0-dev.32` (latest rc)"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 18 Jan 2024 15:05:39 GMT",
+      "version": "1.5.1",
+      "tag": "@itwin/property-grid-react_v1.5.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "916273493a96a46369865b658e47732dadae2d90",
+            "comment": "Update `@itwin/itwinui-react` version to `2.12.19`."
+          }
+        ],
+        "none": [
+          {
+            "author": "114080994+ViliusBa@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "32fec20f0f56f524fa108176ae82724aa3368650",
+            "comment": "Add missing dependency."
+          },
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "7e69cfd65dfd1badc42125859f1a76e3cd5f4fa7",
+            "comment": "Run prettier to format code"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Thu, 11 Jan 2024 14:32:37 GMT",
+      "version": "1.5.0",
+      "tag": "@itwin/property-grid-react_v1.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "24278440+saskliutas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "11e375d1a819b23bedf832a30bee0aca485e82e1",
+            "comment": "Added React 18 support."
+          }
+        ],
+        "none": [
+          {
+            "author": "35135765+grigasp@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "df80b1ea1d3bd64737bddcb46c40ffa6a12d7234",
+            "comment": "Skip tests that are failing due to a backend issue"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.1",
+      "tag": "@itwin/property-grid-react_v1.4.1",
+      "date": "Thu, 04 Jan 2024 16:26:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add lint checks for *.scss files."
+          },
+          {
+            "comment": "Fix flaky test."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix incorrect `PropertyGrid` title on concurrent `getData()` calls."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.0",
+      "tag": "@itwin/property-grid-react_v1.4.0",
+      "date": "Fri, 10 Nov 2023 14:46:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update to AppUI 4.5.0"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add filtering support."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.0",
+      "tag": "@itwin/property-grid-react_v1.3.0",
+      "date": "Tue, 29 Aug 2023 13:48:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Make selected items list striped."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Add missing dev dependencies"
+          },
+          {
+            "comment": "Bump `@itwin/presentation-components` dev dependency to `4.1.0`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.0",
+      "tag": "@itwin/property-grid-react_v1.2.0",
+      "date": "Fri, 25 Aug 2023 14:06:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Sort selected elements list by label in an ascending order."
+          },
+          {
+            "comment": "Improved property editing workflow by adding data provider to `onPropertyUpdated` callback arguments."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.2",
+      "tag": "@itwin/property-grid-react_v1.1.2",
+      "date": "Fri, 18 Aug 2023 11:01:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Correctly determine if element has parent element when both are instances of the same class."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.1",
+      "tag": "@itwin/property-grid-react_v1.1.1",
+      "date": "Thu, 17 Aug 2023 14:42:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added e2e tests for `PropertyGrid` component."
+          },
+          {
+            "comment": "Fix changelog"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fixed `Selected elements` button not appearing sometimes when selection changes quickly."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.0",
+      "tag": "@itwin/property-grid-react_v1.1.0",
+      "date": "Mon, 07 Aug 2023 13:36:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added ability to override behavior of default context menu items."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fixed scrollbar not appearing when property grid content starts overflowing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@itwin/property-grid-react_v1.0.1",
+      "date": "Mon, 02 Aug 2023 12:11:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Render property grid header even when too many elements are selected."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.0",
+      "tag": "@itwin/property-grid-react_v1.0.0",
+      "date": "Mon, 31 Jul 2023 14:10:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle errors thrown from property grid component."
+          },
+          {
+            "comment": "Persist property grid scroll position when switching between widgets."
+          },
+          {
+            "comment": "Fixed property grid not hiding empty struct and array properties."
+          },
+          {
+            "comment": "Improved keyboard navigation when navigating from Property Grid to Element List."
+          }
+        ],
+        "major": [
+          {
+            "comment": "Bumped AppUI peer dependencies to `^4.3.0`."
+          },
+          {
+            "comment": "Replaced `enableAncestorNavigation` property with `ancestorsNavigationControls` to allow using custom components for ancestors navigation."
+          },
+          {
+            "comment": "Removed properties used to configure data provider in favor of `createDataProvider` prop for supplying custom data provider."
+          },
+          {
+            "comment": "Removed properties used for enabling/disabling context menu items in favor of `contextMenuItems` list that is now used to populate context menu."
+          },
+          {
+            "comment": "Removed `customOnDataChanged` property. `createDataProvider` and `IPresentationPropertyDataProvider.onDataChanged` should be used instead."
+          },
+          {
+            "comment": "Removed `Show/Hide Empty Values` setting from context menu and moved it to the setting dropdown in header."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Do not open property grid widget when transient instance is selected."
+          },
+          {
+            "comment": "Added unit tests."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Refactored preferences storing to allow persisting new settings in the future."
+          },
+          {
+            "comment": "Added settings dropdown menu inside Property Grid header."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.0",
       "tag": "@itwin/property-grid-react_v0.11.0",
       "date": "Tue, 23 May 2023 13:16:11 GMT",
       "comments": {
         "none": [
           {
-            "comment": "Updated to iTwin.js Core 4.0"
+            "comment": "Updated to iTwin.js Core 4.0."
           }
         ]
       }
@@ -20,12 +392,12 @@
       "comments": {
         "none": [
           {
-            "comment": "Make property grid column resizer more movable"
+            "comment": "Make property grid column resizer more movable."
           }
         ],
         "minor": [
           {
-            "comment": "Updated to AppUI 4.0 and Presentation 4.0"
+            "comment": "Updated to AppUI 4.0 and Presentation 4.0."
           }
         ]
       }
@@ -49,7 +421,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Created FilteringPropertyGrid which is called directly when disableUnifiedSelection is true or called through FilteringPropertyGridWithUnifiedSelection when false"
+            "comment": "Created `FilteringPropertyGrid` which is called directly when `disableUnifiedSelection` is `true` or called through `FilteringPropertyGridWithUnifiedSelection` when false."
           }
         ]
       }
@@ -73,7 +445,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Instead of hiding the down navigation button, show it disabled"
+            "comment": "Instead of hiding the down navigation button, show it disabled."
           }
         ]
       }
@@ -85,7 +457,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Added ancestor navigation to the Property Grid."
+            "comment": "Added ancestor navigation to the property grid."
           }
         ]
       }
@@ -97,7 +469,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Replaces deprecated Table with MenuItem from iTwinUI-React, and fixes warning about deprecated findDOMNode usage"
+            "comment": "Replaces deprecated `Table` with `MenuItem` from `@itwin/itwinui-react`, and fixes warning about deprecated `findDOMNode` usage."
           }
         ]
       }
@@ -109,7 +481,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "refresh property grid when frontstage changes with active selection set"
+            "comment": "Refresh property grid when frontstage changes with active selection set."
           }
         ]
       }
@@ -121,7 +493,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Added persistNValueToggle property and the code to store this value in UserPreferences if true."
+            "comment": "Added `persistNullValueToggle` property and the code to store this value in `UserPreferences` if true."
           }
         ]
       }
@@ -133,10 +505,10 @@
       "comments": {
         "patch": [
           {
-            "comment": "Allow a caller to specify a default priority for PropertyGrid item provider."
+            "comment": "Allow a caller to specify a default priority for `PropertyGridUiItemsProvider`."
           },
           {
-            "comment": "Added option forcePosition property to ContextMenuItemInfo"
+            "comment": "Added option `forcePosition` property to `ContextMenuItemInfo`."
           }
         ]
       }
@@ -148,7 +520,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "if the property grid is minimized do not force it open"
+            "comment": "If the property grid is minimized do not force it open."
           }
         ]
       }
@@ -160,10 +532,10 @@
       "comments": {
         "patch": [
           {
-            "comment": "Fixed misaligned property grid header"
+            "comment": "Fixed misaligned property grid header."
           },
           {
-            "comment": "support overriding property grid auto child category expansion behavior"
+            "comment": "Support overriding property grid auto child category expansion behavior."
           }
         ]
       }
@@ -175,7 +547,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Add ability to persist shared favorites via consuming app"
+            "comment": "Add ability to persist shared favorites via consuming app."
           }
         ]
       }
@@ -187,7 +559,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "allow default zone location to be overridden"
+            "comment": "Allow default zone location to be overridden."
           }
         ]
       }
@@ -199,7 +571,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "manually bump to 0.4.2 to allow previous commits to be published"
+            "comment": "Manually bump to 0.4.2 to allow previous commits to be published."
           }
         ]
       }
@@ -211,13 +583,13 @@
       "comments": {
         "patch": [
           {
-            "comment": "ensure the multi select property grid option appears if applicable when component first mounts"
+            "comment": "Ensure the multi select property grid option appears if applicable when component first mounts."
           },
           {
-            "comment": "dont open property grid tab when only transient elements (such as view sections) are selected"
+            "comment": "Don't open property grid tab when only transient elements (such as view sections) are selected."
           },
           {
-            "comment": "fix property grid ui items provider when loading into appui v1.0"
+            "comment": "Fix `PropertyGridUiItemsProvider` when loading into AppUI v1.0."
           }
         ]
       }
@@ -227,20 +599,22 @@
       "tag": "@itwin/property-grid-react_v0.4.0",
       "date": "Wed, 06 Apr 2022 13:48:44 GMT",
       "comments": {
+        "none": [
+          {
+            "comment": "Add transitive peers as dev deps."
+          }
+        ],
         "minor": [
           {
-            "comment": "hide property-grid by default"
+            "comment": "Hide property grid by default."
           }
         ],
         "patch": [
           {
-            "comment": "PropertyGridProps expanded to allow default location"
+            "comment": "`PropertyGridProps` expanded to allow default location."
           },
           {
-            "comment": "Add transitive peers as dev deps"
-          },
-          {
-            "comment": "remove widget control and add temporary support for ui 1.0"
+            "comment": "Remove widget control and add temporary support for ui 1.0."
           }
         ]
       }
@@ -252,7 +626,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "remove react-spring dependency, and replaced grid animation with css"
+            "comment": "Removed react-spring dependency, and replaced grid animation with css."
           }
         ]
       }
@@ -264,7 +638,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Update init to be lazy, make arg optional"
+            "comment": "Update initialization to be lazy and make arguments optional."
           }
         ]
       }
@@ -276,7 +650,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Update scss to be pulled from cjs dir"
+            "comment": "Update scss to be pulled from cjs dir."
           }
         ]
       }
@@ -288,7 +662,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Bump to official iTwin.js 3.0 release"
+            "comment": "Bump to official iTwin.js 3.0 release."
           }
         ]
       }
@@ -300,7 +674,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "updated to latest rc, dev-185, and updated deps"
+            "comment": "Updated to latest rc, dev-185, and updated deps."
           }
         ]
       }
@@ -312,328 +686,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "iTwin.js 3.0 first rc"
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.2.5",
-      "tag": "@bentley/property-grid-react_v2.2.5",
-      "date": "Fri, 10 Dec 2021 15:33:50 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fix for info button not appearing when multiple elements are selected"
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.2.4",
-      "tag": "@bentley/property-grid-react_v2.2.4",
-      "date": "Thu, 30 Sep 2021 19:32:32 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Styling updates to include displaying an ellipsis for header labels, consistent header size (50px) and consistent back button lozation."
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.2.3",
-      "tag": "@bentley/property-grid-react_v2.2.3",
-      "date": "Thu, 16 Sep 2021 17:55:54 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Stop delivering psuedo-localized strings"
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.2.2",
-      "tag": "@bentley/property-grid-react_v2.2.2",
-      "date": "Mon, 30 Aug 2021 17:10:22 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fix bug where label and class name didnt show in multi element property grid, as well as an animation bug"
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.2.1",
-      "tag": "@bentley/property-grid-react_v2.2.1",
-      "date": "Thu, 26 Aug 2021 15:28:08 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Remove unused PropertyGrid Extension that never worked. Make sure i18n gets delivered\""
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.2.0",
-      "tag": "@bentley/property-grid-react_v2.2.0",
-      "date": "Wed, 25 Aug 2021 18:17:58 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Updated class based components to functional. UiProvider now adds the multi element property grid instead of the previous single element property grid. Deprecated a few props which are unused and will be removed in next major."
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.1.0",
-      "tag": "@bentley/property-grid-react_v2.1.0",
-      "date": "Fri, 20 Aug 2021 18:32:34 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Changes the PropertyGrid UiProvider to use a new PropertyGrid functional component"
-          }
-        ]
-      }
-    },
-    {
-      "version": "2.0.0",
-      "tag": "@bentley/property-grid-react_v2.0.0",
-      "date": "Thu, 08 Jul 2021 20:22:14 GMT",
-      "comments": {
-        "major": [
-          {
-            "comment": "Added support for FilteringPropertyDataProvider in PropertyGrid"
-          }
-        ],
-        "none": [
-          {
-            "comment": "add rebuild script"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.7",
-      "tag": "@bentley/property-grid-react_v1.3.7",
-      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "fix classnames import"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.6",
-      "tag": "@bentley/property-grid-react_v1.3.6",
-      "date": "Mon, 26 Apr 2021 15:52:28 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Added property grid manager to multi element select for property group nesting flag."
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.5",
-      "tag": "@bentley/property-grid-react_v1.3.5",
-      "date": "Thu, 04 Feb 2021 21:41:55 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "update to property favoriting to work with nested props"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.4",
-      "tag": "@bentley/property-grid-react_v1.3.4",
-      "date": "Thu, 28 Jan 2021 22:45:16 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "added highlight color when hovering over property in grid"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.3",
-      "tag": "@bentley/property-grid-react_v1.3.3",
-      "date": "Mon, 11 Jan 2021 21:36:07 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "fixed duplicate scrollbars via CSS"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.2",
-      "tag": "@bentley/property-grid-react_v1.3.2",
-      "date": "Mon, 21 Dec 2020 16:29:36 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "update deps"
-          },
-          {
-            "comment": "drop min ver of core required to be 2.6.0"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.1",
-      "tag": "@bentley/property-grid-react_v1.3.1",
-      "date": "Wed, 09 Dec 2020 19:09:13 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "removed height on property panel header"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.3.0",
-      "tag": "@bentley/property-grid-react_v1.3.0",
-      "date": "Tue, 24 Nov 2020 14:14:52 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Updated property grid to virtualized property grid."
-          }
-        ],
-        "minor": [
-          {
-            "comment": "Updated core packages to 2.9.2"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.1",
-      "tag": "@bentley/property-grid-react_v1.2.1",
-      "date": "Thu, 01 Oct 2020 15:19:45 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "feature flagged nested property category groups"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.2.0",
-      "tag": "@bentley/property-grid-react_v1.2.0",
-      "date": "Tue, 29 Sep 2020 20:33:53 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Add nested property grouping"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.4",
-      "tag": "@bentley/property-grid-react_v1.1.4",
-      "date": "Wed, 26 Aug 2020 14:45:55 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fix for property panel not maintaining favorite properties"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.3",
-      "tag": "@bentley/property-grid-react_v1.1.3",
-      "date": "Tue, 25 Aug 2020 16:57:36 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "React-spring: Import from CommonJS to avoid issues with jest"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.2",
-      "tag": "@bentley/property-grid-react_v1.1.2",
-      "date": "Mon, 24 Aug 2020 19:57:25 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "make react-spring a peer dep to avoid versioning issues in it1"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.1",
-      "tag": "@bentley/property-grid-react_v1.1.1",
-      "date": "Mon, 24 Aug 2020 17:39:24 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "alphabetize package.json"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.1.0",
-      "tag": "@bentley/property-grid-react_v1.1.0",
-      "date": "Fri, 21 Aug 2020 21:17:48 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "minor pkg reorder"
-          },
-          {
-            "comment": "fix property grid source file headers"
-          }
-        ],
-        "minor": [
-          {
-            "comment": "Added multi-element property grid that has support for selecting single elements based on selection set. First pass at property grid extension."
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.0.2",
-      "tag": "@bentley/property-grid-react_v1.0.2",
-      "date": "Tue, 11 Aug 2020 14:24:07 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Fixing inf recursion with property grid data loader"
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.0.1",
-      "tag": "@bentley/property-grid-react_v1.0.1",
-      "date": "Mon, 20 Jul 2020 19:24:20 GMT",
-      "comments": {
-        "patch": [
-          {
-            "comment": "Adjusted package to conform to PR comments for improvements"
+            "comment": "iTwin.js 3.0 first rc."
           }
         ]
       }

@@ -1,6 +1,6 @@
 {
   "name": "@itwin/measure-tools-react",
-  "version": "0.12.1",
+  "version": "0.14.2",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
@@ -19,7 +19,7 @@
     "copy:esm": "cpx \"./src/**/*.*css\" ./lib/esm",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "watch": "tsc --w",
-    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "clean": "rimraf lib",
     "rebuild": "npm run clean && npm run build",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
@@ -42,31 +42,27 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "files": [
-    "lib/**/*",
-    "!lib/**/test/**/*"
-  ],
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
-    "@itwin/appui-layout-react": "^4.0.0",
-    "@itwin/appui-react": "^4.0.0",
-    "@itwin/components-react": "^4.0.0",
+    "@itwin/appui-layout-react": "^4.4.0",
+    "@itwin/appui-react": "^4.4.0",
+    "@itwin/components-react": "^4.4.0",
     "@itwin/core-bentley": "^4.0.0",
     "@itwin/core-common": "^4.0.0",
     "@itwin/core-frontend": "^4.0.0",
     "@itwin/core-geometry": "^4.0.0",
-    "@itwin/core-react": "^4.0.0",
+    "@itwin/core-react": "^4.4.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "redux": "^4.2.1"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
-    "@itwin/appui-layout-react": "^4.0.0",
-    "@itwin/appui-react": "^4.0.0",
+    "@itwin/appui-layout-react": "^4.4.0",
+    "@itwin/appui-react": "^4.4.0",
     "@itwin/build-tools": "^4.0.0",
     "@itwin/certa": "^4.0.0",
-    "@itwin/components-react": "^4.0.0",
+    "@itwin/components-react": "^4.4.0",
     "@itwin/core-bentley": "^4.0.0",
     "@itwin/core-common": "^4.0.0",
     "@itwin/core-frontend": "^4.0.0",
@@ -75,17 +71,17 @@
     "@itwin/core-markup": "^4.0.0",
     "@itwin/core-orbitgt": "^4.0.0",
     "@itwin/core-quantity": "^4.0.0",
-    "@itwin/core-react": "^4.0.0",
+    "@itwin/core-react": "^4.4.0",
     "@itwin/ecschema-metadata": "^4.0.0",
     "@itwin/eslint-plugin": "^3.7.0",
-    "@itwin/imodel-components-react": "^4.0.0",
+    "@itwin/imodel-components-react": "^4.4.0",
     "@itwin/presentation-common": "^4.0.0",
     "@itwin/presentation-components": "^4.0.0",
     "@itwin/presentation-frontend": "^4.0.0",
     "@itwin/webgl-compatibility": "^4.0.0",
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^7.1.1",
-    "@types/mocha": "^8.2.2",
+    "@types/mocha": "^10.0.6",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
@@ -95,8 +91,8 @@
     "eslint": "^7.11.0",
     "glob": "^7.1.2",
     "madge": "4.0.2",
-    "mocha": "^8.3.2",
-    "null-loader": "3.0.0",
+    "mocha": "^10.2.0",
+    "null-loader": "^4.0.1",
     "nyc": "^15.1.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
@@ -104,8 +100,8 @@
     "redux": "^4.2.1",
     "rimraf": "^3.0.2",
     "source-map-loader": "^1.0.0",
-    "typescript": "^4.4.0",
-    "url-loader": "2.1.0",
+    "typescript": "~4.6.0",
+    "url-loader": "^4.1.1",
     "webpack": "5.76.0",
     "webpack-cli": "^5.0.1"
   },
@@ -127,6 +123,16 @@
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
+      "@itwin/no-internal": [
+        "warn",
+        {
+          "tag": [
+            "internal",
+            "alpha",
+            "beta"
+          ]
+        }
+      ],
       "@typescript-eslint/unbound-method": "off",
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error"
