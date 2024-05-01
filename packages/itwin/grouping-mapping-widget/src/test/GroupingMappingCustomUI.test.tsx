@@ -75,15 +75,23 @@ jest.mock("@itwin/core-frontend", () => ({
   },
 }));
 
-jest.mock("../components/context/MappingClientContext", () => ({
-  ...jest.requireActual("../components/context/MappingClientContext"),
-  useMappingClient: () => mappingClientMock.object,
-}));
+jest.mock("../components/context/MappingClientContext", () => {
+  const actualMappingContextModule = jest.requireActual("../components/context/MappingClientContext");
 
-jest.mock("../components/context/GroupsClientContext", () => ({
-  ...jest.requireActual("../components/context/GroupsClientContext"),
-  useGroupsClient: ()=> groupsClientMock.object,
-}));
+  return {
+    ...actualMappingContextModule,
+    useMappingClient: () => mappingClientMock.object,
+  };
+});
+
+jest.mock("../components/context/GroupsClientContext", () => {
+  const actualGroupsContextModule = jest.requireActual("../components/context/GroupsClientContext");
+
+  return {
+    ...actualGroupsContextModule,
+    useGroupsClient: ()=> groupsClientMock.object,
+  };
+});
 
 jest.mock("../common/utils", () => ({
   ...jest.requireActual("../common/utils"),
