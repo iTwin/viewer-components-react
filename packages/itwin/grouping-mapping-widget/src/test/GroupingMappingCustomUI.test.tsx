@@ -77,7 +77,6 @@ jest.mock("@itwin/core-frontend", () => ({
 
 jest.mock("../components/context/MappingClientContext", () => {
   const actualMappingContextModule = jest.requireActual("../components/context/MappingClientContext");
-
   return {
     ...actualMappingContextModule,
     useMappingClient: () => mappingClientMock.object,
@@ -86,7 +85,6 @@ jest.mock("../components/context/MappingClientContext", () => {
 
 jest.mock("../components/context/GroupsClientContext", () => {
   const actualGroupsContextModule = jest.requireActual("../components/context/GroupsClientContext");
-
   return {
     ...actualGroupsContextModule,
     useGroupsClient: ()=> groupsClientMock.object,
