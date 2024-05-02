@@ -7,10 +7,11 @@ import { BeEvent } from "@itwin/core-bentley";
 
 import type { IDisposable } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
+import type { VisibilityChangeListener } from "../../VisibilityTreeEventHandler";
 
 /** @internal */
 export interface IVisibilityChangeEventListener extends IDisposable {
-  onVisibilityChange: BeEvent<() => void>;
+  onVisibilityChange: BeEvent<VisibilityChangeListener>;
 }
 
 /** @internal */

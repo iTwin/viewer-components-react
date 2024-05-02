@@ -7,8 +7,11 @@ import { TreeWidget } from "../../../../TreeWidget";
 
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 
+
+/** @internal */
 export type Visibility = "visible" | "hidden" | "partial";
 
+/** @internal */
 export function createVisibilityStatus(status: Visibility | "disabled", tooltipStringId?: string): VisibilityStatus {
   return {
     state: status === "disabled" ? "hidden" : status,
@@ -17,6 +20,7 @@ export function createVisibilityStatus(status: Visibility | "disabled", tooltipS
   };
 }
 
+/** @internal */
 export function createTooltip(status: Visibility | "disabled", tooltipStringId: string | undefined): string {
   const statusStringId = `modelTree.status.${status}`;
   const statusString = TreeWidget.translate(statusStringId);

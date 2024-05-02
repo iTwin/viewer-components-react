@@ -52,7 +52,11 @@ interface ChangeModelStateProps {
   on: boolean;
 }
 
-type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
+/**
+ * Properties for a method of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
+ * @public
+ */
+export type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
   ? TProps & {
       /** A callback that produces the value from the original implementation. */
       readonly originalImplementation: () => TResult;
@@ -64,9 +68,15 @@ type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer
     }
   : never;
 
-type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
+/**
+ * Function type for an overridden method of [[IHierarchyBasedVisibilityHandler]].
+ * @public
+ */
+export type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
 
 /**
+ * Functionality of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
+ * Each callback will be provided original implementation and reference to a [[IHierarchyBasedVisibilityHandler]].
  * @public
  */
 export interface VisibilityHandlerOverrides {
@@ -84,6 +94,7 @@ export interface VisibilityHandlerOverrides {
 }
 
 /**
+ * Properties for [[IHierarchyBasedVisibilityHandler]].
  * @public
  */
 export interface HierarchyBasedVisibilityHandlerProps {
@@ -94,13 +105,18 @@ export interface HierarchyBasedVisibilityHandlerProps {
 }
 
 /**
+ * Hierarchy based visibility handler.
+ * When determining visibility for nodes, it should take into account the visibility of their children.
  * @public
  */
 export interface IHierarchyBasedVisibilityHandler extends IVisibilityHandler {
   filteredDataProvider?: IFilteredPresentationTreeDataProvider;
 }
 
-/** @public */
+/**
+ * Creates an instance if [[IHierarchyBasedVisibilityHandler]].
+ * @public
+ */
 export function createHierarchyBasedVisibilityHandler(props: HierarchyBasedVisibilityHandlerProps): IHierarchyBasedVisibilityHandler {
   return new VisibilityHandlerImplementation(props);
 }

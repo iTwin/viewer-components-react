@@ -76,6 +76,26 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._filteredDataProvider = provider;
   }
 
+  // istanbul ignore next
+  public static getNodeType(item: TreeNodeItem) {
+    return NodeUtils.getNodeType(item);
+  }
+
+  // istanbul ignore next
+  public static isSubjectNode(node: TreeNodeItem) {
+    return NodeUtils.isSubjectNode(node);
+  }
+
+  // istanbul ignore next
+  public static isModelNode(node: TreeNodeItem) {
+    return NodeUtils.isModelNode(node);
+  }
+
+  // istanbul ignore next
+  public static isCategoryNode(node: TreeNodeItem) {
+    return NodeUtils.isCategoryNode(node);
+  }
+
   /** Returns visibility status of the tree node. */
   public getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus> {
     const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;

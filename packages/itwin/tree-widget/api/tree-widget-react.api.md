@@ -9,7 +9,10 @@
 import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
 import { BeEvent } from '@itwin/core-bentley';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
+import type { GroupingNodeKey } from '@itwin/presentation-common';
 import { HighlightableTreeProps } from '@itwin/components-react';
+import type { Id64Arg } from '@itwin/core-bentley';
+import type { Id64Set } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IFilteredPresentationTreeDataProvider } from '@itwin/presentation-components';
@@ -21,6 +24,7 @@ import type { LocalizationOptions } from '@itwin/core-i18n';
 import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
+import type { Observable } from 'rxjs';
 import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyValueRendererContext } from '@itwin/components-react';
@@ -166,6 +170,9 @@ export interface ContextMenuItemProps {
 }
 
 // @public
+export function createHierarchyBasedVisibilityHandler(props: HierarchyBasedVisibilityHandlerProps): IHierarchyBasedVisibilityHandler;
+
+// @public
 export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
 
 // @public
@@ -240,12 +247,30 @@ export function hideAllCategories(categories: string[], viewport: Viewport): Pro
 // @public
 export function hideAllModels(models: string[], viewport: Viewport): Promise<void>;
 
+// @public
+export interface HierarchyBasedVisibilityHandlerProps {
+    // (undocumented)
+    hierarchyAutoUpdateEnabled?: boolean;
+    // (undocumented)
+    overrides?: VisibilityHandlerOverrides;
+    // (undocumented)
+    rulesetId: string;
+    // (undocumented)
+    viewport: Viewport;
+}
+
 // @beta
 export interface HierarchyLevelConfig {
     // (undocumented)
     isFilteringEnabled: true;
     // (undocumented)
     sizeLimit?: number;
+}
+
+// @public
+export interface IHierarchyBasedVisibilityHandler extends IVisibilityHandler {
+    // (undocumented)
+    filteredDataProvider?: IFilteredPresentationTreeDataProvider;
 }
 
 // @public
@@ -349,9 +374,13 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
     activeView: Viewport;
     // @alpha @deprecated
     enableHierarchyAutoUpdate?: boolean;
+    // @deprecated
+    hierarchyBased?: boolean;
+    hierarchyBasedVisibilityHandler?: IHierarchyBasedVisibilityHandler | ((props: HierarchyBasedVisibilityHandlerProps) => IHierarchyBasedVisibilityHandler);
     hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
+    // @deprecated
     modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
     // @beta
     onFeatureUsed?: (feature: string) => void;
@@ -363,7 +392,7 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
 // @public
 export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
 
-// @public
+// @public @deprecated
 export class ModelsVisibilityHandler implements IVisibilityHandler {
     constructor(props: ModelsVisibilityHandlerProps);
     // (undocumented)
@@ -397,24 +426,24 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     protected getSubjectNodeVisibility(ids: Id64String[], node: TreeNodeItem): Promise<VisibilityStatus>;
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
     // (undocumented)
-    static isCategoryNode(node: TreeNodeItem): any;
+    static isCategoryNode(node: TreeNodeItem): boolean;
     // (undocumented)
-    static isModelNode(node: TreeNodeItem): any;
+    static isModelNode(node: TreeNodeItem): boolean;
     // (undocumented)
-    static isSubjectNode(node: TreeNodeItem): any;
+    static isSubjectNode(node: TreeNodeItem): boolean;
     // (undocumented)
-    onVisibilityChange: BeEvent<VisibilityChangeListener>;
+    get onVisibilityChange(): BeEvent<VisibilityChangeListener>;
     setFilteredDataProvider(provider: IFilteredPresentationTreeDataProvider | undefined): void;
 }
 
-// @public
+// @public @deprecated
 export interface ModelsVisibilityHandlerProps {
     // (undocumented)
     hierarchyAutoUpdateEnabled?: boolean;
     // (undocumented)
+    queryHandler?: IQueryHandler;
+    // (undocumented)
     rulesetId: string;
-    // @internal (undocumented)
-    subjectModelIdsCache?: SubjectModelIdsCache;
     // (undocumented)
     viewport: Viewport;
 }
@@ -423,6 +452,25 @@ export interface ModelsVisibilityHandlerProps {
 export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
 }
+
+// @public (undocumented)
+export namespace NodeUtils {
+    export function getNodeType(item: TreeNodeItem): ModelsTreeNodeType;
+    const isSubjectNode: (node: TreeNodeItem) => boolean;
+    const isModelNode: (node: TreeNodeItem) => boolean;
+    const isCategoryNode: (node: TreeNodeItem) => boolean;
+    const getModelId: (node: TreeNodeItem) => Id64String | undefined;
+    const getElementCategoryId: (node: TreeNodeItem) => Id64String | undefined;
+}
+
+// @public
+export type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
+
+// @public
+export type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult ? TProps & {
+    readonly originalImplementation: () => TResult;
+    readonly handler: IHierarchyBasedVisibilityHandler;
+} : never;
 
 // @internal
 export const RULESET_CATEGORIES: Ruleset;
@@ -453,13 +501,6 @@ export function showAllCategories(categories: string[], viewport: Viewport): Pro
 
 // @public
 export function showAllModels(models: string[], viewport: Viewport): Promise<void>;
-
-// @internal (undocumented)
-export class SubjectModelIdsCache {
-    constructor(imodel: IModelConnection);
-    // (undocumented)
-    getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]>;
-}
 
 // @public
 export function toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise<void>;
@@ -598,6 +639,44 @@ export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWit
 
 // @public
 export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map<string, VisibilityStatus>) => void;
+
+// @public
+export interface VisibilityHandlerOverrides {
+    // (undocumented)
+    changeCategoryState?: OverriddenMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
+    // (undocumented)
+    changeElementGroupingNodeState?: OverriddenMethod<(props: {
+        key: ECClassGroupingNodeKey;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    changeElementState?: OverriddenMethod<(props: ChangeElementStateProps) => Promise<void>>;
+    // (undocumented)
+    changeModelState?: OverriddenMethod<(props: ChangeModelStateProps) => Promise<void>>;
+    // (undocumented)
+    changeSubjectNodeState?: OverriddenMethod<(props: {
+        node: TreeNodeItem;
+        ids: Id64Set;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    getCategoryDisplayStatus?: OverriddenMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getElementDisplayStatus?: OverriddenMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getElementGroupingNodeDisplayStatus?: OverriddenMethod<(props: {
+        key: ECClassGroupingNodeKey;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getModelDisplayStatus?: OverriddenMethod<(props: {
+        id: Id64String;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getSubjectNodeVisibility?: OverriddenMethod<(props: {
+        node: TreeNodeItem;
+        ids: Id64Set;
+    }) => Promise<VisibilityStatus>>;
+}
 
 // @public
 export interface VisibilityStatus {

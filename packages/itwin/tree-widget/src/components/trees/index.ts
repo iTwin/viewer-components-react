@@ -23,4 +23,5 @@ export * from "./external-sources-tree/ExternalSourcesTreeComponent";
 export * from "./models-tree/ModelsTree";
 export * from "./models-tree/ModelsTreeComponent";
 export * from "./models-tree/ModelsVisibilityHandler";
+export * from "./models-tree/HierarchyBasedVisibilityHandler";
 export * from "./models-tree/NodeUtils";
