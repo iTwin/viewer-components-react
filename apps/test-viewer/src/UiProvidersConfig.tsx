@@ -95,6 +95,21 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
+                id: `${ModelsTreeComponent.id}-hierarchy`,
+                getLabel: () => "Models Tree (Hierarchy Based) (BETA)",
+                render: (props: TreeRenderProps) => (
+                  <ModelsTreeComponent
+                    selectionPredicate={() => true}
+                    selectionMode={SelectionMode.Multiple}
+                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                    density={props.density}
+                    hierarchyBased
+                  />
+                ),
+              },
+              {
                 id: CategoriesTreeComponent.id,
                 getLabel: CategoriesTreeComponent.getLabel,
                 render: (props: TreeRenderProps) => (
