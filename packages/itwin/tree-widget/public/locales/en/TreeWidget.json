@@ -30,28 +30,48 @@
     "tooltips": {
       "subject": {
         "nonSpatialView": "Active view is not spatial",
+        "atLeastOneModelVisible": "At least one model is visible",
+        "allModelsHidden": "All models are hidden",
         "someModelsHidden": "Some models are hidden",
-        "allModelsVisible": "All models are visible",
-        "allModelsHidden": "All models are hidden"
+        "allModelsVisible": "All models are visible"
       },
       "model": {
         "nonSpatialView": "Active view is not spatial",
-        "allChildElementsHidden": "All child elements are hidden",
-        "someChildElementsHidden": "Some child elements are hidden"
+        "hiddenThroughModelSelector": "Model display is hidden through model selector",
+        "allChildElementsHidden": "All child elements are in the never drawn list",
+        "allChildElementsInAlwaysDrawnList": "All child elements are in the always drawn list",
+        "childElementsInAlwaysAndNeverDrawnList": "There are child elements in both always and never drawn lists",
+        "noChildrenInExclusiveAlwaysDrawnList": "There are no children in the always drawn list and exclusive draw mode is is enabled",
+        "someCategoriesHidden": "Some categories are visible and some are hidden",
+        "allCategoriesVisible": "All categories visible",
+        "allCategoriesHidden": "All categories hidden"
       },
       "category": {
-        "modelNotDisplayed": "Hidden through the model",
+        "modelNotDisplayed": "Can't control category display if model is not displayed",
         "displayedThroughPerModelOverride": "Per-model category override set to 'Show'",
         "hiddenThroughPerModelOverride": "Per-model category override set to 'Hide'",
         "displayedThroughCategorySelector": "Category display enabled through category selector",
-        "hiddenThroughCategorySelector": "Category display disabled through category selector"
+        "hiddenThroughCategorySelector": "Category display disabled through category selector",
+        "allElementsHidden": "All category elements are in the never drawn list or none of the category elements are in the exclusive always drawn list",
+        "someElementsAreHidden": "There are both visible and hidden elements in this category",
+        "allElementsVisible": "All category elements are in the always drawn list"
       },
       "element": {
         "modelNotDisplayed": "Can't control element display if model is not displayed",
         "hiddenThroughNeverDrawnList": "Element(s) in \"never drawn\" list",
         "displayedThroughAlwaysDrawnList": "Element(s) in \"always drawn\" list",
         "hiddenDueToOtherElementsExclusivelyAlwaysDrawn": "Other elements in \"exclusively always drawn\" list",
-        "hiddenThroughCategory": "Category not displayed"
+        "hiddenThroughCategory": "Category not displayed",
+        "hiddenThroughModel": "Model is hidden",
+        "visibleThroughCategory": "Category is visible",
+        "allElementsHidden": "All child elements are in the never drawn list or none of the elements are in the exclusive always drawn list",
+        "someElementsAreHidden": "There are both visible and hidden child elements",
+        "allElementsVisible": "All child elements are in the always drawn list"
+      },
+      "groupingNode": {
+        "allElementsHidden": "All elements are in the never drawn list or none of the elements are in the exclusive always drawn list",
+        "someElementsAreHidden": "There are both visible and hidden elements",
+        "allElementsVisible": "All elements are in the always drawn list"
       }
     },
     "noModelFound": "No model found.",

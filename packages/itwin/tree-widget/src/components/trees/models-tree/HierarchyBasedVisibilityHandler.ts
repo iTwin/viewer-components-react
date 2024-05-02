@@ -237,7 +237,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     }
 
     if (!viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatusObs("hidden");
+      return createVisibilityStatusObs("hidden", "model.hiddenThroughModelSelector");
     }
 
     return this._queryHandler.queryModelCategories(modelId).pipe(
@@ -248,14 +248,18 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         // istanbul ignore if
         if (visibilityByCategories === "empty") {
           // TODO: Is this possible?
-          return createVisibilityStatusObs("hidden");
+          return createVisibilityStatusObs("visible");
         }
 
         // If different categories have different visibilities,
         // then there's no need to check for children.
         if (visibilityByCategories === "partial") {
-          return createVisibilityStatusObs(visibilityByCategories);
+          return createVisibilityStatusObs("partial", "model.someCategoriesHidden");
         }
+
+        const createStatusByCategories = () => {
+          return createVisibilityStatus(visibilityByCategories, visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "allCategoriesHidden");
+        };
 
         // We need to check if model's state is partially visible.
         // Instead of recursively checking each element of each category,
@@ -264,7 +268,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         const alwaysDrawn = viewport.alwaysDrawn;
         const neverDrawn = viewport.neverDrawn;
         if (!alwaysDrawn?.size && !neverDrawn?.size) {
-          return createVisibilityStatusObs(visibilityByCategories);
+          return of(createStatusByCategories());
         }
 
         return forkJoin({
@@ -274,22 +278,24 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         }).pipe(
           map(({ neverDrawnChildren, alwaysDrawnChildren, totalCount }) => {
             if (neverDrawnChildren?.size === totalCount) {
-              return createVisibilityStatus("hidden");
+              return createVisibilityStatus("hidden", "model.allChildElementsHidden");
             }
 
             if (alwaysDrawnChildren?.size === totalCount) {
-              return createVisibilityStatus("visible");
+              return createVisibilityStatus("visible", "model.allChildElementsInAlwaysDrawnList");
             }
 
             if (viewport.isAlwaysDrawnExclusive && alwaysDrawn?.size) {
-              return alwaysDrawnChildren?.size ? createVisibilityStatus("partial") : createVisibilityStatus("hidden");
+              return alwaysDrawnChildren?.size
+                ? createVisibilityStatus("partial", "model.childElementsInAlwaysAndNeverDrawnList")
+                : createVisibilityStatus("hidden", "model.noChildrenInExclusiveAlwaysDrawnList");
             }
 
             if (!neverDrawnChildren?.size && !alwaysDrawnChildren?.size) {
-              return createVisibilityStatus(visibilityByCategories);
+              return createStatusByCategories();
             }
 
-            return createVisibilityStatus("partial");
+            return createVisibilityStatus("partial", "model.childElementsInAlwaysAndNeverDrawnList");
           }),
         );
       }),
@@ -300,7 +306,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     const getCategoryViewportVisibilityStatus = () => {
       const isVisible = this._props.viewport.view.viewsCategory(categoryId);
       return isVisible
-        ? createVisibilityStatus("visible", "category.visibleThroughCategorySelector")
+        ? createVisibilityStatus("visible", "category.displayedThroughCategorySelector")
         : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
     };
 
@@ -310,9 +316,9 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
     switch (this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId)) {
       case PerModelCategoryVisibility.Override.Show:
-        return createVisibilityStatus("visible");
+        return createVisibilityStatus("visible", "category.displayedThroughPerModelOverride");
       case PerModelCategoryVisibility.Override.Hide:
-        return createVisibilityStatus("hidden");
+        return createVisibilityStatus("hidden", "category.hiddenThroughPerModelOverride");
     }
 
     return getCategoryViewportVisibilityStatus();
@@ -328,9 +334,9 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       return this._queryHandler.queryCategoryElements(props.categoryId, props.modelId).pipe(
         map((id) => this.getElementOverriddenVisibility(id)?.state ?? defaultStatus.state),
         getVisibilityStatusFromChildren({
-          visible: undefined,
-          hidden: "category.allChildrenAreHidden",
-          partial: "category.someChildrenAreHidden",
+          visible: "category.allElementsVisible",
+          hidden: "category.allElementsHidden",
+          partial: "category.someElementsAreHidden",
           empty: () => defaultStatus,
         }),
       );
@@ -348,9 +354,9 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         }),
         map((x) => x.state),
         getVisibilityStatusFromChildren({
-          visible: undefined,
-          hidden: "groupingNode.allChildrenAreHidden",
-          partial: "groupingNode.someChildrenAreHidden",
+          visible: "groupingNode.allElementsVisible",
+          hidden: "groupingNode.allElementsHidden",
+          partial: "groupingNode.someElementsAreHidden",
         }),
       ),
     );
@@ -388,12 +394,11 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     }
 
     if (!viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatus("hidden", "element.hiddenModelIsHidden");
+      return createVisibilityStatus("hidden", "element.hiddenThroughModel");
     }
 
     status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-    delete status.tooltip;
-    return status;
+    return createVisibilityStatus(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "hiddenThroughCategory");
   }
 
   private getElementDisplayStatus(props: GetElementStateProps): Observable<VisibilityStatus> {
@@ -406,9 +411,9 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       return this._queryHandler.queryElementChildren(props.elementId).pipe(
         map((elementId) => this.getElementDefaultVisibility({ ...props, elementId }).state),
         getVisibilityStatusFromChildren({
-          visible: undefined,
-          hidden: "element.allChildrenAreHidden",
-          partial: "element.someChildrenAreHidden",
+          visible: "element.allElementsVisible",
+          hidden: "element.allElementsHidden",
+          partial: "element.someElementsAreHidden",
           empty: () => this.getElementDefaultVisibility(props),
         }),
       );
