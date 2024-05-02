@@ -34,7 +34,7 @@ export interface IQueryHandler {
   queryModelElementsCount(modelId: Id64String): Observable<number>;
   queryModelElements(modelId: Id64String, elementIds?: Id64Set): Observable<Id64String>;
   queryCategoryElements(categoryId: Id64String, modelId: Id64String | undefined): Observable<Id64String>;
-  queryElementChildren(props: { elementId: Id64String; categoryId: Id64String; modelId: Id64String }): Observable<Id64String>;
+  queryElementChildren(elementId: Id64String): Observable<Id64String>;
   queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds>;
   invalidateCache(): void;
 }
@@ -188,11 +188,51 @@ class QueryHandlerImplementation implements IQueryHandler {
     return this.getObservableOrInsertToCache({
       cache: this._categoryElementsCache,
       cacheKey,
-      factory: () => this.runCategoryElementsRecursiveQuery(categoryId, modelId).pipe(this.populateElementHierarchyCacheOperator()),
+      factory: () => this.runCategoryChildrenRecursiveQuery({ categoryId, modelId }).pipe(this.populateElementHierarchyCacheOperator()),
     });
   }
 
-  private populateElementHierarchyCacheOperator() {
+  private runCategoryChildrenRecursiveQuery(props: { categoryId: string; modelId?: string }): Observable<{ id: string; parentId?: string | undefined }> {
+    const { categoryId, modelId } = props;
+    const bindings = new Map<string, Id64String>();
+    const query = /* sql */ `
+      WITH RECURSIVE
+        ParentCategoryElements(id) AS (
+          SELECT ECInstanceId id
+          FROM bis.GeometricElement3d
+          WHERE
+            ${bindNamed("Category.Id", categoryId, bindings, "categoryId")}
+            ${modelId ? `AND ${bindNamed("Model.Id", modelId, bindings, "modelId")}` : ""}
+        ),
+        ChildCategoryElements(id, parentId) AS (
+          SELECT id, NULL AS parentId
+          FROM ParentCategoryElements
+
+          UNION ALL
+
+          SELECT e.ECInstanceId AS id, e.Parent.Id AS parentId
+          FROM bis.GeometricElement3d e
+          JOIN ChildCategoryElements ce ON e.Parent.Id = ce.id
+        )
+      SELECT * FROM ChildCategoryElements
+    `;
+    return this.runQuery(query, bindings, (row) => ({ id: row.id, parentId: row.parentId }));
+  }
+
+  public queryElementChildren(elementId: string): Observable<Id64String> {
+    const cachedChildren = this._elementHierarchyCache.get(elementId);
+    if (cachedChildren) {
+      return from(cachedChildren).pipe(
+        expand((id) => {
+          const res = this._elementHierarchyCache.get(id);
+          return res ? from(res) : EMPTY;
+        }),
+      );
+    }
+    return this.runElementChildrenRecursiveQuery(elementId).pipe(this.populateElementHierarchyCacheOperator(elementId));
+  }
+
+  private populateElementHierarchyCacheOperator(rootElementId?: Id64String) {
     return (elementObs: Observable<{ id: Id64String; parentId?: Id64String }>) => {
       const hierarchySubset = new Map<Id64String, Id64Set>();
       const elementSet = new Set<Id64String>();
@@ -210,7 +250,12 @@ class QueryHandlerImplementation implements IQueryHandler {
                 hierarchySubset.set(id, EMPTY_ID_SET);
               }
             }
-            mergeMaps(this._elementHierarchyCache, hierarchySubset);
+
+            if (hierarchySubset.size) {
+              mergeMaps(this._elementHierarchyCache, hierarchySubset);
+            } else {
+              rootElementId && this._elementHierarchyCache.set(rootElementId, EMPTY_ID_SET);
+            }
           },
         }),
         map(({ id }) => id),
@@ -218,78 +263,19 @@ class QueryHandlerImplementation implements IQueryHandler {
     };
   }
 
-  private runCategoryElementsRecursiveQuery(categoryId: Id64String, modelId: Id64String | undefined): Observable<{ id: Id64String; parentId?: Id64String }> {
+  private runElementChildrenRecursiveQuery(elementId: string): Observable<{ id: string; parentId?: string | undefined }> {
     const bindings = new Map<string, Id64String>();
-    const commonWhereClause = `
-      ${bindNamed("e.Category.Id", categoryId, bindings, "categoryId")}
-      ${modelId ? `AND ${bindNamed("e.Model.Id", modelId, bindings, "modelId")}` : ""}
-    `;
     const query = /* sql */ `
       WITH RECURSIVE ChildElements(id, parentId) AS (
-        SELECT e.ECInstanceId AS id, NULL as parentId
+        SELECT e.ECInstanceId AS id, e.Parent.Id AS parentId
         FROM bis.GeometricElement3d e
-        WHERE
-          ${commonWhereClause}
-          AND e.Parent IS NULL
+        WHERE ${bindNamed("e.Parent.Id", elementId, bindings, "parentId")}
 
         UNION ALL
 
         SELECT e.ECInstanceId AS id, e.Parent.Id as parentId
         FROM bis.GeometricElement3d e
         INNER JOIN ChildElements ce ON e.Parent.Id = ce.id
-        WHERE
-          ${commonWhereClause}
-          AND e.Parent.RelECClassId IS (bis.ElementOwnsChildElements)
-      )
-      SELECT * FROM ChildElements
-    `;
-    return this.runQuery(query, bindings, (row) => ({ id: row.id, parentId: row.parentId }));
-  }
-
-  public queryElementChildren({
-    elementId,
-    categoryId,
-    modelId,
-  }: {
-    elementId: Id64String;
-    categoryId: Id64String;
-    modelId: Id64String;
-  }): Observable<Id64String> {
-    const cachedChildren = this._elementHierarchyCache.get(elementId);
-    if (cachedChildren) {
-      return from(cachedChildren).pipe(
-        expand((id) => {
-          const res = this._elementHierarchyCache.get(id);
-          return res ? from(res) : EMPTY;
-        }),
-      );
-    }
-    return this.runElementChildrenRecursiveQuery(elementId, categoryId, modelId).pipe(this.populateElementHierarchyCacheOperator());
-  }
-
-  private runElementChildrenRecursiveQuery(elementId: string, categoryId: string, modelId: string): Observable<{ id: string; parentId?: string | undefined }> {
-    const bindings = new Map<string, Id64String>();
-    const commonWhereClause = `
-      ${bindNamed("e.Category.Id", categoryId, bindings, "categoryId")}
-      AND ${bindNamed("e.Model.Id", modelId, bindings, "modelId")}
-    `;
-    const query = /* sql */ `
-      WITH RECURSIVE ChildElements(id, parentId) AS (
-        SELECT e.ECInstanceId AS id, NULL as parentId
-        FROM bis.GeometricElement3d e
-        WHERE
-          ${commonWhereClause}
-          AND ${bindNamed("e.Parent.Id", elementId, bindings, "rootParentId")}
-          AND e.Parent.RelECClassId IS (bis.ElementOwnsChildElements)
-
-        UNION ALL
-
-        SELECT e.ECInstanceId AS id, e.Parent.Id as parentId
-        FROM bis.GeometricElement3d e
-        INNER JOIN ChildElements ce ON e.Parent.Id = ce.id
-        WHERE
-          ${commonWhereClause}
-          AND e.Parent.RelECClassId IS (bis.ElementOwnsChildElements)
       )
       SELECT * FROM ChildElements
     `;
@@ -400,7 +386,10 @@ function bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>)
   return `InVirtualSet(?, ${key})`;
 }
 
-function bindNamed(key: string, value: Id64String, bindings: Map<string, QueryBindable>, bindingName: string) {
+function bindNamed(key: string, value: Id64String | undefined, bindings: Map<string, QueryBindable>, bindingName: string) {
+  if (value === undefined) {
+    return `${key} IS NULL`;
+  }
   bindings.set(bindingName, value);
   return `${key} = :${bindingName}`;
 }
@@ -429,7 +418,6 @@ function pushToMap<TKey, TValue>(_map: Map<TKey, Set<TValue>>, key: TKey, value:
   set.add(value);
 }
 
-// istanbul ignore next
 function mergeMaps<TKey, TValue>(dest: Map<TKey, Set<TValue>>, src: Map<TKey, Set<TValue>>) {
   for (const [key, srcSet] of src) {
     const destSet = dest.get(key);

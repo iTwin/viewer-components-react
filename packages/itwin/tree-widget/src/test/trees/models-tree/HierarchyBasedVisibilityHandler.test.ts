@@ -38,7 +38,7 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-describe.only("VisibilityStateHandler", () => {
+describe("VisibilityStateHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -1519,10 +1519,6 @@ describe.only("VisibilityStateHandler", () => {
       console.log("Categories to parent elements:", categories);
       console.log("Elements to their children:", elementHierarchy);
       /* eslint-enable no-console */
-
-      // for await (const row of iModel.createQueryReader("SELECT * FROM bis.Model", undefined, { convertClassIdsToClassNames: true })) {
-      //   console.log(JSON.stringify(row.toRow(), undefined, 2));
-      // }
     });
 
     after(async () => {

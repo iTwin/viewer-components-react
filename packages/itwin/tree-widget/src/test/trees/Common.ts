@@ -85,7 +85,7 @@ export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQuery
         reduce((a, b) => a + b),
       );
     }),
-    queryElementChildren: sinon.fake(({ elementId }) => from(props?.elementChildren?.get(elementId) ?? [])),
+    queryElementChildren: sinon.fake((elementId) => from(props?.elementChildren?.get(elementId) ?? [])),
     queryGroupingNodeChildren: sinon.fake((node) => {
       const groupingInfo = props?.groupingNodeChildren?.get(node);
       return groupingInfo

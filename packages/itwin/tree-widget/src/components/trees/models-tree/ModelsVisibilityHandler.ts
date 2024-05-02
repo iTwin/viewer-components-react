@@ -432,8 +432,8 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
    * Wrapper for element IDs cache access which allows for easier stubbing in tests.
    */
   // istanbul ignore next
-  private getAssemblyElementIds(elementId: string, modelId: string, categoryId: string) {
-    const elementIds = this._queryHandler.queryElementChildren({ elementId, modelId, categoryId });
+  private getAssemblyElementIds(elementId: string, _modelId: string, _categoryId: string) {
+    const elementIds = this._queryHandler.queryElementChildren(elementId);
     return {
       async *getElementIds() {
         for await (const item of eachValueFrom(elementIds)) {

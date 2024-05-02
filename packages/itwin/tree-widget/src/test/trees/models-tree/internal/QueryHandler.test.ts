@@ -96,7 +96,7 @@ describe("QueryHandler", () => {
       if (query.includes("FROM bis.SpatialCategory")) {
         return [{ id: "0x10" }];
       }
-      if (query.includes("JOIN ChildElements")) {
+      if (query.includes("JOIN ChildCategoryElements")) {
         return [{ id: "0x100" }, { id: "0x200" }];
       }
       return undefined;
@@ -119,7 +119,7 @@ describe("QueryHandler", () => {
       if (query.includes("FROM bis.SpatialCategory")) {
         return [{ id: "0x10" }];
       }
-      if (query.includes("JOIN ChildElements")) {
+      if (query.includes("JOIN ChildCategoryElements")) {
         return [{ id: "0x100" }, { id: "0x200" }];
       }
       return undefined;
@@ -198,17 +198,31 @@ describe("QueryHandler", () => {
     expect(stub).to.be.calledOnce;
 
     let elementId = "0x100";
-    result = await collect(handler.queryElementChildren({ elementId, categoryId, modelId }));
+    result = await collect(handler.queryElementChildren(elementId));
     expect(stub).to.be.calledOnce;
     expect(result.sort()).to.deep.eq(categoryElementsHierarchy.get("0x100")!);
 
     elementId = "0x10";
-    result = await collect(handler.queryElementChildren({ elementId, categoryId, modelId }));
+    result = await collect(handler.queryElementChildren(elementId));
     expect(stub).to.be.calledOnce;
     expect(result.sort()).to.deep.eq(allElements.filter((x) => x !== elementId));
 
     elementId = "0x400";
-    result = await collect(handler.queryElementChildren({ elementId, categoryId, modelId }));
+    result = await collect(handler.queryElementChildren(elementId));
+    expect(stub).to.be.calledOnce;
+    expect(result).to.be.empty;
+  });
+
+  it("doesn't query element children if previous query returned no results", async () => {
+    const elementId = "0x10";
+    const stub = sinon.fake.returns([]);
+
+    const handler = createQueryHandler(createIModelMock(stub), "");
+    let result = await collect(handler.queryElementChildren(elementId));
+    expect(stub).to.be.calledOnce;
+    expect(result).to.be.empty;
+
+    result = await collect(handler.queryElementChildren(elementId));
     expect(stub).to.be.calledOnce;
     expect(result).to.be.empty;
   });

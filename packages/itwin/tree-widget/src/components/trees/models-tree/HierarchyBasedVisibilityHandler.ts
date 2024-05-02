@@ -403,9 +403,8 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         return of(this.getElementDefaultVisibility(props));
       }
 
-      return this._queryHandler.queryElementChildren(props).pipe(
-        map((x) => this.getElementOverriddenVisibility(x)?.state),
-        filter((x): x is Exclude<typeof x, undefined> => !!x),
+      return this._queryHandler.queryElementChildren(props.elementId).pipe(
+        map((elementId) => this.getElementDefaultVisibility({ ...props, elementId }).state),
         getVisibilityStatusFromChildren({
           visible: undefined,
           hidden: "element.allChildrenAreHidden",
@@ -594,7 +593,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return of(elementId).pipe(
-            concatWith(hasChildren === false ? EMPTY : from(this._queryHandler.queryElementChildren(props))),
+            concatWith(hasChildren === false ? EMPTY : from(this._queryHandler.queryElementChildren(props.elementId))),
             this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }),
           );
         }),
