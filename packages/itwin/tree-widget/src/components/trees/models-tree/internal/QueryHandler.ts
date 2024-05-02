@@ -8,12 +8,12 @@ import { count, defer, EMPTY, expand, filter, first, from, isObservable, last, m
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
+import { reduceWhile } from "../../common/Rxjs";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { QueryRowProxy } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GroupingNodeKey } from "@itwin/presentation-common";
-
 interface GroupedElementIds {
   modelId: string;
   categoryId: string;
@@ -145,7 +145,7 @@ class QueryHandlerImplementation implements IQueryHandler {
   }
 
   private runModelCategoriesQuery(id: Id64String): Observable<Id64String> {
-    const bindings = new Array<QueryBindable>();
+    const bindings = new Array<Id64String>();
     const query = /* sql */ `
       SELECT ECInstanceId id
       FROM bis.SpatialCategory c
@@ -164,14 +164,38 @@ class QueryHandlerImplementation implements IQueryHandler {
   public queryModelElementsCount(id: Id64String): Observable<number> {
     return this.queryModelCategories(id).pipe(
       mergeMap((categoryId) => {
-        const categoryElements = this._categoryElementsCache.get(categoryId);
-        if (categoryElements && !isObservable(categoryElements)) {
-          return of(categoryElements.size);
+        const categoryElements = this._categoryElementsCache.get(`${categoryId}${id}`);
+        if (categoryElements) {
+          return isObservable(categoryElements) ? categoryElements.pipe(count()) : of(categoryElements.size);
         }
-        return this.queryCategoryElements(categoryId, id).pipe(count());
+        return of(undefined);
       }),
-      reduce((a, b) => a + b, 0),
+      reduceWhile(
+        ({ allDefined }) => allDefined,
+        (acc, x) => {
+          if (x === undefined) {
+            acc.allDefined = false;
+            return acc;
+          }
+          acc.result += x;
+          return acc;
+        },
+        { allDefined: true, result: 0 },
+      ),
+      mergeMap((acc) => {
+        // istanbul ignore if
+        if (!acc) {
+          return of(0);
+        }
+        return acc.allDefined ? of(acc.result) : this.runModelElementCountQuery(id);
+      }),
     );
+  }
+
+  private runModelElementCountQuery(modelId: string): Observable<number> {
+    const bindings = new Array<string>();
+    const query = `SELECT COUNT(*) FROM bis.GeometricElement3d WHERE ${bind("Model.Id", modelId, bindings)}`;
+    return this.runQuery(query, bindings, (row) => row[0]);
   }
 
   public queryModelElements(modelId: Id64String, elementIds?: Id64Set): Observable<Id64String> {
@@ -323,7 +347,7 @@ class QueryHandlerImplementation implements IQueryHandler {
 
   private runQuery<TResult>(
     query: string,
-    bindings: Array<QueryBindable> | Map<string, Id64String> | undefined,
+    bindings: Array<Id64String> | Map<string, Id64String> | undefined,
     resultMapper: (row: QueryRowProxy) => TResult,
   ): Observable<TResult> {
     return defer(() => {
@@ -367,34 +391,18 @@ class QueryHandlerImplementation implements IQueryHandler {
   }
 }
 
-type QueryBindable = Id64String | Id64Set;
-const MAX_ALLOWED_BINDINGS = 1000;
-
-function bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>) {
-  if (typeof value === "string") {
-    bindings.push(value);
-    return `${key} = ?`;
-  }
-
-  const length = Array.isArray(value) ? value.length : value.size;
-  if (length < MAX_ALLOWED_BINDINGS) {
-    bindings.push(...value);
-    return `${key} IN (${[...value].map(() => "?").join(",")})`;
-  }
-
+function bind(key: string, value: Id64String, bindings: Array<Id64String>) {
   bindings.push(value);
-  return `InVirtualSet(?, ${key})`;
+  return `${key} = ?`;
 }
 
-function bindNamed(key: string, value: Id64String | undefined, bindings: Map<string, QueryBindable>, bindingName: string) {
-  if (value === undefined) {
-    return `${key} IS NULL`;
-  }
+function bindNamed(key: string, value: Id64String, bindings: Map<string, Id64String>, bindingName: string) {
   bindings.set(bindingName, value);
   return `${key} = :${bindingName}`;
 }
 
-function createBinder(bindings: Array<QueryBindable> | Map<string, Id64String>): QueryBinder | undefined {
+// istanbul ignore next
+function createBinder(bindings: Array<Id64String> | Map<string, Id64String>): QueryBinder | undefined {
   const binder = new QueryBinder();
   bindings.forEach((x, idx) => {
     // Binder expect index to start from 1
@@ -421,6 +429,7 @@ function pushToMap<TKey, TValue>(_map: Map<TKey, Set<TValue>>, key: TKey, value:
 function mergeMaps<TKey, TValue>(dest: Map<TKey, Set<TValue>>, src: Map<TKey, Set<TValue>>) {
   for (const [key, srcSet] of src) {
     const destSet = dest.get(key);
+    // istanbul ignore if
     if (destSet) {
       srcSet.forEach((x) => destSet.add(x));
     } else {

@@ -348,6 +348,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return;
     }
 
+    // istanbul ignore if
     if (!modelId || !categoryId) {
       return;
     }

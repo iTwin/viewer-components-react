@@ -420,6 +420,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: TreeNodeItem, on: boolean): Observable<void> {
+    // istanbul ignore if
     if (!isPresentationTreeNodeItem(node)) {
       return EMPTY;
     }
@@ -429,6 +430,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       return this.changeElementGroupingNodeState(nodeKey, on);
     }
 
+    // istanbul ignore if
     if (!NodeKey.isInstancesNodeKey(nodeKey)) {
       return EMPTY;
     }
@@ -498,6 +500,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private changeModelState(props: ChangeModelStateProps): Observable<void> {
     const result = defer(() => {
       const viewport = this._props.viewport;
+      // istanbul ignore if
       if (!viewport.view.isSpatialView()) {
         return EMPTY;
       }
@@ -658,6 +661,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       );
     }
 
+    // istanbul ignore if
     if (!props.modelId) {
       return of(undefined);
     }

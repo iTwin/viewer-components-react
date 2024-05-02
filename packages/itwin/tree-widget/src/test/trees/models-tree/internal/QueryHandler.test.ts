@@ -122,7 +122,7 @@ describe("QueryHandler", () => {
       if (query.includes("JOIN ChildCategoryElements")) {
         return [{ id: "0x100" }, { id: "0x200" }];
       }
-      return undefined;
+      throw new Error(`Unexpected query: ${query}`);
     });
     const handler = createQueryHandler(createIModelMock(stub), "");
     const result = await collect(handler.queryModelElements(modelId));
@@ -134,6 +134,29 @@ describe("QueryHandler", () => {
     const count = await firstValueFrom(handler.queryModelElementsCount(modelId));
     expect(count).to.deep.eq(elements.length);
     expect(stub).to.be.calledTwice;
+  });
+
+  it("queries model elements count if not all categories had their children queried", async () => {
+    const modelId = "0x1";
+    const categoryId = "0x10";
+    const stub = sinon.fake((query: string) => {
+      if (query.includes("FROM bis.SpatialCategory")) {
+        return [{ id: "0x10" }, { id: "0x20" }];
+      }
+      if (query.includes("JOIN ChildCategoryElements")) {
+        return [{ id: "0x100" }, { id: "0x200" }];
+      }
+      if (query.includes("SELECT COUNT(*)")) {
+        return [[10]];
+      }
+      throw new Error(`Unexpected query: ${query}`);
+    });
+
+    const handler = createQueryHandler(createIModelMock(stub), "");
+    await collect(handler.queryCategoryElements(categoryId, modelId));
+
+    const count = await firstValueFrom(handler.queryModelElementsCount(modelId));
+    expect(count).to.deep.eq(10);
   });
 
   it("caches category recursive elements", async () => {
@@ -225,6 +248,26 @@ describe("QueryHandler", () => {
     result = await collect(handler.queryElementChildren(elementId));
     expect(stub).to.be.calledOnce;
     expect(result).to.be.empty;
+  });
+
+  it("builds element children cache from responses in random order", async () => {
+    const stub = sinon.fake(() => {
+      return [
+        { id: "0x20", parentId: "0x10" },
+        { id: "0x30", parentId: "0x20" },
+        { id: "0x40", parentId: "0x30" },
+        { id: "0x50", parentId: "0x10" },
+        { id: "0x10" },
+      ];
+    });
+
+    const handler = createQueryHandler(createIModelMock(stub), "");
+    let result = await collect(handler.queryElementChildren("0x1"));
+    const allChildren = ["0x10", "0x20", "0x30", "0x40", "0x50"];
+    expect(result.sort()).to.deep.eq(allChildren);
+
+    result = await collect(handler.queryElementChildren("0x10"));
+    expect(result.sort()).to.deep.eq(allChildren.filter((x) => x !== "0x10"));
   });
 });
 
