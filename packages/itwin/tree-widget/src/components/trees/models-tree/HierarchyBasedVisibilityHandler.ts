@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatAll, concatWith, defer, EMPTY, filter, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
+import { concat, concatAll, concatWith, defer, EMPTY, filter, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
@@ -233,7 +233,11 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private getModelVisibilityStatusImpl(modelId: Id64String): Observable<VisibilityStatus> {
     const viewport = this._props.viewport;
     if (!viewport.view.isSpatialView()) {
-      return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
+      return createVisibilityStatusObs("disabled", "model.nonSpatialView");
+    }
+
+    if (!viewport.view.viewsModel(modelId)) {
+      return createVisibilityStatusObs("hidden");
     }
 
     return this._queryHandler.queryModelCategories(modelId).pipe(
@@ -241,12 +245,10 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       map((x) => x.state),
       getVisibilityFromChildren,
       mergeMap((visibilityByCategories) => {
-        const modelVisible = viewport.view.viewsModel(modelId);
-
         // istanbul ignore if
         if (visibilityByCategories === "empty") {
           // TODO: Is this possible?
-          return createVisibilityStatusObs(modelVisible ? "visible" : "hidden");
+          return createVisibilityStatusObs("hidden");
         }
 
         // If different categories have different visibilities,
@@ -261,75 +263,49 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
         const alwaysDrawn = viewport.alwaysDrawn;
         const neverDrawn = viewport.neverDrawn;
-        if (!alwaysDrawn && !neverDrawn) {
+        if (!alwaysDrawn?.size && !neverDrawn?.size) {
           return createVisibilityStatusObs(visibilityByCategories);
         }
 
-        if (!modelVisible) {
-          return this.getAlwaysDrawnChildren(modelId).pipe(
-            mergeMap((ad) => {
-              // Model is hidden and there are no always drawn children => model is fully hidden.
-              if (!ad.size) {
-                return createVisibilityStatusObs("hidden");
-              }
-
-              return this._queryHandler
-                .queryModelElementsCount(modelId)
-                .pipe(map((count) => createVisibilityStatus(ad.size === count ? "visible" : "partial")));
-            }),
-          );
-        }
-
         return forkJoin({
-          neverDrawnChildren: this.getNeverDrawnChildren(modelId),
+          neverDrawnChildren: neverDrawn?.size ? this.getNeverDrawnChildren({ modelId }) : of(undefined),
+          alwaysDrawnChildren: alwaysDrawn?.size ? this.getAlwaysDrawnChildren({ modelId }) : of(undefined),
           totalCount: this._queryHandler.queryModelElementsCount(modelId),
         }).pipe(
-          mergeMap(({ neverDrawnChildren, totalCount }) => {
-            // Model is visible but all children are in the never drawn list.
-            if (neverDrawnChildren.size === totalCount) {
-              return createVisibilityStatusObs("hidden");
+          map(({ neverDrawnChildren, alwaysDrawnChildren, totalCount }) => {
+            if (neverDrawnChildren?.size === totalCount) {
+              return createVisibilityStatus("hidden");
             }
 
-            // Some children are in the never drawn list.
-            if (neverDrawnChildren.size) {
-              return createVisibilityStatusObs("partial");
+            if (alwaysDrawnChildren?.size === totalCount) {
+              return createVisibilityStatus("visible");
             }
 
-            if (!this._props.viewport.isAlwaysDrawnExclusive || !alwaysDrawn?.size) {
-              return createVisibilityStatusObs("visible");
+            if (viewport.isAlwaysDrawnExclusive && alwaysDrawn?.size) {
+              return alwaysDrawnChildren?.size ? createVisibilityStatus("partial") : createVisibilityStatus("hidden");
             }
 
-            return this.getAlwaysDrawnChildren(modelId).pipe(
-              map((alwaysDrawnChildren) => {
-                // No children in exclusive always drawn set => model is hidden
-                if (alwaysDrawnChildren.size === 0) {
-                  return createVisibilityStatus("hidden");
-                }
+            if (!neverDrawnChildren?.size && !alwaysDrawnChildren?.size) {
+              return createVisibilityStatus(visibilityByCategories);
+            }
 
-                // All children in exclusive always drawn set => model is visible
-                if (alwaysDrawnChildren.size === totalCount) {
-                  return createVisibilityStatus("visible");
-                }
-
-                return createVisibilityStatus("partial");
-              }),
-            );
+            return createVisibilityStatus("partial");
           }),
         );
       }),
     );
   }
 
-  private getCategoryViewportVisibilityStatus(categoryId: Id64String) {
-    const isVisible = this._props.viewport.view.viewsCategory(categoryId);
-    return isVisible
-      ? createVisibilityStatus("visible", "category.visibleThroughCategorySelector")
-      : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
-  }
-
   private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String | undefined): VisibilityStatus {
+    const getCategoryViewportVisibilityStatus = () => {
+      const isVisible = this._props.viewport.view.viewsCategory(categoryId);
+      return isVisible
+        ? createVisibilityStatus("visible", "category.visibleThroughCategorySelector")
+        : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
+    };
+
     if (!modelId) {
-      return this.getCategoryViewportVisibilityStatus(categoryId);
+      return getCategoryViewportVisibilityStatus();
     }
 
     switch (this._props.viewport.perModelCategoryVisibility.getOverride(modelId, categoryId)) {
@@ -339,7 +315,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         return createVisibilityStatus("hidden");
     }
 
-    return this.getCategoryViewportVisibilityStatus(categoryId);
+    return getCategoryViewportVisibilityStatus();
   }
 
   private getCategoryDisplayStatus(props: GetCategoryStatusProps): Observable<VisibilityStatus> {
@@ -415,7 +391,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       return createVisibilityStatus("hidden", "element.hiddenModelIsHidden");
     }
 
-    status = this.getCategoryViewportVisibilityStatus(categoryId);
+    status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
     delete status.tooltip;
     return status;
   }
@@ -521,72 +497,67 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   }
 
   private changeModelState(props: ChangeModelStateProps): Observable<void> {
-    const result = this.changeModelStateImpl(props);
+    const result = defer(() => {
+      const viewport = this._props.viewport;
+      if (!viewport.view.isSpatialView()) {
+        return EMPTY;
+      }
+
+      const { ids, on } = props;
+      return concat(
+        defer(() => {
+          viewport.perModelCategoryVisibility.clearOverrides(ids);
+          if (on) {
+            return from(viewport.addViewedModels(ids));
+          }
+
+          viewport.changeModelDisplay(ids, false);
+          return EMPTY;
+        }),
+        (typeof ids === "string" ? of(ids) : from(ids)).pipe(
+          mergeMap((modelId) => {
+            return this._queryHandler.queryModelCategories(modelId).pipe(mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on })));
+          }),
+        ),
+      );
+    });
     const ovr = this._props.overrides?.changeModelState;
     return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
   }
 
-  private changeModelStateImpl({ ids, on }: ChangeModelStateProps): Observable<void> {
+  private changeCategoryState(props: ChangeCategoryStateProps): Observable<void> {
     const viewport = this._props.viewport;
-    if (!viewport.view.isSpatialView()) {
-      return EMPTY;
-    }
+    const { modelId, categoryId, on } = props;
 
-    return concat(
+    const result = concat(
       defer(() => {
-        viewport.perModelCategoryVisibility.clearOverrides(ids);
-        if (on) {
-          return from(viewport.addViewedModels(ids));
+        if (!modelId) {
+          viewport.changeCategoryDisplay(categoryId, on, on);
+          return EMPTY;
         }
 
-        viewport.changeModelDisplay(ids, false);
-        return EMPTY;
+        return concat(
+          props.on && !viewport.view.viewsModel(modelId) ? viewport.addViewedModels(modelId) : EMPTY,
+          defer(() => {
+            const isDisplayedInSelector = viewport.view.viewsCategory(categoryId);
+            const override =
+              on === isDisplayedInSelector
+                ? PerModelCategoryVisibility.Override.None
+                : on
+                  ? PerModelCategoryVisibility.Override.Show
+                  : PerModelCategoryVisibility.Override.Hide;
+            viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, override);
+            if (override === PerModelCategoryVisibility.Override.None && on) {
+              // we took off the override which means the category is displayed in selector, but
+              // doesn't mean all its subcategories are displayed - this call ensures that
+              viewport.changeCategoryDisplay(categoryId, true, true);
+            }
+            return EMPTY;
+          }),
+        );
       }),
-      (typeof ids === "string" ? of(ids) : from(ids)).pipe(
-        mergeMap((modelId) => {
-          const observables = new Array<Observable<void>>();
-
-          if (viewport.alwaysDrawn?.size) {
-            observables.push(this.clearAlwaysDrawnChildren(modelId));
-          }
-
-          if (viewport.neverDrawn?.size) {
-            observables.push(this.clearNeverDrawnChildren(modelId));
-          }
-
-          observables.push(
-            this._queryHandler.queryModelCategories(modelId).pipe(mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on }))),
-          );
-          return observables.length ? merge(...observables) : EMPTY;
-        }),
-      ),
+      defer(() => this.clearAlwaysAndNeverDrawnChildren(props)),
     );
-  }
-
-  private changeCategoryState(props: ChangeCategoryStateProps): Observable<void> {
-    const result = defer(() => {
-      const viewport = this._props.viewport;
-      const { modelId, categoryId, on } = props;
-      if (!modelId) {
-        viewport.changeCategoryDisplay(categoryId, on, on);
-        return EMPTY;
-      }
-
-      const isDisplayedInSelector = this._props.viewport.view.viewsCategory(categoryId);
-      const override =
-        on === isDisplayedInSelector
-          ? PerModelCategoryVisibility.Override.None
-          : on
-            ? PerModelCategoryVisibility.Override.Show
-            : PerModelCategoryVisibility.Override.Hide;
-      this._props.viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, override);
-      if (override === PerModelCategoryVisibility.Override.None && on) {
-        // we took off the override which means the category is displayed in selector, but
-        // doesn't mean all its subcategories are displayed - this call ensures that
-        this._props.viewport.changeCategoryDisplay(categoryId, true, true);
-      }
-      return EMPTY;
-    });
 
     const ovr = this._props.overrides?.changeCategoryState;
     return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
@@ -642,14 +613,16 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         reduce(
           (acc, elementId) => {
             if (on) {
-              acc.changedNeverDrawn ||= acc.neverDrawn.delete(elementId);
+              const wasRemoved = acc.neverDrawn.delete(elementId);
+              acc.changedNeverDrawn ||= wasRemoved;
               // If exclusive mode is enabled, we must add the element to the always drawn list.
               if ((!isDisplayedByDefault || isAlwaysDrawnExclusive) && !acc.alwaysDrawn.has(elementId)) {
                 acc.alwaysDrawn.add(elementId);
                 acc.changedAlwaysDrawn = true;
               }
             } else {
-              acc.changedAlwaysDrawn ||= acc.alwaysDrawn.delete(elementId);
+              const wasRemoved = acc.alwaysDrawn.delete(elementId);
+              acc.changedAlwaysDrawn ||= wasRemoved;
               // If exclusive mode is enabled, we don't have to add the element to the never drawn list.
               if (isDisplayedByDefault && !isAlwaysDrawnExclusive && !acc.neverDrawn.has(elementId)) {
                 acc.neverDrawn.add(elementId);
@@ -673,33 +646,46 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     };
   }
 
-  private getAlwaysDrawnChildren(modelId: string): Observable<Id64Set> {
-    const alwaysDrawn = this._props.viewport.alwaysDrawn;
-    return (alwaysDrawn?.size ? this._queryHandler.queryModelElements(modelId, alwaysDrawn) : EMPTY).pipe(toSet());
+  private getAlwaysOrNeverDrawnChildren(props: { modelId?: string; categoryId?: string; always: boolean }): Observable<Id64Set | undefined> {
+    const set = props.always ? this._props.viewport.alwaysDrawn : this._props.viewport.neverDrawn;
+    if (!set?.size) {
+      return of(undefined);
+    }
+
+    if (props.categoryId) {
+      return from(this._queryHandler.queryCategoryElements(props.categoryId, props.modelId)).pipe(
+        filter((id) => set.has(id)),
+        toSet(),
+      );
+    }
+
+    if (!props.modelId) {
+      return of(undefined);
+    }
+
+    return from(this._queryHandler.queryModelElements(props.modelId, set)).pipe(toSet());
   }
 
-  private clearAlwaysDrawnChildren(modelId: string): Observable<void> {
-    return this.getAlwaysDrawnChildren(modelId).pipe(
-      map((children) => {
-        if (children.size) {
-          const viewport = this._props.viewport;
-          viewport.setAlwaysDrawn(setDifference(viewport.alwaysDrawn!, children));
+  private getAlwaysDrawnChildren(props: { modelId?: string; categoryId?: string }) {
+    return this.getAlwaysOrNeverDrawnChildren({ ...props, always: true });
+  }
+
+  private getNeverDrawnChildren(props: { modelId?: string; categoryId?: string }) {
+    return this.getAlwaysOrNeverDrawnChildren({ ...props, always: false });
+  }
+
+  private clearAlwaysAndNeverDrawnChildren(props: { modelId?: string; categoryId?: string }) {
+    return forkJoin({
+      alwaysDrawn: this.getAlwaysDrawnChildren(props),
+      neverDrawn: this.getNeverDrawnChildren(props),
+    }).pipe(
+      map(({ alwaysDrawn, neverDrawn }) => {
+        const viewport = this._props.viewport;
+        if (viewport.alwaysDrawn?.size && alwaysDrawn?.size) {
+          viewport.setAlwaysDrawn(setDifference(viewport.alwaysDrawn, alwaysDrawn));
         }
-      }),
-    );
-  }
-
-  private getNeverDrawnChildren(modelId: string) {
-    const neverDrawn = this._props.viewport.neverDrawn;
-    return (neverDrawn?.size ? this._queryHandler.queryModelElements(modelId, neverDrawn) : EMPTY).pipe(toSet());
-  }
-
-  private clearNeverDrawnChildren(modelId: string): Observable<void> {
-    return this.getNeverDrawnChildren(modelId).pipe(
-      map((children) => {
-        if (children.size) {
-          const viewport = this._props.viewport;
-          viewport.setNeverDrawn(setDifference(viewport.neverDrawn!, children));
+        if (viewport.neverDrawn?.size && neverDrawn?.size) {
+          viewport.setNeverDrawn(setDifference(viewport.neverDrawn, neverDrawn));
         }
       }),
     );
