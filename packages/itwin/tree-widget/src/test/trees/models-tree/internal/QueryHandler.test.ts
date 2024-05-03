@@ -31,7 +31,7 @@ describe("QueryHandler", () => {
     const modelId = "0x1";
     const items = ["0x10", "0x20"];
     const stub = sinon.fake.returns(items.map((id) => ({ id })));
-    const handler = createQueryHandler(createIModelMock(stub), "");
+    const handler = createQueryHandler(createIModelMock(stub));
     let result = await collect(handler.queryModelCategories(modelId));
     expect(result).to.deep.eq(items);
     expect(stub).to.be.calledOnce;
@@ -60,7 +60,7 @@ describe("QueryHandler", () => {
       .withArgs(sinon.match(modelsQueryRegex))
       .returns([...models.entries()].map(([subjectId, modelIds]) => modelIds.map((id) => ({ id, parentId: subjectId }))).flat());
 
-    const handler = createQueryHandler(createIModelMock(stub), "");
+    const handler = createQueryHandler(createIModelMock(stub));
     let result = await collect(handler.querySubjectModels("0x1"));
     expect(result).to.deep.eq(models.get("0x1"));
     expect(stub).to.be.calledTwice;
@@ -80,7 +80,7 @@ describe("QueryHandler", () => {
     const modelId = "0x1";
     const items = ["0x10", "0x20"];
     const stub = sinon.fake.returns(items.map((id) => ({ id })));
-    const handler = createQueryHandler(createIModelMock(stub), "");
+    const handler = createQueryHandler(createIModelMock(stub));
     let result = await collect(handler.queryModelCategories(modelId));
     expect(result).to.deep.eq(items);
     expect(stub).to.be.calledOnce;
@@ -94,7 +94,7 @@ describe("QueryHandler", () => {
     const elementId = "0x10";
     const stub = sinon.fake.returns([]);
 
-    const handler = createQueryHandler(createIModelMock(stub), "");
+    const handler = createQueryHandler(createIModelMock(stub));
     let result = await collect(handler.queryElementChildren(elementId));
     expect(stub).to.be.calledOnce;
     expect(result).to.be.empty;
@@ -115,7 +115,7 @@ describe("QueryHandler", () => {
       ];
     });
 
-    const handler = createQueryHandler(createIModelMock(stub), "");
+    const handler = createQueryHandler(createIModelMock(stub));
     let result = await collect(handler.queryElementChildren("0x1"));
     const allChildren = ["0x10", "0x20", "0x30", "0x40", "0x50"];
     expect(result.sort()).to.deep.eq(allChildren);

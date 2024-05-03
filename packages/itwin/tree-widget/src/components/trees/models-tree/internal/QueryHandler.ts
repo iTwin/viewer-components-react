@@ -12,7 +12,7 @@ import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { QueryRowProxy } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { GroupingNodeKey, Ruleset } from "@itwin/presentation-common";
+import type { GroupingNodeKey } from "@itwin/presentation-common";
 interface GroupedElementIds {
   modelId: string;
   categoryId: string;
@@ -50,8 +50,8 @@ export interface IQueryHandler {
 /**
  * @internal
  */
-export function createQueryHandler(iModel: IModelConnection, rulesetOrId: Ruleset | string): IQueryHandler {
-  return new QueryHandlerImplementation(iModel, rulesetOrId);
+export function createQueryHandler(iModel: IModelConnection): IQueryHandler {
+  return new QueryHandlerImplementation(iModel);
 }
 
 const EMPTY_ID_SET = new Set<Id64String>();
@@ -62,10 +62,7 @@ class QueryHandlerImplementation implements IQueryHandler {
   private readonly _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
   private _subjectsInfo?: Observable<SubjectsInfo>;
 
-  constructor(
-    private readonly _iModel: IModelConnection,
-    private readonly _rulesetOrId: Ruleset | string,
-  ) {}
+  constructor(private readonly _iModel: IModelConnection) {}
 
   public invalidateCache(): void {
     this._modelCategoriesCache.clear();
@@ -238,12 +235,35 @@ class QueryHandlerImplementation implements IQueryHandler {
       return obs;
     }
 
-    const rulesetId = this._rulesetOrId;
     const elementIds = from(
       Presentation.presentation.getContentInstanceKeys({
         imodel: this._iModel,
-        rulesetOrId: rulesetId,
-        displayType: "AssemblyElementsRequest",
+        rulesetOrId: {
+          id: "ModelsTree/AssemblyElements",
+          rules: [
+            {
+              ruleType: "Content",
+              specifications: [
+                {
+                  specType: "SelectedNodeInstances",
+                },
+                {
+                  specType: "ContentRelatedInstances",
+                  relationshipPaths: [
+                    {
+                      relationship: {
+                        schemaName: "BisCore",
+                        className: "ElementOwnsChildElements",
+                      },
+                      direction: "Forward",
+                      count: "*",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
         keys: new KeySet([node]),
       }),
     ).pipe(

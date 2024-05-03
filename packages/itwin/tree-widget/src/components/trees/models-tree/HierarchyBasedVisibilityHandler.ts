@@ -22,7 +22,7 @@ import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEven
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./internal/Tooltip";
-import type { ECClassGroupingNodeKey, Ruleset } from "@itwin/presentation-common";
+import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Observable, OperatorFunction } from "rxjs";
 interface GetCategoryStatusProps {
@@ -96,7 +96,6 @@ interface VisibilityHandlerOverrides {
  */
 export interface HierarchyBasedVisibilityHandlerProps {
   viewport: Viewport;
-  rulesetOrId: Ruleset | string;
   overrides?: VisibilityHandlerOverrides;
   hierarchyAutoUpdateEnabled?: boolean;
 }
@@ -130,7 +129,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
   constructor(private readonly _props: HierarchyBasedVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
-    this._queryHandler = createQueryHandler(this._props.viewport.iModel, this._props.rulesetOrId);
+    this._queryHandler = createQueryHandler(this._props.viewport.iModel);
     // istanbul ignore if
     if (this._props.hierarchyAutoUpdateEnabled) {
       // eslint-disable-next-line @itwin/no-internal

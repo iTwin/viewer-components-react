@@ -86,7 +86,6 @@ describe.only("VisibilityStateHandler", () => {
       props?.queryHandler && queryHandlerStub.stub(() => queryHandler);
       return {
         handler: createHierarchyBasedVisibilityHandler({
-          rulesetOrId: "",
           viewport: props?.viewport ?? createFakeSinonViewport(),
           overrides,
         }),
@@ -133,7 +132,6 @@ describe.only("VisibilityStateHandler", () => {
             getSubjectNodeVisibility: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -551,7 +549,6 @@ describe.only("VisibilityStateHandler", () => {
             getCategoryDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -938,7 +935,6 @@ describe.only("VisibilityStateHandler", () => {
             getElementGroupingNodeDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1028,7 +1024,6 @@ describe.only("VisibilityStateHandler", () => {
             changeSubjectNodeState: sinon.fake.resolves(undefined),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1209,7 +1204,6 @@ describe.only("VisibilityStateHandler", () => {
             changeCategoryState: sinon.fake.resolves(undefined),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1279,7 +1273,6 @@ describe.only("VisibilityStateHandler", () => {
             changeElementState: sinon.fake.resolves(undefined),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1499,7 +1492,6 @@ describe.only("VisibilityStateHandler", () => {
             changeElementGroupingNodeState: sinon.fake.resolves(undefined),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1654,7 +1646,6 @@ describe.only("VisibilityStateHandler", () => {
 
     let viewport: Viewport;
     let handler: IVisibilityHandler;
-    let rulesetOrId: Ruleset | string = "";
 
     beforeEach(async () => {
       viewport = OffScreenViewport.create({
@@ -1662,7 +1653,6 @@ describe.only("VisibilityStateHandler", () => {
         viewRect: new ViewRect(),
       });
       handler = createHierarchyBasedVisibilityHandler({
-        rulesetOrId,
         viewport,
       });
     });
@@ -1988,25 +1978,26 @@ describe.only("VisibilityStateHandler", () => {
     });
 
     describe("grouping nodes", () => {
+      let ruleset: Ruleset;
       const classGroups = new Array<{
         parent: TreeNodeItem & { key: ECClassGroupingNodeKey };
-        children: TreeNodeItem[],
+        children: TreeNodeItem[];
       }>();
 
       before((done) => {
-        rulesetOrId = createRuleset({
+        ruleset = createRuleset({
           enableElementsClassGrouping: true,
         });
 
-        function createTreeNodeItem<T extends Node>(node: T): T & { id: string, label: PropertyRecord } {
+        function createTreeNodeItem<T extends Node>(node: T): T & { id: string; label: PropertyRecord } {
           const id = JSON.stringify(node.key);
           return { ...node, id, label: PropertyRecord.fromString(id) };
-        };
+        }
 
         from(
           Presentation.presentation.getNodesIterator({
             imodel: iModel,
-            rulesetOrId,
+            rulesetOrId: ruleset,
           }),
         )
           .pipe(
@@ -2015,7 +2006,7 @@ describe.only("VisibilityStateHandler", () => {
               return from(
                 Presentation.presentation.getNodesIterator({
                   imodel: iModel,
-                  rulesetOrId,
+                  rulesetOrId: ruleset,
                   parentKey: parent.key,
                 }),
               ).pipe(
@@ -2056,7 +2047,10 @@ describe.only("VisibilityStateHandler", () => {
         await Promise.all(
           classGroups.map(async ({ parent, children }) => {
             await handler.changeVisibility(parent, true);
-            await expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "visible" }, `Grouping node for ${parent.key.className} has unexpected visibility`);
+            await expect(handler.getVisibilityStatus(parent)).to.eventually.include(
+              { state: "visible" },
+              `Grouping node for ${parent.key.className} has unexpected visibility`,
+            );
             await Promise.all(children.map(async (node) => expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "visible" })));
           }),
         );

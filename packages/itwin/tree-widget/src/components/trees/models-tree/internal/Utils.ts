@@ -163,28 +163,6 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
           },
         ],
       },
-      {
-        ruleType: "Content",
-        condition: `ContentDisplayType = "AssemblyElementsRequest"`,
-        specifications: [
-          {
-            specType: "SelectedNodeInstances",
-          },
-          {
-            specType: "ContentRelatedInstances",
-            relationshipPaths: [
-              {
-                relationship: {
-                  schemaName: "BisCore",
-                  className: "ElementOwnsChildElements",
-                },
-                direction: "Forward",
-                count: "*",
-              },
-            ],
-          },
-        ],
-      },
     ],
   };
 }

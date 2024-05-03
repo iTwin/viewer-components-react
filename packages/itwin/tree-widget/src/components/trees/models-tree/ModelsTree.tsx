@@ -357,7 +357,7 @@ function useLegacyVisibilityHandler({
   hierarchyAutoUpdateEnabled,
   iModel,
 }: UseVisibilityHandlerProps) {
-  const subjectModelIdsCache = useMemo(() => createQueryHandler(iModel, rulesetId), [iModel, rulesetId]);
+  const subjectModelIdsCache = useMemo(() => createQueryHandler(iModel), [iModel]);
   // eslint-disable-next-line deprecation/deprecation
   const [state, setState] = useState<ModelsVisibilityHandler>();
 
@@ -388,7 +388,6 @@ function useLegacyVisibilityHandler({
 function useHierarchyBasedVisibilityHandler({
   legacyHandler,
   hierarchyBasedHandler,
-  rulesetId,
   activeView,
   hierarchyAutoUpdateEnabled,
 }: UseVisibilityHandlerProps & {
@@ -402,7 +401,6 @@ function useHierarchyBasedVisibilityHandler({
     }
 
     const visibilityHandlerProps: HierarchyBasedVisibilityHandlerProps = {
-      rulesetOrId: rulesetId,
       viewport: activeView,
       hierarchyAutoUpdateEnabled,
     };
@@ -412,7 +410,7 @@ function useHierarchyBasedVisibilityHandler({
     return () => {
       handler.dispose();
     };
-  }, [activeView, hierarchyAutoUpdateEnabled, legacyHandler, hierarchyBasedHandler, rulesetId]);
+  }, [activeView, hierarchyAutoUpdateEnabled, legacyHandler, hierarchyBasedHandler]);
 
   if (legacyHandler) {
     return undefined;

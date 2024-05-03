@@ -254,8 +254,6 @@ export interface HierarchyBasedVisibilityHandlerProps {
     // (undocumented)
     overrides?: VisibilityHandlerOverrides;
     // (undocumented)
-    rulesetOrId: Ruleset | string;
-    // (undocumented)
     viewport: Viewport;
 }
 
