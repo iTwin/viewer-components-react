@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECPropertyReference } from "@itwin/insights-client";
-import { DataType } from "@itwin/insights-client";
 import type {
   ContentDescriptorRequestOptions,
   Field,
@@ -30,29 +29,12 @@ export interface PropertyMetaData {
   sourceSchema: string;
   sourceClassName: string;
   categoryLabel: string;
-  propertyType: DataType;
   actualECClassName: string;
   parentPropertyClassName: string | undefined;
   ecPropertyTraversal: string[];
   primitiveNavigationClass: string;
   key: string;
 }
-
-const convertType = (type: string): DataType => {
-  switch (type) {
-    case "int":
-    case "enum":
-    case "long":
-    case "number":
-      return DataType.Integer;
-    case "boolean":
-      return DataType.Boolean;
-    case "double":
-      return DataType.Double;
-    default:
-      return DataType.String;
-  }
-};
 
 const generateKey = (
   parentPropertyClassName: string | undefined,
@@ -71,11 +53,6 @@ const extractPrimitives = (
   // It belongs to this parent class
   const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
   const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
-  /* Presentation assigns primitive navigations properties as a long type due to how it stores the
-     ECInstanceId of the class in the meta.ECClassDef table on the C++ layer.
-     We are handling this special case.
-  */
-  const propertyType = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
   const actualECClassName = property.property.classInfo.name;
   const newPropertyTraversal = [...propertyTraversal, propertyName];
 
@@ -85,7 +62,6 @@ const extractPrimitives = (
       sourceSchema: "*",
       sourceClassName: "*",
       ecPropertyTraversal: newPropertyTraversal,
-      propertyType,
       primitiveNavigationClass,
       actualECClassName,
       parentPropertyClassName,
@@ -105,7 +81,6 @@ const extractPrimitiveStructProperties = (
   if (member.type.valueFormat === PropertyValueFormat.Primitive) {
     const propertyName = member.name;
     const displayLabel = member.label;
-    const propertyType = convertType(member.type.typeName);
     const newPropertyTraversal = [...propertyTraversal, propertyName];
 
     return ({
@@ -113,7 +88,6 @@ const extractPrimitiveStructProperties = (
       sourceSchema: "*",
       sourceClassName: "*",
       ecPropertyTraversal: newPropertyTraversal,
-      propertyType,
       primitiveNavigationClass: "",
       actualECClassName,
       parentPropertyClassName,

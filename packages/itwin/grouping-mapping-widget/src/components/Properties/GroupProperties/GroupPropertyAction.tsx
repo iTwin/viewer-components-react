@@ -276,7 +276,7 @@ export const GroupPropertyAction = ({
               selectedProperties.map((property) => (
                 <GroupPropertyListItem
                   key={property.key}
-                  content={`${property.displayLabel} (${property.propertyType})`}
+                  content={`${property.displayLabel}`}
                   title={`${property.actualECClassName}`}
                   description={property.categoryLabel}
                 />
