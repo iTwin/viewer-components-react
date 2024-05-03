@@ -27,7 +27,6 @@ import type { Observable, OperatorFunction } from "rxjs";
 interface GetCategoryStatusProps {
   categoryId: Id64String;
   modelId: Id64String | undefined;
-  hasChildren?: boolean;
 }
 
 interface ChangeCategoryStateProps {
@@ -54,9 +53,8 @@ interface ChangeModelStateProps {
 
 /**
  * Properties for a method of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
- * @public
  */
-export type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
+type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
   ? TProps & {
       /** A callback that produces the value from the original implementation. */
       readonly originalImplementation: () => TResult;
@@ -70,16 +68,14 @@ export type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) =
 
 /**
  * Function type for an overridden method of [[IHierarchyBasedVisibilityHandler]].
- * @public
  */
-export type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
+type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
 
 /**
  * Functionality of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
  * Each callback will be provided original implementation and reference to a [[IHierarchyBasedVisibilityHandler]].
- * @public
  */
-export interface VisibilityHandlerOverrides {
+interface VisibilityHandlerOverrides {
   getSubjectNodeVisibility?: OverriddenMethod<(props: { node: TreeNodeItem; ids: Id64Set }) => Promise<VisibilityStatus>>;
   getModelDisplayStatus?: OverriddenMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
   getCategoryDisplayStatus?: OverriddenMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
@@ -343,17 +339,12 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private getCategoryDisplayStatus(props: GetCategoryStatusProps): Observable<VisibilityStatus> {
     const result = defer(() => {
       const defaultStatus = this.getDefaultCategoryVisibilityStatus(props.categoryId, props.modelId);
-      if (props.hasChildren === false) {
-        return of(defaultStatus);
-      }
-
       return this._queryHandler.queryCategoryElements(props.categoryId, props.modelId).pipe(
         map((id) => this.getElementOverriddenVisibility(id)?.state ?? defaultStatus.state),
         getVisibilityStatusFromChildren({
           visible: "category.allElementsVisible",
           hidden: "category.allElementsHidden",
           partial: "category.someElementsAreHidden",
-          empty: () => defaultStatus,
         }),
       );
     });

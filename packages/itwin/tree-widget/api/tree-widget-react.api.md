@@ -463,15 +463,6 @@ export namespace NodeUtils {
     const getElementCategoryId: (node: TreeNodeItem) => Id64String | undefined;
 }
 
-// @public
-export type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
-
-// @public
-export type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult ? TProps & {
-    readonly originalImplementation: () => TResult;
-    readonly handler: IHierarchyBasedVisibilityHandler;
-} : never;
-
 // @internal
 export const RULESET_CATEGORIES: Ruleset;
 
@@ -639,44 +630,6 @@ export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWit
 
 // @public
 export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map<string, VisibilityStatus>) => void;
-
-// @public
-export interface VisibilityHandlerOverrides {
-    // (undocumented)
-    changeCategoryState?: OverriddenMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
-    // (undocumented)
-    changeElementGroupingNodeState?: OverriddenMethod<(props: {
-        key: ECClassGroupingNodeKey;
-        on: boolean;
-    }) => Promise<void>>;
-    // (undocumented)
-    changeElementState?: OverriddenMethod<(props: ChangeElementStateProps) => Promise<void>>;
-    // (undocumented)
-    changeModelState?: OverriddenMethod<(props: ChangeModelStateProps) => Promise<void>>;
-    // (undocumented)
-    changeSubjectNodeState?: OverriddenMethod<(props: {
-        node: TreeNodeItem;
-        ids: Id64Set;
-        on: boolean;
-    }) => Promise<void>>;
-    // (undocumented)
-    getCategoryDisplayStatus?: OverriddenMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getElementDisplayStatus?: OverriddenMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getElementGroupingNodeDisplayStatus?: OverriddenMethod<(props: {
-        key: ECClassGroupingNodeKey;
-    }) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getModelDisplayStatus?: OverriddenMethod<(props: {
-        id: Id64String;
-    }) => Promise<VisibilityStatus>>;
-    // (undocumented)
-    getSubjectNodeVisibility?: OverriddenMethod<(props: {
-        node: TreeNodeItem;
-        ids: Id64Set;
-    }) => Promise<VisibilityStatus>>;
-}
 
 // @public
 export interface VisibilityStatus {

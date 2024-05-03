@@ -54,8 +54,6 @@ public;ModelsVisibilityHandlerProps
 deprecated;ModelsVisibilityHandlerProps
 public;ModelTreeComponentProps 
 public;NodeUtils
-public;OverriddenMethod
-public;OverriddenMethodProps
 internal;RULESET_CATEGORIES: Ruleset
 internal;RULESET_EXTERNAL_SOURCES: Ruleset
 internal;RULESET_IMODEL_CONTENT: Ruleset
@@ -89,7 +87,6 @@ public;useTreeTransientState
 public;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
 deprecated;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
 public;VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map
-public;VisibilityHandlerOverrides
 public;VisibilityStatus
 public;VisibilityTreeEventHandler 
 public;VisibilityTreeEventHandlerParams 
