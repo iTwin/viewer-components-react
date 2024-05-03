@@ -5,27 +5,32 @@
 
 import { expect } from "chai";
 import path from "path";
-import { filter, from, mergeMap } from "rxjs";
+import { concatAll, expand, filter, from, mergeMap } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import { NodeKey } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { toVoidPromise } from "../../../components/trees/common/Rxjs";
 import { createHierarchyBasedVisibilityHandler } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
 import { createVisibilityStatus } from "../../../components/trees/models-tree/internal/Tooltip";
-import { addModel, addPartition, addPhysicalObject, addSpatialCategory } from "../../IModelUtils";
+import { createRuleset } from "../../../components/trees/models-tree/internal/Utils";
+import { addModel, addPartition, addSpatialCategory } from "../../IModelUtils";
 import { TestUtils } from "../../TestUtils";
 import {
   createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeQueryHandler, createFakeSinonViewport, createModelNode,
   createSubjectNode, stubFactoryFunction,
 } from "../Common";
 
-import type { StubbedFactoryFunction } from "../Common";
 import type { Id64String } from "@itwin/core-bentley";
-import type { VisibilityHandlerOverrides } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
+import type { Node, Ruleset } from "@itwin/presentation-common";
+import type { GeometricElement3dProps } from "@itwin/core-common";
+import type { StubbedFactoryFunction } from "../Common";
+import type { HierarchyBasedVisibilityHandlerProps } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
 import type { Visibility } from "../../../components/trees/models-tree/internal/Tooltip";
 import type { IQueryHandler } from "../../../components/trees/models-tree/internal/QueryHandler";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -54,7 +59,7 @@ describe("VisibilityStateHandler", () => {
 
     function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: IQueryHandler; viewport?: Viewport }) {
       const queryHandler = props?.queryHandler ?? createFakeQueryHandler();
-      const overrides: VisibilityHandlerOverrides = {
+      const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
         getModelDisplayStatus:
           props?.overrides?.models &&
           (async ({ id, originalImplementation }) => {
@@ -81,7 +86,7 @@ describe("VisibilityStateHandler", () => {
       props?.queryHandler && queryHandlerStub.stub(() => queryHandler);
       return {
         handler: createHierarchyBasedVisibilityHandler({
-          rulesetId: "",
+          rulesetOrId: "",
           viewport: props?.viewport ?? createFakeSinonViewport(),
           overrides,
         }),
@@ -128,7 +133,7 @@ describe("VisibilityStateHandler", () => {
             getSubjectNodeVisibility: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetId: "",
+            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -542,11 +547,11 @@ describe("VisibilityStateHandler", () => {
 
       describe("category", () => {
         it("can be overridden", async () => {
-          const overrides: VisibilityHandlerOverrides = {
+          const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
             getCategoryDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetId: "",
+            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -911,11 +916,11 @@ describe("VisibilityStateHandler", () => {
 
       describe("grouping node", () => {
         it("can be overridden", async () => {
-          const overrides: VisibilityHandlerOverrides = {
+          const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
             getElementGroupingNodeDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetId: "",
+            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -951,9 +956,9 @@ describe("VisibilityStateHandler", () => {
             queryHandler: createFakeQueryHandler({
               groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
             }),
-            overrides: {
-              elements: new Map(elementIds.map((x) => [x, "hidden"])),
-            },
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set(elementIds),
+            }),
           });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
@@ -968,27 +973,44 @@ describe("VisibilityStateHandler", () => {
             queryHandler: createFakeQueryHandler({
               groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
             }),
-            overrides: {
-              elements: new Map([
-                [elementIds[0], "visible"],
-                [elementIds[1], "hidden"],
-              ]),
-            },
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set([elementIds[0]]),
+            }),
           });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "partial" });
         });
+
+        it("uses category visibility when always/never drawn lists are empty", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const elementIds = ["0x10", "0x20"];
+          const node = createElementClassGroupingNode(elementIds);
+
+          for (const categoryOn of [true, false]) {
+            const { handler } = createVisibilityHandlerWrapper({
+              viewport: createFakeSinonViewport({
+                view: { viewsCategory: sinon.fake.returns(categoryOn) },
+              }),
+              queryHandler: createFakeQueryHandler({
+                groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
+              }),
+            });
+            const result = await handler.getVisibilityStatus(node);
+            expect(result).to.include({ state: categoryOn ? "visible" : "hidden" });
+          }
+        })
       });
     });
 
     describe("changeVisibilityStatus", () => {
       describe("subject", () => {
         it("can be overridden", async () => {
-          const overrides: VisibilityHandlerOverrides = {
+          const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
             changeSubjectNodeState: sinon.fake.resolves(undefined),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetId: "",
+            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1165,11 +1187,11 @@ describe("VisibilityStateHandler", () => {
 
       describe("category", () => {
         it("can be overridden", async () => {
-          const overrides: VisibilityHandlerOverrides = {
+          const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
             changeCategoryState: sinon.fake.resolves(undefined),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetId: "",
+            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1235,11 +1257,11 @@ describe("VisibilityStateHandler", () => {
           const modelId = "0x1";
           const categoryId = "0x2";
           const elementId = "0x10";
-          const overrides: VisibilityHandlerOverrides = {
+          const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
             changeElementState: sinon.fake.resolves(undefined),
           };
           const handler = createHierarchyBasedVisibilityHandler({
-            rulesetId: "",
+            rulesetOrId: "",
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1452,6 +1474,56 @@ describe("VisibilityStateHandler", () => {
           });
         });
       });
+
+      describe("grouping node", () => {
+        it("can be overridden", async () => {
+          const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
+            changeElementGroupingNodeState: sinon.fake.resolves(undefined),
+          };
+          const handler = createHierarchyBasedVisibilityHandler({
+            rulesetOrId: "",
+            viewport: createFakeSinonViewport(),
+            overrides,
+          });
+
+          const node = createElementClassGroupingNode([]);
+          for (const on of [true, false]) {
+            await handler.changeVisibility(node, on);
+            expect(overrides.changeElementGroupingNodeState).to.be.calledWithMatch({
+              key: node.key,
+              on,
+            });
+          }
+        });
+
+        function testChildElementsChange(on: boolean) {
+          it(`${on ? "shows" : "hides"} all its elements`, async () => {
+            const modelId = "0x1";
+            const categoryId = "0x2";
+            const elementIds = ["0x10", "0x20"];
+            const node = createElementClassGroupingNode([]);
+            const queryHandler = createFakeQueryHandler({
+              groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
+            });
+            const viewport = createFakeSinonViewport({
+              view: {
+                viewsModel: sinon.fake.returns(true),
+                viewsCategory: sinon.fake.returns(!on),
+              },
+            });
+            const { handler } = createVisibilityHandlerWrapper({
+              queryHandler,
+              viewport,
+            });
+
+            await handler.changeVisibility(node, on);
+            expect(on ? viewport.alwaysDrawn : viewport.neverDrawn).to.deep.eq(new Set(elementIds));
+          });
+        }
+
+        testChildElementsChange(true);
+        testChildElementsChange(false);
+      });
     });
   });
 
@@ -1478,8 +1550,35 @@ describe("VisibilityStateHandler", () => {
         },
       });
 
+      // Logger.initializeToConsole();
+      // Logger.setLevelDefault(LogLevel.Info);
+
+      const schemaName = "VisibilityHandlerIntegrationTests";
+      const schemaAlias = "test";
+      const classNames = [...Array(6).keys()].map((i) => `ElementClass${i}`);
+      const schema = `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <ECSchema schemaName="${schemaName}" alias="${schemaAlias}" version="01.00.00" xmlns="http://www.bentley.com/schemas/Bentley.ECXML.3.2">
+          <ECSchemaReference name="CoreCustomAttributes" version="01.00.03" alias="CoreCA" />
+          <ECSchemaReference name="ECDbMap" version="02.00.01" alias="ecdbmap" />
+          <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
+
+          ${classNames
+            .map(
+              (className) => `
+                <ECEntityClass typeName="${className}">
+                  <BaseClass>bis:GeometricElement3d</BaseClass>
+                </ECEntityClass>
+              `,
+            )
+            .join("\n")}
+        </ECSchema>
+      `;
+
       // eslint-disable-next-line deprecation/deprecation
-      iModel = await buildTestIModel("CategoriesTree3d", async (builder) => {
+      iModel = await buildTestIModel("ModelsTreeTest", async (builder) => {
+        await builder.importSchema(schema);
+
         const partitions = [
           addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel 1"),
           addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel 2"),
@@ -1494,14 +1593,23 @@ describe("VisibilityStateHandler", () => {
             modelCategories.push(categoryId);
 
             const parents = new Array<string>();
-            for (let elementIdx = 0; elementIdx < 5; ++elementIdx) {
-              const parentCode = new Code({ scope: partitionId, spec: "", value: `${categoryIdx}_${elementIdx}` });
-              const parent = addPhysicalObject(builder, modelId, categoryId, parentCode);
+            for (const className of classNames) {
+              const props: GeometricElement3dProps = {
+                classFullName: "Generic:PhysicalObject",
+                code: new Code({ scope: partitionId, spec: "", value: `${categoryIdx}_${className}` }),
+                model: modelId,
+                category: categoryId,
+              };
+              const parent = builder.insertElement(props);
               parents.push(parent);
               const elements = new Set<string>();
               for (let childIdx = 0; childIdx < 2; ++childIdx) {
-                const code = new Code({ scope: partitionId, spec: "", value: `${categoryIdx}_${elementIdx}_${childIdx}` });
-                const element = addPhysicalObject(builder, modelId, categoryId, code, parent);
+                const element = builder.insertElement({
+                  ...props,
+                  code: new Code({ scope: partitionId, spec: "", value: `${categoryIdx}_${className}_${childIdx}` }),
+                  classFullName: `test:${className}`,
+                  parent: { id: parent, relClassName: "BisCore:PhysicalElementAssemblesElements" },
+                });
                 elements.add(element);
               }
               elementHierarchy.set(parent, elements);
@@ -1528,6 +1636,7 @@ describe("VisibilityStateHandler", () => {
 
     let viewport: Viewport;
     let handler: IVisibilityHandler;
+    let rulesetOrId: Ruleset | string = "";
 
     beforeEach(async () => {
       viewport = OffScreenViewport.create({
@@ -1535,7 +1644,7 @@ describe("VisibilityStateHandler", () => {
         viewRect: new ViewRect(),
       });
       handler = createHierarchyBasedVisibilityHandler({
-        rulesetId: "",
+        rulesetOrId,
         viewport,
       });
     });
@@ -1857,6 +1966,128 @@ describe("VisibilityStateHandler", () => {
             visibility: "visible",
           }),
         ]);
+      });
+    });
+
+    describe("grouping nodes", () => {
+      const classGroups = new Array<{ parent: TreeNodeItem; children: TreeNodeItem[] }>();
+
+      // function getCategoryModel(categoryId: string) {
+      //   for (const [modelId, categoryIds] of models) {
+      //     if (categoryIds.includes(categoryId)) {
+      //       return modelId;
+      //     }
+      //   }
+      //   throw new Error(`Model not found for category: ${categoryId}`);
+      // }
+
+      // function getElementInfo(elementId: string) {
+      //   for (const [categoryId, elements] of categories) {
+      //     if (elements.includes(elementId)) {
+      //       return { categoryId, modelId: getCategoryModel(categoryId) };
+      //     }
+      //   }
+
+      //   for (const [parentId, ids] of elementHierarchy) {
+      //     if (ids.has(elementId)) {
+      //       return getElementInfo(parentId);
+      //     }
+      //   }
+
+      //   throw new Error(`Category not found for element: ${elementId}`);
+      // }
+
+      before((done) => {
+        rulesetOrId = createRuleset({
+          enableElementsClassGrouping: true,
+        });
+
+        const createTreeNodeItem = (node: Node): TreeNodeItem => {
+          const id = JSON.stringify(node.key);
+          return { ...node, id, label: PropertyRecord.fromString(id) };
+        };
+
+        from(
+          Presentation.presentation.getNodesIterator({
+            imodel: iModel,
+            rulesetOrId,
+          }),
+        )
+          .pipe(
+            mergeMap(({ items }) => items),
+            expand((parent) => {
+              return from(
+                Presentation.presentation.getNodesIterator({
+                  imodel: iModel,
+                  rulesetOrId,
+                  parentKey: parent.key,
+                }),
+              ).pipe(
+                mergeMap(async ({ items }) => {
+                  const children = new Array<Node>();
+                  for await (const node of items) {
+                    children.push(node);
+                  }
+
+                  if (NodeKey.isClassGroupingNodeKey(parent.key) && parent.key.className !== "Generic:PhysicalObject") {
+                    classGroups.push({
+                      parent: createTreeNodeItem(parent),
+                      children: children.map(createTreeNodeItem),
+                    });
+                  }
+                  return children;
+                }),
+                concatAll(),
+              );
+            }),
+          )
+          .subscribe({
+            complete: done,
+            error: done,
+          });
+      });
+
+      it("is hidden by default", async () => {
+        await Promise.all(
+          classGroups.map(async ({ parent }) => {
+            await expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "hidden" });
+          }),
+        );
+      });
+
+      it("showing node makes it and its children visible", async () => {
+        await Promise.all(
+          classGroups.map(async ({ parent, children }) => {
+            await handler.changeVisibility(parent, true);
+            await Promise.all([
+              expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "visible" }),
+              ...children.map(async (node) => expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "visible" })),
+            ]);
+          }),
+        );
+      });
+
+      it("hiding node makes it and its children visible", async () => {
+        await viewport.addViewedModels([...models.keys()]);
+        await Promise.all(
+          classGroups.map(async ({ parent, children }) => {
+            await handler.changeVisibility(parent, false);
+            await Promise.all([
+              expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "hidden" }),
+              ...children.map(async (node) => expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "hidden" })),
+            ]);
+          }),
+        );
+      });
+
+      it("hiding child node makes grouping node partial", async () => {
+        await Promise.all(classGroups.map(async ({ parent }) => handler.changeVisibility(parent, true)));
+        await Promise.all(
+          classGroups.map(async ({ parent, children }) => {
+            await handler.changeVisibility(children[0], false);
+            await expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "partial" });
+          }),
+        );
       });
     });
   });

@@ -402,7 +402,7 @@ function useHierarchyBasedVisibilityHandler({
     }
 
     const visibilityHandlerProps: HierarchyBasedVisibilityHandlerProps = {
-      rulesetId,
+      rulesetOrId: rulesetId,
       viewport: activeView,
       hierarchyAutoUpdateEnabled,
     };

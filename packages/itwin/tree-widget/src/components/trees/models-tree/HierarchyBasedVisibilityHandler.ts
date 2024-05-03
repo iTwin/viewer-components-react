@@ -19,9 +19,9 @@ import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-
 import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
-import type { Visibility } from "./internal/Tooltip";
+import type { NonPartialVisibilityStatus, Visibility } from "./internal/Tooltip";
 import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
+import type { ECClassGroupingNodeKey, Ruleset } from "@itwin/presentation-common";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Observable, OperatorFunction } from "rxjs";
 interface GetCategoryStatusProps {
@@ -95,7 +95,7 @@ interface VisibilityHandlerOverrides {
  */
 export interface HierarchyBasedVisibilityHandlerProps {
   viewport: Viewport;
-  rulesetId: string;
+  rulesetOrId: Ruleset | string;
   overrides?: VisibilityHandlerOverrides;
   hierarchyAutoUpdateEnabled?: boolean;
 }
@@ -126,7 +126,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
   constructor(private readonly _props: HierarchyBasedVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
-    this._queryHandler = createQueryHandler(this._props.viewport.iModel, this._props.rulesetId);
+    this._queryHandler = createQueryHandler(this._props.viewport.iModel, this._props.rulesetOrId);
     // istanbul ignore if
     if (this._props.hierarchyAutoUpdateEnabled) {
       // eslint-disable-next-line @itwin/no-internal
@@ -314,8 +314,8 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     );
   }
 
-  private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String | undefined): VisibilityStatus {
-    const getCategoryViewportVisibilityStatus = () => {
+  private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String | undefined): NonPartialVisibilityStatus {
+    const getCategoryViewportVisibilityStatus = (): NonPartialVisibilityStatus => {
       const isVisible = this._props.viewport.view.viewsCategory(categoryId);
       return isVisible
         ? createVisibilityStatus("visible", "category.displayedThroughCategorySelector")
@@ -357,13 +357,28 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     const result = defer(() =>
       this._queryHandler.queryGroupingNodeChildren(key).pipe(
         mergeMap(({ modelId, categoryId, elementIds }) => {
-          return elementIds.pipe(mergeMap((elementId) => this.getElementDisplayStatus({ categoryId, modelId, elementId, hasChildren: false })));
-        }),
-        map((x) => x.state),
-        getVisibilityStatusFromChildren({
-          visible: "groupingNode.allElementsVisible",
-          hidden: "groupingNode.allElementsHidden",
-          partial: "groupingNode.someElementsAreHidden",
+          const viewport = this._props.viewport;
+          if (!viewport.view.viewsModel(modelId)) {
+            return createVisibilityStatusObs("hidden");
+          }
+
+          const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId).state;
+          return elementIds.pipe(
+            map((elementId) => {
+              if (viewport.alwaysDrawn?.has(elementId)) {
+                return "visible";
+              }
+              if (viewport.neverDrawn?.has(elementId)) {
+                return "hidden";
+              }
+              return categoryVisibility;
+            }),
+            getVisibilityStatusFromChildren({
+              visible: "groupingNode.allElementsVisible",
+              hidden: "groupingNode.allElementsHidden",
+              partial: "groupingNode.someElementsAreHidden",
+            }),
+          );
         }),
       ),
     );
@@ -372,7 +387,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return ovr ? from(ovr(this.createOverrideProps({ key }, result))) : result;
   }
 
-  private getElementOverriddenVisibility(elementId: string): VisibilityStatus | undefined {
+  private getElementOverriddenVisibility(elementId: string): NonPartialVisibilityStatus | undefined {
     const viewport = this._props.viewport;
     if (viewport.neverDrawn?.has(elementId)) {
       return createVisibilityStatus("hidden", "element.hiddenThroughNeverDrawnList");
@@ -395,13 +410,13 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     const viewport = this._props.viewport;
     const { elementId, modelId, categoryId } = props;
 
+    if (!viewport.view.viewsModel(modelId)) {
+      return createVisibilityStatus("hidden", "element.hiddenThroughModel");
+    }
+
     let status = this.getElementOverriddenVisibility(elementId);
     if (status) {
       return status;
-    }
-
-    if (!viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatus("hidden", "element.hiddenThroughModel");
     }
 
     status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
@@ -585,7 +600,15 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     const result = defer(() => {
       return this._queryHandler.queryGroupingNodeChildren(key).pipe(
         mergeMap(({ modelId, categoryId, elementIds }) => {
-          return elementIds.pipe(mergeMap((elementId) => this.changeElementState({ elementId, on, modelId, categoryId })));
+          const viewport = this._props.viewport;
+          return concat(
+            on && !viewport.view.viewsModel(modelId) ? from(viewport.addViewedModels(modelId)) : EMPTY,
+            defer(() => {
+              const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+              const isDisplayedByDefault = categoryVisibility.state === "visible";
+              return from(elementIds).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
+            }),
+          );
         }),
       );
     });

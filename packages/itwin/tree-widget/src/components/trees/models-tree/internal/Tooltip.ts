@@ -12,6 +12,11 @@ import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 export type Visibility = "visible" | "hidden" | "partial";
 
 /** @internal */
+export type NonPartialVisibilityStatus = Omit<VisibilityStatus, "state"> & { state: "visible" | "hidden" };
+
+/** @internal */
+export function createVisibilityStatus(status: "visible" | "hidden", tooltipStringId?: string): NonPartialVisibilityStatus;
+export function createVisibilityStatus(status: "visible" | "hidden" | "partial" | "disabled", tooltipStringId?: string): VisibilityStatus;
 export function createVisibilityStatus(status: Visibility | "disabled", tooltipStringId?: string): VisibilityStatus {
   return {
     state: status === "disabled" ? "hidden" : status,
