@@ -54,7 +54,8 @@
         "hiddenThroughCategorySelector": "Category display disabled through category selector",
         "allElementsHidden": "All category elements are in the never drawn list or none of the category elements are in the exclusive always drawn list",
         "someElementsAreHidden": "There are both visible and hidden elements in this category",
-        "allElementsVisible": "All category elements are in the always drawn list"
+        "allElementsVisible": "All category elements are in the always drawn list",
+        "hiddenThroughModel": "Model is hidden"
       },
       "element": {
         "modelNotDisplayed": "Can't control element display if model is not displayed",

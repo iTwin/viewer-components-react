@@ -3,13 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable } from "rxjs";
-import { count, defer, EMPTY, expand, filter, first, from, isObservable, last, map, mergeMap, of, reduce, shareReplay, tap } from "rxjs";
+import { defer, EMPTY, expand, first, from, isObservable, last, map, mergeMap, reduce, shareReplay, tap } from "rxjs";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import { reduceWhile } from "../../common/Rxjs";
 
+import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { QueryRowProxy } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -28,14 +27,23 @@ interface SubjectsInfo {
 /**
  * @internal
  */
+export interface ElementsQueryProps {
+  modelId?: Id64String;
+  categoryId?: Id64String;
+  rootElementId?: Id64String;
+  elementIds?: Id64Set;
+}
+
+/**
+ * @internal
+ */
 export interface IQueryHandler {
   querySubjectModels(subjectId: Id64String): Observable<Id64String>;
   queryModelCategories(id: Id64String): Observable<Id64String>;
-  queryModelElementsCount(modelId: Id64String): Observable<number>;
-  queryModelElements(modelId: Id64String, elementIds?: Id64Set): Observable<Id64String>;
-  queryCategoryElements(categoryId: Id64String, modelId: Id64String | undefined): Observable<Id64String>;
   queryElementChildren(elementId: Id64String): Observable<Id64String>;
   queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds>;
+  queryElements(props: ElementsQueryProps): Observable<Id64String>;
+  queryElementsCount(props: ElementsQueryProps): Observable<number>;
   invalidateCache(): void;
 }
 
@@ -50,7 +58,6 @@ const EMPTY_ID_SET = new Set<Id64String>();
 
 class QueryHandlerImplementation implements IQueryHandler {
   private readonly _modelCategoriesCache = new Map<string, Id64Set | Observable<Id64String>>();
-  private readonly _categoryElementsCache = new Map<string, Id64Set | Observable<Id64String>>();
   private readonly _elementHierarchyCache = new Map<string, Id64Set>();
   private readonly _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
   private _subjectsInfo?: Observable<SubjectsInfo>;
@@ -62,7 +69,6 @@ class QueryHandlerImplementation implements IQueryHandler {
 
   public invalidateCache(): void {
     this._modelCategoriesCache.clear();
-    this._categoryElementsCache.clear();
     this._elementHierarchyCache.clear();
     this._groupedElementIdsCache.clear();
     this._subjectsInfo = undefined;
@@ -153,94 +159,13 @@ class QueryHandlerImplementation implements IQueryHandler {
         SELECT 1
         FROM bis.GeometricElement3d e
         WHERE
-          ${bind("e.model.id", id, bindings)}
+          ${bind("e.Model.id", id, bindings)}
           AND e.Category.Id = c.ECInstanceId
           AND e.Parent IS NULL
+        LIMIT 1
       )
     `;
     return this.runQuery(query, [id], (row) => row.id);
-  }
-
-  public queryModelElementsCount(id: Id64String): Observable<number> {
-    return this.queryModelCategories(id).pipe(
-      mergeMap((categoryId) => {
-        const categoryElements = this._categoryElementsCache.get(`${categoryId}${id}`);
-        if (categoryElements) {
-          return isObservable(categoryElements) ? categoryElements.pipe(count()) : of(categoryElements.size);
-        }
-        return of(undefined);
-      }),
-      reduceWhile(
-        ({ allDefined }) => allDefined,
-        (acc, x) => {
-          if (x === undefined) {
-            acc.allDefined = false;
-            return acc;
-          }
-          acc.result += x;
-          return acc;
-        },
-        { allDefined: true, result: 0 },
-      ),
-      mergeMap((acc) => {
-        // istanbul ignore if
-        if (!acc) {
-          return of(0);
-        }
-        return acc.allDefined ? of(acc.result) : this.runModelElementCountQuery(id);
-      }),
-    );
-  }
-
-  private runModelElementCountQuery(modelId: string): Observable<number> {
-    const bindings = new Array<string>();
-    const query = `SELECT COUNT(*) FROM bis.GeometricElement3d WHERE ${bind("Model.Id", modelId, bindings)}`;
-    return this.runQuery(query, bindings, (row) => row[0]);
-  }
-
-  public queryModelElements(modelId: Id64String, elementIds?: Id64Set): Observable<Id64String> {
-    return this.queryModelCategories(modelId).pipe(
-      mergeMap((categoryId) => {
-        return this.queryCategoryElements(categoryId, modelId);
-      }),
-      filter((id) => !elementIds || elementIds.has(id)),
-    );
-  }
-
-  public queryCategoryElements(categoryId: Id64String, modelId: Id64String | undefined): Observable<Id64String> {
-    const cacheKey = `${categoryId}${modelId ?? ""}`;
-    return this.getObservableOrInsertToCache({
-      cache: this._categoryElementsCache,
-      cacheKey,
-      factory: () => this.runCategoryChildrenRecursiveQuery({ categoryId, modelId }).pipe(this.populateElementHierarchyCacheOperator()),
-    });
-  }
-
-  private runCategoryChildrenRecursiveQuery(props: { categoryId: string; modelId?: string }): Observable<{ id: string; parentId?: string | undefined }> {
-    const { categoryId, modelId } = props;
-    const bindings = new Map<string, Id64String>();
-    const query = /* sql */ `
-      WITH RECURSIVE
-        ParentCategoryElements(id) AS (
-          SELECT ECInstanceId id
-          FROM bis.GeometricElement3d
-          WHERE
-            ${bindNamed("Category.Id", categoryId, bindings, "categoryId")}
-            ${modelId ? `AND ${bindNamed("Model.Id", modelId, bindings, "modelId")}` : ""}
-        ),
-        ChildCategoryElements(id, parentId) AS (
-          SELECT id, NULL AS parentId
-          FROM ParentCategoryElements
-
-          UNION ALL
-
-          SELECT e.ECInstanceId AS id, e.Parent.Id AS parentId
-          FROM bis.GeometricElement3d e
-          JOIN ChildCategoryElements ce ON e.Parent.Id = ce.id
-        )
-      SELECT * FROM ChildCategoryElements
-    `;
-    return this.runQuery(query, bindings, (row) => ({ id: row.id, parentId: row.parentId }));
   }
 
   public queryElementChildren(elementId: string): Observable<Id64String> {
@@ -345,9 +270,68 @@ class QueryHandlerImplementation implements IQueryHandler {
     return obs;
   }
 
+  public queryElements(props: ElementsQueryProps): Observable<string> {
+    return this.runElementsQuery({
+      ...props,
+      type: "ids",
+    });
+  }
+
+  public queryElementsCount(props: ElementsQueryProps): Observable<number> {
+    return this.runElementsQuery({
+      ...props,
+      type: "count",
+    });
+  }
+
+  private runElementsQuery(
+    props: ElementsQueryProps & {
+      type: "ids";
+    },
+  ): Observable<Id64String>;
+  private runElementsQuery(
+    props: ElementsQueryProps & {
+      type: "count";
+    },
+  ): Observable<number>;
+  private runElementsQuery(
+    props: ElementsQueryProps & {
+      type: "ids" | "count";
+    },
+  ): Observable<Id64String | number> {
+    const bindings = new Array<QueryBindable>();
+    const conditions = new Array<string>();
+    props.modelId && conditions.push(bind("Model.Id", props.modelId, bindings));
+    props.categoryId && conditions.push(bind("Category.Id", props.categoryId, bindings));
+    props.rootElementId && conditions.push(bind("Parent.Id", props.rootElementId, bindings));
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    const query = /* sql */ `
+      WITH RECURSIVE
+        RootElements(id) AS (
+          SELECT e.ECInstanceId AS id
+          FROM bis.GeometricElement3d e
+          ${whereClause}
+        ),
+        ChildElements(id) AS (
+          SELECT * FROM RootElements
+
+          UNION ALL
+
+          SELECT e.ECInstanceId AS id
+          FROM bis.GeometricElement3d e
+          INNER JOIN ChildElements ce ON e.Parent.Id = ce.id
+        )
+        SELECT ${props.type === "ids" ? "*" : "COUNT(*)"} FROM ChildElements
+        ${props.elementIds ? `WHERE ${bind("id", props.elementIds, bindings)}` : ""}
+    `;
+    return this.runQuery(query, bindings, (row) => row[0]);
+  }
+
   private runQuery<TResult>(
     query: string,
-    bindings: Array<Id64String> | Map<string, Id64String> | undefined,
+    bindings: Array<QueryBindable> | Map<string, Id64String> | undefined,
     resultMapper: (row: QueryRowProxy) => TResult,
   ): Observable<TResult> {
     return defer(() => {
@@ -391,9 +375,23 @@ class QueryHandlerImplementation implements IQueryHandler {
   }
 }
 
-function bind(key: string, value: Id64String, bindings: Array<Id64String>) {
+type QueryBindable = Id64String | Id64Set;
+
+function bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>) {
+  if (typeof value === "string") {
+    bindings.push(value);
+    return `${key} = ?`;
+  }
+
+  const maxBindings = 1000;
+  if (value.size < maxBindings) {
+    const values = [...value];
+    bindings.push(...values);
+    return `${key} IN (${values.join(",")})`;
+  }
+
   bindings.push(value);
-  return `${key} = ?`;
+  return `inVirtualSet(?, ${key})`;
 }
 
 function bindNamed(key: string, value: Id64String, bindings: Map<string, Id64String>, bindingName: string) {
@@ -402,7 +400,7 @@ function bindNamed(key: string, value: Id64String, bindings: Map<string, Id64Str
 }
 
 // istanbul ignore next
-function createBinder(bindings: Array<Id64String> | Map<string, Id64String>): QueryBinder | undefined {
+function createBinder(bindings: Array<QueryBindable> | Map<string, Id64String>): QueryBinder | undefined {
   const binder = new QueryBinder();
   bindings.forEach((x, idx) => {
     // Binder expect index to start from 1

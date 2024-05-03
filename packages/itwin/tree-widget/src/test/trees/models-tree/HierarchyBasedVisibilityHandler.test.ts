@@ -27,7 +27,7 @@ import {
 } from "../Common";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { Node, Ruleset } from "@itwin/presentation-common";
+import type { ECClassGroupingNodeKey, Node, Ruleset } from "@itwin/presentation-common";
 import type { GeometricElement3dProps } from "@itwin/core-common";
 import type { StubbedFactoryFunction } from "../Common";
 import type { HierarchyBasedVisibilityHandlerProps } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
@@ -43,7 +43,7 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-describe("VisibilityStateHandler", () => {
+describe.only("VisibilityStateHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -599,7 +599,25 @@ describe("VisibilityStateHandler", () => {
         });
 
         describe("is hidden", () => {
-          it("when `viewport.view.viewsCategory` returns FALSE and there ARE NO CHILD elements in the ALWAYS drawn list", async () => {
+          it("when model is hidden", async () => {
+            const modelId = "0x1";
+            const categoryId = "0x2";
+            const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
+            const { handler } = createVisibilityHandlerWrapper({
+              queryHandler: createFakeQueryHandler({
+                categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
+              }),
+              viewport: createFakeSinonViewport({
+                view: {
+                  viewsModel: sinon.fake.returns(false),
+                },
+              }),
+            });
+            const result = await handler.getVisibilityStatus(node);
+            expect(result).to.include({ state: "hidden" });
+          });
+
+          it("`viewport.view.viewsCategory` returns FALSE and there ARE NO CHILD elements in the ALWAYS drawn list", async () => {
             const categoryId = "0x2";
             const node = createCategoryNode(undefined, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
@@ -999,7 +1017,7 @@ describe("VisibilityStateHandler", () => {
             const result = await handler.getVisibilityStatus(node);
             expect(result).to.include({ state: categoryOn ? "visible" : "hidden" });
           }
-        })
+        });
       });
     });
 
@@ -1970,39 +1988,17 @@ describe("VisibilityStateHandler", () => {
     });
 
     describe("grouping nodes", () => {
-      const classGroups = new Array<{ parent: TreeNodeItem; children: TreeNodeItem[] }>();
-
-      // function getCategoryModel(categoryId: string) {
-      //   for (const [modelId, categoryIds] of models) {
-      //     if (categoryIds.includes(categoryId)) {
-      //       return modelId;
-      //     }
-      //   }
-      //   throw new Error(`Model not found for category: ${categoryId}`);
-      // }
-
-      // function getElementInfo(elementId: string) {
-      //   for (const [categoryId, elements] of categories) {
-      //     if (elements.includes(elementId)) {
-      //       return { categoryId, modelId: getCategoryModel(categoryId) };
-      //     }
-      //   }
-
-      //   for (const [parentId, ids] of elementHierarchy) {
-      //     if (ids.has(elementId)) {
-      //       return getElementInfo(parentId);
-      //     }
-      //   }
-
-      //   throw new Error(`Category not found for element: ${elementId}`);
-      // }
+      const classGroups = new Array<{
+        parent: TreeNodeItem & { key: ECClassGroupingNodeKey };
+        children: TreeNodeItem[],
+      }>();
 
       before((done) => {
         rulesetOrId = createRuleset({
           enableElementsClassGrouping: true,
         });
 
-        const createTreeNodeItem = (node: Node): TreeNodeItem => {
+        function createTreeNodeItem<T extends Node>(node: T): T & { id: string, label: PropertyRecord } {
           const id = JSON.stringify(node.key);
           return { ...node, id, label: PropertyRecord.fromString(id) };
         };
@@ -2029,9 +2025,10 @@ describe("VisibilityStateHandler", () => {
                     children.push(node);
                   }
 
-                  if (NodeKey.isClassGroupingNodeKey(parent.key) && parent.key.className !== "Generic:PhysicalObject") {
+                  const parentKey = parent.key;
+                  if (NodeKey.isClassGroupingNodeKey(parentKey) && parentKey.className !== "Generic:PhysicalObject") {
                     classGroups.push({
-                      parent: createTreeNodeItem(parent),
+                      parent: createTreeNodeItem({ ...parent, key: parentKey }),
                       children: children.map(createTreeNodeItem),
                     });
                   }
@@ -2059,10 +2056,8 @@ describe("VisibilityStateHandler", () => {
         await Promise.all(
           classGroups.map(async ({ parent, children }) => {
             await handler.changeVisibility(parent, true);
-            await Promise.all([
-              expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "visible" }),
-              ...children.map(async (node) => expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "visible" })),
-            ]);
+            await expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "visible" }, `Grouping node for ${parent.key.className} has unexpected visibility`);
+            await Promise.all(children.map(async (node) => expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "visible" })));
           }),
         );
       });

@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concatMap, concatWith, EMPTY, filter, from, map, of, reduce } from "rxjs";
+import type { Observable } from "rxjs";
+import { concatAll, concatMap, concatWith, count, EMPTY, expand, filter, from, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
@@ -11,11 +12,12 @@ import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
 import { Descriptor, PropertiesField, StandardNodeTypes } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType } from "@itwin/presentation-components";
+import { toSet } from "../../components/trees/common/Rxjs";
 import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNodeRenderer";
 
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type {
   CategoryDescription,
   ClassInfo,
@@ -36,7 +38,6 @@ import type {
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IQueryHandler } from "../../components/trees/models-tree/internal/QueryHandler";
 import type { Viewport, ViewState } from "@itwin/core-frontend";
-
 interface SubjectModelIdsMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
   subjectModels?: Map<Id64String, Id64String[]>;
@@ -47,6 +48,30 @@ interface SubjectModelIdsMockProps {
 }
 
 export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQueryHandler {
+  const queryElements = sinon.fake(
+    ({ modelId, categoryId, elementIds }: { modelId?: string; categoryId?: string; elementIds?: Id64Set }): Observable<string> => {
+      const categoryObs = from(props?.modelCategories ?? []).pipe(
+        filter(([id]) => !modelId || id === modelId),
+        concatMap(([_, categoryIds]) => categoryIds),
+        concatWith(props?.categoryElements?.keys() ?? EMPTY),
+        toSet(),
+        concatAll(),
+        filter((id) => !categoryId || id === categoryId),
+      );
+
+      return categoryObs.pipe(
+        concatMap((id) => props?.categoryElements?.get(id) ?? []),
+        expand((id) => props?.elementChildren?.get(id) ?? []),
+        concatWith(
+          from(props?.groupingNodeChildren?.values() ?? []).pipe(
+            filter((group) => (!modelId || group.modelId === modelId) && (!categoryId || group.categoryId === categoryId)),
+            concatMap((group) => group.elementIds),
+          ),
+        ),
+        filter((id) => !elementIds || elementIds.has(id)),
+      );
+    },
+  );
   const res: IQueryHandler = {
     invalidateCache: sinon.fake(),
     querySubjectModels: sinon.fake((subjectId) => {
@@ -58,33 +83,6 @@ export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQuery
     queryModelCategories: sinon.fake((x) => {
       return from(props?.modelCategories?.get(x) ?? []);
     }),
-    queryCategoryElements: sinon.fake((x) => {
-      return from(props?.categoryElements?.get(x) ?? []);
-    }),
-    queryModelElements: sinon.fake((modelId, elementIds) => {
-      const result = from(props?.modelCategories?.get(modelId) ?? []).pipe(concatMap((x) => props?.categoryElements?.get(x) ?? []));
-
-      if (!elementIds) {
-        return result;
-      }
-
-      if (Array.isArray(elementIds)) {
-        return result.pipe(filter((x) => elementIds.includes(x)));
-      }
-
-      return result.pipe(filter((x) => elementIds.has(x)));
-    }),
-    queryModelElementsCount: sinon.fake((modelId) => {
-      const categories = props?.modelCategories?.get(modelId);
-      if (!categories?.length) {
-        return of(0);
-      }
-
-      return from(categories).pipe(
-        map((x) => props?.categoryElements?.get(x)?.length ?? 0),
-        reduce((a, b) => a + b),
-      );
-    }),
     queryElementChildren: sinon.fake((elementId) => from(props?.elementChildren?.get(elementId) ?? [])),
     queryGroupingNodeChildren: sinon.fake((node) => {
       const groupingInfo = props?.groupingNodeChildren?.get(node);
@@ -94,6 +92,10 @@ export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQuery
             elementIds: from(groupingInfo.elementIds),
           })
         : of({ modelId: "", categoryId: "", elementIds: EMPTY });
+    }),
+    queryElements,
+    queryElementsCount: sinon.fake((queryProps) => {
+      return queryElements(queryProps).pipe(count());
     }),
   };
   return res;
