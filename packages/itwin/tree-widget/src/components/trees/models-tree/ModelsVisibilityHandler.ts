@@ -66,7 +66,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
     this._subjectModelIdsCache = props.subjectModelIdsCache ?? new SubjectModelIdsCache(this._props.viewport.iModel);
-    this._elementIdsCache = new ElementIdsCache(this._props.viewport.iModel, this._props.rulesetId);
+    this._elementIdsCache = new ElementIdsCache(this._props.viewport.iModel);
     this._listeners.push(this._props.viewport.onViewedCategoriesPerModelChanged.addListener(this.onViewChanged));
     this._listeners.push(this._props.viewport.onViewedCategoriesChanged.addListener(this.onViewChanged));
     this._listeners.push(this._props.viewport.onViewedModelsChanged.addListener(this.onViewChanged));
@@ -615,10 +615,7 @@ class ElementIdsCache {
   private _assemblyElementIdsCache = new Map<string, CachingElementIdsContainer>();
   private _groupedElementIdsCache = new Map<string, GroupedElementIds>();
 
-  constructor(
-    private _imodel: IModelConnection,
-    private _rulesetId: string,
-  ) {}
+  constructor(private _imodel: IModelConnection) {}
 
   public clear() {
     this._assemblyElementIdsCache.clear();
@@ -631,7 +628,7 @@ class ElementIdsCache {
       return ids;
     }
 
-    const container = createAssemblyElementIdsContainer(this._imodel, this._rulesetId, assemblyId);
+    const container = createAssemblyElementIdsContainer(this._imodel, assemblyId);
     this._assemblyElementIdsCache.set(assemblyId, container);
     return container;
   }
@@ -642,18 +639,42 @@ class ElementIdsCache {
     if (ids) {
       return ids;
     }
-    const info = await createGroupedElementsInfo(this._imodel, this._rulesetId, groupingNodeKey);
+    const info = await createGroupedElementsInfo(this._imodel, groupingNodeKey);
     this._groupedElementIdsCache.set(keyString, info);
     return info;
   }
 }
 
 // istanbul ignore next
-async function* createInstanceIdsGenerator(imodel: IModelConnection, rulesetId: string, displayType: string, inputKeys: Keys) {
+async function* createInstanceIdsGenerator(imodel: IModelConnection, inputKeys: Keys) {
   const res = await Presentation.presentation.getContentInstanceKeys({
     imodel,
-    rulesetOrId: rulesetId,
-    displayType,
+    rulesetOrId: {
+      id: "ModelsTree/AssemblyElements",
+      rules: [
+        {
+          ruleType: "Content",
+          specifications: [
+            {
+              specType: "SelectedNodeInstances",
+            },
+            {
+              specType: "ContentRelatedInstances",
+              relationshipPaths: [
+                {
+                  relationship: {
+                    schemaName: "BisCore",
+                    className: "ElementOwnsChildElements",
+                  },
+                  direction: "Forward",
+                  count: "*",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     keys: new KeySet(inputKeys),
   });
   for await (const key of res.items()) {
@@ -662,17 +683,13 @@ async function* createInstanceIdsGenerator(imodel: IModelConnection, rulesetId: 
 }
 
 // istanbul ignore next
-function createAssemblyElementIdsContainer(imodel: IModelConnection, rulesetId: string, assemblyId: Id64String) {
-  return new CachingElementIdsContainer(
-    createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [{ className: "BisCore:Element", id: assemblyId }]),
-  );
+function createAssemblyElementIdsContainer(imodel: IModelConnection, assemblyId: Id64String) {
+  return new CachingElementIdsContainer(createInstanceIdsGenerator(imodel, [{ className: "BisCore:Element", id: assemblyId }]));
 }
 
 // istanbul ignore next
-async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: string, groupingNodeKey: GroupingNodeKey) {
-  const groupedElementIdsContainer = new CachingElementIdsContainer(
-    createInstanceIdsGenerator(imodel, rulesetId, "AssemblyElementsRequest", [groupingNodeKey]),
-  );
+async function createGroupedElementsInfo(imodel: IModelConnection, groupingNodeKey: GroupingNodeKey) {
+  const groupedElementIdsContainer = new CachingElementIdsContainer(createInstanceIdsGenerator(imodel, [groupingNodeKey]));
   const elementId = await groupedElementIdsContainer.getElementIds().next();
   if (elementId.done) {
     throw new Error("Invalid grouping node key");
