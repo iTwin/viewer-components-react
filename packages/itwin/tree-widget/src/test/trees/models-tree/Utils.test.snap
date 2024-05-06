@@ -345,28 +345,6 @@ Object {
       ],
       "ruleType": "Grouping",
     },
-    Object {
-      "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
-      "ruleType": "Content",
-      "specifications": Array [
-        Object {
-          "specType": "SelectedNodeInstances",
-        },
-        Object {
-          "relationshipPaths": Array [
-            Object {
-              "count": "*",
-              "direction": "Forward",
-              "relationship": Object {
-                "className": "ElementOwnsChildElements",
-                "schemaName": "BisCore",
-              },
-            },
-          ],
-          "specType": "ContentRelatedInstances",
-        },
-      ],
-    },
   ],
 }
 `;
@@ -715,28 +693,6 @@ Object {
         },
       ],
       "ruleType": "Grouping",
-    },
-    Object {
-      "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
-      "ruleType": "Content",
-      "specifications": Array [
-        Object {
-          "specType": "SelectedNodeInstances",
-        },
-        Object {
-          "relationshipPaths": Array [
-            Object {
-              "count": "*",
-              "direction": "Forward",
-              "relationship": Object {
-                "className": "ElementOwnsChildElements",
-                "schemaName": "BisCore",
-              },
-            },
-          ],
-          "specType": "ContentRelatedInstances",
-        },
-      ],
     },
   ],
 }
@@ -1087,28 +1043,6 @@ Object {
       ],
       "ruleType": "Grouping",
     },
-    Object {
-      "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
-      "ruleType": "Content",
-      "specifications": Array [
-        Object {
-          "specType": "SelectedNodeInstances",
-        },
-        Object {
-          "relationshipPaths": Array [
-            Object {
-              "count": "*",
-              "direction": "Forward",
-              "relationship": Object {
-                "className": "ElementOwnsChildElements",
-                "schemaName": "BisCore",
-              },
-            },
-          ],
-          "specType": "ContentRelatedInstances",
-        },
-      ],
-    },
   ],
 }
 `;
@@ -1457,28 +1391,6 @@ Object {
         },
       ],
       "ruleType": "Grouping",
-    },
-    Object {
-      "condition": "ContentDisplayType = \\"AssemblyElementsRequest\\"",
-      "ruleType": "Content",
-      "specifications": Array [
-        Object {
-          "specType": "SelectedNodeInstances",
-        },
-        Object {
-          "relationshipPaths": Array [
-            Object {
-              "count": "*",
-              "direction": "Forward",
-              "relationship": Object {
-                "className": "ElementOwnsChildElements",
-                "schemaName": "BisCore",
-              },
-            },
-          ],
-          "specType": "ContentRelatedInstances",
-        },
-      ],
     },
   ],
 }
