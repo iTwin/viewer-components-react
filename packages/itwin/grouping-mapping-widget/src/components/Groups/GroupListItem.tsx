@@ -16,7 +16,7 @@ import { Anchor, ListItem } from "@itwin/itwinui-react";
 import "./GroupListItem.scss";
 
 export interface GroupListItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
-  group: Group | GroupMinimal;
+  group: GroupMinimal;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
   setShowDeleteModal: (showDeleteModal: Group | GroupMinimal) => void;
