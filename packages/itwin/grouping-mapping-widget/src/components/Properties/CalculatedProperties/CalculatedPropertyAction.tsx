@@ -37,7 +37,10 @@ export const CalculatedPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>(
     calculatedProperty?.propertyName ?? "",
   );
-  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.calculatedPropertyType);
+  const [type, setType] = useState<CalculatedPropertyType | undefined>(
+    calculatedProperty ?
+      (calculatedProperty.calculatedPropertyType ? calculatedProperty.calculatedPropertyType : undefined) : undefined
+  );
   const [validator, showValidationMessage] = useValidator();
   const queryClient = useQueryClient();
 
