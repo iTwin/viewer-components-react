@@ -24,24 +24,29 @@ export const useRunExtraction = ({
   const { mutateAsync: runExtraction, isLoading: isRunExtractionLoading, isSuccess: isRunExtractionSuccess } = useMutation({
     mutationKey: ["runExtraction"],
     mutationFn: async (mappings: Mapping[]) => {
-      const accessToken = await getAccessToken();
-      const mappingIds: ExtractionMapping[] = mappings.length > 0 ? mappings.map((mapping) => { return { id: mapping.id }; }) : [];
-      const extractionRequest: ExtractionRequestDetails = {
-        mappings: mappingIds,
-        iModelId,
-      };
+      if(mappings.length > 0){
+        const accessToken = await getAccessToken();
+        const mappingIds: ExtractionMapping[] = mappings.map((mapping) => { return { id: mapping.id }; });
+        const extractionRequest: ExtractionRequestDetails = {
+          mappings: mappingIds,
+          iModelId,
+        };
 
-      const runExtractionResponse = await extractionClient.runExtraction(accessToken, extractionRequest);
-      return runExtractionResponse;
+        const runExtractionResponse = await extractionClient.runExtraction(accessToken, extractionRequest);
+        return runExtractionResponse;
+      }
+      return;
     },
     onSuccess: async (runExtractionResponse, mappings) => {
-      for (const mapping of mappings){
-        if(mappingIdJobInfo?.get(mapping.id) === undefined){
-          setMappingIdJobInfo((prevMap: Map<string, string>) => {
-            const newMap = new Map(prevMap);
-            newMap.set(mapping.id, runExtractionResponse.id);
-            return newMap;
-          });
+      if(runExtractionResponse){
+        for (const mapping of mappings){
+          if(mappingIdJobInfo?.get(mapping.id) === undefined){
+            setMappingIdJobInfo((prevMap: Map<string, string>) => {
+              const newMap = new Map(prevMap);
+              newMap.set(mapping.id, runExtractionResponse.id);
+              return newMap;
+            });
+          }
         }
       }
     },
