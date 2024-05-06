@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed a bad caching problem when opening the group with the extraction issue after opening extraction logs.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -2,6 +2,21 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Mon, 29 Apr 2024 14:59:26 GMT",
+      "version": "0.5.0",
+      "tag": "@itwin/ec3-widget-react_v0.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "478bc36ae3240a434dced8758a30448c40447ab8",
+            "comment": "Replaced duplicate types with types from @itwin/insights-client."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@itwin/ec3-widget-react_v0.4.1",
       "date": "Thu, 24 Aug 2023 21:32:34 GMT",
