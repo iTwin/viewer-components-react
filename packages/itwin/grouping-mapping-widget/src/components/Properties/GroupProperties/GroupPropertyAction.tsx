@@ -113,7 +113,7 @@ export const GroupPropertyAction = ({
     return { propertiesMetaData, groupPropertyDetails };
   }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, mappingId, propertiesClient]);
 
-  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["groupProperties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
+  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["properties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
 
   useEffect(() => {
     if (isLoadingPropertiesSuccessful && data?.propertiesMetaData) {
@@ -164,7 +164,7 @@ export const GroupPropertyAction = ({
     onSuccess: async () => {
       onSaveSuccess();
       reset();
-      await queryClient.invalidateQueries(["groupProperties", iModelId, mappingId, group.id]);
+      await queryClient.invalidateQueries(["properties", iModelId, mappingId, group.id]);
     },
   });
 

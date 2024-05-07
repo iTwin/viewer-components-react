@@ -21,7 +21,7 @@ import type { PossibleDataType, PropertyMap } from "../../../formula/Types";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { Property , QuantityType } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
-import { useGroupPropertiesQuery } from "../hooks/useGroupPropertiesQuery";
+import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
@@ -95,9 +95,9 @@ export const CustomCalculationAction = ({
   const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
   const queryClient = useQueryClient();
 
-  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
   useEffect(() => {
     const propertiesMap = convertToPropertyMap(groupProperties?.properties ?? [], calculatedProperties?.properties ?? [], customCalculationProperties?.properties ?? []);
@@ -134,7 +134,7 @@ export const CustomCalculationAction = ({
       );
   }, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, groupId] });
+      await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, groupId] });
       onSaveSuccess();
       setPropertyName("");
       setFormula("");

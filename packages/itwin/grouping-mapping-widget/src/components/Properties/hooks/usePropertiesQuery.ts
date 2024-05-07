@@ -6,9 +6,9 @@ import type { IPropertiesClient } from "@itwin/insights-client";
 import { useQuery } from "@tanstack/react-query";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 
-export const useGroupPropertiesQuery = (iModelId: string, mappingId: string, groupId: string, getAccessToken: GetAccessTokenFn, propertiesClient: IPropertiesClient) => {
+export const usePropertiesQuery = (iModelId: string, mappingId: string, groupId: string, getAccessToken: GetAccessTokenFn, propertiesClient: IPropertiesClient) => {
   return useQuery({
-    queryKey: ["groupProperties", iModelId, mappingId, groupId],
+    queryKey: ["properties", iModelId, mappingId, groupId],
     queryFn:  async () => propertiesClient.getProperties(await getAccessToken(), mappingId, groupId),
   });
 };

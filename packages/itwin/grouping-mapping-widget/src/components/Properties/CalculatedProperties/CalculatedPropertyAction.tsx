@@ -37,10 +37,7 @@ export const CalculatedPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>(
     calculatedProperty?.propertyName ?? "",
   );
-  const [type, setType] = useState<CalculatedPropertyType | undefined>(
-    calculatedProperty ?
-      (calculatedProperty.calculatedPropertyType ? calculatedProperty.calculatedPropertyType : undefined) : undefined
-  );
+  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.calculatedPropertyType ?? undefined);
   const [validator, showValidationMessage] = useValidator();
   const queryClient = useQueryClient();
 
@@ -72,7 +69,7 @@ export const CalculatedPropertyAction = ({
       );
   }, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] });
+      await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, group.id] });
       onSaveSuccess();
       setPropertyName("");
       setType(undefined);

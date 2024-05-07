@@ -9,7 +9,7 @@ import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext
 import type { Group, GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import { CalculatedPropertyTable } from "./CalculatedProperties/CalculatedPropertyTable";
 import { CustomCalculationTable } from "./CustomCalculations/CustomCalculationTable";
-import { useGroupPropertiesQuery } from "./hooks/useGroupPropertiesQuery";
+import { usePropertiesQuery } from "./hooks/usePropertiesQuery";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../context/PropertiesClientContext";
 
@@ -46,9 +46,9 @@ export const PropertyMenu = ({
   const propertiesClient = usePropertiesClient();
   const queryClient = useQueryClient();
 
-  const { data: groupProperties, isFetching: isLoadingGroupProperties } = useGroupPropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
+  const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
-  const refreshGroupProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
+  const refreshGroupProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
 
   return (
     <div className='gmw-property-menu-wrapper'>
