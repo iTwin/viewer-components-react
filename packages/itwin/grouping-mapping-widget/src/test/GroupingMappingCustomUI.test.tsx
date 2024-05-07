@@ -87,7 +87,7 @@ jest.mock("../components/context/GroupsClientContext", () => {
   const actualGroupsContextModule = jest.requireActual("../components/context/GroupsClientContext");
   return {
     ...actualGroupsContextModule,
-    useGroupsClient: ()=> groupsClientMock.object,
+    useGroupsClient: () => groupsClientMock.object,
   };
 });
 

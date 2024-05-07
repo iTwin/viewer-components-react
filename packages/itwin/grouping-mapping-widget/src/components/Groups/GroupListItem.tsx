@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group, GroupMinimal } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import React, { useCallback } from "react";
 import type {
   ContextCustomUI,
@@ -19,9 +19,9 @@ export interface GroupListItemProps extends Omit<GroupsProps, "onClickAddGroup">
   group: GroupMinimal;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
-  setShowDeleteModal: (showDeleteModal: Group | GroupMinimal) => void;
+  setShowDeleteModal: (showDeleteModal: GroupMinimal) => void;
   setActiveOverlapInfoPanelGroup?: (
-    activeOverlapInfoPanelGroup: Group | GroupMinimal
+    activeOverlapInfoPanelGroup: GroupMinimal
   ) => void;
 }
 

@@ -5,7 +5,7 @@
 import React from "react";
 import type { GroupingCustomUI } from "../../customUI/GroupingMappingCustomUI";
 import { EmptyMessage } from "../../SharedComponents/EmptyMessage";
-import type { Group, GroupMinimal } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 
 export interface QueryBuilderCustomUIProps {
   queryGenerationType: string;
@@ -13,7 +13,7 @@ export interface QueryBuilderCustomUIProps {
   isUpdating: boolean;
   resetView: () => Promise<void>;
   setQuery: (query: string) => void;
-  group?: Group | GroupMinimal;
+  group?: GroupMinimal;
 }
 
 export const QueryBuilderCustomUI = ({

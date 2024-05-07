@@ -5,7 +5,7 @@
 import React, { useCallback, useEffect } from "react";
 import type { ToggleSwitchProps } from "@itwin/itwinui-react";
 import { toaster, ToggleSwitch } from "@itwin/itwinui-react";
-import type { Group, GroupMinimal } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import { clearAll, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
@@ -17,7 +17,7 @@ import { useIsMounted } from "../../common/hooks/useIsMounted";
 
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
-  group: Group | GroupMinimal;
+  group: GroupMinimal;
 };
 
 export const GroupColorToggle = ({

@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group, GroupMinimal } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { OverlappedElementGroupPairs } from "../context/GroupHilitedElementsContext";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
@@ -137,7 +137,7 @@ export const GroupsVisualization = ({
   }, [groupQueries, isGroupsQueriesReady, groups]);
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
-    (groups: Group[] | GroupMinimal[]) =>
+    (groups: GroupMinimal[]) =>
       hiliteIds.filter((id) => groups.some((group) => group.id === id.groupId)).flatMap((id) => id.elementIds),
     [hiliteIds]
   );
@@ -191,19 +191,19 @@ export const GroupsVisualization = ({
   );
 
   const hideSingleGroupWrapper = useCallback(
-    (groupToHide: Group | GroupMinimal) => {
+    (groupToHide: GroupMinimal) => {
       hideGroupConsideringOverlaps(overlappedElementsMetadata.overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
     },
     [hiddenGroupsIds, overlappedElementsMetadata.overlappedElementGroupPairs]
   );
 
   const showGroup = useCallback(
-    (viewGroup: Group | GroupMinimal) => {
+    (viewGroup: GroupMinimal) => {
       if (!groups) return;
       clearHiddenElements();
 
       // hide group Ids filter
-      const newHiddenGroups: Group[] | GroupMinimal[] = groups.filter((g) => hiddenGroupsIds.has(g.id) && g.id !== viewGroup.id);
+      const newHiddenGroups: GroupMinimal[] = groups.filter((g) => hiddenGroupsIds.has(g.id) && g.id !== viewGroup.id);
 
       // view group Ids filter
       const viewGroups = groups.filter((g) => !hiddenGroupsIds.has(g.id) || g.id === viewGroup.id);
@@ -235,7 +235,7 @@ export const GroupsVisualization = ({
   ]);
 
   const onModify = useCallback(
-    (group: Group | GroupMinimal, type: string) => {
+    (group: GroupMinimal, type: string) => {
       if (!onClickGroupModify) return;
       if (group.id && hiddenGroupsIds.has(group.id)) {
         showGroup(group);

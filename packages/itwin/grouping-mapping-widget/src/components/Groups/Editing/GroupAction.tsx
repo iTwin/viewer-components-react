@@ -16,7 +16,7 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { useGroupingMappingCustomUI } from "../../context/GroupingMappingCustomUIContext";
 import type { GroupingCustomUI } from "../../customUI/GroupingMappingCustomUI";
 import { GroupingMappingCustomUIType } from "../../customUI/GroupingMappingCustomUI";
-import type { Group, GroupMinimal } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import { QueryBuilderStep } from "../QueryBuilder/QueryBuilderStep";
 import { GroupDetailsStep } from "./GroupDetailsStep";
 import { QueryBuilderActionPanel } from "../QueryBuilder/QueryBuilderActionPanel";
@@ -38,7 +38,7 @@ enum GroupActionStep {
 export interface GroupActionProps {
   mappingId: string;
   shouldVisualize: boolean;
-  group?: Group | GroupMinimal;
+  group?: GroupMinimal;
   queryGenerationType: string;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;

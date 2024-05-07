@@ -46,7 +46,7 @@ export interface Route {
 }
 export interface GroupingRouteFields {
   mapping?: Mapping;
-  group?: Group | GroupMinimal;
+  group?: GroupMinimal;
   property?: Property;
   calculatedProperty?: Property;
   customCalculation?: Property;

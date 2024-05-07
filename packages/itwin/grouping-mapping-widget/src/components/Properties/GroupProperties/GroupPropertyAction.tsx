@@ -40,7 +40,7 @@ import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
-  group: Group | GroupMinimal;
+  group: GroupMinimal;
   groupProperty?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;

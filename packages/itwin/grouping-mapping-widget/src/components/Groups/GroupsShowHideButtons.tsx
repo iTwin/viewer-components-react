@@ -2,17 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group, GroupMinimal } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo } from "react";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 
 interface GroupsShowHideButtonsProps {
-  group: Group | GroupMinimal;
+  group: GroupMinimal;
   isLoadingQuery: boolean;
-  showGroup: (group: Group | GroupMinimal) => void;
-  hideGroup: (group: Group | GroupMinimal) => void;
+  showGroup: (group: GroupMinimal) => void;
+  hideGroup: (group: GroupMinimal) => void;
 }
 
 export const GroupsShowHideButtons = ({

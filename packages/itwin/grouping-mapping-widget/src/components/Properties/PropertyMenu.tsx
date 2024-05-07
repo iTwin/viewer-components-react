@@ -6,7 +6,7 @@ import React, { useCallback } from "react";
 import "./PropertyMenu.scss";
 import { GroupPropertyTable } from "./GroupProperties/GroupPropertyTable";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
-import type { Group, GroupMinimal, Mapping, Property } from "@itwin/insights-client";
+import type { GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import { CalculatedPropertyTable } from "./CalculatedProperties/CalculatedPropertyTable";
 import { CustomCalculationTable } from "./CustomCalculations/CustomCalculationTable";
 import { usePropertiesQuery } from "./hooks/usePropertiesQuery";
@@ -15,7 +15,7 @@ import { usePropertiesClient } from "../context/PropertiesClientContext";
 
 export interface PropertyMenuProps {
   mapping: Mapping;
-  group: Group | GroupMinimal;
+  group: GroupMinimal;
   onClickAddGroupProperty?: () => void;
   onClickModifyGroupProperty?: (groupProperty: Property) => void;
   onClickAddCalculatedProperty?: () => void;
