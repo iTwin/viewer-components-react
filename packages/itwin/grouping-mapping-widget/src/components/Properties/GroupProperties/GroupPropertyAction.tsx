@@ -18,7 +18,6 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
-  Group,
   GroupMinimal,
   Property,
   PropertyModify,
