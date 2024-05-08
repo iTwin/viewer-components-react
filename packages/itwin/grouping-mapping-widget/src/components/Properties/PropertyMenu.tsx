@@ -15,6 +15,10 @@ import { useCalculatedPropertiesQuery } from "./hooks/useCalculatedPropertiesQue
 import { useCustomCalculationsQuery } from "./hooks/useCustomCalculationsQuery";
 import { useQueryClient } from "@tanstack/react-query";
 
+/**
+ * Props for the {@link PropertyMenu} component.
+ * @public
+ */
 export interface PropertyMenuProps {
   mapping: Mapping;
   group: Group;
@@ -29,6 +33,10 @@ export interface PropertyMenuProps {
   hideCustomCalculationProps?: boolean;
 }
 
+/**
+ * Component to display the properties of a group.
+ * @public
+ */
 export const PropertyMenu = ({
   mapping,
   group,

@@ -17,6 +17,10 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { useMappingClient } from "../../context/MappingClientContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+/**
+ * Props for the {@link CalculatedPropertyAction} component.
+ * @public
+ */
 export interface CalculatedPropertyActionProps {
   mappingId: string;
   group: Group;
@@ -25,6 +29,10 @@ export interface CalculatedPropertyActionProps {
   onClickCancel?: () => void;
 }
 
+/**
+ * Component to create or update a calculated property.
+ * @public
+ */
 export const CalculatedPropertyAction = ({
   mappingId,
   group,

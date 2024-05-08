@@ -16,6 +16,7 @@ import type { DataType, PropertyMap } from "./Types";
  * @param properties All available properties or variables with their data types
  * that could be used in formula. Names are expected to be lowercase.
  * @returns `dataType` if formula is valid. `errorMessage` otherwise.
+ * @public
  */
 export function resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap): IResult<DataType> {
   const parenthesisState = validateParenthesis(formula);

@@ -37,6 +37,10 @@ import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 
+/**
+ * Props for the {@link GroupPropertyAction} component.
+ * @public
+ */
 export interface GroupPropertyActionProps {
   mappingId: string;
   group: Group;
@@ -56,6 +60,10 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
   { value: QuantityType.Undefined, label: "No Quantity Type" },
 ];
 
+/**
+ * Component to create or update a group.
+ * @public
+ */
 export const GroupPropertyAction = ({
   mappingId,
   group,

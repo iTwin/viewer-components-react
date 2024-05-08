@@ -12,10 +12,18 @@ import { useFetchMappings } from "./useFetchMappings";
 import { useFetchExtractionStatus } from "./useFetchExtractionStatus";
 import { useExtractionStateJobContext } from "../../context/ExtractionStateJobContext";
 
+/**
+ * Props for the {@link useMappingsOperations} hook.
+ * @internal
+ */
 export interface MappingsOperationsProps extends GroupingMappingApiConfig {
   mappingClient: IMappingsClient;
 }
 
+/**
+ * Custom hook to handle mapping operations.
+ * @internal
+ */
 export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient }: MappingsOperationsProps) => {
   const [showImportModal, setShowImportModal] = useState<boolean | undefined>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
