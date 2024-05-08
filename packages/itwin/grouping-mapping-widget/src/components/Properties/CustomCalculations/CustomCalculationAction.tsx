@@ -27,6 +27,10 @@ import { useCustomCalculationsQuery } from "../hooks/useCustomCalculationsQuery"
 import { useGroupPropertiesQuery } from "../hooks/useGroupPropertiesQuery";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+/**
+ * Props for the {@link CustomCalculationAction} component.
+ * @public
+ */
 export interface CustomCalculationActionProps {
   mappingId: string;
   groupId: string;
@@ -75,6 +79,10 @@ const convertToPropertyMap = (
   return map;
 };
 
+/**
+ * Component to create or update a custom calculation property.
+ * @public
+ */
 export const CustomCalculationAction = ({
   mappingId,
   groupId,
