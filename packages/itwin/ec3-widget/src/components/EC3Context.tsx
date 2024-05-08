@@ -7,10 +7,18 @@ import type { EC3ConfigProps } from "./EC3/EC3Config";
 import { EC3Config } from "./EC3/EC3Config";
 import { ApiContext, createApiContext } from "./api/APIContext";
 
+/**
+ * EC3 Context props
+ * @beta
+ */
 export type EC3ContextProps = EC3ConfigProps & {
   children?: React.ReactNode;
 };
 
+/**
+ * EC3 Context required for EC3 components
+ * @beta
+ */
 export const EC3Context = (props: EC3ContextProps) => {
   const apiConfig = useMemo(() => {
     const ec3Config = new EC3Config(props);

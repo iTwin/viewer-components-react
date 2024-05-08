@@ -17,8 +17,16 @@ import type { EC3Token } from "./EC3Token";
 * } else {
 */
 
+/**
+ * EC3 Auth Callback Config Props
+ * @beta
+ */
 export type EC3AuthCallbackConfigProps = Pick<EC3ConfigPropsWithRedirectUri, "clientId" | "redirectUri" | "ec3Uri">;
 
+/**
+ * Simple implementation to handle EC3 OAuth2 callback and exchange token
+ * @beta
+ */
 export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source: string = "ec3-auth") {
   const MILLI_SECONDS = 1000;
   const ec3Uri = getDefaultEC3Uri(ec3Config.ec3Uri);
