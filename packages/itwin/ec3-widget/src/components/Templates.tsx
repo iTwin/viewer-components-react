@@ -20,11 +20,19 @@ import { useApiContext } from "./api/APIContext";
 import { ExportModal } from "./ExportModal";
 import { DeleteModal } from "./DeleteModal";
 
+/**
+ * Template props
+ * @beta
+ */
 export interface TemplateProps {
   onClickCreate?: () => void;
   onClickTemplateTitle?: (template: Configuration) => void;
 }
 
+/**
+ * Templates component to display list of templates
+ * @beta
+ */
 export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => {
   const { config: { getAccessToken, iTwinId, getEC3AccessToken } } = useApiContext();
   const [isLoading, setIsLoading] = useState<boolean>(true);

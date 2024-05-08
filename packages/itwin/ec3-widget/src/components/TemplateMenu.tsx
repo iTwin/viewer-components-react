@@ -31,12 +31,20 @@ import { ReportConfirmModal } from "./ReportConfirmModal";
 import { LabelActionModal } from "./LabelActionModal";
 import { RequiredFieldsNotice } from "./RequiredFieldsNotice";
 
+/**
+ * Props for {@link TemplateMenu}
+ * @beta
+ */
 export interface TemplateMenuProps {
   template?: Configuration;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
 }
 
+/**
+ * EC3 Template menu
+ * @beta
+ */
 export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: TemplateMenuProps) => {
   const { config: { getAccessToken, iTwinId: projectId } } = useApiContext();
   const reportsClient = useApiContext().reportsClient;
