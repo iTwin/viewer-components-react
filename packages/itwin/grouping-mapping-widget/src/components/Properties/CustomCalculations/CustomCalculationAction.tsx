@@ -35,8 +35,8 @@ export interface CustomCalculationActionProps {
 
 const stringToPossibleDataType = (str?: string): PossibleDataType => {
   switch (str?.toLowerCase()) {
-    case "double":
-    case "integer": return "Number";
+    case "double": return "Double";
+    case "integer": return "Integer";
     case "string": return "String";
     case "boolean": return "Boolean";
     default: return "Undefined";
@@ -61,7 +61,7 @@ const convertToPropertyMap = (
   calculatedProperties.forEach((p) => {
     const lowerName = p.propertyName?.toLowerCase();
     if (lowerName)
-      map[lowerName] = "Number";
+      map[lowerName] = "Double";
   });
 
   customCalculations.forEach((p) => {
@@ -71,6 +71,21 @@ const convertToPropertyMap = (
   });
 
   return map;
+};
+
+const inferToPropertyDataType = (value: string): DataType => {
+  switch(value){
+    case "Double":
+      return DataType.Double;
+    case "Integer":
+      return DataType.Integer;
+    case "String":
+      return DataType.String;
+    case "Boolean":
+      return DataType.Boolean;
+    default:
+      return DataType.String;
+  }
 };
 
 export const CustomCalculationAction = ({
@@ -92,7 +107,7 @@ export const CustomCalculationAction = ({
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [properties, setProperties] = useState<PropertyMap>({});
-  const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
+  const { isValid, forceValidation, inferredDataType } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
   const queryClient = useQueryClient();
 
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
@@ -108,8 +123,10 @@ export const CustomCalculationAction = ({
 
     const accessToken = await getAccessToken();
 
-    return customCalculation
-      ? propertiesClient.updateProperty(
+    let propertyMutation;
+
+    if(customCalculation){
+      propertyMutation = propertiesClient.updateProperty(
         accessToken,
         mappingId,
         groupId,
@@ -120,18 +137,23 @@ export const CustomCalculationAction = ({
           formula,
           quantityType,
         }
-      )
-      : propertiesClient.createProperty(
+      );
+    }
+
+    if(!customCalculation && inferredDataType){
+      propertyMutation  = propertiesClient.createProperty(
         accessToken,
         mappingId,
         groupId,
         {
           propertyName,
-          dataType: DataType.Double,
+          dataType: inferToPropertyDataType(inferredDataType as string),
           formula,
           quantityType,
         }
       );
+    }
+    return propertyMutation;
   }, {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, groupId] });

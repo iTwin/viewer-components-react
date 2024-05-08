@@ -6,7 +6,7 @@ export type ValueType = number | string | boolean;
 
 export type PossibleValueType = ValueType | undefined;
 
-export type DataType = "Number" | "String" | "Boolean";
+export type DataType = "Double" | "String" | "Boolean" | "Integer";
 
 export type PossibleDataType = DataType | "Undefined";
 
