@@ -19,7 +19,7 @@ import { StagePanelSection } from '@itwin/appui-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
 import type { Widget } from '@itwin/appui-react';
 
-// @public (undocumented)
+// @internal (undocumented)
 export class BulkExtractor {
     constructor(reportsClient: ReportsClient, extractionClient: ExtractionClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
     // (undocumented)
@@ -65,7 +65,7 @@ export interface ReportMappingsProps {
 // @public
 export const Reports: ({ onClickAddReport, onClickReportModify, onClickReportTitle, }: ReportsProps) => JSX.Element | null;
 
-// @public (undocumented)
+// @internal (undocumented)
 export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
 
 // @public

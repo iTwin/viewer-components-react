@@ -18,7 +18,7 @@ import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import ReportsContainer from "./components/ReportsContainer";
 
 /**
- * @public
+ * @internal
  */
 export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
 
