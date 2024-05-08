@@ -15,7 +15,10 @@ import React from "react";
 import type { EC3WidgetProps } from "../components/EC3Widget";
 import { EC3Widget } from "../components/EC3Widget";
 
-/* eslint-disable deprecation/deprecation */
+/**
+ * EC3 Widget UI Provider
+ * @beta
+ */
 export class EC3Provider implements UiItemsProvider {
   public readonly id = "EC3Provider";
 
