@@ -21,6 +21,7 @@ import type { PossibleDataType, PropertyMap } from "../../../formula/Types";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { Property , QuantityType } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
+import type { DataType as FormulaDataType } from "../../../formula/Types";
 import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
@@ -44,27 +45,13 @@ const stringToPossibleDataType = (str?: string): PossibleDataType => {
 };
 
 const convertToPropertyMap = (
-  groupProperties: Property[],
-  calculatedProperties: Property[],
-  customCalculations: Property[],
+  properties: Property[],
   selectedPropertyName?: string
 ): PropertyMap => {
   const map: PropertyMap = {};
   const selectedLowerName = selectedPropertyName?.toLowerCase();
 
-  groupProperties.forEach((p) => {
-    const lowerName = p.propertyName?.toLowerCase();
-    if (lowerName && lowerName !== selectedLowerName)
-      map[lowerName] = stringToPossibleDataType(p.dataType);
-  });
-
-  calculatedProperties.forEach((p) => {
-    const lowerName = p.propertyName?.toLowerCase();
-    if (lowerName)
-      map[lowerName] = "Double";
-  });
-
-  customCalculations.forEach((p) => {
+  properties.forEach((p) => {
     const lowerName = p.propertyName?.toLowerCase();
     if (lowerName && lowerName !== selectedLowerName)
       map[lowerName] = stringToPossibleDataType(p.dataType);
@@ -73,7 +60,7 @@ const convertToPropertyMap = (
   return map;
 };
 
-const inferToPropertyDataType = (value: string): DataType => {
+const inferToPropertyDataType = (value: FormulaDataType): DataType => {
   switch(value){
     case "Double":
       return DataType.Double;
@@ -111,22 +98,18 @@ export const CustomCalculationAction = ({
   const queryClient = useQueryClient();
 
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: calculatedProperties, isFetching: isLoadingCalculatedProperties } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
-  const { data: customCalculationProperties, isFetching: isLoadingCustomCalculations } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
   useEffect(() => {
-    const propertiesMap = convertToPropertyMap(groupProperties?.properties ?? [], calculatedProperties?.properties ?? [], customCalculationProperties?.properties ?? []);
+    const propertiesMap = convertToPropertyMap(groupProperties?.properties ?? []);
     setProperties(propertiesMap);
-  }, [calculatedProperties, customCalculationProperties, groupProperties]);
+  }, [groupProperties]);
 
   const { mutate: saveMutation, isLoading: isSaving } = useMutation(async () => {
 
     const accessToken = await getAccessToken();
 
-    let propertyMutation;
-
     if(customCalculation){
-      propertyMutation = propertiesClient.updateProperty(
+      return propertiesClient.updateProperty(
         accessToken,
         mappingId,
         groupId,
@@ -140,20 +123,20 @@ export const CustomCalculationAction = ({
       );
     }
 
-    if(!customCalculation && inferredDataType){
-      propertyMutation  = propertiesClient.createProperty(
+    if(inferredDataType){
+      return propertiesClient.createProperty(
         accessToken,
         mappingId,
         groupId,
         {
           propertyName,
-          dataType: inferToPropertyDataType(inferredDataType as string),
+          dataType: inferToPropertyDataType(inferredDataType),
           formula,
           quantityType,
         }
       );
     }
-    return propertyMutation;
+    return;
   }, {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, groupId] });
@@ -188,7 +171,7 @@ export const CustomCalculationAction = ({
     saveMutation();
   };
 
-  const isLoading = isSaving || isLoadingGroupProperties || isLoadingCalculatedProperties || isLoadingCustomCalculations;
+  const isLoading = isSaving || isLoadingGroupProperties;
 
   return (
     <>
