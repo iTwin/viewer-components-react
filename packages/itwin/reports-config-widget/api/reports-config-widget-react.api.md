@@ -19,7 +19,7 @@ import { StagePanelSection } from '@itwin/appui-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
 import type { Widget } from '@itwin/appui-react';
 
-// @internal (undocumented)
+// @public (undocumented)
 export class BulkExtractor {
     constructor(reportsClient: ReportsClient, extractionClient: ExtractionClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
     // (undocumented)
