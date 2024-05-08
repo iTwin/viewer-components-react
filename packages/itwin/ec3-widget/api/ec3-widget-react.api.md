@@ -29,7 +29,28 @@ export interface Configuration {
 }
 
 // @beta
+export interface EC3ConfigCommonProps {
+    carbonCalculationBasePath?: string;
+    clientId: string;
+    ec3Uri?: string;
+    getAccessToken?: GetAccessTokenFn;
+    // (undocumented)
+    iTwinId: string;
+    reportingBasePath?: string;
+}
+
+// @beta
 export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken;
+
+// @beta
+export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
+    getEC3AccessToken: GetAccessTokenFn;
+};
+
+// @beta
+export type EC3ConfigPropsWithRedirectUri = EC3ConfigCommonProps & {
+    redirectUri: string;
+};
 
 // @beta
 export const EC3Context: (props: EC3ContextProps) => JSX.Element;

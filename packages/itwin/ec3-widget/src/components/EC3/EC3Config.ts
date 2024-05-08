@@ -9,6 +9,10 @@ import type { EC3Token } from "./EC3Token";
 
 export const EC3URI = "https://buildingtransparency.org/";
 
+/**
+ * EC3 Config Common Props
+ * @beta
+ */
 export interface EC3ConfigCommonProps {
   /**
    * The OAuth client ID used to authenticate with the EC3 API.
@@ -18,7 +22,7 @@ export interface EC3ConfigCommonProps {
 
   /**
    * A callback function that returns an access token for authenticating API requests.
-   * If not specified, it defaults to the authorizationClient of the {@link IModelApp}.
+   * If not specified, it defaults to the authorizationClient of the IModelApp.
    */
   getAccessToken?: GetAccessTokenFn;
 
@@ -28,16 +32,20 @@ export interface EC3ConfigCommonProps {
   ec3Uri?: string;
 
   /**
-   * The base path for the Reporting API endpoints. If not specified, it defaults to {@link REPORTING_BASE_PATH}.
+   * The base path for the Reporting API endpoints. If not specified, it defaults to REPORTING_BASE_PATH from @itwin/insights-client.
    */
   reportingBasePath?: string;
 
   /**
-   * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to {@link CARBON_CALCULATION_BASE_PATH}.
+   * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to CARBON_CALCULATION_BASE_PATH from @itwin/insights-client.
    */
   carbonCalculationBasePath?: string;
 }
 
+/**
+ * EC3 Config Props with Redirect URI
+ * @beta
+ */
 export type EC3ConfigPropsWithRedirectUri = EC3ConfigCommonProps & {
   /**
    * The OAuth redirect URI used to authenticate with the EC3 API.
@@ -45,6 +53,10 @@ export type EC3ConfigPropsWithRedirectUri = EC3ConfigCommonProps & {
   redirectUri: string;
 };
 
+/**
+ * EC3 Config Props with EC3 Access Token
+ * @beta
+ */
 export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
   /**
    * A callback function that returns an access token for the EC3 API.
