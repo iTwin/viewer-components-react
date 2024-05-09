@@ -14,11 +14,17 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
   return baseUrl;
 };
 
+/**
+ * @internal
+ */
 export const createDefaultPropertiesClient = (prefix?: ClientPrefix): IPropertiesClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
   return new PropertiesClient(undefined, url);
 };
 
+/**
+ * @internal
+ */
 export const createPropertiesClient = (clientProp: IPropertiesClient | ClientPrefix) => {
   if (undefined === clientProp || typeof clientProp === "string") {
     return createDefaultPropertiesClient(clientProp as ClientPrefix);
@@ -26,8 +32,14 @@ export const createPropertiesClient = (clientProp: IPropertiesClient | ClientPre
   return clientProp;
 };
 
+/**
+ * @internal
+ */
 export const PropertiesClientContext = createContext<IPropertiesClient>(createDefaultPropertiesClient());
 
+/**
+ * @internal
+ */
 export const usePropertiesClient = () => {
   const context = useContext(PropertiesClientContext);
   if (!context) {

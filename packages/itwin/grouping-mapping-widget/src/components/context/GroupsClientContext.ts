@@ -14,11 +14,17 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
   return baseUrl;
 };
 
+/**
+ * @internal
+ */
 export const createDefaultGroupsClient = (prefix?: ClientPrefix): IGroupsClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
   return new GroupsClient(undefined, url);
 };
 
+/**
+ * @internal
+ */
 export const createGroupsClient = (clientProp: IGroupsClient | ClientPrefix) => {
   if (undefined === clientProp || typeof clientProp === "string") {
     return createDefaultGroupsClient(clientProp as ClientPrefix);
@@ -26,8 +32,14 @@ export const createGroupsClient = (clientProp: IGroupsClient | ClientPrefix) => 
   return clientProp;
 };
 
+/**
+ * @internal
+ */
 export const GroupsClientContext = createContext<IGroupsClient>(createDefaultGroupsClient());
 
+/**
+ * @internal
+ */
 export const useGroupsClient = () => {
   const context = useContext(GroupsClientContext);
   if (!context) {
