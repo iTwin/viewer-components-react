@@ -21,13 +21,13 @@ import {
 import useValidator from "../hooks/useValidator";
 import { visualizeElements, zoomToElements } from "../../../common/viewerUtils";
 import "./CalculatedPropertyActionWithVisuals.scss";
-import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import { CalculatedPropertyType } from "@itwin/insights-client";
-import type { CalculatedProperty, Group } from "@itwin/insights-client";
+import { DataType } from "@itwin/insights-client";
+import type { CalculatedPropertyType, GroupMinimal, Property} from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 /**
  * Props for the {@link CalculatedPropertyActionWithVisuals} component.
@@ -35,8 +35,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
  */
 export interface CalculatedPropertyActionWithVisualsProps {
   mappingId: string;
-  group: Group;
-  calculatedProperty?: CalculatedProperty;
+  group: GroupMinimal;
+  calculatedProperty?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
 }
@@ -56,11 +56,11 @@ export const CalculatedPropertyActionWithVisuals = ({
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const [propertyName, setPropertyName] = useState<string>(
     calculatedProperty?.propertyName ?? "",
   );
-  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
+  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.calculatedPropertyType);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
   const [validator, showValidationMessage] = useValidator();
@@ -117,27 +117,33 @@ export const CalculatedPropertyActionWithVisuals = ({
     const accessToken = await getAccessToken();
 
     return calculatedProperty
-      ? mappingClient.updateCalculatedProperty(
+      ? propertiesClient.updateProperty(
         accessToken,
-        iModelId,
         mappingId,
         group.id,
         calculatedProperty.id,
-        { propertyName, type },
+        {
+          propertyName,
+          dataType: calculatedProperty.dataType,
+          calculatedPropertyType: type,
+        },
       )
-      : mappingClient.createCalculatedProperty(
+      : propertiesClient.createProperty(
         accessToken,
-        iModelId,
         mappingId,
         group.id,
-        { propertyName, type },
+        {
+          propertyName,
+          dataType: DataType.Double,
+          calculatedPropertyType: type,
+        },
       );
   }, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, group.id] });
+      await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, group.id] });
       onSaveSuccess();
       setPropertyName("");
-      setType(CalculatedPropertyType.Undefined);
+      setType(undefined);
     },
   });
 

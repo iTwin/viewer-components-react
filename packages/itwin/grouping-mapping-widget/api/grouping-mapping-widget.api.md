@@ -8,18 +8,18 @@
 
 import type { AccessToken } from '@itwin/core-bentley';
 import { Alert } from '@itwin/itwinui-react';
-import type { CalculatedProperty } from '@itwin/insights-client';
 import { Context } from 'react';
-import type { CustomCalculation } from '@itwin/insights-client';
 import { Dispatch } from 'react';
-import { Extraction } from '@itwin/insights-client';
 import { ExtractionStatus } from '@itwin/insights-client';
 import type { Group } from '@itwin/insights-client';
-import type { GroupProperty } from '@itwin/insights-client';
+import type { GroupMinimal } from '@itwin/insights-client';
 import type { IExtractionClient } from '@itwin/insights-client';
+import type { IGroupsClient } from '@itwin/insights-client';
 import type { IMappingsClient } from '@itwin/insights-client';
 import type { IModelConnection } from '@itwin/core-frontend';
+import type { IPropertiesClient } from '@itwin/insights-client';
 import type { Mapping } from '@itwin/insights-client';
+import type { Property } from '@itwin/insights-client';
 import { QueryClient } from '@tanstack/react-query';
 import * as React_2 from 'react';
 import { default as React_3 } from 'react';
@@ -37,7 +37,7 @@ export const CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, 
 // @public
 export interface CalculatedPropertyActionProps {
     // (undocumented)
-    calculatedProperty?: CalculatedProperty;
+    calculatedProperty?: Property;
     // (undocumented)
     group: Group;
     // (undocumented)
@@ -54,9 +54,9 @@ export const CalculatedPropertyActionWithVisuals: ({ mappingId, group, calculate
 // @public
 export interface CalculatedPropertyActionWithVisualsProps {
     // (undocumented)
-    calculatedProperty?: CalculatedProperty;
+    calculatedProperty?: Property;
     // (undocumented)
-    group: Group;
+    group: GroupMinimal;
     // (undocumented)
     mappingId: string;
     // (undocumented)
@@ -70,7 +70,7 @@ export type ClientPrefix = "" | "dev" | "qa" | undefined;
 
 // @public
 export interface ContextCustomUI extends IGroupingMappingCustomUI {
-    onClick?: (group: Group, mapping: Mapping, iModelId: string) => void;
+    onClick?: (group: GroupMinimal, mapping: Mapping, iModelId: string) => void;
     type: GroupingMappingCustomUIType.Context;
     uiComponent?: React.ComponentType<ContextCustomUIProps>;
 }
@@ -83,10 +83,22 @@ export interface ContextCustomUIProps {
 }
 
 // @internal (undocumented)
+export const createDefaultGroupsClient: (prefix?: ClientPrefix) => IGroupsClient;
+
+// @internal (undocumented)
 export const createDefaultMappingClient: (prefix?: ClientPrefix) => IMappingsClient;
 
 // @internal (undocumented)
+export const createDefaultPropertiesClient: (prefix?: ClientPrefix) => IPropertiesClient;
+
+// @internal (undocumented)
+export const createGroupsClient: (clientProp: IGroupsClient | ClientPrefix) => IGroupsClient;
+
+// @internal (undocumented)
 export const createMappingClient: (clientProp: IMappingsClient | ClientPrefix) => IMappingsClient;
+
+// @internal (undocumented)
+export const createPropertiesClient: (clientProp: IPropertiesClient | ClientPrefix) => IPropertiesClient;
 
 // @public
 export const CustomCalculationAction: ({ mappingId, groupId, customCalculation, onSaveSuccess, onClickCancel, }: CustomCalculationActionProps) => JSX.Element;
@@ -94,7 +106,7 @@ export const CustomCalculationAction: ({ mappingId, groupId, customCalculation, 
 // @public
 export interface CustomCalculationActionProps {
     // (undocumented)
-    customCalculation?: CustomCalculation;
+    customCalculation?: Property;
     // (undocumented)
     groupId: string;
     // (undocumented)
@@ -106,7 +118,7 @@ export interface CustomCalculationActionProps {
 }
 
 // @public (undocumented)
-export type DataType = "Number" | "String" | "Boolean";
+export type DataType = "Double" | "String" | "Boolean" | "Integer";
 
 // @public (undocumented)
 export type GetAccessTokenFn = () => Promise<AccessToken>;
@@ -119,7 +131,7 @@ export interface GroupActionProps {
     // (undocumented)
     displayStrings?: Partial<typeof defaultDisplayStrings_2>;
     // (undocumented)
-    group?: Group;
+    group?: GroupMinimal;
     // (undocumented)
     mappingId: string;
     // (undocumented)
@@ -168,13 +180,15 @@ export const GroupingMappingContext: (props: GroupingMappingContextProps) => JSX
 export interface GroupingMappingContextProps {
     // (undocumented)
     children?: React_3.ReactNode;
-    client?: IMappingsClient;
     customUIs?: GroupingMappingCustomUI[];
     extractionClient?: IExtractionClient;
     getAccessToken?: GetAccessTokenFn;
+    groupsClient?: IGroupsClient;
     iModelConnection?: IModelConnection;
     iModelId: string;
+    mappingsClient?: IMappingsClient;
     prefix?: ClientPrefix;
+    propertiesClient?: IPropertiesClient;
     queryClient?: QueryClient;
 }
 
@@ -204,9 +218,9 @@ export const GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSucc
 // @public
 export interface GroupPropertyActionProps {
     // (undocumented)
-    group: Group;
+    group: GroupMinimal;
     // (undocumented)
-    groupProperty?: GroupProperty;
+    groupProperty?: Property;
     // (undocumented)
     mappingId: string;
     // (undocumented)
@@ -220,6 +234,9 @@ export const GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView, }
 
 // @public
 export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, }: GroupsProps) => JSX.Element;
+
+// @internal (undocumented)
+export const GroupsClientContext: Context<IGroupsClient>;
 
 // @internal
 export interface GroupsOperationsProps {
@@ -242,11 +259,11 @@ export interface GroupsProps {
     // (undocumented)
     onClickAddGroup?: (queryGenerationType: string) => void;
     // (undocumented)
-    onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
+    onClickGroupModify?: (group: GroupMinimal, queryGenerationType: string) => void;
     // (undocumented)
-    onClickGroupTitle?: (group: Group) => void;
+    onClickGroupTitle?: (group: GroupMinimal) => void;
     // (undocumented)
-    onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group, displayLabel: string) => void;
+    onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: GroupMinimal, displayLabel: string) => void;
     // (undocumented)
     progressConfig?: ProgressConfig;
 }
@@ -259,7 +276,7 @@ export interface GroupsViewProps {
     // (undocumented)
     actionButtonRenderers?: ActionButtonRenderer[];
     // (undocumented)
-    activeOverlapInfoPanelGroup?: Group | undefined;
+    activeOverlapInfoPanelGroup?: GroupMinimal | undefined;
     // (undocumented)
     alert?: React_3.ReactElement<typeof Alert>;
     // (undocumented)
@@ -267,7 +284,7 @@ export interface GroupsViewProps {
     // (undocumented)
     disableActions?: boolean;
     // (undocumented)
-    groups: Group[];
+    groups: GroupMinimal[];
     // (undocumented)
     groupUIs: GroupingCustomUI[];
     // (undocumented)
@@ -277,15 +294,15 @@ export interface GroupsViewProps {
     // (undocumented)
     onClickAddGroup?: (queryGenerationType: string) => void;
     // (undocumented)
-    onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
+    onClickGroupModify?: (group: GroupMinimal, queryGenerationType: string) => void;
     // (undocumented)
-    onClickGroupTitle?: (group: Group) => void;
+    onClickGroupTitle?: (group: GroupMinimal) => void;
     // (undocumented)
-    onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group, displayLabel: string) => void;
+    onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: GroupMinimal, displayLabel: string) => void;
     // (undocumented)
     onCloseDeleteModal: () => void;
     // (undocumented)
-    onDeleteGroup: (group: Group) => Promise<void>;
+    onDeleteGroup: (group: GroupMinimal) => Promise<void>;
     // (undocumented)
     onRefresh: () => Promise<void>;
     // (undocumented)
@@ -293,11 +310,11 @@ export interface GroupsViewProps {
     // (undocumented)
     progressConfig?: ProgressConfig;
     // (undocumented)
-    selectedGroupForDeletion?: Group;
+    selectedGroupForDeletion?: GroupMinimal;
     // (undocumented)
-    setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group | undefined) => void;
+    setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: GroupMinimal | undefined) => void;
     // (undocumented)
-    setSelectedGroupForDeletion: (group: Group) => void;
+    setSelectedGroupForDeletion: (group: GroupMinimal) => void;
 }
 
 // @public
@@ -412,6 +429,9 @@ export interface MappingsViewProps {
     showImportModal?: boolean;
 }
 
+// @internal (undocumented)
+export const PropertiesClientContext: Context<IPropertiesClient>;
+
 // @public (undocumented)
 export interface PropertyMap {
     // (undocumented)
@@ -424,7 +444,7 @@ export const PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickMo
 // @public
 export interface PropertyMenuProps {
     // (undocumented)
-    group: Group;
+    group: GroupMinimal;
     // (undocumented)
     hideCalculatedProps?: boolean;
     // (undocumented)
@@ -440,11 +460,11 @@ export interface PropertyMenuProps {
     // (undocumented)
     onClickAddGroupProperty?: () => void;
     // (undocumented)
-    onClickModifyCalculatedProperty?: (calculatedProperty: CalculatedProperty) => void;
+    onClickModifyCalculatedProperty?: (calculatedProperty: Property) => void;
     // (undocumented)
-    onClickModifyCustomCalculation?: (customCalculation: CustomCalculation) => void;
+    onClickModifyCustomCalculation?: (customCalculation: Property) => void;
     // (undocumented)
-    onClickModifyGroupProperty?: (groupProperty: GroupProperty) => void;
+    onClickModifyGroupProperty?: (groupProperty: Property) => void;
 }
 
 // @public
@@ -465,20 +485,23 @@ export const SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView, }: G
 // @public
 export const useGroupingMappingApiConfig: () => GroupingMappingApiConfig;
 
+// @internal (undocumented)
+export const useGroupsClient: () => IGroupsClient;
+
 // @internal
 export const useGroupsOperations: ({ mappingId, }: GroupsOperationsProps) => {
-    groups: Group[] | undefined;
+    groups: GroupMinimal[] | undefined;
     isLoading: boolean;
     refresh: () => Promise<void>;
-    onDeleteGroup: (group: Group) => Promise<void>;
-    setShowDeleteModal: Dispatch<SetStateAction<Group | undefined>>;
-    showDeleteModal: Group | undefined;
+    onDeleteGroup: (group: GroupMinimal) => Promise<void>;
+    setShowDeleteModal: Dispatch<SetStateAction<GroupMinimal | undefined>>;
+    showDeleteModal: GroupMinimal | undefined;
     groupUIs: GroupingCustomUI[];
     contextUIs: ContextCustomUI[];
     errorMessage: string | undefined;
     setErrorMessage: Dispatch<SetStateAction<string | undefined>>;
-    activeOverlapInfoPanelGroup: Group | undefined;
-    setActiveOverlapInfoPanelGroup: Dispatch<SetStateAction<Group | undefined>>;
+    activeOverlapInfoPanelGroup: GroupMinimal | undefined;
+    setActiveOverlapInfoPanelGroup: Dispatch<SetStateAction<GroupMinimal | undefined>>;
     overlappedElementsInfo: Map<string, OverlappedInfo[]>;
 };
 
@@ -493,8 +516,7 @@ export const useMappingsOperations: ({ iModelId, getAccessToken, mappingClient }
     extractionStatus: {
         extractionStatusIcon: ExtractionStatusData;
         extractionMessageData: ExtractionMessageData[];
-        latestExtractionResult: IteratorResult<Extraction, any>;
-        latestJobStatus: ExtractionStatus | undefined;
+        latestExtractionResult: IteratorResult<ExtractionStatus, any>;
     } | {
         extractionStatusIcon: {
             iconStatus: undefined;
@@ -513,6 +535,9 @@ export const useMappingsOperations: ({ iModelId, getAccessToken, mappingClient }
     showDeleteModal: Mapping | undefined;
     isTogglingExtraction: boolean;
 };
+
+// @internal (undocumented)
+export const usePropertiesClient: () => IPropertiesClient;
 
 
 export * from "@itwin/insights-client";

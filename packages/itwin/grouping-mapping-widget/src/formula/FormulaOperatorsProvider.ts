@@ -165,16 +165,16 @@ export function getOperatorReturnType(token: string, arg1: PossibleDataType, arg
     case "%":
       return arg1 === "String" || arg2 === "String" ?
         { errorMessage: `Binary operator "${token}" does not support string operands.` } :
-        { value: "Number" };
+        { value: "Double" };
     case "-":
       return arg1 === "String" || arg2 === "String" ?
         { errorMessage: `${!arg2 ? "Unary" : "Binary"} operator "${token}" does not support string operands.` } :
-        { value: "Number" };
+        { value: "Double" };
     case "+":
       if (!arg2)
         return { value: arg1 as DataType };
       else
-        return arg1 === "String" || arg2 === "String" ? { value: "String" } : { value: "Number" };
+        return arg1 === "String" || arg2 === "String" ? { value: "String" } : { value: "Double" };
     case "!":
     case "<":
     case "<=":

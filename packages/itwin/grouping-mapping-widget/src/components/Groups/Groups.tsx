@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback } from "react";
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { GroupMinimal, Mapping } from "@itwin/insights-client";
 import type {
   ContextCustomUI,
 } from "../customUI/GroupingMappingCustomUI";
@@ -20,11 +20,11 @@ export interface GroupsProps {
   mapping: Mapping;
   actionButtonRenderers?: ActionButtonRenderer[];
   onClickAddGroup?: (queryGenerationType: string) => void;
-  onClickGroupTitle?: (group: Group) => void;
-  onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
+  onClickGroupTitle?: (group: GroupMinimal) => void;
+  onClickGroupModify?: (group: GroupMinimal, queryGenerationType: string) => void;
   onClickRenderContextCustomUI?: (
     contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>,
-    group: Group,
+    group: GroupMinimal,
     displayLabel: string,
   ) => void;
   disableActions?: boolean;

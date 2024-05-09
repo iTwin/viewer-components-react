@@ -166,7 +166,6 @@ export const MappingImportWizardModal = ({
                   </div>
                   {currentStep === 3 && (
                     <ConfirmMappingImport
-                      sourceiModelId={selectedIModelId}
                       selectedMappings={selectedMappings}
                       importing={importing}
                       setImporting={setImporting}
