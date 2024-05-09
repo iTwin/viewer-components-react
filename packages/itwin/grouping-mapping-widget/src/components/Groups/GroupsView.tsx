@@ -20,7 +20,7 @@ import DeleteModal from "../SharedComponents/DeleteModal";
 import "./GroupsView.scss";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
 import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { GroupMinimal, Mapping } from "@itwin/insights-client";
 import { GroupListItem } from "./GroupListItem";
 import type { ContextCustomUI, GroupingCustomUI } from "../customUI/GroupingMappingCustomUI";
 import { GroupsAddButton } from "./GroupsAddButton";
@@ -28,7 +28,7 @@ import { OverlappedElementsInformationPanel } from "./OverlappedElementsInformat
 import type { OverlappedInfo } from "../context/GroupHilitedElementsContext";
 
 export interface ActionButtonRendererProps {
-  group: Group;
+  group: GroupMinimal;
 }
 
 export type ActionButtonRenderer = (
@@ -50,28 +50,28 @@ export interface ProgressConfig {
  */
 export interface GroupsViewProps {
   mapping: Mapping;
-  groups: Group[];
+  groups: GroupMinimal[];
   isLoading: boolean;
   onRefresh: () => Promise<void>;
   groupUIs: GroupingCustomUI[];
   actionButtonRenderers?: ActionButtonRenderer[];
   contextUIs: ContextCustomUI[];
   onClickAddGroup?: (queryGenerationType: string) => void;
-  onClickGroupTitle?: (group: Group) => void;
-  onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
+  onClickGroupTitle?: (group: GroupMinimal) => void;
+  onClickGroupModify?: (group: GroupMinimal, queryGenerationType: string) => void;
   onClickRenderContextCustomUI?: (
     contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>,
-    group: Group,
+    group: GroupMinimal,
     displayLabel: string,
   ) => void;
   disableActions?: boolean;
-  selectedGroupForDeletion?: Group;
-  setSelectedGroupForDeletion: (group: Group) => void;
-  onDeleteGroup: (group: Group) => Promise<void>;
+  selectedGroupForDeletion?: GroupMinimal;
+  setSelectedGroupForDeletion: (group: GroupMinimal) => void;
+  onDeleteGroup: (group: GroupMinimal) => Promise<void>;
   onCloseDeleteModal: () => void;
   alert?: React.ReactElement<typeof Alert>;
-  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group | undefined) => void;
-  activeOverlapInfoPanelGroup?: Group | undefined;
+  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: GroupMinimal | undefined) => void;
+  activeOverlapInfoPanelGroup?: GroupMinimal | undefined;
   overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
   progressConfig?: ProgressConfig;
 }

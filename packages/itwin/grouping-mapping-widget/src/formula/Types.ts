@@ -15,8 +15,7 @@ export type PossibleValueType = ValueType | undefined;
 /**
  * @public
  */
-export type DataType = "Number" | "String" | "Boolean";
-
+export type DataType = "Double" | "String" | "Boolean" | "Integer";
 /**
  * @public
  */

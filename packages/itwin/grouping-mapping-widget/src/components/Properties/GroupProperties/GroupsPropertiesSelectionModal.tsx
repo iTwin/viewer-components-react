@@ -204,7 +204,7 @@ export const GroupsPropertiesSelectionModal = (
                   filteredProperties.map((property) => (
                     <GroupPropertyListItem
                       key={property.key}
-                      content={`${property.displayLabel} (${property.propertyType})`}
+                      content={`${property.displayLabel}`}
                       title={`${property.actualECClassName}`}
                       description={getLocalizedStringPresentation(property.categoryLabel)}
                       selected={selectedProperties.some((p) => property.key === p.key)}
@@ -237,7 +237,7 @@ export const GroupsPropertiesSelectionModal = (
                     <SortableHorizontalTile
                       key={property.key}
                       id={property.key}
-                      content={`${property.displayLabel} (${property.propertyType})`}
+                      content={`${property.displayLabel}`}
                       title={`${property.actualECClassName}`}
                       description={getLocalizedStringPresentation(property.categoryLabel)}
                       action={
@@ -275,7 +275,7 @@ export const GroupsPropertiesSelectionModal = (
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
           <GroupPropertyListItem
-            content={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
+            content={`${activeDragProperty.displayLabel}`}
             title={`${activeDragProperty.actualECClassName}`}
             description={getLocalizedStringPresentation(activeDragProperty.categoryLabel)}
             action={

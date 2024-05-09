@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IMappingsClient} from "@itwin/insights-client";
-import { GROUPING_AND_MAPPING_BASE_PATH, MappingsClient } from "@itwin/insights-client";
+import type { IPropertiesClient } from "@itwin/insights-client";
+import { GROUPING_AND_MAPPING_BASE_PATH, PropertiesClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 import type { ClientPrefix } from "./GroupingApiConfigContext";
 
@@ -17,17 +17,17 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 /**
  * @internal
  */
-export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingsClient => {
+export const createDefaultPropertiesClient = (prefix?: ClientPrefix): IPropertiesClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
-  return new MappingsClient(undefined, url);
+  return new PropertiesClient(undefined, url);
 };
 
 /**
  * @internal
  */
-export const createMappingClient = (clientProp: IMappingsClient | ClientPrefix) => {
+export const createPropertiesClient = (clientProp: IPropertiesClient | ClientPrefix) => {
   if (undefined === clientProp || typeof clientProp === "string") {
-    return createDefaultMappingClient(clientProp as ClientPrefix);
+    return createDefaultPropertiesClient(clientProp as ClientPrefix);
   }
   return clientProp;
 };
@@ -35,16 +35,16 @@ export const createMappingClient = (clientProp: IMappingsClient | ClientPrefix) 
 /**
  * @internal
  */
-export const MappingClientContext = createContext<IMappingsClient>(createDefaultMappingClient());
+export const PropertiesClientContext = createContext<IPropertiesClient>(createDefaultPropertiesClient());
 
 /**
  * @internal
  */
-export const useMappingClient = () => {
-  const context = useContext(MappingClientContext);
+export const usePropertiesClient = () => {
+  const context = useContext(PropertiesClientContext);
   if (!context) {
     throw new Error(
-      "useMappingClient should be used within a MappingClientContext provider"
+      "useGroupsClient should be used within a GroupsClientContext provider"
     );
   }
   return context;

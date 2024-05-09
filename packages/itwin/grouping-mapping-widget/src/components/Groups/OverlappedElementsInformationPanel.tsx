@@ -14,17 +14,17 @@ import {
   toaster,
 } from "@itwin/itwinui-react";
 import "./OverlappedElementsInformationPanel.scss";
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import type { OverlappedInfo } from "../context/GroupHilitedElementsContext";
 import type { CellProps, Column } from "react-table";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 import { clearEmphasizedOverriddenElements, clearHiddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 
 export interface OverlappedElementsInformationPanelProps {
-  group?: Group;
+  group?: GroupMinimal;
   onClose: () => void;
   overlappedElementsInfo: Map<string, OverlappedInfo[]>;
-  groups: Group[];
+  groups: GroupMinimal[];
 }
 
 export interface OverlappedElementsDisplayProps {

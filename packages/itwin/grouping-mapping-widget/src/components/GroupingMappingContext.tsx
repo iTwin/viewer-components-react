@@ -15,7 +15,7 @@ import {
   createMappingClient,
   MappingClientContext,
 } from "./context/MappingClientContext";
-import type { Group, IExtractionClient, IMappingsClient } from "@itwin/insights-client";
+import type { Group, IExtractionClient, IGroupsClient, IMappingsClient, IPropertiesClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import type { OverlappedElementsMetadata } from "./context/GroupHilitedElementsContext";
@@ -29,6 +29,8 @@ import { toaster } from "@itwin/itwinui-react";
 import { getErrorMessage } from "../common/utils";
 import { TErrCodes } from "./Constants";
 import { ExtractionStatusJobContext } from "./context/ExtractionStateJobContext";
+import { createGroupsClient, GroupsClientContext } from "./context/GroupsClientContext";
+import { createPropertiesClient, PropertiesClientContext } from "./context/PropertiesClientContext";
 
 /**
  * Props for the {@link GroupingMappingContext} component.
@@ -51,7 +53,15 @@ export interface GroupingMappingContextProps {
   /**
    * A custom implementation of MappingClient.
    */
-  client?: IMappingsClient;
+  mappingsClient?: IMappingsClient;
+  /**
+   * A custom implementation of GroupsClient.
+   */
+  groupsClient?: IGroupsClient;
+  /**
+   * A custom implementation of PropertiesClient.
+   */
+  propertiesClient?: IPropertiesClient;
   /**
    * A custom implementation of ExtractionClient.
    */
@@ -112,9 +122,13 @@ const defaultQueryClient = new QueryClient({
  */
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const activeIModelConnection = useActiveIModelConnection();
-  const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
+  const mappingsClientProp: IMappingsClient | ClientPrefix = props.mappingsClient ?? props.prefix;
+  const groupsClientProp: IGroupsClient | ClientPrefix = props.groupsClient ?? props.prefix;
+  const propertiesClientProp: IPropertiesClient | ClientPrefix = props.propertiesClient ?? props.prefix;
   const extractionClientProp: IExtractionClient | ClientPrefix = props.extractionClient ?? props.prefix;
-  const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
+  const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(mappingsClientProp));
+  const [groupsClient, setGroupsClient] = useState<IGroupsClient>(createGroupsClient(groupsClientProp));
+  const [propertiesClient, setPropertiesClient] = useState<IPropertiesClient>(createPropertiesClient(propertiesClientProp));
   const [extractionClient, setExtractionClient] = useState<IExtractionClient>(createExtractionClient(extractionClientProp));
   const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
     createGroupingMappingCustomUI(props.customUIs),
@@ -150,8 +164,16 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   }, [activeIModelConnection, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
-    setMappingClient(createMappingClient(clientProp));
-  }, [clientProp]);
+    setMappingClient(createMappingClient(mappingsClientProp));
+  }, [mappingsClientProp]);
+
+  useEffect(()=>{
+    setGroupsClient(createGroupsClient(groupsClientProp));
+  }, [groupsClientProp]);
+
+  useEffect(()=>{
+    setPropertiesClient(createPropertiesClient(propertiesClientProp));
+  }, [propertiesClientProp]);
 
   useEffect(() => {
     setExtractionClient(createExtractionClient(extractionClientProp));
@@ -205,17 +227,21 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     <QueryClientProvider client={queryClient}>
       <GroupingMappingApiConfigContext.Provider value={apiConfig}>
         <MappingClientContext.Provider value={mappingClient}>
-          <ExtractionClientContext.Provider value={extractionClient}>
-            <ExtractionStatusJobContext.Provider value={extractionStateJobContextValue}>
-              <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
-                <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-                  <PropertiesGroupColorContext.Provider value={propertiesContextValue}>
-                    {props.children}
-                  </PropertiesGroupColorContext.Provider>
-                </GroupHilitedElementsContext.Provider>
-              </GroupingMappingCustomUIContext.Provider>
-            </ExtractionStatusJobContext.Provider>
-          </ExtractionClientContext.Provider>
+          <GroupsClientContext.Provider value={groupsClient}>
+            <PropertiesClientContext.Provider value={propertiesClient}>
+              <ExtractionClientContext.Provider value={extractionClient}>
+                <ExtractionStatusJobContext.Provider value={extractionStateJobContextValue}>
+                  <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
+                    <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
+                      <PropertiesGroupColorContext.Provider value={propertiesContextValue}>
+                        {props.children}
+                      </PropertiesGroupColorContext.Provider>
+                    </GroupHilitedElementsContext.Provider>
+                  </GroupingMappingCustomUIContext.Provider>
+                </ExtractionStatusJobContext.Provider>
+              </ExtractionClientContext.Provider>
+            </PropertiesClientContext.Provider>
+          </GroupsClientContext.Provider>
         </MappingClientContext.Provider>
       </GroupingMappingApiConfigContext.Provider>
     </QueryClientProvider>

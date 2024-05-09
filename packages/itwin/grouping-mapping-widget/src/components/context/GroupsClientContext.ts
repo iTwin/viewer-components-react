@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IMappingsClient} from "@itwin/insights-client";
-import { GROUPING_AND_MAPPING_BASE_PATH, MappingsClient } from "@itwin/insights-client";
+import type { IGroupsClient } from "@itwin/insights-client";
+import { GROUPING_AND_MAPPING_BASE_PATH, GroupsClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 import type { ClientPrefix } from "./GroupingApiConfigContext";
 
@@ -17,17 +17,17 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 /**
  * @internal
  */
-export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingsClient => {
+export const createDefaultGroupsClient = (prefix?: ClientPrefix): IGroupsClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
-  return new MappingsClient(undefined, url);
+  return new GroupsClient(undefined, url);
 };
 
 /**
  * @internal
  */
-export const createMappingClient = (clientProp: IMappingsClient | ClientPrefix) => {
+export const createGroupsClient = (clientProp: IGroupsClient | ClientPrefix) => {
   if (undefined === clientProp || typeof clientProp === "string") {
-    return createDefaultMappingClient(clientProp as ClientPrefix);
+    return createDefaultGroupsClient(clientProp as ClientPrefix);
   }
   return clientProp;
 };
@@ -35,16 +35,16 @@ export const createMappingClient = (clientProp: IMappingsClient | ClientPrefix) 
 /**
  * @internal
  */
-export const MappingClientContext = createContext<IMappingsClient>(createDefaultMappingClient());
+export const GroupsClientContext = createContext<IGroupsClient>(createDefaultGroupsClient());
 
 /**
  * @internal
  */
-export const useMappingClient = () => {
-  const context = useContext(MappingClientContext);
+export const useGroupsClient = () => {
+  const context = useContext(GroupsClientContext);
   if (!context) {
     throw new Error(
-      "useMappingClient should be used within a MappingClientContext provider"
+      "useGroupsClient should be used within a GroupsClientContext provider"
     );
   }
   return context;

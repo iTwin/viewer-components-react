@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useState } from "react";
-import { ExtractorState } from "@itwin/insights-client";
+import { ExtractionState } from "@itwin/insights-client";
 import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import type { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useExtractionClient } from "../../context/ExtractionClientContext";
@@ -53,13 +53,13 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   useEffect(() => {
     if(initialStateExtractionFlag && isMappingsFetched && isExtractionStatusFetched && mappings && extractionStatus && !mappingIdJobInfo.size){
       const newMappingIdJobInfo = new Map<string, string>();
-      const jobId = extractionStatus.latestExtractionResult.value?.jobId;
-      const state = extractionStatus.latestJobStatus?.state;
-      if((state === ExtractorState.Failed || state === ExtractorState.Succeeded)) return;
-      !!jobId && mappings.forEach((mapping) => {
+      const latestExtractionResultId = extractionStatus.latestExtractionResult.value?.id;
+      const state = extractionStatus.latestExtractionResult.value?.state;
+      if((state === ExtractionState.Failed || state === ExtractionState.Succeeded || state === ExtractionState.PartiallySucceeded)) return;
+      !!latestExtractionResultId && mappings.forEach((mapping) => {
         const mappingId = mapping.id;
-        const jobId = extractionStatus.latestExtractionResult.value.jobId;
-        newMappingIdJobInfo.set(mappingId, jobId);
+        const latestExtractionResultId = extractionStatus.latestExtractionResult.value.id;
+        newMappingIdJobInfo.set(mappingId, latestExtractionResultId);
       });
       setMappingIdJobInfo(newMappingIdJobInfo);
       setInitialExtractionStateFlag(false);
@@ -74,7 +74,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     mutationFn: async (mapping: Mapping) => {
       const accessToken = await getAccessToken();
       const newState = !mapping.extractionEnabled;
-      await mappingClient.updateMapping(accessToken, iModelId, mapping.id, { extractionEnabled: newState });
+      await mappingClient.updateMapping(accessToken, mapping.id, { extractionEnabled: newState });
     },
     onSuccess: async () => {
       await refreshMappings();
@@ -84,7 +84,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const { mutateAsync: onDelete, isLoading: isDeletingMapping} = useMutation({
     mutationFn: async (mapping: Mapping) => {
       const accessToken = await getAccessToken();
-      await mappingClient.deleteMapping(accessToken, iModelId, mapping.id);
+      await mappingClient.deleteMapping(accessToken, mapping.id);
     },
     onSuccess: async () => {
       await refreshMappings();
