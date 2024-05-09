@@ -13,10 +13,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetchGroups } from "./useFetchGroups";
 import { useGroupsClient } from "../../context/GroupsClientContext";
 
+/**
+ * Props for the {@link useGroupsOperations} hook.
+ * @internal
+ */
 export interface GroupsOperationsProps {
   mappingId: string;
 }
 
+/**
+ * Custom hook to handle group operations.
+ * @internal
+ */
 export const useGroupsOperations = ({
   mappingId,
 }: GroupsOperationsProps) => {

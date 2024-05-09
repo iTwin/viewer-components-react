@@ -35,11 +35,19 @@ import { useFetchGroups } from "./hooks/useFetchGroups";
 import { useKeySetHiliteQueries } from "./hooks/useKeySetHiliteQueries";
 import { useGroupsClient } from "../context/GroupsClientContext";
 
+/**
+ * Props for the {@link GroupsVisualization} component.
+ * @public
+ */
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
 }
 
+/**
+ * Component to visualize groups and their elements.
+ * @public
+ */
 export const GroupsVisualization = ({
   emphasizeElements = true,
   isNonEmphasizedSelectable = false,

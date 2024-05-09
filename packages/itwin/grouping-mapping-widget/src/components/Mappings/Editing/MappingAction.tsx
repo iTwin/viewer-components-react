@@ -17,6 +17,10 @@ const defaultDisplayStrings = {
   mappingDetails: "Mapping Details",
 };
 
+/**
+ * Props for the {@link MappingAction} component.
+ * @public
+ */
 export interface MappingActionProps {
   mapping?: Mapping;
   onSaveSuccess: () => void;
@@ -24,6 +28,10 @@ export interface MappingActionProps {
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
+/**
+ * Component to create or update a mapping.
+ * @public
+ */
 export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();

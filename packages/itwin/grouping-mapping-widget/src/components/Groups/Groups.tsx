@@ -12,6 +12,10 @@ import { GroupsView } from "./GroupsView";
 import { useGroupsOperations } from "./hooks/useGroupsOperations";
 import { Alert } from "@itwin/itwinui-react";
 
+/**
+ * Props for the {@link Groups} component.
+ * @public
+ */
 export interface GroupsProps {
   mapping: Mapping;
   actionButtonRenderers?: ActionButtonRenderer[];
@@ -29,6 +33,10 @@ export interface GroupsProps {
   alert?: React.ReactElement<typeof Alert>;
 }
 
+/**
+ * Component to list groups and handle basic operations.
+ * @public
+ */
 export const Groups = ({
   mapping,
   actionButtonRenderers,

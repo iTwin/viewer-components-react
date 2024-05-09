@@ -44,6 +44,10 @@ export interface ProgressConfig {
   maxDynamicProgress?: number;
 }
 
+/**
+ * Props for the {@link GroupsView} component.
+ * @internal
+ */
 export interface GroupsViewProps {
   mapping: Mapping;
   groups: GroupMinimal[];
@@ -72,6 +76,10 @@ export interface GroupsViewProps {
   progressConfig?: ProgressConfig;
 }
 
+/**
+ * Component to list groups.
+ * @internal
+ */
 export const GroupsView = ({
   mapping,
   groups,

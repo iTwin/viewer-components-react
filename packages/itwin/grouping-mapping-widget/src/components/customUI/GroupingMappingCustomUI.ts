@@ -5,15 +5,22 @@
 import type {GroupMinimal, Mapping } from "@itwin/insights-client";
 import type { ReactElement } from "react";
 
+/**
+ * @public
+ */
 export enum GroupingMappingCustomUIType {
   Grouping,
   Context,
 }
 
+/**
+ * @public
+ */
 export type GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI;
 
-/** Custom UI Definitions. */
-
+/** Custom UI Definitions.
+ * @public
+ */
 export interface IGroupingMappingCustomUI {
   /**
    * See GroupingMappingCustomUIType.
@@ -35,6 +42,7 @@ export interface IGroupingMappingCustomUI {
 
 /**
  * Context custom UI type definition.
+ * @public
  */
 export interface ContextCustomUI extends IGroupingMappingCustomUI {
   /**
@@ -53,6 +61,7 @@ export interface ContextCustomUI extends IGroupingMappingCustomUI {
 
 /**
  * Group custom UI type definition.
+ * @public
  */
 export interface GroupingCustomUI extends IGroupingMappingCustomUI {
   /**
@@ -69,6 +78,7 @@ export interface GroupingCustomUI extends IGroupingMappingCustomUI {
 
 /**
  * Context custom UI component arguments definition.
+ * @public
  */
 export interface ContextCustomUIProps {
   /**
@@ -87,6 +97,7 @@ export interface ContextCustomUIProps {
 
 /**
  * Group custom UI component arguments definition.
+ * @public
  */
 export interface GroupingCustomUIProps {
   /**

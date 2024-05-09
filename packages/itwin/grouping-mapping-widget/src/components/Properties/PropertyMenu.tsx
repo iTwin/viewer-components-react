@@ -13,6 +13,10 @@ import { usePropertiesQuery } from "./hooks/usePropertiesQuery";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../context/PropertiesClientContext";
 
+/**
+ * Props for the {@link PropertyMenu} component.
+ * @public
+ */
 export interface PropertyMenuProps {
   mapping: Mapping;
   group: GroupMinimal;
@@ -27,6 +31,10 @@ export interface PropertyMenuProps {
   hideCustomCalculationProps?: boolean;
 }
 
+/**
+ * Component to display the properties of a group.
+ * @public
+ */
 export const PropertyMenu = ({
   mapping,
   group,

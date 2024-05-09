@@ -14,19 +14,32 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
   return baseUrl;
 };
 
+/**
+ * @internal
+ */
 export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingsClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
   return new MappingsClient(undefined, url);
 };
 
+/**
+ * @internal
+ */
 export const createMappingClient = (clientProp: IMappingsClient | ClientPrefix) => {
   if (undefined === clientProp || typeof clientProp === "string") {
     return createDefaultMappingClient(clientProp as ClientPrefix);
   }
   return clientProp;
 };
+
+/**
+ * @internal
+ */
 export const MappingClientContext = createContext<IMappingsClient>(createDefaultMappingClient());
 
+/**
+ * @internal
+ */
 export const useMappingClient = () => {
   const context = useContext(MappingClientContext);
   if (!context) {

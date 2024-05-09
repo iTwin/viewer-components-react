@@ -26,6 +26,10 @@ import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
+/**
+ * Props for the {@link CustomCalculationAction} component.
+ * @public
+ */
 export interface CustomCalculationActionProps {
   mappingId: string;
   groupId: string;
@@ -75,6 +79,10 @@ const inferToPropertyDataType = (value: FormulaDataType): DataType => {
   }
 };
 
+/**
+ * Component to create or update a custom calculation property.
+ * @public
+ */
 export const CustomCalculationAction = ({
   mappingId,
   groupId,

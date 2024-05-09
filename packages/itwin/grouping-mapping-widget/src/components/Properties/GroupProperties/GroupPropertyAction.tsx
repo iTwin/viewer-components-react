@@ -37,6 +37,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
+/**
+ * Props for the {@link GroupPropertyAction} component.
+ * @public
+ */
 export interface GroupPropertyActionProps {
   mappingId: string;
   group: GroupMinimal;
@@ -56,6 +60,10 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefine
   { value: undefined, label: "No Quantity Type" },
 ];
 
+/**
+ * Component to create or update a group.
+ * @public
+ */
 export const GroupPropertyAction = ({
   mappingId,
   group,

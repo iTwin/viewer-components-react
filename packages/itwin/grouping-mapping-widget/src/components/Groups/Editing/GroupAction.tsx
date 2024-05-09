@@ -35,6 +35,10 @@ enum GroupActionStep {
   GroupDetails,
 }
 
+/**
+ * Props for the {@link GroupAction} component.
+ * @public
+ */
 export interface GroupActionProps {
   mappingId: string;
   shouldVisualize: boolean;
@@ -45,6 +49,10 @@ export interface GroupActionProps {
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
+/**
+ * Component to create or update a group.
+ * @public
+ */
 export const GroupAction = (props: GroupActionProps) => {
   const { getAccessToken, iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {

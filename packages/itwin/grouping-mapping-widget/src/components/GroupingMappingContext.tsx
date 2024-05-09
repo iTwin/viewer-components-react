@@ -32,6 +32,10 @@ import { ExtractionStatusJobContext } from "./context/ExtractionStateJobContext"
 import { createGroupsClient, GroupsClientContext } from "./context/GroupsClientContext";
 import { createPropertiesClient, PropertiesClientContext } from "./context/PropertiesClientContext";
 
+/**
+ * Props for the {@link GroupingMappingContext} component.
+ * @public
+ */
 export interface GroupingMappingContextProps {
   /**
    * Custom callback to retrieve access token.
@@ -43,7 +47,7 @@ export interface GroupingMappingContextProps {
   iModelId: string;
   /**
    * Used for iTwin and iModel APIs.
-   * Also used for Mapping API if a custom {@link client} is not provided.
+   * Also used for Mapping API if a custom IMappingsClient is not provided.
    */
   prefix?: ClientPrefix;
   /**
@@ -112,6 +116,10 @@ const defaultQueryClient = new QueryClient({
   }),
 });
 
+/**
+ * Grouping and Mapping Context providers required for all components.
+ * @public
+ */
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const activeIModelConnection = useActiveIModelConnection();
   const mappingsClientProp: IMappingsClient | ClientPrefix = props.mappingsClient ?? props.prefix;
