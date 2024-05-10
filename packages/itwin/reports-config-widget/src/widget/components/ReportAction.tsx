@@ -15,12 +15,20 @@ import type { Report } from "@itwin/insights-client";
 import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
+/**
+ * Props for the {@link ReportAction} component.
+ * @public
+ */
 export interface ReportActionProps {
   report?: Report;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
 }
 
+/**
+ * Component to create or update a report.
+ * @public
+ */
 export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportActionProps) => {
   const { iTwinId, getAccessToken, reportsClient } = useReportsConfigApi();
   const [values, setValues] = useState({
@@ -126,4 +134,3 @@ export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportAct
     </>
   );
 };
-
