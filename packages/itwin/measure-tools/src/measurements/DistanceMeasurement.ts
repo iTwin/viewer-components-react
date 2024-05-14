@@ -51,6 +51,7 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
+  ratio?: number;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -651,6 +652,9 @@ export class DistanceMeasurement extends Measurement {
         ? jsonDist.showAxes
         : MeasurementPreferences.current.displayMeasurementAxes;
 
+    if (jsonDist.ratio !== undefined)
+      this._ratio = jsonDist.ratio;
+
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
@@ -666,6 +670,7 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
+    jsonDist.ratio = this._ratio;
   }
 
   public static create(start: Point3d, end: Point3d, viewType?: string) {

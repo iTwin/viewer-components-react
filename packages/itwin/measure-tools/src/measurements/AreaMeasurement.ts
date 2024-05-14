@@ -42,6 +42,7 @@ import { MeasureTools } from "../MeasureTools";
  */
 export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
+  ratio?: number;
 }
 
 /** Serializer for a [[AreaeMeasurement]]. */
@@ -572,6 +573,9 @@ export class AreaMeasurement extends Measurement {
 
       this._polygon.setPoints(pts, false, true);
 
+      if (jsonArea.ratio !== undefined)
+        this._ratio = jsonArea.ratio;
+
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
     }
@@ -589,6 +593,7 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
+    jsonArea.ratio = this._ratio;
   }
 
   public static create(pts: Point3d[], viewType?: string): AreaMeasurement {
