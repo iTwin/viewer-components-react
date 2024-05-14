@@ -282,3 +282,34 @@ return (
   />
 );
 ```
+
+## Badge rendering
+
+When providing trees to `TreeWidgetUiItemsProvider` it is possible to provide a `renderBadge` callback that will be used to render custom badges in tree selector.
+
+Example:
+
+```ts
+import { UiItemsManager } from "@itwin/appui-react";
+import { TreeWidgetUiItemsProvider, ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { Icon } from "@itwin/itwinui-react";
+import { SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({
+    defaultPanelLocation: StagePanelLocation.Left,
+    defaultPanelSection: StagePanelSection.End,
+    defaultTreeWidgetPriority: 1000,
+    trees: [{
+      id: ModelsTreeComponent.id,
+      getLabel: ModelsTreeComponent.getLabel,
+      render: (props) => <ModelsTreeComponent { ...props } />,
+      renderBadge: (props) => (
+        <Icon size={props.density === "enlarged" ? "medium" : "small"}>
+          <SvgTechnicalPreviewMiniBw />
+        </Icon>
+      ),
+    }];
+  })
+);
+```
