@@ -271,11 +271,6 @@ export class ExperimentalModelsVisibilityHandler {
     if (!hasChildren) {
       return;
     }
-
-    const childElements = this.getAssemblyElementIds(id);
-    for await (const elementId of childElements.getElementIds()) {
-      this.changeElementStateInternal(elementId, on, isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements);
-    }
   }
 
   private async changeElementsState(modelId: Id64String | undefined, categoryId: Id64String | undefined, elementIds: AsyncGenerator<Id64String>, on: boolean) {
@@ -354,16 +349,10 @@ export class ExperimentalModelsVisibilityHandler {
     );
   }
 
-  private getAssemblyElementIds(assemblyId: Id64String) {
-    return this._elementIdsCache.getAssemblyElementIds(assemblyId);
-  }
-
   // istanbul ignore next
   private getGroupedElementIds(node: GroupingHierarchyNode & { key: ClassGroupingNodeKey }) {
     const modelId = this.getElementModelId(node);
     const categoryId = this.getElementCategoryId(node);
-
-    const getAssemblyElementIds = (id: Id64String) => this.getAssemblyElementIds(id);
 
     return {
       modelId,
@@ -371,10 +360,6 @@ export class ExperimentalModelsVisibilityHandler {
       elementIds: async function* () {
         for (const key of node.groupedInstanceKeys) {
           yield key.id;
-          const assemblyElements = getAssemblyElementIds(key.id);
-          for await (const elementId of assemblyElements.getElementIds()) {
-            yield elementId;
-          }
         }
       },
     };

@@ -12,8 +12,13 @@ import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
-  AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
-  RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
+  AddFavoritePropertyContextMenuItem,
+  AncestorsNavigationControls,
+  CopyPropertyTextContextMenuItem,
+  PropertyGridManager,
+  PropertyGridUiItemsProvider,
+  RemoveFavoritePropertyContextMenuItem,
+  ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
@@ -29,8 +34,10 @@ import {
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
+import { unifiedSelectionStorage } from "./SelectionStorage";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -73,15 +80,16 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
   return baseUrl;
 };
 
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  const schemas = new SchemaContext();
-  schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
-  return schemas;
-}
-
 interface UiItem {
   initialize: () => Promise<void>;
   createUiItemsProviders: () => UiItemsProvider[];
+}
+
+function getSchemaContext(imodel: IModelConnection) {
+  const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
+  const schemaContext = new SchemaContext();
+  schemaContext.addLocater(schemaLocater);
+  return schemaContext;
 }
 
 const configuredUiItems = new Map<string, UiItem>([
@@ -97,17 +105,10 @@ const configuredUiItems = new Map<string, UiItem>([
           getWidgets: () => {
             const experimentalTrees = [
               {
-                id: "experimental-models-tree",
-                getLabel: () => "Experimental Models Tree",
+                id: `experimental-${ModelsTreeComponent.id}`,
+                getLabel: () => `${ModelsTreeComponent.getLabel()} (Experimental)`,
                 render: (props: TreeRenderProps) => (
-                  <ExperimentalModelsTreeComponent
-                    density={props.density}
-                    getSchemaContext={getSchemaContext}
-                    hierarchyLevelConfig={{
-                      isFilteringEnabled: true,
-                      sizeLimit: 10,
-                    }}
-                  />
+                  <ExperimentalModelsTreeComponent getSchemaContext={getSchemaContext} density={props.density} selectionStorage={unifiedSelectionStorage} />
                 ),
               },
             ];
@@ -167,7 +168,7 @@ const configuredUiItems = new Map<string, UiItem>([
             return [
               {
                 id: "tree-widget",
-                label: "Tree Widget",
+                icon: <SvgHierarchyTree />,
                 content: <TreeWidgetWithOptions trees={trees} />,
                 layouts: {
                   standard: {
@@ -179,6 +180,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: "experimental-tree-widget",
                 label: "Experimental Tree Widget",
+                icon: <SvgHierarchyTree />,
                 content: <TreeWidgetWithOptions trees={experimentalTrees} />,
                 layouts: {
                   standard: {

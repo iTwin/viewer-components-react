@@ -7,6 +7,7 @@ import { PresentationHierarchyNode, TreeNodeRenderer, isPresentationHierarchyNod
 import { ComponentPropsWithoutRef } from "react";
 import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import { Checkbox } from "@itwin/itwinui-react";
+import cx from "classnames";
 
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;
 
@@ -26,6 +27,7 @@ export function VisibilityTreeNodeRenderer({ onCheckboxClicked, getCheckboxStatu
     const checkboxStatus = getCheckboxStatus(node);
     return (
       <Checkbox
+        className="visibility-tree-node-checkbox"
         variant="eyeball"
         checked={checkboxStatus.state === "visible"}
         onClick={(e) => {
@@ -40,5 +42,12 @@ export function VisibilityTreeNodeRenderer({ onCheckboxClicked, getCheckboxStatu
       />
     );
   };
-  return <TreeNodeRenderer {...restProps} checkbox={renderCheckbox()} />;
+  return (
+    <TreeNodeRenderer
+      {...restProps}
+      className={cx("visibility-tree-node", restProps.isSelected && "selected")}
+      actionButtonsClassName="visibility-tree-node-action-buttons"
+      checkbox={renderCheckbox()}
+    />
+  );
 }

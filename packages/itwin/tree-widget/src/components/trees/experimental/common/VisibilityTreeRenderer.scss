@@ -1,0 +1,36 @@
+.visibility-tree-renderer {
+  width: fit-content;
+  min-width: 100%;
+
+  div:has(> .visibility-tree-node-checkbox) {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--iui-color-background);
+  }
+
+  div:has(> .visibility-tree-node-action-buttons) {
+    overflow: visible;
+  }
+
+  .visibility-tree-node-action-buttons {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background-color: var(--iui-color-background);
+  }
+
+  .visibility-tree-node:not(.selected) > div {
+    div:has(> .visibility-tree-node-checkbox),
+    .visibility-tree-node-action-buttons {
+      background-color: var(--iui-color-background-hover);
+    }
+  }
+
+  .visibility-tree-node.selected {
+    div:has(> .visibility-tree-node-checkbox),
+    .visibility-tree-node-action-buttons {
+      background-color: var(--iui-color-background-accent-muted);
+    }
+  }
+}

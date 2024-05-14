@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { category } from "@itwin/appui-react/lib/cjs/appui-react/layout/state/internal/NineZoneStateHelpers";
 import { Id64String } from "@itwin/core-bentley";
 import {
   ClassBasedHierarchyLevelDefinitionsFactory,
@@ -14,33 +13,32 @@ import {
   HierarchyNode,
   HierarchyNodeIdentifiersPath,
   IHierarchyLevelDefinitionsFactory,
-  ILimitingECSqlQueryExecutor,
+  LimitingECSqlQueryExecutor,
   NodeSelectClauseColumnNames,
   NodeSelectQueryFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import {
   createBisInstanceLabelSelectClauseFactory,
-  createCachingECClassHierarchyInspector,
   ECSql,
   ECSqlBinding,
-  IECClassHierarchyInspector,
-  IECMetadataProvider,
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
   IInstanceLabelSelectClauseFactory,
   InstanceKey,
 } from "@itwin/presentation-shared";
 
 interface ModelsTreeDefinitionProps {
-  imodelAccess: IECMetadataProvider & IECClassHierarchyInspector;
+  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
-  imodelAccess: IECClassHierarchyInspector & ILimitingECSqlQueryExecutor;
+  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   keys: InstanceKey[];
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
-  imodelAccess: IECClassHierarchyInspector & ILimitingECSqlQueryExecutor;
+  imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   label: string;
 }
 
@@ -516,7 +514,7 @@ function createECInstanceKeySelectClause(
   const classIdSelector = (props as any).classIdSelector ?? `[${(props as any).classIdAlias ?? (props as any).alias}].[ECClassId]`;
   const instanceHexIdSelector =
     (props as any).instanceHexIdSelector ?? `printf('0x%x', [${(props as any).instanceIdAlias ?? (props as any).alias}].[ECInstanceId])`;
-  return `json_object('className', replace(ec_classname(${classIdSelector}), ':', '.'), 'id', ${instanceHexIdSelector})`;
+  return `json_object('className', ec_classname(${classIdSelector}, 's.c'), 'id', ${instanceHexIdSelector})`;
 }
 
 async function createInstanceKeyPathsCTEs(labelsFactory: IInstanceLabelSelectClauseFactory) {
@@ -762,7 +760,7 @@ async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceK
       ecsql: queries.join(" UNION ALL "),
       bindings,
     },
-    { rowFormat: "Indexes" },
+    { rowFormat: "Indexes", restartToken: "FilterByKeysQuery" },
   );
   const paths = new Array<HierarchyNodeIdentifiersPath>();
   for await (const row of reader) {
@@ -821,7 +819,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
       `,
       bindings: [{ type: "string", value: props.label }],
     },
-    { rowFormat: "Indexes" },
+    { rowFormat: "Indexes", restartToken: "FilterByLabelQuery" },
   );
   const paths = new Array<HierarchyNodeIdentifiersPath>();
   for await (const row of reader) {

@@ -5,22 +5,17 @@
 
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
-import { createECSqlQueryExecutor, createMetadataProvider } from "@itwin/presentation-core-interop";
-import {
-  HierarchyNode,
-  HierarchyNodeIdentifiersPath,
-  IHierarchyLevelDefinitionsFactory,
-  createLimitingECSqlQueryExecutor,
-} from "@itwin/presentation-hierarchies";
-import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
+import { createECSqlQueryExecutor, createECSchemaProvider } from "@itwin/presentation-core-interop";
+import { HierarchyNode, IHierarchyLevelDefinitionsFactory, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { ComponentPropsWithoutRef, ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 import { VisibilityTree } from "../common/VisibilityTree";
-import { GetFilteredPathsProps, IModelAccess } from "../common/UseHierarchyProvider";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { InstanceKey, createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { HierarchyLevelConfig } from "../../common/Types";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { Text } from "@itwin/itwinui-react";
 
 interface ExperimentalModelsTreeProps {
   imodel: IModelConnection;
@@ -30,8 +25,13 @@ interface ExperimentalModelsTreeProps {
   getSchemaContext: (imodel: IModelConnection) => SchemaContext;
   filter: string;
   density?: "default" | "enlarged";
-  hierarchyLevelConfig?: HierarchyLevelConfig;
+  hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
+  focusedInstanceKeys?: InstanceKey[];
 }
+
+type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
+type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
+type GetHierarchyDefinitionsProviderCallback = VisibilityTreeProps["getHierarchyDefinitionsProvider"];
 
 /** @internal */
 export function ExperimentalModelsTree({
@@ -43,19 +43,8 @@ export function ExperimentalModelsTree({
   filter,
   density,
   hierarchyLevelConfig,
+  focusedInstanceKeys,
 }: ExperimentalModelsTreeProps) {
-  const [imodelAccess, setImodelAccess] = useState<IModelAccess>();
-  const hierarchyLevelSizeLimit = hierarchyLevelConfig?.sizeLimit ?? 1000;
-
-  useEffect(() => {
-    const metadataProvider = createMetadataProvider(getSchemaContext(imodel));
-    setImodelAccess({
-      ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), hierarchyLevelSizeLimit),
-      ...metadataProvider,
-      ...createCachingECClassHierarchyInspector({ metadataProvider }),
-    });
-  }, [imodel, getSchemaContext, hierarchyLevelSizeLimit]);
-
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new ExperimentalModelsVisibilityHandler({ viewport: activeView });
     return {
@@ -66,56 +55,48 @@ export function ExperimentalModelsTree({
     };
   }, [activeView]);
 
-  const createDefinitionsProvider = useMemo(
-    () => createDefinitionsProviderFactory(hierarchyLevelConfig?.isFilteringEnabled),
-    [hierarchyLevelConfig?.isFilteringEnabled],
-  );
+  const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    if (!focusedInstanceKeys) {
+      return undefined;
+    }
+    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstanceKeys });
+  }, [focusedInstanceKeys]);
 
-  if (!imodelAccess) {
-    return null;
-  }
+  const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    if (!filter) {
+      return undefined;
+    }
+    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
+  }, [filter]);
+
+  const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
   return (
     <VisibilityTree
-      imodelAccess={imodelAccess}
-      filter={filter}
       height={height}
       width={width}
       imodel={imodel}
+      getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
-      getHierarchyDefinitionsProvider={createDefinitionsProvider}
-      getFilteredPaths={getFilteredNodePaths}
-      defaultHierarchyLevelSizeLimit={hierarchyLevelSizeLimit}
+      getHierarchyDefinitionsProvider={getDefinitionsProvider}
+      getFilteredPaths={getFilteredPaths}
+      hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       getIcon={getIcon}
       density={density}
+      noDataMessage={getNoDataMessage(filter)}
     />
   );
 }
 
-function createDefinitionsProviderFactory(enableHierarchyFiltering?: boolean) {
-  return (props: { imodelAccess: IModelAccess }): IHierarchyLevelDefinitionsFactory => {
-    const modelsTreeDefinition = new ModelsTreeDefinition(props);
-    return {
-      defineHierarchyLevel: (props) => modelsTreeDefinition.defineHierarchyLevel(props),
-      postProcessNode: async (node) => {
-        const defaultNode = await modelsTreeDefinition.postProcessNode(node);
-        if (!HierarchyNode.isGroupingNode(defaultNode) && defaultNode.supportsFiltering && !enableHierarchyFiltering) {
-          return {
-            ...defaultNode,
-            supportsFiltering: false,
-          };
-        }
-        return defaultNode;
-      },
-    };
-  };
+function getNoDataMessage(filter: string) {
+  if (filter) {
+    return <Text>There are no nodes matching filter - "{filter}"</Text>;
+  }
+  return undefined;
 }
 
-function getFilteredNodePaths({ imodelAccess, filter }: GetFilteredPathsProps): Promise<HierarchyNodeIdentifiersPath[]> {
-  return ModelsTreeDefinition.createInstanceKeyPaths({
-    imodelAccess,
-    label: filter,
-  });
+function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+  return new ModelsTreeDefinition(props);
 }
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {

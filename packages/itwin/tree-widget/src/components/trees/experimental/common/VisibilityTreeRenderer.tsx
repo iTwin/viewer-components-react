@@ -8,6 +8,7 @@ import { PresentationHierarchyNode, PresentationTreeNode, createTreeNode } from 
 import { ComponentPropsWithoutRef, useCallback } from "react";
 import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import { VisibilityTreeNodeRenderer } from "./VisibilityTreeNodeRenderer";
+import "./VisibilityTreeRenderer.scss";
 
 type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
 type VisibilityTreeNodeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeNodeRenderer>;
@@ -61,5 +62,14 @@ export function VisibilityTreeRenderer({
 
   const getNode = useCallback<TreeProps<PresentationTreeNode>["getNode"]>((node) => createTreeNode(node, isNodeSelected), [isNodeSelected]);
 
-  return <Tree<PresentationTreeNode> {...props} data={rootNodes} nodeRenderer={nodeRenderer} getNode={getNode} enableVirtualization={true} />;
+  return (
+    <Tree<PresentationTreeNode>
+      {...props}
+      className="visibility-tree-renderer"
+      data={rootNodes}
+      nodeRenderer={nodeRenderer}
+      getNode={getNode}
+      enableVirtualization={true}
+    />
+  );
 }
