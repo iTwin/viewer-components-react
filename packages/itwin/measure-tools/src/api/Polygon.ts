@@ -83,14 +83,14 @@ export class Polygon {
     this.recomputeFromPoints();
   }
 
-  public recomputeFromPoints() {
+  public recomputeFromPoints(ratio?: number) {
     this._perimeter = this.calculatePerimeter(this.points);
     this._area = Math.abs(PolygonOps.area(this.points));
     this._areaXY = Math.abs(PolygonOps.areaXY(this.points));
     const center = this.getCenter(this.points);
 
     this._textMarker.worldLocation = center;
-    this.setTextToMarker();
+    this.setTextToMarker(ratio);
   }
 
   public setPoints(points: Point3d[], copyPts: boolean = true, recompute: boolean = true) {
@@ -106,14 +106,14 @@ export class Polygon {
       this.recomputeFromPoints();
   }
 
-  private setTextToMarker() {
+  private setTextToMarker(ratio?: number) {
     if (this._overrideText) {
       this._textMarker.textLines = this._overrideText;
     } else {
       const lines: string[] = [];
       const areaFormatter = IModelApp.quantityFormatter.findFormatterSpecByQuantityType(QuantityType.Area);
       if (undefined !== areaFormatter)
-        lines.push(IModelApp.quantityFormatter.formatQuantity(this.area, areaFormatter));
+        lines.push(IModelApp.quantityFormatter.formatQuantity(ratio? (ratio * ratio) * this.area: this.area, areaFormatter));
 
       this._textMarker.textLines = lines;
     }

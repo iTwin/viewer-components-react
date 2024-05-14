@@ -85,6 +85,8 @@ export class AreaMeasurement extends Measurement {
 
   private _polygon: Polygon;
 
+  private _ratio: number | undefined;
+
   private _isDynamic: boolean; // No serialize, for dynamics
   private _dynamicEdge?: DistanceMeasurement; // No serialize, for dynamics
 
@@ -120,6 +122,7 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super();
 
+    this._ratio = undefined;
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
@@ -129,6 +132,10 @@ export class AreaMeasurement extends Measurement {
     this._isDynamic = false;
 
     if (props) this.readFromJSON(props);
+  }
+
+  public setRatio(ratio: number | undefined) {
+    this._ratio = ratio;
   }
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
@@ -176,6 +183,7 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
+    this._dynamicEdge.setRatio(this._ratio);
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
     this._dynamicEdge.lockStyle = this.lockStyle;
@@ -194,7 +202,7 @@ export class AreaMeasurement extends Measurement {
     );
     if (!isClosedPath) polyPoints.push(polyPoints[0].clone());
 
-    this._polygon.recomputeFromPoints();
+    this._polygon.recomputeFromPoints(this._ratio);
     this._dynamicEdge = undefined;
     this.isDynamic = false;
     return true;
@@ -401,11 +409,11 @@ export class AreaMeasurement extends Measurement {
       );
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
-      this._polygon.perimeter,
+      this._ratio ? this._ratio * this._polygon.perimeter: this._polygon.perimeter,
       lengthSpec
     );
     const fArea = IModelApp.quantityFormatter.formatQuantity(
-      this._polygon.area,
+      this._ratio ? (this._ratio * this._ratio) * this._polygon.area: this._polygon.area,
       areaSpec
     );
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(
@@ -433,18 +441,26 @@ export class AreaMeasurement extends Measurement {
           areaSpec !== undefined
             ? { value: this._polygon.area, formatSpec: areaSpec }
             : undefined,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureArea.popupAreaXY"
-        ),
-        name: "AreaMeasurement_AreaXY",
-        value: fAreaXY,
-        aggregatableValue:
-          areaSpec !== undefined
-            ? { value: this._polygon.areaXY, formatSpec: areaSpec }
-            : undefined,
-      },
+      }
+    );
+
+    if (this._ratio === undefined) {
+      data.properties.push(
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureArea.popupAreaXY"
+          ),
+          name: "AreaMeasurement_AreaXY",
+          value: fAreaXY,
+          aggregatableValue:
+            areaSpec !== undefined
+              ? { value: this._polygon.areaXY, formatSpec: areaSpec }
+              : undefined,
+        }
+      );
+    }
+
+    data.properties.push(
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureArea.popupPerimeter"
@@ -486,7 +502,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public override onDisplayUnitsChanged(): void {
-    this._polygon.recomputeFromPoints();
+    this._polygon.recomputeFromPoints(this._ratio);
   }
 
   /**

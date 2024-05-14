@@ -18,10 +18,19 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
   private _currentState: State;
   private _currentViewportType?: string;
   private _currentMeasurement?: AreaMeasurement;
+  private _firstPointDrawingId?: string;
 
   constructor() {
     super();
     this._currentState = State.SetMeasurementViewport;
+  }
+
+  public get firstPointDrawingId(): string | undefined {
+    return this._firstPointDrawingId;
+  }
+
+  public set firstPointDrawingId(newId: string | undefined) {
+    this._firstPointDrawingId = newId;
   }
 
   public get currentState(): State { return this._currentState; }
@@ -31,6 +40,10 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
       return false;
 
     return this._currentMeasurement.isValidPolygon;
+  }
+
+  public setRatio(ratio: number | undefined) {
+    this._currentMeasurement?.setRatio(ratio);
   }
 
   public override get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }

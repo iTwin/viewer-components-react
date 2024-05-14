@@ -24,6 +24,7 @@ import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -91,11 +92,14 @@ MeasureAreaToolModel
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
 
+    let prepareRatio = false;
+
     if (
       MeasureAreaToolModel.State.SetMeasurementViewport ===
       this.toolModel.currentState
     ) {
       this.toolModel.setMeasurementViewport(viewType);
+      prepareRatio = true;
     }
 
     this.toolModel.addPoint(viewType, ev.point, false);
@@ -104,6 +108,16 @@ MeasureAreaToolModel
     } else {
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
+    }
+
+    if (prepareRatio) {
+      this.toolModel.firstPointDrawingId = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+      if (this.toolModel.firstPointDrawingId)
+        this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
+    } else {
+      if (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) !== this.toolModel.firstPointDrawingId && this.toolModel.firstPointDrawingId !== undefined) {
+        this.toolModel.setRatio(undefined);
+      }
     }
 
     ev.viewport.invalidateDecorations();
