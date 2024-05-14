@@ -481,8 +481,8 @@ export class DistanceMeasurement extends Measurement {
       );
 
     const distance = this._ratio ? this._ratio * this._startPoint.distance(this._endPoint): this._startPoint.distance(this._endPoint);
-    const run = this._ratio ? this._ratio * this._startPoint.distanceXY(this._endPoint): this._startPoint.distanceXY(this._endPoint);
-    const rise = this._ratio ? this._ratio * this._endPoint.z - this._startPoint.z: this._endPoint.z - this._startPoint.z;
+    const run = this._ratio ? this._ratio * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this._ratio ? this._ratio * Math.abs(this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
