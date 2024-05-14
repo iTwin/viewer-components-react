@@ -25,3 +25,13 @@
     overflow: hidden;
   }
 }
+
+.presentation-components-tree-selector-option-content {
+  display: flex;
+
+  .presentation-components-tree-selector-badge {
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
+  }
+}

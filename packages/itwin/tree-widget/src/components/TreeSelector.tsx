@@ -18,6 +18,7 @@ export interface TreeContentDefinition {
   id: string;
   label: string;
   render: (props: TreeRenderProps) => React.ReactNode;
+  renderBadge?: (props: TreeRenderProps) => React.ReactNode;
 }
 
 /**
@@ -46,6 +47,16 @@ export function TreeSelector(props: TreeSelectorProps) {
     return props.trees.map((c) => ({ label: c.label, value: c.id })) as SelectOption<string>[];
   }, [props.trees]);
 
+  const renderOption = (content: TreeContentDefinition) => {
+    const badge = content.renderBadge ? <div className="presentation-components-tree-selector-badge">{content.renderBadge(props)}</div> : <></>;
+    return (
+      <div className="presentation-components-tree-selector-option-content">
+        {badge}
+        {content.label}
+      </div>
+    );
+  };
+
   return (
     <div className="presentation-components-tree-selector-content">
       <div className="presentation-components-tree-selector-content-header">
@@ -58,11 +69,15 @@ export function TreeSelector(props: TreeSelectorProps) {
               props.onFeatureUsed?.(`choose-${treeId}`);
               setSelectedContentId(treeId);
             }}
-            itemRenderer={(option, itemProps) => (
-              <MenuItem {...option} isSelected={itemProps.isSelected} size={isEnlarged ? "large" : "default"}>
-                {option.label}
-              </MenuItem>
-            )}
+            selectedItemRenderer={() => renderOption(selectedContent)}
+            itemRenderer={(option, itemProps) => {
+              const content = props.trees.find((x) => x.id === option.value);
+              return (
+                <MenuItem {...option} isSelected={itemProps.isSelected} size={isEnlarged ? "large" : "default"}>
+                  {renderOption(content!)}
+                </MenuItem>
+              );
+            }}
           />
         )}
       </div>

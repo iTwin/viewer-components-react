@@ -64,6 +64,66 @@ describe("<TreeSelector />", () => {
     });
   });
 
+  it("renders default selection badge when renderer provided", async () => {
+    const { getByText, queryByText, queryAllByText } = render(
+      <TreeSelector
+        defaultSelectedContentId={""}
+        trees={[
+          { id: "a", label: "A", render: () => <div />, renderBadge: () => <div>Badge</div> },
+          { id: "b", label: "B", render: () => <div /> },
+          { id: "c", label: "C", render: () => <div /> },
+        ]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(queryAllByText("A")).to.not.be.null;
+      expect(getByText("Badge")).to.not.be.null;
+      expect(queryByText("B")).to.be.null;
+      expect(queryByText("C")).to.be.null;
+    });
+  });
+
+  it("renders selected content with badge when renderer provided", async () => {
+    const { user, getByText, queryByText, queryAllByText, getByRole } = render(
+      <TreeSelector
+        defaultSelectedContentId={""}
+        trees={[
+          { id: "a", label: "A", render: () => <div /> },
+          { id: "b", label: "B", render: () => <div />, renderBadge: () => <div>Badge</div> },
+          { id: "c", label: "C", render: () => <div /> },
+        ]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(queryAllByText("A")).to.not.be.null;
+      expect(queryByText("Badge")).to.be.null;
+      expect(queryByText("B")).to.be.null;
+      expect(queryByText("C")).to.be.null;
+    });
+
+    const select = await waitFor(() => getByRole("combobox"));
+    await user.click(select);
+
+    await waitFor(() => {
+      expect(queryAllByText("A")).to.have.length(2);
+      expect(getByText("Badge")).to.not.be.null;
+      expect(getByText("B")).to.not.be.null;
+      expect(getByText("C")).to.not.be.null;
+    });
+
+    const option = getByText("B");
+    await user.click(option);
+
+    await waitFor(() => {
+      expect(queryAllByText("B")).to.not.be.null;
+      expect(getByText("Badge")).to.not.be.null;
+      expect(queryByText("A")).to.be.null;
+      expect(queryByText("C")).to.be.null;
+    });
+  });
+
   it("changes displayed content based on selected item in select box", async () => {
     const { user, getByText, getByRole, queryByText } = render(
       <TreeSelector
