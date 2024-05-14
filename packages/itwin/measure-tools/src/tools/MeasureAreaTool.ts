@@ -115,7 +115,7 @@ MeasureAreaToolModel
       if (this.toolModel.firstPointDrawingId)
         this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
     } else {
-      if (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) !== this.toolModel.firstPointDrawingId && this.toolModel.firstPointDrawingId !== undefined) {
+      if (this.toolModel.firstPointDrawingId !== undefined && await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) !== this.toolModel.firstPointDrawingId) {
         this.toolModel.setRatio(undefined);
       }
     }
