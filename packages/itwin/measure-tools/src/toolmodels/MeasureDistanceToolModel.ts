@@ -20,6 +20,7 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   private _currentState: State;
   private _currentViewportType?: string;
   private _currentMeasurement?: DistanceMeasurement;
+  private _firstPointDrawingId?: string;
 
   constructor() {
     super();
@@ -30,6 +31,14 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
 
   public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
 
+  public get firstPointDrawingId(): string | undefined {
+    return this._firstPointDrawingId;
+  }
+
+  public set firstPointDrawingId(newId: string | undefined) {
+    this._firstPointDrawingId = newId;
+  }
+
   public setMeasurementViewport(viewType: string): boolean {
     if (State.SetMeasurementViewport !== this._currentState)
       return false;
@@ -37,6 +46,10 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
     this._currentViewportType = viewType;
     this.moveToNextState();
     return true;
+  }
+
+  public setRatio(ratio: number | undefined) {
+    this._currentMeasurement?.setRatio(ratio);
   }
 
   public setStartPoint(viewType: string, point: Point3d): boolean {

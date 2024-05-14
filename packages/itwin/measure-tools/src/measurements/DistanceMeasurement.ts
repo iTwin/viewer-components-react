@@ -95,6 +95,7 @@ export class DistanceMeasurement extends Measurement {
   private _startPoint: Point3d;
   private _endPoint: Point3d;
   private _showAxes: boolean;
+  private _ratio: number | undefined;
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -143,12 +144,17 @@ export class DistanceMeasurement extends Measurement {
     this._startPoint = Point3d.createZero();
     this._endPoint = Point3d.createZero();
     this._isDynamic = false;
+    this._ratio = undefined;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
 
     if (props) this.readFromJSON(props);
 
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  public setRatio(ratio: number | undefined) {
+    this._ratio = ratio;
   }
 
   public setStartPoint(point: XYAndZ) {
@@ -435,7 +441,7 @@ export class DistanceMeasurement extends Measurement {
       );
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance,
+      this._ratio ? distance * this._ratio : distance,
       lengthSpec
     );
 
@@ -474,9 +480,9 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const distance = this._startPoint.distance(this._endPoint);
-    const run = this._startPoint.distanceXY(this._endPoint);
-    const rise = this._endPoint.z - this._startPoint.z;
+    const distance = this._ratio ? this._ratio * this._startPoint.distance(this._endPoint): this._startPoint.distance(this._endPoint);
+    const run = this._ratio ? this._ratio * this._startPoint.distanceXY(this._endPoint): this._startPoint.distanceXY(this._endPoint);
+    const rise = this._ratio ? this._ratio * this._endPoint.z - this._startPoint.z: this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
@@ -545,35 +551,41 @@ export class DistanceMeasurement extends Measurement {
         name: "DistanceMeasurement_Slope",
         value: fSlope,
       },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.delta_x"
-        ),
-        name: "DistanceMeasurement_Dx",
-        value: fDeltaX,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.delta_y"
-        ),
-        name: "DistanceMeasurement_Dy",
-        value: fDeltaY,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.startCoordinates"
-        ),
-        name: "DistanceMeasurement_StartPoint",
-        value: fStartCoords,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.endCoordinates"
-        ),
-        name: "DistanceMeasurement_EndPoint",
-        value: fEndCoords,
-      }
     );
+
+    if (this._ratio === undefined) {
+      data.properties.push(
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.delta_x"
+          ),
+          name: "DistanceMeasurement_Dx",
+          value: fDeltaX,
+        },
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.delta_y"
+          ),
+          name: "DistanceMeasurement_Dy",
+          value: fDeltaY,
+        },
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.startCoordinates"
+          ),
+          name: "DistanceMeasurement_StartPoint",
+          value: fStartCoords,
+        },
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.endCoordinates"
+          ),
+          name: "DistanceMeasurement_EndPoint",
+          value: fEndCoords,
+        }
+      );
+    }
+
     return data;
   }
 

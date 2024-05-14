@@ -23,6 +23,7 @@ import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
@@ -80,11 +81,23 @@ MeasureDistanceToolModel
     ) {
       this.toolModel.setMeasurementViewport(viewType);
       this.toolModel.setStartPoint(viewType, ev.point);
+
+      if (ev.viewport.view.id !== undefined) {
+        this.toolModel.firstPointDrawingId = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        if (this.toolModel.firstPointDrawingId)
+          this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
+      }
+
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
     } else if (
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
+      if (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) === this.toolModel.firstPointDrawingId && this.toolModel.firstPointDrawingId !== undefined) {
+        this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
+      } else {
+        this.toolModel.setRatio(undefined);
+      }
       this.toolModel.setEndPoint(viewType, ev.point, false);
       await this.onReinitialize();
     }
