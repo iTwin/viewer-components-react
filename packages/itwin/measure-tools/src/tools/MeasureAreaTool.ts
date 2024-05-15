@@ -32,6 +32,7 @@ MeasureAreaToolModel
 > {
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
+  private _enableSheetMeasurements;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -53,12 +54,13 @@ MeasureAreaToolModel
     return MeasureToolsFeatures.Tools_MeasureArea;
   }
 
-  constructor() {
+  constructor(enableSheetMeasurements: boolean) {
     super();
+    this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureAreaTool();
+    const tool = new MeasureAreaTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -110,13 +112,15 @@ MeasureAreaToolModel
       this.updateToolAssistance();
     }
 
-    if (prepareRatio) {
-      this.toolModel.firstPointDrawingId = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
-      if (this.toolModel.firstPointDrawingId)
-        this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
-    } else {
-      if (this.toolModel.firstPointDrawingId !== undefined && await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) !== this.toolModel.firstPointDrawingId) {
-        this.toolModel.setRatio(undefined);
+    if (this._enableSheetMeasurements) {
+      if (prepareRatio) {
+        this.toolModel.firstPointDrawingId = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        if (this.toolModel.firstPointDrawingId)
+          this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
+      } else {
+        if (this.toolModel.firstPointDrawingId !== undefined && await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) !== this.toolModel.firstPointDrawingId) {
+          this.toolModel.setRatio(undefined);
+        }
       }
     }
 

@@ -191,7 +191,7 @@ export class AreaMeasurement extends Measurement {
     this._dynamicEdge.isDynamic = true;
     this._dynamicEdge.showAxes = false;
     this._dynamicEdge.displayLabels = this.displayLabels;
-    this._polygon.recomputeFromPoints();
+    this._polygon.recomputeFromPoints(this._ratio);
   }
 
   public closeDynamicPolygon(): boolean {

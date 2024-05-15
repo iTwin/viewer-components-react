@@ -31,6 +31,7 @@ MeasureDistanceToolModel
 > {
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
+  private _enableSheetMeasurements;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -52,12 +53,13 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor() {
+  constructor(enableSheetMeasurements: boolean) {
     super();
+    this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureDistanceTool();
+    const tool = new MeasureDistanceTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -82,7 +84,7 @@ MeasureDistanceToolModel
       this.toolModel.setMeasurementViewport(viewType);
       this.toolModel.setStartPoint(viewType, ev.point);
 
-      if (ev.viewport.view.id !== undefined) {
+      if (this._enableSheetMeasurements && ev.viewport.view.id !== undefined) {
         this.toolModel.firstPointDrawingId = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
         if (this.toolModel.firstPointDrawingId)
           this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
@@ -93,10 +95,12 @@ MeasureDistanceToolModel
     } else if (
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
-      if (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) === this.toolModel.firstPointDrawingId && this.toolModel.firstPointDrawingId !== undefined) {
-        this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
-      } else {
-        this.toolModel.setRatio(undefined);
+      if (this._enableSheetMeasurements) {
+        if (this.toolModel.firstPointDrawingId !== undefined && await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) === this.toolModel.firstPointDrawingId) {
+          this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
+        } else {
+          this.toolModel.setRatio(undefined);
+        }
       }
       this.toolModel.setEndPoint(viewType, ev.point, false);
       await this.onReinitialize();

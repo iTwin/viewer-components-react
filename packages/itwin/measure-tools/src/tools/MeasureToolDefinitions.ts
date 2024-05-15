@@ -19,26 +19,28 @@ import { MeasureTools } from "../MeasureTools";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 
 export class MeasureToolDefinitions {
-  public static get measureDistanceToolCommand() {
+  public static getMeasureDistanceToolCommand(enableSheetMeasurements: boolean) {
     return new ToolItemDef({
       toolId: MeasureDistanceTool.toolId,
       iconSpec: MeasureDistanceTool.iconSpec,
       label: () => MeasureDistanceTool.flyover,
       tooltip: () => MeasureDistanceTool.description,
       execute: () => {
-        void IModelApp.tools.run(MeasureDistanceTool.toolId);
+        const tool = new MeasureDistanceTool(enableSheetMeasurements);
+        void tool.run();
       },
     });
   }
 
-  public static get measureAreaToolCommand() {
+  public static getMeasureAreaToolCommand(enableSheetMeasurements: boolean) {
     return new ToolItemDef({
       toolId: MeasureAreaTool.toolId,
       iconSpec: MeasureAreaTool.iconSpec,
       label: () => MeasureAreaTool.flyover,
       tooltip: () => MeasureAreaTool.description,
       execute: () => {
-        void IModelApp.tools.run(MeasureAreaTool.toolId);
+        const tool = new MeasureAreaTool(enableSheetMeasurements);
+        void tool.run();
       },
     });
   }
