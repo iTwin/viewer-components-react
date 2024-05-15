@@ -60,14 +60,15 @@ export const GroupListItem = ({
             {...rest}
           />
         </div>
-        <div className="gmw-overlap-progress">
-          {showGroupColor && overlappedElementsInfo.size > 0 &&
+        {showGroupColor && overlappedElementsInfo.size > 0 &&
+          <div className="gmw-overlap-progress">
             <OverlapProgress
               group={group}
               overlappedElementsInfo={overlappedElementsInfo}
               groupElementsInfo={groupElementsInfo}
-            />}
-        </div>
+            />
+          </div>
+        }
       </div>
     </ListItem>
   );

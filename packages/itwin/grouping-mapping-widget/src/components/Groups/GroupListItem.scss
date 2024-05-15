@@ -18,10 +18,10 @@
   flex-direction: column;
   justify-content: center;
   .gmw-group-menu-actions {
-    margin-top: auto;
+    display: flex;
+    flex-grow: 1
   }
   .gmw-overlap-progress {
-    margin-top: auto;
-    margin-bottom: auto;
+    width: 100%
   }
 }
