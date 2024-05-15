@@ -107,6 +107,8 @@ MeasureDistanceToolModel
         if (this.toolModel.firstPointDrawingId !== undefined && (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id === this.toolModel.firstPointDrawingId) {
           this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
         } else {
+          this.toolModel.drawingOrigin = undefined;
+          this.toolModel.drawingExtents = undefined;
           this.toolModel.setRatio(undefined);
         }
       }
