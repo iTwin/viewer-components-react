@@ -7,6 +7,12 @@ import type { IModel, QueryOptions} from "@itwin/core-common";
 import { QueryBinder } from "@itwin/core-common";
 import { Point2d, Point3d } from "@itwin/core-geometry";
 
+interface idAndLocation {
+  id?: string;
+  origin?: Point2d;
+  extents?: Point2d;
+}
+
 export class SheetMeasurementsHelper {
 
   /** The frontend / backend subclasses of IModel both have the same query function signature but it isn't present in the base class. Initiates a concurrent ECSql query. */
@@ -22,7 +28,7 @@ export class SheetMeasurementsHelper {
    * @param mousePos position of the mouse click
    * @returns Id of the clicked on drawing
    */
-  public static async getDrawingId(imodel: IModel, id: string, mousePos: Point3d): Promise<string | undefined> {
+  public static async getDrawingId(imodel: IModel, id: string, mousePos: Point3d): Promise<idAndLocation | undefined> {
     const { ecsql, parameters } = SheetMeasurementsHelper.getDrawingInfoECSQL(id);
 
     const iter = SheetMeasurementsHelper.doIModelQuery(imodel, ecsql, QueryBinder.from(parameters));
@@ -34,7 +40,12 @@ export class SheetMeasurementsHelper {
         // Within x extents
         if (y >= row[1].Y && y <= row[1].Y + row[2].Y) {
           // Within y extents
-          return row[0];
+          const result: idAndLocation = {
+            id: row[0],
+            origin: new Point2d(row[1].X, row[1].Y),
+            extents: new Point2d(row[2].X, row[2].Y),
+          };
+          return result;
         }
       }
     }
@@ -117,5 +128,9 @@ export class SheetMeasurementsHelper {
     AND [val].userLabel = [spvd].codeValue";
 
     return { ecsql, parameters: { id }};
+  }
+
+  public static checkIfInDrawing(point: Point3d, drawingOrigin: Point2d, drawingExtents: Point2d): boolean {
+    return (point.x >= drawingOrigin.x && point.x <= drawingExtents.x + drawingOrigin.x && point.y >= drawingOrigin.y && point.y <= drawingExtents.y + drawingOrigin.y);
   }
 }

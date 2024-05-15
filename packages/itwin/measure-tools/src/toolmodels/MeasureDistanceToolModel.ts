@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Point3d } from "@itwin/core-geometry";
+import type { Point2d, Point3d } from "@itwin/core-geometry";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
@@ -20,7 +20,10 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   private _currentState: State;
   private _currentViewportType?: string;
   private _currentMeasurement?: DistanceMeasurement;
+
   private _firstPointDrawingId?: string;
+  private _drawingOrigin?: Point2d;
+  private _drawingExtents?: Point2d;
 
   constructor() {
     super();
@@ -37,6 +40,22 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
 
   public set firstPointDrawingId(newId: string | undefined) {
     this._firstPointDrawingId = newId;
+  }
+
+  public get drawingExtents(): Point2d | undefined {
+    return this._drawingExtents;
+  }
+
+  public set drawingExtents(extents: Point2d | undefined) {
+    this._drawingExtents = extents;
+  }
+
+  public get drawingOrigin(): Point2d | undefined {
+    return this._drawingOrigin;
+  }
+
+  public set drawingOrigin(origin: Point2d | undefined) {
+    this._drawingOrigin = origin;
   }
 
   public setMeasurementViewport(viewType: string): boolean {

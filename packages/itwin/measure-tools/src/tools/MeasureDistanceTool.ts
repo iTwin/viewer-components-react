@@ -5,12 +5,14 @@
 
 import type {
   BeButtonEvent,
+  DecorateContext,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
   AccuDrawHintBuilder,
   EventHandled,
+  GraphicType,
   IModelApp,
   ToolAssistance,
   ToolAssistanceImage,
@@ -24,6 +26,8 @@ import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
+import type { Point3d } from "@itwin/core-geometry";
+import { Point2d } from "@itwin/core-geometry";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
@@ -32,6 +36,7 @@ MeasureDistanceToolModel
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
   private _enableSheetMeasurements;
+  private _currentMousePoint?: Point3d;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -85,7 +90,10 @@ MeasureDistanceToolModel
       this.toolModel.setStartPoint(viewType, ev.point);
 
       if (this._enableSheetMeasurements && ev.viewport.view.id !== undefined) {
-        this.toolModel.firstPointDrawingId = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.firstPointDrawingId = drawingInfo?.id;
+        this.toolModel.drawingOrigin = drawingInfo?.origin;
+        this.toolModel.drawingExtents = drawingInfo?.extents;
         if (this.toolModel.firstPointDrawingId)
           this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
       }
@@ -96,7 +104,7 @@ MeasureDistanceToolModel
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
       if (this._enableSheetMeasurements) {
-        if (this.toolModel.firstPointDrawingId !== undefined && await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point) === this.toolModel.firstPointDrawingId) {
+        if (this.toolModel.firstPointDrawingId !== undefined && (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id === this.toolModel.firstPointDrawingId) {
           this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
         } else {
           this.toolModel.setRatio(undefined);
@@ -108,6 +116,20 @@ MeasureDistanceToolModel
 
     ev.viewport.invalidateDecorations();
     return EventHandled.Yes;
+  }
+
+  public override decorate(context: DecorateContext): void {
+    super.decorate(context);
+
+    if (this._enableSheetMeasurements && this._currentMousePoint !== undefined && this.toolModel.drawingOrigin !== undefined && this.toolModel.drawingExtents !== undefined && !SheetMeasurementsHelper.checkIfInDrawing(this._currentMousePoint, this.toolModel.drawingOrigin, this.toolModel.drawingExtents)) {
+      const areaBuilder = context.createGraphicBuilder(GraphicType.WorldOverlay);
+      const left = this.toolModel.drawingOrigin.x;
+      const right = this.toolModel.drawingOrigin.x + this.toolModel.drawingExtents.x;
+      const up = this.toolModel.drawingOrigin.y + this.toolModel.drawingExtents.y;
+      const down = this.toolModel.drawingOrigin.y;
+      areaBuilder.addLineString2d([this.toolModel.drawingOrigin, new Point2d(right, down), new Point2d(right, up), new Point2d(left, up), this.toolModel.drawingOrigin], 0);
+      context.addDecorationFromBuilder(areaBuilder);
+    }
   }
 
   private _sendHintsToAccuDraw(ev: BeButtonEvent): void {
@@ -126,6 +148,7 @@ MeasureDistanceToolModel
       return;
     const type = MeasurementViewTarget.classifyViewport(ev.viewport);
     this.toolModel.setEndPoint(type, ev.point, true);
+    this._currentMousePoint = ev.point;
     ev.viewport.invalidateDecorations();
   }
 
