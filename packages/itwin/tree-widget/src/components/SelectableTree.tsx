@@ -40,8 +40,8 @@ export interface TreeDefinition {
    * If callback is `undefined` tree is shown for all iModel connections.
    */
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
-  /** Callback that is used to render a badge in tree selector */
-  renderBadge?: (props: TreeRenderProps) => React.ReactNode;
+  /** Badge to render in tree selector */
+  badge?: React.ReactNode;
 }
 
 /**
@@ -115,7 +115,7 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
       id: treeDef.id,
       label: treeDef.getLabel(),
       render: treeDef.render,
-      renderBadge: treeDef.renderBadge,
+      badge: treeDef.badge,
     };
   };
 

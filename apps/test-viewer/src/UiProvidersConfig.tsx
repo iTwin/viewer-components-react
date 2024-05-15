@@ -8,7 +8,6 @@ import { EC3Provider } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
-import { Icon } from "@itwin/itwinui-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
@@ -131,11 +130,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     density={props.density}
                   />
                 ),
-                renderBadge: (props: TreeRenderProps) => (
-                  <Icon size={props.density === "enlarged" ? "medium" : "small"}>
-                    <SvgTechnicalPreviewMiniBw />
-                  </Icon>
-                ),
+                badge: <SvgTechnicalPreviewMiniBw />,
               },
             ];
             return [

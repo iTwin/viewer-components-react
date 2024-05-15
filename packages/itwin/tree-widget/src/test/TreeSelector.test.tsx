@@ -64,12 +64,12 @@ describe("<TreeSelector />", () => {
     });
   });
 
-  it("renders default selection badge when renderer provided", async () => {
+  it("renders default selection badge when badge provided", async () => {
     const { getByText, queryByText, queryAllByText } = render(
       <TreeSelector
         defaultSelectedContentId={""}
         trees={[
-          { id: "a", label: "A", render: () => <div />, renderBadge: () => <div>Badge</div> },
+          { id: "a", label: "A", render: () => <div />, badge: <div>Badge</div> },
           { id: "b", label: "B", render: () => <div /> },
           { id: "c", label: "C", render: () => <div /> },
         ]}
@@ -84,13 +84,13 @@ describe("<TreeSelector />", () => {
     });
   });
 
-  it("renders selected content with badge when renderer provided", async () => {
+  it("renders selected content with badge when badge provided", async () => {
     const { user, getByText, queryByText, queryAllByText, getByRole } = render(
       <TreeSelector
         defaultSelectedContentId={""}
         trees={[
           { id: "a", label: "A", render: () => <div /> },
-          { id: "b", label: "B", render: () => <div />, renderBadge: () => <div>Badge</div> },
+          { id: "b", label: "B", render: () => <div />, badge: <div>Badge</div> },
           { id: "c", label: "C", render: () => <div /> },
         ]}
       />,
