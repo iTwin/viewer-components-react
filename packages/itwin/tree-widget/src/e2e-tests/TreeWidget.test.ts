@@ -140,6 +140,17 @@ test.describe("tree widget", () => {
       await page.getByRole("listbox").waitFor();
       await takeScreenshot(page, treeWidget);
     });
+
+    test("tree selector badge", async ({ page }) => {
+      await treeWidget.getByText("BayTown").waitFor();
+      await treeWidget.getByRole("combobox").click();
+      await page.getByRole("listbox").waitFor();
+
+      const externalSourcesTree = page.getByText("External Sources");
+      await externalSourcesTree.click();
+
+      await takeScreenshot(page, treeWidget);
+    });
   };
 
   test.describe("default", () => {
