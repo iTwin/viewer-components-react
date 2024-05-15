@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "Added support for badge renderers in `TreeSelector`.",
+  "comment": "Added support for custom badges in `TreeSelector`.",
   "packageName": "@itwin/tree-widget-react",
   "email": "33428304+jasdom@users.noreply.github.com",
   "dependentChangeType": "patch"

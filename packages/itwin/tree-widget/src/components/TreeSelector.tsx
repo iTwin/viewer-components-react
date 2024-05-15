@@ -59,13 +59,11 @@ export function TreeSelector(props: TreeSelectorProps) {
               props.onFeatureUsed?.(`choose-${treeId}`);
               setSelectedContentId(treeId);
             }}
-            itemRenderer={(option, itemProps) => {
-              return (
-                <MenuItem {...option} isSelected={itemProps.isSelected} size={isEnlarged ? "large" : "default"}>
-                  {option.label}
-                </MenuItem>
-              );
-            }}
+            itemRenderer={(option, itemProps) => (
+              <MenuItem {...option} isSelected={itemProps.isSelected} size={isEnlarged ? "large" : "default"}>
+                {option.label}
+              </MenuItem>
+            )}
           />
         )}
       </div>
