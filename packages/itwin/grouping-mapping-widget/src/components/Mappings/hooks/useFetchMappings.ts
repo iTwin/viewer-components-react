@@ -12,5 +12,5 @@ export const useFetchMappings = (iModelId: string, getAccessToken: GetAccessToke
     queryFn: async () => {
       const accessToken = await getAccessToken();
       const mappings = await mappingsClient.getMappings(accessToken, iModelId);
-      return mappings.sort((a, b) => a.mappingName.localeCompare(b.mappingName));
+      return mappings.mappings.sort((a, b) => a.mappingName.localeCompare(b.mappingName));
     }});

@@ -5,7 +5,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import type { ExtractionStatus, IExtractionClient } from "@itwin/insights-client";
-import { ExtractorState } from "@itwin/insights-client";
+import { ExtractionState } from "@itwin/insights-client";
 import type { Mapping } from "@itwin/insights-client";
 import { STATUS_CHECK_INTERVAL } from "../../Constants";
 import { ExtractionStates } from "../Extraction/ExtractionStatus";
@@ -35,13 +35,14 @@ export const fetchMappingStatus = async (
     switch(extractionStatusResponse.state) {
       case undefined:
         return { mappingId, finalExtractionStateValue: ExtractionStates.Starting};
-      case ExtractorState.Running:
+      case ExtractionState.Running:
         return { mappingId, finalExtractionStateValue: ExtractionStates.Running};
-      case ExtractorState.Failed:
+      case ExtractionState.Failed:
         return { mappingId, finalExtractionStateValue: ExtractionStates.Failed};
-      case ExtractorState.Queued:
+      case ExtractionState.Queued:
         return { mappingId, finalExtractionStateValue: ExtractionStates.Queued};
-      case ExtractorState.Succeeded:
+      case ExtractionState.Succeeded:
+      case ExtractionState.PartiallySucceeded:
         return { mappingId, finalExtractionStateValue: ExtractionStates.Succeeded};
       default:
         return { mappingId, finalExtractionStateValue: ExtractionStates.None};

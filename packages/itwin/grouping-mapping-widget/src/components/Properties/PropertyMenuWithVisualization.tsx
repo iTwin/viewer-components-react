@@ -11,10 +11,18 @@ import { GroupInformationPanel } from "./GroupInformationPanel";
 import { SvgProperties } from "@itwin/itwinui-icons-react";
 import "./PropertyMenuWithVisualization.scss";
 
+/**
+ * Properties for the {@link PropertyMenuWithVisualization} component.
+ * @public
+ */
 export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
   color: string;
 }
 
+/**
+ * Component to display a property menu with visualization.
+ * @public
+ */
 export const PropertyMenuWithVisualization = ({
   group,
   color,

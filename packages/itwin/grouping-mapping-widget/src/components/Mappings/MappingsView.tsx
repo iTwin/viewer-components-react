@@ -45,6 +45,9 @@ export const mappingViewDefaultDisplayStrings = {
   iModelDescription: "Description",
 };
 
+/**
+ * @internal
+ */
 export interface MappingsViewProps {
   mappings: Mapping[];
   isLoading: boolean;
@@ -70,6 +73,10 @@ export interface MappingsViewProps {
   setInitialExtractionStateFlag?: (initialStateExtractionFlag: boolean) => void;
 }
 
+/**
+ * UI Component to list mappings and handle extraction.
+ * @internal
+ */
 export const MappingsView = ({
   mappings,
   isLoading,
