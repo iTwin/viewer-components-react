@@ -77,19 +77,17 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   if (hasData && dataProvider.current) {
     return (
-      <>
-        <ResizableContainerObserver onResize={handleResize}>
-          <VirtualizedPropertyGridWithDataProvider
-            width={width}
-            height={height}
-            dataProvider={dataProvider.current}
-            orientation={Orientation.Vertical}
-            isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled}
-            isPropertyHoverEnabled={true}   // This need to be turned on to have the action button appears only when property hovered
-            actionButtonRenderers={[copyButton]}
-          />
-        </ResizableContainerObserver>
-      </>
+      <ResizableContainerObserver onResize={handleResize}>
+        <VirtualizedPropertyGridWithDataProvider
+          width={width}
+          height={height}
+          dataProvider={dataProvider.current}
+          orientation={Orientation.Vertical}
+          isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled}
+          isPropertyHoverEnabled={true}   // This need to be turned on to have the action button appears only when property hovered
+          actionButtonRenderers={[copyButton]}
+        />
+      </ResizableContainerObserver>
     );
   } else {
     return (
