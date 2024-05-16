@@ -14,6 +14,7 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { useMultiCheckboxHandler } from "./UseMultiCheckboxHandler";
 
 interface VisibilityTreeOwnProps {
   imodel: IModelConnection;
@@ -74,7 +75,8 @@ function VisibilityTreeImpl({
     sourceName: "ExperimentalModelsTree",
   });
 
-  const nodesVisibility = useHierarchyVisibility({ visibilityHandlerFactory });
+  const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
+  const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
   const { filteringDialog, onFilterClick } = useHierarchyFiltering({
     imodel,
     hierarchyProvider,
@@ -107,7 +109,8 @@ function VisibilityTreeImpl({
         <VisibilityTreeRenderer
           rootNodes={rootNodes}
           {...treeProps}
-          {...nodesVisibility}
+          getCheckboxStatus={getCheckboxStatus}
+          onCheckboxClicked={onCheckboxClicked}
           onFilterClick={onFilterClick}
           getIcon={getIcon}
           size={density === "enlarged" ? "default" : "small"}
