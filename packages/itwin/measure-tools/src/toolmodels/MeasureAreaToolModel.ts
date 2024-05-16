@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Point3d } from "@itwin/core-geometry";
+import type { Point2d, Point3d } from "@itwin/core-geometry";
 import { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 
@@ -18,7 +18,10 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
   private _currentState: State;
   private _currentViewportType?: string;
   private _currentMeasurement?: AreaMeasurement;
+
   private _firstPointDrawingId?: string;
+  private _drawingOrigin?: Point2d;
+  private _drawingExtents?: Point2d;
 
   constructor() {
     super();
@@ -31,6 +34,22 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
 
   public set firstPointDrawingId(newId: string | undefined) {
     this._firstPointDrawingId = newId;
+  }
+
+  public get drawingExtents(): Point2d | undefined {
+    return this._drawingExtents;
+  }
+
+  public set drawingExtents(extents: Point2d | undefined) {
+    this._drawingExtents = extents;
+  }
+
+  public get drawingOrigin(): Point2d | undefined {
+    return this._drawingOrigin;
+  }
+
+  public set drawingOrigin(origin: Point2d | undefined) {
+    this._drawingOrigin = origin;
   }
 
   public get currentState(): State { return this._currentState; }

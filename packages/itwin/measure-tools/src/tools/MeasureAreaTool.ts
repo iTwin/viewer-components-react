@@ -3,8 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import type { Point3d} from "@itwin/core-geometry";
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import type {
+  DecorateContext,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -33,6 +35,7 @@ MeasureAreaToolModel
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
   private _enableSheetMeasurements;
+  private _currentMousePoint?: Point3d;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -66,8 +69,16 @@ MeasureAreaToolModel
     return this.exitTool();
   }
 
+  private resetSheetData(): void {
+    this.toolModel.firstPointDrawingId = undefined;
+    this.toolModel.drawingExtents = undefined;
+    this.toolModel.drawingExtents = undefined;
+    this.toolModel.setRatio(undefined);
+  }
+
   public override async onReinitialize(): Promise<void> {
     await super.onReinitialize();
+    this.resetSheetData();
     AccuDrawHintBuilder.deactivate();
   }
 
@@ -94,17 +105,18 @@ MeasureAreaToolModel
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
 
-    let prepareRatio = false;
+    let first = false;
 
     if (
       MeasureAreaToolModel.State.SetMeasurementViewport ===
       this.toolModel.currentState
     ) {
       this.toolModel.setMeasurementViewport(viewType);
-      prepareRatio = true;
+      first = true;
     }
 
     this.toolModel.addPoint(viewType, ev.point, false);
+    await this.sheetMeasurementsDataButtonDown(ev, first);
     if (undefined === this.toolModel.dynamicMeasurement) {
       await this.onReinitialize();
     } else {
@@ -112,20 +124,32 @@ MeasureAreaToolModel
       this.updateToolAssistance();
     }
 
+    ev.viewport.invalidateDecorations();
+    return EventHandled.Yes;
+  }
+
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent, initial: boolean) {
+    if (!ev.viewport) return;
+
     if (this._enableSheetMeasurements) {
-      if (prepareRatio) {
-        this.toolModel.firstPointDrawingId = (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id;
-        if (this.toolModel.firstPointDrawingId)
+      if (this.toolModel.firstPointDrawingId === undefined && ev.viewport.view.id !== undefined && initial) {
+        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.firstPointDrawingId = drawingInfo?.id;
+        if (this.toolModel.firstPointDrawingId) {
           this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
+          this.toolModel.drawingOrigin = drawingInfo?.origin;
+          this.toolModel.drawingExtents = drawingInfo?.extents;
+        }
       } else {
-        if (this.toolModel.firstPointDrawingId !== undefined && (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id !== this.toolModel.firstPointDrawingId) {
-          this.toolModel.setRatio(undefined);
+        if (this.toolModel.firstPointDrawingId !== undefined) {
+          if ((await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id !== this.toolModel.firstPointDrawingId) {
+            this.toolModel.drawingOrigin = undefined;
+            this.toolModel.drawingExtents = undefined;
+            this.toolModel.setRatio(undefined);
+          }
         }
       }
     }
-
-    ev.viewport.invalidateDecorations();
-    return EventHandled.Yes;
   }
 
   private _sendHintsToAccuDraw(ev: BeButtonEvent): void {
@@ -182,12 +206,21 @@ MeasureAreaToolModel
     if (!ev.viewport) return;
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
+    this._currentMousePoint = ev.point;
     if (this.toolModel.addPoint(viewType, ev.point, true))
       ev.viewport.invalidateDecorations();
   }
 
   protected createToolModel(): MeasureAreaToolModel {
     return new MeasureAreaToolModel();
+  }
+
+  public override decorate(context: DecorateContext): void {
+    super.decorate(context);
+
+    if (this._enableSheetMeasurements && this._currentMousePoint !== undefined && this.toolModel.drawingOrigin !== undefined && this.toolModel.drawingExtents !== undefined && !SheetMeasurementsHelper.checkIfInDrawing(this._currentMousePoint, this.toolModel.drawingOrigin, this.toolModel.drawingExtents)) {
+      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingOrigin, this.toolModel.drawingExtents));
+    }
   }
 
   protected override updateToolAssistance(): void {

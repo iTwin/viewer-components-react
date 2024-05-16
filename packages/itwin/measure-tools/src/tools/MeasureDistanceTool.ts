@@ -12,7 +12,6 @@ import type {
 import {
   AccuDrawHintBuilder,
   EventHandled,
-  GraphicType,
   IModelApp,
   ToolAssistance,
   ToolAssistanceImage,
@@ -27,8 +26,6 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { Point3d } from "@itwin/core-geometry";
-import { Point2d } from "@itwin/core-geometry";
-import { ColorDef } from "@itwin/core-common";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
@@ -71,8 +68,16 @@ MeasureDistanceToolModel
     return this.exitTool();
   }
 
+  private resetSheetData(): void {
+    this.toolModel.firstPointDrawingId = undefined;
+    this.toolModel.drawingExtents = undefined;
+    this.toolModel.drawingExtents = undefined;
+    this.toolModel.setRatio(undefined);
+  }
+
   public override async onReinitialize(): Promise<void> {
     await super.onReinitialize();
+    this.resetSheetData();
     AccuDrawHintBuilder.deactivate();
   }
 
@@ -89,30 +94,13 @@ MeasureDistanceToolModel
     ) {
       this.toolModel.setMeasurementViewport(viewType);
       this.toolModel.setStartPoint(viewType, ev.point);
-
-      if (this._enableSheetMeasurements && ev.viewport.view.id !== undefined) {
-        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
-        this.toolModel.firstPointDrawingId = drawingInfo?.id;
-        this.toolModel.drawingOrigin = drawingInfo?.origin;
-        this.toolModel.drawingExtents = drawingInfo?.extents;
-        if (this.toolModel.firstPointDrawingId)
-          this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
-      }
-
+      await this.sheetMeasurementsDataButtonDown(ev, true);
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
     } else if (
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
-      if (this._enableSheetMeasurements) {
-        if (this.toolModel.firstPointDrawingId !== undefined && (await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id === this.toolModel.firstPointDrawingId) {
-          this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
-        } else {
-          this.toolModel.drawingOrigin = undefined;
-          this.toolModel.drawingExtents = undefined;
-          this.toolModel.setRatio(undefined);
-        }
-      }
+      await this.sheetMeasurementsDataButtonDown(ev, false);
       this.toolModel.setEndPoint(viewType, ev.point, false);
       await this.onReinitialize();
     }
@@ -121,18 +109,35 @@ MeasureDistanceToolModel
     return EventHandled.Yes;
   }
 
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent, initial: boolean) {
+    if (!ev.viewport) return;
+
+    if (this._enableSheetMeasurements) {
+      if (this.toolModel.firstPointDrawingId === undefined && ev.viewport.view.id !== undefined && initial) {
+        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.firstPointDrawingId = drawingInfo?.id;
+        if (this.toolModel.firstPointDrawingId) {
+          this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
+          this.toolModel.drawingOrigin = drawingInfo?.origin;
+          this.toolModel.drawingExtents = drawingInfo?.extents;
+        }
+      } else {
+        if (this.toolModel.firstPointDrawingId !== undefined) {
+          if ((await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id !== this.toolModel.firstPointDrawingId) {
+            this.toolModel.drawingOrigin = undefined;
+            this.toolModel.drawingExtents = undefined;
+            this.toolModel.setRatio(undefined);
+          }
+        }
+      }
+    }
+  }
+
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     if (this._enableSheetMeasurements && this._currentMousePoint !== undefined && this.toolModel.drawingOrigin !== undefined && this.toolModel.drawingExtents !== undefined && !SheetMeasurementsHelper.checkIfInDrawing(this._currentMousePoint, this.toolModel.drawingOrigin, this.toolModel.drawingExtents)) {
-      const areaBuilder = context.createGraphicBuilder(GraphicType.WorldOverlay);
-      const left = this.toolModel.drawingOrigin.x;
-      const right = this.toolModel.drawingOrigin.x + this.toolModel.drawingExtents.x;
-      const up = this.toolModel.drawingOrigin.y + this.toolModel.drawingExtents.y;
-      const down = this.toolModel.drawingOrigin.y;
-      areaBuilder.setSymbology(ColorDef.blue, ColorDef.blue, 2);
-      areaBuilder.addLineString2d([this.toolModel.drawingOrigin, new Point2d(right, down), new Point2d(right, up), new Point2d(left, up), this.toolModel.drawingOrigin], 0);
-      context.addDecorationFromBuilder(areaBuilder);
+      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingOrigin, this.toolModel.drawingExtents));
     }
   }
 

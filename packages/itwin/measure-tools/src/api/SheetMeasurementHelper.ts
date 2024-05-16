@@ -4,7 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { IModel, QueryOptions} from "@itwin/core-common";
-import { QueryBinder } from "@itwin/core-common";
+import { ColorDef, QueryBinder } from "@itwin/core-common";
+import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
+import { GraphicType } from "@itwin/core-frontend";
 import { Point2d, Point3d } from "@itwin/core-geometry";
 
 interface idAndLocation {
@@ -132,5 +134,16 @@ export class SheetMeasurementsHelper {
 
   public static checkIfInDrawing(point: Point3d, drawingOrigin: Point2d, drawingExtents: Point2d): boolean {
     return (point.x >= drawingOrigin.x && point.x <= drawingExtents.x + drawingOrigin.x && point.y >= drawingOrigin.y && point.y <= drawingExtents.y + drawingOrigin.y);
+  }
+
+  public static getDrawingContourGraphic(context: DecorateContext, origin: Point2d, extents: Point2d): GraphicBuilder {
+    const areaBuilder = context.createGraphicBuilder(GraphicType.WorldOverlay);
+    const left = origin.x;
+    const right = origin.x + extents.x;
+    const up = origin.y + extents.y;
+    const down = origin.y;
+    areaBuilder.setSymbology(ColorDef.blue, ColorDef.blue, 2);
+    areaBuilder.addLineString2d([origin, new Point2d(right, down), new Point2d(right, up), new Point2d(left, up), origin], 0);
+    return areaBuilder;
   }
 }
