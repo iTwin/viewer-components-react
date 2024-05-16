@@ -16,9 +16,7 @@ interface UseMultiCheckboxHandlerResult {
 }
 
 /** @internal */
-export function useMultiCheckboxHandler(props: UseMultiCheckboxHandlerProps): UseMultiCheckboxHandlerResult {
-  const { rootNodes, isNodeSelected, onClick } = props;
-
+export function useMultiCheckboxHandler({ rootNodes, isNodeSelected, onClick }: UseMultiCheckboxHandlerProps): UseMultiCheckboxHandlerResult {
   const clickSelectedNodes = (nodes: Array<PresentationTreeNode>, checked: boolean) => {
     nodes.forEach((node) => {
       if (!isPresentationHierarchyNode(node)) {
