@@ -28,6 +28,7 @@ import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { Point3d } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
+import { ColorDef } from "@itwin/core-common";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
@@ -129,6 +130,7 @@ MeasureDistanceToolModel
       const right = this.toolModel.drawingOrigin.x + this.toolModel.drawingExtents.x;
       const up = this.toolModel.drawingOrigin.y + this.toolModel.drawingExtents.y;
       const down = this.toolModel.drawingOrigin.y;
+      areaBuilder.setSymbology(ColorDef.blue, ColorDef.blue, 2);
       areaBuilder.addLineString2d([this.toolModel.drawingOrigin, new Point2d(right, down), new Point2d(right, up), new Point2d(left, up), this.toolModel.drawingOrigin], 0);
       context.addDecorationFromBuilder(areaBuilder);
     }
