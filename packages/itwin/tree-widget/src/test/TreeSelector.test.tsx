@@ -64,12 +64,12 @@ describe("<TreeSelector />", () => {
     });
   });
 
-  it("renders default selection badge when badge provided", async () => {
+  it("renders default selection start icon when provided", async () => {
     const { getByText, queryByText, queryAllByText } = render(
       <TreeSelector
         defaultSelectedContentId={""}
         trees={[
-          { id: "a", label: "A", render: () => <div />, badge: <div>Badge</div> },
+          { id: "a", label: "A", render: () => <div />, startIcon: <div>Icon</div> },
           { id: "b", label: "B", render: () => <div /> },
           { id: "c", label: "C", render: () => <div /> },
         ]}
@@ -78,19 +78,19 @@ describe("<TreeSelector />", () => {
 
     await waitFor(() => {
       expect(queryAllByText("A")).to.not.be.null;
-      expect(getByText("Badge")).to.not.be.null;
+      expect(getByText("Icon")).to.not.be.null;
       expect(queryByText("B")).to.be.null;
       expect(queryByText("C")).to.be.null;
     });
   });
 
-  it("renders selected content with badge when badge provided", async () => {
+  it("renders selected content with start icon when icon provided", async () => {
     const { user, getByText, queryByText, queryAllByText, getByRole } = render(
       <TreeSelector
         defaultSelectedContentId={""}
         trees={[
           { id: "a", label: "A", render: () => <div /> },
-          { id: "b", label: "B", render: () => <div />, badge: <div>Badge</div> },
+          { id: "b", label: "B", render: () => <div />, startIcon: <div>Icon</div> },
           { id: "c", label: "C", render: () => <div /> },
         ]}
       />,
@@ -98,7 +98,7 @@ describe("<TreeSelector />", () => {
 
     await waitFor(() => {
       expect(queryAllByText("A")).to.not.be.null;
-      expect(queryByText("Badge")).to.be.null;
+      expect(queryByText("Icon")).to.be.null;
       expect(queryByText("B")).to.be.null;
       expect(queryByText("C")).to.be.null;
     });
@@ -108,7 +108,7 @@ describe("<TreeSelector />", () => {
 
     await waitFor(() => {
       expect(queryAllByText("A")).to.have.length(2);
-      expect(getByText("Badge")).to.not.be.null;
+      expect(getByText("Icon")).to.not.be.null;
       expect(getByText("B")).to.not.be.null;
       expect(getByText("C")).to.not.be.null;
     });
@@ -118,7 +118,7 @@ describe("<TreeSelector />", () => {
 
     await waitFor(() => {
       expect(queryAllByText("B")).to.not.be.null;
-      expect(getByText("Badge")).to.not.be.null;
+      expect(getByText("Icon")).to.not.be.null;
       expect(queryByText("A")).to.be.null;
       expect(queryByText("C")).to.be.null;
     });

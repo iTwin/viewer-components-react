@@ -148,6 +148,7 @@ test.describe("tree widget", () => {
 
       const externalSourcesTree = page.getByText("External Sources");
       await externalSourcesTree.click();
+      await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
 
       await takeScreenshot(page, treeWidget);
     });

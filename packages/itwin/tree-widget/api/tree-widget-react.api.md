@@ -485,11 +485,11 @@ export interface TreeContextMenuProps {
 
 // @public
 export interface TreeDefinition {
-    badge?: React.ReactNode;
     getLabel: () => string;
     id: string;
     render: (props: TreeRenderProps) => React.ReactNode;
     shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+    startIcon?: React.ReactNode;
 }
 
 // @internal (undocumented)

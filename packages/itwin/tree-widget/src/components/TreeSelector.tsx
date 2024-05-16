@@ -18,7 +18,7 @@ export interface TreeContentDefinition {
   id: string;
   label: string;
   render: (props: TreeRenderProps) => React.ReactNode;
-  badge?: React.ReactNode;
+  startIcon?: React.ReactNode;
 }
 
 /**
@@ -44,7 +44,7 @@ export function TreeSelector(props: TreeSelectorProps) {
   const isEnlarged = props.density === "enlarged";
 
   const options = useMemo(() => {
-    return props.trees.map((c) => ({ label: c.label, value: c.id, startIcon: c.badge })) as SelectOption<string>[];
+    return props.trees.map((c) => ({ label: c.label, value: c.id, startIcon: c.startIcon })) as SelectOption<string>[];
   }, [props.trees]);
 
   return (
@@ -54,7 +54,7 @@ export function TreeSelector(props: TreeSelectorProps) {
           <Select
             options={options}
             value={selectedContent.id}
-            size={isEnlarged ? "large" : undefined}
+            size={isEnlarged ? "large" : "small"}
             onChange={(treeId: string) => {
               props.onFeatureUsed?.(`choose-${treeId}`);
               setSelectedContentId(treeId);

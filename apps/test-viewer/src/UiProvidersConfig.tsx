@@ -130,7 +130,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     density={props.density}
                   />
                 ),
-                badge: <SvgTechnicalPreviewMiniBw />,
+                startIcon: <SvgTechnicalPreviewMiniBw />,
               },
             ];
             return [
