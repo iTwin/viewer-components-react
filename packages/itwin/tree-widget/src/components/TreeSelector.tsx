@@ -18,6 +18,7 @@ export interface TreeContentDefinition {
   id: string;
   label: string;
   render: (props: TreeRenderProps) => React.ReactNode;
+  startIcon?: React.ReactNode;
 }
 
 /**
@@ -43,7 +44,7 @@ export function TreeSelector(props: TreeSelectorProps) {
   const isEnlarged = props.density === "enlarged";
 
   const options = useMemo(() => {
-    return props.trees.map((c) => ({ label: c.label, value: c.id })) as SelectOption<string>[];
+    return props.trees.map((c) => ({ label: c.label, value: c.id, startIcon: c.startIcon })) as SelectOption<string>[];
   }, [props.trees]);
 
   return (

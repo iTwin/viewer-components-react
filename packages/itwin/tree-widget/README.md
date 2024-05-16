@@ -282,3 +282,29 @@ return (
   />
 );
 ```
+
+## Tree selector icons
+
+Provided trees to `TreeWidgetUiItemsProvider` can define a `startIcon` property that will be shown next to the tree label in tree selector.
+
+Example:
+
+```ts
+import { UiItemsManager } from "@itwin/appui-react";
+import { TreeWidgetUiItemsProvider, ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({
+    defaultPanelLocation: StagePanelLocation.Left,
+    defaultPanelSection: StagePanelSection.End,
+    defaultTreeWidgetPriority: 1000,
+    trees: [{
+      id: ModelsTreeComponent.id,
+      getLabel: ModelsTreeComponent.getLabel,
+      render: (props) => <ModelsTreeComponent { ...props } />,
+      startIcon: <SvgTechnicalPreviewMiniBw />,
+    }];
+  })
+);
+```
