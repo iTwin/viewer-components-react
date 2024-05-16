@@ -64,10 +64,10 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
   const copyButton = React.useCallback(
     (props: ActionButtonRendererProps) => props.isPropertyHovered &&
       <div>
-        <IconButton styleType="borderless" onClick={()=>{
+        <IconButton styleType="borderless" onClick={() => {
           const value = props.property.value;
-          if (value !== undefined && value.hasOwnProperty("displayValue") )
-            navigator.clipboard.writeText((value as PrimitiveValue).displayValue??"").catch((_) => { });
+          if (value !== undefined && value.hasOwnProperty("displayValue"))
+            navigator.clipboard.writeText((value as PrimitiveValue).displayValue ?? "").catch((_) => { });
         }}>
           <SvgCopy/>
         </IconButton>
