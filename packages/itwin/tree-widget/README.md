@@ -285,7 +285,7 @@ return (
 
 ## Tree selector icons
 
-Provided trees to `TreeWidgetUiItemsProvider` can define a component to `startIcon` property that will be used to show a custom icon before the tree label in tree selector.
+Provided trees to `TreeWidgetUiItemsProvider` can define a `startIcon` property that will be shown next to the tree label in tree selector.
 
 Example:
 
