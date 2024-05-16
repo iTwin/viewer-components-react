@@ -152,6 +152,13 @@ MeasureAreaToolModel
     }
   }
 
+  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+    if (!this._enableSheetMeasurements || this.toolModel.firstPointDrawingId === undefined || this.toolModel.drawingOrigin === undefined || this.toolModel.drawingExtents === undefined)
+      return true;
+
+    return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingOrigin, this.toolModel.drawingExtents);
+  }
+
   private _sendHintsToAccuDraw(ev: BeButtonEvent): void {
     const dynamicMeasurement = this.toolModel.dynamicMeasurement;
     if (undefined === ev.viewport || undefined === dynamicMeasurement) return;

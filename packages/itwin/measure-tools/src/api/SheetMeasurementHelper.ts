@@ -142,7 +142,7 @@ export class SheetMeasurementsHelper {
     const right = origin.x + extents.x;
     const up = origin.y + extents.y;
     const down = origin.y;
-    areaBuilder.setSymbology(ColorDef.blue, ColorDef.blue, 2);
+    areaBuilder.setSymbology(ColorDef.from(148, 190, 250), ColorDef.from(148, 190, 250), 2);
     areaBuilder.addLineString2d([origin, new Point2d(right, down), new Point2d(right, up), new Point2d(left, up), origin], 0);
     return areaBuilder;
   }
