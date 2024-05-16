@@ -6,6 +6,8 @@
 .gmw-actions {
   display: flex;
   flex-direction: row;
+  align-self: center;
+  flex-shrink: 1;
   .gmw-action-dropdown {
     width: calc(var(--iui-size-3xl) + var(--iui-size-xl));
   }

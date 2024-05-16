@@ -10,21 +10,21 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
-import type { CalculatedProperty } from "@itwin/insights-client";
-import { useMappingClient } from "../../context/MappingClientContext";
+import type { Property } from "@itwin/insights-client";
 import "./CalculatedPropertyTable.scss";
 import { PropertyNameCell } from "../PropertyNameCell";
 import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface CalculatedPropertyTableProps {
   mappingId: string;
   groupId: string;
   onClickAdd?: () => void;
-  onClickModify?: (value: CalculatedProperty) => void;
+  onClickModify?: (value: Property) => void;
   isLoading: boolean;
-  calculatedProperties: CalculatedProperty[];
+  calculatedProperties: Property[];
   refresh: () => Promise<void>;
 }
 
@@ -37,17 +37,17 @@ export const CalculatedPropertyTable = ({
   calculatedProperties,
   refresh,
 }: CalculatedPropertyTableProps) => {
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const queryClient = useQueryClient();
 
   const columnsFactory = useCallback(
-    (handleShowDeleteModal: (value: CalculatedProperty) => void): Column<CalculatedProperty>[] => [
+    (handleShowDeleteModal: (value: Property) => void): Column<Property>[] => [
       {
         id: "propertyName",
         Header: "Calculated Property",
         accessor: "propertyName",
-        Cell: (value: CellProps<CalculatedProperty>) => (
+        Cell: (value: CellProps<Property>) => (
           <PropertyNameCell
             property={value.row.original}
             onClickModify={onClickModify}
@@ -58,7 +58,7 @@ export const CalculatedPropertyTable = ({
         id: "dropdown",
         Header: "",
         width: 80,
-        Cell: (value: CellProps<CalculatedProperty>) => {
+        Cell: (value: CellProps<Property>) => {
           return (
             <DropdownMenu
               menuItems={(close: () => void) =>
@@ -107,15 +107,16 @@ export const CalculatedPropertyTable = ({
   const { mutateAsync: deleteProperty } = useMutation({
     mutationFn: async (propertyId: string) => {
       const accessToken = await getAccessToken();
-      await mappingClient.deleteCalculatedProperty(
+      await propertiesClient.deleteProperty(
         accessToken,
-        iModelId,
         mappingId,
         groupId,
         propertyId,
       );
     },
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["calculatedProperties", iModelId, mappingId, groupId] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, groupId] });
+    },
   });
 
   return (

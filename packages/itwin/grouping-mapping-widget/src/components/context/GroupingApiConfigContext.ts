@@ -7,8 +7,19 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import * as React from "react";
 import { createContext } from "react";
 
+/**
+ * @public
+ */
 export type ClientPrefix = "" | "dev" | "qa" | undefined;
+
+/**
+ * @public
+ */
 export type GetAccessTokenFn = () => Promise<AccessToken>;
+
+/**
+ * @public
+ */
 export interface GroupingMappingApiConfig {
   getAccessToken: GetAccessTokenFn;
   iModelId: string;
@@ -16,6 +27,9 @@ export interface GroupingMappingApiConfig {
   prefix?: ClientPrefix;
 }
 
+/**
+ * @public
+ */
 export const GroupingMappingApiConfigContext =
   createContext<GroupingMappingApiConfig>({
     getAccessToken: async () => "",
@@ -24,6 +38,10 @@ export const GroupingMappingApiConfigContext =
     iModelConnection: undefined,
   });
 
+/**
+ * Hook to access the GroupingMappingApiConfig from the context.
+ * @public
+ */
 export const useGroupingMappingApiConfig = () => {
   const context = React.useContext(GroupingMappingApiConfigContext);
   if (!context) {

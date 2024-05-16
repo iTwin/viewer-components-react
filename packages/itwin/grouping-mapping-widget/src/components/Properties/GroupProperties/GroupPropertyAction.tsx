@@ -15,13 +15,12 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { useMappingClient } from "../../context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
-  Group,
-  GroupProperty,
-  GroupPropertyCreate,
+  GroupMinimal,
+  Property,
+  PropertyModify,
 } from "@itwin/insights-client";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
@@ -36,16 +35,21 @@ import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
+/**
+ * Props for the {@link GroupPropertyAction} component.
+ * @public
+ */
 export interface GroupPropertyActionProps {
   mappingId: string;
-  group: Group;
-  groupProperty?: GroupProperty;
+  group: GroupMinimal;
+  groupProperty?: Property;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
 }
 
-export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
+export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefined>[] = [
   { value: QuantityType.Area, label: "Area" },
   { value: QuantityType.Distance, label: "Distance" },
   { value: QuantityType.Force, label: "Force" },
@@ -53,9 +57,13 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
   { value: QuantityType.Monetary, label: "Monetary" },
   { value: QuantityType.Time, label: "Time" },
   { value: QuantityType.Volume, label: "Volume" },
-  { value: QuantityType.Undefined, label: "No Quantity Type" },
+  { value: undefined, label: "No Quantity Type" },
 ];
 
+/**
+ * Component to create or update a group.
+ * @public
+ */
 export const GroupPropertyAction = ({
   mappingId,
   group,
@@ -64,11 +72,11 @@ export const GroupPropertyAction = ({
   onClickCancel,
 }: GroupPropertyActionProps) => {
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
-  const mappingClient = useMappingClient();
+  const propertiesClient = usePropertiesClient();
   const [propertyName, setPropertyName] = useState<string>("");
   const [oldPropertyName, setOldPropertyName] = useState<string>("");
-  const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
-  const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
+  const [dataType, setDataType] = useState<DataType>(DataType.String);
+  const [quantityType, setQuantityType] = useState<QuantityType>();
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>([]);
   const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
@@ -79,7 +87,7 @@ export const GroupPropertyAction = ({
 
   const reset = useCallback(() => {
     setPropertyName("");
-    setDataType(DataType.Undefined);
+    setDataType(DataType.String);
     setSelectedProperties([]);
   }, []);
 
@@ -101,9 +109,8 @@ export const GroupPropertyAction = ({
     let groupPropertyDetails = null;
     if (groupProperty) {
       const accessToken = await getAccessToken();
-      groupPropertyDetails = await mappingClient.getGroupProperty(
+      groupPropertyDetails = await propertiesClient.getProperty(
         accessToken,
-        iModelId,
         mappingId,
         group.id,
         groupProperty.id
@@ -111,9 +118,9 @@ export const GroupPropertyAction = ({
     }
 
     return { propertiesMetaData, groupPropertyDetails };
-  }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, iModelId, mappingClient, mappingId]);
+  }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, mappingId, propertiesClient]);
 
-  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["groupProperties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
+  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["properties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
 
   useEffect(() => {
     if (isLoadingPropertiesSuccessful && data?.propertiesMetaData) {
@@ -123,9 +130,10 @@ export const GroupPropertyAction = ({
         setPropertyName(data.groupPropertyDetails.propertyName);
         setOldPropertyName(data.groupPropertyDetails.propertyName);
         setDataType(data.groupPropertyDetails.dataType);
-        setQuantityType(data.groupPropertyDetails.quantityType);
+        if(data.groupPropertyDetails.quantityType)
+          setQuantityType(data.groupPropertyDetails.quantityType);
 
-        const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
+        const properties = findProperties(data.groupPropertyDetails.ecProperties ?? [], data.propertiesMetaData);
         if (properties.length === 0) {
           setPropertiesNotFoundAlert(true);
         }
@@ -138,7 +146,7 @@ export const GroupPropertyAction = ({
   const { mutate: onSave, isLoading: isSaving } = useMutation({
     mutationFn: async () => {
       const accessToken = await getAccessToken();
-      const newGroupProperty: GroupPropertyCreate = {
+      const newGroupProperty: PropertyModify = {
         propertyName,
         dataType,
         quantityType,
@@ -146,17 +154,15 @@ export const GroupPropertyAction = ({
       };
 
       return groupProperty
-        ? mappingClient.updateGroupProperty(
+        ? propertiesClient.updateProperty(
           accessToken,
-          iModelId,
           mappingId,
           group.id,
           groupProperty.id,
           newGroupProperty
         )
-        : mappingClient.createGroupProperty(
+        : propertiesClient.createProperty(
           accessToken,
-          iModelId,
           mappingId,
           group.id,
           newGroupProperty
@@ -165,7 +171,7 @@ export const GroupPropertyAction = ({
     onSuccess: async () => {
       onSaveSuccess();
       reset();
-      await queryClient.invalidateQueries(["groupProperties", iModelId, mappingId, group.id]);
+      await queryClient.invalidateQueries(["properties", iModelId, mappingId, group.id]);
     },
   });
 
@@ -222,7 +228,8 @@ export const GroupPropertyAction = ({
             id='dataType'
             options={[
               { value: DataType.Boolean, label: "Boolean" },
-              { value: DataType.Number, label: "Number" },
+              { value: DataType.Integer, label: "Integer" },
+              { value: DataType.Double, label: "Double" },
               { value: DataType.String, label: "String" },
             ]}
             required
@@ -243,13 +250,14 @@ export const GroupPropertyAction = ({
             onShow={() => { }}
             onHide={() => { }}
           />
-          <LabeledSelect<QuantityType>
+          <LabeledSelect<QuantityType | undefined>
             label='Quantity Type'
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
             onShow={() => { }}
             onHide={() => { }}
+            placeholder = 'No Quantity Type'
           />
         </Fieldset>
         {propertiesNotFoundAlert &&
@@ -275,7 +283,7 @@ export const GroupPropertyAction = ({
               selectedProperties.map((property) => (
                 <GroupPropertyListItem
                   key={property.key}
-                  content={`${property.displayLabel} (${property.propertyType})`}
+                  content={`${property.displayLabel}`}
                   title={`${property.actualECClassName}`}
                   description={property.categoryLabel}
                 />
@@ -288,7 +296,7 @@ export const GroupPropertyAction = ({
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
-          selectedProperties.length === 0 || !propertyName || dataType === DataType.Undefined
+          selectedProperties.length === 0 || !propertyName || dataType === undefined
         }
       />
       <GroupsPropertiesSelectionModal

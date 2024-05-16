@@ -50,6 +50,10 @@ interface ContainerDimensions {
   height: number;
 }
 
+/**
+ * A default group query builder for the Grouping Mapping Widget that uses the property grid to generate queries.
+ * @public
+ */
 export const GroupQueryBuilderCustomUI = ({
   updateQuery,
   isUpdating,
@@ -150,4 +154,3 @@ export const GroupQueryBuilderCustomUI = ({
     </div>
   );
 };
-

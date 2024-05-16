@@ -44,12 +44,20 @@ const fetchReports = async (
   }
 };
 
+/**
+ * Props for {@link Reports} component.
+ * @public
+ */
 export interface ReportsProps {
   onClickAddReport?: () => void;
   onClickReportTitle?: (report: Report) => void;
   onClickReportModify?: (report: Report) => void;
 }
 
+/**
+ * Component to manage and list reports for an iTwin.
+ * @public
+ */
 export const Reports = ({
   onClickAddReport,
   onClickReportModify,

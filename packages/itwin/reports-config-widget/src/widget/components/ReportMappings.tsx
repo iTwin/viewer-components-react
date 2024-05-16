@@ -106,12 +106,20 @@ const fetchReportMappings = async (
   }
 };
 
+/**
+ * Props for the {@link ReportMappings} component.
+ * @public
+ */
 export interface ReportMappingsProps {
   report: Report;
   onClickClose: () => void;
   defaultIModelId?: string;
 }
 
+/**
+ * Component to display and manage report mappings.
+ * @public
+ */
 export const ReportMappings = ({ report, onClickClose, defaultIModelId }: ReportMappingsProps) => {
   const { getAccessToken, reportsClient, iModelsClient, mappingsClient, baseUrl } = useReportsConfigApi();
   const [showDeleteModal, setShowDeleteModal] = useState<ReportMappingAndMapping | undefined>(undefined);

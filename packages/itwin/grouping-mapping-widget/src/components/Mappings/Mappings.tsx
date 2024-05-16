@@ -13,6 +13,10 @@ import { useMappingsOperations } from "./hooks/useMappingsOperations";
 
 export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
+/**
+ * Props for the {@link Mappings} component.
+ * @public
+ */
 export interface MappingsProps {
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
@@ -20,6 +24,10 @@ export interface MappingsProps {
   displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
 }
 
+/**
+ * Component to list mappings and handle basic operations.
+ * @public
+ */
 export const Mappings = (props: MappingsProps) => {
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();

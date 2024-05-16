@@ -40,6 +40,8 @@ export interface TreeDefinition {
    * If callback is `undefined` tree is shown for all iModel connections.
    */
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+  /** Icon to render before tree label in tree selector */
+  startIcon?: React.ReactNode;
 }
 
 /**
@@ -113,6 +115,7 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
       id: treeDef.id,
       label: treeDef.getLabel(),
       render: treeDef.render,
+      startIcon: treeDef.startIcon,
     };
   };
 

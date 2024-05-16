@@ -8,8 +8,16 @@ import { EC3ConfigurationsClient, EC3JobsClient, ODataClient, ReportsClient } fr
 import { createContext, useContext } from "react";
 import { EC3Config } from "../EC3/EC3Config";
 
+/**
+ * Get Access Token callback function
+ * @public
+ */
 export type GetAccessTokenFn = () => Promise<AccessToken>;
 
+/**
+ * EC3 API Context
+ * @beta
+ */
 export interface EC3ApiContext {
   reportsClient: IReportsClient;
   oDataClient: IOdataClient;

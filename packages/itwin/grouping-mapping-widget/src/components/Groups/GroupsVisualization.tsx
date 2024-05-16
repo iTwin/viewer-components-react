@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { OverlappedElementGroupPairs } from "../context/GroupHilitedElementsContext";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
@@ -29,17 +29,25 @@ import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext
 import type { ActionButtonRenderer, ActionButtonRendererProps } from "./GroupsView";
 import { Alert, Icon, Text } from "@itwin/itwinui-react";
 import { SvgMore } from "@itwin/itwinui-icons-react";
-import { useMappingClient } from "../context/MappingClientContext";
 import { useMutation } from "@tanstack/react-query";
 import { useIsMounted } from "../../common/hooks/useIsMounted";
 import { useFetchGroups } from "./hooks/useFetchGroups";
 import { useKeySetHiliteQueries } from "./hooks/useKeySetHiliteQueries";
+import { useGroupsClient } from "../context/GroupsClientContext";
 
+/**
+ * Props for the {@link GroupsVisualization} component.
+ * @public
+ */
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
 }
 
+/**
+ * Component to visualize groups and their elements.
+ * @public
+ */
 export const GroupsVisualization = ({
   emphasizeElements = true,
   isNonEmphasizedSelectable = false,
@@ -66,9 +74,9 @@ export const GroupsVisualization = ({
     overlappedElementsMetadata,
     setOverlappedElementsMetadata,
   } = useGroupHilitedElementsContext();
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
-  const mappingClient = useMappingClient();
-  const { data: groups, isFetched: isGroupsFetched, isFetching: isGroupsFetching } = useFetchGroups(iModelId, mapping.id, getAccessToken, mappingClient);
+  const { getAccessToken} = useGroupingMappingApiConfig();
+  const groupsClient = useGroupsClient();
+  const { data: groups, isFetched: isGroupsFetched, isFetching: isGroupsFetching } = useFetchGroups(mapping.id, getAccessToken, groupsClient);
   const isMounted = useIsMounted();
   const [enableGroupQueries, setEnableGroupQueries] = useState<boolean>(false);
   const { groupQueries } = useKeySetHiliteQueries(groups ?? [], enableGroupQueries, iModelConnection);
@@ -137,7 +145,7 @@ export const GroupsVisualization = ({
   }, [groupQueries, isGroupsQueriesReady, groups]);
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
-    (groups: Group[]) =>
+    (groups: GroupMinimal[]) =>
       hiliteIds.filter((id) => groups.some((group) => group.id === id.groupId)).flatMap((id) => id.elementIds),
     [hiliteIds]
   );
@@ -191,19 +199,19 @@ export const GroupsVisualization = ({
   );
 
   const hideSingleGroupWrapper = useCallback(
-    (groupToHide: Group) => {
+    (groupToHide: GroupMinimal) => {
       hideGroupConsideringOverlaps(overlappedElementsMetadata.overlappedElementGroupPairs, groupToHide.id, hiddenGroupsIds);
     },
     [hiddenGroupsIds, overlappedElementsMetadata.overlappedElementGroupPairs]
   );
 
   const showGroup = useCallback(
-    (viewGroup: Group) => {
+    (viewGroup: GroupMinimal) => {
       if (!groups) return;
       clearHiddenElements();
 
       // hide group Ids filter
-      const newHiddenGroups: Group[] = groups.filter((g) => hiddenGroupsIds.has(g.id) && g.id !== viewGroup.id);
+      const newHiddenGroups: GroupMinimal[] = groups.filter((g) => hiddenGroupsIds.has(g.id) && g.id !== viewGroup.id);
 
       // view group Ids filter
       const viewGroups = groups.filter((g) => !hiddenGroupsIds.has(g.id) || g.id === viewGroup.id);
@@ -235,7 +243,7 @@ export const GroupsVisualization = ({
   ]);
 
   const onModify = useCallback(
-    (group: Group, type: string) => {
+    (group: GroupMinimal, type: string) => {
       if (!onClickGroupModify) return;
       if (group.id && hiddenGroupsIds.has(group.id)) {
         showGroup(group);
