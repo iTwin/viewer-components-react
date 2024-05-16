@@ -84,7 +84,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
           dataProvider={dataProvider.current}
           orientation={Orientation.Vertical}
           isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled}
-          isPropertyHoverEnabled={true}   // This need to be turned on to have the action button appears only when property hovered
+          isPropertyHoverEnabled   // This need to be turned on to have the action button appears only when property hovered
           actionButtonRenderers={[copyButton]}
         />
       </ResizableContainerObserver>
