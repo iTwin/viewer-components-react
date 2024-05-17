@@ -2,24 +2,40 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+
+import { ReactNode, useState } from "react";
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { SelectionMode } from "@itwin/components-react";
 import { EC3Provider } from "@itwin/ec3-widget-react";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
+import { Flex } from "@itwin/itwinui-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
-  AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
-  RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
+  AddFavoritePropertyContextMenuItem,
+  AncestorsNavigationControls,
+  CopyPropertyTextContextMenuItem,
+  PropertyGridManager,
+  PropertyGridUiItemsProvider,
+  RemoveFavoritePropertyContextMenuItem,
+  ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps,
-  TreeWidget, TreeWidgetComponent,
+  CategoriesTreeComponent,
+  DefaultLabelRenderer,
+  ExternalSourcesTreeComponent,
+  IModelContentTreeComponent,
+  ModelsTreeComponent,
+  SelectableTreeProps,
+  TreeNodeLabelRendererProps,
+  TreeRenderProps,
+  TreeWidget,
+  TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 
@@ -92,6 +108,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
                     density={props.density}
+                    nodeLabelRenderer={CustomModelsTreeLabelRenderer}
                   />
                 ),
               },
@@ -258,5 +275,26 @@ function TreeWidgetWithOptions(props: SelectableTreeProps) {
         console.log(`TreeWidget [${feature}] used`);
       }}
     />
+  );
+}
+
+function CustomModelsTreeLabelRenderer(props: TreeNodeLabelRendererProps): ReactNode {
+  const [color] = useState(() => {
+    const rand = Math.random();
+    return rand < 0.33 ? "red" : rand < 0.66 ? "green" : "blue";
+  });
+
+  return (
+    <Flex flexDirection="row">
+      <div
+        style={{
+          height: 16,
+          width: 16,
+          backgroundColor: color,
+          borderRadius: "50%",
+        }}
+      ></div>
+      <DefaultLabelRenderer label={props.node.label} context={props.context} />
+    </Flex>
   );
 }
