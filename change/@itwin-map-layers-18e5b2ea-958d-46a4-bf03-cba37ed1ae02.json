@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Url scheme validation when adding a new map layer and fix an issue with usersPreferences and browser storage.",
+  "packageName": "@itwin/map-layers",
+  "email": "mdastous-bentley@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

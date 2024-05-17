@@ -23,7 +23,7 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
 
   const getCustomParamsFromStorage = React.useCallback(() => {
     const params = storage.get(undefined);
-    return (params ? params.map((item) => {return {value: item.name, label: item.name};}) : []);
+    return (params && Array.isArray(params) ? params.map((item) => {return {value: item.name, label: item.name};}) : []);
   }, [storage]);
 
   const [customParams] = React.useState(() => getCustomParamsFromStorage());

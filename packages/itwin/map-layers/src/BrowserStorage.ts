@@ -51,7 +51,7 @@ export class BrowserStorage<Type>  {
       if (!Object.keys(map).includes(key))
         return undefined;
 
-      return [map[key]];
+      return map[key];
     } else {  // No key provided, return all objects
       return Object.entries(map).map(([_key, value]) => value);
     }
