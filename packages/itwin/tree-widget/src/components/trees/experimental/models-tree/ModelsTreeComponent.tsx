@@ -26,7 +26,8 @@ import { SelectionStorage, UnifiedSelectionProvider } from "@itwin/presentation-
 
 type ExperimentalModelsTreeProps = ComponentPropsWithoutRef<typeof ExperimentalModelsTree>;
 
-interface ExperimentalModelsTreeComponentProps extends Pick<ExperimentalModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig"> {
+interface ExperimentalModelsTreeComponentProps
+  extends Pick<ExperimentalModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
 }

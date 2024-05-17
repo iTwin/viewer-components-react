@@ -6,7 +6,7 @@
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { createECSqlQueryExecutor, createECSchemaProvider } from "@itwin/presentation-core-interop";
-import { HierarchyNode, IHierarchyLevelDefinitionsFactory, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyLevelDefinitionsFactory, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { ComponentPropsWithoutRef, ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
@@ -27,11 +27,13 @@ interface ExperimentalModelsTreeProps {
   density?: "default" | "enlarged";
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   focusedInstanceKeys?: InstanceKey[];
+  selectionMode?: SelectionMode;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionsProviderCallback = VisibilityTreeProps["getHierarchyDefinitionsProvider"];
+type SelectionMode = VisibilityTreeProps["selectionMode"];
 
 /** @internal */
 export function ExperimentalModelsTree({
@@ -44,6 +46,7 @@ export function ExperimentalModelsTree({
   density,
   hierarchyLevelConfig,
   focusedInstanceKeys,
+  selectionMode,
 }: ExperimentalModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new ExperimentalModelsVisibilityHandler({ viewport: activeView });
@@ -84,6 +87,7 @@ export function ExperimentalModelsTree({
       getIcon={getIcon}
       density={density}
       noDataMessage={getNoDataMessage(filter)}
+      selectionMode={selectionMode}
     />
   );
 }

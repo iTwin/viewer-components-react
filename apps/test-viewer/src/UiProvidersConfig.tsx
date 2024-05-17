@@ -108,7 +108,12 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: `experimental-${ModelsTreeComponent.id}`,
                 getLabel: () => `${ModelsTreeComponent.getLabel()} (Experimental)`,
                 render: (props: TreeRenderProps) => (
-                  <ExperimentalModelsTreeComponent getSchemaContext={getSchemaContext} density={props.density} selectionStorage={unifiedSelectionStorage} />
+                  <ExperimentalModelsTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    selectionMode={"extended"}
+                  />
                 ),
               },
             ];

@@ -15,7 +15,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { Keys } from "@itwin/presentation-common";
 import type { VisibilityChangeListener, VisibilityStatus } from "../../VisibilityTreeEventHandler";
-import { ClassGroupingNodeKey, GroupingHierarchyNode, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { GroupingNodeKey, GroupingHierarchyNode, HierarchyNode } from "@itwin/presentation-hierarchies";
 
 interface ExperimentalModelsVisibilityHandlerProps {
   viewport: Viewport;
@@ -143,7 +143,7 @@ export class ExperimentalModelsVisibilityHandler {
     };
   }
 
-  private async getElementGroupingNodeDisplayStatus(node: GroupingHierarchyNode & { key: ClassGroupingNodeKey }): Promise<VisibilityStatus> {
+  private async getElementGroupingNodeDisplayStatus(node: GroupingHierarchyNode & { key: GroupingNodeKey }): Promise<VisibilityStatus> {
     const { modelId, categoryId, elementIds } = this.getGroupedElementIds(node);
 
     if (!modelId || !this._viewport.view.viewsModel(modelId)) {
@@ -258,7 +258,7 @@ export class ExperimentalModelsVisibilityHandler {
     this._viewport.changeCategoryDisplay([categoryId], on, on ? true : false);
   }
 
-  private async changeElementGroupingNodeState(node: GroupingHierarchyNode & { key: ClassGroupingNodeKey }, on: boolean) {
+  private async changeElementGroupingNodeState(node: GroupingHierarchyNode & { key: GroupingNodeKey }, on: boolean) {
     const { modelId, categoryId, elementIds } = this.getGroupedElementIds(node);
     await this.changeElementsState(modelId, categoryId, elementIds(), on);
   }
@@ -350,7 +350,7 @@ export class ExperimentalModelsVisibilityHandler {
   }
 
   // istanbul ignore next
-  private getGroupedElementIds(node: GroupingHierarchyNode & { key: ClassGroupingNodeKey }) {
+  private getGroupedElementIds(node: GroupingHierarchyNode & { key: GroupingNodeKey }) {
     const modelId = this.getElementModelId(node);
     const categoryId = this.getElementCategoryId(node);
 

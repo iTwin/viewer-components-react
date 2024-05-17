@@ -6,7 +6,7 @@
 import { IModelConnection } from "@itwin/core-frontend";
 import { useHierarchyVisibility } from "./UseHierarchyVisibility";
 import { useHierarchyFiltering } from "./UseHierarchyFiltering";
-import { PresentationHierarchyNode, useTree, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { PresentationHierarchyNode, useSelectionHandler, useTree, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { Flex, ProgressLinear, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { VisibilityTreeRenderer } from "./VisibilityTreeRenderer";
 import { PropsWithChildren, ReactElement, ReactNode, useEffect, useLayoutEffect, useState } from "react";
@@ -30,8 +30,12 @@ interface VisibilityTreeOwnProps {
 type UseTreeProps = Parameters<typeof useTree>[0];
 type UseNodesVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
+type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
 
-type VisibilityTreeProps = VisibilityTreeOwnProps & Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinitionsProvider"> & UseNodesVisibilityProps;
+type VisibilityTreeProps = VisibilityTreeOwnProps &
+  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinitionsProvider"> &
+  UseNodesVisibilityProps &
+  Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
 
 /** @internal */
 export function VisibilityTree({ imodel, getSchemaContext, hierarchyLevelSizeLimit, ...props }: VisibilityTreeProps) {
@@ -66,15 +70,16 @@ function VisibilityTreeImpl({
   noDataMessage,
   getIcon,
   density,
+  selectionMode,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
-  const { rootNodes, hierarchyProvider, getHierarchyLevelConfiguration, isLoading, reloadTree, ...treeProps } = useUnifiedSelectionTree({
+  const { rootNodes, hierarchyProvider, getHierarchyLevelConfiguration, isLoading, reloadTree, selectNodes, ...treeProps } = useUnifiedSelectionTree({
     imodelAccess,
     getHierarchyDefinitionsProvider,
     getFilteredPaths,
     imodelKey: imodel.key,
     sourceName: "ExperimentalModelsTree",
   });
-
+  const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes, selectionMode: selectionMode ?? "single" });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
   const { filteringDialog, onFilterClick } = useHierarchyFiltering({
@@ -109,6 +114,8 @@ function VisibilityTreeImpl({
         <VisibilityTreeRenderer
           rootNodes={rootNodes}
           {...treeProps}
+          onNodeClick={onNodeClick}
+          onNodeKeyDown={onNodeKeyDown}
           getCheckboxStatus={getCheckboxStatus}
           onCheckboxClicked={onCheckboxClicked}
           onFilterClick={onFilterClick}

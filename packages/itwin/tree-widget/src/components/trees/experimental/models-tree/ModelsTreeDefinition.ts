@@ -5,18 +5,19 @@
 
 import { Id64String } from "@itwin/core-bentley";
 import {
-  ClassBasedHierarchyLevelDefinitionsFactory,
+  createClassBasedHierarchyLevelDefinitionsFactory,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
   HierarchyLevelDefinition,
   HierarchyNode,
   HierarchyNodeIdentifiersPath,
-  IHierarchyLevelDefinitionsFactory,
+  HierarchyLevelDefinitionsFactory,
   LimitingECSqlQueryExecutor,
   NodeSelectClauseColumnNames,
-  NodeSelectQueryFactory,
+  createNodesQueryClauseFactory,
   ProcessedHierarchyNode,
+  NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 import {
   createBisInstanceLabelSelectClauseFactory,
@@ -51,13 +52,13 @@ export namespace ModelsTreeInstanceKeyPathsProps {
   }
 }
 
-export class ModelsTreeDefinition implements IHierarchyLevelDefinitionsFactory {
-  private _impl: ClassBasedHierarchyLevelDefinitionsFactory;
-  private _selectQueryFactory: NodeSelectQueryFactory;
+export class ModelsTreeDefinition implements HierarchyLevelDefinitionsFactory {
+  private _impl: HierarchyLevelDefinitionsFactory;
+  private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 
   public constructor(props: ModelsTreeDefinitionProps) {
-    this._impl = new ClassBasedHierarchyLevelDefinitionsFactory({
+    this._impl = createClassBasedHierarchyLevelDefinitionsFactory({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
         rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition(requestProps),
@@ -85,7 +86,7 @@ export class ModelsTreeDefinition implements IHierarchyLevelDefinitionsFactory {
         ],
       },
     });
-    this._selectQueryFactory = new NodeSelectQueryFactory({ imodelAccess: props.imodelAccess });
+    this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
 
@@ -105,7 +106,10 @@ export class ModelsTreeDefinition implements IHierarchyLevelDefinitionsFactory {
   }
 
   private async createRootHierarchyLevelDefinition(props: DefineRootHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses(props.instanceFilter, { fullName: "BisCore.Subject", alias: "this" });
+    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: props.instanceFilter,
+      contentClass: { fullName: "BisCore.Subject", alias: "this" },
+    });
     return [
       {
         fullClassName: "BisCore.Subject",
@@ -144,8 +148,14 @@ export class ModelsTreeDefinition implements IHierarchyLevelDefinitionsFactory {
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const selectColumnNames = Object.values(NodeSelectClauseColumnNames).join(", ");
-    const subjectFilterClauses = await this._selectQueryFactory.createFilterClauses(instanceFilter, { fullName: "BisCore.Subject", alias: "this" });
-    const modelFilterClauses = await this._selectQueryFactory.createFilterClauses(instanceFilter, { fullName: "BisCore.GeometricModel3d", alias: "this" });
+    const subjectFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: "BisCore.Subject", alias: "this" },
+    });
+    const modelFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: "BisCore.GeometricModel3d", alias: "this" },
+    });
     const ctes = [
       `
         subjects(${selectColumnNames}, ParentId) AS (
@@ -330,7 +340,10 @@ export class ModelsTreeDefinition implements IHierarchyLevelDefinitionsFactory {
       }
       return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
     }
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses(instanceFilter, { fullName: "BisCore.SpatialCategory", alias: "this" });
+    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
+    });
     return [
       {
         fullClassName: "BisCore.SpatialCategory",
@@ -389,7 +402,10 @@ export class ModelsTreeDefinition implements IHierarchyLevelDefinitionsFactory {
     if (modelIds.length === 0) {
       throw new Error(`Invalid category node "${parentNode.label}" - missing model information.`);
     }
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses(instanceFilter, { fullName: "BisCore.GeometricElement3d", alias: "this" });
+    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: "BisCore.GeometricElement3d", alias: "this" },
+    });
     return [
       {
         fullClassName: "BisCore.GeometricElement3d",
@@ -447,7 +463,10 @@ export class ModelsTreeDefinition implements IHierarchyLevelDefinitionsFactory {
     parentNodeInstanceIds: elementIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses(instanceFilter, { fullName: "BisCore.GeometricElement3d", alias: "this" });
+    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: "BisCore.GeometricElement3d", alias: "this" },
+    });
     return [
       {
         fullClassName: "BisCore.GeometricElement3d",
