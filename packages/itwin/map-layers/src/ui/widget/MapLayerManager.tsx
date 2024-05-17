@@ -256,8 +256,8 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         // Find existing entries to avoid adding duplicated sources
         if (!sources.find((curSource) => source.name === curSource.name)) {
           const cpMapping = cpMappingStorage.get(source.url.toLowerCase());
-          if (cpMapping && cpMapping.length > 0) {
-            CustomParamUtils.setSourceCustomParams(source, cpMapping[0].customParamNames);
+          if (cpMapping  && !Array.isArray(cpMapping)) {
+            CustomParamUtils.setSourceCustomParams(source, cpMapping.customParamNames);
           }
           addSource(source);
         }
