@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Tree } from "@itwin/itwinui-react";
-import { PresentationHierarchyNode, PresentationTreeNode, createTreeNode } from "@itwin/presentation-hierarchies-react";
+import { PresentationTreeNode, createTreeNode } from "@itwin/presentation-hierarchies-react";
 import { ComponentPropsWithoutRef, useCallback } from "react";
-import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import { VisibilityTreeNodeRenderer } from "./VisibilityTreeNodeRenderer";
 import "./VisibilityTreeRenderer.scss";
 
@@ -16,13 +15,19 @@ type VisibilityTreeNodeRendererProps = ComponentPropsWithoutRef<typeof Visibilit
 interface VisibilityTreeRendererOwnProps {
   rootNodes: PresentationTreeNode[];
   isNodeSelected: (nodeId: string) => boolean;
-  getCheckboxStatus: (node: PresentationHierarchyNode) => VisibilityStatus;
-  onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
 }
 
 type VisibilityTreeRendererProps = Pick<
   VisibilityTreeNodeRendererProps,
-  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "setHierarchyLevelLimit" | "setHierarchyLevelFilter" | "onFilterClick" | "getIcon"
+  | "expandNode"
+  | "onNodeClick"
+  | "onNodeKeyDown"
+  | "setHierarchyLevelLimit"
+  | "setHierarchyLevelFilter"
+  | "onFilterClick"
+  | "getIcon"
+  | "getCheckboxStatus"
+  | "onCheckboxClicked"
 > &
   Omit<TreeProps<PresentationTreeNode>, "data" | "nodeRenderer" | "getNode"> &
   VisibilityTreeRendererOwnProps;

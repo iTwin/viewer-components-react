@@ -65,6 +65,7 @@
     "@itwin/presentation-hierarchies": "workspace:*",
     "@itwin/presentation-hierarchies-react": "workspace:*",
     "@itwin/presentation-shared": "workspace:*",
+    "@itwin/unified-selection": "workspace:*",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-error-boundary": "^4.0.10",

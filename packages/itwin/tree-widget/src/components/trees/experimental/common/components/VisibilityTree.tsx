@@ -3,18 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { IModelConnection } from "@itwin/core-frontend";
-import { useHierarchyVisibility } from "./UseHierarchyVisibility";
-import { useHierarchyFiltering } from "./UseHierarchyFiltering";
 import { PresentationHierarchyNode, useSelectionHandler, useTree, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
-import { Flex, ProgressLinear, ProgressRadial, Text } from "@itwin/itwinui-react";
-import { VisibilityTreeRenderer } from "./VisibilityTreeRenderer";
-import { PropsWithChildren, ReactElement, ReactNode, useEffect, useLayoutEffect, useState } from "react";
+import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { useMultiCheckboxHandler } from "./UseMultiCheckboxHandler";
+import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
+import { useHierarchyVisibility } from "../UseHierarchyVisibility";
+import { useHierarchyFiltering } from "../UseHierarchyFiltering";
+import { VisibilityTreeRenderer } from "./VisibilityTreeRenderer";
+import { Delayed } from "./Delayed";
+import { ProgressOverlay } from "./ProgressOverlay";
 
 interface VisibilityTreeOwnProps {
   imodel: IModelConnection;
@@ -125,58 +127,8 @@ function VisibilityTreeImpl({
         {filteringDialog}
       </div>
       <Delayed show={isLoading}>
-        <FilteringOverlay />
+        <ProgressOverlay />
       </Delayed>
-    </div>
-  );
-}
-
-function Delayed({ show, children }: PropsWithChildren<{ show: boolean }>) {
-  const [visible, setVisible] = useState(false);
-
-  useLayoutEffect(() => {
-    if (!show) {
-      setVisible(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setVisible(show);
-    }, 250);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [show]);
-
-  if (!visible) {
-    return null;
-  }
-
-  return <>{children}</>;
-}
-
-function FilteringOverlay() {
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: 0,
-        top: 0,
-        zIndex: 1000,
-        height: "100%",
-        width: "100%",
-        overflow: "hidden",
-      }}
-    >
-      <ProgressLinear indeterminate />
-      <div
-        style={{
-          opacity: 0.5,
-          backgroundColor: "var(--iui-color-background-backdrop)",
-          height: "100%",
-          width: "100%",
-        }}
-      />
     </div>
   );
 }

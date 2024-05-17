@@ -3,19 +3,18 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { ComponentPropsWithoutRef, ReactElement, useCallback, useMemo } from "react";
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
-import { createECSqlQueryExecutor, createECSchemaProvider } from "@itwin/presentation-core-interop";
-import { HierarchyNode, HierarchyLevelDefinitionsFactory, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { ComponentPropsWithoutRef, ReactElement, useCallback, useEffect, useMemo, useState } from "react";
-import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { Text } from "@itwin/itwinui-react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
-import { VisibilityTree } from "../common/VisibilityTree";
-import { InstanceKey, createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { VisibilityTree } from "../common/components/VisibilityTree";
 import { HierarchyLevelConfig } from "../../common/Types";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
-import { Text } from "@itwin/itwinui-react";
+import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 
 interface ExperimentalModelsTreeProps {
   imodel: IModelConnection;
@@ -26,7 +25,6 @@ interface ExperimentalModelsTreeProps {
   filter: string;
   density?: "default" | "enlarged";
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
-  focusedInstanceKeys?: InstanceKey[];
   selectionMode?: SelectionMode;
 }
 
@@ -45,7 +43,6 @@ export function ExperimentalModelsTree({
   filter,
   density,
   hierarchyLevelConfig,
-  focusedInstanceKeys,
   selectionMode,
 }: ExperimentalModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
@@ -57,19 +54,32 @@ export function ExperimentalModelsTree({
       dispose: () => visibilityHandler.dispose(),
     };
   }, [activeView]);
+  const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
-    if (!focusedInstanceKeys) {
+    if (!focusedInstancesKeys) {
       return undefined;
     }
-    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstanceKeys });
-  }, [focusedInstanceKeys]);
+    return async ({ imodelAccess }) => {
+      try {
+        return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys });
+      } catch {
+        return undefined;
+      }
+    };
+  }, [focusedInstancesKeys]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
+    return async ({ imodelAccess }) => {
+      try {
+        return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
+      } catch {
+        return undefined;
+      }
+    };
   }, [filter]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
