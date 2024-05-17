@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { IconButton } from "@itwin/itwinui-react";
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import { getGroupColor } from "./groupsHelpers";
 import "./GroupColorLegend.scss";
 
 interface GroupColorLegendProps {
-  group: Group;
-  groups: Group[];
+  group: GroupMinimal;
+  groups: GroupMinimal[];
 }
 
 export const GroupColorLegend = ({ group, groups }: GroupColorLegendProps) => (

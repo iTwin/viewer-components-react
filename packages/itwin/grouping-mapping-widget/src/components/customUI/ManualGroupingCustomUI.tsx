@@ -8,6 +8,10 @@ import { LoadingSpinner } from "../SharedComponents/LoadingSpinner";
 import "./ManualGroupingCustomUI.scss";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 
+/**
+ * A default group query builder for the Grouping Mapping Widget that uses a manual input to generate queries.
+ * @public
+ */
 export const ManualGroupingCustomUI = ({
   updateQuery,
   isUpdating,

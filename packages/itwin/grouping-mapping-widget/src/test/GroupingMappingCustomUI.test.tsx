@@ -6,7 +6,7 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { faker } from "@faker-js/faker";
 import { GroupingMappingCustomUIType, Groups } from "../grouping-mapping-widget";
-import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
+import type { GroupMinimalList, IGroupsClient, IMappingsClient, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
 import type { IModelConnection, ViewManager } from "@itwin/core-frontend";
 import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI } from "../grouping-mapping-widget";
@@ -26,13 +26,13 @@ const mockMapping: Mapping = {
   modifiedOn: faker.date.past().toDateString(),
   extractionEnabled: false,
   _links: {
-    imodel: {
+    iModel: {
       href: "",
     },
   },
 };
 
-const groupsFactory = (): GroupCollection => ({
+const groupsFactory = (): GroupMinimalList => ({
   groups: Array.from(
     { length: faker.datatype.number({ min: 3, max: 5 }) },
     (_, index) => ({
@@ -41,7 +41,7 @@ const groupsFactory = (): GroupCollection => ({
       description: `mOcKgRoUpDeScRiPtIoN${index}`,
       query: `mOcKgRoUpQuErY${index}`,
       _links: {
-        imodel: {
+        iModel: {
           href: "",
         },
         mapping: {
@@ -61,6 +61,7 @@ const groupsFactory = (): GroupCollection => ({
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const viewManagerMock = moq.Mock.ofType<ViewManager>();
 const mappingClientMock = moq.Mock.ofType<IMappingsClient>();
+const groupsClientMock = moq.Mock.ofType<IGroupsClient>();
 
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
@@ -74,10 +75,21 @@ jest.mock("@itwin/core-frontend", () => ({
   },
 }));
 
-jest.mock("../components/context/MappingClientContext", () => ({
-  ...jest.requireActual("../components/context/MappingClientContext"),
-  useMappingClient: () => mappingClientMock.object,
-}));
+jest.mock("../components/context/MappingClientContext", () => {
+  const actualMappingContextModule = jest.requireActual("../components/context/MappingClientContext");
+  return {
+    ...actualMappingContextModule,
+    useMappingClient: () => mappingClientMock.object,
+  };
+});
+
+jest.mock("../components/context/GroupsClientContext", () => {
+  const actualGroupsContextModule = jest.requireActual("../components/context/GroupsClientContext");
+  return {
+    ...actualGroupsContextModule,
+    useGroupsClient: () => groupsClientMock.object,
+  };
+});
 
 jest.mock("../common/utils", () => ({
   ...jest.requireActual("../common/utils"),
@@ -91,9 +103,9 @@ describe("Groups View", () => {
     connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
     connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
 
-    mappingClientMock
+    groupsClientMock
       .setup(async (x) => x.getGroups(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => Promise.resolve(mockGroups.groups));
+      .returns(async () => Promise.resolve(mockGroups));
   });
 
   afterEach(() => {

@@ -8,6 +8,10 @@ import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 import { LoadingSpinner } from "../SharedComponents/LoadingSpinner";
 import "./SearchGroupingCustomUI.scss";
 
+/**
+ * A default group query builder for the Grouping Mapping Widget that uses a generic query template to search for elements.
+ * @public
+ */
 export const SearchGroupingCustomUI = ({
   updateQuery,
   isUpdating,
@@ -167,4 +171,3 @@ export const SearchGroupingCustomUI = ({
     </div>
   );
 };
-

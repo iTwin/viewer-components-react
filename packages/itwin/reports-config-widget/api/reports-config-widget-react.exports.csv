@@ -1,0 +1,14 @@
+sep=;
+Release Tag;API Item
+public;BulkExtractor
+public;ReportAction: ({ report, onSaveSuccess, onClickCancel }: ReportActionProps) => JSX.Element
+public;ReportActionProps
+public;ReportMappings: ({ report, onClickClose, defaultIModelId }: ReportMappingsProps) => JSX.Element | null
+public;ReportMappingsProps
+public;Reports: ({ onClickAddReport, onClickReportModify, onClickReportTitle, }: ReportsProps) => JSX.Element | null
+internal;REPORTS_CONFIG_BASE_URL = "https://api.bentley.com"
+public;ReportsConfigContext: (props: ReportsConfigContextProps) => JSX.Element
+public;ReportsConfigContextProps
+public;ReportsConfigProvider 
+public;ReportsConfigWidget
+public;ReportsProps

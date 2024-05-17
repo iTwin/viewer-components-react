@@ -93,8 +93,8 @@ dependencies:
     specifier: workspace:*
     version: file:../../packages/itwin/measure-tools(@itwin/appui-abstract@4.4.0)(@itwin/appui-layout-react@4.8.3)(@itwin/appui-react@4.11.0)(@itwin/components-react@4.11.0)(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)(@itwin/core-geometry@4.4.0)(@itwin/core-react@4.11.0)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
   '@itwin/oidc-signin-tool':
-    specifier: ^4.3.2
-    version: 4.3.2(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0)
+    specifier: ^4.3.5
+    version: 4.3.5(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0)
   '@itwin/one-click-lca-react':
     specifier: workspace:*
     version: file:../../packages/itwin/one-click-lca-widget(@itwin/appui-abstract@4.4.0)(@itwin/appui-react@4.11.0)(@itwin/core-frontend@4.4.0)(@itwin/core-react@4.11.0)(react-dom@18.2.0)(react@18.2.0)
@@ -2630,8 +2630,8 @@ packages:
       - debug
     dev: false
 
-  /@itwin/insights-client@0.4.0:
-    resolution: {integrity: sha512-vOdk5AbcqfnEW0S2VmZzPoBFQPEHIhhUybJqKLajB1/rBSwcK40EIo+JienBrqCgV3KU9N31H4UISEOfRDgqOg==}
+  /@itwin/insights-client@0.10.1:
+    resolution: {integrity: sha512-20vqnr0AijYyO5zHmjakOyG6nzL8FFQZ9Wu4pnW4F7ulzlKiayKOW4183UdOX0oTQt3BHMvnkphhEWJF8a/MDw==}
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.5
@@ -2639,8 +2639,8 @@ packages:
       - encoding
     dev: false
 
-  /@itwin/insights-client@0.6.0:
-    resolution: {integrity: sha512-DeQnoz+POwxnBPDPJ3HNo/JzXSPKgvIwrUk5hFVnrJC6gjvkiZsZLZ78ydBGhQu8QT66TsvPwTTcaAGQ11Z8GQ==}
+  /@itwin/insights-client@0.4.0:
+    resolution: {integrity: sha512-vOdk5AbcqfnEW0S2VmZzPoBFQPEHIhhUybJqKLajB1/rBSwcK40EIo+JienBrqCgV3KU9N31H4UISEOfRDgqOg==}
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.5
@@ -2767,8 +2767,8 @@ packages:
       - debug
     dev: false
 
-  /@itwin/oidc-signin-tool@4.3.2(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0):
-    resolution: {integrity: sha512-Nac/EbZCqhezoB7Q5tb542oqLdhR/GlcSq9jQYaPu55ULVJ+f9aK03xLop4GgaAl7+KXRZ1dRYE7aOrv0yXtnw==}
+  /@itwin/oidc-signin-tool@4.3.5(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0):
+    resolution: {integrity: sha512-+84Qr2EwfdQ1teOHlS6MQlTWWcIaE94n6xX0awqX9LBhZK2A2a98EIqJtUw1hFEbP6TVwsrEmzOMOctplx0HjQ==}
     requiresBuild: true
     peerDependencies:
       '@itwin/core-bentley': ^3.3.0 || ^4.0.0
@@ -2776,8 +2776,8 @@ packages:
       '@itwin/certa': 4.4.5
       '@itwin/core-bentley': 4.4.0
       '@itwin/core-common': 4.4.0(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0)
-      '@itwin/service-authorization': 1.1.0(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0)
-      '@playwright/test': 1.35.1
+      '@itwin/service-authorization': 1.2.1(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0)
+      '@playwright/test': 1.41.2
       dotenv: 10.0.0
       dotenv-expand: 5.1.0
       oidc-client-ts: 2.4.0
@@ -2878,8 +2878,8 @@ packages:
       - debug
     dev: false
 
-  /@itwin/service-authorization@1.1.0(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0):
-    resolution: {integrity: sha512-apP2uOmKQuxb0PQ/39dre2sE8tfQUC9BfLV5yPwwaSgRnFwQ4YZgcAJu/NVtYuFxDHAsnerbD2C5TzbtQWWyKA==}
+  /@itwin/service-authorization@1.2.1(@itwin/core-bentley@4.4.0)(@itwin/core-geometry@4.4.0):
+    resolution: {integrity: sha512-i2GhDIdxbcMdj41zoahcgHJkDQhFgur0M3O3eNzllvFxMgORWvFX2hyLbjefEv00WryqMIo5WBP6J5ASdxJv6g==}
     peerDependencies:
       '@itwin/core-bentley': ^3.3.0 || ^4.0.0
     dependencies:
@@ -3335,15 +3335,12 @@ packages:
     dev: false
     optional: true
 
-  /@playwright/test@1.35.1:
-    resolution: {integrity: sha512-b5YoFe6J9exsMYg0pQAobNDR85T1nLumUYgUTtKm4d21iX2L7WqKq9dW8NGJ+2vX0etZd+Y7UeuqsxDXm9+5ZA==}
+  /@playwright/test@1.41.2:
+    resolution: {integrity: sha512-qQB9h7KbibJzrDpkXkYvsmiDJK14FULCCZgEcoe2AvFAS64oCirWTwzTlAYEbKaRxWs5TFesE1Na6izMv3HfGg==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      '@types/node': 18.18.10
-      playwright-core: 1.35.1
-    optionalDependencies:
-      fsevents: 2.3.2
+      playwright: 1.41.2
     dev: false
 
   /@pmmmwh/react-refresh-webpack-plugin@0.5.11(react-refresh@0.11.0)(webpack-dev-server@4.15.1)(webpack@5.90.3):
@@ -10281,6 +10278,12 @@ packages:
     hasBin: true
     dev: false
 
+  /playwright-core@1.41.2:
+    resolution: {integrity: sha512-VaTvwCA4Y8kxEe+kfm2+uUUw5Lubf38RxF7FpBxLPmGe5sdNkSg5e3ChEigaGrX7qdqT3pt2m/98LiyvU2x6CA==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dev: false
+
   /playwright@1.35.1:
     resolution: {integrity: sha512-NbwBeGJLu5m7VGM0+xtlmLAH9VUfWwYOhUi/lSEDyGg46r1CA9RWlvoc5yywxR9AzQb0mOCm7bWtOXV7/w43ZA==}
     engines: {node: '>=16'}
@@ -10288,6 +10291,16 @@ packages:
     requiresBuild: true
     dependencies:
       playwright-core: 1.35.1
+    dev: false
+
+  /playwright@1.41.2:
+    resolution: {integrity: sha512-v0bOa6H2GJChDL8pAeLa/LZC4feoAMbSQm1/jF/ySsWWoaNItvrMP7GEkvEEFyCTUYKMxjQKaTSg5up7nR6/8A==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.41.2
+    optionalDependencies:
+      fsevents: 2.3.2
     dev: false
 
   /posix-character-classes@0.1.1:
@@ -14088,13 +14101,13 @@ packages:
     name: '@itwin/geo-tools-react'
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0
-      '@itwin/appui-react': ^4.0.0
-      '@itwin/components-react': ^4.0.0
+      '@itwin/appui-react': ^4.10.0
+      '@itwin/components-react': ^4.10.0
       '@itwin/core-bentley': ^4.0.0
       '@itwin/core-common': ^4.0.0
       '@itwin/core-frontend': ^4.0.0
       '@itwin/core-geometry': ^4.0.0
-      '@itwin/core-react': ^4.0.0
+      '@itwin/core-react': ^4.10.0
       react: ^17.0.2
       react-dom: ^17.0.2
       redux: ^4.1.0
@@ -14140,7 +14153,7 @@ packages:
       '@itwin/imodels-access-common': 4.1.5(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)
       '@itwin/imodels-access-frontend': 4.1.5(@itwin/core-bentley@4.4.0)(@itwin/core-common@4.4.0)(@itwin/core-frontend@4.4.0)
       '@itwin/imodels-client-management': 4.3.0
-      '@itwin/insights-client': 0.6.0
+      '@itwin/insights-client': 0.10.1
       '@itwin/itwins-client': 1.2.1
       '@itwin/itwinui-icons-color-react': 2.1.0(react-dom@18.2.0)(react@18.2.0)
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.2.0)(react@18.2.0)

@@ -7,6 +7,8 @@ export * from "./WidgetShell/GroupingMappingWidget";
 
 /** Interfaces for providing custom MappingClient and API configuration */
 export { createDefaultMappingClient, createMappingClient, MappingClientContext, useMappingClient } from "./components/context/MappingClientContext";
+export { createDefaultGroupsClient, createGroupsClient, GroupsClientContext, useGroupsClient } from "./components/context/GroupsClientContext";
+export { createDefaultPropertiesClient, createPropertiesClient, PropertiesClientContext, usePropertiesClient } from "./components/context/PropertiesClientContext";
 export { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig, GroupingMappingApiConfigContext, useGroupingMappingApiConfig } from "./components/context/GroupingApiConfigContext";
 export * from "@itwin/insights-client";
 

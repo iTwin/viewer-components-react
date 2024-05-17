@@ -15,6 +15,10 @@ import React from "react";
 import type { GroupingMappingProps } from "./GroupingMapping";
 import GroupingMapping from "./GroupingMapping";
 
+/**
+ * UI Provider for Grouping & Mapping Widget
+ * @public
+ */
 export class GroupingMappingProvider implements UiItemsProvider {
   public readonly id = "GroupingMappingProvider";
 

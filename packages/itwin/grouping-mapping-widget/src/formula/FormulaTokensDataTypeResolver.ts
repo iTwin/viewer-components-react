@@ -35,7 +35,7 @@ export function resolveTokensDataType(formulaName: string, tokens: Queue<Token>,
 
     switch (token.type) {
       case TokenType.Number:
-        argStack.push("Number");
+        argStack.push("Double");
         break;
       case TokenType.String:
         argStack.push("String");
@@ -49,7 +49,7 @@ export function resolveTokensDataType(formulaName: string, tokens: Queue<Token>,
       case TokenType.Variable:
         const isConstant = isNumericalConstant(token.value);
         if (isConstant) {
-          argStack.push("Number");
+          argStack.push("Double");
         } else {
           if (token.value === formulaName)
             return { errorMessage: "Formula cannot reference itself." };

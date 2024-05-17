@@ -17,6 +17,10 @@ const defaultDisplayStrings = {
   mappingDetails: "Mapping Details",
 };
 
+/**
+ * Props for the {@link MappingAction} component.
+ * @public
+ */
 export interface MappingActionProps {
   mapping?: Mapping;
   onSaveSuccess: () => void;
@@ -24,6 +28,10 @@ export interface MappingActionProps {
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
+/**
+ * Component to create or update a mapping.
+ * @public
+ */
 export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -45,8 +53,8 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
       mutationFn: async (newMapping: MappingCreate) => {
         const accessToken = await getAccessToken();
         return mapping
-          ? mappingClient.updateMapping(accessToken, iModelId, mapping.id, newMapping)
-          : mappingClient.createMapping(accessToken, iModelId, newMapping);
+          ? mappingClient.updateMapping(accessToken, mapping.id, newMapping)
+          : mappingClient.createMapping(accessToken, newMapping);
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: ["mappings"] });
@@ -61,6 +69,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
       return;
     }
     saveMutation({
+      iModelId,
       mappingName: values.name,
       description: values.description,
       extractionEnabled: values.extractionEnabled,
