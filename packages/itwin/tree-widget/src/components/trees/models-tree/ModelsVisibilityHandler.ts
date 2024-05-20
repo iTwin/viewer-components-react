@@ -371,7 +371,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     if (!modelId || !categoryId) {
       return;
     }
-    for await (const childId of this.getAssemblyElementIds(id, modelId, categoryId).getElementIds()) {
+    for await (const childId of this.getAssemblyElementIds(id)) {
       this.changeElementStateInternal(childId, on, isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements);
     }
   }
@@ -454,13 +454,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   // istanbul ignore next
   private getAssemblyElementIds(elementId: string) {
     const elementIds = this._queryHandler.queryElementChildren(elementId);
-    return {
-      async *getElementIds() {
-        for await (const item of eachValueFrom(elementIds)) {
-          yield item;
-        }
-      },
-    };
+    return eachValueFrom(elementIds);
   }
 
   /**
