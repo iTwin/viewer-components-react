@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, expand, first, from, isObservable, last, map, mergeMap, reduce, shareReplay, tap } from "rxjs";
+import { defer, EMPTY, expand, first, forkJoin, from, last, map, mergeMap, shareReplay, tap, toArray } from "rxjs";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -20,9 +20,10 @@ interface GroupedElementIds {
   elementIds: Observable<Id64String>;
 }
 
-interface SubjectsInfo {
+interface InitialInfo {
   subjectsHierarchy: Map<Id64String, Id64Set>;
   subjectModels: Map<Id64String, Id64Set>;
+  modelCategories: Map<Id64String, Id64Set>;
 }
 
 /**
@@ -40,7 +41,7 @@ export interface ElementsQueryProps {
  */
 export interface IQueryHandler {
   querySubjectModels(subjectId: Id64String): Observable<Id64String>;
-  queryModelCategories(id: Id64String): Observable<Id64String>;
+  queryModelCategories(modelId: Id64String): Observable<Id64String>;
   queryElementChildren(elementId: Id64String): Observable<Id64String>;
   queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds>;
   queryElements(props: ElementsQueryProps): Observable<Id64String>;
@@ -58,22 +59,20 @@ export function createQueryHandler(iModel: IModelConnection): IQueryHandler {
 const EMPTY_ID_SET = new Set<Id64String>();
 
 class QueryHandlerImplementation implements IQueryHandler {
-  private readonly _modelCategoriesCache = new Map<string, Id64Set | Observable<Id64String>>();
   private readonly _elementHierarchyCache = new Map<string, Id64Set>();
   private readonly _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
-  private _subjectsInfo?: Observable<SubjectsInfo>;
+  private _initialInfoObs?: Observable<InitialInfo>;
 
   constructor(private readonly _iModel: IModelConnection) {}
 
   public invalidateCache(): void {
-    this._modelCategoriesCache.clear();
     this._elementHierarchyCache.clear();
     this._groupedElementIdsCache.clear();
-    this._subjectsInfo = undefined;
+    this._initialInfoObs = undefined;
   }
 
   public querySubjectModels(subjectId: string): Observable<string> {
-    return (this._subjectsInfo ??= this.getSubjectsInfoObs()).pipe(
+    return this.initialInfoObs.pipe(
       map((state) => ({ ...state, modelIds: new Array<string>(), subjectId })),
       expand((state) => {
         const subjectModelIds = state.subjectModels.get(state.subjectId);
@@ -87,39 +86,43 @@ class QueryHandlerImplementation implements IQueryHandler {
     );
   }
 
-  private getSubjectsInfoObs(): Observable<SubjectsInfo> {
-    return this.runSubjectsQuery().pipe(
-      reduce(
-        (acc, subject) => {
+  private get initialInfoObs(): Observable<InitialInfo> {
+    return (this._initialInfoObs ??= forkJoin({
+      subjects: this.runSubjectsQuery().pipe(toArray()),
+      models: this.runModelsQuery().pipe(toArray()),
+      modelCategories: this.runModelCategoriesQuery().pipe(toArray()),
+    }).pipe(
+      map((info) => {
+        const subjectsHierarchy = new Map<Id64String, Id64Set>();
+        const targetPartitionSubjects = new Map<Id64String, Id64Set>();
+        info.subjects.forEach((subject) => {
           if (subject.parentId) {
-            pushToMap(acc.subjectsHierarchy, subject.parentId, subject.id);
+            pushToMap(subjectsHierarchy, subject.parentId, subject.id);
           }
 
           if (subject.targetPartitionId) {
-            pushToMap(acc.targetPartitionSubjects, subject.targetPartitionId, subject.id);
+            pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
           }
-          return acc;
-        },
-        { subjectsHierarchy: new Map<Id64String, Set<Id64String>>(), targetPartitionSubjects: new Map<Id64String, Set<Id64String>>() },
-      ),
-      mergeMap((state) =>
-        this.runModelsQuery().pipe(
-          reduce(
-            (acc, model) => {
-              const subjectIds = acc.targetPartitionSubjects.get(model.id) ?? new Set();
-              subjectIds.add(model.parentId);
-              subjectIds.forEach((subjectId) => {
-                pushToMap(acc.subjectModels, subjectId, model.id);
-              });
-              return acc;
-            },
-            { ...state, subjectModels: new Map<Id64String, Set<Id64String>>() },
-          ),
-        ),
-      ),
-      map(({ subjectModels, subjectsHierarchy }) => ({ subjectModels, subjectsHierarchy })),
+        });
+
+        const subjectModels = new Map<Id64String, Id64Set>();
+        info.models.forEach((model) => {
+          const subjectIds = targetPartitionSubjects.get(model.id) ?? new Set();
+          subjectIds.add(model.parentId);
+          subjectIds.forEach((subjectId) => {
+            pushToMap(subjectModels, subjectId, model.id);
+          });
+        });
+
+        const modelCategories = new Map<Id64String, Id64Set>();
+        info.modelCategories.forEach(({ modelId, categoryId }) => {
+          pushToMap(modelCategories, modelId, categoryId);
+        });
+
+        return { subjectsHierarchy, subjectModels, modelCategories };
+      }),
       shareReplay(),
-    );
+    ));
   }
 
   private runSubjectsQuery(): Observable<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }> {
@@ -140,30 +143,18 @@ class QueryHandlerImplementation implements IQueryHandler {
     return this.runQuery(query, undefined, (row) => ({ id: row.id, parentId: row.parentId }));
   }
 
-  public queryModelCategories(id: Id64String): Observable<Id64String> {
-    return this.getObservableOrInsertToCache({
-      cache: this._modelCategoriesCache,
-      cacheKey: id,
-      factory: () => this.runModelCategoriesQuery(id),
-    });
+  private runModelCategoriesQuery(): Observable<{ modelId: Id64String; categoryId: string }> {
+    const bindings = new Array<QueryBindable>();
+    const query = /* sql */ `
+      SELECT Model.Id modelId, Category.Id categoryId
+      FROM bis.GeometricElement3d e
+      GROUP BY modelId, categoryId
+    `;
+    return this.runQuery(query, bindings, (row) => ({ categoryId: row.categoryId, modelId: row.modelId }));
   }
 
-  private runModelCategoriesQuery(id: Id64String): Observable<Id64String> {
-    const bindings = new Array<Id64String>();
-    const query = /* sql */ `
-      SELECT ECInstanceId id
-      FROM bis.SpatialCategory c
-      WHERE EXISTS (
-        SELECT 1
-        FROM bis.GeometricElement3d e
-        WHERE
-          ${bind("e.Model.id", id, bindings)}
-          AND e.Category.Id = c.ECInstanceId
-          AND e.Parent IS NULL
-        LIMIT 1
-      )
-    `;
-    return this.runQuery(query, [id], (row) => row.id);
+  public queryModelCategories(modelId: Id64String): Observable<Id64String> {
+    return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? EMPTY_ID_SET));
   }
 
   public queryElementChildren(elementId: string): Observable<Id64String> {
@@ -362,38 +353,6 @@ class QueryHandlerImplementation implements IQueryHandler {
       return from(reader).pipe(map(resultMapper));
     });
   }
-
-  private getObservableOrInsertToCache(props: {
-    cache: Map<string, Id64Set | Observable<Id64String>>;
-    cacheKey: string;
-    factory: () => Observable<Id64String>;
-  }): Observable<Id64String> {
-    const res = this.getOrInsertToCache(props);
-    return isObservable(res) ? res : from(res);
-  }
-
-  private getOrInsertToCache(props: {
-    cache: Map<string, Id64Set | Observable<Id64String>>;
-    cacheKey: string;
-    factory: () => Observable<Id64String>;
-  }): Id64Set | Observable<Id64String> {
-    const { cache, cacheKey, factory } = props;
-    const cachedResult = cache.get(cacheKey);
-    if (cachedResult) {
-      return cachedResult;
-    }
-
-    const idSet = new Set<Id64String>();
-    const obs = factory().pipe(
-      tap({
-        next: (id) => idSet.add(id),
-        complete: () => cache.set(cacheKey, idSet),
-      }),
-      shareReplay(),
-    );
-    cache.set(cacheKey, obs);
-    return obs;
-  }
 }
 
 type QueryBindable = Id64String | Id64Set;
@@ -436,11 +395,11 @@ function createBinder(bindings: Array<QueryBindable> | Map<string, Id64String>):
   return binder;
 }
 
-function pushToMap<TKey, TValue>(_map: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  let set = _map.get(key);
+function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
+  let set = targetMap.get(key);
   if (!set) {
     set = new Set();
-    _map.set(key, set);
+    targetMap.set(key, set);
   }
   set.add(value);
 }

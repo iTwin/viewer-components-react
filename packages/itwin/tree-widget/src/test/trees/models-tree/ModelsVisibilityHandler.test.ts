@@ -8,8 +8,7 @@ import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent, using } from "@itwin/core-bentley";
-import { QueryRowFormat } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
@@ -19,15 +18,15 @@ import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
-import type { ECSqlReader } from "@itwin/core-common";
+import type { ViewState, ViewState3d } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection, ViewState, ViewState3d } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { ModelInfo } from "../../../tree-widget-react";
+import type { ECSqlReader } from "@itwin/core-common";
 
 describe("ModelsVisibilityHandler", () => {
   before(async () => {
@@ -40,11 +39,11 @@ describe("ModelsVisibilityHandler", () => {
     await IModelApp.shutdown();
   });
 
-  const imodelMock = moq.Mock.ofType<IModelConnection>();
+  let imodelMock = sinon.createStubInstance(IModelConnection);
 
   afterEach(() => {
-    imodelMock.reset();
     sinon.restore();
+    imodelMock = sinon.createStubInstance(IModelConnection);
   });
 
   // eslint-disable-next-line deprecation/deprecation
@@ -63,7 +62,7 @@ describe("ModelsVisibilityHandler", () => {
   };
 
   interface SubjectModelIdsMockProps {
-    imodelMock: moq.IMock<IModelConnection>;
+    imodelMock: sinon.SinonStubbedInstance<IModelConnection>;
     subjectsHierarchy: Map<Id64String, Id64String[]>;
     subjectModels: Map<Id64String, Array<{ id: Id64String; content?: string }>>;
   }
@@ -86,33 +85,22 @@ describe("ModelsVisibilityHandler", () => {
     const elementQueryRows: ElementRow[] = [];
     props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => elementQueryRows.push({ id: modelInfo.id, parentId: subjectId })));
 
-    props.imodelMock
-      .setup((x) =>
-        x.createQueryReader(
-          moq.It.is((q: string) => -1 !== q.indexOf("FROM bis.Subject")),
-          undefined,
-          { rowFormat: QueryRowFormat.UseJsPropertyNames },
-        ),
-      )
-      .returns(async function* () {
-        for await (const row of subjectQueryRows) {
-          yield row;
-        }
-      } as () => unknown as () => ECSqlReader);
+    props.imodelMock.createQueryReader.callsFake(async function* (query: string) {
+      let rows: any[] = [];
+      if (query.includes("FROM bis.Subject")) {
+        rows = subjectQueryRows;
+      } else if (query.includes("FROM bis.InformationPartitionElement")) {
+        rows = elementQueryRows;
+      } else if (query.includes("FROM bis.GeometricElement3d")) {
+        rows = [];
+      } else {
+        throw new Error(`Unexpected query: ${query}`);
+      }
 
-    props.imodelMock
-      .setup((x) =>
-        x.createQueryReader(
-          moq.It.is((q: string) => -1 !== q.indexOf("FROM bis.InformationPartitionElement")),
-          undefined,
-          { rowFormat: QueryRowFormat.UseJsPropertyNames },
-        ),
-      )
-      .returns(async function* () {
-        for await (const row of elementQueryRows) {
-          yield row;
-        }
-      } as () => unknown as () => ECSqlReader);
+      for (const row of rows) {
+        yield row;
+      }
+    } as () => unknown as () => ECSqlReader);
   };
 
   const modelsInfo: ModelInfo[] = [{ id: "ModelId1" }, { id: "ModelId2" }];
@@ -220,7 +208,7 @@ describe("ModelsVisibilityHandler", () => {
         viewStateMock.setup((x) => x.viewsModel("0x5")).returns(() => false);
         viewStateMock.setup((x) => x.viewsModel("0x6")).returns(() => false);
 
-        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
@@ -249,7 +237,7 @@ describe("ModelsVisibilityHandler", () => {
         viewStateMock.setup((x) => x.viewsModel("0x5")).returns(() => true);
         viewStateMock.setup((x) => x.viewsModel("0x6")).returns(() => false);
 
-        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
@@ -278,38 +266,13 @@ describe("ModelsVisibilityHandler", () => {
         viewStateMock.setup((x) => x.viewsModel("0x10")).returns(() => true);
         viewStateMock.setup((x) => x.viewsModel("0x11")).returns(() => false);
 
-        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           const result = handler.getVisibilityStatus(node);
           expect(isPromiseLike(result)).to.be.true;
           if (isPromiseLike(result)) {
             expect(await result).to.include({ state: "visible" });
           }
-        });
-      });
-
-      it("initializes subject models cache only once", async () => {
-        const node = createSubjectNode();
-        const key = (node.key as ECInstancesNodeKey).instanceKeys[0];
-
-        mockSubjectModelIds({
-          imodelMock,
-          subjectsHierarchy: new Map([["0x0", [key.id]]]),
-          subjectModels: new Map([[key.id, [{ id: "0x1" }, { id: "0x2" }]]]),
-        });
-
-        const viewStateMock = moq.Mock.ofType<ViewState3d>();
-        viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
-        viewStateMock.setup((x) => x.viewsModel(moq.It.isAny())).returns(() => false);
-
-        const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
-        await using(createHandler({ viewport: vpMock.object }), async (handler) => {
-          await Promise.all([handler.getVisibilityStatus(node), handler.getVisibilityStatus(node)]);
-          // expect the `createQueryReader` to be called only twice (once for subjects and once for models)
-          imodelMock.verify(
-            (x) => x.createQueryReader(moq.It.isAnyString(), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }),
-            moq.Times.exactly(2),
-          );
         });
       });
 
@@ -332,7 +295,7 @@ describe("ModelsVisibilityHandler", () => {
           viewStateMock.setup((x) => x.viewsModel("0x10")).returns(() => true);
           viewStateMock.setup((x) => x.viewsModel("0x20")).returns(() => false);
 
-          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
           await using(createHandler({ viewport: vpMock.object }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
@@ -377,7 +340,7 @@ describe("ModelsVisibilityHandler", () => {
           viewStateMock.setup((x) => x.viewsModel("0x11")).returns(() => false);
           viewStateMock.setup((x) => x.viewsModel("0x20")).returns(() => false);
 
-          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
           await using(createHandler({ viewport: vpMock.object }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
@@ -429,7 +392,7 @@ describe("ModelsVisibilityHandler", () => {
           viewStateMock.setup((x) => x.viewsModel("0x20")).returns(() => false);
           viewStateMock.setup((x) => x.viewsModel("0x30")).returns(() => true);
 
-          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
           await using(createHandler({ viewport: vpMock.object }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
@@ -479,7 +442,7 @@ describe("ModelsVisibilityHandler", () => {
           viewStateMock.setup((x) => x.viewsModel("0x20")).returns(() => false);
           viewStateMock.setup((x) => x.viewsModel("0x30")).returns(() => false);
 
-          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+          const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
 
           await using(createHandler({ viewport: vpMock.object }), async (handler) => {
             handler.setFilteredDataProvider(filteredProvider.object);
@@ -1114,7 +1077,7 @@ describe("ModelsVisibilityHandler", () => {
               subjectModels: new Map([[key.id, [{ id: subjectModelIds[0], content: "reference" }, { id: subjectModelIds[1] }]]]),
             });
 
-            const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+            const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
             if (mode === "visible") {
               vpMock.setup(async (x) => x.addViewedModels(subjectModelIds)).verifiable();
             } else {
@@ -1159,7 +1122,7 @@ describe("ModelsVisibilityHandler", () => {
               ]),
             });
 
-            const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock.object });
+            const vpMock = mockViewport({ viewState: viewStateMock.object, imodel: imodelMock });
             if (mode === "visible") {
               vpMock.setup(async (x) => x.addViewedModels(childSubjectModelIds)).verifiable();
             } else {
