@@ -96,7 +96,7 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: `${ModelsTreeComponent.id}-hierarchy`,
-                getLabel: () => "Models Tree (Hierarchy Based) (BETA)",
+                getLabel: () => "${ModelsTreeComponent.getLabel} (Hierarchy-based display states)",
                 render: (props: TreeRenderProps) => (
                   <ModelsTreeComponent
                     selectionPredicate={() => true}

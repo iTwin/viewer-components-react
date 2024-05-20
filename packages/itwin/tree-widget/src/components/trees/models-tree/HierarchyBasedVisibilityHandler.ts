@@ -25,6 +25,7 @@ import type { NonPartialVisibilityStatus, Visibility } from "./internal/Tooltip"
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Observable, OperatorFunction } from "rxjs";
+
 interface GetCategoryStatusProps {
   categoryId: Id64String;
   modelId: Id64String | undefined;
@@ -653,7 +654,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
             } else {
               const wasRemoved = acc.alwaysDrawn.delete(elementId);
               acc.changedAlwaysDrawn ||= wasRemoved;
-              // If exclusive mode is enabled, we don't have to add the element to the never drawn list.
+              // If exclusive mode is not enabled, we have to add the element to the never drawn list.
               if (isDisplayedByDefault && !isAlwaysDrawnExclusive && !acc.neverDrawn.has(elementId)) {
                 acc.neverDrawn.add(elementId);
                 acc.changedNeverDrawn = true;

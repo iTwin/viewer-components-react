@@ -41,7 +41,7 @@
         "allChildElementsHidden": "All child elements are in the never drawn list",
         "allChildElementsInAlwaysDrawnList": "All child elements are in the always drawn list",
         "childElementsInAlwaysAndNeverDrawnList": "There are child elements in both always and never drawn lists",
-        "noChildrenInExclusiveAlwaysDrawnList": "There are no children in the always drawn list and exclusive draw mode is is enabled",
+        "noChildrenInExclusiveAlwaysDrawnList": "There are no children in the always drawn list and exclusive draw mode is enabled",
         "someCategoriesHidden": "Some categories are visible and some are hidden",
         "allCategoriesVisible": "All categories visible",
         "allCategoriesHidden": "All categories hidden"

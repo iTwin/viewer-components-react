@@ -13,15 +13,16 @@ import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { QueryRowProxy } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GroupingNodeKey } from "@itwin/presentation-common";
+
 interface GroupedElementIds {
   modelId: string;
   categoryId: string;
-  elementIds: Observable<string>;
+  elementIds: Observable<Id64String>;
 }
 
 interface SubjectsInfo {
-  subjectsHierarchy: Map<string, Id64Set>;
-  subjectModels: Map<string, Id64Set>;
+  subjectsHierarchy: Map<Id64String, Id64Set>;
+  subjectModels: Map<Id64String, Id64Set>;
 }
 
 /**
