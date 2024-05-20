@@ -9,7 +9,6 @@
 import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
 import { BeEvent } from '@itwin/core-bentley';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
-import type { GroupingNodeKey } from '@itwin/presentation-common';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Set } from '@itwin/core-bentley';
@@ -24,7 +23,6 @@ import type { LocalizationOptions } from '@itwin/core-i18n';
 import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
-import type { Observable } from 'rxjs';
 import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyValueRendererContext } from '@itwin/components-react';
@@ -438,8 +436,6 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
 export interface ModelsVisibilityHandlerProps {
     // (undocumented)
     hierarchyAutoUpdateEnabled?: boolean;
-    // (undocumented)
-    queryHandler?: IQueryHandler;
     // (undocumented)
     rulesetId: string;
     // (undocumented)

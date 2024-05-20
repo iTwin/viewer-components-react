@@ -33,7 +33,6 @@ export interface ModelsVisibilityHandlerProps {
   rulesetId: string;
   viewport: Viewport;
   hierarchyAutoUpdateEnabled?: boolean;
-  queryHandler?: IQueryHandler;
 }
 
 /**
@@ -52,7 +51,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   // eslint-disable-next-line deprecation/deprecation
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
-    this._queryHandler = props.queryHandler ?? createQueryHandler(this._props.viewport.iModel);
+    this._queryHandler = createQueryHandler(this._props.viewport.iModel);
     this._eventListener = createVisibilityChangeEventListener(this._props.viewport);
     if (this._props.hierarchyAutoUpdateEnabled) {
       // eslint-disable-next-line @itwin/no-internal
