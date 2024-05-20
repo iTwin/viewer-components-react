@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import React, { useCallback } from "react";
 import type {
   ContextCustomUI,
@@ -16,12 +16,12 @@ import { Anchor, ListItem } from "@itwin/itwinui-react";
 import "./GroupListItem.scss";
 
 export interface GroupListItemProps extends Omit<GroupsProps, "onClickAddGroup"> {
-  group: Group;
+  group: GroupMinimal;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
-  setShowDeleteModal: (showDeleteModal: Group) => void;
+  setShowDeleteModal: (showDeleteModal: GroupMinimal) => void;
   setActiveOverlapInfoPanelGroup?: (
-    activeOverlapInfoPanelGroup: Group
+    activeOverlapInfoPanelGroup: GroupMinimal
   ) => void;
 }
 
@@ -52,17 +52,24 @@ export const GroupListItem = ({
           {group.description}
         </ListItem.Description>
       </ListItem.Content>
-      {showGroupColor && overlappedElementsInfo.size > 0 &&
-        <OverlapProgress
-          group={group}
-          overlappedElementsInfo={overlappedElementsInfo}
-          groupElementsInfo={groupElementsInfo}
-        />}
-      <GroupMenuActions
-        group={group}
-        disableActions={disableActions}
-        {...rest}
-      />
+      <div className="gmw-group-list-end">
+        <div className="gmw-group-menu-actions">
+          <GroupMenuActions
+            group={group}
+            disableActions={disableActions}
+            {...rest}
+          />
+        </div>
+        {showGroupColor && overlappedElementsInfo.size > 0 &&
+          <div className="gmw-overlap-progress">
+            <OverlapProgress
+              group={group}
+              overlappedElementsInfo={overlappedElementsInfo}
+              groupElementsInfo={groupElementsInfo}
+            />
+          </div>
+        }
+      </div>
     </ListItem>
   );
 };

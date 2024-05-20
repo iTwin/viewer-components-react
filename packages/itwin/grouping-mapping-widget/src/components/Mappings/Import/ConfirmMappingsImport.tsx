@@ -23,7 +23,6 @@ const defaultDisplayStrings = {
 };
 
 interface ConfirmMappingImportProps {
-  sourceiModelId: string;
   selectedMappings: IMappingTyped[];
   importing: boolean;
   setImporting: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,7 +34,6 @@ interface ConfirmMappingImportProps {
 }
 
 const ConfirmMappingImport = ({
-  sourceiModelId,
   selectedMappings,
   importing,
   setImporting,
@@ -81,13 +79,12 @@ const ConfirmMappingImport = ({
   const importMutation = useMutation({
     mutationFn: async (selectedMapping: IMappingTyped) => {
       const accessToken = await getAccessToken();
-      await mappingClient.copyMapping(
+      await mappingClient.createMapping(
         accessToken,
-        sourceiModelId,
-        selectedMapping.id,
         {
-          targetIModelId: iModelId,
+          iModelId,
           mappingName: selectedMapping.mappingName,
+          sourceMappingId: selectedMapping.id,
         }
       );
     },

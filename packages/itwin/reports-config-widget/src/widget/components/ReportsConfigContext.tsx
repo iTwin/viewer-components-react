@@ -20,6 +20,10 @@ import { IMODELS_BASE_URL } from "./Constants";
 import { FailedExtractionToast, SuccessfulExtractionToast } from "./ExtractionToast";
 import { generateUrl } from "./utils";
 
+/**
+ * Props for the {@link ReportsConfigContext} component.
+ * @public
+ */
 export interface ReportsConfigContextProps {
   getAccessToken?: GetAccessTokenFn;
   baseUrl?: string;
@@ -35,6 +39,10 @@ export interface ReportsConfigContextProps {
 const authorizationClientGetAccessToken = async () =>
   (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
+/**
+ * Reports Config context providers required for all components.
+ * @public
+ */
 export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
   const reportsBaseUrl = useCallback(() => generateUrl(
     REPORTING_BASE_PATH,

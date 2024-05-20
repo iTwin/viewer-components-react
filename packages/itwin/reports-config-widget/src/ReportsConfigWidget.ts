@@ -5,6 +5,10 @@
 import type { Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 
+/**
+ * ReportsConfigWidget localization
+ * @public
+ */
 export class ReportsConfigWidget {
   private static _localizationNamespace: string;
   private static _localization: Localization;
