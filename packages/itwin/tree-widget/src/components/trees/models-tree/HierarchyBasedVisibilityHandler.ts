@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatAll, concatWith, defer, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
+import { concat, concatAll, concatWith, defer, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce, toArray } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
@@ -547,6 +547,41 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
   }
 
+  private showModelWithoutAnyCategoriesOrElements(modelId: Id64String) {
+    const viewport = this._props.viewport;
+    return forkJoin({
+      categories: this._queryHandler.queryModelCategories(modelId).pipe(toArray()),
+      alwaysDrawnChildren: this.getAlwaysDrawnChildren({ modelId }),
+      _: viewport.addViewedModels(modelId),
+    }).pipe(
+      mergeMap(({ categories, alwaysDrawnChildren }) => {
+        const alwaysDrawn = this._props.viewport.alwaysDrawn;
+        if (alwaysDrawn && alwaysDrawnChildren) {
+          viewport.setAlwaysDrawn(setDifference(alwaysDrawn, alwaysDrawnChildren));
+        }
+        return categories;
+      }),
+      map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false)),
+    );
+  }
+
+  private changeCategoryStateInViewportAccordingToModelVisibility(modelId: string, categoryId: string, on: boolean) {
+    const viewport = this._props.viewport;
+    const isDisplayedInSelector = viewport.view.viewsCategory(categoryId);
+    const override =
+      on === isDisplayedInSelector
+        ? PerModelCategoryVisibility.Override.None
+        : on
+          ? PerModelCategoryVisibility.Override.Show
+          : PerModelCategoryVisibility.Override.Hide;
+    viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, override);
+    if (override === PerModelCategoryVisibility.Override.None && on) {
+      // we took off the override which means the category is displayed in selector, but
+      // doesn't mean all its subcategories are displayed - this call ensures that
+      viewport.changeCategoryDisplay(categoryId, true, true);
+    }
+  }
+
   private changeCategoryState(props: ChangeCategoryStateProps): Observable<void> {
     const viewport = this._props.viewport;
     const { modelId, categoryId, on } = props;
@@ -559,21 +594,9 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         }
 
         return concat(
-          props.on && !viewport.view.viewsModel(modelId) ? viewport.addViewedModels(modelId) : EMPTY,
+          props.on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
           defer(() => {
-            const isDisplayedInSelector = viewport.view.viewsCategory(categoryId);
-            const override =
-              on === isDisplayedInSelector
-                ? PerModelCategoryVisibility.Override.None
-                : on
-                  ? PerModelCategoryVisibility.Override.Show
-                  : PerModelCategoryVisibility.Override.Hide;
-            viewport.perModelCategoryVisibility.setOverride(modelId, categoryId, override);
-            if (override === PerModelCategoryVisibility.Override.None && on) {
-              // we took off the override which means the category is displayed in selector, but
-              // doesn't mean all its subcategories are displayed - this call ensures that
-              viewport.changeCategoryDisplay(categoryId, true, true);
-            }
+            this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, on);
             return EMPTY;
           }),
         );
@@ -619,7 +642,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       const { elementId, on, hasChildren, modelId, categoryId } = props;
       const viewport = this._props.viewport;
       return concat(
-        props.on && !viewport.view.viewsModel(modelId) ? from(viewport.addViewedModels(modelId)) : EMPTY,
+        props.on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
         defer(() => {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
           const isDisplayedByDefault = categoryVisibility.state === "visible";
