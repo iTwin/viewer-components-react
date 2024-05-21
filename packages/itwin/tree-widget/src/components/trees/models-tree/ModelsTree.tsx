@@ -138,7 +138,7 @@ export function ModelsTree(props: ModelsTreeProps) {
       iconsEnabled: true,
       descriptionEnabled: false,
       levelOffset: 10,
-      disableRootNodeCollapse: false,
+      disableRootNodeCollapse: true,
       onVisibilityToggled: () => reportUsage({ featureId: "visibility-change", reportInteraction: true }),
     },
   };

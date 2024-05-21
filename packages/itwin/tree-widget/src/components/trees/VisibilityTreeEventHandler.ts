@@ -6,7 +6,7 @@
  * @module IModelComponents
  */
 
-import { bufferCount, EMPTY, endWith, from, ignoreElements, map, mergeMap, Observable, of } from "rxjs";
+import { bufferCount, concatMap, EMPTY, endWith, from, ignoreElements, map, mergeMap, Observable, of } from "rxjs";
 import { CheckBoxState } from "@itwin/core-react";
 import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
@@ -195,12 +195,15 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
 
   private getAllNodesCheckboxInfos(visibilityStatus?: Map<string, VisibilityStatus>) {
     return from(this.modelSource.getModel().iterateTreeModelNodes()).pipe(
-      // Without throttling, this can crash the browser
+      // Doing this without throttling can crash the browser when using hierarchy-based display states.
       bufferCount(8),
-      mergeMap((nodes) => nodes),
-      mergeMap((node) => {
-        return this.getNodeCheckBoxInfoObs(node, visibilityStatus).pipe(map((info) => [node.id, info] as const));
-      }),
+      concatMap((nodes) =>
+        from(nodes).pipe(
+          mergeMap((node) => {
+            return this.getNodeCheckBoxInfoObs(node, visibilityStatus).pipe(map((info) => [node.id, info] as const));
+          }),
+        ),
+      ),
     );
   }
 

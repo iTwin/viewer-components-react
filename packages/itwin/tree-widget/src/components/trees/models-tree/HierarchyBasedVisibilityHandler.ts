@@ -115,9 +115,6 @@ export function createHierarchyBasedVisibilityHandler(props: HierarchyBasedVisib
   return new VisibilityHandlerImplementation(props);
 }
 
-const MAX_PARALLEL_SUBJECT_MODELS_REQUESTS = Infinity;
-const MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS = Infinity;
-
 class VisibilityHandlerImplementation implements IVisibilityHandler {
   public filteredDataProvider?: IFilteredPresentationTreeDataProvider;
   public readonly isHierarchyBased = true;
@@ -211,11 +208,11 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         provider && !provider.nodeMatchesFilter(node)
           ? from(provider.getNodes(node)).pipe(
               concatAll(),
-              mergeMap((filteredNode) => this.getVisibilityStatusObs(filteredNode), MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS),
+              mergeMap((filteredNode) => this.getVisibilityStatusObs(filteredNode)),
             )
           : subjectIds.pipe(
-              mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId), MAX_PARALLEL_SUBJECT_MODELS_REQUESTS),
-              mergeMap((modelId) => this.getModelVisibilityStatus(modelId), MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS),
+              mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId)),
+              mergeMap((modelId) => this.getModelVisibilityStatus(modelId)),
             );
 
       return childStatuses.pipe(
