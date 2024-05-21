@@ -152,10 +152,12 @@ export function stubCancelAnimationFrame() {
 
 export function createResolvablePromise<T>() {
   let resolve: (value: T) => void = () => {};
-  const promise = new Promise<T>((resolvePromise) => {
+  let reject: (error: any) => void = () => {};
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
     resolve = resolvePromise;
+    reject = rejectPromise;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 
 export function createTestContentDescriptor(props: Partial<DescriptorSource> & { fields: Field[] }) {
