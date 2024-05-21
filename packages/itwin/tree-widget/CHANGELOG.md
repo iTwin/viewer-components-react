@@ -1,8 +1,20 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
+This log was last generated on Tue, 21 May 2024 13:26:36 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.3.0
+
+Tue, 21 May 2024 13:26:36 GMT
+
+### Minor changes
+
+- Added support for custom start icons in `TreeSelector`. ([#830](https://github.com/iTwin/viewer-components-react/pull/830))
+
+### Patches
+
+- Fixed `ModelsTree` not changing visibility for child elements. ([#828](https://github.com/iTwin/viewer-components-react/pull/828))
 
 ## 2.2.0
 

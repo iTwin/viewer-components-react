@@ -1,8 +1,20 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
+This log was last generated on Tue, 21 May 2024 13:26:35 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.26.0
+
+Tue, 21 May 2024 13:26:35 GMT
+
+### Minor changes
+
+- Updated insights client to 0.10.1 ([#806](https://github.com/iTwin/viewer-components-react/pull/806))
+
+### Patches
+
+- Fixed overlap progress bar not appearing in Groups component. ([#831](https://github.com/iTwin/viewer-components-react/pull/831))
 
 ## 0.25.2
 
