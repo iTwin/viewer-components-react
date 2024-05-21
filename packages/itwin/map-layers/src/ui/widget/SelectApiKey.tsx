@@ -22,7 +22,7 @@ export function SelectApiKey(props: SelectApiKeyProps) {
   const [apiKeys] = React.useState(() => {
     const storage = new CustomParamsStorage();
     const keys  = storage.get(undefined);
-    if (keys)
+    if (keys && Array.isArray(keys))
       return keys.map((keyItem) => {return {value: keyItem.name, label: keyItem.name};});
     return [];
   }

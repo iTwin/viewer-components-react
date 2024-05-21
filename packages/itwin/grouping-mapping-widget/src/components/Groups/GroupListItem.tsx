@@ -52,17 +52,24 @@ export const GroupListItem = ({
           {group.description}
         </ListItem.Description>
       </ListItem.Content>
-      {showGroupColor && overlappedElementsInfo.size > 0 &&
-        <OverlapProgress
-          group={group}
-          overlappedElementsInfo={overlappedElementsInfo}
-          groupElementsInfo={groupElementsInfo}
-        />}
-      <GroupMenuActions
-        group={group}
-        disableActions={disableActions}
-        {...rest}
-      />
+      <div className="gmw-group-list-end">
+        <div className="gmw-group-menu-actions">
+          <GroupMenuActions
+            group={group}
+            disableActions={disableActions}
+            {...rest}
+          />
+        </div>
+        {showGroupColor && overlappedElementsInfo.size > 0 &&
+          <div className="gmw-overlap-progress">
+            <OverlapProgress
+              group={group}
+              overlappedElementsInfo={overlappedElementsInfo}
+              groupElementsInfo={groupElementsInfo}
+            />
+          </div>
+        }
+      </div>
     </ListItem>
   );
 };
