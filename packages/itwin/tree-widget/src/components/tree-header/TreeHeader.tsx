@@ -9,6 +9,7 @@ import { Children, useEffect, useRef, useState } from "react";
 import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, Divider, DropdownMenu, IconButton, SearchBox } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../TreeWidget";
+import { useFocusedInstancesContext } from "../trees/experimental/common/FocusedInstancesContext";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { CommonProps } from "@itwin/core-react";
@@ -42,14 +43,22 @@ export interface TreeHeaderProps extends CommonProps {
 export function TreeHeader(props: TreeHeaderProps) {
   const { onFilterStart, onFilterClear, resultCount, selectedIndex, onSelectedChanged, children, density, className } = props;
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const { enabled: instanceFocusEnabled } = useFocusedInstancesContext();
   const isEnlarged = density === "enlarged";
+
+  useEffect(() => {
+    if (instanceFocusEnabled) {
+      setIsSearchOpen(false);
+    }
+  }, [instanceFocusEnabled]);
+
   return (
     <div className={classnames("tree-widget-tree-header", className, isEnlarged && "enlarge")}>
       <HeaderButtons contracted={isSearchOpen} isEnlarged={isEnlarged}>
         {children}
       </HeaderButtons>
       <DebouncedSearchBox
-        isOpened={isSearchOpen}
+        isOpened={isSearchOpen && !instanceFocusEnabled}
         onOpen={() => setIsSearchOpen(true)}
         onClose={() => setIsSearchOpen(false)}
         onChange={(value) => (value ? onFilterStart(value) : onFilterClear())}
@@ -58,6 +67,7 @@ export function TreeHeader(props: TreeHeaderProps) {
         resultCount={resultCount}
         onSelectedResultChanged={onSelectedChanged}
         size={isEnlarged ? "large" : "small"}
+        isDisabled={instanceFocusEnabled}
       />
     </div>
   );
@@ -73,6 +83,7 @@ interface DebouncedSearchBoxProps {
   resultCount?: number;
   onSelectedResultChanged: (index: number) => void;
   size?: "large" | "small";
+  isDisabled?: boolean;
 }
 
 function DebouncedSearchBox({
@@ -85,6 +96,7 @@ function DebouncedSearchBox({
   onClose,
   delay,
   size,
+  isDisabled,
 }: DebouncedSearchBoxProps) {
   const [inputValue, setInputValue] = useState<string>("");
   const onChangeRef = useRef(onChange);
@@ -107,7 +119,15 @@ function DebouncedSearchBox({
   }, [inputValue, delay]);
 
   return (
-    <SearchBox expandable onExpand={onOpen} onCollapse={onClose} size={size} className={classnames("tree-widget-search-box", !isOpened && "contracted")}>
+    <SearchBox
+      expandable
+      isExpanded={isOpened}
+      onExpand={onOpen}
+      onCollapse={onClose}
+      size={size}
+      className={classnames("tree-widget-search-box", !isOpened && "contracted")}
+      isDisabled={isDisabled}
+    >
       <SearchBox.CollapsedState>
         <SearchBox.ExpandButton
           title={TreeWidget.translate("searchBox.searchForSomething")}
