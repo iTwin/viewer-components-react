@@ -1,8 +1,17 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Thu, 04 Apr 2024 14:19:35 GMT and should not be manually modified.
+This log was last generated on Tue, 21 May 2024 13:26:35 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.4.4
+
+Tue, 21 May 2024 13:26:35 GMT
+
+### Patches
+
+- Url scheme validation when adding a new map layer and fix an issue with usersPreferences and browser storage. ([#836](https://github.com/iTwin/viewer-components-react/pull/836))
+- Added copy property value button in Map Layers Info widget ([#834](https://github.com/iTwin/viewer-components-react/pull/834))
 
 ## 5.4.3
 
