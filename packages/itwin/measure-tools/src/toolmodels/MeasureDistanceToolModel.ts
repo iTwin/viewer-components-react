@@ -58,6 +58,15 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
     this._drawingOrigin = origin;
   }
 
+  public set sheetViewId(id: string | undefined) {
+    if (this._currentMeasurement)
+      this._currentMeasurement.sheetViewId = id;
+  }
+
+  public get sheetViewId(): string | undefined {
+    return this._currentMeasurement?.sheetViewId;
+  }
+
   public setMeasurementViewport(viewType: string): boolean {
     if (State.SetMeasurementViewport !== this._currentState)
       return false;

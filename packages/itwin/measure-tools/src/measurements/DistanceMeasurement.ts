@@ -96,7 +96,10 @@ export class DistanceMeasurement extends Measurement {
   private _startPoint: Point3d;
   private _endPoint: Point3d;
   private _showAxes: boolean;
+
+  // Used for sheet measurements
   private _ratio: number | undefined;
+  private _sheetViewId?: string;
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -110,6 +113,14 @@ export class DistanceMeasurement extends Measurement {
   }
   public get endPointRef(): Point3d {
     return this._endPoint;
+  }
+
+  public set sheetViewId(id: string | undefined) {
+    this._sheetViewId = id;
+  }
+
+  public get sheetViewId(): string | undefined {
+    return this._sheetViewId;
   }
 
   public get isDynamic(): boolean {
@@ -256,6 +267,9 @@ export class DistanceMeasurement extends Measurement {
 
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
+
+    if (this._ratio && this._sheetViewId !== context.viewport.view.id)
+      return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
     const points = [this._startPoint, this._endPoint];
