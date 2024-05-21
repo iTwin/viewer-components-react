@@ -139,6 +139,7 @@ MeasureAreaToolModel
           this.toolModel.setRatio(await SheetMeasurementsHelper.getRatio(this.iModel, this.toolModel.firstPointDrawingId));
           this.toolModel.drawingOrigin = drawingInfo?.origin;
           this.toolModel.drawingExtents = drawingInfo?.extents;
+          this.toolModel.sheetViewId = ev.viewport.view.id;
         }
       } else {
         if (this.toolModel.firstPointDrawingId !== undefined) {

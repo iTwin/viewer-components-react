@@ -86,7 +86,9 @@ export class AreaMeasurement extends Measurement {
 
   private _polygon: Polygon;
 
+  // Used for sheet measurements
   private _ratio: number | undefined;
+  private _sheetViewId?: string;
 
   private _isDynamic: boolean; // No serialize, for dynamics
   private _dynamicEdge?: DistanceMeasurement; // No serialize, for dynamics
@@ -109,6 +111,14 @@ export class AreaMeasurement extends Measurement {
 
   public get polygonPoints(): Point3d[] {
     return this._polygon.points;
+  }
+
+  public set sheetViewId(id: string | undefined) {
+    this._sheetViewId = id;
+  }
+
+  public get sheetViewId(): string | undefined {
+    return this._sheetViewId;
   }
 
   public get isValidPolygon(): boolean {
@@ -185,6 +195,7 @@ export class AreaMeasurement extends Measurement {
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
     this._dynamicEdge.setRatio(this._ratio);
+    this._dynamicEdge.sheetViewId = this._sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
     this._dynamicEdge.lockStyle = this.lockStyle;
@@ -310,7 +321,8 @@ export class AreaMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.polygonPoints.length === 0) return;
+    if (this.polygonPoints.length === 0 || (this._ratio && this._sheetViewId !== context.viewport.view.id))
+      return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
     const snapId = !this.isDynamic ? this.getSnapId() : undefined;

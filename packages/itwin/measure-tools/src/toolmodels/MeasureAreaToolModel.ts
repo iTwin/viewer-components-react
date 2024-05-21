@@ -52,6 +52,15 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     this._drawingOrigin = origin;
   }
 
+  public set sheetViewId(id: string | undefined) {
+    if (this._currentMeasurement)
+      this._currentMeasurement.sheetViewId = id;
+  }
+
+  public get sheetViewId(): string | undefined {
+    return this._currentMeasurement?.sheetViewId;
+  }
+
   public get currentState(): State { return this._currentState; }
 
   public get hasEnoughPoints(): boolean {
