@@ -94,8 +94,10 @@ describe("VisibilityStateHandler", () => {
     }
 
     before(async () => {
-      queryHandlerStub = stubFactoryFunction(`${__dirname}/../../../components/trees/models-tree/internal/ModelsTreeQueryHandler`, "createModelsTreeQueryHandler", () =>
-        createFakeModelsTreeQueryHandler(),
+      queryHandlerStub = stubFactoryFunction(
+        `${__dirname}/../../../components/trees/models-tree/internal/ModelsTreeQueryHandler`,
+        "createModelsTreeQueryHandler",
+        () => createFakeModelsTreeQueryHandler(),
       );
     });
 
@@ -1560,33 +1562,29 @@ describe("VisibilityStateHandler", () => {
         },
       });
 
-      // Logger.initializeToConsole();
-      // Logger.setLevelDefault(LogLevel.Info);
-
-      const schemaName = "VisibilityHandlerIntegrationTests";
-      const schemaAlias = "test";
-      const classNames = [...Array(6).keys()].map((i) => `ElementClass${i}`);
-      const schema = `
-        <?xml version="1.0" encoding="UTF-8"?>
-        <ECSchema schemaName="${schemaName}" alias="${schemaAlias}" version="01.00.00" xmlns="http://www.bentley.com/schemas/Bentley.ECXML.3.2">
-          <ECSchemaReference name="CoreCustomAttributes" version="01.00.03" alias="CoreCA" />
-          <ECSchemaReference name="ECDbMap" version="02.00.01" alias="ecdbmap" />
-          <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
-
-          ${classNames
-            .map(
-              (className) => `
-                <ECEntityClass typeName="${className}">
-                  <BaseClass>bis:GeometricElement3d</BaseClass>
-                </ECEntityClass>
-              `,
-            )
-            .join("\n")}
-        </ECSchema>
-      `;
-
       // eslint-disable-next-line deprecation/deprecation
       iModel = await buildTestIModel("ModelsTreeTest", async (builder) => {
+        const schemaName = "VisibilityHandlerIntegrationTests";
+        const schemaAlias = "test";
+        const classNames = [...Array(6).keys()].map((i) => `ElementClass${i}`);
+        const schema = `
+          <?xml version="1.0" encoding="UTF-8"?>
+          <ECSchema schemaName="${schemaName}" alias="${schemaAlias}" version="01.00.00" xmlns="http://www.bentley.com/schemas/Bentley.ECXML.3.2">
+            <ECSchemaReference name="CoreCustomAttributes" version="01.00.03" alias="CoreCA" />
+            <ECSchemaReference name="ECDbMap" version="02.00.01" alias="ecdbmap" />
+            <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
+
+            ${classNames
+              .map(
+                (className) => `
+                  <ECEntityClass typeName="${className}">
+                    <BaseClass>bis:GeometricElement3d</BaseClass>
+                  </ECEntityClass>
+                `,
+              )
+              .join("\n")}
+          </ECSchema>
+        `;
         await builder.importSchema(schema);
 
         const partitions = [

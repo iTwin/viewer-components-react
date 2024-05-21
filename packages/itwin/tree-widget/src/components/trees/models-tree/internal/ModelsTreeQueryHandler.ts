@@ -274,11 +274,9 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
 
           UNION ALL
 
-          SELECT e.ECInstanceId AS id
-          FROM bis.GeometricElement3d e
-          INNER JOIN ChildElements ce
-            ON e.Parent.Id = ce.id
-            AND e.Parent.RelECClassId = ec_classId('BisCore.ElementOwnsChildElements')
+          SELECT rel.TargetECInstanceId id
+          FROM ChildElements e
+          JOIN bis.ElementOwnsChildElements rel ON rel.SourceECInstanceId = e.id
         )
         SELECT ${props.type === "ids" ? "*" : "COUNT(*)"} FROM ChildElements
         ${props.elementIds ? `WHERE ${bind("id", props.elementIds, bindings)}` : ""}
