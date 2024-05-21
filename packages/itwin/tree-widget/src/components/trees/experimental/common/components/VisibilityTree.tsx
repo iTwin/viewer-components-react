@@ -35,7 +35,7 @@ type IModelAccess = UseTreeProps["imodelAccess"];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
 
 type VisibilityTreeProps = VisibilityTreeOwnProps &
-  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinitionsProvider"> &
+  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> &
   UseNodesVisibilityProps &
   Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
 
@@ -65,7 +65,7 @@ function VisibilityTreeImpl({
   width,
   imodel,
   imodelAccess,
-  getHierarchyDefinitionsProvider,
+  getHierarchyDefinition,
   getFilteredPaths,
   visibilityHandlerFactory,
   defaultHierarchyLevelSizeLimit,
@@ -74,9 +74,17 @@ function VisibilityTreeImpl({
   density,
   selectionMode,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
-  const { rootNodes, hierarchyProvider, getHierarchyLevelConfiguration, isLoading, reloadTree, selectNodes, ...treeProps } = useUnifiedSelectionTree({
+  const {
+    rootNodes,
+    getHierarchyLevelDetails,
+    isLoading,
+    reloadTree,
+    selectNodes,
+    setFormatter: _,
+    ...treeProps
+  } = useUnifiedSelectionTree({
     imodelAccess,
-    getHierarchyDefinitionsProvider,
+    getHierarchyDefinition,
     getFilteredPaths,
     imodelKey: imodel.key,
     sourceName: "ExperimentalModelsTree",
@@ -86,8 +94,7 @@ function VisibilityTreeImpl({
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
   const { filteringDialog, onFilterClick } = useHierarchyFiltering({
     imodel,
-    hierarchyProvider,
-    getHierarchyLevelConfiguration,
+    getHierarchyLevelDetails,
     setHierarchyLevelFilter: treeProps.setHierarchyLevelFilter,
     defaultHierarchyLevelSizeLimit,
   });

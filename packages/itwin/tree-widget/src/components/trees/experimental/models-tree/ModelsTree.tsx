@@ -30,7 +30,7 @@ interface ExperimentalModelsTreeProps {
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
-type GetHierarchyDefinitionsProviderCallback = VisibilityTreeProps["getHierarchyDefinitionsProvider"];
+type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 type SelectionMode = VisibilityTreeProps["selectionMode"];
 
 /** @internal */
@@ -91,7 +91,7 @@ export function ExperimentalModelsTree({
       imodel={imodel}
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
-      getHierarchyDefinitionsProvider={getDefinitionsProvider}
+      getHierarchyDefinition={getHierarchyDefinition}
       getFilteredPaths={getFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       getIcon={getIcon}
@@ -109,7 +109,7 @@ function getNoDataMessage(filter: string) {
   return undefined;
 }
 
-function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+function getHierarchyDefinition(props: Parameters<GetHierarchyDefinitionCallback>[0]) {
   return new ModelsTreeDefinition(props);
 }
 

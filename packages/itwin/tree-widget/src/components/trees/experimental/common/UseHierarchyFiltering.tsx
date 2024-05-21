@@ -14,7 +14,7 @@ import {
 } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, HierarchyProvider, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
-import { HierarchyLevelConfiguration, useTree } from "@itwin/presentation-hierarchies-react";
+import { HierarchyLevelDetails, useTree } from "@itwin/presentation-hierarchies-react";
 import { InstanceKey } from "@itwin/presentation-shared";
 import { useCallback, useMemo, useState } from "react";
 
@@ -26,32 +26,26 @@ interface UseHierarchyFilteringOwnProps {
   defaultHierarchyLevelSizeLimit: number;
 }
 
-type UseHierarchyFilteringProps = UseHierarchyFilteringOwnProps & Pick<UseTreeResult, "setHierarchyLevelFilter" | "getHierarchyLevelConfiguration">;
+type UseHierarchyFilteringProps = UseHierarchyFilteringOwnProps & Pick<UseTreeResult, "setHierarchyLevelFilter" | "getHierarchyLevelDetails">;
 
 /** @internal */
-export function useHierarchyFiltering({
-  imodel,
-  hierarchyProvider,
-  defaultHierarchyLevelSizeLimit,
-  setHierarchyLevelFilter,
-  getHierarchyLevelConfiguration,
-}: UseHierarchyFilteringProps) {
-  const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string | undefined; configuration: HierarchyLevelConfiguration }>();
+export function useHierarchyFiltering({ imodel, defaultHierarchyLevelSizeLimit, setHierarchyLevelFilter, getHierarchyLevelDetails }: UseHierarchyFilteringProps) {
+  const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string | undefined; hierarchyDetails: HierarchyLevelDetails }>();
   const onFilterClick = useCallback(
     (nodeId: string | undefined) => {
-      const configuration = getHierarchyLevelConfiguration(nodeId);
-      setFilteringOptions(configuration ? { nodeId, configuration } : undefined);
+      const hierarchyDetails = getHierarchyLevelDetails(nodeId);
+      setFilteringOptions(hierarchyDetails ? { nodeId, hierarchyDetails } : undefined);
     },
-    [getHierarchyLevelConfiguration],
+    [getHierarchyLevelDetails],
   );
 
   const propertiesSource = useMemo<(() => Promise<PresentationInstanceFilterPropertiesSource>) | undefined>(() => {
-    if (!hierarchyProvider || !filteringOptions) {
+    if (!filteringOptions) {
       return undefined;
     }
 
     return async () => {
-      const inputKeys = await collectInstanceKeys(hierarchyProvider.getNodeInstanceKeys({ parentNode: filteringOptions.configuration.hierarchyNode }));
+      const inputKeys = await collectInstanceKeys(filteringOptions.hierarchyDetails.getInstanceKeysIterator());
       if (inputKeys.length === 0) {
         throw new Error("Hierarchy level is empty - unable to create content descriptor.");
       }
@@ -80,10 +74,10 @@ export function useHierarchyFiltering({
 
       return { descriptor, inputKeys };
     };
-  }, [filteringOptions, imodel, hierarchyProvider]);
+  }, [filteringOptions, imodel]);
 
   const getInitialFilter = useMemo(() => {
-    const currentFilter = filteringOptions?.configuration.currentFilter;
+    const currentFilter = filteringOptions?.hierarchyDetails.currentFilter;
     if (!currentFilter) {
       return undefined;
     }
@@ -108,15 +102,14 @@ export function useHierarchyFiltering({
       propertiesSource={propertiesSource}
       initialFilter={getInitialFilter}
       filterResultsCountRenderer={(filter) => {
-        if (!filteringOptions || !hierarchyProvider) {
+        if (!filteringOptions) {
           return null;
         }
 
         return (
           <MatchingInstancesCount
             filter={filter}
-            hierarchyLevelConfiguration={filteringOptions.configuration}
-            hierarchyProvider={hierarchyProvider}
+            hierarchyLevelDetails={filteringOptions.hierarchyDetails}
             defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit}
           />
         );
@@ -132,21 +125,19 @@ export function useHierarchyFiltering({
 
 interface MatchingInstancesCountProps {
   filter: PresentationInstanceFilterInfo;
-  hierarchyLevelConfiguration: HierarchyLevelConfiguration;
-  hierarchyProvider: HierarchyProvider;
+  hierarchyLevelDetails: HierarchyLevelDetails;
   defaultHierarchyLevelSizeLimit: number;
 }
 
-function MatchingInstancesCount({ filter, hierarchyProvider, defaultHierarchyLevelSizeLimit, hierarchyLevelConfiguration }: MatchingInstancesCountProps) {
+function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierarchyLevelDetails }: MatchingInstancesCountProps) {
   const { value } = useDebouncedAsyncValue(
     useCallback(async () => {
       const instanceFilter = toGenericFilter(filter);
       try {
         const instanceKeys = await collectInstanceKeys(
-          hierarchyProvider.getNodeInstanceKeys({
-            parentNode: hierarchyLevelConfiguration.hierarchyNode,
-            instanceFilter: instanceFilter,
-            hierarchyLevelSizeLimit: hierarchyLevelConfiguration.hierarchyLevelSizeLimit ?? defaultHierarchyLevelSizeLimit,
+          hierarchyLevelDetails.getInstanceKeysIterator({
+            instanceFilter,
+            hierarchyLevelSizeLimit: hierarchyLevelDetails.hierarchyLevelSizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
         return `Current filter matching instances count: ${instanceKeys.length}`;
@@ -157,7 +148,7 @@ function MatchingInstancesCount({ filter, hierarchyProvider, defaultHierarchyLev
       }
 
       return undefined;
-    }, [filter, hierarchyLevelConfiguration, hierarchyProvider]),
+    }, [filter, hierarchyLevelDetails]),
   );
   if (!value) {
     return null;
