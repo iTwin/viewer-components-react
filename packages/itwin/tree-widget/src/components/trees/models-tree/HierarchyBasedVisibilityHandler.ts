@@ -30,9 +30,7 @@ interface GetCategoryStatusProps {
   modelId: Id64String | undefined;
 }
 
-interface ChangeCategoryStateProps {
-  categoryId: Id64String;
-  modelId: Id64String | undefined;
+interface ChangeCategoryStateProps extends GetCategoryStatusProps {
   on: boolean;
 }
 
@@ -55,7 +53,7 @@ interface ChangeModelStateProps {
 /**
  * Properties for a method of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
  */
-type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
+type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
   ? TProps & {
       /** A callback that produces the value from the original implementation. */
       readonly originalImplementation: () => TResult;
@@ -70,24 +68,24 @@ type OverriddenMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer
 /**
  * Function type for an overridden method of [[IHierarchyBasedVisibilityHandler]].
  */
-type OverriddenMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverriddenMethodProps<TFunc>) => TResult : never;
+type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverridableMethodProps<TFunc>) => TResult : never;
 
 /**
  * Functionality of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
  * Each callback will be provided original implementation and reference to a [[IHierarchyBasedVisibilityHandler]].
  */
 interface VisibilityHandlerOverrides {
-  getSubjectNodeVisibility?: OverriddenMethod<(props: { node: TreeNodeItem; ids: Id64Set }) => Promise<VisibilityStatus>>;
-  getModelDisplayStatus?: OverriddenMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
-  getCategoryDisplayStatus?: OverriddenMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
-  getElementGroupingNodeDisplayStatus?: OverriddenMethod<(props: { key: ECClassGroupingNodeKey }) => Promise<VisibilityStatus>>;
-  getElementDisplayStatus?: OverriddenMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
+  getSubjectNodeVisibility?: OverridableMethod<(props: { node: TreeNodeItem; ids: Id64Set }) => Promise<VisibilityStatus>>;
+  getModelDisplayStatus?: OverridableMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
+  getCategoryDisplayStatus?: OverridableMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
+  getElementGroupingNodeDisplayStatus?: OverridableMethod<(props: { key: ECClassGroupingNodeKey }) => Promise<VisibilityStatus>>;
+  getElementDisplayStatus?: OverridableMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
 
-  changeSubjectNodeState?: OverriddenMethod<(props: { node: TreeNodeItem; ids: Id64Set; on: boolean }) => Promise<void>>;
-  changeModelState?: OverriddenMethod<(props: ChangeModelStateProps) => Promise<void>>;
-  changeCategoryState?: OverriddenMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
-  changeElementGroupingNodeState?: OverriddenMethod<(props: { key: ECClassGroupingNodeKey; on: boolean }) => Promise<void>>;
-  changeElementState?: OverriddenMethod<(props: ChangeElementStateProps) => Promise<void>>;
+  changeSubjectNodeState?: OverridableMethod<(props: { node: TreeNodeItem; ids: Id64Set; on: boolean }) => Promise<void>>;
+  changeModelState?: OverridableMethod<(props: ChangeModelStateProps) => Promise<void>>;
+  changeCategoryState?: OverridableMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
+  changeElementGroupingNodeState?: OverridableMethod<(props: { key: ECClassGroupingNodeKey; on: boolean }) => Promise<void>>;
+  changeElementState?: OverridableMethod<(props: ChangeElementStateProps) => Promise<void>>;
 }
 
 /**
@@ -117,8 +115,8 @@ export function createHierarchyBasedVisibilityHandler(props: HierarchyBasedVisib
   return new VisibilityHandlerImplementation(props);
 }
 
-const MAX_PARALLEL_SUBJECT_MODELS_REQUESTS = 1;
-const MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS = 1;
+const MAX_PARALLEL_SUBJECT_MODELS_REQUESTS = Infinity;
+const MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS = Infinity;
 
 class VisibilityHandlerImplementation implements IVisibilityHandler {
   public filteredDataProvider?: IFilteredPresentationTreeDataProvider;
@@ -216,8 +214,8 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
               mergeMap((filteredNode) => this.getVisibilityStatusObs(filteredNode), MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS),
             )
           : subjectIds.pipe(
-              mergeMap((id) => this._queryHandler.querySubjectModels(id), MAX_PARALLEL_SUBJECT_MODELS_REQUESTS),
-              mergeMap((x) => this.getModelVisibilityStatus(x), MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS),
+              mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId), MAX_PARALLEL_SUBJECT_MODELS_REQUESTS),
+              mergeMap((modelId) => this.getModelVisibilityStatus(modelId), MAX_PARALLEL_MODELS_CATEGORIES_REQUESTS),
             );
 
       return childStatuses.pipe(
@@ -791,7 +789,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     );
   }
 
-  private createVoidOverrideProps<TProps>(props: TProps, obs: Observable<void>): OverriddenMethodProps<(props: TProps) => Promise<void>> {
+  private createVoidOverrideProps<TProps>(props: TProps, obs: Observable<void>): OverridableMethodProps<(props: TProps) => Promise<void>> {
     return {
       ...props,
       originalImplementation: async () => toVoidPromise(obs),
@@ -802,11 +800,11 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private createOverrideProps<TProps, TObservable extends Observable<any>>(
     props: TProps,
     obs: TObservable,
-  ): TObservable extends Observable<infer T> ? OverriddenMethodProps<(props: TProps) => Promise<T>> : never;
+  ): TObservable extends Observable<infer T> ? OverridableMethodProps<(props: TProps) => Promise<T>> : never;
   private createOverrideProps<TProps, TObservable extends Observable<unknown>>(
     props: TProps,
     obs: TObservable,
-  ): OverriddenMethodProps<(props: TProps) => Promise<unknown>> {
+  ): OverridableMethodProps<(props: TProps) => Promise<unknown>> {
     return {
       ...props,
       originalImplementation: async () => firstValueFrom(obs),
