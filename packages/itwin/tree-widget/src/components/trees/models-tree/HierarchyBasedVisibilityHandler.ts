@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { concat, concatAll, concatWith, defer, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce, toArray } from "rxjs";
-import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
@@ -731,7 +730,9 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       totalCount: totalCountObs,
     }).pipe(
       map(({ neverDrawnChildren, alwaysDrawnChildren, totalCount }) => {
-        assert(totalCount !== 0);
+        if (totalCount === 0) {
+          return props.defaultStatus();
+        }
 
         if (neverDrawnChildren?.size === totalCount) {
           return createVisibilityStatus("hidden", props.tooltips.allElementsInNeverDrawnList);
