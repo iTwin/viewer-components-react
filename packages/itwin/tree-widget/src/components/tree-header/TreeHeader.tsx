@@ -58,7 +58,7 @@ export function TreeHeader(props: TreeHeaderProps) {
         {children}
       </HeaderButtons>
       <DebouncedSearchBox
-        isOpened={isSearchOpen && !instanceFocusEnabled}
+        isOpened={isSearchOpen}
         onOpen={() => setIsSearchOpen(true)}
         onClose={() => setIsSearchOpen(false)}
         onChange={(value) => (value ? onFilterStart(value) : onFilterClear())}
