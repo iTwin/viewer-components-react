@@ -94,7 +94,7 @@ describe("VisibilityStateHandler", () => {
     }
 
     before(async () => {
-      queryHandlerStub = stubFactoryFunction(`${__dirname}/../../../components/trees/models-tree/internal/QueryHandler`, "createQueryHandler", () =>
+      queryHandlerStub = stubFactoryFunction(`${__dirname}/../../../components/trees/models-tree/internal/ModelsTreeQueryHandler`, "createModelsTreeQueryHandler", () =>
         createFakeModelsTreeQueryHandler(),
       );
     });
@@ -1362,7 +1362,7 @@ describe("VisibilityStateHandler", () => {
             });
 
             await handler.changeVisibility(createElementNode(modelId, categoryId, undefined, elementId), true);
-            expect(queryHandler.queryElementChildren).to.be.called;
+            expect(queryHandler.queryElements).to.be.called;
             expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
           });
 
@@ -1385,7 +1385,7 @@ describe("VisibilityStateHandler", () => {
             });
 
             await handler.changeVisibility(createElementNode(modelId, categoryId, undefined, elementId), true);
-            expect(queryHandler.queryElementChildren).to.be.called;
+            expect(queryHandler.queryElements).to.be.called;
             expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId, ...childElements]));
           });
         });
@@ -1461,7 +1461,7 @@ describe("VisibilityStateHandler", () => {
             });
 
             await handler.changeVisibility(createElementNode(modelId, categoryId, undefined, elementId), false);
-            expect(queryHandler.queryElementChildren).to.be.called;
+            expect(queryHandler.queryElements).to.be.called;
             expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
           });
 
@@ -1480,7 +1480,7 @@ describe("VisibilityStateHandler", () => {
             });
 
             await handler.changeVisibility(createElementNode(modelId, categoryId, undefined, elementId), false);
-            expect(queryHandler.queryElementChildren).to.be.called;
+            expect(queryHandler.queryElements).to.be.called;
             expect(viewport.neverDrawn).to.deep.eq(new Set([elementId, ...childElements]));
           });
         });

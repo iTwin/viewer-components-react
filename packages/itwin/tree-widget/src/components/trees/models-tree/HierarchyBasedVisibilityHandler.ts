@@ -330,7 +330,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private getCategoryDisplayStatus(props: GetCategoryStatusProps): Observable<VisibilityStatus> {
     const result = defer(() => {
       return this.getVisibilityFromAlwaysAndNeverDrawnChildren({
-        queryProps: { categoryId: props.categoryId },
+        queryProps: { categoryId: props.categoryId, modelId: props.modelId },
         tooltips: {
           allElementsInAlwaysDrawnList: "category.allElementsVisible",
           allElementsInNeverDrawnList: "category.allElementsHidden",
@@ -423,7 +423,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         return of(this.getElementDefaultVisibility(props));
       }
 
-      return this._queryHandler.queryElementChildren(props.elementId).pipe(
+      return this._queryHandler.queryElements({ rootElementId: props.elementId }).pipe(
         map((elementId) => this.getElementDefaultVisibility({ ...props, elementId }).state),
         getVisibilityStatusFromChildren({
           visible: "element.allElementsVisible",
@@ -624,7 +624,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return of(elementId).pipe(
-            concatWith(hasChildren === false ? EMPTY : from(this._queryHandler.queryElementChildren(props.elementId))),
+            concatWith(hasChildren === false ? EMPTY : from(this._queryHandler.queryElements({ rootElementId: props.elementId }))),
             this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }),
           );
         }),

@@ -88,40 +88,6 @@ describe("QueryHandler", () => {
     handler.invalidateCache();
     await runTest();
   });
-
-  it("doesn't query element children if previous query returned no results", async () => {
-    const elementId = "0x10";
-    const stub = sinon.fake.returns([]);
-
-    const handler = createModelsTreeQueryHandler(createIModelMock(stub));
-    let result = await collect(handler.queryElementChildren(elementId));
-    expect(stub).to.be.calledOnce;
-    expect(result).to.be.empty;
-
-    result = await collect(handler.queryElementChildren(elementId));
-    expect(stub).to.be.calledOnce;
-    expect(result).to.be.empty;
-  });
-
-  it("builds element children cache from responses in random order", async () => {
-    const stub = sinon.fake(() => {
-      return [
-        { id: "0x20", parentId: "0x10" },
-        { id: "0x30", parentId: "0x20" },
-        { id: "0x40", parentId: "0x30" },
-        { id: "0x50", parentId: "0x10" },
-        { id: "0x10" },
-      ];
-    });
-
-    const handler = createModelsTreeQueryHandler(createIModelMock(stub));
-    let result = await collect(handler.queryElementChildren("0x1"));
-    const allChildren = ["0x10", "0x20", "0x30", "0x40", "0x50"];
-    expect(result.sort()).to.deep.eq(allChildren);
-
-    result = await collect(handler.queryElementChildren("0x10"));
-    expect(result.sort()).to.deep.eq(allChildren.filter((x) => x !== "0x10"));
-  });
 });
 
 async function collect<T>(obs: Observable<T>): Promise<T[]> {

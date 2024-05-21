@@ -453,7 +453,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
    */
   // istanbul ignore next
   private getAssemblyElementIds(elementId: string) {
-    const elementIds = this._queryHandler.queryElementChildren(elementId);
+    const elementIds = this._queryHandler.queryElements({ rootElementId: elementId });
     return eachValueFrom(elementIds);
   }
 

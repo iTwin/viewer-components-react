@@ -49,7 +49,21 @@ interface SubjectModelIdsMockProps {
 
 export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProps): ModelsTreeQueryHandler {
   const queryElements = sinon.fake(
-    ({ modelId, categoryId, elementIds }: { modelId?: string; categoryId?: string; elementIds?: Id64Set }): Observable<string> => {
+    ({
+      modelId,
+      categoryId,
+      elementIds,
+      rootElementId,
+    }: {
+      modelId?: string;
+      categoryId?: string;
+      elementIds?: Id64Set;
+      rootElementId?: Id64String;
+    }): Observable<string> => {
+      if (rootElementId) {
+        return from(props?.elementChildren?.get(rootElementId) ?? []).pipe(expand((id) => props?.elementChildren?.get(id) ?? []));
+      }
+
       const categoryObs = from(props?.modelCategories ?? []).pipe(
         filter(([id]) => !modelId || id === modelId),
         concatMap(([_, categoryIds]) => categoryIds),
@@ -83,7 +97,6 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
     queryModelCategories: sinon.fake((x) => {
       return from(props?.modelCategories?.get(x) ?? []);
     }),
-    queryElementChildren: sinon.fake((elementId) => from(props?.elementChildren?.get(elementId) ?? [])),
     queryGroupingNodeChildren: sinon.fake((node) => {
       const groupingInfo = props?.groupingNodeChildren?.get(node);
       return groupingInfo

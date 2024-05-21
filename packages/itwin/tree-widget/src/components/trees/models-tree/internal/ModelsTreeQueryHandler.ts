@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, expand, first, forkJoin, from, last, map, mergeMap, shareReplay, tap, toArray } from "rxjs";
+import { defer, EMPTY, expand, first, forkJoin, from, last, map, mergeMap, shareReplay, toArray } from "rxjs";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -40,14 +40,24 @@ export interface ElementsQueryProps {
  * @internal
  */
 export interface ModelsTreeQueryHandler {
+  /** Retrieves all models under a given subject */
   querySubjectModels(subjectId: Id64String): Observable<Id64String>;
+  /** Retrieves all unique categories of elements under a given model */
   queryModelCategories(modelId: Id64String): Observable<Id64String>;
-  queryElementChildren(elementId: Id64String): Observable<Id64String>;
+  /** Retrieves elements of a class grouping node */
   queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds>;
+  /**
+   * Retrieves all elements that match given model, category and root (parent) element IDs,
+   * then recursively retrieves all children of those elements by the "ElementOwnsChildElements" relationship.
+   */
   queryElements(props: ElementsQueryProps): Observable<Id64String>;
+  /** Analogous to `queryElements` but returns a count instead of values */
   queryElementsCount(props: ElementsQueryProps): Observable<number>;
+  /** Clears cached query results */
   invalidateCache(): void;
 }
+
+const EMPTY_ID_SET = new Set<Id64String>();
 
 /**
  * @internal
@@ -56,17 +66,13 @@ export function createModelsTreeQueryHandler(iModel: IModelConnection): ModelsTr
   return new QueryHandlerImplementation(iModel);
 }
 
-const EMPTY_ID_SET = new Set<Id64String>();
-
 class QueryHandlerImplementation implements ModelsTreeQueryHandler {
-  private readonly _elementHierarchyCache = new Map<string, Id64Set>();
   private readonly _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
   private _initialInfoObs?: Observable<InitialInfo>;
 
   constructor(private readonly _iModel: IModelConnection) {}
 
   public invalidateCache(): void {
-    this._elementHierarchyCache.clear();
     this._groupedElementIdsCache.clear();
     this._initialInfoObs = undefined;
   }
@@ -154,70 +160,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
   }
 
   public queryModelCategories(modelId: Id64String): Observable<Id64String> {
-    return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? EMPTY_ID_SET));
-  }
-
-  public queryElementChildren(elementId: string): Observable<Id64String> {
-    const cachedChildren = this._elementHierarchyCache.get(elementId);
-    if (cachedChildren) {
-      return from(cachedChildren).pipe(
-        expand((id) => {
-          const res = this._elementHierarchyCache.get(id);
-          return res ? from(res) : EMPTY;
-        }),
-      );
-    }
-    return this.runElementChildrenRecursiveQuery(elementId).pipe(this.populateElementHierarchyCacheOperator(elementId));
-  }
-
-  private populateElementHierarchyCacheOperator(rootElementId?: Id64String) {
-    return (elementObs: Observable<{ id: Id64String; parentId?: Id64String }>) => {
-      const hierarchySubset = new Map<Id64String, Id64Set>();
-      const elementSet = new Set<Id64String>();
-      return elementObs.pipe(
-        tap({
-          next({ id, parentId }) {
-            if (parentId) {
-              pushToMap(hierarchySubset, parentId, id);
-            }
-            elementSet.add(id);
-          },
-          complete: () => {
-            for (const id of elementSet) {
-              if (!hierarchySubset.has(id)) {
-                hierarchySubset.set(id, EMPTY_ID_SET);
-              }
-            }
-
-            if (hierarchySubset.size) {
-              mergeMaps(this._elementHierarchyCache, hierarchySubset);
-            } else {
-              rootElementId && this._elementHierarchyCache.set(rootElementId, EMPTY_ID_SET);
-            }
-          },
-        }),
-        map(({ id }) => id),
-      );
-    };
-  }
-
-  private runElementChildrenRecursiveQuery(elementId: string): Observable<{ id: string; parentId?: string | undefined }> {
-    const bindings = new Map<string, Id64String>();
-    const query = /* sql */ `
-      WITH RECURSIVE ChildElements(id, parentId) AS (
-        SELECT e.ECInstanceId AS id, e.Parent.Id AS parentId
-        FROM bis.GeometricElement3d e
-        WHERE ${bindNamed("e.Parent.Id", elementId, bindings, "parentId")}
-
-        UNION ALL
-
-        SELECT e.ECInstanceId AS id, e.Parent.Id as parentId
-        FROM bis.GeometricElement3d e
-        INNER JOIN ChildElements ce ON e.Parent.Id = ce.id
-      )
-      SELECT * FROM ChildElements
-    `;
-    return this.runQuery(query, bindings, (row) => ({ id: row.id, parentId: row.parentId }));
+    return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? /* istanbul ignore next */ EMPTY_ID_SET));
   }
 
   public queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds> {
@@ -317,7 +260,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     props.categoryId && conditions.push(bind("Category.Id", props.categoryId, bindings));
     props.rootElementId && conditions.push(bind("Parent.Id", props.rootElementId, bindings));
 
-    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : /* istanbul ignore next */ "";
 
     const query = /* sql */ `
       WITH RECURSIVE
@@ -333,7 +276,9 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
 
           SELECT e.ECInstanceId AS id
           FROM bis.GeometricElement3d e
-          INNER JOIN ChildElements ce ON e.Parent.Id = ce.id
+          INNER JOIN ChildElements ce
+            ON e.Parent.Id = ce.id
+            AND e.Parent.RelECClassId = ec_classId('BisCore.ElementOwnsChildElements')
         )
         SELECT ${props.type === "ids" ? "*" : "COUNT(*)"} FROM ChildElements
         ${props.elementIds ? `WHERE ${bind("id", props.elementIds, bindings)}` : ""}
@@ -341,11 +286,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     return this.runQuery(query, bindings, (row) => row[0]);
   }
 
-  private runQuery<TResult>(
-    query: string,
-    bindings: Array<QueryBindable> | Map<string, Id64String> | undefined,
-    resultMapper: (row: QueryRowProxy) => TResult,
-  ): Observable<TResult> {
+  private runQuery<TResult>(query: string, bindings: Array<QueryBindable> | undefined, resultMapper: (row: QueryRowProxy) => TResult): Observable<TResult> {
     return defer(() => {
       const reader = this._iModel.createQueryReader(query, bindings && createBinder(bindings), {
         rowFormat: QueryRowFormat.UseJsPropertyNames,
@@ -371,21 +312,17 @@ function bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>)
     return `${key} IN (${values.join(",")})`;
   }
 
+  // istanbul ignore next
   bindings.push(value);
   return `inVirtualSet(?, ${key})`;
 }
 
-function bindNamed(key: string, value: Id64String, bindings: Map<string, Id64String>, bindingName: string) {
-  bindings.set(bindingName, value);
-  return `${key} = :${bindingName}`;
-}
-
 // istanbul ignore next
-function createBinder(bindings: Array<QueryBindable> | Map<string, Id64String>): QueryBinder | undefined {
+function createBinder(bindings: Array<QueryBindable>): QueryBinder | undefined {
   const binder = new QueryBinder();
   bindings.forEach((x, idx) => {
     // Binder expect index to start from 1
-    typeof idx === "number" && idx++;
+    idx++;
     if (typeof x === "string") {
       binder.bindId(idx, x);
       return;
@@ -403,16 +340,4 @@ function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, v
     targetMap.set(key, set);
   }
   set.add(value);
-}
-
-function mergeMaps<TKey, TValue>(dest: Map<TKey, Set<TValue>>, src: Map<TKey, Set<TValue>>) {
-  for (const [key, srcSet] of src) {
-    const destSet = dest.get(key);
-    // istanbul ignore if
-    if (destSet) {
-      srcSet.forEach((x) => destSet.add(x));
-    } else {
-      dest.set(key, srcSet);
-    }
-  }
 }
