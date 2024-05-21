@@ -39,7 +39,7 @@ export interface ElementsQueryProps {
 /**
  * @internal
  */
-export interface IQueryHandler {
+export interface ModelsTreeQueryHandler {
   querySubjectModels(subjectId: Id64String): Observable<Id64String>;
   queryModelCategories(modelId: Id64String): Observable<Id64String>;
   queryElementChildren(elementId: Id64String): Observable<Id64String>;
@@ -52,13 +52,13 @@ export interface IQueryHandler {
 /**
  * @internal
  */
-export function createQueryHandler(iModel: IModelConnection): IQueryHandler {
+export function createModelsTreeQueryHandler(iModel: IModelConnection): ModelsTreeQueryHandler {
   return new QueryHandlerImplementation(iModel);
 }
 
 const EMPTY_ID_SET = new Set<Id64String>();
 
-class QueryHandlerImplementation implements IQueryHandler {
+class QueryHandlerImplementation implements ModelsTreeQueryHandler {
   private readonly _elementHierarchyCache = new Map<string, Id64Set>();
   private readonly _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
   private _initialInfoObs?: Observable<InitialInfo>;
@@ -364,6 +364,7 @@ function bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>)
   }
 
   const maxBindings = 1000;
+  // istanbul ignore else
   if (value.size < maxBindings) {
     const values = [...value];
     bindings.push(...values);

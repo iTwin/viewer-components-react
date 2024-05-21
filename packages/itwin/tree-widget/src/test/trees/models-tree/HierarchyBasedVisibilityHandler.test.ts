@@ -22,7 +22,7 @@ import { createRuleset } from "../../../components/trees/models-tree/internal/Ut
 import { addModel, addPartition, addSpatialCategory } from "../../IModelUtils";
 import { TestUtils } from "../../TestUtils";
 import {
-  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeQueryHandler, createFakeSinonViewport, createModelNode,
+  createCategoryNode, createElementClassGroupingNode, createElementNode, createFakeModelsTreeQueryHandler, createFakeSinonViewport, createModelNode,
   createSubjectNode, stubFactoryFunction,
 } from "../Common";
 
@@ -32,7 +32,7 @@ import type { GeometricElement3dProps } from "@itwin/core-common";
 import type { StubbedFactoryFunction } from "../Common";
 import type { HierarchyBasedVisibilityHandlerProps } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
 import type { Visibility } from "../../../components/trees/models-tree/internal/Tooltip";
-import type { IQueryHandler } from "../../../components/trees/models-tree/internal/QueryHandler";
+import type { ModelsTreeQueryHandler } from "../../../components/trees/models-tree/internal/ModelsTreeQueryHandler";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
@@ -55,10 +55,10 @@ describe("VisibilityStateHandler", () => {
   });
 
   describe("#unit", () => {
-    let queryHandlerStub: StubbedFactoryFunction<IQueryHandler>;
+    let queryHandlerStub: StubbedFactoryFunction<ModelsTreeQueryHandler>;
 
-    function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: IQueryHandler; viewport?: Viewport }) {
-      const queryHandler = props?.queryHandler ?? createFakeQueryHandler();
+    function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: ModelsTreeQueryHandler; viewport?: Viewport }) {
+      const queryHandler = props?.queryHandler ?? createFakeModelsTreeQueryHandler();
       const overrides: HierarchyBasedVisibilityHandlerProps["overrides"] = {
         getModelDisplayStatus:
           props?.overrides?.models &&
@@ -95,7 +95,7 @@ describe("VisibilityStateHandler", () => {
 
     before(async () => {
       queryHandlerStub = stubFactoryFunction(`${__dirname}/../../../components/trees/models-tree/internal/QueryHandler`, "createQueryHandler", () =>
-        createFakeQueryHandler(),
+        createFakeModelsTreeQueryHandler(),
       );
     });
 
@@ -157,7 +157,7 @@ describe("VisibilityStateHandler", () => {
         it("is visible when subject contains no models", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectNode(subjectIds);
-          const queryHandler = createFakeQueryHandler({
+          const queryHandler = createFakeModelsTreeQueryHandler({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
           });
           const { handler } = createVisibilityHandlerWrapper({ queryHandler });
@@ -168,7 +168,7 @@ describe("VisibilityStateHandler", () => {
         it("is visible when all models are displayed", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectNode(subjectIds);
-          const queryHandler = createFakeQueryHandler({
+          const queryHandler = createFakeModelsTreeQueryHandler({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
             subjectModels: new Map([
               [subjectIds[0], ["0x3"]],
@@ -191,7 +191,7 @@ describe("VisibilityStateHandler", () => {
         it("is hidden when all models are hidden", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectNode(subjectIds);
-          const queryHandler = createFakeQueryHandler({
+          const queryHandler = createFakeModelsTreeQueryHandler({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
             subjectModels: new Map([
               [subjectIds[0], ["0x3"]],
@@ -214,7 +214,7 @@ describe("VisibilityStateHandler", () => {
         it("is partially visible when at least one model is displayed and at least one model is hidden", async () => {
           const subjectIds = ["0x1", "0x2"];
           const node = createSubjectNode(subjectIds);
-          const queryHandler = createFakeQueryHandler({
+          const queryHandler = createFakeModelsTreeQueryHandler({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
             subjectModels: new Map([
               [subjectIds[0], ["0x3"]],
@@ -278,7 +278,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
             });
             const { handler } = createVisibilityHandlerWrapper({
@@ -292,7 +292,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -314,7 +314,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -335,7 +335,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -373,7 +373,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
             });
             const { handler } = createVisibilityHandlerWrapper({
@@ -396,7 +396,7 @@ describe("VisibilityStateHandler", () => {
               ["0x10", ["0x100", "0x200"]],
               ["0x20", ["0x300", "0x400"]],
             ]);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories,
               categoryElements,
             });
@@ -418,7 +418,7 @@ describe("VisibilityStateHandler", () => {
               ["0x10", ["0x100", "0x200"]],
               ["0x20", ["0x300", "0x400"]],
             ]);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories,
               categoryElements,
             });
@@ -437,7 +437,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -462,7 +462,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
             });
             const { handler } = createVisibilityHandlerWrapper({
@@ -480,7 +480,7 @@ describe("VisibilityStateHandler", () => {
           it("when some of the nested child elements are in never drawn list", async () => {
             const modelId = "0x1";
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -500,7 +500,7 @@ describe("VisibilityStateHandler", () => {
           it("when some of the nested child elements are not in the exclusive always drawn list", async () => {
             const modelId = "0x1";
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -522,7 +522,7 @@ describe("VisibilityStateHandler", () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelNode(modelId);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
               categoryElements: new Map([
                 ["0x10", ["0x100", "0x200"]],
@@ -563,7 +563,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode(undefined, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -581,7 +581,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -601,7 +601,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -618,7 +618,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode(undefined, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -635,7 +635,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode(undefined, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -654,7 +654,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode(undefined, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -673,7 +673,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -691,7 +691,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -712,7 +712,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode(undefined, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -730,7 +730,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode(undefined, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -749,7 +749,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -768,7 +768,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const node = createCategoryNode({ id: modelId, className: "" }, categoryId);
             const { handler } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
               viewport: createFakeSinonViewport({
@@ -800,7 +800,7 @@ describe("VisibilityStateHandler", () => {
           const childElements = ["0x10", "0x20"];
           const node = createElementNode(modelId, categoryId, true, elementId);
           const { handler } = createVisibilityHandlerWrapper({
-            queryHandler: createFakeQueryHandler({
+            queryHandler: createFakeModelsTreeQueryHandler({
               elementChildren: new Map([[elementId, childElements]]),
             }),
             overrides: {
@@ -816,7 +816,7 @@ describe("VisibilityStateHandler", () => {
           const childElements = ["0x10", "0x20"];
           const node = createElementNode(undefined, undefined, true, elementId);
           const { handler } = createVisibilityHandlerWrapper({
-            queryHandler: createFakeQueryHandler({
+            queryHandler: createFakeModelsTreeQueryHandler({
               elementChildren: new Map([[elementId, childElements]]),
             }),
             viewport: createFakeSinonViewport({
@@ -834,7 +834,7 @@ describe("VisibilityStateHandler", () => {
           const childElements = ["0x20", "0x30"];
           const node = createElementNode(modelId, categoryId, true, elementId);
           const { handler } = createVisibilityHandlerWrapper({
-            queryHandler: createFakeQueryHandler({
+            queryHandler: createFakeModelsTreeQueryHandler({
               elementChildren: new Map([[elementId, childElements]]),
             }),
             viewport: createFakeSinonViewport({
@@ -858,7 +858,7 @@ describe("VisibilityStateHandler", () => {
             const subscribeSpy = sinon.spy(obs.subscribe);
             const queryHandler = {
               queryElementChildren: () => obs,
-            } as unknown as IQueryHandler;
+            } as unknown as ModelsTreeQueryHandler;
             const { handler } = createVisibilityHandlerWrapper({
               queryHandler,
             });
@@ -950,7 +950,7 @@ describe("VisibilityStateHandler", () => {
           const elementIds = ["0x10", "0x20"];
           const node = createElementClassGroupingNode(elementIds);
           const { handler } = createVisibilityHandlerWrapper({
-            queryHandler: createFakeQueryHandler({
+            queryHandler: createFakeModelsTreeQueryHandler({
               groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
             }),
             overrides: {
@@ -967,7 +967,7 @@ describe("VisibilityStateHandler", () => {
           const elementIds = ["0x10", "0x20"];
           const node = createElementClassGroupingNode(elementIds);
           const { handler } = createVisibilityHandlerWrapper({
-            queryHandler: createFakeQueryHandler({
+            queryHandler: createFakeModelsTreeQueryHandler({
               groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
             }),
             viewport: createFakeSinonViewport({
@@ -984,7 +984,7 @@ describe("VisibilityStateHandler", () => {
           const elementIds = ["0x10", "0x20"];
           const node = createElementClassGroupingNode(elementIds);
           const { handler } = createVisibilityHandlerWrapper({
-            queryHandler: createFakeQueryHandler({
+            queryHandler: createFakeModelsTreeQueryHandler({
               groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
             }),
             viewport: createFakeSinonViewport({
@@ -1006,7 +1006,7 @@ describe("VisibilityStateHandler", () => {
               viewport: createFakeSinonViewport({
                 view: { viewsCategory: sinon.fake.returns(categoryOn) },
               }),
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
               }),
             });
@@ -1042,7 +1042,7 @@ describe("VisibilityStateHandler", () => {
             const node = createSubjectNode(subjectIds);
             const viewport = createFakeSinonViewport();
             const { handler, overrides } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
               }),
               viewport,
@@ -1062,7 +1062,7 @@ describe("VisibilityStateHandler", () => {
             ];
             const node = createSubjectNode(subjectIds);
             const { handler, overrides } = createVisibilityHandlerWrapper({
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
               }),
             });
@@ -1101,7 +1101,7 @@ describe("VisibilityStateHandler", () => {
             });
             const { handler } = createVisibilityHandlerWrapper({
               viewport,
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
                 categoryElements: new Map([
                   ["0x10", ["0x100", "0x200"]],
@@ -1125,7 +1125,7 @@ describe("VisibilityStateHandler", () => {
             });
             const { handler } = createVisibilityHandlerWrapper({
               viewport,
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
                 categoryElements: new Map([
                   ["0x10", ["0x100", "0x200"]],
@@ -1158,7 +1158,7 @@ describe("VisibilityStateHandler", () => {
             const viewport = createFakeSinonViewport();
             const { handler } = createVisibilityHandlerWrapper({
               viewport,
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, categoryIds]]),
               }),
             });
@@ -1187,7 +1187,7 @@ describe("VisibilityStateHandler", () => {
             const viewport = createFakeSinonViewport();
             const { handler } = createVisibilityHandlerWrapper({
               viewport,
-              queryHandler: createFakeQueryHandler({
+              queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, categoryIds]]),
               }),
             });
@@ -1350,7 +1350,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const elementId = "0x3";
             const childElements = ["0x4", "0x5", "0x6"];
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               elementChildren: new Map([[elementId, childElements]]),
             });
             const viewport = createFakeSinonViewport({
@@ -1371,7 +1371,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const elementId = "0x3";
             const childElements = ["0x4", "0x5", "0x6"];
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               elementChildren: new Map([[elementId, childElements]]),
             });
             const viewport = createFakeSinonViewport({
@@ -1449,7 +1449,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const elementId = "0x3";
             const childElements = ["0x4", "0x5", "0x6"];
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               elementChildren: new Map([[elementId, childElements]]),
             });
             const viewport = createFakeSinonViewport({
@@ -1470,7 +1470,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const elementId = "0x3";
             const childElements = ["0x4", "0x5", "0x6"];
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               elementChildren: new Map([[elementId, childElements]]),
             });
             const viewport = createFakeSinonViewport();
@@ -1512,7 +1512,7 @@ describe("VisibilityStateHandler", () => {
             const categoryId = "0x2";
             const elementIds = ["0x10", "0x20"];
             const node = createElementClassGroupingNode([]);
-            const queryHandler = createFakeQueryHandler({
+            const queryHandler = createFakeModelsTreeQueryHandler({
               groupingNodeChildren: new Map([[node.key, { modelId, categoryId, elementIds }]]),
             });
             const viewport = createFakeSinonViewport({

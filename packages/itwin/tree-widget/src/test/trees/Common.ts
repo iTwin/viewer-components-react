@@ -36,7 +36,7 @@ import type {
   TypeDescription,
 } from "@itwin/presentation-common";
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { IQueryHandler } from "../../components/trees/models-tree/internal/QueryHandler";
+import type { ModelsTreeQueryHandler } from "../../components/trees/models-tree/internal/ModelsTreeQueryHandler";
 import type { Viewport, ViewState } from "@itwin/core-frontend";
 interface SubjectModelIdsMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
@@ -47,7 +47,7 @@ interface SubjectModelIdsMockProps {
   groupingNodeChildren?: Map<NodeKey, { modelId: string; categoryId: string; elementIds: Array<string> }>;
 }
 
-export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQueryHandler {
+export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProps): ModelsTreeQueryHandler {
   const queryElements = sinon.fake(
     ({ modelId, categoryId, elementIds }: { modelId?: string; categoryId?: string; elementIds?: Id64Set }): Observable<string> => {
       const categoryObs = from(props?.modelCategories ?? []).pipe(
@@ -72,7 +72,7 @@ export function createFakeQueryHandler(props?: SubjectModelIdsMockProps): IQuery
       );
     },
   );
-  const res: IQueryHandler = {
+  const res: ModelsTreeQueryHandler = {
     invalidateCache: sinon.fake(),
     querySubjectModels: sinon.fake((subjectId) => {
       return of(subjectId).pipe(

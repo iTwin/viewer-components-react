@@ -10,13 +10,13 @@ import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { reduceWhile, toSet, toVoidPromise } from "../common/Rxjs";
-import { createQueryHandler } from "./internal/QueryHandler";
+import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import { NodeUtils } from "./NodeUtils";
 
 import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { ElementsQueryProps, IQueryHandler as IQueryHandler } from "./internal/QueryHandler";
+import type { ElementsQueryProps, ModelsTreeQueryHandler as ModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
@@ -125,12 +125,12 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   public filteredDataProvider?: IFilteredPresentationTreeDataProvider;
   public readonly isHierarchyBased = true;
   private readonly _eventListener: IVisibilityChangeEventListener;
-  private readonly _queryHandler: IQueryHandler;
+  private readonly _queryHandler: ModelsTreeQueryHandler;
   private _removePresentationHierarchyListener?: () => void;
 
   constructor(private readonly _props: HierarchyBasedVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
-    this._queryHandler = createQueryHandler(this._props.viewport.iModel);
+    this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
     // istanbul ignore if
     if (this._props.hierarchyAutoUpdateEnabled) {
       // eslint-disable-next-line @itwin/no-internal
@@ -263,7 +263,6 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
       mergeMap((visibilityByCategories) => {
         // istanbul ignore if
         if (visibilityByCategories === "empty") {
-          // TODO: Is this possible?
           return createVisibilityStatusObs("visible");
         }
 
@@ -734,8 +733,8 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     );
   }
 
-  private getAlwaysOrNeverDrawnChildren(props: ElementsQueryProps & { always: boolean }): Observable<Id64Set | undefined> {
-    const set = props.always ? this._props.viewport.alwaysDrawn : this._props.viewport.neverDrawn;
+  private getAlwaysOrNeverDrawnChildren(props: ElementsQueryProps & { setType: "always" | "never" }): Observable<Id64Set | undefined> {
+    const set = props.setType === "always" ? this._props.viewport.alwaysDrawn : this._props.viewport.neverDrawn;
     if (!set?.size) {
       return of(undefined);
     }
@@ -744,11 +743,11 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   }
 
   private getAlwaysDrawnChildren(props: ElementsQueryProps) {
-    return this.getAlwaysOrNeverDrawnChildren({ ...props, always: true });
+    return this.getAlwaysOrNeverDrawnChildren({ ...props, setType: "always" });
   }
 
   private getNeverDrawnChildren(props: ElementsQueryProps) {
-    return this.getAlwaysOrNeverDrawnChildren({ ...props, always: false });
+    return this.getAlwaysOrNeverDrawnChildren({ ...props, setType: "never" });
   }
 
   private clearAlwaysAndNeverDrawnChildren(props: ElementsQueryProps) {

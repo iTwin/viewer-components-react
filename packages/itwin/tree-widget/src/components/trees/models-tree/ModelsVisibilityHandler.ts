@@ -10,12 +10,12 @@ import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { eachValueFrom } from "./internal/EachValueFrom";
-import { createQueryHandler } from "./internal/QueryHandler";
+import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import { createTooltip } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import { NodeUtils } from "./NodeUtils";
 
-import type { IQueryHandler } from "./internal/QueryHandler";
+import type { ModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
@@ -43,7 +43,7 @@ export interface ModelsVisibilityHandlerProps {
 export class ModelsVisibilityHandler implements IVisibilityHandler {
   // eslint-disable-next-line deprecation/deprecation
   private readonly _props: ModelsVisibilityHandlerProps;
-  private readonly _queryHandler: IQueryHandler;
+  private readonly _queryHandler: ModelsTreeQueryHandler;
   private readonly _eventListener: IVisibilityChangeEventListener;
   private _filteredDataProvider?: IFilteredPresentationTreeDataProvider;
   private _removePresentationHierarchyListener?: () => void;
@@ -51,7 +51,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   // eslint-disable-next-line deprecation/deprecation
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
-    this._queryHandler = createQueryHandler(this._props.viewport.iModel);
+    this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
     this._eventListener = createVisibilityChangeEventListener(this._props.viewport);
     if (this._props.hierarchyAutoUpdateEnabled) {
       // eslint-disable-next-line @itwin/no-internal

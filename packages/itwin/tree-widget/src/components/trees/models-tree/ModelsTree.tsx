@@ -17,7 +17,7 @@ import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { createHierarchyBasedVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
-import { createQueryHandler } from "./internal/QueryHandler";
+import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./internal/Utils";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
@@ -357,7 +357,7 @@ function useLegacyVisibilityHandler({
   hierarchyAutoUpdateEnabled,
   iModel,
 }: UseVisibilityHandlerProps) {
-  const subjectModelIdsCache = useMemo(() => createQueryHandler(iModel), [iModel]);
+  const subjectModelIdsCache = useMemo(() => createModelsTreeQueryHandler(iModel), [iModel]);
   // eslint-disable-next-line deprecation/deprecation
   const [state, setState] = useState<ModelsVisibilityHandler>();
 
