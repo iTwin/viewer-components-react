@@ -124,7 +124,7 @@ export class Polygon {
       const lines: string[] = [];
       const areaFormatter = IModelApp.quantityFormatter.findFormatterSpecByQuantityType(QuantityType.Area);
       if (undefined !== areaFormatter)
-        lines.push(IModelApp.quantityFormatter.formatQuantity(this.sheetToWorldScale !== undefined ? this.sheetToWorldScale * this.sheetToWorldScale * this.area: this.area, areaFormatter));
+        lines.push(IModelApp.quantityFormatter.formatQuantity(this.sheetToWorldScale * this.sheetToWorldScale * this.area, areaFormatter));
 
       this._textMarker.textLines = lines;
     }
