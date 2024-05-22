@@ -72,9 +72,15 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._listeners.push(this._props.viewport.onViewedModelsChanged.addListener(this.onViewChanged));
     this._listeners.push(this._props.viewport.onAlwaysDrawnChanged.addListener(this.onElementAlwaysDrawnChanged));
     this._listeners.push(this._props.viewport.onNeverDrawnChanged.addListener(this.onElementNeverDrawnChanged));
-    if (this._props.hierarchyAutoUpdateEnabled) {
-      this._listeners.push(Presentation.presentation.onIModelHierarchyChanged.addListener(/* istanbul ignore next */ () => this._elementIdsCache.clear())); // eslint-disable-line @itwin/no-internal
-    }
+    this._listeners.push(
+      // eslint-disable-next-line @itwin/no-internal
+      Presentation.presentation.onIModelHierarchyChanged.addListener(
+        /* istanbul ignore next */ () => {
+          this._elementIdsCache.clear();
+          this._subjectModelIdsCache.clear();
+        },
+      ),
+    );
   }
 
   public dispose() {
@@ -594,6 +600,13 @@ export class SubjectModelIdsCache {
     if (childSubjectIds) {
       childSubjectIds.forEach((cs) => this.appendSubjectModelsRecursively(modelIds, cs));
     }
+  }
+
+  // istanbul ignore next
+  public clear() {
+    this._subjectsHierarchy?.clear();
+    this._subjectModels?.clear();
+    this._init = undefined;
   }
 
   public async getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]> {
