@@ -76,8 +76,8 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
     return true;
   }
 
-  public setRatio(ratio: number | undefined) {
-    this._currentMeasurement?.setRatio(ratio);
+  public setSheetToWorldScale(scale: number | undefined) {
+    this._currentMeasurement?.setSheetToWorldScale(scale);
   }
 
   public setStartPoint(viewType: string, point: Point3d): boolean {

@@ -70,8 +70,8 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     return this._currentMeasurement.isValidPolygon;
   }
 
-  public setRatio(ratio: number | undefined) {
-    this._currentMeasurement?.setSheetToWorldScale(ratio);
+  public setSheetToWorldScale(scale: number | undefined) {
+    this._currentMeasurement?.setSheetToWorldScale(scale);
   }
 
   public override get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }
