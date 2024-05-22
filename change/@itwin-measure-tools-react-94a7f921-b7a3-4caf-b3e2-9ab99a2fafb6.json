@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Measurement in sheets",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "email not defined",
+  "dependentChangeType": "patch"
+}
