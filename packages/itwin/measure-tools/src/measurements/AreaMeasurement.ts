@@ -330,7 +330,7 @@ export class AreaMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.polygonPoints.length === 0 || (this.sheetToWorldScale && this._sheetViewId !== context.viewport.view.id))
+    if (this.polygonPoints.length === 0 || (this._sheetToWorldScale && this._sheetViewId !== context.viewport.view.id))
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
