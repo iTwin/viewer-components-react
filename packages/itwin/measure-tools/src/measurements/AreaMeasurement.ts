@@ -42,7 +42,8 @@ import { MeasureTools } from "../MeasureTools";
  */
 export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
-  ratio?: number;
+  sheetToWorldScale?: number;
+  sheetViewId?: string;
 }
 
 /** Serializer for a [[AreaeMeasurement]]. */
@@ -141,7 +142,8 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super();
 
-    this.sheetToWorldScale = undefined;
+    this.sheetToWorldScale = props?.sheetToWorldScale;
+    this._sheetViewId = props?.sheetViewId;
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
@@ -594,8 +596,11 @@ export class AreaMeasurement extends Measurement {
 
       this._polygon.setPoints(pts, false, true);
 
-      if (jsonArea.ratio !== undefined)
-        this.sheetToWorldScale = jsonArea.ratio;
+      if (jsonArea.sheetToWorldScale !== undefined)
+        this.sheetToWorldScale = jsonArea.sheetToWorldScale;
+
+      if (jsonArea.sheetViewId !== undefined)
+        this.sheetViewId = jsonArea.sheetViewId;
 
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
@@ -614,7 +619,8 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
-    jsonArea.ratio = this._sheetToWorldScale;
+    jsonArea.sheetToWorldScale = this._sheetToWorldScale;
+    jsonArea.sheetViewId = this._sheetViewId;
   }
 
   public static create(pts: Point3d[], viewType?: string): AreaMeasurement {

@@ -51,7 +51,8 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
-  ratio?: number;
+  sheetToWorldScale?: number;
+  sheetViewId?: string;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -164,7 +165,8 @@ export class DistanceMeasurement extends Measurement {
     this._startPoint = Point3d.createZero();
     this._endPoint = Point3d.createZero();
     this._isDynamic = false;
-    this.sheetToWorldScale = undefined;
+    this.sheetToWorldScale = props?.sheetToWorldScale;
+    this.sheetViewId = props?.sheetViewId;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
 
@@ -504,8 +506,8 @@ export class DistanceMeasurement extends Measurement {
       );
 
     const distance = this.sheetToWorldScale * this._startPoint.distance(this._endPoint);
-    const run = this.sheetToWorldScale * Math.abs(this._endPoint.x - this._startPoint.x);
-    const rise = this.sheetToWorldScale * Math.abs(this._endPoint.y - this._startPoint.y);
+    const run = this._sheetToWorldScale ? this.sheetToWorldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this._sheetToWorldScale ? this.sheetToWorldScale * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
@@ -674,8 +676,11 @@ export class DistanceMeasurement extends Measurement {
         ? jsonDist.showAxes
         : MeasurementPreferences.current.displayMeasurementAxes;
 
-    if (jsonDist.ratio !== undefined)
-      this.sheetToWorldScale = jsonDist.ratio;
+    if (jsonDist.sheetToWorldScale !== undefined)
+      this.sheetToWorldScale = jsonDist.sheetToWorldScale;
+
+    if (jsonDist.sheetViewId !== undefined)
+      this.sheetViewId = jsonDist.sheetViewId;
 
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -692,7 +697,8 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
-    jsonDist.ratio = this._sheetToWorldScale;
+    jsonDist.sheetToWorldScale = this._sheetToWorldScale;
+    jsonDist.sheetViewId = this._sheetViewId;
   }
 
   public static create(start: Point3d, end: Point3d, viewType?: string) {

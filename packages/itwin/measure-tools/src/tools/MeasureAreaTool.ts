@@ -226,7 +226,7 @@ MeasureAreaToolModel
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this._enableSheetMeasurements && this._currentMousePoint !== undefined && this.toolModel.drawingOrigin !== undefined && this.toolModel.drawingExtents !== undefined && !SheetMeasurementsHelper.checkIfInDrawing(this._currentMousePoint, this.toolModel.drawingOrigin, this.toolModel.drawingExtents)) {
+    if (this._enableSheetMeasurements && this.toolModel.drawingOrigin !== undefined && this.toolModel.drawingExtents !== undefined) {
       context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingOrigin, this.toolModel.drawingExtents));
     }
   }
