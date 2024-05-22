@@ -25,6 +25,7 @@ import {
   WellKnownTextStyleType,
 } from "../api/GraphicStyle";
 import type {
+  DrawingMetaData,
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement";
@@ -51,8 +52,7 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
-  sheetToWorldScale?: number;
-  sheetViewId?: string;
+  drawingMetaData?: DrawingMetaData;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -98,10 +98,6 @@ export class DistanceMeasurement extends Measurement {
   private _endPoint: Point3d;
   private _showAxes: boolean;
 
-  // Used for sheet measurements
-  private _sheetToWorldScale: number | undefined;
-  private _sheetViewId?: string;
-
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
 
@@ -114,22 +110,6 @@ export class DistanceMeasurement extends Measurement {
   }
   public get endPointRef(): Point3d {
     return this._endPoint;
-  }
-
-  public set sheetViewId(id: string | undefined) {
-    this._sheetViewId = id;
-  }
-
-  public get sheetViewId(): string | undefined {
-    return this._sheetViewId;
-  }
-
-  public set sheetToWorldScale(scale: number | undefined) {
-    this._sheetToWorldScale = scale ?? undefined;
-  }
-
-  public get sheetToWorldScale(): number {
-    return this._sheetToWorldScale ?? 1.0;
   }
 
   public get isDynamic(): boolean {
@@ -165,8 +145,8 @@ export class DistanceMeasurement extends Measurement {
     this._startPoint = Point3d.createZero();
     this._endPoint = Point3d.createZero();
     this._isDynamic = false;
-    this.sheetToWorldScale = props?.sheetToWorldScale;
-    this.sheetViewId = props?.sheetViewId;
+    if (props?.drawingMetaData)
+      this.drawingMetaData = props.drawingMetaData;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
 
@@ -278,7 +258,7 @@ export class DistanceMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this._sheetToWorldScale && this._sheetViewId !== context.viewport.view.id)
+    if (this.drawingMetaData?.sheetToWorldScale !== undefined && this.sheetViewId !== context.viewport.view.id)
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -506,8 +486,8 @@ export class DistanceMeasurement extends Measurement {
       );
 
     const distance = this.sheetToWorldScale * this._startPoint.distance(this._endPoint);
-    const run = this._sheetToWorldScale ? this.sheetToWorldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this._sheetToWorldScale ? this.sheetToWorldScale * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
+    const run = this.drawingMetaData?.sheetToWorldScale !== undefined ? this.sheetToWorldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this.drawingMetaData?.sheetToWorldScale !== undefined ? this.sheetToWorldScale * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
@@ -578,7 +558,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
 
-    if (this._sheetToWorldScale === undefined) {
+    if (this.drawingMetaData?.sheetToWorldScale !== undefined === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
@@ -676,11 +656,8 @@ export class DistanceMeasurement extends Measurement {
         ? jsonDist.showAxes
         : MeasurementPreferences.current.displayMeasurementAxes;
 
-    if (jsonDist.sheetToWorldScale !== undefined)
-      this.sheetToWorldScale = jsonDist.sheetToWorldScale;
-
-    if (jsonDist.sheetViewId !== undefined)
-      this.sheetViewId = jsonDist.sheetViewId;
+    if (jsonDist.drawingMetaData !== undefined)
+      this.drawingMetaData = jsonDist.drawingMetaData;
 
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -697,8 +674,7 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
-    jsonDist.sheetToWorldScale = this._sheetToWorldScale;
-    jsonDist.sheetViewId = this._sheetViewId;
+    jsonDist.drawingMetaData = this.drawingMetaData;
   }
 
   public static create(start: Point3d, end: Point3d, viewType?: string) {

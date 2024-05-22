@@ -8,7 +8,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
-import type { Point3d } from "@itwin/core-geometry";
+import type { Point2d, Point3d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
@@ -232,6 +232,21 @@ export interface MeasurementEqualityOptions {
   angleTolerance?: number;
 }
 
+export interface DrawingMetaData {
+  /** Id of the drawing */
+  drawingId?: string;
+
+  /** Scaling from sheet to world distance */
+  sheetToWorldScale?: number;
+
+  /** Origin of the drawing in sheet coordinates */
+  origin?: Point2d;
+
+  /** Extents of the drawing in sheet coordinates */
+  extents?: Point2d;
+
+}
+
 /** Handler function that modifies the data sent to the widget for display. */
 export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData: MeasurementWidgetData) => Promise<void>;
 /** Handler for modifying the data sent to the widget for display. The highest priority will execute last. */
@@ -256,6 +271,10 @@ export abstract class Measurement {
   private _displayLabels: boolean;
   private _transientId?: Id64String; // Not serialized
   private _isVisible: boolean; // Not serialized
+
+  // Used for sheet measurements
+  private _drawingMetaData: DrawingMetaData;
+  private _sheetViewId?: string;
 
   /** Default drawing style name. */
   public static readonly defaultStyle: string = WellKnownMeasurementStyle.Default;
@@ -283,6 +302,31 @@ export abstract class Measurement {
     const prevId = this._transientId;
     this._transientId = newId;
     this.onTransientIdChanged(prevId);
+  }
+
+  public get drawingMetaData(): DrawingMetaData {
+    return this._drawingMetaData;
+  }
+
+  public set drawingMetaData(data: DrawingMetaData) {
+    this._drawingMetaData = data;
+  }
+
+  public set sheetViewId(id: string | undefined) {
+    this._sheetViewId = id;
+  }
+
+  public get sheetViewId(): string | undefined {
+    return this._sheetViewId;
+  }
+
+  public set sheetToWorldScale(scale: number | undefined) {
+    if (this._drawingMetaData)
+      this._drawingMetaData.sheetToWorldScale = scale ?? undefined;
+  }
+
+  public get sheetToWorldScale(): number {
+    return this._drawingMetaData?.sheetToWorldScale ?? 1.0;
   }
 
   /** Gets or sets if the measurement should be drawn. */
@@ -408,6 +452,7 @@ export abstract class Measurement {
     this._isVisible = true;
     this._displayLabels = MeasurementPreferences.current.displayMeasurementLabels;
     this._viewTarget = new MeasurementViewTarget();
+    this._drawingMetaData = {};
   }
 
   /** Copies the measurement data into a new instance.

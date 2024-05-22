@@ -21,10 +21,6 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   private _currentViewportType?: string;
   private _currentMeasurement?: DistanceMeasurement;
 
-  private _firstPointDrawingId?: string;
-  private _drawingOrigin?: Point2d;
-  private _drawingExtents?: Point2d;
-
   constructor() {
     super();
     this._currentState = State.SetMeasurementViewport;
@@ -35,27 +31,30 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
 
   public get firstPointDrawingId(): string | undefined {
-    return this._firstPointDrawingId;
+    return this._currentMeasurement?.drawingMetaData.drawingId;
   }
 
   public set firstPointDrawingId(newId: string | undefined) {
-    this._firstPointDrawingId = newId;
+    if (this._currentMeasurement)
+      this._currentMeasurement.drawingMetaData.drawingId = newId;
   }
 
   public get drawingExtents(): Point2d | undefined {
-    return this._drawingExtents;
+    return this._currentMeasurement?.drawingMetaData.extents;
   }
 
   public set drawingExtents(extents: Point2d | undefined) {
-    this._drawingExtents = extents;
+    if (this._currentMeasurement)
+      this._currentMeasurement.drawingMetaData.extents = extents;
   }
 
   public get drawingOrigin(): Point2d | undefined {
-    return this._drawingOrigin;
+    return this._currentMeasurement?.drawingMetaData.origin;
   }
 
   public set drawingOrigin(origin: Point2d | undefined) {
-    this._drawingOrigin = origin;
+    if (this._currentMeasurement)
+      this._currentMeasurement.drawingMetaData.origin = origin;
   }
 
   public set sheetViewId(id: string | undefined) {

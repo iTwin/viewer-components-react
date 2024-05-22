@@ -22,6 +22,7 @@ import type {
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
 import type {
+  DrawingMetaData,
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement";
@@ -42,8 +43,7 @@ import { MeasureTools } from "../MeasureTools";
  */
 export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
-  sheetToWorldScale?: number;
-  sheetViewId?: string;
+  drawingMetaData?: DrawingMetaData;
 }
 
 /** Serializer for a [[AreaeMeasurement]]. */
@@ -87,10 +87,6 @@ export class AreaMeasurement extends Measurement {
 
   private _polygon: Polygon;
 
-  // Used for sheet measurements
-  private _sheetToWorldScale: number | undefined;
-  private _sheetViewId?: string;
-
   private _isDynamic: boolean; // No serialize, for dynamics
   private _dynamicEdge?: DistanceMeasurement; // No serialize, for dynamics
 
@@ -114,14 +110,6 @@ export class AreaMeasurement extends Measurement {
     return this._polygon.points;
   }
 
-  public set sheetViewId(id: string | undefined) {
-    this._sheetViewId = id;
-  }
-
-  public get sheetViewId(): string | undefined {
-    return this._sheetViewId;
-  }
-
   public get isValidPolygon(): boolean {
     if (this.polygonPoints.length < 3) return false;
 
@@ -131,19 +119,11 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
-  public set sheetToWorldScale(scale: number | undefined) {
-    this._sheetToWorldScale = scale ?? undefined;
-  }
-
-  public get sheetToWorldScale(): number {
-    return this._sheetToWorldScale ?? 1.0;
-  }
-
   constructor(props?: AreaMeasurementProps) {
     super();
 
-    this.sheetToWorldScale = props?.sheetToWorldScale;
-    this._sheetViewId = props?.sheetViewId;
+    if (props?.drawingMetaData)
+      this.drawingMetaData = props.drawingMetaData;
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
@@ -205,8 +185,8 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
-    this._dynamicEdge.setSheetToWorldScale(this._sheetToWorldScale);
-    this._dynamicEdge.sheetViewId = this._sheetViewId;
+    this._dynamicEdge.setSheetToWorldScale(this.drawingMetaData?.sheetToWorldScale);
+    this._dynamicEdge.sheetViewId = this.sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
     this._dynamicEdge.lockStyle = this.lockStyle;
@@ -332,7 +312,7 @@ export class AreaMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.polygonPoints.length === 0 || (this._sheetToWorldScale && this._sheetViewId !== context.viewport.view.id))
+    if (this.polygonPoints.length === 0 || (this.drawingMetaData?.sheetToWorldScale && this.sheetViewId !== context.viewport.view.id))
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -468,7 +448,7 @@ export class AreaMeasurement extends Measurement {
       }
     );
 
-    if (this._sheetToWorldScale === undefined) {
+    if (this.drawingMetaData?.sheetToWorldScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
@@ -596,11 +576,8 @@ export class AreaMeasurement extends Measurement {
 
       this._polygon.setPoints(pts, false, true);
 
-      if (jsonArea.sheetToWorldScale !== undefined)
-        this.sheetToWorldScale = jsonArea.sheetToWorldScale;
-
-      if (jsonArea.sheetViewId !== undefined)
-        this.sheetViewId = jsonArea.sheetViewId;
+      if (jsonArea.drawingMetaData !== undefined)
+        this.drawingMetaData = jsonArea.drawingMetaData;
 
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
@@ -619,8 +596,7 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
-    jsonArea.sheetToWorldScale = this._sheetToWorldScale;
-    jsonArea.sheetViewId = this._sheetViewId;
+    jsonArea.drawingMetaData = this.drawingMetaData;
   }
 
   public static create(pts: Point3d[], viewType?: string): AreaMeasurement {
