@@ -1,39 +1,21 @@
-/*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import React from "react";
 import "@testing-library/jest-dom";
-import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import {
-  act,
-  mockIModelId1,
-  mockIModelId2,
-  mockIModelsResponse,
-  mockReportId,
-  render,
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-  within,
-} from "./test-utils";
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import React from "react";
 import * as moq from "typemoq";
-import type {
-  MappingsClient,
-  MappingSingle,
-  Report,
-  ReportMappingCollection,
-} from "@itwin/insights-client";
-import {
-  ExtractionClient,
-  ReportsClient,
-} from "@itwin/insights-client";
-import { ReportMappings } from "../widget/components/ReportMappings";
-import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
-import { BulkExtractor } from "../widget/components/BulkExtractor";
-import type { ReportMappingHorizontalTileProps } from "../widget/components/ReportMappingHorizontalTile";
-import { Text } from "@itwin/itwinui-react";
 import { EmptyLocalization } from "@itwin/core-common";
+import { ExtractionClient, MappingsClient, ReportsClient } from "@itwin/insights-client";
+import { Text } from "@itwin/itwinui-react";
+import { ReportsConfigWidget } from "../ReportsConfigWidget";
+import { BulkExtractor } from "../widget/components/BulkExtractor";
+import { ReportMappings } from "../widget/components/ReportMappings";
+import { act, mockIModelId1, mockIModelId2, mockIModelsResponse, mockReportId, render, screen, waitFor, waitForElementToBeRemoved, within } from "./test-utils";
+
+import type { MappingContainer, Report, ReportMappingCollection } from "@itwin/insights-client";
+import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
+import type { ReportMappingHorizontalTileProps } from "../widget/components/ReportMappingHorizontalTile";
 import type { AddMappingsModalProps } from "../widget/components/AddMappingsModal";
 import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management/lib/operations";
 
@@ -108,29 +90,25 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
   };
 };
 
-const mockMappingsFactory = (
-  mockReportMappings: ReportMappingCollection
-): MappingSingle[] => {
-  const mockMappings: MappingSingle[] = mockReportMappings.mappings.map(
-    (mapping, index) => ({
-      mapping: {
-        id: mapping.mappingId,
-        mappingName: `mOcKMaPpIngNaMe${index}`,
-        description: `mOcKmApPInGDeScRiPtIoN${index}`,
-        extractionEnabled: false,
-        createdOn: "",
-        createdBy: "",
-        modifiedOn: "",
-        modifiedBy: "",
-        _links: {
-          imodel: {
-            // Tie the mapping to to the iModel Id
-            href: mapping.imodelId,
-          },
+const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): MappingContainer[] => {
+  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map((mapping, index) => ({
+    mapping: {
+      id: mapping.mappingId,
+      mappingName: `mOcKMaPpIngNaMe${index}`,
+      description: `mOcKmApPInGDeScRiPtIoN${index}`,
+      extractionEnabled: false,
+      createdOn: "",
+      createdBy: "",
+      modifiedOn: "",
+      modifiedBy: "",
+      _links: {
+        iModel: {
+          // Tie the mapping to to the iModel Id
+          href: mapping.imodelId,
         },
       },
-    })
-  );
+    },
+  }));
 
   return mockMappings;
 };
@@ -142,10 +120,12 @@ jest.mock("../widget/components/Constants.ts", () => ({
 
 jest.mock("../widget/components/ReportMappingHorizontalTile", () => ({
   ReportMappingHorizontalTile: (props: ReportMappingHorizontalTileProps) => {
-    return (<div data-testid="horizontal-tile">
-      <Text>{props.mapping.mappingName}</Text>
-      <Text title={props.mapping.mappingDescription}>{props.mapping.iModelName}</Text>
-    </div>);
+    return (
+      <div data-testid="horizontal-tile">
+        <Text>{props.mapping.mappingName}</Text>
+        <Text title={props.mapping.mappingDescription}>{props.mapping.iModelName}</Text>
+      </div>
+    );
   },
 }));
 
@@ -178,15 +158,16 @@ const mockMappingsClient = moq.Mock.ofType<MappingsClient>();
 beforeAll(async () => {
   const localization = new EmptyLocalization();
   await ReportsConfigWidget.initialize(localization);
-  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+  mockIModelsClientOperations
+    .setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
     .returns(async () => mockIModelsResponse[0].iModel);
-  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+  mockIModelsClientOperations
+    .setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
     .returns(async () => mockIModelsResponse[1].iModel);
-  mockIModelsClient.setup((x) => x.iModels)
-    .returns(() => mockIModelsClientOperations.object);
+  mockIModelsClient.setup((x) => x.iModels).returns(() => mockIModelsClientOperations.object);
   mockReportsClient.setup(async (x) => x.getReportMappings(moq.It.isAny(), moq.It.isAny())).returns(mockGetReportMappings);
   mockMappingsClient.setup(async (x) => x.getMappings(moq.It.isAny(), moq.It.isAny())).returns(mockGetMappings);
-  mockMappingsClient.setup(async (x) => x.getMapping(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(mockGetMapping);
+  mockMappingsClient.setup(async (x) => x.getMapping(moq.It.isAny(), moq.It.isAny())).returns(mockGetMapping);
 });
 
 afterEach(() => {
@@ -203,7 +184,11 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+      reportsClient: mockReportsClient.object,
+      mappingsClient: mockMappingsClient.object,
+      iModelsClient: mockIModelsClient.object,
+    });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -218,7 +203,11 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+      reportsClient: mockReportsClient.object,
+      mappingsClient: mockMappingsClient.object,
+      iModelsClient: mockIModelsClient.object,
+    });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -232,29 +221,20 @@ describe("Report Mappings View", () => {
     // Be an exact match on display name.
     await user.type(searchInput, mockMappings[0].mapping.mappingName);
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(
-      screen.getByText(mockMappings[0].mapping.mappingName)
-    ).toBeInTheDocument();
+    expect(screen.getByText(mockMappings[0].mapping.mappingName)).toBeInTheDocument();
 
     // Be an exact match on description.
     await user.clear(searchInput);
     await user.type(searchInput, mockMappings[0].mapping.description ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(
-      screen.getByTitle(mockMappings[0].mapping.description ?? "")
-    ).toBeInTheDocument();
+    expect(screen.getByTitle(mockMappings[0].mapping.description ?? "")).toBeInTheDocument();
 
     // Be an exact match on iModel Name.
-    const iModel = mockIModelsResponse.find(
-      (mockIModel) =>
-        mockIModel.iModel.id === mockMappings[0].mapping._links.imodel.href
-    );
+    const iModel = mockIModelsResponse.find((mockIModel) => mockIModel.iModel.id === mockMappings[0].mapping._links.iModel.href);
     await user.clear(searchInput);
     await user.type(searchInput, iModel?.iModel.displayName ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(
-      screen.getByText(iModel?.iModel.displayName ?? "")
-    ).toBeInTheDocument();
+    expect(screen.getByText(iModel?.iModel.displayName ?? "")).toBeInTheDocument();
   });
 
   it("add mapping", async () => {
@@ -264,11 +244,15 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+      reportsClient: mockReportsClient.object,
+      mappingsClient: mockMappingsClient.object,
+      iModelsClient: mockIModelsClient.object,
+    });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingSingle) => m.mapping));
+    mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingContainer) => m.mapping));
 
     const addMappingButton = screen.getByRole("button", {
       name: /addmapping/i,
@@ -290,7 +274,11 @@ describe("Report Mappings View", () => {
   });
 
   it("odata feed url", async () => {
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+      reportsClient: mockReportsClient.object,
+      mappingsClient: mockMappingsClient.object,
+      iModelsClient: mockIModelsClient.object,
+    });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -298,11 +286,7 @@ describe("Report Mappings View", () => {
       name: /odatafeedurl/i,
     });
     expect(urlTextbox).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(
-        `https://api.bentley.com/insights/reporting/odata/${mockReport.id}`
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue(`https://api.bentley.com/insights/reporting/odata/${mockReport.id}`)).toBeInTheDocument();
 
     const copyButton = screen.getByRole("button", {
       name: /copy/i,
@@ -321,11 +305,23 @@ describe("Report Mappings View", () => {
 
     const iModels = mockIModelsResponse.map((iModel) => iModel.iModel.id);
 
-    const bulkExtractor = new BulkExtractor(new ReportsClient(), new ExtractionClient(), jest.fn().mockResolvedValue("mockAccessToken"), jest.fn, jest.fn);
+    const bulkExtractor = new BulkExtractor(
+      new ReportsClient(),
+      new ExtractionClient(),
+      new MappingsClient(),
+      jest.fn().mockResolvedValue("mockAccessToken"),
+      jest.fn,
+      jest.fn,
+    );
 
     const runIModelExtractionsMock = jest.spyOn(bulkExtractor, "runIModelExtractions").mockImplementation(async () => Promise.resolve());
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object, bulkExtractor });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, {
+      reportsClient: mockReportsClient.object,
+      mappingsClient: mockMappingsClient.object,
+      iModelsClient: mockIModelsClient.object,
+      bulkExtractor,
+    });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -339,28 +335,15 @@ describe("Report Mappings View", () => {
     expect(runIModelExtractionsMock).toHaveBeenCalledWith(iModels);
   });
 
-  const assertHorizontalTiles = (horizontalTiles: HTMLElement[], mockMappings: MappingSingle[]) => {
+  const assertHorizontalTiles = (horizontalTiles: HTMLElement[], mockMappings: MappingContainer[]) => {
     expect(horizontalTiles).toHaveLength(mockMappings.length);
 
     for (const [index, horizontalTile] of horizontalTiles.entries()) {
       const reportMappingTile = within(horizontalTile);
-      const mockiModel = mockIModelsResponse.find(
-        (iModel) =>
-          iModel.iModel.id === mockMappings[index].mapping._links.imodel.href
-      );
-      expect(
-        reportMappingTile.getByText(
-          mockMappings[index].mapping.mappingName
-        )
-      ).toBeInTheDocument();
-      expect(
-        reportMappingTile.getByTitle(
-          mockMappings[index].mapping.description ?? ""
-        )
-      ).toBeInTheDocument();
-      expect(
-        reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
-      ).toBeInTheDocument();
+      const mockiModel = mockIModelsResponse.find((iModel) => iModel.iModel.id === mockMappings[index].mapping._links.iModel.href);
+      expect(reportMappingTile.getByText(mockMappings[index].mapping.mappingName)).toBeInTheDocument();
+      expect(reportMappingTile.getByTitle(mockMappings[index].mapping.description ?? "")).toBeInTheDocument();
+      expect(reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")).toBeInTheDocument();
     }
   };
 });
