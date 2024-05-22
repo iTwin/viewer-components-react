@@ -60,26 +60,14 @@ export function ExperimentalModelsTree({
     if (!focusedInstancesKeys) {
       return undefined;
     }
-    return async ({ imodelAccess }) => {
-      try {
-        return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys });
-      } catch {
-        return undefined;
-      }
-    };
+    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys });
   }, [focusedInstancesKeys]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) => {
-      try {
-        return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
-      } catch {
-        return undefined;
-      }
-    };
+    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
   }, [filter]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;

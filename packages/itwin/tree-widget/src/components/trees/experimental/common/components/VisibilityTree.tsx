@@ -76,7 +76,6 @@ function VisibilityTreeImpl({
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
   const {
     rootNodes,
-    getHierarchyLevelDetails,
     isLoading,
     reloadTree,
     selectNodes,
@@ -94,8 +93,7 @@ function VisibilityTreeImpl({
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
   const { filteringDialog, onFilterClick } = useHierarchyFiltering({
     imodel,
-    getHierarchyLevelDetails,
-    setHierarchyLevelFilter: treeProps.setHierarchyLevelFilter,
+    getHierarchyLevelDetails: treeProps.getHierarchyLevelDetails,
     defaultHierarchyLevelSizeLimit,
   });
 

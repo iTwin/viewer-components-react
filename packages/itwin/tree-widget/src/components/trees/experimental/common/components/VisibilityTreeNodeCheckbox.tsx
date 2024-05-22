@@ -4,18 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Checkbox } from "@itwin/itwinui-react";
-import { PresentationHierarchyNode, PresentationTreeNode, isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { PresentationHierarchyNode, RenderedTreeNode, isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
 
-interface Props {
-  node: PresentationTreeNode;
+interface VisibilityTreeNodeCheckboxProps {
+  node: RenderedTreeNode;
   onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
   getCheckboxStatus: (node: PresentationHierarchyNode) => VisibilityStatus;
 }
 
 /** @internal */
-export function VisibilityTreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxStatus }: Props) {
-  if (!isPresentationHierarchyNode(node)) {
+export function VisibilityTreeNodeCheckbox({ node, onCheckboxClicked, getCheckboxStatus }: VisibilityTreeNodeCheckboxProps) {
+  if ("type" in node || !isPresentationHierarchyNode(node)) {
     return null;
   }
 

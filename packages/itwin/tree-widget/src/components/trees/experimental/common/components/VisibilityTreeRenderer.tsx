@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Tree } from "@itwin/itwinui-react";
-import { PresentationTreeNode, createTreeNode } from "@itwin/presentation-hierarchies-react";
+import { PresentationTreeNode, RenderedTreeNode, createRenderedTreeNodeData } from "@itwin/presentation-hierarchies-react";
 import { ComponentPropsWithoutRef, useCallback } from "react";
 import { VisibilityTreeNodeRenderer } from "./VisibilityTreeNodeRenderer";
 import "./VisibilityTreeRenderer.scss";
@@ -19,17 +19,9 @@ interface VisibilityTreeRendererOwnProps {
 
 type VisibilityTreeRendererProps = Pick<
   VisibilityTreeNodeRendererProps,
-  | "expandNode"
-  | "onNodeClick"
-  | "onNodeKeyDown"
-  | "setHierarchyLevelLimit"
-  | "setHierarchyLevelFilter"
-  | "onFilterClick"
-  | "getIcon"
-  | "getCheckboxStatus"
-  | "onCheckboxClicked"
+  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getCheckboxStatus" | "onCheckboxClicked" | "getHierarchyLevelDetails"
 > &
-  Omit<TreeProps<PresentationTreeNode>, "data" | "nodeRenderer" | "getNode"> &
+  Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
   VisibilityTreeRendererOwnProps;
 
 /** @internal */
@@ -39,15 +31,14 @@ export function VisibilityTreeRenderer({
   onNodeClick,
   onNodeKeyDown,
   isNodeSelected,
-  setHierarchyLevelLimit,
-  setHierarchyLevelFilter,
   onFilterClick,
   getIcon,
   getCheckboxStatus,
   onCheckboxClicked,
+  getHierarchyLevelDetails,
   ...props
 }: VisibilityTreeRendererProps) {
-  const nodeRenderer = useCallback<TreeProps<PresentationTreeNode>["nodeRenderer"]>(
+  const nodeRenderer = useCallback<TreeProps<RenderedTreeNode>["nodeRenderer"]>(
     (nodeProps) => {
       return (
         <VisibilityTreeNodeRenderer
@@ -56,21 +47,20 @@ export function VisibilityTreeRenderer({
           onNodeClick={onNodeClick}
           onNodeKeyDown={onNodeKeyDown}
           getIcon={getIcon}
-          setHierarchyLevelFilter={setHierarchyLevelFilter}
-          setHierarchyLevelLimit={setHierarchyLevelLimit}
           getCheckboxStatus={getCheckboxStatus}
           onCheckboxClicked={onCheckboxClicked}
           onFilterClick={onFilterClick}
+          getHierarchyLevelDetails={getHierarchyLevelDetails}
         />
       );
     },
-    [expandNode, onNodeClick, onNodeKeyDown, setHierarchyLevelLimit, setHierarchyLevelFilter, getIcon, getCheckboxStatus, onCheckboxClicked, onFilterClick],
+    [expandNode, onNodeClick, onNodeKeyDown, getHierarchyLevelDetails, getIcon, getCheckboxStatus, onCheckboxClicked, onFilterClick],
   );
 
-  const getNode = useCallback<TreeProps<PresentationTreeNode>["getNode"]>((node) => createTreeNode(node, isNodeSelected), [isNodeSelected]);
+  const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
 
   return (
-    <Tree<PresentationTreeNode>
+    <Tree<RenderedTreeNode>
       {...props}
       className="visibility-tree-renderer"
       data={rootNodes}

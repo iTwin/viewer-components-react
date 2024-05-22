@@ -26,10 +26,10 @@ interface UseHierarchyFilteringOwnProps {
   defaultHierarchyLevelSizeLimit: number;
 }
 
-type UseHierarchyFilteringProps = UseHierarchyFilteringOwnProps & Pick<UseTreeResult, "setHierarchyLevelFilter" | "getHierarchyLevelDetails">;
+type UseHierarchyFilteringProps = UseHierarchyFilteringOwnProps & Pick<UseTreeResult, "getHierarchyLevelDetails">;
 
 /** @internal */
-export function useHierarchyFiltering({ imodel, defaultHierarchyLevelSizeLimit, setHierarchyLevelFilter, getHierarchyLevelDetails }: UseHierarchyFilteringProps) {
+export function useHierarchyFiltering({ imodel, defaultHierarchyLevelSizeLimit, getHierarchyLevelDetails }: UseHierarchyFilteringProps) {
   const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string | undefined; hierarchyDetails: HierarchyLevelDetails }>();
   const onFilterClick = useCallback(
     (nodeId: string | undefined) => {
@@ -77,7 +77,7 @@ export function useHierarchyFiltering({ imodel, defaultHierarchyLevelSizeLimit, 
   }, [filteringOptions, imodel]);
 
   const getInitialFilter = useMemo(() => {
-    const currentFilter = filteringOptions?.hierarchyDetails.currentFilter;
+    const currentFilter = filteringOptions?.hierarchyDetails.instanceFilter;
     if (!currentFilter) {
       return undefined;
     }
@@ -93,7 +93,7 @@ export function useHierarchyFiltering({ imodel, defaultHierarchyLevelSizeLimit, 
         if (!filteringOptions) {
           return;
         }
-        setHierarchyLevelFilter(filteringOptions.nodeId, toGenericFilter(info));
+        filteringOptions.hierarchyDetails.setInstanceFilter(toGenericFilter(info));
         setFilteringOptions(undefined);
       }}
       onClose={() => {
@@ -137,7 +137,7 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
         const instanceKeys = await collectInstanceKeys(
           hierarchyLevelDetails.getInstanceKeysIterator({
             instanceFilter,
-            hierarchyLevelSizeLimit: hierarchyLevelDetails.hierarchyLevelSizeLimit ?? defaultHierarchyLevelSizeLimit,
+            hierarchyLevelSizeLimit: hierarchyLevelDetails.sizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
         return `Current filter matching instances count: ${instanceKeys.length}`;
