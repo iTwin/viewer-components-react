@@ -98,7 +98,7 @@ export class DistanceMeasurement extends Measurement {
   private _showAxes: boolean;
 
   // Used for sheet measurements
-  private _ratio: number | undefined;
+  private _sheetToWorldScale: number | undefined;
   private _sheetViewId?: string;
 
   private _isDynamic: boolean; // No serialize
@@ -121,6 +121,14 @@ export class DistanceMeasurement extends Measurement {
 
   public get sheetViewId(): string | undefined {
     return this._sheetViewId;
+  }
+
+  public set sheetToWorldScale(scale: number | undefined) {
+    this._sheetToWorldScale = scale ?? undefined;
+  }
+
+  public get sheetToWorldScale(): number {
+    return this._sheetToWorldScale ?? 1.0;
   }
 
   public get isDynamic(): boolean {
@@ -156,7 +164,7 @@ export class DistanceMeasurement extends Measurement {
     this._startPoint = Point3d.createZero();
     this._endPoint = Point3d.createZero();
     this._isDynamic = false;
-    this._ratio = undefined;
+    this.sheetToWorldScale = undefined;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
 
@@ -165,8 +173,8 @@ export class DistanceMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public setRatio(ratio: number | undefined) {
-    this._ratio = ratio;
+  public setSheetToWorldScale(ratio: number | undefined) {
+    this.sheetToWorldScale = ratio;
   }
 
   public setStartPoint(point: XYAndZ) {
@@ -268,7 +276,7 @@ export class DistanceMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this._ratio && this._sheetViewId !== context.viewport.view.id)
+    if (this._sheetToWorldScale && this._sheetViewId !== context.viewport.view.id)
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -456,7 +464,7 @@ export class DistanceMeasurement extends Measurement {
       );
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      this._ratio ? distance * this._ratio : distance,
+      distance * this.sheetToWorldScale,
       lengthSpec
     );
 
@@ -495,9 +503,9 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const distance = this._ratio ? this._ratio * this._startPoint.distance(this._endPoint): this._startPoint.distance(this._endPoint);
-    const run = this._ratio ? this._ratio * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this._ratio ? this._ratio * Math.abs(this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
+    const distance = this.sheetToWorldScale * this._startPoint.distance(this._endPoint);
+    const run = this.sheetToWorldScale * Math.abs(this._endPoint.x - this._startPoint.x);
+    const rise = this.sheetToWorldScale * Math.abs(this._endPoint.y - this._startPoint.y);
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
@@ -568,7 +576,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
 
-    if (this._ratio === undefined) {
+    if (this._sheetToWorldScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
@@ -667,7 +675,7 @@ export class DistanceMeasurement extends Measurement {
         : MeasurementPreferences.current.displayMeasurementAxes;
 
     if (jsonDist.ratio !== undefined)
-      this._ratio = jsonDist.ratio;
+      this.sheetToWorldScale = jsonDist.ratio;
 
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -684,7 +692,7 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
-    jsonDist.ratio = this._ratio;
+    jsonDist.ratio = this._sheetToWorldScale;
   }
 
   public static create(start: Point3d, end: Point3d, viewType?: string) {

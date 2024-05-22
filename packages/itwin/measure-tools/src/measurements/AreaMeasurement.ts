@@ -130,10 +130,18 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
+  public set sheetToWorldScale(scale: number | undefined) {
+    this._sheetToWorldScale = scale ?? undefined;
+  }
+
+  public get sheetToWorldScale(): number {
+    return this._sheetToWorldScale ?? 1.0;
+  }
+
   constructor(props?: AreaMeasurementProps) {
     super();
 
-    this._sheetToWorldScale = undefined;
+    this.sheetToWorldScale = undefined;
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
@@ -146,7 +154,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public setSheetToWorldScale(sheetToWorldScale: number | undefined) {
-    this._sheetToWorldScale = sheetToWorldScale;
+    this.sheetToWorldScale = sheetToWorldScale;
     this.polygon.sheetToWorldScale = sheetToWorldScale;
   }
 
@@ -195,7 +203,7 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
-    this._dynamicEdge.setRatio(this._sheetToWorldScale);
+    this._dynamicEdge.setSheetToWorldScale(this._sheetToWorldScale);
     this._dynamicEdge.sheetViewId = this._sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
@@ -322,7 +330,7 @@ export class AreaMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.polygonPoints.length === 0 || (this._sheetToWorldScale && this._sheetViewId !== context.viewport.view.id))
+    if (this.polygonPoints.length === 0 || (this.sheetToWorldScale && this._sheetViewId !== context.viewport.view.id))
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -423,11 +431,11 @@ export class AreaMeasurement extends Measurement {
       );
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
-      this._sheetToWorldScale ? this._sheetToWorldScale * this._polygon.perimeter: this._polygon.perimeter,
+      this.sheetToWorldScale * this._polygon.perimeter,
       lengthSpec
     );
     const fArea = IModelApp.quantityFormatter.formatQuantity(
-      this._sheetToWorldScale ? (this._sheetToWorldScale * this._sheetToWorldScale) * this._polygon.area: this._polygon.area,
+      this.sheetToWorldScale * this.sheetToWorldScale * this._polygon.area,
       areaSpec
     );
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(
@@ -587,7 +595,7 @@ export class AreaMeasurement extends Measurement {
       this._polygon.setPoints(pts, false, true);
 
       if (jsonArea.ratio !== undefined)
-        this._sheetToWorldScale = jsonArea.ratio;
+        this.sheetToWorldScale = jsonArea.ratio;
 
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);

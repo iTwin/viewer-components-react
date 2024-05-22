@@ -56,7 +56,7 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor(enableSheetMeasurements: boolean) {
+  constructor(enableSheetMeasurements = false) {
     super();
     this._enableSheetMeasurements = enableSheetMeasurements;
   }

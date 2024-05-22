@@ -57,7 +57,7 @@ MeasureAreaToolModel
     return MeasureToolsFeatures.Tools_MeasureArea;
   }
 
-  constructor(enableSheetMeasurements: boolean) {
+  constructor(enableSheetMeasurements = false) {
     super();
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
