@@ -71,7 +71,7 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
   }
 
   public setRatio(ratio: number | undefined) {
-    this._currentMeasurement?.setRatio(ratio);
+    this._currentMeasurement?.setSheetToWorldScale(ratio);
   }
 
   public override get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }

@@ -87,7 +87,7 @@ export class AreaMeasurement extends Measurement {
   private _polygon: Polygon;
 
   // Used for sheet measurements
-  private _ratio: number | undefined;
+  private _sheetToWorldScale: number | undefined;
   private _sheetViewId?: string;
 
   private _isDynamic: boolean; // No serialize, for dynamics
@@ -133,7 +133,7 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super();
 
-    this._ratio = undefined;
+    this._sheetToWorldScale = undefined;
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
@@ -145,8 +145,9 @@ export class AreaMeasurement extends Measurement {
     if (props) this.readFromJSON(props);
   }
 
-  public setRatio(ratio: number | undefined) {
-    this._ratio = ratio;
+  public setSheetToWorldScale(sheetToWorldScale: number | undefined) {
+    this._sheetToWorldScale = sheetToWorldScale;
+    this.polygon.sheetToWorldScale = sheetToWorldScale;
   }
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
@@ -194,7 +195,7 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
-    this._dynamicEdge.setRatio(this._ratio);
+    this._dynamicEdge.setRatio(this._sheetToWorldScale);
     this._dynamicEdge.sheetViewId = this._sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
@@ -202,7 +203,7 @@ export class AreaMeasurement extends Measurement {
     this._dynamicEdge.isDynamic = true;
     this._dynamicEdge.showAxes = false;
     this._dynamicEdge.displayLabels = this.displayLabels;
-    this._polygon.recomputeFromPoints(this._ratio);
+    this._polygon.recomputeFromPoints();
   }
 
   public closeDynamicPolygon(): boolean {
@@ -214,7 +215,7 @@ export class AreaMeasurement extends Measurement {
     );
     if (!isClosedPath) polyPoints.push(polyPoints[0].clone());
 
-    this._polygon.recomputeFromPoints(this._ratio);
+    this._polygon.recomputeFromPoints();
     this._dynamicEdge = undefined;
     this.isDynamic = false;
     return true;
@@ -321,7 +322,7 @@ export class AreaMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.polygonPoints.length === 0 || (this._ratio && this._sheetViewId !== context.viewport.view.id))
+    if (this.polygonPoints.length === 0 || (this._sheetToWorldScale && this._sheetViewId !== context.viewport.view.id))
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -422,11 +423,11 @@ export class AreaMeasurement extends Measurement {
       );
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
-      this._ratio ? this._ratio * this._polygon.perimeter: this._polygon.perimeter,
+      this._sheetToWorldScale ? this._sheetToWorldScale * this._polygon.perimeter: this._polygon.perimeter,
       lengthSpec
     );
     const fArea = IModelApp.quantityFormatter.formatQuantity(
-      this._ratio ? (this._ratio * this._ratio) * this._polygon.area: this._polygon.area,
+      this._sheetToWorldScale ? (this._sheetToWorldScale * this._sheetToWorldScale) * this._polygon.area: this._polygon.area,
       areaSpec
     );
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(
@@ -457,7 +458,7 @@ export class AreaMeasurement extends Measurement {
       }
     );
 
-    if (this._ratio === undefined) {
+    if (this._sheetToWorldScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
@@ -515,7 +516,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public override onDisplayUnitsChanged(): void {
-    this._polygon.recomputeFromPoints(this._ratio);
+    this._polygon.recomputeFromPoints();
   }
 
   /**
@@ -586,7 +587,7 @@ export class AreaMeasurement extends Measurement {
       this._polygon.setPoints(pts, false, true);
 
       if (jsonArea.ratio !== undefined)
-        this._ratio = jsonArea.ratio;
+        this._sheetToWorldScale = jsonArea.ratio;
 
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
@@ -605,7 +606,7 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
-    jsonArea.ratio = this._ratio;
+    jsonArea.ratio = this._sheetToWorldScale;
   }
 
   public static create(pts: Point3d[], viewType?: string): AreaMeasurement {
