@@ -1,5 +1,5 @@
 {
-  "type": "patch",
+  "type": "minor",
   "comment": "Measurement in sheets",
   "packageName": "@itwin/measure-tools-react",
   "email": "maxime.brassard@bentley.com",
