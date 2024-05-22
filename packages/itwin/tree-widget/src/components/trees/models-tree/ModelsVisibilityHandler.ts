@@ -606,8 +606,8 @@ export class SubjectModelIdsCache {
 
   // istanbul ignore next
   public clear() {
-    this._subjectsHierarchy = undefined;
-    this._subjectModels = undefined;
+    this._subjectsHierarchy?.clear();
+    this._subjectModels?.clear();
     this._init = undefined;
   }
 
