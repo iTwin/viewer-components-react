@@ -3,26 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { IModel, QueryOptions} from "@itwin/core-common";
 import { ColorDef, QueryBinder } from "@itwin/core-common";
-import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
+import type { DecorateContext, GraphicBuilder, IModelConnection } from "@itwin/core-frontend";
 import { GraphicType } from "@itwin/core-frontend";
 import { Point2d, Point3d } from "@itwin/core-geometry";
 
-interface idAndLocation {
+interface IdAndLocation {
   id?: string;
   origin?: Point2d;
   extents?: Point2d;
 }
 
-export class SheetMeasurementsHelper {
-
-  /** The frontend / backend subclasses of IModel both have the same query function signature but it isn't present in the base class. Initiates a concurrent ECSql query. */
-  public static doIModelQuery(imodel: IModel, ecsql: string, params?: object | QueryBinder, options?: QueryOptions): AsyncIterableIterator<any> {
-    const queryBinder = undefined === params || params instanceof QueryBinder ? params : QueryBinder.from(params);
-    const imodelAny = imodel as any;
-    return imodelAny.query(ecsql, queryBinder, options) as AsyncIterableIterator<any>;
-  }
+export namespace SheetMeasurementsHelper {
 
   /**
    * @param imodel
@@ -30,10 +22,10 @@ export class SheetMeasurementsHelper {
    * @param mousePos position of the mouse click
    * @returns Id of the clicked on drawing
    */
-  public static async getDrawingId(imodel: IModel, id: string, mousePos: Point3d): Promise<idAndLocation | undefined> {
-    const { ecsql, parameters } = SheetMeasurementsHelper.getDrawingInfoECSQL(id);
+  export async function getDrawingId(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<IdAndLocation | undefined> {
+    const { ecsql, parameters } = getDrawingInfoECSQL(id);
 
-    const iter = SheetMeasurementsHelper.doIModelQuery(imodel, ecsql, QueryBinder.from(parameters));
+    const iter = imodel.createQueryReader(ecsql, QueryBinder.from(parameters));
 
     for await (const row of iter) {
       const x = mousePos.x;
@@ -42,7 +34,7 @@ export class SheetMeasurementsHelper {
         // Within x extents
         if (y >= row[1].Y && y <= row[1].Y + row[2].Y) {
           // Within y extents
-          const result: idAndLocation = {
+          const result: IdAndLocation = {
             id: row[0],
             origin: new Point2d(row[1].X, row[1].Y),
             extents: new Point2d(row[2].X, row[2].Y),
@@ -55,7 +47,7 @@ export class SheetMeasurementsHelper {
     return undefined;
   }
 
-  private static getDrawingInfoECSQL(id: string) {
+  function getDrawingInfoECSQL(id: string) {
     const ecsql = "SELECT [d].ECInstanceId, \
       [dvd].origin, \
       [dvd].Extents \
@@ -69,11 +61,11 @@ export class SheetMeasurementsHelper {
     return { ecsql, parameters: { id }};
   }
 
-  private static async getScale(imodel: IModel, id: string): Promise<number | undefined>{
+  export async function getScale(imodel: IModelConnection, id: string): Promise<number | undefined>{
 
-    const { ecsql, parameters } = SheetMeasurementsHelper.getScaleECSQL(id);
+    const { ecsql, parameters } = getScaleECSQL(id);
 
-    const iter = SheetMeasurementsHelper.doIModelQuery(imodel, ecsql, QueryBinder.from(parameters));
+    const iter = imodel.createQueryReader(ecsql, QueryBinder.from(parameters));
 
     for await (const row of iter) {
       if (row[0] !== undefined) {
@@ -86,17 +78,17 @@ export class SheetMeasurementsHelper {
     return undefined;
   }
 
-  public static async getRatio(imodel: IModel, id: string): Promise<number | undefined> {
+  export async function getRatio(imodel: IModelConnection, id: string): Promise<number | undefined> {
 
     // Check if the scale is present in the viewAttachment JsonProperties
-    const scale = await SheetMeasurementsHelper.getScale(imodel, id);
+    const scale = await getScale(imodel, id);
     if (scale)
       return scale;
 
     // Otherwise, we make a ratio but this method might add a small rounding error if the drawing does not exactly match the spatialViewDefinition area
-    const { ecsql, parameters } = SheetMeasurementsHelper.getRatioECSQL(id);
+    const { ecsql, parameters } = getRatioECSQL(id);
 
-    const iter = SheetMeasurementsHelper.doIModelQuery(imodel, ecsql, QueryBinder.from(parameters));
+    const iter = imodel.createQueryReader(ecsql, QueryBinder.from(parameters));
 
     for await (const row of iter) {
       if (row[0] !== undefined && row[1] !== undefined && row[2] !== undefined && row[3] !== undefined) {
@@ -109,7 +101,7 @@ export class SheetMeasurementsHelper {
     return undefined;
   }
 
-  private static getScaleECSQL(id: string) {
+  function getScaleECSQL(id: string) {
     const ecsql = "SELECT [va].JsonProperties \
     FROM Biscore.viewAttachment [va], Biscore.DrawingViewDefinition [dvd] \
     WHERE [dvd].baseModel.id =:[id] \
@@ -118,7 +110,7 @@ export class SheetMeasurementsHelper {
     return { ecsql, parameters: { id }};
   }
 
-  private static getRatioECSQL(id: string) {
+  function getRatioECSQL(id: string) {
     const ecsql = "SELECT [spvd].origin as SPVD_ORIGIN, \
     [spvd].extents as SPVD_EXTENTS, \
     [dvd].origin as DVD_ORIGIN, \
@@ -132,11 +124,11 @@ export class SheetMeasurementsHelper {
     return { ecsql, parameters: { id }};
   }
 
-  public static checkIfInDrawing(point: Point3d, drawingOrigin: Point2d, drawingExtents: Point2d): boolean {
+  export function checkIfInDrawing(point: Point3d, drawingOrigin: Point2d, drawingExtents: Point2d): boolean {
     return (point.x >= drawingOrigin.x && point.x <= drawingExtents.x + drawingOrigin.x && point.y >= drawingOrigin.y && point.y <= drawingExtents.y + drawingOrigin.y);
   }
 
-  public static getDrawingContourGraphic(context: DecorateContext, origin: Point2d, extents: Point2d): GraphicBuilder {
+  export function getDrawingContourGraphic(context: DecorateContext, origin: Point2d, extents: Point2d): GraphicBuilder {
     const areaBuilder = context.createGraphicBuilder(GraphicType.WorldOverlay);
     const left = origin.x;
     const right = origin.x + extents.x;
