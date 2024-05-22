@@ -28,7 +28,7 @@ export function CustomParamsSettingsPanel() {
   const [params, setParams] = React.useState<CustomParamsMap>(() => {
     const paramsMap: CustomParamsMap ={};
     const paramsList = storage.get(undefined);
-    if (paramsList) {
+    if (Array.isArray(paramsList)) {
       for (const param of paramsList)
         paramsMap[param.name] = param;
     }

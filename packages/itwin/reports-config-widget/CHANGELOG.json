@@ -2,6 +2,21 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "date": "Tue, 21 May 2024 13:26:36 GMT",
+      "version": "0.5.0",
+      "tag": "@itwin/reports-config-widget-react_v0.5.0",
+      "comments": {
+        "none": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/reports-config-widget-react",
+            "commit": "60fe54a19b5a2d8354163b137da975cd27be8489",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 29 Jan 2024 21:37:20 GMT",
       "version": "0.5.0",
       "tag": "@itwin/reports-config-widget-react_v0.5.0",
