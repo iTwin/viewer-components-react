@@ -52,7 +52,7 @@ export interface MeasurementWidgetData {
 
 export namespace DrawingMetaData {
 
-  export function drawingMetaDataToJSON(obj: DrawingMetaData | undefined): DrawingMetaDataProps | undefined {
+  export function toJSON(obj: DrawingMetaData | undefined): DrawingMetaDataProps | undefined {
     if (obj === undefined)
       return undefined;
     const origin = obj.origin?.toJSONXY();
@@ -62,7 +62,7 @@ export namespace DrawingMetaData {
     return undefined;
   }
 
-  export function drawingMetaDataFromJSON(json: DrawingMetaDataProps): DrawingMetaData {
+  export function fromJSON(json: DrawingMetaDataProps): DrawingMetaData {
 
     return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
 
