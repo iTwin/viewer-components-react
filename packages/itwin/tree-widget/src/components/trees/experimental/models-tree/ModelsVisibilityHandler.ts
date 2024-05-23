@@ -8,6 +8,7 @@ import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
+import { GroupingHierarchyNode, GroupingNodeKey, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
 import { CachingElementIdsContainer } from "../../models-tree/Utils";
 
@@ -15,7 +16,6 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { Keys } from "@itwin/presentation-common";
 import type { VisibilityChangeListener, VisibilityStatus } from "../../VisibilityTreeEventHandler";
-import { GroupingNodeKey, GroupingHierarchyNode, HierarchyNode } from "@itwin/presentation-hierarchies";
 
 interface ExperimentalModelsVisibilityHandlerProps {
   viewport: Viewport;

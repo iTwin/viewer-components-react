@@ -3,26 +3,22 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useCallback, useMemo, useState } from "react";
 import { useDebouncedAsyncValue } from "@itwin/components-react";
 import { IModelConnection } from "@itwin/core-frontend";
 import { ClassInfo, DefaultContentDisplayTypes, Descriptor, KeySet } from "@itwin/presentation-common";
 import {
-  PresentationInstanceFilter,
-  PresentationInstanceFilterDialog,
-  PresentationInstanceFilterInfo,
-  PresentationInstanceFilterPropertiesSource,
+  PresentationInstanceFilter, PresentationInstanceFilterDialog, PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource,
 } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
-import { GenericInstanceFilter, HierarchyProvider, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
+import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { HierarchyLevelDetails, useTree } from "@itwin/presentation-hierarchies-react";
 import { InstanceKey } from "@itwin/presentation-shared";
-import { useCallback, useMemo, useState } from "react";
 
 type UseTreeResult = ReturnType<typeof useTree>;
 
 interface UseHierarchyFilteringOwnProps {
   imodel: IModelConnection;
-  hierarchyProvider?: HierarchyProvider;
   defaultHierarchyLevelSizeLimit: number;
 }
 

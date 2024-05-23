@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
-import { BeEvent } from "@itwin/core-bentley";
-import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
-import { Subject, defer, distinct, from, map, merge, mergeMap, takeUntil } from "rxjs";
+import { defer, distinct, mergeMap, Subject, takeUntil } from "rxjs";
+import { BeEvent } from "@itwin/core-bentley";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 
 interface HierarchyVisibilityHandler {
   getVisibilityStatus: (node: HierarchyNode) => Promise<VisibilityStatus>;
