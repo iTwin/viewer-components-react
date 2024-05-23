@@ -38,10 +38,10 @@
       "model": {
         "nonSpatialView": "Active view is not spatial",
         "hiddenThroughModelSelector": "Model display is hidden through model selector",
-        "allChildElementsHidden": "All child elements are in the never drawn list",
-        "allChildElementsInAlwaysDrawnList": "All child elements are in the always drawn list",
-        "childElementsInAlwaysAndNeverDrawnList": "There are child elements in both always and never drawn lists",
-        "noChildrenInExclusiveAlwaysDrawnList": "There are no children in the always drawn list and exclusive draw mode is enabled",
+        "allElementsHidden": "All elements are in the never drawn list",
+        "allElementsInAlwaysDrawnList": "All elements are in the always drawn list",
+        "elementsInAlwaysAndNeverDrawnList": "There are elements in both always and never drawn lists",
+        "noElementsInExclusiveAlwaysDrawnList": "There are no elements in the always drawn list and exclusive draw mode is enabled",
         "someCategoriesHidden": "Some categories are visible and some are hidden",
         "allCategoriesVisible": "All categories visible",
         "allCategoriesHidden": "All categories hidden"

@@ -571,3 +571,13 @@ export async function queryModelsForHeaderActions(iModel: IModelConnection) {
   const modelProps = await iModel.models.queryProps(queryParams);
   return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
 }
+
+/** @internal */
+export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
+  let set = targetMap.get(key);
+  if (!set) {
+    set = new Set();
+    targetMap.set(key, set);
+  }
+  set.add(value);
+}

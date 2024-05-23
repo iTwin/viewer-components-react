@@ -7,9 +7,10 @@ import { defer, EMPTY, expand, first, forkJoin, from, last, map, mergeMap, share
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
+import { pushToMap } from "./Utils";
 
-import type { Observable } from "rxjs";
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Observable } from "rxjs";
 import type { QueryRowProxy } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GroupingNodeKey } from "@itwin/presentation-common";
@@ -26,14 +27,33 @@ interface InitialInfo {
   modelCategories: Map<Id64String, Id64Set>;
 }
 
+export interface ModelElementsQueryProps {
+  modelId: Id64String;
+}
+
+export interface CategoryElementsQueryProps {
+  categoryId: Id64String;
+  modelId: Id64String;
+}
+
+export interface ElementsByParentQueryProps {
+  rootElementId: Id64String;
+}
+
 /**
  * @internal
  */
-export interface ElementsQueryProps {
-  modelId?: Id64String;
-  categoryId?: Id64String;
-  rootElementId?: Id64String;
-  elementIds?: Id64Set;
+export type ElementsQueryProps = ModelElementsQueryProps | CategoryElementsQueryProps | ElementsByParentQueryProps;
+
+export type FilterableQueryProps<TProps extends {} = ElementsQueryProps> = TProps & {
+  elementIdFilter?: Id64Set;
+};
+
+export interface ElementInfo {
+  parentId?: Id64String;
+  elementId: Id64String;
+  modelId: Id64String;
+  categoryId: Id64String;
 }
 
 /**
@@ -50,9 +70,11 @@ export interface ModelsTreeQueryHandler {
    * Retrieves all elements that match given model, category and root (parent) element IDs,
    * then recursively retrieves all children of those elements by the "ElementOwnsChildElements" relationship.
    */
-  queryElements(props: ElementsQueryProps): Observable<Id64String>;
+  queryElements(props: FilterableQueryProps): Observable<Id64String>;
   /** Analogous to `queryElements` but returns a count instead of values */
-  queryElementsCount(props: ElementsQueryProps): Observable<number>;
+  queryElementsCount(props: FilterableQueryProps): Observable<number>;
+  /** Returns information about given elements */
+  queryElementInfo(elementIds: Id64Set): Observable<ElementInfo>;
   /** Clears cached query results */
   invalidateCache(): void;
 }
@@ -68,12 +90,14 @@ export function createModelsTreeQueryHandler(iModel: IModelConnection): ModelsTr
 
 class QueryHandlerImplementation implements ModelsTreeQueryHandler {
   private readonly _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
+  private readonly _elementsCountCache = new Map<string, Observable<number>>();
   private _initialInfoObs?: Observable<InitialInfo>;
 
   constructor(private readonly _iModel: IModelConnection) {}
 
   public invalidateCache(): void {
     this._groupedElementIdsCache.clear();
+    this._elementsCountCache.clear();
     this._initialInfoObs = undefined;
   }
 
@@ -136,7 +160,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
       SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
       FROM bis.Subject
     `;
-    return this.runQuery(query, undefined, (row) => ({ id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId }));
+    return this.runQuery(query, undefined, ["id", "parentId", "targetPartitionId"]);
   }
 
   private runModelsQuery(): Observable<{ id: Id64String; parentId: Id64String }> {
@@ -146,7 +170,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
       INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate
     `;
-    return this.runQuery(query, undefined, (row) => ({ id: row.id, parentId: row.parentId }));
+    return this.runQuery(query, undefined, ["id", "parentId"]);
   }
 
   private runModelCategoriesQuery(): Observable<{ modelId: Id64String; categoryId: string }> {
@@ -156,7 +180,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
       FROM bis.GeometricElement3d e
       GROUP BY modelId, categoryId
     `;
-    return this.runQuery(query, bindings, (row) => ({ categoryId: row.categoryId, modelId: row.modelId }));
+    return this.runQuery(query, bindings, ["modelId", "categoryId"]);
   }
 
   public queryModelCategories(modelId: Id64String): Observable<Id64String> {
@@ -217,7 +241,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
           WHERE ${bind("ECInstanceId", id, bindings)}
           LIMIT 1
         `;
-        return from(this.runQuery(query, bindings, (row) => ({ modelId: row.modelId, categoryId: row.categoryId, elementIds })));
+        return this.runQuery(query, bindings, (row) => ({ modelId: row.modelId, categoryId: row.categoryId, elementIds }));
       }),
       shareReplay(),
     );
@@ -232,40 +256,55 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     });
   }
 
-  public queryElementsCount(props: ElementsQueryProps): Observable<number> {
-    return this.runElementsQuery({
-      ...props,
-      type: "count",
-    });
+  public queryElementsCount(props: FilterableQueryProps): Observable<number> {
+    const runQuery = () =>
+      this.runElementsQuery({
+        ...props,
+        type: "count",
+      });
+
+    if ("rootElementId" in props || props.elementIdFilter !== undefined) {
+      return runQuery();
+    }
+
+    const cacheKey = `${props.modelId}${"categoryId" in props ? props.categoryId : ""}`;
+    let obs = this._elementsCountCache.get(cacheKey);
+    if (obs) {
+      return obs;
+    }
+
+    obs = runQuery().pipe(shareReplay());
+    this._elementsCountCache.set(cacheKey, obs);
+    return obs;
   }
 
   private runElementsQuery(
-    props: ElementsQueryProps & {
+    props: FilterableQueryProps & {
       type: "ids";
     },
   ): Observable<Id64String>;
   private runElementsQuery(
-    props: ElementsQueryProps & {
+    props: FilterableQueryProps & {
       type: "count";
     },
   ): Observable<number>;
   private runElementsQuery(
-    props: ElementsQueryProps & {
+    props: FilterableQueryProps & {
       type: "ids" | "count";
     },
   ): Observable<Id64String | number> {
     const bindings = new Array<QueryBindable>();
     const conditions = new Array<string>();
-    props.modelId && conditions.push(bind("Model.Id", props.modelId, bindings));
-    props.categoryId && conditions.push(bind("Category.Id", props.categoryId, bindings));
-    props.rootElementId && conditions.push(bind("Parent.Id", props.rootElementId, bindings));
+    "modelId" in props && props.modelId && conditions.push(bind("Model.Id", props.modelId, bindings));
+    "categoryId" in props && conditions.push(bind("Category.Id", props.categoryId, bindings));
+    "rootElementId" in props && conditions.push(bind("Parent.Id", props.rootElementId, bindings));
 
     const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : /* istanbul ignore next */ "";
 
     const query = /* sql */ `
       WITH RECURSIVE
         RootElements(id) AS (
-          SELECT e.ECInstanceId AS id
+          SELECT e.ECInstanceId id
           FROM bis.GeometricElement3d e
           ${whereClause}
         ),
@@ -274,22 +313,64 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
 
           UNION ALL
 
-          SELECT rel.TargetECInstanceId id
+          SELECT c.ECInstanceId id
           FROM ChildElements e
-          JOIN bis.ElementOwnsChildElements rel ON rel.SourceECInstanceId = e.id
+          JOIN bis.GeometricElement3d c ON c.Parent.Id = e.id
         )
         SELECT ${props.type === "ids" ? "*" : "COUNT(*)"} FROM ChildElements
-        ${props.elementIds ? `WHERE ${bind("id", props.elementIds, bindings)}` : ""}
+        ${props.elementIdFilter ? `WHERE ${bind("id", props.elementIdFilter, bindings)}` : ""}
     `;
     return this.runQuery(query, bindings, (row) => row[0]);
   }
 
-  private runQuery<TResult>(query: string, bindings: Array<QueryBindable> | undefined, resultMapper: (row: QueryRowProxy) => TResult): Observable<TResult> {
+  public queryElementInfo(elementIds: Id64Set): Observable<ElementInfo> {
+    const bindings = new Array<QueryBindable>();
+    const query = /* sql */ `
+      WITH RECURSIVE
+        ElementInfo(Id, ModelId, CategoryId, ParentId) AS (
+          SELECT
+            ECInstanceId Id,
+            Model.Id ModelId,
+            Category.Id CategoryId,
+            Parent.Id ParentId
+          FROM bis.GeometricElement3d
+          WHERE ${bind("ECInstanceId", elementIds, bindings)}
+
+          UNION ALL
+
+          SELECT
+            e.Id,
+            e.ModelId,
+            p.Category.Id CategoryId,
+            p.Parent.Id ParentId
+          FROM bis.GeometricElement3d p
+          JOIN ElementInfo e ON p.ECInstanceId = e.ParentId
+        )
+      SELECT Id, ModelId, CategoryId
+      FROM ElementInfo
+      WHERE ParentId IS NULL
+    `;
+    return this.runQuery(query, bindings, ["elementId", "modelId", "categoryId", "parentId"]);
+  }
+
+  private runQuery<TResult extends {}>(
+    query: string,
+    bindings: Array<QueryBindable> | undefined,
+    mapperOrProps: ((row: QueryRowProxy) => TResult) | Array<keyof TResult>,
+  ): Observable<TResult> {
     return defer(() => {
       const reader = this._iModel.createQueryReader(query, bindings && createBinder(bindings), {
         rowFormat: QueryRowFormat.UseJsPropertyNames,
       });
-      return from(reader).pipe(map(resultMapper));
+
+      let mapper: (row: QueryRowProxy) => TResult;
+      if (typeof mapperOrProps === "function") {
+        mapper = mapperOrProps;
+      } else {
+        mapper = (row) => Object.fromEntries(mapperOrProps.map((key) => [key, row[key as string]])) as TResult;
+      }
+
+      return from(reader).pipe(map(mapper));
     });
   }
 }
@@ -329,13 +410,4 @@ function createBinder(bindings: Array<QueryBindable>): QueryBinder | undefined {
     binder.bindIdSet(idx, Array.isArray(x) ? new Set(x) : x);
   });
   return binder;
-}
-
-function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  let set = targetMap.get(key);
-  if (!set) {
-    set = new Set();
-    targetMap.set(key, set);
-  }
-  set.add(value);
 }

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Observable } from "rxjs";
-import { concatAll, concatMap, concatWith, count, EMPTY, expand, filter, from, of } from "rxjs";
+import { concatAll, concatMap, concatWith, count, EMPTY, expand, filter, find, from, map, mergeMap, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
@@ -17,7 +17,7 @@ import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNode
 
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import type { Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type {
   CategoryDescription,
   ClassInfo,
@@ -41,8 +41,8 @@ import type { Viewport, ViewState } from "@itwin/core-frontend";
 interface SubjectModelIdsMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
   subjectModels?: Map<Id64String, Id64String[]>;
-  modelCategories?: Map<Id64String, Id64String[]>;
-  categoryElements?: Map<Id64String, Array<Id64String>>;
+  modelCategories?: Map<Id64String, Id64Array>;
+  categoryElements?: Map<Id64String, Id64Array>;
   elementChildren?: Map<Id64String, Array<Id64String>>;
   groupingNodeChildren?: Map<NodeKey, { modelId: string; categoryId: string; elementIds: Array<string> }>;
 }
@@ -86,6 +86,7 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
       );
     },
   );
+
   const res: ModelsTreeQueryHandler = {
     invalidateCache: sinon.fake(),
     querySubjectModels: sinon.fake((subjectId) => {
@@ -107,6 +108,30 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
         : of({ modelId: "", categoryId: "", elementIds: EMPTY });
     }),
     queryElements,
+    queryElementInfo: sinon.fake((elementIds) => {
+      return from(elementIds).pipe(
+        mergeMap((elementId) => {
+          return from(props?.categoryElements ?? []).pipe(
+            find(([_, elements]) => elements.includes(elementId)),
+            mergeMap((categoryEntry) => {
+              const createDefaultElementInfo = () => ({
+                elementId,
+                modelId: "",
+                categoryId: "",
+              });
+              if (!categoryEntry) {
+                return of(createDefaultElementInfo());
+              }
+              const categoryId = categoryEntry[0];
+              return from(props?.modelCategories ?? []).pipe(
+                find(([_, categories]) => categories.includes(categoryId)),
+                map((modelEntry) => (modelEntry ? { elementId, modelId: modelEntry[0], categoryId } : createDefaultElementInfo())),
+              );
+            }),
+          );
+        }),
+      );
+    }),
     queryElementsCount: sinon.fake((queryProps) => {
       return queryElements(queryProps).pipe(count());
     }),
@@ -354,8 +379,7 @@ export function createFakeSinonViewport(
   let alwaysDrawn = props?.alwaysDrawn;
   let neverDrawn = props?.neverDrawn;
 
-  // Stubs are defined as partial to ensure that the overrided implementation is compatible with original interfaces
-
+  // Stubs are defined as partial to ensure that the overridden implementation is compatible with original interfaces
   const perModelCategoryVisibility: Partial<PerModelCategoryVisibility.Overrides> = {
     getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
     setOverride: sinon.fake(),
@@ -370,6 +394,9 @@ export function createFakeSinonViewport(
     ...props?.view,
   };
 
+  const onAlwaysDrawnChanged = new BeEvent();
+  const onNeverDrawnChanged = new BeEvent();
+
   const result: Partial<Viewport> = {
     addViewedModels: sinon.fake.resolves(undefined),
     changeCategoryDisplay: sinon.fake(),
@@ -378,8 +405,8 @@ export function createFakeSinonViewport(
     onViewedCategoriesPerModelChanged: new BeEvent(),
     onViewedCategoriesChanged: new BeEvent(),
     onViewedModelsChanged: new BeEvent(),
-    onAlwaysDrawnChanged: new BeEvent(),
-    onNeverDrawnChanged: new BeEvent(),
+    onAlwaysDrawnChanged,
+    onNeverDrawnChanged,
     ...props,
     get alwaysDrawn() {
       return alwaysDrawn;
@@ -387,10 +414,26 @@ export function createFakeSinonViewport(
     get neverDrawn() {
       return neverDrawn;
     },
-    setAlwaysDrawn: sinon.fake((x) => (alwaysDrawn = x)),
-    setNeverDrawn: sinon.fake((x) => (neverDrawn = x)),
-    clearAlwaysDrawn: sinon.fake(() => alwaysDrawn?.clear()),
-    clearNeverDrawn: sinon.fake(() => neverDrawn?.clear()),
+    setAlwaysDrawn: sinon.fake((x) => {
+      alwaysDrawn = x;
+      onAlwaysDrawnChanged.raiseEvent(result);
+    }),
+    setNeverDrawn: sinon.fake((x) => {
+      neverDrawn = x;
+      onNeverDrawnChanged.raiseEvent(result);
+    }),
+    clearAlwaysDrawn: sinon.fake(() => {
+      if (alwaysDrawn?.size) {
+        alwaysDrawn.clear();
+        onAlwaysDrawnChanged.raiseEvent(result);
+      }
+    }),
+    clearNeverDrawn: sinon.fake(() => {
+      if(neverDrawn?.size) {
+        neverDrawn.clear();
+        onNeverDrawnChanged.raiseEvent(result);
+      }
+    }),
     perModelCategoryVisibility: perModelCategoryVisibility as PerModelCategoryVisibility.Overrides,
     view: view as ViewState,
   };
