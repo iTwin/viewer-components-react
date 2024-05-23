@@ -8,8 +8,6 @@ import "./MapUrlDialog.scss";
 import * as React from "react";
 import { SpecialKey } from "@itwin/appui-abstract";
 import { BeEvent, Guid } from "@itwin/core-bentley";
-import type { ImageMapLayerSettings } from "@itwin/core-common";
-import type { MapLayerAccessClient, MapLayerSourceValidation, ScreenViewport } from "@itwin/core-frontend";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
 import { SvgStatusWarning, SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
@@ -19,11 +17,13 @@ import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
-import type { MapLayerOptions } from "../Interfaces";
 import { SelectCustomParam } from "./SelectCustomParam";
 import { SelectMapFormat } from "./SelectMapFormat";
 import { UserPreferencesStorageOptions } from "./UserPreferencesStorageOptions";
 
+import type { ImageMapLayerSettings } from "@itwin/core-common";
+import type { MapLayerAccessClient, MapLayerSourceValidation, ScreenViewport } from "@itwin/core-frontend";
+import type { MapLayerOptions } from "../Interfaces";
 export const MAP_TYPES = {
   wms: "WMS",
   arcGis: "ArcGIS",
@@ -424,7 +424,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
     const ac = IModelApp.mapLayerFormatRegistry.getAccessClient(mapType);
     if (ac?.onOAuthProcessEnd) {
-      setAccessClient(ac); // cache it, so we dont need to make another lookup;
+      setAccessClient(ac); // cache it, so we don't need to make another lookup;
       ac.onOAuthProcessEnd.addListener(handleOAuthProcessEnd);
     }
     setAccessClientInitialized(true);
