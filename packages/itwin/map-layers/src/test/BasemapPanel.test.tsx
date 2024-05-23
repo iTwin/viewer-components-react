@@ -3,16 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable deprecation/deprecation */
+/* eslint-disable @itwin/no-internal */
 
 import { expect, should } from "chai";
 import * as sinon from "sinon";
 import * as coreCommon from "@itwin/core-common";
 import * as coreFrontend from "@itwin/core-frontend";
 import { fireEvent, render } from "@testing-library/react";
+import { BasemapPanel } from "../ui/widget/BasemapPanel";
 import { defaultBaseMapLayers, SourceMapContext } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
 import { ViewportMock } from "./ViewportMock";
-import { BasemapPanel } from "../ui/widget/BasemapPanel";
 
 describe("BasemapPanel", () => {
   const sandbox = sinon.createSandbox();

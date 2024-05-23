@@ -1,13 +1,12 @@
+import * as moq from "typemoq";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { BeEvent } from "@itwin/core-bentley";
 import * as coreCommon from "@itwin/core-common";
-import type * as coreFrontend from "@itwin/core-frontend";
-import type { MapLayerIndex } from "@itwin/core-frontend";
-import * as moq from "typemoq";
 
+import type * as coreFrontend from "@itwin/core-frontend";
 /**
  * ViewportMock
  *
@@ -55,7 +54,7 @@ export class ViewportMock {
 
     this.displayStyleMock
       .setup((ds) => ds.changeMapLayerProps(moq.It.isAny(), moq.It.isAny()))
-      .returns((props: Partial<coreCommon.MapLayerProps>, mapLayerIndex: MapLayerIndex) => {
+      .returns((props: Partial<coreCommon.MapLayerProps>, mapLayerIndex: coreFrontend.MapLayerIndex) => {
         const index = mapLayerIndex.index;
         const layers = mapLayerIndex.isOverlay ? this.overlayLayers : this.backgroundLayers;
         if (index < 0 || index >= layers.length) {
@@ -67,7 +66,7 @@ export class ViewportMock {
       });
     this.displayStyleMock
       .setup((ds) => ds.detachMapLayerByIndex(moq.It.isAny()))
-      .returns((mapLayerIndex: MapLayerIndex) => {
+      .returns((mapLayerIndex: coreFrontend.MapLayerIndex) => {
         if (this.detachMapLayerByIndexFunc) {
           this.detachMapLayerByIndexFunc(mapLayerIndex);
         }

@@ -3,18 +3,19 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable deprecation/deprecation */
+/* eslint-disable @itwin/no-internal */
 
 import { expect, should } from "chai";
 import * as sinon from "sinon";
+import { ImageMapLayerSettings } from "@itwin/core-common";
 import * as coreFrontend from "@itwin/core-frontend";
 import { fireEvent, getAllByTestId, getByTestId, getByTitle, queryByText, render } from "@testing-library/react";
+import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
-import type { GuidString } from "@itwin/core-bentley";
-import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { ViewportMock } from "./ViewportMock";
-import { ImageMapLayerSettings } from "@itwin/core-common";
 
+import type { GuidString } from "@itwin/core-bentley";
 describe("MapLayerManager", () => {
   const sourceDataset: any = [
     { formatId: "ArcGIS", name: "source2", url: "https://test.com/Mapserver" },
