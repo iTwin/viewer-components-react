@@ -3,9 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Point2d, Point3d } from "@itwin/core-geometry";
+import type { Point3d } from "@itwin/core-geometry";
 import { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
+import type { DrawingMetaData } from "../api/Measurement";
 
 enum State {
   SetMeasurementViewport,
@@ -24,31 +25,13 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     this._currentState = State.SetMeasurementViewport;
   }
 
-  public get firstPointDrawingId(): string | undefined {
-    return this._currentMeasurement?.drawingId;
+  public get drawingMetaData(): DrawingMetaData | undefined {
+    return this._currentMeasurement?.drawingMetaData;
   }
 
-  public set firstPointDrawingId(newId: string | undefined) {
+  public set drawingMetaData(data: DrawingMetaData | undefined) {
     if (this._currentMeasurement)
-      this._currentMeasurement.drawingId = newId;
-  }
-
-  public get drawingExtents(): Point2d | undefined {
-    return this._currentMeasurement?.drawingExtents;
-  }
-
-  public set drawingExtents(extents: Point2d | undefined) {
-    if (this._currentMeasurement)
-      this._currentMeasurement.drawingExtents = extents;
-  }
-
-  public get drawingOrigin(): Point2d | undefined {
-    return this._currentMeasurement?.drawingOrigin;
-  }
-
-  public set drawingOrigin(origin: Point2d | undefined) {
-    if (this._currentMeasurement)
-      this._currentMeasurement.drawingOrigin = origin;
+      this._currentMeasurement.drawingMetaData = data;
   }
 
   public set sheetViewId(id: string | undefined) {
@@ -69,9 +52,9 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     return this._currentMeasurement.isValidPolygon;
   }
 
-  public setWorldScale(scale: number | undefined) {
+  public setPolygonWorldScale(scale: number | undefined) {
     if (this._currentMeasurement)
-      this._currentMeasurement.setWorldScale(scale);
+      this._currentMeasurement.setPolygonWorldScale(scale);
   }
 
   public override get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }

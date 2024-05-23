@@ -3,10 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Point2d, Point3d } from "@itwin/core-geometry";
+import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
+import type { DrawingMetaData } from "../api/Measurement";
 
 enum State {
   SetMeasurementViewport,
@@ -30,31 +31,13 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
 
   public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
 
-  public get firstPointDrawingId(): string | undefined {
-    return this._currentMeasurement?.drawingId;
+  public get drawingMetaData(): DrawingMetaData | undefined {
+    return this._currentMeasurement?.drawingMetaData;
   }
 
-  public set firstPointDrawingId(newId: string | undefined) {
+  public set drawingMetaData(data: DrawingMetaData | undefined) {
     if (this._currentMeasurement)
-      this._currentMeasurement.drawingId = newId;
-  }
-
-  public get drawingExtents(): Point2d | undefined {
-    return this._currentMeasurement?.drawingExtents;
-  }
-
-  public set drawingExtents(extents: Point2d | undefined) {
-    if (this._currentMeasurement)
-      this._currentMeasurement.drawingExtents = extents;
-  }
-
-  public get drawingOrigin(): Point2d | undefined {
-    return this._currentMeasurement?.drawingOrigin;
-  }
-
-  public set drawingOrigin(origin: Point2d | undefined) {
-    if (this._currentMeasurement)
-      this._currentMeasurement.drawingOrigin = origin;
+      this._currentMeasurement.drawingMetaData = data;
   }
 
   public set sheetViewId(id: string | undefined) {
@@ -73,11 +56,6 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
     this._currentViewportType = viewType;
     this.moveToNextState();
     return true;
-  }
-
-  public set worldScale(scale: number | undefined) {
-    if (this._currentMeasurement)
-      this._currentMeasurement.setWorldScale(scale);
   }
 
   public setStartPoint(viewType: string, point: Point3d): boolean {

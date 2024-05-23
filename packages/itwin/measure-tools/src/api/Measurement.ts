@@ -237,10 +237,10 @@ export interface DrawingMetaData {
   drawingId?: string;
 
   /** Scaling from sheet to world distance */
-  worldScale?: number;
+  worldScale: number;
 
   /** Origin of the drawing in sheet coordinates */
-  origin?: Point2d;
+  origin: Point2d;
 
   /** Extents of the drawing in sheet coordinates */
   extents?: Point2d;
@@ -323,8 +323,6 @@ export abstract class Measurement {
   public set drawingId(id: string | undefined) {
     if (this._drawingMetaData)
       this._drawingMetaData.drawingId = id;
-    else
-      this._drawingMetaData = { drawingId: id };
   }
 
   public get drawingId(): string | undefined {
@@ -332,10 +330,8 @@ export abstract class Measurement {
   }
 
   public set drawingOrigin(origin: Point2d | undefined) {
-    if (this._drawingMetaData)
+    if (this._drawingMetaData && origin)
       this._drawingMetaData.origin = origin;
-    else
-      this._drawingMetaData = { origin };
   }
 
   public get drawingOrigin(): Point2d | undefined {
@@ -345,22 +341,18 @@ export abstract class Measurement {
   public set drawingExtents(extents: Point2d | undefined) {
     if (this._drawingMetaData)
       this._drawingMetaData.extents = extents;
-    else
-      this._drawingMetaData = { extents };
   }
 
   public get drawingExtents(): Point2d | undefined {
     return this._drawingMetaData?.extents;
   }
 
-  public setWorldScale(scale: number | undefined) {
-    if (this._drawingMetaData)
+  public set worldScale(scale: number) {
+    if (this._drawingMetaData && scale > 0)
       this._drawingMetaData.worldScale = scale;
-    else
-      this._drawingMetaData = { worldScale: scale };
   }
 
-  public getWorldScale(): number {
+  public get worldScale(): number {
     return this._drawingMetaData?.worldScale ?? 1.0;
   }
 

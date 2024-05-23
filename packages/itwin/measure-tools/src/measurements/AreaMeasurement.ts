@@ -22,7 +22,6 @@ import type {
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
 import type {
-  DrawingMetaData,
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement";
@@ -43,7 +42,6 @@ import { MeasureTools } from "../MeasureTools";
  */
 export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
-  drawingMetaData?: DrawingMetaData;
 }
 
 /** Serializer for a [[AreaeMeasurement]]. */
@@ -135,8 +133,7 @@ export class AreaMeasurement extends Measurement {
     if (props) this.readFromJSON(props);
   }
 
-  public override setWorldScale(worldScale: number | undefined) {
-    super.setWorldScale(worldScale);
+  public setPolygonWorldScale(worldScale: number | undefined) {
     this.polygon.worldScale = worldScale;
   }
 
@@ -185,7 +182,8 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
-    this._dynamicEdge.setWorldScale(this.drawingMetaData?.worldScale);
+    if (this.drawingOrigin)
+      this._dynamicEdge.drawingMetaData = { origin: this.drawingOrigin, worldScale: this.worldScale };
     this._dynamicEdge.sheetViewId = this.sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
@@ -413,11 +411,11 @@ export class AreaMeasurement extends Measurement {
       );
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
-      this.getWorldScale() * this._polygon.perimeter,
+      this.worldScale * this._polygon.perimeter,
       lengthSpec
     );
     const fArea = IModelApp.quantityFormatter.formatQuantity(
-      this.getWorldScale() * this.getWorldScale() * this._polygon.area,
+      this.worldScale * this.worldScale * this._polygon.area,
       areaSpec
     );
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(

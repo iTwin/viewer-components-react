@@ -8,13 +8,7 @@ import type { DecorateContext, GraphicBuilder, IModelConnection } from "@itwin/c
 import { GraphicType } from "@itwin/core-frontend";
 import type { Point3d } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
-
-interface IdAndLocation {
-  id?: string;
-  origin?: Point2d;
-  extents?: Point2d;
-  scale?: number;
-}
+import type { DrawingMetaData } from "./Measurement";
 
 export namespace SheetMeasurementsHelper {
 
@@ -24,7 +18,7 @@ export namespace SheetMeasurementsHelper {
    * @param mousePos position of the mouse click
    * @returns Id of the clicked on drawing
    */
-  export async function getDrawingId(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<IdAndLocation | undefined> {
+  export async function getDrawingId(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetaData | undefined> {
     const { ecsql, parameters } = getDrawingInfoECSQL(id);
 
     const iter = imodel.createQueryReader(ecsql, QueryBinder.from(parameters));
@@ -38,11 +32,11 @@ export namespace SheetMeasurementsHelper {
           // Within y extents
           const jsonProp = JSON.parse(row[3]);
           const scale = jsonProp.scale;
-          const result: IdAndLocation = {
-            id: row[0],
+          const result: DrawingMetaData = {
+            drawingId: row[0],
             origin: new Point2d(row[1].X, row[1].Y),
             extents: new Point2d(row[2].X, row[2].Y),
-            scale,
+            worldScale: scale,
           };
           return result;
         }

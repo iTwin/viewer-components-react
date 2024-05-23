@@ -27,6 +27,7 @@ import type { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
+import type { DrawingMetaData } from "../api/Measurement";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -70,10 +71,8 @@ MeasureAreaToolModel
   }
 
   private resetSheetData(): void {
-    this.toolModel.firstPointDrawingId = undefined;
-    this.toolModel.drawingExtents = undefined;
-    this.toolModel.drawingExtents = undefined;
-    this.toolModel.setWorldScale(undefined);
+    this.toolModel.drawingMetaData = undefined;
+    this.toolModel.setPolygonWorldScale(undefined);
   }
 
   public override async onReinitialize(): Promise<void> {
@@ -132,32 +131,24 @@ MeasureAreaToolModel
     if (!ev.viewport) return;
 
     if (this._enableSheetMeasurements) {
-      if (this.toolModel.firstPointDrawingId === undefined && ev.viewport.view.id !== undefined && initial) {
+      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined && initial) {
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
-        this.toolModel.firstPointDrawingId = drawingInfo?.id;
-        if (this.toolModel.firstPointDrawingId) {
-          this.toolModel.setWorldScale(drawingInfo?.scale);
-          this.toolModel.drawingOrigin = drawingInfo?.origin;
-          this.toolModel.drawingExtents = drawingInfo?.extents;
+
+        if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
+          const data: DrawingMetaData = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
+          this.toolModel.drawingMetaData = data;
+          this.toolModel.setPolygonWorldScale(drawingInfo.worldScale);
           this.toolModel.sheetViewId = ev.viewport.view.id;
-        }
-      } else {
-        if (this.toolModel.firstPointDrawingId !== undefined) {
-          if ((await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id !== this.toolModel.firstPointDrawingId) {
-            this.toolModel.drawingOrigin = undefined;
-            this.toolModel.drawingExtents = undefined;
-            this.toolModel.setWorldScale(undefined);
-          }
         }
       }
     }
   }
 
   public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
-    if (!this._enableSheetMeasurements || this.toolModel.firstPointDrawingId === undefined || this.toolModel.drawingOrigin === undefined || this.toolModel.drawingExtents === undefined)
+    if (!this._enableSheetMeasurements || this.toolModel.drawingMetaData?.drawingId === undefined || this.toolModel.drawingMetaData?.origin === undefined || this.toolModel.drawingMetaData?.extents === undefined)
       return true;
 
-    return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingOrigin, this.toolModel.drawingExtents);
+    return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents);
   }
 
   private _sendHintsToAccuDraw(ev: BeButtonEvent): void {
@@ -226,8 +217,8 @@ MeasureAreaToolModel
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this._enableSheetMeasurements && this.toolModel.drawingOrigin !== undefined && this.toolModel.drawingExtents !== undefined) {
-      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingOrigin, this.toolModel.drawingExtents));
+    if (this._enableSheetMeasurements && this.toolModel.drawingMetaData?.origin !== undefined && this.toolModel.drawingMetaData?.extents !== undefined) {
+      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents));
     }
   }
 

@@ -25,7 +25,6 @@ import {
   WellKnownTextStyleType,
 } from "../api/GraphicStyle";
 import type {
-  DrawingMetaData,
   MeasurementEqualityOptions,
   MeasurementWidgetData,
 } from "../api/Measurement";
@@ -52,7 +51,6 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
-  drawingMetaData?: DrawingMetaData;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -442,7 +440,7 @@ export class DistanceMeasurement extends Measurement {
       );
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance * this.getWorldScale(),
+      distance * this.worldScale,
       lengthSpec
     );
 
@@ -481,9 +479,9 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const distance = this.getWorldScale() * this._startPoint.distance(this._endPoint);
-    const run = this.drawingMetaData?.worldScale !== undefined ? this.getWorldScale() * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this.drawingMetaData?.worldScale !== undefined ? this.getWorldScale() * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
+    const distance = this.worldScale * this._startPoint.distance(this._endPoint);
+    const run = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
