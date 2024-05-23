@@ -28,7 +28,7 @@ interface UseHierarchyVisibilityResult {
 
 /** @internal */
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseNodesVisibilityProps): UseHierarchyVisibilityResult {
-  const statusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus }>());
+  const statusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>());
   const [state, setState] = useState({
     getCheckboxStatus: (_node: PresentationHierarchyNode): VisibilityStatus => ({ state: "hidden", isDisabled: true }),
     onCheckboxClicked: (_node: PresentationHierarchyNode, _checked: boolean): void => {},
@@ -40,26 +40,15 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseNodesVis
 
     const visibilityChanged = new Subject<void>();
     const calculate = new Subject<PresentationHierarchyNode>();
-    const recalculate = new Subject<PresentationHierarchyNode[]>();
 
-    const subscription = merge(
-      calculate.pipe(
-        distinct(),
-        map((nodes) => ({ nodes: [nodes] })),
-      ),
-      recalculate.pipe(map((nodes) => ({ nodes }))),
-    )
+    const subscription = calculate
       .pipe(
-        mergeMap(({ nodes }) =>
-          from(nodes).pipe(
-            takeUntil(visibilityChanged),
-            mergeMap((node) => defer(async () => ({ node, status: await handler.getVisibilityStatus(node.nodeData) }))),
-          ),
-        ),
+        distinct(undefined, visibilityChanged),
+        mergeMap((node) => defer(async () => ({ node, status: await handler.getVisibilityStatus(node.nodeData) })).pipe(takeUntil(visibilityChanged))),
       )
       .subscribe({
         next: ({ node, status }) => {
-          statusMap.current.set(node.id, { node, status });
+          statusMap.current.set(node.id, { node, status, needsRefresh: false });
           setState((prev) => ({
             ...prev,
             getCheckboxStatus: createStatusGetter(statusMap, (node) => calculate.next(node)),
@@ -67,21 +56,32 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseNodesVis
         },
       });
 
+    const changeVisibility = (node: PresentationHierarchyNode, checked: boolean) => {
+      void handler.changeVisibility(node.nodeData, checked);
+      const status = statusMap.current.get(node.id);
+      if (!status) {
+        return;
+      }
+      status.status.state = checked ? "visible" : "hidden";
+      status.status.tooltip = undefined;
+      setState((prev) => ({ ...prev, getCheckboxStatus: createStatusGetter(statusMap, (node) => calculate.next(node)) }));
+    };
+
     setState({
-      onCheckboxClicked: (node, checked) => {
-        void handler.changeVisibility(node.nodeData, checked).then(() => calculate.next(node));
-      },
+      onCheckboxClicked: changeVisibility,
       getCheckboxStatus: createStatusGetter(statusMap, (node) => calculate.next(node)),
     });
 
     const removeListener = handler.onVisibilityChange.addListener(() => {
-      const nodes: PresentationHierarchyNode[] = [];
       statusMap.current.forEach((value) => {
-        nodes.push(value.node);
+        value.needsRefresh = true;
       });
 
       visibilityChanged.next();
-      recalculate.next(nodes);
+      setState((prev) => ({
+        ...prev,
+        getCheckboxStatus: createStatusGetter(statusMap, (node) => calculate.next(node)),
+      }));
     });
 
     return () => {
@@ -95,7 +95,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseNodesVis
 }
 
 function createStatusGetter(
-  map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus }>>,
+  map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>>,
   calculateVisibility: (node: PresentationHierarchyNode) => void,
 ) {
   return (node: PresentationHierarchyNode): VisibilityStatus => {
@@ -103,6 +103,9 @@ function createStatusGetter(
     if (status === undefined) {
       calculateVisibility(node);
       return { state: "hidden", isDisabled: true };
+    }
+    if (status.needsRefresh) {
+      calculateVisibility(node);
     }
 
     return status.status;
