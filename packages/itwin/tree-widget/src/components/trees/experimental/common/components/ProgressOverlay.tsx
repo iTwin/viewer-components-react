@@ -9,9 +9,9 @@ import "./ProgressOverlay.scss";
 /** @internal */
 export function ProgressOverlay() {
   return (
-    <div className="tr-progress-overlay-container">
+    <div className="tw-progress-overlay-container">
       <ProgressLinear indeterminate />
-      <div className="tr-progress-overlay-backdrop" />
+      <div className="tw-progress-overlay-backdrop" />
     </div>
   );
 }

@@ -62,7 +62,7 @@ export function VisibilityTreeRenderer({
   return (
     <Tree<RenderedTreeNode>
       {...props}
-      className="visibility-tree-renderer"
+      className="tw-visibility-tree-renderer"
       data={rootNodes}
       nodeRenderer={nodeRenderer}
       getNode={getNode}

@@ -103,21 +103,6 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const experimentalTrees = [
-              {
-                id: `experimental-${ModelsTreeComponent.id}`,
-                getLabel: () => `${ModelsTreeComponent.getLabel()} (Experimental)`,
-                render: (props: TreeRenderProps) => (
-                  <ExperimentalModelsTreeComponent
-                    getSchemaContext={getSchemaContext}
-                    density={props.density}
-                    selectionStorage={unifiedSelectionStorage}
-                    selectionMode={"extended"}
-                  />
-                ),
-              },
-            ];
-
             const trees = [
               {
                 id: ModelsTreeComponent.id,
@@ -169,6 +154,18 @@ const configuredUiItems = new Map<string, UiItem>([
                   />
                 ),
               },
+              {
+                id: `experimental-${ModelsTreeComponent.id}`,
+                getLabel: () => `${ModelsTreeComponent.getLabel()} (Experimental)`,
+                render: (props: TreeRenderProps) => (
+                  <ExperimentalModelsTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    selectionMode={"extended"}
+                  />
+                ),
+              },
             ];
             return [
               {
@@ -179,18 +176,6 @@ const configuredUiItems = new Map<string, UiItem>([
                   standard: {
                     section: StagePanelSection.Start,
                     location: StagePanelLocation.Right,
-                  },
-                },
-              },
-              {
-                id: "experimental-tree-widget",
-                label: "Experimental Tree Widget",
-                icon: <SvgHierarchyTree />,
-                content: <TreeWidgetWithOptions trees={experimentalTrees} />,
-                layouts: {
-                  standard: {
-                    section: StagePanelSection.Start,
-                    location: StagePanelLocation.Left,
                   },
                 },
               },

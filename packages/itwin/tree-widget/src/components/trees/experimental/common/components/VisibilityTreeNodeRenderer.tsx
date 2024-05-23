@@ -18,8 +18,8 @@ export function VisibilityTreeNodeRenderer({ onCheckboxClicked, getCheckboxStatu
   return (
     <TreeNodeRenderer
       {...restProps}
-      className={cx("visibility-tree-node", restProps.isSelected && "selected")}
-      actionButtonsClassName="visibility-tree-node-action-buttons"
+      className={cx("tw-visibility-tree-node", restProps.isSelected && "selected")}
+      actionButtonsClassName="tw-visibility-tree-node-action-buttons"
       checkbox={<VisibilityTreeNodeCheckbox node={restProps.node} onCheckboxClicked={onCheckboxClicked} getCheckboxStatus={getCheckboxStatus} />}
     />
   );

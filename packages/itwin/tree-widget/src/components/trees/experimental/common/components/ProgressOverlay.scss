@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-.tr-progress-overlay-container {
+.tw-progress-overlay-container {
   position: absolute;
   left: 0;
   top: 0;
@@ -12,7 +12,7 @@
   width: 100%;
   overflow: hidden;
 
-  .tr-progress-overlay-backdrop {
+  .tw-progress-overlay-backdrop {
     opacity: 0.5;
     background-color: var(--iui-color-background-backdrop);
     height: 100%;
