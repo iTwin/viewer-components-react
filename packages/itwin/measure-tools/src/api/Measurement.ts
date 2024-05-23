@@ -8,7 +8,8 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
-import type { Point2d, Point3d } from "@itwin/core-geometry";
+import type { Point3d, XYProps } from "@itwin/core-geometry";
+import { Point2d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
@@ -230,6 +231,11 @@ export interface MeasurementEqualityOptions {
 
   /** Tolerance for angle equality, if needed (usually [[Geometry.smallAngleRadians]] is a default). */
   angleTolerance?: number;
+}
+
+export interface DrawingMetaDataProps extends Omit<DrawingMetaData, "origin" | "extents"> {
+  origin: XYProps;
+  extents?: XYProps;
 }
 
 export interface DrawingMetaData {
@@ -573,6 +579,20 @@ export abstract class Measurement {
     }
 
     return true;
+  }
+
+  public drawingMetaDataToJSON(): DrawingMetaDataProps | undefined {
+    const origin = this.drawingOrigin?.toJSONXY();
+    const extents = this.drawingExtents?.toJSONXY();
+    if (origin !== undefined)
+      return { origin, extents, worldScale: this.worldScale, drawingId: this.drawingId };
+    return undefined;
+  }
+
+  public drawingMetaDataFromJSON(json: DrawingMetaDataProps): DrawingMetaData {
+
+    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
+
   }
 
   /** Draw the measurement. This is called every frame, e.g. when the mouse moves. This is suitable for small or dynamic graphics, but if the measurement

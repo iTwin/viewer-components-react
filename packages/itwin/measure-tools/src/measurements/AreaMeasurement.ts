@@ -121,7 +121,7 @@ export class AreaMeasurement extends Measurement {
     super();
 
     if (props?.drawingMetaData)
-      this.drawingMetaData = props.drawingMetaData;
+      this.drawingMetaData = this.drawingMetaDataFromJSON(props.drawingMetaData);
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
@@ -575,7 +575,7 @@ export class AreaMeasurement extends Measurement {
       this._polygon.setPoints(pts, false, true);
 
       if (jsonArea.drawingMetaData !== undefined)
-        this.drawingMetaData = jsonArea.drawingMetaData;
+        this.drawingMetaData = this.drawingMetaDataFromJSON(jsonArea.drawingMetaData);
 
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
@@ -594,7 +594,9 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
-    jsonArea.drawingMetaData = this.drawingMetaData;
+    const drawingMetaDataJson = this.drawingMetaDataToJSON();
+    if (drawingMetaDataJson)
+      jsonArea.drawingMetaData = drawingMetaDataJson;
   }
 
   public static create(pts: Point3d[], viewType?: string): AreaMeasurement {
