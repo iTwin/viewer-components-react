@@ -25,30 +25,30 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
   }
 
   public get firstPointDrawingId(): string | undefined {
-    return this._currentMeasurement?.drawingMetaData.drawingId;
+    return this._currentMeasurement?.drawingId;
   }
 
   public set firstPointDrawingId(newId: string | undefined) {
     if (this._currentMeasurement)
-      this._currentMeasurement.drawingMetaData.drawingId = newId;
+      this._currentMeasurement.drawingId = newId;
   }
 
   public get drawingExtents(): Point2d | undefined {
-    return this._currentMeasurement?.drawingMetaData.extents;
+    return this._currentMeasurement?.drawingExtents;
   }
 
   public set drawingExtents(extents: Point2d | undefined) {
     if (this._currentMeasurement)
-      this._currentMeasurement.drawingMetaData.extents = extents;
+      this._currentMeasurement.drawingExtents = extents;
   }
 
   public get drawingOrigin(): Point2d | undefined {
-    return this._currentMeasurement?.drawingMetaData.origin;
+    return this._currentMeasurement?.drawingOrigin;
   }
 
   public set drawingOrigin(origin: Point2d | undefined) {
     if (this._currentMeasurement)
-      this._currentMeasurement.drawingMetaData.origin = origin;
+      this._currentMeasurement.drawingOrigin = origin;
   }
 
   public set sheetViewId(id: string | undefined) {
@@ -69,8 +69,9 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     return this._currentMeasurement.isValidPolygon;
   }
 
-  public setSheetToWorldScale(scale: number | undefined) {
-    this._currentMeasurement?.setSheetToWorldScale(scale);
+  public setWorldScale(scale: number | undefined) {
+    if (this._currentMeasurement)
+      this._currentMeasurement.setWorldScale(scale);
   }
 
   public override get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }

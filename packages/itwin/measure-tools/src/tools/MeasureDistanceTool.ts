@@ -72,7 +72,7 @@ MeasureDistanceToolModel
     this.toolModel.firstPointDrawingId = undefined;
     this.toolModel.drawingExtents = undefined;
     this.toolModel.drawingExtents = undefined;
-    this.toolModel.setSheetToWorldScale(undefined);
+    this.toolModel.worldScale = undefined;
   }
 
   public override async onReinitialize(): Promise<void> {
@@ -117,7 +117,7 @@ MeasureDistanceToolModel
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
         this.toolModel.firstPointDrawingId = drawingInfo?.id;
         if (this.toolModel.firstPointDrawingId) {
-          this.toolModel.setSheetToWorldScale(drawingInfo?.scale);
+          this.toolModel.worldScale = drawingInfo?.scale;
           this.toolModel.drawingOrigin = drawingInfo?.origin;
           this.toolModel.drawingExtents = drawingInfo?.extents;
           this.toolModel.sheetViewId = ev.viewport.view.id;
@@ -127,7 +127,7 @@ MeasureDistanceToolModel
           if ((await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point))?.id !== this.toolModel.firstPointDrawingId) {
             this.toolModel.drawingOrigin = undefined;
             this.toolModel.drawingExtents = undefined;
-            this.toolModel.setSheetToWorldScale(undefined);
+            this.toolModel.worldScale = undefined;
           }
         }
       }

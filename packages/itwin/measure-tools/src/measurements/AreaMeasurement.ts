@@ -135,9 +135,9 @@ export class AreaMeasurement extends Measurement {
     if (props) this.readFromJSON(props);
   }
 
-  public setSheetToWorldScale(sheetToWorldScale: number | undefined) {
-    this.sheetToWorldScale = sheetToWorldScale;
-    this.polygon.sheetToWorldScale = sheetToWorldScale;
+  public override setWorldScale(worldScale: number | undefined) {
+    super.setWorldScale(worldScale);
+    this.polygon.worldScale = worldScale;
   }
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
@@ -185,7 +185,7 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
-    this._dynamicEdge.setSheetToWorldScale(this.drawingMetaData?.sheetToWorldScale);
+    this._dynamicEdge.setWorldScale(this.drawingMetaData?.worldScale);
     this._dynamicEdge.sheetViewId = this.sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
@@ -312,7 +312,7 @@ export class AreaMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.polygonPoints.length === 0 || (this.drawingMetaData?.sheetToWorldScale && this.sheetViewId !== context.viewport.view.id))
+    if (this.polygonPoints.length === 0 || (this.drawingMetaData?.worldScale && this.sheetViewId !== context.viewport.view.id))
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -413,11 +413,11 @@ export class AreaMeasurement extends Measurement {
       );
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
-      this.sheetToWorldScale * this._polygon.perimeter,
+      this.getWorldScale() * this._polygon.perimeter,
       lengthSpec
     );
     const fArea = IModelApp.quantityFormatter.formatQuantity(
-      this.sheetToWorldScale * this.sheetToWorldScale * this._polygon.area,
+      this.getWorldScale() * this.getWorldScale() * this._polygon.area,
       areaSpec
     );
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(
@@ -448,7 +448,7 @@ export class AreaMeasurement extends Measurement {
       }
     );
 
-    if (this.drawingMetaData?.sheetToWorldScale === undefined) {
+    if (this.drawingMetaData?.worldScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(

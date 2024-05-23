@@ -237,7 +237,7 @@ export interface DrawingMetaData {
   drawingId?: string;
 
   /** Scaling from sheet to world distance */
-  sheetToWorldScale?: number;
+  worldScale?: number;
 
   /** Origin of the drawing in sheet coordinates */
   origin?: Point2d;
@@ -273,7 +273,7 @@ export abstract class Measurement {
   private _isVisible: boolean; // Not serialized
 
   // Used for sheet measurements
-  private _drawingMetaData: DrawingMetaData;
+  private _drawingMetaData?: DrawingMetaData;
   private _sheetViewId?: string;
 
   /** Default drawing style name. */
@@ -304,11 +304,11 @@ export abstract class Measurement {
     this.onTransientIdChanged(prevId);
   }
 
-  public get drawingMetaData(): DrawingMetaData {
+  public get drawingMetaData(): DrawingMetaData | undefined {
     return this._drawingMetaData;
   }
 
-  public set drawingMetaData(data: DrawingMetaData) {
+  public set drawingMetaData(data: DrawingMetaData | undefined) {
     this._drawingMetaData = data;
   }
 
@@ -320,13 +320,48 @@ export abstract class Measurement {
     return this._sheetViewId;
   }
 
-  public set sheetToWorldScale(scale: number | undefined) {
+  public set drawingId(id: string | undefined) {
     if (this._drawingMetaData)
-      this._drawingMetaData.sheetToWorldScale = scale ?? undefined;
+      this._drawingMetaData.drawingId = id;
+    else
+      this._drawingMetaData = { drawingId: id };
   }
 
-  public get sheetToWorldScale(): number {
-    return this._drawingMetaData?.sheetToWorldScale ?? 1.0;
+  public get drawingId(): string | undefined {
+    return this._drawingMetaData?.drawingId;
+  }
+
+  public set drawingOrigin(origin: Point2d | undefined) {
+    if (this._drawingMetaData)
+      this._drawingMetaData.origin = origin;
+    else
+      this._drawingMetaData = { origin };
+  }
+
+  public get drawingOrigin(): Point2d | undefined {
+    return this._drawingMetaData?.origin;
+  }
+
+  public set drawingExtents(extents: Point2d | undefined) {
+    if (this._drawingMetaData)
+      this._drawingMetaData.extents = extents;
+    else
+      this._drawingMetaData = { extents };
+  }
+
+  public get drawingExtents(): Point2d | undefined {
+    return this._drawingMetaData?.extents;
+  }
+
+  public setWorldScale(scale: number | undefined) {
+    if (this._drawingMetaData)
+      this._drawingMetaData.worldScale = scale;
+    else
+      this._drawingMetaData = { worldScale: scale };
+  }
+
+  public getWorldScale(): number {
+    return this._drawingMetaData?.worldScale ?? 1.0;
   }
 
   /** Gets or sets if the measurement should be drawn. */
@@ -452,7 +487,6 @@ export abstract class Measurement {
     this._isVisible = true;
     this._displayLabels = MeasurementPreferences.current.displayMeasurementLabels;
     this._viewTarget = new MeasurementViewTarget();
-    this._drawingMetaData = {};
   }
 
   /** Copies the measurement data into a new instance.

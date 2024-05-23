@@ -155,10 +155,6 @@ export class DistanceMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public setSheetToWorldScale(ratio: number | undefined) {
-    this.sheetToWorldScale = ratio;
-  }
-
   public setStartPoint(point: XYAndZ) {
     this._startPoint.setFrom(point);
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -258,7 +254,7 @@ export class DistanceMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.drawingMetaData?.sheetToWorldScale !== undefined && this.sheetViewId !== context.viewport.view.id)
+    if (this.drawingMetaData?.worldScale !== undefined && this.sheetViewId !== context.viewport.view.id)
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -446,7 +442,7 @@ export class DistanceMeasurement extends Measurement {
       );
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance * this.sheetToWorldScale,
+      distance * this.getWorldScale(),
       lengthSpec
     );
 
@@ -485,9 +481,9 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const distance = this.sheetToWorldScale * this._startPoint.distance(this._endPoint);
-    const run = this.drawingMetaData?.sheetToWorldScale !== undefined ? this.sheetToWorldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this.drawingMetaData?.sheetToWorldScale !== undefined ? this.sheetToWorldScale * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
+    const distance = this.getWorldScale() * this._startPoint.distance(this._endPoint);
+    const run = this.drawingMetaData?.worldScale !== undefined ? this.getWorldScale() * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this.drawingMetaData?.worldScale !== undefined ? this.getWorldScale() * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
@@ -558,7 +554,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
 
-    if (this.drawingMetaData?.sheetToWorldScale !== undefined === undefined) {
+    if (this.drawingMetaData?.worldScale !== undefined === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
