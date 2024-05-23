@@ -21,7 +21,7 @@ import type { Widget } from '@itwin/appui-react';
 
 // @public (undocumented)
 export class BulkExtractor {
-    constructor(reportsClient: ReportsClient, extractionClient: ExtractionClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
+    constructor(reportsClient: ReportsClient, extractionClient: ExtractionClient, mappingsClient: MappingsClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
     // (undocumented)
     getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates>;
     // (undocumented)
