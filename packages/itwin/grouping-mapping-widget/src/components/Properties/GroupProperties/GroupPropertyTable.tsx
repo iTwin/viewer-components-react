@@ -5,10 +5,15 @@
 import {
   SvgDelete,
   SvgEdit,
+  SvgFunction,
+  SvgLabel,
+  SvgMeasure,
   SvgMore,
 } from "@itwin/itwinui-icons-react";
 import {
   DropdownMenu,
+  Flex,
+  Icon,
   IconButton,
   MenuItem,
 } from "@itwin/itwinui-react";
@@ -20,7 +25,6 @@ import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
-
 export interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
@@ -54,8 +58,25 @@ export const GroupPropertyTable = ({
         Cell: (value: CellProps<Property>) => (
           <PropertyNameCell
             property={value.row.original}
-            onClickModify={onClickModify}
-          />
+            onClickModify={onClickModify} />
+        ),
+      },
+      {
+        id: "propertyTypeIcons",
+        Cell: (value: CellProps<Property>) => (
+          <Flex
+            flexDirection={"row"}
+            gap="xs">
+            <Icon fill={value.row.original.ecProperties ? "informational" : "default"}>
+              <SvgLabel />
+            </Icon>
+            <Icon fill={value.row.original.calculatedPropertyType ? "informational" : "default"}>
+              <SvgMeasure />
+            </Icon>
+            <Icon fill={value.row.original.formula ? "informational" : "default"}>
+              <SvgFunction />
+            </Icon>
+          </Flex>
         ),
       },
       {

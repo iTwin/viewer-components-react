@@ -7,7 +7,9 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
   Button,
+  ExpandableBlock,
   Fieldset,
+  Icon,
   LabeledInput,
   LabeledSelect,
   Text,
@@ -36,6 +38,7 @@ import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
+import { SvgLabel } from "@itwin/itwinui-icons-react";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -83,6 +86,11 @@ export const GroupPropertyAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
+
+  const [mappedPropertiesSelected, setMappedPropertiesSelected] = useState<boolean>(false);
+  // const [calculatedPropertySelected, setCalculatedPropertySelected] = useState<boolean>(false);
+  // const [customCalculationSelected, setCustomCalculationSelected] = useState<boolean>(false);
+
   const queryClient = useQueryClient();
 
   const reset = useCallback(() => {
@@ -193,6 +201,22 @@ export const GroupPropertyAction = ({
 
   const isLoading = isLoadingProperties || isSaving;
 
+  const setSelectedPropertyType = useCallback(()=> {
+    if(groupProperty?.ecProperties){
+      setMappedPropertiesSelected(true);
+    }
+    if(groupProperty?.calculatedPropertyType){
+      // setCalculatedPropertySelected(true);
+    }
+    if(groupProperty?.formula){
+      // setCustomCalculationSelected(true);
+    }
+  }, [groupProperty?.calculatedPropertyType, groupProperty?.ecProperties, groupProperty?.formula]);
+
+  useEffect(() => {
+    setSelectedPropertyType();
+  }, [setSelectedPropertyType]);
+
   return (
     <>
       <div className='gmw-group-property-action-container'>
@@ -265,31 +289,42 @@ export const GroupPropertyAction = ({
             Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new selection is made and saved.
           </Alert>
         }
-        <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
-          <div className="gmw-property-view-button">
-            <Button
-              onClick={async () => setShowPropertiesSelectionModal(true)}
-              disabled={isLoading}
-            >
+        <div>
+          <ExpandableBlock
+            title={"Mapped Properties"}
+            endIcon={
+              <Icon fill={mappedPropertiesSelected === true ? "informational" : "default"}>
+                <SvgLabel />
+              </Icon>
+            }
+            isExpanded={mappedPropertiesSelected}>
+            <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
+              <div className="gmw-property-view-button">
+                <Button
+                  onClick={async () => setShowPropertiesSelectionModal(true)}
+                  disabled={isLoading}
+                >
               Select Properties
-            </Button>
-          </div>
-          <div className="gmw-properties-list">
-            {selectedProperties.length === 0 && !isLoading ?
-              <div className="gmw-empty-selection">
-                <Text>No properties selected.</Text>
-                <Text>Press the &quot;Select Properties&quot; button for options.</Text>
-              </div> :
-              selectedProperties.map((property) => (
-                <GroupPropertyListItem
-                  key={property.key}
-                  content={`${property.displayLabel}`}
-                  title={`${property.actualECClassName}`}
-                  description={property.categoryLabel}
-                />
-              ))}
-          </div>
-        </Fieldset>
+                </Button>
+              </div>
+              <div className="gmw-properties-list">
+                {selectedProperties.length === 0 && !isLoading ?
+                  <div className="gmw-empty-selection">
+                    <Text>No properties selected.</Text>
+                    <Text>Press the &quot;Select Properties&quot; button for options.</Text>
+                  </div> :
+                  selectedProperties.map((property) => (
+                    <GroupPropertyListItem
+                      key={property.key}
+                      content={`${property.displayLabel}`}
+                      title={`${property.actualECClassName}`}
+                      description={property.categoryLabel}
+                    />
+                  ))}
+              </div>
+            </Fieldset>
+          </ExpandableBlock>
+        </div>
       </div>
       <ActionPanel
         onSave={handleSaveClick}

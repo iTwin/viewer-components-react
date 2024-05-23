@@ -123,6 +123,7 @@ export const CalculatedPropertyActionWithVisuals = ({
         group.id,
         calculatedProperty.id,
         {
+          ...calculatedProperty,
           propertyName,
           dataType: calculatedProperty.dataType,
           calculatedPropertyType: type,

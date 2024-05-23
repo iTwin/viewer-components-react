@@ -45,8 +45,8 @@ export const PropertyMenu = ({
   onClickAddCustomCalculationProperty,
   onClickModifyCustomCalculation,
   hideGroupProps = false,
-  hideCalculatedProps = false,
-  hideCustomCalculationProps = false,
+  hideCalculatedProps = true,
+  hideCustomCalculationProps = true,
 }: PropertyMenuProps) => {
   const groupId = group.id;
   const mappingId = mapping.id;
