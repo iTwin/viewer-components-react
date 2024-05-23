@@ -310,6 +310,7 @@ export abstract class Measurement {
 
   public set drawingMetaData(data: DrawingMetaData | undefined) {
     this._drawingMetaData = data;
+    this.onDrawingMetaDataChanged();
   }
 
   public set sheetViewId(id: string | undefined) {
@@ -321,8 +322,10 @@ export abstract class Measurement {
   }
 
   public set drawingId(id: string | undefined) {
-    if (this._drawingMetaData)
+    if (this._drawingMetaData) {
       this._drawingMetaData.drawingId = id;
+      this.onDrawingMetaDataChanged();
+    }
   }
 
   public get drawingId(): string | undefined {
@@ -330,8 +333,10 @@ export abstract class Measurement {
   }
 
   public set drawingOrigin(origin: Point2d | undefined) {
-    if (this._drawingMetaData && origin)
+    if (this._drawingMetaData && origin) {
       this._drawingMetaData.origin = origin;
+      this.onDrawingMetaDataChanged();
+    }
   }
 
   public get drawingOrigin(): Point2d | undefined {
@@ -339,8 +344,10 @@ export abstract class Measurement {
   }
 
   public set drawingExtents(extents: Point2d | undefined) {
-    if (this._drawingMetaData)
+    if (this._drawingMetaData) {
       this._drawingMetaData.extents = extents;
+      this.onDrawingMetaDataChanged();
+    }
   }
 
   public get drawingExtents(): Point2d | undefined {
@@ -348,8 +355,10 @@ export abstract class Measurement {
   }
 
   public set worldScale(scale: number) {
-    if (this._drawingMetaData && scale > 0)
+    if (this._drawingMetaData && scale > 0) {
       this._drawingMetaData.worldScale = scale;
+      this.onDrawingMetaDataChanged();
+    }
   }
 
   public get worldScale(): number {
@@ -788,6 +797,11 @@ export abstract class Measurement {
    * @param _prevId The previous ID, if any.
    */
   protected onTransientIdChanged(_prevId?: Id64String): void { }
+
+  /**
+   * Notify subclasses when DrawingMetaData changes
+   */
+  protected onDrawingMetaDataChanged(): void { }
 
   /**
    * Notify subclasses when the display labels property has changed.
