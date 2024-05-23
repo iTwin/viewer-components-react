@@ -3,8 +3,11 @@
   "compilerOptions": {
     "outDir": "./lib",
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noImplicitOverride": false,
+    "resolveJsonModule": true,
     "module": "commonjs",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "types": [
       "sinon-chai",
       "mocha"

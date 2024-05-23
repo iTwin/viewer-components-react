@@ -1,12 +1,23 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import { StagePanelLocation, StagePanelSection, StageUsage, ToolbarHelper, ToolbarItem, ToolbarOrientation, ToolbarUsage, ToolItemDef, UiItemsProvider, WidgetState } from "@itwin/appui-react";
+import type {
+  ToolbarItem,
+  UiItemsProvider } from "@itwin/appui-react";
+import {
+  StagePanelLocation,
+  StagePanelSection,
+  StageUsage,
+  ToolbarHelper,
+  ToolbarOrientation,
+  ToolbarUsage,
+  ToolItemDef,
+  WidgetState,
+} from "@itwin/appui-react";
 import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
-import { MapFeatureInfoOptions } from "./Interfaces";
+import type { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersUI } from "../mapLayers";
 import { IModelApp } from "@itwin/core-frontend";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
@@ -16,18 +27,21 @@ import { BadgeType } from "@itwin/appui-abstract";
 export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({
     toolId: MapFeatureInfoTool.toolId,
-    iconSpec: <SvgMapInfo/>,
+    iconSpec: <SvgMapInfo />,
     label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
     description: () => MapFeatureInfoTool.description,
-    execute: async () => { await IModelApp.tools.run(MapFeatureInfoTool.toolId); },
+    execute: async () => {
+      await IModelApp.tools.run(MapFeatureInfoTool.toolId);
+    },
     badgeType: BadgeType.TechnicalPreview,
   });
 
-export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-disable-line deprecation/deprecation
+export class FeatureInfoUiItemsProvider implements UiItemsProvider {
+  // eslint-disable-line deprecation/deprecation
   public readonly id = "FeatureInfoUiItemsProvider";
   public static readonly widgetId = "map-layers:mapFeatureInfoWidget";
 
-  public constructor(private _featureInfoOpts: MapFeatureInfoOptions) { }
+  public constructor(private _featureInfoOpts: MapFeatureInfoOptions) {}
 
   public provideToolbarItems(
     _stageId: string,
@@ -41,9 +55,7 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
       toolbarUsage === ToolbarUsage.ContentManipulation &&
       toolbarOrientation === ToolbarOrientation.Vertical
     ) {
-      return [
-        ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef()),
-      ];
+      return [ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef())];
     }
 
     return [];
@@ -53,11 +65,11 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
     const widgets = [];
 
     const tmpSection = section ?? StagePanelSection.End;
-    if (tmpSection === StagePanelSection.End  && stageUsage === StageUsage.General && location === StagePanelLocation.Right )  {
+    if (tmpSection === StagePanelSection.End && stageUsage === StageUsage.General && location === StagePanelLocation.Right) {
       widgets.push({
         id: FeatureInfoUiItemsProvider.widgetId,
         label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
-        icon: <SvgMapInfo/>,
+        icon: <SvgMapInfo />,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
         defaultState: WidgetState.Hidden,
         badge: BadgeType.TechnicalPreview,

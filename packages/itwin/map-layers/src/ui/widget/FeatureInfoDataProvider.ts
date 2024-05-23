@@ -4,9 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataChangeEvent } from "@itwin/components-react";
-import { IModelApp, MapFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
-import { MapFeatureInfoTool, MapFeatureInfoToolData } from "@itwin/map-layers-formats";
+import type { IPropertyDataProvider, PropertyCategory, PropertyData } from "@itwin/components-react";
+import { PropertyDataChangeEvent } from "@itwin/components-react";
+import type { MapFeatureInfo, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
+import { IModelApp, MapLayerFeatureRecord } from "@itwin/core-frontend";
+import type { MapFeatureInfoToolData } from "@itwin/map-layers-formats";
+import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
 
 /**
  * Implementation of [IPropertyDataProvider] that uses an associative  array.
@@ -36,9 +39,7 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   private handleActiveToolChanged = (tool: Tool, _start: StartOrResume) => {
-
-    if (this._detachActiveToolListener)
-      this._detachActiveToolListener();
+    if (this._detachActiveToolListener) {this._detachActiveToolListener();}
     this._detachActiveToolListener = undefined;
 
     if (tool.toolId === MapFeatureInfoTool.toolId) {
@@ -109,7 +110,7 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
               }
             }
           }
-          if (layerCatIdx === -1 && nbRecords > 0) this.addCategory(layerCategory);
+          if (layerCatIdx === -1 && nbRecords > 0) {this.addCategory(layerCategory);}
         }
       }
     }

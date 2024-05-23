@@ -1,19 +1,40 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/appui-abstract";
+import type {
+  AbstractTreeNodeLoaderWithProvider,
+  DelayLoadedTreeNodeItem,
+  HighlightableTreeProps,
+  ITreeDataProvider,
+  MutableTreeModel,
+  MutableTreeModelNode,
+  TreeCheckboxStateChangeEventArgs,
+  TreeDataProvider,
+  TreeModel,
+  TreeModelChanges,
+  TreeNodeItem,
+  TreeNodeRendererProps,
+  TreeRendererProps } from "@itwin/components-react";
 import {
-  AbstractTreeNodeLoaderWithProvider, ControlledTree, DelayLoadedTreeNodeItem, HighlightableTreeProps, ITreeDataProvider,
-  MutableTreeModel, MutableTreeModelNode, SelectionMode, TreeCheckboxStateChangeEventArgs, TreeDataProvider,
-  TreeEventHandler, TreeImageLoader, TreeModel, TreeModelChanges, TreeModelSource, TreeNodeItem, TreeNodeLoader,
-  TreeNodeRenderer, TreeNodeRendererProps, TreeRenderer, TreeRendererProps, useTreeModel,
+  ControlledTree,
+  SelectionMode,
+  TreeEventHandler,
+  TreeImageLoader,
+  TreeModelSource,
+  TreeNodeLoader,
+  TreeNodeRenderer,
+  TreeRenderer,
+  useTreeModel,
 } from "@itwin/components-react";
-import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
-import { CheckBoxState, ImageCheckBox, NodeCheckboxRenderProps, ResizableContainerObserver, useDisposable } from "@itwin/core-react";
+import type { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
+import type { NodeCheckboxRenderProps } from "@itwin/core-react";
+import { CheckBoxState, ImageCheckBox, ResizableContainerObserver, useDisposable } from "@itwin/core-react";
 import { IconButton, Input } from "@itwin/itwinui-react";
 import * as React from "react";
-import { SubLayersDataProvider, SubLayersTreeExpandMode } from "./SubLayersDataProvider";
+import type { SubLayersTreeExpandMode } from "./SubLayersDataProvider";
+import { SubLayersDataProvider } from "./SubLayersDataProvider";
 import "./SubLayersTree.scss";
 import { MapLayersUI } from "../../mapLayers";
 import { SvgCheckboxDeselect, SvgCheckboxSelect, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
@@ -27,12 +48,8 @@ interface ToolbarProps {
 function Toolbar(props: ToolbarProps) {
   return (
     <div className="map-manager-sublayer-tree-toolbar">
-      <div className="tree-toolbar-action-buttons">
-        {props.children}
-      </div>
-      {props.searchField && <div className="tree-toolbar-searchbox">
-        {props.searchField}
-      </div>}
+      <div className="tree-toolbar-action-buttons">{props.children}</div>
+      {props.searchField && <div className="tree-toolbar-searchbox">{props.searchField}</div>}
     </div>
   );
 }
@@ -46,13 +63,13 @@ export interface SubLayersPanelProps extends Omit<SubLayersTreeProps, "subLayers
 export function SubLayersPanel(props: SubLayersPanelProps) {
   const [noneAvailableLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.NoSubLayers"));
   if (undefined === props.subLayers || 0 === props.subLayers.length) {
-    return <div className="map-manager-sublayer-panel">
-      <div>{noneAvailableLabel}</div>
-    </div>;
-  } else {
     return (
-      <SubLayersTree subLayers={props.subLayers} {...props} />
+      <div className="map-manager-sublayer-panel">
+        <div>{noneAvailableLabel}</div>
+      </div>
     );
+  } else {
+    return <SubLayersTree subLayers={props.subLayers} {...props} />;
   }
 }
 
@@ -72,8 +89,8 @@ export interface SubLayersTreeProps {
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function SubLayersTree(props: SubLayersTreeProps) {
-  const [width, setWidth] = React.useState<number|undefined>(props.width);
-  const [height, setHeight] = React.useState<number|undefined>(props.height);
+  const [width, setWidth] = React.useState<number | undefined>(props.width);
+  const [height, setHeight] = React.useState<number | undefined>(props.height);
 
   const [placeholderLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.SearchPlaceholder"));
   const [noResults] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.NoResults"));
@@ -84,92 +101,111 @@ export function SubLayersTree(props: SubLayersTreeProps) {
   // `React.useMemo' is used avoid creating new object on each render cycle
   // We DO want a dependency on 'layerFilterString' (event though eslint doesn't like it)..
   // each time the filter is updated the provider must be refreshed otherwise the state of model is out of synch.
-  const dataProvider = React.useMemo(() => new SubLayersDataProvider(subLayers, props.expandMode),
+  const dataProvider = React.useMemo(
+    () => new SubLayersDataProvider(subLayers, props.expandMode),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [subLayers, props.expandMode, layerFilterString]);
+    [subLayers, props.expandMode, layerFilterString],
+  );
 
-  const {
-    modelSource,
-    nodeLoader,
-    nodeHighlightingProps,
-  } = useTreeFiltering(dataProvider, layerFilterString);
+  const { modelSource, nodeLoader, nodeHighlightingProps } = useTreeFiltering(dataProvider, layerFilterString);
 
   // create custom event handler. It handles all tree event same as `TreeEventHandler` but additionally
   // it selects/deselects node when checkbox is checked/unchecked and vice versa.
   // `useDisposable` takes care of disposing old event handler when new is created in case 'nodeLoader' has changed
   // `React.useCallback` is used to avoid creating new callback that creates handler on each render
-  const eventHandler = useDisposable(React.useCallback(() => new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange),
-    [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer]));
+  const eventHandler = useDisposable(
+    React.useCallback(
+      () => new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange),
+      [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer],
+    ),
+  );
 
   // Get an immutable tree model from the model source. The model is regenerated every time the model source
   // emits the `onModelChanged` event.
   const treeModel = useTreeModel(modelSource);
-  const changeAll = React.useCallback(async (visible: boolean) => {
-    const tmpSubLayers = [...subLayers];    // deep copy to trigger state change
-    if (tmpSubLayers) {
-      tmpSubLayers?.forEach((subLayer: MapSubLayerProps) => {
-        subLayer.visible = visible;
-      });
+  const changeAll = React.useCallback(
+    async (visible: boolean) => {
+      const tmpSubLayers = [...subLayers]; // deep copy to trigger state change
+      if (tmpSubLayers) {
+        tmpSubLayers?.forEach((subLayer: MapSubLayerProps) => {
+          subLayer.visible = visible;
+        });
 
-      setSubLayers(tmpSubLayers);
-    }
+        setSubLayers(tmpSubLayers);
+      }
 
-    if (props.onSubLayerStateChange)
-      props.onSubLayerStateChange(-1, visible);
-  }, [subLayers, props]);
+      if (props.onSubLayerStateChange) {props.onSubLayerStateChange(-1, visible);}
+    },
+    [subLayers, props],
+  );
 
   const handleFilterTextChanged = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setLayerFilterString(event.target.value);
   }, []);
 
-  return <>
-    <div className="map-manager-sublayer-tree">
-      <Toolbar
-        searchField={
-          <Input type="text" className="map-manager-sublayer-tree-searchbox"
-            placeholder={placeholderLabel}
-            value={layerFilterString}
-            onChange={handleFilterTextChanged}
-            size="small" />
-        }
-      >
-        {props.singleVisibleSubLayer ? undefined : [
-          <IconButton
-            key="show-all-btn"
-            size="small"
-            title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOn") : MapLayersUI.translate("SelectFeaturesDialog.AllOn")}
-            onClick={async () => changeAll(true)}
-          >
-            {props.checkboxStyle === "eye" ? <SvgVisibilityShow /> : <SvgCheckboxSelect /> }
-          </IconButton>,
-          <IconButton
-            style={{ marginLeft: "5px" }}
-            key="hide-all-btn"
-            size="small"
-            title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
-            onClick={async () => changeAll(false)}
-          >
-            {props.checkboxStyle === "eye" ? <SvgVisibilityHide /> : <SvgCheckboxDeselect /> }
-          </IconButton>,
-        ]}
-      </Toolbar>
-      <div className="map-manager-sublayer-tree-content" >
-        {(props.width === undefined && props.height === undefined) && <ResizableContainerObserver onResize={(w, h) => {setWidth(w); setHeight(h);} }/> }
-        {(width !== undefined && height !== undefined)
-        && <ControlledTree
-          nodeLoader={nodeLoader}
-          selectionMode={SelectionMode.None}
-          eventsHandler={eventHandler}
-          model={treeModel}
-          treeRenderer={props.checkboxStyle === "eye" ? nodeWithEyeCheckboxTreeRenderer : undefined}
-          nodeHighlightingProps={nodeHighlightingProps}
-          width={width}
-          height={height}
-          noDataRenderer={()=>(<p className="components-controlledTree-errorMessage">{noResults}</p>)}
-        />}
+  return (
+    <>
+      <div className="map-manager-sublayer-tree">
+        <Toolbar
+          searchField={
+            <Input
+              type="text"
+              className="map-manager-sublayer-tree-searchbox"
+              placeholder={placeholderLabel}
+              value={layerFilterString}
+              onChange={handleFilterTextChanged}
+              size="small"
+            />
+          }
+        >
+          {props.singleVisibleSubLayer
+            ? undefined
+            : [
+                <IconButton
+                  key="show-all-btn"
+                  size="small"
+                  title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOn") : MapLayersUI.translate("SelectFeaturesDialog.AllOn")}
+                  onClick={async () => changeAll(true)}
+                >
+                  {props.checkboxStyle === "eye" ? <SvgVisibilityShow /> : <SvgCheckboxSelect />}
+                </IconButton>,
+                <IconButton
+                  style={{ marginLeft: "5px" }}
+                  key="hide-all-btn"
+                  size="small"
+                  title={props.checkboxStyle === "eye" ? MapLayersUI.translate("SubLayers.AllOff") : MapLayersUI.translate("SelectFeaturesDialog.AllOff")}
+                  onClick={async () => changeAll(false)}
+                >
+                  {props.checkboxStyle === "eye" ? <SvgVisibilityHide /> : <SvgCheckboxDeselect />}
+                </IconButton>,
+              ]}
+        </Toolbar>
+        <div className="map-manager-sublayer-tree-content">
+          {props.width === undefined && props.height === undefined && (
+            <ResizableContainerObserver
+              onResize={(w, h) => {
+                setWidth(w);
+                setHeight(h);
+              }}
+            />
+          )}
+          {width !== undefined && height !== undefined && (
+            <ControlledTree
+              nodeLoader={nodeLoader}
+              selectionMode={SelectionMode.None}
+              eventsHandler={eventHandler}
+              model={treeModel}
+              treeRenderer={props.checkboxStyle === "eye" ? nodeWithEyeCheckboxTreeRenderer : undefined}
+              nodeHighlightingProps={nodeHighlightingProps}
+              width={width}
+              height={height}
+              noDataRenderer={() => <p className="components-controlledTree-errorMessage">{noResults}</p>}
+            />
+          )}
+        </div>
       </div>
-    </div >
-  </>;
+    </>
+  );
 }
 
 /** TreeEventHandler derived class that handler processing changes to subLayer visibility */
@@ -179,7 +215,12 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
   private _subLayers: MapSubLayerProps[];
   private _singleVisibleSubLayer?: boolean;
 
-  constructor(subLayers: MapSubLayerProps[], singleVisibleSubLayer: boolean, nodeLoader: AbstractTreeNodeLoaderWithProvider<TreeDataProvider>, onSubLayerStateChange?: OnSubLayerStateChangeType) {
+  constructor(
+    subLayers: MapSubLayerProps[],
+    singleVisibleSubLayer: boolean,
+    nodeLoader: AbstractTreeNodeLoaderWithProvider<TreeDataProvider>,
+    onSubLayerStateChange?: OnSubLayerStateChangeType,
+  ) {
     super({ modelSource: nodeLoader.modelSource, nodeLoader, collapsedChildrenDisposalEnabled: true });
     this._subLayers = subLayers;
     this._singleVisibleSubLayer = singleVisibleSubLayer;
@@ -197,14 +238,12 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
   // they get rendered anyway.
   private cascadeStateToAllChildren(model: MutableTreeModel, parentId?: string) {
     const children = model.getChildren(parentId);
-    if (children === undefined)
-      return;
+    if (children === undefined) {return;}
 
     for (const childID of children) {
       const childNode = childID ? model.getNode(childID) : undefined;
 
-      if (childNode)
-        this.syncNodeStateWithParent(model, childNode);
+      if (childNode) {this.syncNodeStateWithParent(model, childNode);}
 
       // Drill down the tree.
       this.cascadeStateToAllChildren(model, childID);
@@ -213,15 +252,12 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
 
   private applyMutualExclusiveState(model: MutableTreeModel, nodeId: string) {
     const changedNode = model.getNode(nodeId);
-    if (changedNode?.checkbox.state === CheckBoxState.Off)
-      return;
+    if (changedNode?.checkbox.state === CheckBoxState.Off) {return;}
 
     for (const node of model.iterateTreeModelNodes()) {
-      if (node.id === changedNode?.id)
-        continue;
+      if (node.id === changedNode?.id) {continue;}
 
-      if (node && node.checkbox.state === CheckBoxState.On)
-        node.checkbox.state = CheckBoxState.Off;
+      if (node && node.checkbox.state === CheckBoxState.On) {node.checkbox.state = CheckBoxState.Off;}
     }
   }
 
@@ -239,8 +275,7 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
     this.modelSource.modifyModel((model) => {
       const addedNodes = args[1].addedNodeIds.map((id) => model.getNode(id));
       addedNodes.forEach((node) => {
-        if (!node)
-          return;
+        if (!node) {return;}
 
         this.syncNodeStateWithParent(model, node);
       });
@@ -248,10 +283,9 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
   };
 
   private static isUnnamedGroup(subLayer: MapSubLayerProps | undefined): boolean {
-    if (!subLayer)
-      return false;
+    if (!subLayer) {return false;}
 
-    return (!subLayer.name || subLayer.name.length === 0) && (subLayer.children !== undefined && subLayer.children.length > 0);
+    return (!subLayer.name || subLayer.name.length === 0) && subLayer.children !== undefined && subLayer.children.length > 0;
   }
 
   // Ensure the state of changed node matches the state of its parent.
@@ -259,11 +293,9 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
     // Lookup node parent. If non exists, I assume thats the root node,
     // and it must have a proper initial state.
     const parentNode = changedNode.parentId ? model.getNode(changedNode.parentId) : undefined;
-    if (!parentNode)
-      return;
+    if (!parentNode) {return;}
 
-    if (!changedNode.checkbox)
-      return; // don't see why this would happen, but if there is no checkbox, we cant do much here.
+    if (!changedNode.checkbox) {return;} // don't see why this would happen, but if there is no checkbox, we cant do much here.
 
     const parentLayerId = undefined !== parentNode.item.extendedData?.subLayerId ? parentNode.item.extendedData?.subLayerId : parentNode.item.id;
     const parentSubLayer = this._subLayers?.find((subLayer) => subLayer.id === parentLayerId);
@@ -291,23 +323,21 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
     const selectionHandling = stateChanges.subscribe({
       next: (changes) => {
         changes.forEach((change) => {
-          const isSelected = (change.newState === CheckBoxState.On);
+          const isSelected = change.newState === CheckBoxState.On;
           const subLayerId = undefined !== change.nodeItem.extendedData?.subLayerId ? change.nodeItem.extendedData?.subLayerId : change.nodeItem.id;
 
           // Get the previously visible node if we are in 'singleVisibleSubLayer' node
           let prevVisibleSubLayers: SubLayerId[] = [];
           if (this._singleVisibleSubLayer) {
             prevVisibleSubLayers = this._subLayers.reduce((filtered: SubLayerId[], subLayer) => {
-              if (subLayer.visible && subLayer.id !== undefined)
-                filtered.push(subLayer.id);
+              if (subLayer.visible && subLayer.id !== undefined) {filtered.push(subLayer.id);}
               return filtered;
             }, []);
           }
 
           // Inform caller that subLayer state is going to change (i.e. update display style state)
           if (this._onSubLayerStateChange) {
-            for (const slId of prevVisibleSubLayers)
-              this._onSubLayerStateChange(slId, false);
+            for (const slId of prevVisibleSubLayers) {this._onSubLayerStateChange(slId, false);}
 
             this._onSubLayerStateChange(subLayerId, isSelected);
           }
@@ -315,17 +345,14 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
           // Update sublayer object, otherwise state would get out of sync with DisplayStyle each time the TreeView is re-rendered
           this._subLayers?.forEach((curSubLayer) => {
             if (curSubLayer.id !== undefined) {
-              if (curSubLayer.id === subLayerId)
-                curSubLayer.visible = isSelected;
-              else if  (prevVisibleSubLayers.includes(curSubLayer.id))
-                curSubLayer.visible = false;
+              if (curSubLayer.id === subLayerId) {curSubLayer.visible = isSelected;}
+              else if (prevVisibleSubLayers.includes(curSubLayer.id)) {curSubLayer.visible = false;}
             }
           });
 
           // Cascade state
           this.modelSource.modifyModel((model) => {
-            if (this._singleVisibleSubLayer)
-              this.applyMutualExclusiveState(model, change.nodeItem.id);
+            if (this._singleVisibleSubLayer) {this.applyMutualExclusiveState(model, change.nodeItem.id);}
             this.cascadeStateToAllChildren(model, change.nodeItem.id);
           });
         });
@@ -352,25 +379,13 @@ const eyeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
 /** Custom node renderer. It uses default 'TreeNodeRenderer' but overrides default checkbox renderer to render checkbox as an eye */
 const imageLoader = new TreeImageLoader();
 const nodeWithEyeCheckboxRenderer = (props: TreeNodeRendererProps) => (
-  <TreeNodeRenderer
-    {...props}
-    checkboxRenderer={eyeCheckboxRenderer}
-    imageLoader={imageLoader}
-  />
+  <TreeNodeRenderer {...props} checkboxRenderer={eyeCheckboxRenderer} imageLoader={imageLoader} />
 );
 
 /** Custom tree renderer. It uses default `TreeRenderer` but overrides default node renderer to render node with custom checkbox */
-const nodeWithEyeCheckboxTreeRenderer = (props: TreeRendererProps) => (
-  <TreeRenderer
-    {...props}
-    nodeRenderer={nodeWithEyeCheckboxRenderer}
-  />
-);
+const nodeWithEyeCheckboxTreeRenderer = (props: TreeRendererProps) => <TreeRenderer {...props} nodeRenderer={nodeWithEyeCheckboxRenderer} />;
 
-function useTreeFiltering(
-  dataProvider: ITreeDataProvider,
-  filter: string,
-) {
+function useTreeFiltering(dataProvider: ITreeDataProvider, filter: string) {
   const nodeLoader = useFilteredProvider(dataProvider, filter);
   const nodeHighlightingProps = useNodeHighlightingProps(filter);
   return {
@@ -380,10 +395,7 @@ function useTreeFiltering(
   };
 }
 
-function useFilteredProvider(
-  dataProvider: ITreeDataProvider,
-  filter: string,
-) {
+function useFilteredProvider(dataProvider: ITreeDataProvider, filter: string) {
   const filteredProvider = React.useMemo(() => {
     return new FilteredTreeDataProvider(dataProvider, filter);
   }, [dataProvider, filter]);
@@ -395,9 +407,7 @@ function useFilteredProvider(
   return nodeLoader;
 }
 
-function useNodeHighlightingProps(
-  filter: string,
-) {
+function useNodeHighlightingProps(filter: string) {
   const [nodeHighlightingProps, setNodeHighlightingProps] = React.useState<HighlightableTreeProps>();
 
   React.useEffect(() => {
@@ -469,8 +479,7 @@ class FilteredTreeHierarchy {
   private filterNodes(hierarchy: Map<string | undefined, DelayLoadedTreeNodeItem[]>, current?: DelayLoadedTreeNodeItem): DelayLoadedTreeNodeItem | undefined {
     const matches = current ? this.matchesFilter(current) : false;
     const children = hierarchy.get(current?.id);
-    if (!children)
-      return matches ? current : undefined;
+    if (!children) {return matches ? current : undefined;}
 
     const matchedChildren = new Array<DelayLoadedTreeNodeItem>();
     for (const child of children) {
@@ -497,12 +506,10 @@ class FilteredTreeHierarchy {
   }
 
   private matchesFilter(node: TreeNodeItem) {
-    if (node.label.value.valueFormat !== PropertyValueFormat.Primitive)
-      return false;
+    if (node.label.value.valueFormat !== PropertyValueFormat.Primitive) {return false;}
 
     const value = node.label.value.displayValue?.toLowerCase();
-    if (!value)
-      return false;
+    if (!value) {return false;}
     return value.includes(this._filter.toLowerCase());
   }
 
@@ -515,10 +522,7 @@ class FilteredTreeHierarchy {
 class FilteredTreeDataProvider implements ITreeDataProvider {
   private _hierarchy: FilteredTreeHierarchy;
 
-  public constructor(
-    parentDataProvider: ITreeDataProvider,
-    filter: string,
-  ) {
+  public constructor(parentDataProvider: ITreeDataProvider, filter: string) {
     this._hierarchy = new FilteredTreeHierarchy(parentDataProvider, filter);
   }
 

@@ -1,19 +1,24 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable deprecation/deprecation */
 
 import { assert, expect, should } from "chai";
 import * as enzyme from "enzyme";
-import * as React from "react";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
+import type {
+  BackgroundMapSettings,
+  DisplayStyle3dSettings,
+  TerrainSettings } from "@itwin/core-common";
 import {
-  BackgroundMapSettings, DisplayStyle3dSettings, PlanarClipMaskMode,
-  PlanarClipMaskPriority, TerrainHeightOriginMode, TerrainSettings,
+  PlanarClipMaskMode,
+  PlanarClipMaskPriority,
+  TerrainHeightOriginMode
 } from "@itwin/core-common";
-import { DisplayStyle3dState, IModelConnection, MockRender, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+import type { DisplayStyle3dState, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+import { MockRender } from "@itwin/core-frontend";
 import { SpecialKey } from "@itwin/appui-abstract";
 import { NumberInput } from "@itwin/core-react";
 import { Select, ToggleSwitch } from "@itwin/itwinui-react";
@@ -38,11 +43,16 @@ describe("MapManagerSettings", () => {
   // this and will need to be revisited.
   const getToggleIndex = (toggleName: string) => {
     switch (toggleName) {
-      case "locatable": return 0;
-      case "mask": return 1;
-      case "overrideMaskTransparency": return 2;
-      case "depthBuffer": return 3;
-      case "terrain": return 4;
+      case "locatable":
+        return 0;
+      case "mask":
+        return 1;
+      case "overrideMaskTransparency":
+        return 2;
+      case "depthBuffer":
+        return 3;
+      case "terrain":
+        return 4;
     }
     assert.fail("invalid name provided.");
     return 0;
@@ -50,8 +60,10 @@ describe("MapManagerSettings", () => {
 
   const getQuantityNumericInputIndex = (name: string) => {
     switch (name) {
-      case "groundBias": return 0;
-      case "terrainOrigin": return 1;
+      case "groundBias":
+        return 0;
+      case "terrainOrigin":
+        return 1;
     }
     assert.fail("invalid name provided.");
     return 0;
@@ -106,15 +118,18 @@ describe("MapManagerSettings", () => {
 
   const mountComponent = () => {
     return enzyme.mount(
-      <SourceMapContext.Provider value={{
-        activeViewport: viewportMock.object,
-        loadingSources: false,
-        sources: [],
-        bases: [],
-        refreshFromStyle,
-      }}>
+      <SourceMapContext.Provider
+        value={{
+          activeViewport: viewportMock.object,
+          loadingSources: false,
+          sources: [],
+          bases: [],
+          refreshFromStyle,
+        }}
+      >
         <MapManagerSettings />
-      </SourceMapContext.Provider>);
+      </SourceMapContext.Provider>,
+    );
   };
 
   it("renders", () => {
@@ -151,7 +166,10 @@ describe("MapManagerSettings", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
 
     // Toggle 'enable' terrain
-    toggles.at(getToggleIndex("terrain")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("terrain"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
     component.update();
 
     // 'changeBackgroundMapProps' should have been called once now
@@ -181,16 +199,19 @@ describe("MapManagerSettings", () => {
   it("Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
 
-    const { container }  =  render(
-      <SourceMapContext.Provider value={{
-        activeViewport: viewportMock.object,
-        loadingSources: false,
-        sources: [],
-        bases: [],
-        refreshFromStyle,
-      }}>
+    const { container } = render(
+      <SourceMapContext.Provider
+        value={{
+          activeViewport: viewportMock.object,
+          loadingSources: false,
+          sources: [],
+          bases: [],
+          refreshFromStyle,
+        }}
+      >
         <MapManagerSettings />
-      </SourceMapContext.Provider>);
+      </SourceMapContext.Provider>,
+    );
 
     const sliders = container.querySelectorAll(".iui-slider-thumb");
     expect(sliders.length).to.eq(2);
@@ -198,21 +219,23 @@ describe("MapManagerSettings", () => {
       fireEvent.keyUp(sliders[0], { key: "ArrowLeft" });
     });
     viewportMock.verify((x) => x.changeBackgroundMapProps({ transparency: 0 }), moq.Times.once());
-
   });
 
   it("Mask Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    const { container }  =  render(
-      <SourceMapContext.Provider value={{
-        activeViewport: viewportMock.object,
-        loadingSources: false,
-        sources: [],
-        bases: [],
-        refreshFromStyle,
-      }}>
+    const { container } = render(
+      <SourceMapContext.Provider
+        value={{
+          activeViewport: viewportMock.object,
+          loadingSources: false,
+          sources: [],
+          bases: [],
+          refreshFromStyle,
+        }}
+      >
         <MapManagerSettings />
-      </SourceMapContext.Provider>);
+      </SourceMapContext.Provider>,
+    );
 
     const sliders = container.querySelectorAll(".iui-slider-thumb");
     expect(sliders.length).to.eq(2);
@@ -228,14 +251,24 @@ describe("MapManagerSettings", () => {
     should().exist(maskToggle);
     fireEvent.click(maskToggle);
     // Enabling the 'mask' toggle should set mask transparency to undefined
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: undefined } }), moq.Times.once());
+    viewportMock.verify(
+      (x) =>
+        x.changeBackgroundMapProps({
+          planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: undefined },
+        }),
+      moq.Times.once(),
+    );
 
     const overrideMaskTransToggle = toggles[getToggleIndex("overrideMaskTransparency")];
     should().exist(overrideMaskTransToggle);
     fireEvent.click(overrideMaskTransToggle);
 
     // Enabling the 'overrideMaskTransparency' toggle should set mask transparency to 0
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }), moq.Times.once());
+    viewportMock.verify(
+      (x) =>
+        x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }),
+      moq.Times.once(),
+    );
 
     expect(sliderThumb?.getAttribute("aria-disabled")).to.eql("false");
 
@@ -243,7 +276,11 @@ describe("MapManagerSettings", () => {
     act(() => {
       fireEvent.keyUp(sliderThumb, { key: "ArrowLeft" });
     });
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }), moq.Times.exactly(2));
+    viewportMock.verify(
+      (x) =>
+        x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }),
+      moq.Times.exactly(2),
+    );
   });
 
   it("Locatable toggle", () => {
@@ -251,7 +288,10 @@ describe("MapManagerSettings", () => {
     const toggles = component.find(ToggleSwitch);
 
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    toggles.at(getToggleIndex("locatable")).find("input").simulate("change", { target: { checked: false } });
+    toggles
+      .at(getToggleIndex("locatable"))
+      .find("input")
+      .simulate("change", { target: { checked: false } });
     component.update();
 
     // 'changeBackgroundMapProps' should have been called once now
@@ -260,19 +300,30 @@ describe("MapManagerSettings", () => {
   });
 
   it("Mask toggle", () => {
-
     const component = mountComponent();
 
     const toggles = component.find(ToggleSwitch);
 
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
-    toggles.at(getToggleIndex("mask")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("mask"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
     component.update();
 
     // 'changeBackgroundMapProps' should have been called once now
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: undefined } }), moq.Times.once());
+    viewportMock.verify(
+      (x) =>
+        x.changeBackgroundMapProps({
+          planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: undefined },
+        }),
+      moq.Times.once(),
+    );
 
-    toggles.at(getToggleIndex("mask")).find("input").simulate("change", { target: { checked: false } });
+    toggles
+      .at(getToggleIndex("mask"))
+      .find("input")
+      .simulate("change", { target: { checked: false } });
     component.update();
 
     viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.None } }), moq.Times.once());
@@ -289,7 +340,10 @@ describe("MapManagerSettings", () => {
     expect(toggles.at(getToggleIndex("overrideMaskTransparency")).find(".iui-disabled").exists()).to.be.true;
 
     // First turn ON the masking toggle
-    toggles.at(getToggleIndex("mask")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("mask"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
     component.update();
 
     toggles = component.find(ToggleSwitch);
@@ -298,17 +352,33 @@ describe("MapManagerSettings", () => {
     expect(toggles.at(getToggleIndex("overrideMaskTransparency")).find(".iui-disabled").exists()).to.be.false;
 
     // .. then we can turn ON the override mask transparency
-    toggles.at(getToggleIndex("overrideMaskTransparency")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("overrideMaskTransparency"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
     component.update();
 
     // 'changeBackgroundMapProps' should have been called once now
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }), moq.Times.once());
+    viewportMock.verify(
+      (x) =>
+        x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: 0 } }),
+      moq.Times.once(),
+    );
 
     // turn if OFF again
-    toggles.at(getToggleIndex("overrideMaskTransparency")).find("input").simulate("change", { target: { checked: false } });
+    toggles
+      .at(getToggleIndex("overrideMaskTransparency"))
+      .find("input")
+      .simulate("change", { target: { checked: false } });
     component.update();
 
-    viewportMock.verify((x) => x.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: undefined } }), moq.Times.exactly(2));
+    viewportMock.verify(
+      (x) =>
+        x.changeBackgroundMapProps({
+          planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: undefined },
+        }),
+      moq.Times.exactly(2),
+    );
     component.unmount();
   });
 
@@ -332,7 +402,10 @@ describe("MapManagerSettings", () => {
 
     // turn on the 'terrain' toggle then change the input value
     const toggles = component.find(ToggleSwitch);
-    toggles.at(getToggleIndex("terrain")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("terrain"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
 
     const oneStepIncrementValue = 1; // 1 foot
     const oneStepFiredValue = oneStepIncrementValue * 0.3048; // .. in meters
@@ -351,7 +424,10 @@ describe("MapManagerSettings", () => {
 
     // turn ON the 'terrain' toggle then change the input value
     const toggles = component.find(ToggleSwitch);
-    toggles.at(getToggleIndex("terrain")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("terrain"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
     changeNumericInputValue(numericInputs.at(0), 1);
 
     viewportMock.verify((x) => x.changeBackgroundMapProps({ terrainSettings: { exaggeration: 1 } }), moq.Times.once());
@@ -365,7 +441,10 @@ describe("MapManagerSettings", () => {
 
     // turn ON the 'terrain' toggle then change the combo box value
     const toggles = component.find(ToggleSwitch);
-    toggles.at(getToggleIndex("terrain")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("terrain"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
 
     const select = component.find(Select);
     select.props().onChange!("geoid", "added");
@@ -380,7 +459,10 @@ describe("MapManagerSettings", () => {
 
     // turn ON the 'terrain' toggle then change the combo box value
     const toggles = component.find(ToggleSwitch);
-    toggles.at(getToggleIndex("terrain")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("terrain"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
 
     const select = component.find(Select);
     select.props().onChange!("geodetic", "added");
@@ -395,7 +477,10 @@ describe("MapManagerSettings", () => {
 
     // turn ON the 'terrain' toggle then change the combo box value
     const toggles = component.find(ToggleSwitch);
-    toggles.at(getToggleIndex("terrain")).find("input").simulate("change", { target: { checked: true } });
+    toggles
+      .at(getToggleIndex("terrain"))
+      .find("input")
+      .simulate("change", { target: { checked: true } });
 
     const select = component.find(Select);
     select.props().onChange!("ground", "added");
@@ -403,4 +488,3 @@ describe("MapManagerSettings", () => {
     component.unmount();
   });
 });
-

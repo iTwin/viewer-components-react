@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
@@ -24,10 +24,13 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
   const [buttonTooltip] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.SettingsButtonTooltip"));
 
   const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const togglePopupDisplay = React.useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault();
-    setIsSettingsOpen((prev) => !prev);
-  }, [setIsSettingsOpen]);
+  const togglePopupDisplay = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      event.preventDefault();
+      setIsSettingsOpen((prev) => !prev);
+    },
+    [setIsSettingsOpen],
+  );
 
   const handleCloseSetting = React.useCallback(() => {
     setIsSettingsOpen(false);
@@ -35,42 +38,48 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
 
   const isInsideCoreDialog = React.useCallback((element: HTMLElement) => {
     if (element.nodeName === "DIV") {
-      if (element.classList && element.classList.contains("core-dialog"))
-        return true;
-      if (element.parentElement && isInsideCoreDialog(element.parentElement))
-        return true;
+      if (element.classList && element.classList.contains("core-dialog")) {return true;}
+      if (element.parentElement && isInsideCoreDialog(element.parentElement)) {return true;}
     } else {
       // istanbul ignore else
-      if (element.parentElement && isInsideCoreDialog(element.parentElement))
-        return true;
+      if (element.parentElement && isInsideCoreDialog(element.parentElement)) {return true;}
     }
     return false;
   }, []);
 
-  const handleOutsideClick = React.useCallback((event: MouseEvent) => {
-    if (isInsideCoreDialog(event.target as HTMLElement)) {
-      return;
-    }
+  const handleOutsideClick = React.useCallback(
+    (event: MouseEvent) => {
+      if (isInsideCoreDialog(event.target as HTMLElement)) {
+        return;
+      }
 
-    // If clicking on button that open panel -  don't trigger outside click processing
-    if (buttonRef?.current && buttonRef?.current.contains(event.target as Node)) {
-      return;
-    }
+      // If clicking on button that open panel -  don't trigger outside click processing
+      if (buttonRef?.current && buttonRef?.current.contains(event.target as Node)) {
+        return;
+      }
 
-    // If clicking the panel, this is not an outside clicked
-    if (panelRef.current && panelRef?.current.contains(event.target as Node)) {
-      return;
-    }
+      // If clicking the panel, this is not an outside clicked
+      if (panelRef.current && panelRef?.current.contains(event.target as Node)) {
+        return;
+      }
 
-    // If we reach this point, we got an outside clicked, no close the popup
-    setIsSettingsOpen(false);
-
-  }, [isInsideCoreDialog]);
+      // If we reach this point, we got an outside clicked, no close the popup
+      setIsSettingsOpen(false);
+    },
+    [isInsideCoreDialog],
+  );
 
   return (
     <>
-      <IconButton disabled={props.disabled} styleType="borderless" title={buttonTooltip} className="maplayers-settings-popup-button" onClick={togglePopupDisplay} ref={buttonRef}>
-        <SvgSettings/>
+      <IconButton
+        disabled={props.disabled}
+        styleType="borderless"
+        title={buttonTooltip}
+        className="maplayers-settings-popup-button"
+        onClick={togglePopupDisplay}
+        ref={buttonRef}
+      >
+        <SvgSettings />
       </IconButton>
       <Popup
         className="maplayers-settings-popup"
@@ -84,7 +93,7 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
         <div ref={panelRef} className="maplayers-settings-popup-panel">
           <MapManagerSettings />
         </div>
-      </Popup >
-    </ >
+      </Popup>
+    </>
   );
 }

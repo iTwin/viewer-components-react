@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
@@ -27,49 +27,57 @@ export interface TransparencyPopupButtonProps {
 export function TransparencyPopupButton({ transparency, onTransparencyChange, buttonToolTip, disabled }: TransparencyPopupButtonProps) {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [defaultTransparencyLabel] = React.useState(IModelApp.localization.getLocalizedString("mapLayers:TransparencyPopup.SetTransparency"));
-  const toolTipLabel = React.useMemo(() => buttonToolTip ? buttonToolTip : defaultTransparencyLabel, [buttonToolTip, defaultTransparencyLabel]);
+  const toolTipLabel = React.useMemo(() => (buttonToolTip ? buttonToolTip : defaultTransparencyLabel), [buttonToolTip, defaultTransparencyLabel]);
 
   const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const togglePopupDisplay = React.useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault();
-    setIsSettingsOpen((prev) => !prev);
-  }, [setIsSettingsOpen]);
+  const togglePopupDisplay = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      event.preventDefault();
+      setIsSettingsOpen((prev) => !prev);
+    },
+    [setIsSettingsOpen],
+  );
 
   const handleCloseSetting = React.useCallback(() => {
     setIsSettingsOpen(false);
   }, [setIsSettingsOpen]);
 
-  const handleTransparencyChange = React.useCallback((values: readonly number[]) => {
-    if (values.length) {
-      const newTransparency = values[0];
-      if (newTransparency !== transparency) {
-        if (onTransparencyChange)
-          onTransparencyChange(newTransparency / 100);
+  const handleTransparencyChange = React.useCallback(
+    (values: readonly number[]) => {
+      if (values.length) {
+        const newTransparency = values[0];
+        if (newTransparency !== transparency) {
+          if (onTransparencyChange) {onTransparencyChange(newTransparency / 100);}
+        }
       }
-    }
-  }, [onTransparencyChange, transparency]);
+    },
+    [onTransparencyChange, transparency],
+  );
 
   return (
     <>
-      <Button disabled={disabled} size="small" styleType="borderless" title={toolTipLabel} className="map-transparency-popup-button" onClick={togglePopupDisplay} ref={buttonRef}>
+      <Button
+        disabled={disabled}
+        size="small"
+        styleType="borderless"
+        title={toolTipLabel}
+        className="map-transparency-popup-button"
+        onClick={togglePopupDisplay}
+        ref={buttonRef}
+      >
         <div className="transparent-button">
-          <svg className={disabled ? "checkered-disabled": "checkered"} viewBox="0 0 24 24">
+          <svg className={disabled ? "checkered-disabled" : "checkered"} viewBox="0 0 24 24">
             <path d="m21.00427 0h-18.00854a2.9957 2.9957 0 0 0 -2.99573 2.99567v18.0086a2.99575 2.99575 0 0 0 2.99573 2.99573h18.00854a2.99575 2.99575 0 0 0 2.99573-2.99573v-18.0086a2.9957 2.9957 0 0 0 -2.99573-2.99567zm-20.00427 21.00427v-9.00427h11v-11h9.00427a1.998 1.998 0 0 1 1.99573 1.99567v9.00433h-11v11h-9.00427a1.998 1.998 0 0 1 -1.99573-1.99573z" />
           </svg>
         </div>
       </Button>
-      <Popup
-        isOpen={isSettingsOpen}
-        position={RelativePosition.BottomRight}
-        onClose={handleCloseSetting}
-        target={buttonRef.current}
-      >
+      <Popup isOpen={isSettingsOpen} position={RelativePosition.BottomRight} onClose={handleCloseSetting} target={buttonRef.current}>
         <div className="map-transparency-popup-panel">
           <div className="map-transparency-slider-container">
             <Slider min={0} max={100} values={[transparency * 100]} step={1} onChange={handleTransparencyChange} />
           </div>
         </div>
-      </Popup >
-    </ >
+      </Popup>
+    </>
   );
 }

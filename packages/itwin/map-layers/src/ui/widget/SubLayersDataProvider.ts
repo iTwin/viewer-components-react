@@ -1,11 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { compareStringsOrUndefined } from "@itwin/core-bentley";
-import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
+import type { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeNodeItem } from "@itwin/components-react";
+import type { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeNodeItem } from "@itwin/components-react";
 import { CheckBoxState } from "@itwin/core-react";
 
 export type SubLayersTreeExpandMode = "full" | "rootGroupOnly";
@@ -23,10 +23,9 @@ export class SubLayersDataProvider implements ITreeDataProvider {
   }
 
   public static isUnnamedGroup(subLayer: MapSubLayerProps | undefined): boolean {
-    if (!subLayer)
-      return false;
+    if (!subLayer) {return false;}
 
-    return (!subLayer.name || subLayer.name.length === 0) && (subLayer.children !== undefined && subLayer.children.length > 0);
+    return (!subLayer.name || subLayer.name.length === 0) && subLayer.children !== undefined && subLayer.children.length > 0;
   }
 
   private createId(props: MapSubLayerProps): string {
@@ -54,14 +53,15 @@ export class SubLayersDataProvider implements ITreeDataProvider {
       const treeNodes: TreeNodeItem[] = [];
 
       filteredProps.forEach((props) => {
-        treeNodes.push(this.createNode(props,
-          (this._expandMode === "full" ? true : (!parentId && props?.children !== undefined) ? true : undefined),
-          undefined,
-          SubLayersDataProvider.isUnnamedGroup(props) ? "icon-folder" : "icon-layers"
-
-        ));
-        if (props.children)
-          this.loadChildNodes(allSubLayers, props.id);
+        treeNodes.push(
+          this.createNode(
+            props,
+            this._expandMode === "full" ? true : !parentId && props?.children !== undefined ? true : undefined,
+            undefined,
+            SubLayersDataProvider.isUnnamedGroup(props) ? "icon-folder" : "icon-layers",
+          ),
+        );
+        if (props.children) {this.loadChildNodes(allSubLayers, props.id);}
       });
 
       this._nodeMap.set(undefined !== parentId ? `${parentId}` : "", treeNodes);
@@ -77,16 +77,14 @@ export class SubLayersDataProvider implements ITreeDataProvider {
 
   public async getNodesCount(parent?: TreeNodeItem) {
     const nodeArray: TreeNodeItem[] | undefined = parent ? this._nodeMap.get(parent.id) : this._nodeMap.get("");
-    if (nodeArray)
-      return nodeArray.length;
+    if (nodeArray) {return nodeArray.length;}
 
     return 0;
   }
 
   public async getNodes(parent?: TreeNodeItem) {
     const nodeArray: TreeNodeItem[] | undefined = parent ? this._nodeMap.get(parent.id) : this._nodeMap.get("");
-    if (nodeArray)
-      return nodeArray;
+    if (nodeArray) {return nodeArray;}
 
     return [];
   }
