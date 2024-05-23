@@ -12,30 +12,10 @@ import * as React from "react";
 import type { DropResult } from "react-beautiful-dnd";
 import { DragDropContext } from "react-beautiful-dnd";
 import { BentleyError, compareStrings } from "@itwin/core-bentley";
-import type {
-  MapImagerySettings,
-  MapSubLayerProps,
-  MapSubLayerSettings } from "@itwin/core-common";
-import {
-  BackgroundMapProvider,
-  BackgroundMapType,
-  BaseMapLayerSettings,
-  ImageMapLayerSettings
-} from "@itwin/core-common";
-import type {
-  MapLayerImageryProvider,
-  MapLayerScaleRangeVisibility,
-  MapLayerSource,
-  ScreenViewport,
-  TileTreeOwner,
-  Viewport } from "@itwin/core-frontend";
-import {
-  ImageryMapTileTree,
-  IModelApp,
-  MapLayerSources,
-  NotifyMessageDetails,
-  OutputMessagePriority
-} from "@itwin/core-frontend";
+import type { MapImagerySettings, MapSubLayerProps, MapSubLayerSettings } from "@itwin/core-common";
+import { BackgroundMapProvider, BackgroundMapType, BaseMapLayerSettings, ImageMapLayerSettings } from "@itwin/core-common";
+import type { MapLayerImageryProvider, MapLayerScaleRangeVisibility, MapLayerSource, ScreenViewport, TileTreeOwner, Viewport } from "@itwin/core-frontend";
+import { ImageryMapTileTree, IModelApp, MapLayerSources, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { ToggleSwitch } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamUtils } from "../../CustomParamUtils";
@@ -87,7 +67,9 @@ function getSubLayerProps(subLayerSettings: MapSubLayerSettings[]): MapSubLayerP
 
 function getMapLayerSettingsFromViewport(viewport: Viewport, getBackgroundMap: boolean, populateSubLayers = true): StyleMapLayerSettings[] | undefined {
   const displayStyle = viewport.displayStyle;
-  if (!displayStyle) {return undefined;}
+  if (!displayStyle) {
+    return undefined;
+  }
 
   const layers = new Array<StyleMapLayerSettings>();
 
@@ -188,14 +170,19 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   React.useEffect(() => {
     const handleScaleRangeVisibilityChanged = (layerIndexes: MapLayerScaleRangeVisibility[]) => {
       const updateLayers = (array: StyleMapLayerSettings[] | undefined) => {
-        if (array === undefined) {return undefined;}
+        if (array === undefined) {
+          return undefined;
+        }
 
         return array.map((curStyledLayer) => {
           const foundScaleRangeVisibility = layerIndexes.find(
             (layerIdx) => layerIdx.index === curStyledLayer.layerIndex && layerIdx.isOverlay === curStyledLayer.isOverlay,
           );
-          if (undefined === foundScaleRangeVisibility) {return curStyledLayer;}
-          else {return { ...curStyledLayer, treeVisibility: foundScaleRangeVisibility.visibility };}
+          if (undefined === foundScaleRangeVisibility) {
+            return curStyledLayer;
+          } else {
+            return { ...curStyledLayer, treeVisibility: foundScaleRangeVisibility.visibility };
+          }
         });
       };
       setBackgroundMapLayers(updateLayers(backgroundMapLayers));
@@ -328,7 +315,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
           tmpSources = tmpSources.filter((source) => source.name !== oldSource.name);
 
           // We don't update state in case of replacement... it will be done when the source is re-added right after.
-          if (changeType !== MapLayerSourceChangeType.Replaced) {setMapSources(tmpSources);}
+          if (changeType !== MapLayerSourceChangeType.Replaced) {
+            setMapSources(tmpSources);
+          }
         }
       }
 
@@ -353,14 +342,18 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
   const handleOnMenuItemSelection = React.useCallback(
     (action: string, mapLayerSettings: StyleMapLayerSettings) => {
-      if (!activeViewport || !activeViewport.displayStyle) {return;}
+      if (!activeViewport || !activeViewport.displayStyle) {
+        return;
+      }
 
       const indexInDisplayStyle = activeViewport.displayStyle.findMapLayerIndexByNameAndSource(
         mapLayerSettings.name,
         mapLayerSettings.source,
         mapLayerSettings.isOverlay,
       );
-      if (indexInDisplayStyle < 0) {return;}
+      if (indexInDisplayStyle < 0) {
+        return;
+      }
 
       switch (action) {
         case "delete":
@@ -416,18 +409,26 @@ export function MapLayerManager(props: MapLayerManagerProps) {
     (result: DropResult /* ,  _provided: ResponderProvided*/) => {
       const { destination, source } = result;
 
-      if (!destination)
+      if (!destination) {
         // dropped outside of list
-        {return;}
+        return;
+      }
 
       // item was not moved
-      if (destination.droppableId === source.droppableId && destination.index === source.index) {return;}
+      if (destination.droppableId === source.droppableId && destination.index === source.index) {
+        return;
+      }
 
       let fromMapLayer: StyleMapLayerSettings | undefined;
-      if (source.droppableId === "overlayMapLayers" && overlayMapLayers) {fromMapLayer = overlayMapLayers[source.index];}
-      else if (source.droppableId === "backgroundMapLayers" && backgroundMapLayers) {fromMapLayer = backgroundMapLayers[source.index];}
+      if (source.droppableId === "overlayMapLayers" && overlayMapLayers) {
+        fromMapLayer = overlayMapLayers[source.index];
+      } else if (source.droppableId === "backgroundMapLayers" && backgroundMapLayers) {
+        fromMapLayer = backgroundMapLayers[source.index];
+      }
 
-      if (!fromMapLayer || !activeViewport) {return;}
+      if (!fromMapLayer || !activeViewport) {
+        return;
+      }
 
       const displayStyle = activeViewport.displayStyle;
       let toMapLayer: StyleMapLayerSettings | undefined;
@@ -436,13 +437,20 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       // If destination.index is undefined then the user dropped the map at the end of list of maps. To get the "actual" index in the style, look up index in style by name.
       // We need to do this because the order of layers in UI are reversed so higher layers appear above lower layers.
       if (undefined !== destination.index) {
-        if (destination.droppableId === "overlayMapLayers" && overlayMapLayers) {toMapLayer = overlayMapLayers[destination.index];}
-        else if (destination.droppableId === "backgroundMapLayers" && backgroundMapLayers) {toMapLayer = backgroundMapLayers[destination.index];}
-        if (toMapLayer) {toIndexInDisplayStyle = displayStyle.findMapLayerIndexByNameAndSource(toMapLayer.name, toMapLayer.source, toMapLayer.isOverlay);}
+        if (destination.droppableId === "overlayMapLayers" && overlayMapLayers) {
+          toMapLayer = overlayMapLayers[destination.index];
+        } else if (destination.droppableId === "backgroundMapLayers" && backgroundMapLayers) {
+          toMapLayer = backgroundMapLayers[destination.index];
+        }
+        if (toMapLayer) {
+          toIndexInDisplayStyle = displayStyle.findMapLayerIndexByNameAndSource(toMapLayer.name, toMapLayer.source, toMapLayer.isOverlay);
+        }
       }
 
       const fromIndexInDisplayStyle = displayStyle.findMapLayerIndexByNameAndSource(fromMapLayer.name, fromMapLayer.source, fromMapLayer.isOverlay);
-      if (fromIndexInDisplayStyle < 0) {return;}
+      if (fromIndexInDisplayStyle < 0) {
+        return;
+      }
 
       if (destination.droppableId !== source.droppableId) {
         // see if we moved from "overlayMapLayers" to "backgroundMapLayers" or vice-versa
@@ -464,7 +472,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
           displayStyle.moveMapLayerToBottom({ index: fromIndexInDisplayStyle, isOverlay: destination.droppableId === "overlayMapLayers" });
         } else {
           if (toMapLayer) {
-            if (toIndexInDisplayStyle !== -1) {displayStyle.moveMapLayerToIndex(fromIndexInDisplayStyle, toIndexInDisplayStyle, toMapLayer.isOverlay);}
+            if (toIndexInDisplayStyle !== -1) {
+              displayStyle.moveMapLayerToIndex(fromIndexInDisplayStyle, toIndexInDisplayStyle, toMapLayer.isOverlay);
+            }
           }
         }
       }
@@ -478,15 +488,21 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   );
 
   const handleRefreshFromStyle = React.useCallback(() => {
-    if (activeViewport) {loadMapLayerSettingsFromViewport(activeViewport);}
+    if (activeViewport) {
+      loadMapLayerSettingsFromViewport(activeViewport);
+    }
   }, [activeViewport, loadMapLayerSettingsFromViewport]);
 
   const handleItemSelected = React.useCallback(
     (isOverlay: boolean, _index: number) => {
       if (isOverlay) {
-        if (overlayMapLayers) {setOverlayMapLayers([...overlayMapLayers]);}
+        if (overlayMapLayers) {
+          setOverlayMapLayers([...overlayMapLayers]);
+        }
       } else {
-        if (backgroundMapLayers) {setBackgroundMapLayers([...backgroundMapLayers]);}
+        if (backgroundMapLayers) {
+          setBackgroundMapLayers([...backgroundMapLayers]);
+        }
       }
     },
     [backgroundMapLayers, overlayMapLayers],
@@ -495,7 +511,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   const hasItemSelected = React.useCallback(
     (isOverlay: boolean) => {
       const layerList = isOverlay ? overlayMapLayers : backgroundMapLayers;
-      if (!layerList) {return false;}
+      if (!layerList) {
+        return false;
+      }
       return undefined !== layerList?.find((value) => value.selected === true);
     },
     [backgroundMapLayers, overlayMapLayers],
@@ -510,19 +528,26 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
   const changeAllLayerVisibility = React.useCallback(
     async (visible: boolean, isOverlay?: boolean) => {
-      if (isOverlay === undefined || !isOverlay) {backgroundMapLayers?.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));}
+      if (isOverlay === undefined || !isOverlay) {
+        backgroundMapLayers?.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
+      }
 
-      if (isOverlay === undefined || isOverlay) {overlayMapLayers?.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));}
+      if (isOverlay === undefined || isOverlay) {
+        overlayMapLayers?.forEach((layer) => changeLayerVisibility(visible, layer.layerIndex, layer.isOverlay));
+      }
     },
     [backgroundMapLayers, overlayMapLayers, changeLayerVisibility],
   );
 
   const invertAllLayerVisibility = React.useCallback(
     async (isOverlay?: boolean) => {
-      if (isOverlay === undefined || !isOverlay)
-        {backgroundMapLayers?.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));}
+      if (isOverlay === undefined || !isOverlay) {
+        backgroundMapLayers?.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
+      }
 
-      if (isOverlay === undefined || isOverlay) {overlayMapLayers?.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));}
+      if (isOverlay === undefined || isOverlay) {
+        overlayMapLayers?.forEach((layer) => changeLayerVisibility(!layer.visible, layer.layerIndex, layer.isOverlay));
+      }
     },
     [backgroundMapLayers, overlayMapLayers, changeLayerVisibility],
   );
@@ -530,7 +555,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   const detachSelectedLayers = React.useCallback(
     async (isOverlay: boolean) => {
       const layerList = isOverlay ? overlayMapLayers : backgroundMapLayers;
-      if (!layerList || layerList.length === 0) {return;}
+      if (!layerList || layerList.length === 0) {
+        return;
+      }
 
       for (let i = 0; i < layerList.length; i++) {
         if (layerList[i].selected) {
@@ -544,7 +571,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
   const selectAllLayers = React.useCallback(
     async (isOverlay: boolean) => {
-      if (!overlayMapLayers || !backgroundMapLayers) {return;}
+      if (!overlayMapLayers || !backgroundMapLayers) {
+        return;
+      }
 
       const layerList = isOverlay ? [...overlayMapLayers] : [...backgroundMapLayers];
       const hasCheckedLayer = undefined !== layerList?.find((value) => value.selected === true);
@@ -552,15 +581,20 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         layer.selected = !hasCheckedLayer;
       });
 
-      if (isOverlay) {setOverlayMapLayers(layerList);}
-      else {setBackgroundMapLayers(layerList);}
+      if (isOverlay) {
+        setOverlayMapLayers(layerList);
+      } else {
+        setBackgroundMapLayers(layerList);
+      }
     },
     [overlayMapLayers, backgroundMapLayers],
   );
 
   const renderMapLayersList = React.useCallback(
     (options: { isOverlay: boolean }): React.ReactElement<HTMLElement> => {
-      if (!overlayMapLayers || !backgroundMapLayers) {return <></>;}
+      if (!overlayMapLayers || !backgroundMapLayers) {
+        return <></>;
+      }
 
       const { isOverlay } = options;
       const layerList = isOverlay ? [...overlayMapLayers] : [...backgroundMapLayers];

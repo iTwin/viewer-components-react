@@ -34,7 +34,9 @@ export class BrowserStorage<Type> {
     if (itemStr === null) {
       return undefined;
     }
-    if (!itemStr || itemStr === "{}") {return map;}
+    if (!itemStr || itemStr === "{}") {
+      return map;
+    }
 
     map = JSON.parse(itemStr);
     return map;
@@ -42,10 +44,14 @@ export class BrowserStorage<Type> {
 
   public get(key: string | undefined) {
     const map = this.loadFromStorage();
-    if (map === undefined) {return undefined;}
+    if (map === undefined) {
+      return undefined;
+    }
 
     if (key) {
-      if (!Object.keys(map).includes(key)) {return undefined;}
+      if (!Object.keys(map).includes(key)) {
+        return undefined;
+      }
 
       return map[key];
     } else {
@@ -61,13 +67,19 @@ export class BrowserStorage<Type> {
   public delete(key: string) {
     const map = this.loadFromStorage();
     if (map === undefined) {
-      if (this._throwOnDeleteMissingKey) {throw new Error("Could not find key from storage.");}
-      else {return;}
+      if (this._throwOnDeleteMissingKey) {
+        throw new Error("Could not find key from storage.");
+      } else {
+        return;
+      }
     }
 
     if (!Object.keys(map).includes(key)) {
-      if (this._throwOnDeleteMissingKey) {throw Error("Could not find key from storage.");}
-      else {return;}
+      if (this._throwOnDeleteMissingKey) {
+        throw Error("Could not find key from storage.");
+      } else {
+        return;
+      }
     }
     delete map[key];
     window.localStorage.setItem(this._itemKeyName, JSON.stringify(map));
@@ -80,7 +92,9 @@ export class BrowserStorage<Type> {
     }
     const contentJson = JSON.stringify(content);
     for (const [key, value] of Object.entries(map)) {
-      if (JSON.stringify(value) === contentJson) {delete map[key];}
+      if (JSON.stringify(value) === contentJson) {
+        delete map[key];
+      }
     }
 
     window.localStorage.setItem(this._itemKeyName, JSON.stringify(map));
@@ -88,7 +102,9 @@ export class BrowserStorage<Type> {
 
   public save(key: string, content: Type) {
     let map = this.loadFromStorage();
-    if (map === undefined) {map = {};}
+    if (map === undefined) {
+      map = {};
+    }
 
     map[key] = content;
 

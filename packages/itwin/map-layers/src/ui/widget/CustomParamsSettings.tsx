@@ -29,7 +29,9 @@ export function CustomParamsSettingsPanel() {
     const paramsMap: CustomParamsMap = {};
     const paramsList = storage.get(undefined);
     if (Array.isArray(paramsList)) {
-      for (const param of paramsList) {paramsMap[param.name] = param;}
+      for (const param of paramsList) {
+        paramsMap[param.name] = param;
+      }
     }
     return paramsMap;
   });
@@ -113,7 +115,9 @@ export function CustomParamsSettingsPanel() {
   const onListboxValueChange = React.useCallback(
     (newValue: ListboxValue, _isControlOrCommandPressed?: boolean) => {
       const item = params[newValue];
-      if (item) {UiFramework.dialogs.modal.open(<CustomParamEditDialog item={item} onOkResult={onOkEdit} onCancelResult={onCancelEdit} />);}
+      if (item) {
+        UiFramework.dialogs.modal.open(<CustomParamEditDialog item={item} onOkResult={onOkEdit} onCancelResult={onCancelEdit} />);
+      }
 
       setSelectedValue(newValue);
       return;

@@ -16,8 +16,9 @@ export function setup() {
   }
 
   const getStub = async (arg: PreferenceKeyArg & ITwinIdArg & TokenArg) => {
-    if (undefined === iModelPrefs || undefined === iTwinPrefs)
-      {throw new Error("The user preferences mock is not properly setup - please run the `setup` method.");}
+    if (undefined === iModelPrefs || undefined === iTwinPrefs) {
+      throw new Error("The user preferences mock is not properly setup - please run the `setup` method.");
+    }
 
     // If the arg.key isn't set, expect the return of all values since the only namespace used is the MapLayer's one.
     // A real implementation would need to actual find all values in the namespace or loop over the list of values and return the ones
@@ -25,14 +26,20 @@ export function setup() {
 
     let returnVal;
     if (arg.iModelId) {
-      if (!arg.key) {return Array.from(iModelPrefs.values());}
+      if (!arg.key) {
+        return Array.from(iModelPrefs.values());
+      }
       returnVal = iModelPrefs.get(arg.key);
     }
 
-    if (undefined !== returnVal) {return returnVal;}
+    if (undefined !== returnVal) {
+      return returnVal;
+    }
 
     if (arg.iTwinId) {
-      if (!arg.key) {return Array.from(iTwinPrefs.values());}
+      if (!arg.key) {
+        return Array.from(iTwinPrefs.values());
+      }
       returnVal = iTwinPrefs.get(arg.key);
     }
 
@@ -40,19 +47,29 @@ export function setup() {
   };
 
   const deleteStub = async (arg: PreferenceKeyArg & ITwinIdArg & TokenArg) => {
-    if (undefined === iModelPrefs || undefined === iTwinPrefs)
-      {throw new Error("The user preferences mock is not properly setup - please run the `setup` method.");}
+    if (undefined === iModelPrefs || undefined === iTwinPrefs) {
+      throw new Error("The user preferences mock is not properly setup - please run the `setup` method.");
+    }
 
-    if (arg.iModelId) {iModelPrefs.delete(arg.key);}
-    if (arg.iTwinId) {iTwinPrefs.delete(arg.key);}
+    if (arg.iModelId) {
+      iModelPrefs.delete(arg.key);
+    }
+    if (arg.iTwinId) {
+      iTwinPrefs.delete(arg.key);
+    }
   };
 
   const saveStub = async (arg: PreferenceArg & ITwinIdArg & TokenArg) => {
-    if (undefined === iModelPrefs || undefined === iTwinPrefs)
-      {throw new Error("The user preferences mock is not properly setup - please run the `setup` method.");}
+    if (undefined === iModelPrefs || undefined === iTwinPrefs) {
+      throw new Error("The user preferences mock is not properly setup - please run the `setup` method.");
+    }
 
-    if (arg.iModelId) {iModelPrefs.set(arg.key, arg.content);}
-    if (arg.iTwinId) {iTwinPrefs.set(arg.key, arg.content);}
+    if (arg.iModelId) {
+      iModelPrefs.set(arg.key, arg.content);
+    }
+    if (arg.iTwinId) {
+      iTwinPrefs.set(arg.key, arg.content);
+    }
   };
 
   sinon.stub(MapLayersUI, "iTwinConfig").get(() => ({

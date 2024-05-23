@@ -78,7 +78,9 @@ describe("MapLayerManager", () => {
     const { container } = renderResult;
     await TestUtils.flushAsyncOperations();
 
-    if (extraFunc) {extraFunc();}
+    if (extraFunc) {
+      extraFunc();
+    }
 
     const addButton = container.querySelector(attachLAyerButtonSelector) as HTMLElement;
     should().exist(addButton);

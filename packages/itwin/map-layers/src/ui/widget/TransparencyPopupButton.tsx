@@ -47,7 +47,9 @@ export function TransparencyPopupButton({ transparency, onTransparencyChange, bu
       if (values.length) {
         const newTransparency = values[0];
         if (newTransparency !== transparency) {
-          if (onTransparencyChange) {onTransparencyChange(newTransparency / 100);}
+          if (onTransparencyChange) {
+            onTransparencyChange(newTransparency / 100);
+          }
         }
       }
     },

@@ -16,7 +16,8 @@ import type {
   TreeModelChanges,
   TreeNodeItem,
   TreeNodeRendererProps,
-  TreeRendererProps } from "@itwin/components-react";
+  TreeRendererProps,
+} from "@itwin/components-react";
 import {
   ControlledTree,
   SelectionMode,
@@ -134,7 +135,9 @@ export function SubLayersTree(props: SubLayersTreeProps) {
         setSubLayers(tmpSubLayers);
       }
 
-      if (props.onSubLayerStateChange) {props.onSubLayerStateChange(-1, visible);}
+      if (props.onSubLayerStateChange) {
+        props.onSubLayerStateChange(-1, visible);
+      }
     },
     [subLayers, props],
   );
@@ -238,12 +241,16 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
   // they get rendered anyway.
   private cascadeStateToAllChildren(model: MutableTreeModel, parentId?: string) {
     const children = model.getChildren(parentId);
-    if (children === undefined) {return;}
+    if (children === undefined) {
+      return;
+    }
 
     for (const childID of children) {
       const childNode = childID ? model.getNode(childID) : undefined;
 
-      if (childNode) {this.syncNodeStateWithParent(model, childNode);}
+      if (childNode) {
+        this.syncNodeStateWithParent(model, childNode);
+      }
 
       // Drill down the tree.
       this.cascadeStateToAllChildren(model, childID);
@@ -252,12 +259,18 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
 
   private applyMutualExclusiveState(model: MutableTreeModel, nodeId: string) {
     const changedNode = model.getNode(nodeId);
-    if (changedNode?.checkbox.state === CheckBoxState.Off) {return;}
+    if (changedNode?.checkbox.state === CheckBoxState.Off) {
+      return;
+    }
 
     for (const node of model.iterateTreeModelNodes()) {
-      if (node.id === changedNode?.id) {continue;}
+      if (node.id === changedNode?.id) {
+        continue;
+      }
 
-      if (node && node.checkbox.state === CheckBoxState.On) {node.checkbox.state = CheckBoxState.Off;}
+      if (node && node.checkbox.state === CheckBoxState.On) {
+        node.checkbox.state = CheckBoxState.Off;
+      }
     }
   }
 
@@ -275,7 +288,9 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
     this.modelSource.modifyModel((model) => {
       const addedNodes = args[1].addedNodeIds.map((id) => model.getNode(id));
       addedNodes.forEach((node) => {
-        if (!node) {return;}
+        if (!node) {
+          return;
+        }
 
         this.syncNodeStateWithParent(model, node);
       });
@@ -283,7 +298,9 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
   };
 
   private static isUnnamedGroup(subLayer: MapSubLayerProps | undefined): boolean {
-    if (!subLayer) {return false;}
+    if (!subLayer) {
+      return false;
+    }
 
     return (!subLayer.name || subLayer.name.length === 0) && subLayer.children !== undefined && subLayer.children.length > 0;
   }
@@ -293,9 +310,13 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
     // Lookup node parent. If non exists, I assume thats the root node,
     // and it must have a proper initial state.
     const parentNode = changedNode.parentId ? model.getNode(changedNode.parentId) : undefined;
-    if (!parentNode) {return;}
+    if (!parentNode) {
+      return;
+    }
 
-    if (!changedNode.checkbox) {return;} // don't see why this would happen, but if there is no checkbox, we cant do much here.
+    if (!changedNode.checkbox) {
+      return;
+    } // don't see why this would happen, but if there is no checkbox, we cant do much here.
 
     const parentLayerId = undefined !== parentNode.item.extendedData?.subLayerId ? parentNode.item.extendedData?.subLayerId : parentNode.item.id;
     const parentSubLayer = this._subLayers?.find((subLayer) => subLayer.id === parentLayerId);
@@ -330,14 +351,18 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
           let prevVisibleSubLayers: SubLayerId[] = [];
           if (this._singleVisibleSubLayer) {
             prevVisibleSubLayers = this._subLayers.reduce((filtered: SubLayerId[], subLayer) => {
-              if (subLayer.visible && subLayer.id !== undefined) {filtered.push(subLayer.id);}
+              if (subLayer.visible && subLayer.id !== undefined) {
+                filtered.push(subLayer.id);
+              }
               return filtered;
             }, []);
           }
 
           // Inform caller that subLayer state is going to change (i.e. update display style state)
           if (this._onSubLayerStateChange) {
-            for (const slId of prevVisibleSubLayers) {this._onSubLayerStateChange(slId, false);}
+            for (const slId of prevVisibleSubLayers) {
+              this._onSubLayerStateChange(slId, false);
+            }
 
             this._onSubLayerStateChange(subLayerId, isSelected);
           }
@@ -345,14 +370,19 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
           // Update sublayer object, otherwise state would get out of sync with DisplayStyle each time the TreeView is re-rendered
           this._subLayers?.forEach((curSubLayer) => {
             if (curSubLayer.id !== undefined) {
-              if (curSubLayer.id === subLayerId) {curSubLayer.visible = isSelected;}
-              else if (prevVisibleSubLayers.includes(curSubLayer.id)) {curSubLayer.visible = false;}
+              if (curSubLayer.id === subLayerId) {
+                curSubLayer.visible = isSelected;
+              } else if (prevVisibleSubLayers.includes(curSubLayer.id)) {
+                curSubLayer.visible = false;
+              }
             }
           });
 
           // Cascade state
           this.modelSource.modifyModel((model) => {
-            if (this._singleVisibleSubLayer) {this.applyMutualExclusiveState(model, change.nodeItem.id);}
+            if (this._singleVisibleSubLayer) {
+              this.applyMutualExclusiveState(model, change.nodeItem.id);
+            }
             this.cascadeStateToAllChildren(model, change.nodeItem.id);
           });
         });
@@ -479,7 +509,9 @@ class FilteredTreeHierarchy {
   private filterNodes(hierarchy: Map<string | undefined, DelayLoadedTreeNodeItem[]>, current?: DelayLoadedTreeNodeItem): DelayLoadedTreeNodeItem | undefined {
     const matches = current ? this.matchesFilter(current) : false;
     const children = hierarchy.get(current?.id);
-    if (!children) {return matches ? current : undefined;}
+    if (!children) {
+      return matches ? current : undefined;
+    }
 
     const matchedChildren = new Array<DelayLoadedTreeNodeItem>();
     for (const child of children) {
@@ -506,10 +538,14 @@ class FilteredTreeHierarchy {
   }
 
   private matchesFilter(node: TreeNodeItem) {
-    if (node.label.value.valueFormat !== PropertyValueFormat.Primitive) {return false;}
+    if (node.label.value.valueFormat !== PropertyValueFormat.Primitive) {
+      return false;
+    }
 
     const value = node.label.value.displayValue?.toLowerCase();
-    if (!value) {return false;}
+    if (!value) {
+      return false;
+    }
     return value.includes(this._filter.toLowerCase());
   }
 

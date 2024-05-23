@@ -51,10 +51,13 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
       { value: MAP_TYPES.wms, label: MAP_TYPES.wms },
       { value: MAP_TYPES.wmts, label: MAP_TYPES.wmts },
     ];
-    if (props.mapTypesOptions?.supportTileUrl) {formats.push({ value: MAP_TYPES.tileUrl, label: MAP_TYPES.tileUrl });}
+    if (props.mapTypesOptions?.supportTileUrl) {
+      formats.push({ value: MAP_TYPES.tileUrl, label: MAP_TYPES.tileUrl });
+    }
 
-    if (IModelApp.mapLayerFormatRegistry.isRegistered(MAP_TYPES.arcGisFeature))
-      {formats.push({ value: MAP_TYPES.arcGisFeature, label: MAP_TYPES.arcGisFeature, id: "techPreview" });}
+    if (IModelApp.mapLayerFormatRegistry.isRegistered(MAP_TYPES.arcGisFeature)) {
+      formats.push({ value: MAP_TYPES.arcGisFeature, label: MAP_TYPES.arcGisFeature, id: "techPreview" });
+    }
 
     return formats;
   });

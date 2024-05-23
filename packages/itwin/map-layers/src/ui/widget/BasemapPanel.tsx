@@ -8,17 +8,8 @@
 import "./BasemapPanel.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import type {
-  BaseLayerSettings,
-  MapImagerySettings,
-  MapLayerProps } from "@itwin/core-common";
-import {
-  BackgroundMapType,
-  BaseMapLayerSettings,
-  ColorByName,
-  ColorDef,
-  ImageMapLayerSettings
-} from "@itwin/core-common";
+import type { BaseLayerSettings, MapImagerySettings, MapLayerProps } from "@itwin/core-common";
+import { BackgroundMapType, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
 import type { Viewport } from "@itwin/core-frontend";
 import { WebFontIcon } from "@itwin/core-react";
 import { ColorPickerDialog, ColorSwatch } from "@itwin/imodel-components-react";
@@ -111,15 +102,21 @@ export function BasemapPanel(props: BasemapPanelProps) {
       const baseMap = args.backgroundBase;
 
       // Optimization:  If serialized 'backgroundBase' objects are identical, skip refresh
-      if (JSON.stringify(baseMap.toJSON()) === JSON.stringify(selectedBaseMap?.toJSON())) {return;}
+      if (JSON.stringify(baseMap.toJSON()) === JSON.stringify(selectedBaseMap?.toJSON())) {
+        return;
+      }
 
       setSelectedBaseMap(baseMap); // cache current base map objects
       updateBaseMapOptions(baseMap);
 
       if (baseMap instanceof ImageMapLayerSettings) {
-        if (baseMap.transparency !== baseMapTransparencyValue) {setBaseMapTransparencyValue(baseMap.transparency);}
+        if (baseMap.transparency !== baseMapTransparencyValue) {
+          setBaseMapTransparencyValue(baseMap.transparency);
+        }
 
-        if (baseMap.visible !== baseMapVisible) {setBaseMapVisible(baseMap.visible);}
+        if (baseMap.visible !== baseMapVisible) {
+          setBaseMapVisible(baseMap.visible);
+        }
       } else if (baseMap instanceof ColorDef) {
         if (baseMap.getAlpha() !== baseMapTransparencyValue) {
           setBaseMapTransparencyValue(baseMap.getAlpha() / 255);

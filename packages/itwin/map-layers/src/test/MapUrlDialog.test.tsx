@@ -9,20 +9,8 @@ import * as sinon from "sinon";
 import * as moq from "typemoq";
 import type { MapSubLayerProps } from "@itwin/core-common";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import type {
-  DisplayStyle3dState,
-  IModelConnection,
-  MapLayerTokenEndpoint,
-  ScreenViewport,
-  ViewState3d } from "@itwin/core-frontend";
-import {
-  IModelApp,
-  MapLayerSource,
-  MapLayerSourceStatus,
-  MockRender,
-  NotifyMessageDetails,
-  OutputMessagePriority
-} from "@itwin/core-frontend";
+import type { DisplayStyle3dState, IModelConnection, MapLayerTokenEndpoint, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+import { IModelApp, MapLayerSource, MapLayerSourceStatus, MockRender, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../mapLayers";
 import type { SourceState } from "../ui/widget/MapUrlDialog";
@@ -117,7 +105,9 @@ describe("MapUrlDialog", () => {
 
     await TestUtils.flushAsyncOperations();
 
-    if (!sampleLayerSettings) {assert.fail("Invalid layer settings");}
+    if (!sampleLayerSettings) {
+      assert.fail("Invalid layer settings");
+    }
 
     if (!isOAuth) {
       // Make sure credentials are returned part of the source object
@@ -185,7 +175,9 @@ describe("MapUrlDialog", () => {
 
   it("attach a valid WMS layer (with sublayers)", async () => {
     const sampleWmsLayerSettings = getSampleLayerSettings("WMS", false);
-    if (!sampleWmsLayerSettings) {assert.fail("Invalid layer settings");}
+    if (!sampleWmsLayerSettings) {
+      assert.fail("Invalid layer settings");
+    }
 
     const spyMessage = sandbox.spy(IModelApp.notifications, "outputMessage");
     const spyOnOkResult = sandbox.fake();

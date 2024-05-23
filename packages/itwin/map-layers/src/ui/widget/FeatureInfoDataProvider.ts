@@ -39,7 +39,9 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   private handleActiveToolChanged = (tool: Tool, _start: StartOrResume) => {
-    if (this._detachActiveToolListener) {this._detachActiveToolListener();}
+    if (this._detachActiveToolListener) {
+      this._detachActiveToolListener();
+    }
     this._detachActiveToolListener = undefined;
 
     if (tool.toolId === MapFeatureInfoTool.toolId) {
@@ -110,7 +112,9 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
               }
             }
           }
-          if (layerCatIdx === -1 && nbRecords > 0) {this.addCategory(layerCategory);}
+          if (layerCatIdx === -1 && nbRecords > 0) {
+            this.addCategory(layerCategory);
+          }
         }
       }
     }

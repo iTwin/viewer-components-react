@@ -8,15 +8,8 @@ import { assert, expect, should } from "chai";
 import * as enzyme from "enzyme";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
-import type {
-  BackgroundMapSettings,
-  DisplayStyle3dSettings,
-  TerrainSettings } from "@itwin/core-common";
-import {
-  PlanarClipMaskMode,
-  PlanarClipMaskPriority,
-  TerrainHeightOriginMode
-} from "@itwin/core-common";
+import type { BackgroundMapSettings, DisplayStyle3dSettings, TerrainSettings } from "@itwin/core-common";
+import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import type { DisplayStyle3dState, IModelConnection, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
 import { MockRender } from "@itwin/core-frontend";
 import { SpecialKey } from "@itwin/appui-abstract";

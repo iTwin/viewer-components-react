@@ -3,9 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type {
-  ToolbarItem,
-  UiItemsProvider } from "@itwin/appui-react";
+import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 import {
   StagePanelLocation,
   StagePanelSection,

@@ -8,15 +8,8 @@ import * as React from "react";
 import { NumberInput } from "@itwin/core-react";
 import type { ViewState3d } from "@itwin/core-frontend";
 import { QuantityType } from "@itwin/core-frontend";
-import type {
-  BackgroundMapProps,
-  BackgroundMapSettings,
-  TerrainProps } from "@itwin/core-common";
-import {
-  PlanarClipMaskMode,
-  PlanarClipMaskPriority,
-  TerrainHeightOriginMode
-} from "@itwin/core-common";
+import type { BackgroundMapProps, BackgroundMapSettings, TerrainProps } from "@itwin/core-common";
+import { PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode } from "@itwin/core-common";
 import { useSourceMapContext } from "./MapLayerManager";
 import "./MapManagerSettings.scss";
 import type { SelectOption } from "@itwin/itwinui-react";
@@ -42,14 +35,22 @@ function getMapMaskingFromBackgroundMapSetting(backgroundMapSettings: Background
 }
 
 function getHeightOriginModeKey(mode: TerrainHeightOriginMode): string {
-  if (TerrainHeightOriginMode.Geodetic === mode) {return "geodetic";}
-  if (TerrainHeightOriginMode.Geoid === mode) {return "geoid";}
+  if (TerrainHeightOriginMode.Geodetic === mode) {
+    return "geodetic";
+  }
+  if (TerrainHeightOriginMode.Geoid === mode) {
+    return "geoid";
+  }
   return "ground";
 }
 
 function getHeightOriginModeFromKey(mode: string): TerrainHeightOriginMode {
-  if ("geodetic" === mode) {return TerrainHeightOriginMode.Geodetic;}
-  if ("geoid" === mode) {return TerrainHeightOriginMode.Geoid;}
+  if ("geodetic" === mode) {
+    return TerrainHeightOriginMode.Geodetic;
+  }
+  if ("geoid" === mode) {
+    return TerrainHeightOriginMode.Geoid;
+  }
   return TerrainHeightOriginMode.Ground;
 }
 
@@ -223,7 +224,9 @@ export function MapManagerSettings() {
 
   /** Disable commas and letters */
   const onKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.keyCode === 188 || (event.keyCode >= 65 && event.keyCode <= 90)) {event.preventDefault();}
+    if (event.keyCode === 188 || (event.keyCode >= 65 && event.keyCode <= 90)) {
+      event.preventDefault();
+    }
   }, []);
 
   const [isLocatable, setIsLocatable] = React.useState(() => backgroundMapSettings.locatable);

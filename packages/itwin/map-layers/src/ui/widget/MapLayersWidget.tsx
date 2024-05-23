@@ -31,8 +31,8 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
     return activeViewport?.iModel.onEcefLocationChanged.addListener(updateIsGeoLocated);
   }, [activeViewport?.iModel]);
 
-  if (activeViewport && isGeoLocated && activeViewport.view.isSpatialView())
-    {return (
+  if (activeViewport && isGeoLocated && activeViewport.view.isSpatialView()) {
+    return (
       <div ref={ref} className="map-manager-layer-host">
         <MapLayerManager
           activeViewport={activeViewport}
@@ -42,7 +42,8 @@ export function MapLayersWidget(props: MapLayersWidgetProps) {
           }}
         />
       </div>
-    );}
+    );
+  }
 
   return (
     <FillCentered>

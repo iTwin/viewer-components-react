@@ -38,11 +38,17 @@ export function MapLayerSettingsPopupButton(props: MapLayerSettingsPopupButtonPr
 
   const isInsideCoreDialog = React.useCallback((element: HTMLElement) => {
     if (element.nodeName === "DIV") {
-      if (element.classList && element.classList.contains("core-dialog")) {return true;}
-      if (element.parentElement && isInsideCoreDialog(element.parentElement)) {return true;}
+      if (element.classList && element.classList.contains("core-dialog")) {
+        return true;
+      }
+      if (element.parentElement && isInsideCoreDialog(element.parentElement)) {
+        return true;
+      }
     } else {
       // istanbul ignore else
-      if (element.parentElement && isInsideCoreDialog(element.parentElement)) {return true;}
+      if (element.parentElement && isInsideCoreDialog(element.parentElement)) {
+        return true;
+      }
     }
     return false;
   }, []);

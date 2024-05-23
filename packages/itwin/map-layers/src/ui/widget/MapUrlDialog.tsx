@@ -9,17 +9,8 @@ import * as React from "react";
 import { SpecialKey } from "@itwin/appui-abstract";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import type { ImageMapLayerSettings } from "@itwin/core-common";
-import type {
-  MapLayerAccessClient,
-  MapLayerSourceValidation,
-  ScreenViewport } from "@itwin/core-frontend";
-import {
-  IModelApp,
-  MapLayerSource,
-  MapLayerSourceStatus,
-  NotifyMessageDetails,
-  OutputMessagePriority
-} from "@itwin/core-frontend";
+import type { MapLayerAccessClient, MapLayerSourceValidation, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Dialog, useCrossOriginPopup } from "@itwin/core-react";
 import { SvgStatusWarning, SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import { Button, Icon, Input, LabeledInput, ProgressLinear } from "@itwin/itwinui-react";
@@ -104,7 +95,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const getCustomParamsMapping = React.useCallback((url: string): string[] => {
     const cpMappingStorage = new CustomParamsMappingStorage();
     const cpMapping = cpMappingStorage.get(url.toLowerCase());
-    if (cpMapping && !Array.isArray(cpMapping)) {return cpMapping.customParamNames;}
+    if (cpMapping && !Array.isArray(cpMapping)) {
+      return cpMapping.customParamNames;
+    }
     return [];
   }, []);
 
@@ -151,7 +144,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
   const [customParamNamesChangedByUser, SetCustomParamNamesChangedByUser] = React.useState<boolean>(false);
   const [customParamNames, setCustomParamNames] = React.useState<string[] | undefined>(() => {
-    if (mapUrl) {return getCustomParamsMapping(mapUrl);}
+    if (mapUrl) {
+      return getCustomParamsMapping(mapUrl);
+    }
     return undefined;
   });
 
@@ -183,7 +178,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const onUsernameChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setUserName(event.target.value);
-      if (invalidCredentialsProvided) {setInvalidCredentialsProvided(false);}
+      if (invalidCredentialsProvided) {
+        setInvalidCredentialsProvided(false);
+      }
     },
     [setUserName, invalidCredentialsProvided, setInvalidCredentialsProvided],
   );
@@ -191,7 +188,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const onPasswordChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setPassword(event.target.value);
-      if (invalidCredentialsProvided) {setInvalidCredentialsProvided(false);}
+      if (invalidCredentialsProvided) {
+        setInvalidCredentialsProvided(false);
+      }
     },
     [setPassword, invalidCredentialsProvided, setInvalidCredentialsProvided],
   );
@@ -476,8 +475,12 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             });
 
             if (source !== undefined) {
-              if (props.signInModeArgs.layer.savedQueryParams) {source.savedQueryParams = { ...props.signInModeArgs.layer.savedQueryParams };}
-              if (props.signInModeArgs.layer.unsavedQueryParams) {source.unsavedQueryParams = { ...props.signInModeArgs.layer.unsavedQueryParams };}
+              if (props.signInModeArgs.layer.savedQueryParams) {
+                source.savedQueryParams = { ...props.signInModeArgs.layer.savedQueryParams };
+              }
+              if (props.signInModeArgs.layer.unsavedQueryParams) {
+                source.unsavedQueryParams = { ...props.signInModeArgs.layer.unsavedQueryParams };
+              }
 
               setLayerAttachPending(true);
 
@@ -526,7 +529,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       // eslint-disable-next-line deprecation/deprecation
       if (event.key === SpecialKey.Enter) {
-        if (readyToSave()) {handleOk();}
+        if (readyToSave()) {
+          handleOk();
+        }
       }
     },
     [handleOk, readyToSave],
@@ -566,7 +571,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const handleOAuthPopupClose = React.useCallback(() => {
     setShowOauthPopup(false);
     setLayerAuthPending(false);
-    if (oauthProcessSucceeded === undefined) {setOAuthProcessSucceeded(false);} // indicates there was a failed attempt
+    if (oauthProcessSucceeded === undefined) {
+      setOAuthProcessSucceeded(false);
+    } // indicates there was a failed attempt
   }, [oauthProcessSucceeded]);
 
   // Utility function to get warning message section

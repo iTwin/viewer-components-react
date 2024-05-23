@@ -40,12 +40,16 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
     (val, event) => {
       const stateSetter = (prev: string[] | undefined) => {
         const getValue = (): string[] => {
-          if (!prev) {return [val];}
+          if (!prev) {
+            return [val];
+          }
 
           return event === "removed" ? prev.filter((v) => val !== v) : [...prev, val];
         };
         const value = getValue();
-        if (props.onChange) {props.onChange(value);}
+        if (props.onChange) {
+          props.onChange(value);
+        }
         return value;
       };
       setParamValues(stateSetter);

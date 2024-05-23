@@ -13,17 +13,23 @@ export class CustomParamUtils {
       const paramFromStorage = cpStorage.get(paramName);
       let customParam: CustomParamItem | undefined;
       if (Array.isArray(paramFromStorage)) {
-        if (paramFromStorage.length > 0) {customParam = paramFromStorage[0];}
+        if (paramFromStorage.length > 0) {
+          customParam = paramFromStorage[0];
+        }
       } else {
         customParam = paramFromStorage;
       }
 
       if (customParam && source) {
         if (customParam.secret) {
-          if (!source.unsavedQueryParams) {source.unsavedQueryParams = {};}
+          if (!source.unsavedQueryParams) {
+            source.unsavedQueryParams = {};
+          }
           source.unsavedQueryParams[customParam.key] = customParam.value;
         } else {
-          if (!source.savedQueryParams) {source.savedQueryParams = {};}
+          if (!source.savedQueryParams) {
+            source.savedQueryParams = {};
+          }
           source.savedQueryParams[customParam.key] = customParam.value;
         }
       }

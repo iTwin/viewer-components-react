@@ -177,7 +177,9 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         const found = sourceSubLayers.find((value) => {
           visible.name === value.name;
         });
-        if (found) {visible.visible = found?.visible;}
+        if (found) {
+          visible.visible = found?.visible;
+        }
       });
       attachLayer(source, visibleSubLayers, true);
     },

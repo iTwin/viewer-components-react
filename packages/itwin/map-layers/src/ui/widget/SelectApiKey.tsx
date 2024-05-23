@@ -21,10 +21,11 @@ export function SelectApiKey(props: SelectApiKeyProps) {
   const [apiKeys] = React.useState(() => {
     const storage = new CustomParamsStorage();
     const keys = storage.get(undefined);
-    if (keys && Array.isArray(keys))
-      {return keys.map((keyItem) => {
+    if (keys && Array.isArray(keys)) {
+      return keys.map((keyItem) => {
         return { value: keyItem.name, label: keyItem.name };
-      });}
+      });
+    }
     return [];
   });
 
@@ -35,7 +36,9 @@ export function SelectApiKey(props: SelectApiKeyProps) {
   const handleOnChange = React.useCallback(
     (value: string) => {
       setKeyValue(value);
-      if (props.onChange) {props.onChange(value);}
+      if (props.onChange) {
+        props.onChange(value);
+      }
     },
     [props],
   );

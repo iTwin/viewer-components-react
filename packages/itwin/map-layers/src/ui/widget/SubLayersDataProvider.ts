@@ -23,7 +23,9 @@ export class SubLayersDataProvider implements ITreeDataProvider {
   }
 
   public static isUnnamedGroup(subLayer: MapSubLayerProps | undefined): boolean {
-    if (!subLayer) {return false;}
+    if (!subLayer) {
+      return false;
+    }
 
     return (!subLayer.name || subLayer.name.length === 0) && subLayer.children !== undefined && subLayer.children.length > 0;
   }
@@ -61,7 +63,9 @@ export class SubLayersDataProvider implements ITreeDataProvider {
             SubLayersDataProvider.isUnnamedGroup(props) ? "icon-folder" : "icon-layers",
           ),
         );
-        if (props.children) {this.loadChildNodes(allSubLayers, props.id);}
+        if (props.children) {
+          this.loadChildNodes(allSubLayers, props.id);
+        }
       });
 
       this._nodeMap.set(undefined !== parentId ? `${parentId}` : "", treeNodes);
@@ -77,14 +81,18 @@ export class SubLayersDataProvider implements ITreeDataProvider {
 
   public async getNodesCount(parent?: TreeNodeItem) {
     const nodeArray: TreeNodeItem[] | undefined = parent ? this._nodeMap.get(parent.id) : this._nodeMap.get("");
-    if (nodeArray) {return nodeArray.length;}
+    if (nodeArray) {
+      return nodeArray.length;
+    }
 
     return 0;
   }
 
   public async getNodes(parent?: TreeNodeItem) {
     const nodeArray: TreeNodeItem[] | undefined = parent ? this._nodeMap.get(parent.id) : this._nodeMap.get("");
-    if (nodeArray) {return nodeArray;}
+    if (nodeArray) {
+      return nodeArray;
+    }
 
     return [];
   }

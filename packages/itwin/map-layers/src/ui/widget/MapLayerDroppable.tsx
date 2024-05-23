@@ -15,16 +15,8 @@ import { UiFramework } from "@itwin/appui-react";
 import { assert } from "@itwin/core-bentley";
 import type { SubLayerId } from "@itwin/core-common";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import type {
-  MapLayerIndex,
-  ScreenViewport } from "@itwin/core-frontend";
-import {
-  IModelApp,
-  MapLayerImageryProviderStatus,
-  MapTileTreeScaleRangeVisibility,
-  NotifyMessageDetails,
-  OutputMessagePriority
-} from "@itwin/core-frontend";
+import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp, MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Icon } from "@itwin/core-react";
 import { Button, Checkbox } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
@@ -50,7 +42,9 @@ interface MapLayerDroppableProps {
 }
 
 const changeVisibilityByElementId = (element: Element | null, visible: boolean) => {
-  if (element) {element.setAttribute("style", `visibility: ${visible ? "visible" : "hidden"}`);}
+  if (element) {
+    element.setAttribute("style", `visibility: ${visible ? "visible" : "hidden"}`);
+  }
 };
 
 /** @internal */
@@ -67,11 +61,12 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
 
   const onSubLayerStateChange = (activeLayer: StyleMapLayerSettings, subLayerId: SubLayerId, isSelected: boolean) => {
     const mapLayerStyleIdx = props.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
-    if (mapLayerStyleIdx !== -1 && activeLayer.subLayers)
-      {props.activeViewport.displayStyle.changeMapSubLayerProps({ visible: isSelected }, subLayerId, {
+    if (mapLayerStyleIdx !== -1 && activeLayer.subLayers) {
+      props.activeViewport.displayStyle.changeMapSubLayerProps({ visible: isSelected }, subLayerId, {
         index: mapLayerStyleIdx,
         isOverlay: activeLayer.isOverlay,
-      });}
+      });
+    }
   };
 
   const handleOk = React.useCallback(

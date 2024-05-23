@@ -58,7 +58,9 @@ export class ViewportMock {
       .returns((props: Partial<coreCommon.MapLayerProps>, mapLayerIndex: MapLayerIndex) => {
         const index = mapLayerIndex.index;
         const layers = mapLayerIndex.isOverlay ? this.overlayLayers : this.backgroundLayers;
-        if (index < 0 || index >= layers.length) {return;}
+        if (index < 0 || index >= layers.length) {
+          return;
+        }
         layers[index] = layers[index].clone(props);
         this.onMapImageryChanged.raiseEvent(this.mapImageryMock.object);
         this.onDisplayStyleChanged.raiseEvent(this.viewportMock.object); // Indirectly raised by Viewport.renderFrame() at runtime
@@ -66,7 +68,9 @@ export class ViewportMock {
     this.displayStyleMock
       .setup((ds) => ds.detachMapLayerByIndex(moq.It.isAny()))
       .returns((mapLayerIndex: MapLayerIndex) => {
-        if (this.detachMapLayerByIndexFunc) {this.detachMapLayerByIndexFunc(mapLayerIndex);}
+        if (this.detachMapLayerByIndexFunc) {
+          this.detachMapLayerByIndexFunc(mapLayerIndex);
+        }
 
         // Not too sure about this one, but
         this.onMapImageryChanged.raiseEvent(this.mapImageryMock.object);
