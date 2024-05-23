@@ -8,6 +8,7 @@ import path from "path";
 import { concatAll, expand, filter, from, mergeMap } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord } from "@itwin/appui-abstract";
+import { BeEvent } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
@@ -26,6 +27,7 @@ import {
   createSubjectNode, stubFactoryFunction,
 } from "../Common";
 
+import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassGroupingNodeKey, Node, Ruleset } from "@itwin/presentation-common";
 import type { GeometricElement3dProps } from "@itwin/core-common";
@@ -55,6 +57,17 @@ describe("VisibilityStateHandler", () => {
   });
 
   describe("#unit", () => {
+    before(() => {
+      const mockPresentationManager = {
+        onIModelHierarchyChanged: new BeEvent<() => void>(),
+      } as unknown as PresentationManager;
+      sinon.stub(Presentation, "presentation").get(() => mockPresentationManager);
+    });
+
+    after(() => {
+      sinon.restore();
+    });
+
     let queryHandlerStub: StubbedFactoryFunction<ModelsTreeQueryHandler>;
 
     function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: ModelsTreeQueryHandler; viewport?: Viewport }) {

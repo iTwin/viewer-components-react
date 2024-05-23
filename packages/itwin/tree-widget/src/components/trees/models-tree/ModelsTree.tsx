@@ -349,14 +349,7 @@ function useTreeState({
   });
 }
 
-function useLegacyVisibilityHandler({
-  legacyHandler,
-  hierarchyBasedHandler,
-  rulesetId,
-  activeView,
-  hierarchyAutoUpdateEnabled,
-  iModel,
-}: UseVisibilityHandlerProps) {
+function useLegacyVisibilityHandler({ legacyHandler, hierarchyBasedHandler, rulesetId, activeView, iModel }: UseVisibilityHandlerProps) {
   const subjectModelIdsCache = useMemo(() => createModelsTreeQueryHandler(iModel), [iModel]);
   // eslint-disable-next-line deprecation/deprecation
   const [state, setState] = useState<ModelsVisibilityHandler>();
@@ -371,7 +364,6 @@ function useLegacyVisibilityHandler({
     const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
       rulesetId,
       viewport: activeView,
-      hierarchyAutoUpdateEnabled,
     };
 
     // eslint-disable-next-line deprecation/deprecation
@@ -380,7 +372,7 @@ function useLegacyVisibilityHandler({
     return () => {
       handler.dispose();
     };
-  }, [rulesetId, activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache, legacyHandler, hierarchyBasedHandler]);
+  }, [rulesetId, activeView, subjectModelIdsCache, legacyHandler, hierarchyBasedHandler]);
 
   return legacyHandler && typeof legacyHandler !== "function" ? legacyHandler : state;
 }
@@ -389,7 +381,6 @@ function useHierarchyBasedVisibilityHandler({
   legacyHandler,
   hierarchyBasedHandler,
   activeView,
-  hierarchyAutoUpdateEnabled,
 }: UseVisibilityHandlerProps & {
   hierarchyBasedHandler?: UseTreeProps["hierarchyBasedVisibilityHandler"];
 }) {
@@ -402,7 +393,6 @@ function useHierarchyBasedVisibilityHandler({
 
     const visibilityHandlerProps: HierarchyBasedVisibilityHandlerProps = {
       viewport: activeView,
-      hierarchyAutoUpdateEnabled,
     };
 
     const handler = hierarchyBasedHandler ? hierarchyBasedHandler(visibilityHandlerProps) : createHierarchyBasedVisibilityHandler(visibilityHandlerProps);
@@ -410,7 +400,7 @@ function useHierarchyBasedVisibilityHandler({
     return () => {
       handler.dispose();
     };
-  }, [activeView, hierarchyAutoUpdateEnabled, legacyHandler, hierarchyBasedHandler]);
+  }, [activeView, legacyHandler, hierarchyBasedHandler]);
 
   if (legacyHandler) {
     return undefined;

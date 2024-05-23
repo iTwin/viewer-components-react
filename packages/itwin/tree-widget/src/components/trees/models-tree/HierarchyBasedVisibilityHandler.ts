@@ -95,7 +95,6 @@ interface VisibilityHandlerOverrides {
 export interface HierarchyBasedVisibilityHandlerProps {
   viewport: Viewport;
   overrides?: VisibilityHandlerOverrides;
-  hierarchyAutoUpdateEnabled?: boolean;
 }
 
 /**
@@ -125,13 +124,10 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   constructor(private readonly _props: HierarchyBasedVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
     this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
-    // istanbul ignore if
-    if (this._props.hierarchyAutoUpdateEnabled) {
-      // eslint-disable-next-line @itwin/no-internal
-      this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(() => {
-        this._queryHandler.invalidateCache();
-      });
-    }
+    // eslint-disable-next-line @itwin/no-internal
+    this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(() => {
+      this._queryHandler.invalidateCache();
+    });
   }
 
   // istanbul ignore next

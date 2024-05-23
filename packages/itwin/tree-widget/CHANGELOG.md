@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 21 May 2024 13:26:36 GMT and should not be manually modified.
+This log was last generated on Wed, 22 May 2024 16:03:40 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.3.1
+
+Wed, 22 May 2024 16:03:40 GMT
+
+### Patches
+
+- Fixed newly inserted subject node visibility not changing ([#838](https://github.com/iTwin/viewer-components-react/pull/838))
 
 ## 2.3.0
 

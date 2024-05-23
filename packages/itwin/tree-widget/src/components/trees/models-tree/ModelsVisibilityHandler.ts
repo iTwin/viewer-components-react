@@ -32,6 +32,7 @@ import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEven
 export interface ModelsVisibilityHandlerProps {
   rulesetId: string;
   viewport: Viewport;
+  /** @deprecated in 2.3. Hierarchy auto update is always enabled */
   hierarchyAutoUpdateEnabled?: boolean;
 }
 
@@ -53,12 +54,10 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._props = props;
     this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
     this._eventListener = createVisibilityChangeEventListener(this._props.viewport);
-    if (this._props.hierarchyAutoUpdateEnabled) {
-      // eslint-disable-next-line @itwin/no-internal
-      this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(
-        /* istanbul ignore next */ () => this._queryHandler.invalidateCache(),
-      );
-    }
+    // eslint-disable-next-line @itwin/no-internal
+    this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(
+      /* istanbul ignore next */ () => this._queryHandler.invalidateCache(),
+    );
   }
 
   public dispose() {
