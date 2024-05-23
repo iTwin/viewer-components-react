@@ -73,7 +73,9 @@ function ViewerWithOptions() {
         },
       }}
       presentationProps={{
-        selectionStorage: unifiedSelectionStorage,
+        selection: {
+          selectionStorage: unifiedSelectionStorage,
+        },
       }}
     />
   );
