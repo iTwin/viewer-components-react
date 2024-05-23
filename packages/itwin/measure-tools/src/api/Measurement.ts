@@ -50,6 +50,25 @@ export interface MeasurementWidgetData {
   properties: WidgetValue[];
 }
 
+export namespace DrawingMetaData {
+
+  export function drawingMetaDataToJSON(obj: DrawingMetaData | undefined): DrawingMetaDataProps | undefined {
+    if (obj === undefined)
+      return undefined;
+    const origin = obj.origin?.toJSONXY();
+    const extents = obj.extents?.toJSONXY();
+    if (origin !== undefined)
+      return { origin, extents, worldScale: obj.worldScale, drawingId: obj.drawingId };
+    return undefined;
+  }
+
+  export function drawingMetaDataFromJSON(json: DrawingMetaDataProps): DrawingMetaData {
+
+    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
+
+  }
+}
+
 /** Abstract class for serializers that read/write measurements from JSON. */
 export abstract class MeasurementSerializer {
 
@@ -579,20 +598,6 @@ export abstract class Measurement {
     }
 
     return true;
-  }
-
-  public drawingMetaDataToJSON(): DrawingMetaDataProps | undefined {
-    const origin = this.drawingOrigin?.toJSONXY();
-    const extents = this.drawingExtents?.toJSONXY();
-    if (origin !== undefined)
-      return { origin, extents, worldScale: this.worldScale, drawingId: this.drawingId };
-    return undefined;
-  }
-
-  public drawingMetaDataFromJSON(json: DrawingMetaDataProps): DrawingMetaData {
-
-    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
-
   }
 
   /** Draw the measurement. This is called every frame, e.g. when the mouse moves. This is suitable for small or dynamic graphics, but if the measurement

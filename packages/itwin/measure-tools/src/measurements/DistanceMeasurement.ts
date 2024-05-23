@@ -29,6 +29,7 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement";
 import {
+  DrawingMetaData,
   Measurement,
   MeasurementPickContext,
   MeasurementSerializer,
@@ -144,7 +145,7 @@ export class DistanceMeasurement extends Measurement {
     this._endPoint = Point3d.createZero();
     this._isDynamic = false;
     if (props?.drawingMetaData)
-      this.drawingMetaData = this.drawingMetaDataFromJSON(props.drawingMetaData);
+      this.drawingMetaData = DrawingMetaData.drawingMetaDataFromJSON(props.drawingMetaData);
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
 
@@ -651,7 +652,7 @@ export class DistanceMeasurement extends Measurement {
         : MeasurementPreferences.current.displayMeasurementAxes;
 
     if (jsonDist.drawingMetaData !== undefined)
-      this.drawingMetaData = this.drawingMetaDataFromJSON(jsonDist.drawingMetaData);
+      this.drawingMetaData = DrawingMetaData.drawingMetaDataFromJSON(jsonDist.drawingMetaData);
 
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -668,7 +669,7 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
-    const drawingMetaDataJson = this.drawingMetaDataToJSON();
+    const drawingMetaDataJson = DrawingMetaData.drawingMetaDataToJSON(this.drawingMetaData);
     if (drawingMetaDataJson)
       jsonDist.drawingMetaData = drawingMetaDataJson;
   }
