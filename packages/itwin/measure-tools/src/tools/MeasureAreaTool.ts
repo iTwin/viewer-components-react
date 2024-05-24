@@ -34,7 +34,7 @@ MeasureAreaToolModel
 > {
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
-  private _enableSheetMeasurements;
+  private _enableSheetMeasurements: boolean;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(

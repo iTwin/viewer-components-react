@@ -33,7 +33,7 @@ MeasureDistanceToolModel
 > {
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
-  private _enableSheetMeasurements;
+  private _enableSheetMeasurements: boolean;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
