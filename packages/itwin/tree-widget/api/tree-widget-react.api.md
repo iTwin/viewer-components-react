@@ -458,6 +458,8 @@ export function showAllModels(models: string[], viewport: Viewport): Promise<voi
 export class SubjectModelIdsCache {
     constructor(imodel: IModelConnection);
     // (undocumented)
+    clear(): void;
+    // (undocumented)
     getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]>;
 }
 
@@ -489,6 +491,7 @@ export interface TreeDefinition {
     id: string;
     render: (props: TreeRenderProps) => React.ReactNode;
     shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+    startIcon?: React.ReactNode;
 }
 
 // @internal (undocumented)

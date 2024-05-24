@@ -33,6 +33,10 @@ export const MAP_TYPES = {
   tileUrl: "TileURL",
   arcGisFeature: "ArcGISFeature",
 };
+const URL_SCHEMES = {
+  http: "http://",
+  https: "https://",
+};
 
 export type LayerCreationMode = "single"|"multiple";
 interface MapUrlDialogProps {
@@ -93,8 +97,8 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const getCustomParamsMapping = React.useCallback((url: string): string [] => {
     const cpMappingStorage = new CustomParamsMappingStorage();
     const cpMapping = cpMappingStorage.get(url.toLowerCase());
-    if (cpMapping && cpMapping.length > 0)
-      return cpMapping[0].customParamNames;
+    if (cpMapping  && !Array.isArray(cpMapping))
+      return cpMapping.customParamNames;
     return [];
   }, []);
 
@@ -251,14 +255,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
   }, [getCustomParamsMapping, customParamNamesChangedByUser]);
 
-  const createSource = React.useCallback(() => {
+  const createSource = React.useCallback((url: string) => {
     let source: MapLayerSource | undefined;
-    if (mapUrl && mapName) {
-      source = MapLayerSource.fromJSON({
-        url: mapUrl,
-        name: mapName,
-        formatId: mapType,
-      });
+    if (url && mapName) {
+      source = MapLayerSource.fromJSON({url, name: mapName, formatId: mapType});
 
       // Set credentials separately since they are not part of JSON
       if (source) {
@@ -272,10 +272,18 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
     }
     return source;
-  }, [customParamNames, mapName, mapType, mapUrl, password, userName]);
+  }, [customParamNames, mapName, mapType, password, userName]);
 
   const handleOk = React.useCallback(() => {
-    const source = createSource();
+    const mapUrlLow = mapUrl.toLowerCase();
+    // Append 'https://' if url is missing scheme
+    let url = mapUrl;
+    if (!mapUrlLow.startsWith(URL_SCHEMES.http) && !mapUrlLow.startsWith(URL_SCHEMES.https)) {
+      url = `${URL_SCHEMES.https}${mapUrl}`;
+      setMapUrl(url);
+    }
+
+    const source = createSource(url);
     if (source === undefined || props.mapLayerSourceToEdit) {
       onOkResult();
 
@@ -290,7 +298,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       // Store custom params mapping
       if (customParamNames) {
         const cpmStorage = new CustomParamsMappingStorage();
-        cpmStorage.save(mapUrl.toLowerCase(), {customParamNames});
+        cpmStorage.save(url.toLowerCase(), {customParamNames});
       }
 
       // Simply change the source definition in the setting service
@@ -343,14 +351,13 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
           if (customParamNames && customParamNames.length>0) {
             // Link the map-layers URL custom params.
             const cpmStorage = new CustomParamsMappingStorage();
-            cpmStorage.save(mapUrl.toLowerCase(), {customParamNames});
+            cpmStorage.save(url.toLowerCase(), {customParamNames});
 
             const cpStorage = new CustomParamsStorage();
             customParamNames.forEach((customParamName) => {
               const items = cpStorage.get(customParamName);
-              if (items && items.length > 0 ) {
-                const item = items[0];
-                (item.secret ? privateCustomParamIdx : customParamIdx)[item.key] = item.value;
+              if (items && !Array.isArray(items) ) {
+                (items.secret ? privateCustomParamIdx : customParamIdx)[items.key] = items.value;
               }
             });
           }
@@ -377,7 +384,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       }
     })();
 
-  }, [createSource, props.mapLayerSourceToEdit, props.activeViewport, props.signInModeArgs, onOkResult, customParamNames, mapName, mapUrl, isSettingsStorageAvailable, hasImodelContext, settingsStorage, updateAuthState]);
+  }, [mapUrl, createSource, props.mapLayerSourceToEdit, props.activeViewport, props.signInModeArgs, onOkResult, customParamNames, mapName, isSettingsStorageAvailable, hasImodelContext, settingsStorage, updateAuthState]);
 
   React.useEffect(() => {
     const handleOAuthProcessEnd = (success: boolean, _state: any) => {

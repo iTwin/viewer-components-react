@@ -14,13 +14,7 @@ import { StandardNodeTypes } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
-  areAllModelsVisible,
-  hideAllModels,
-  invertAllModels,
-  ModelsTreeNodeType,
-  ModelsVisibilityHandler,
-  showAllModels,
-  toggleModels,
+  areAllModelsVisible, hideAllModels, invertAllModels, ModelsTreeNodeType, ModelsVisibilityHandler, showAllModels, toggleModels,
 } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
@@ -49,8 +43,16 @@ describe("ModelsVisibilityHandler", () => {
   });
 
   const imodelMock = moq.Mock.ofType<IModelConnection>();
+  const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
+  const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
+
+  beforeEach(() => {
+    presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
+    sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
+  });
 
   afterEach(() => {
+    presentationManagerMock.reset();
     imodelMock.reset();
     sinon.restore();
   });
@@ -122,21 +124,19 @@ describe("ModelsVisibilityHandler", () => {
   describe("constructor", () => {
     it("should subscribe for viewport change events", () => {
       const vpMock = mockViewport();
-      createHandler({ viewport: vpMock.object });
-      expect(vpMock.object.onViewedCategoriesPerModelChanged.numberOfListeners).to.eq(1);
-      expect(vpMock.object.onViewedCategoriesChanged.numberOfListeners).to.eq(1);
-      expect(vpMock.object.onViewedModelsChanged.numberOfListeners).to.eq(1);
-      expect(vpMock.object.onAlwaysDrawnChanged.numberOfListeners).to.eq(1);
-      expect(vpMock.object.onNeverDrawnChanged.numberOfListeners).to.eq(1);
+      using(createHandler({ viewport: vpMock.object }), (_) => {
+        expect(vpMock.object.onViewedCategoriesPerModelChanged.numberOfListeners).to.eq(1);
+        expect(vpMock.object.onViewedCategoriesChanged.numberOfListeners).to.eq(1);
+        expect(vpMock.object.onViewedModelsChanged.numberOfListeners).to.eq(1);
+        expect(vpMock.object.onAlwaysDrawnChanged.numberOfListeners).to.eq(1);
+        expect(vpMock.object.onNeverDrawnChanged.numberOfListeners).to.eq(1);
+      });
     });
 
-    it("should subscribe for 'onIModelHierarchyChanged' event if hierarchy auto update is enabled", () => {
-      const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
-      const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
-      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
-      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
-      createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true });
-      expect(changeEvent.numberOfListeners).to.eq(1);
+    it("should subscribe for 'onIModelHierarchyChanged' event", () => {
+      using(createHandler({ viewport: mockViewport().object }), (_) => {
+        expect(changeEvent.numberOfListeners).to.eq(1);
+      });
     });
   });
 
@@ -188,11 +188,7 @@ describe("ModelsVisibilityHandler", () => {
     });
 
     it("should unsubscribe from 'onIModelHierarchyChanged' event", () => {
-      const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
-      const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
-      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
-      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
-      using(createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true }), (_) => {});
+      using(createHandler({ viewport: mockViewport().object }), (_) => {});
       expect(changeEvent.numberOfListeners).to.eq(0);
     });
   });

@@ -10,7 +10,7 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
-import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
+import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
@@ -153,6 +153,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     density={props.density}
                   />
                 ),
+                startIcon: <SvgTechnicalPreviewMiniBw />,
               },
               {
                 id: `stateless-${ModelsTreeComponent.id}`,
