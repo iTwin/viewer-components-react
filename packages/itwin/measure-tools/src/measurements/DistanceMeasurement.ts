@@ -250,7 +250,7 @@ export class DistanceMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.drawingMetaData?.worldScale !== undefined && this.sheetViewId !== context.viewport.view.id)
+    if (this.sheetViewId !== undefined && this.sheetViewId !== context.viewport.view.id)
       return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);

@@ -73,6 +73,7 @@ MeasureAreaToolModel
   private resetSheetData(): void {
     this.toolModel.drawingMetaData = undefined;
     this.toolModel.setPolygonWorldScale(undefined);
+    this.toolModel.sheetViewId = undefined;
   }
 
   public override async onReinitialize(): Promise<void> {
@@ -133,12 +134,12 @@ MeasureAreaToolModel
     if (this._enableSheetMeasurements) {
       if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined && initial) {
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.sheetViewId = ev.viewport.view.id;
 
         if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
           const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
           this.toolModel.drawingMetaData = data;
           this.toolModel.setPolygonWorldScale(drawingInfo.worldScale);
-          this.toolModel.sheetViewId = ev.viewport.view.id;
         }
       }
     }
