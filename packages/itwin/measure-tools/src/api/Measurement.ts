@@ -726,6 +726,8 @@ export abstract class Measurement {
     this.lockStyle = other.lockStyle;
     this.viewTarget.copyFrom(other.viewTarget);
     this.displayLabels = other.displayLabels;
+    if (other.drawingMetaData)
+      this._drawingMetaData = { origin: other.drawingMetaData.origin.clone(), worldScale: other.worldScale, drawingId: other.drawingId, extents: other.drawingExtents};
   }
 
   /**
