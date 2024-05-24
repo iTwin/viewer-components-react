@@ -13,7 +13,7 @@ steps:
 
   - script: |
       corepack enable
-      corepack prepare pnpm@9 --activate
+      corepack prepare pnpm@9.1.2 --activate
       pnpm config set store-dir $(pnpm_config_cache)
     displayName: "Setup pnpm"
 
