@@ -1,21 +1,32 @@
-import "@testing-library/jest-dom";
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import React from "react";
-import * as moq from "typemoq";
 import faker from "@faker-js/faker";
-import { BeEvent } from "@itwin/core-bentley";
-import { EmptyLocalization } from "@itwin/core-common";
+import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import { ExtractionStates } from "../widget/components/ExtractionStatus";
-import { ReportMappingHorizontalTile } from "../widget/components/ReportMappingHorizontalTile";
-import { fireEvent, mockIModelId1, mockIModelsResponse, mockReportId, render, screen, waitFor, within } from "./test-utils";
-
-import type { MappingContainer, ReportMappingCollection } from "@itwin/insights-client";
+import {
+  fireEvent,
+  mockIModelId1,
+  mockIModelsResponse,
+  mockReportId,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "./test-utils";
+import * as moq from "typemoq";
+import type {
+  MappingContainer,
+  ReportMappingCollection,
+} from "@itwin/insights-client";
 import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
 import type { GetSingleIModelParams } from "@itwin/imodels-client-management";
+import { BeEvent } from "@itwin/core-bentley";
+import { ExtractionStates } from "../widget/components/ExtractionStatus";
+import { ReportMappingHorizontalTile } from "../widget/components/ReportMappingHorizontalTile";
+import { EmptyLocalization } from "@itwin/core-common";
 import type { BulkExtractor } from "../widget/components/BulkExtractor";
 import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management/lib/operations";
 
@@ -78,25 +89,29 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
   };
 };
 
-const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): MappingContainer[] => {
-  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map((mapping, index) => ({
-    mapping: {
-      id: mapping.mappingId,
-      mappingName: `mOcKMaPpIngNaMe${index}`,
-      description: `mOcKmApPInGDeScRiPtIoN${index}`,
-      extractionEnabled: false,
-      createdOn: "",
-      createdBy: "",
-      modifiedOn: "",
-      modifiedBy: "",
-      _links: {
-        iModel: {
-          // Tie the mapping to to the iModel Id
-          href: mapping.imodelId,
+const mockMappingsFactory = (
+  mockReportMappings: ReportMappingCollection
+): MappingContainer[] => {
+  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map(
+    (mapping, index) => ({
+      mapping: {
+        id: mapping.mappingId,
+        mappingName: `mOcKMaPpIngNaMe${index}`,
+        description: `mOcKmApPInGDeScRiPtIoN${index}`,
+        extractionEnabled: false,
+        createdOn: "",
+        createdBy: "",
+        modifiedOn: "",
+        modifiedBy: "",
+        _links: {
+          iModel: {
+            // Tie the mapping to to the iModel Id
+            href: mapping.imodelId,
+          },
         },
       },
-    },
-  }));
+    })
+  );
 
   return mockMappings;
 };
@@ -104,17 +119,18 @@ const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): Mappi
 const mockReportMappingsAndMappingsFactory = (): ReportMappingAndMapping[] => {
   const reportMappings = mockReportMappingsFactory();
   const mockMappings = mockMappingsFactory(reportMappings);
-  const reportMappingsAndMapping = reportMappings.mappings.map((reportMapping) => {
-    const mapping = mockMappings.find((x) => x.mapping.id === reportMapping.mappingId)!.mapping;
-    const iModelName = mockProjectIModels.iModels.find((x) => x.id === reportMapping.imodelId)!.displayName;
-    const reportMappingAndMapping: ReportMappingAndMapping = {
-      ...reportMapping,
-      iModelName,
-      mappingName: mapping.mappingName,
-      mappingDescription: mapping.description ?? "",
-    };
-    return reportMappingAndMapping;
-  });
+  const reportMappingsAndMapping =
+    reportMappings.mappings.map((reportMapping) => {
+      const mapping = mockMappings.find((x) => x.mapping.id === reportMapping.mappingId)!.mapping;
+      const iModelName = mockProjectIModels.iModels.find((x) => x.id === reportMapping.imodelId)!.displayName;
+      const reportMappingAndMapping: ReportMappingAndMapping = {
+        ...reportMapping,
+        iModelName,
+        mappingName: mapping.mappingName,
+        mappingDescription: mapping.description ?? "",
+      };
+      return reportMappingAndMapping;
+    });
   return reportMappingsAndMapping;
 };
 

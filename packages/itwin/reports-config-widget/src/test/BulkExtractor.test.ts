@@ -1,15 +1,14 @@
-import { assert } from "chai";
-import * as moq from "typemoq";
-import type { ExtractionRequestDetails} from "@itwin/insights-client";
-import { ExtractionClient, ExtractionState, MappingsClient, ReportsClient } from "@itwin/insights-client";
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { BulkExtractor } from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
-
+import { assert } from "chai";
+import * as moq from "typemoq";
+import { ExtractionClient, ExtractionState, MappingsClient, ReportsClient } from "@itwin/insights-client";
 import type { AccessToken } from "@itwin/core-bentley";
+import type { ExtractionRequestDetails } from "@itwin/insights-client";
 
 jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: -1,
