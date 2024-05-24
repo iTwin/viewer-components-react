@@ -8,6 +8,9 @@ pr:
     include:
       - master
 
+variables:
+  pnpm_config_cache: $(Pipeline.Workspace)/.pnpm-store
+
 jobs:
   - job: Build
     condition: succeeded()

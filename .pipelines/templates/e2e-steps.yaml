@@ -1,6 +1,3 @@
-variables:
-  pnpm_config_cache: $(Pipeline.Workspace)/.pnpm-store
-
 steps:
   - task: UseNode@1
     displayName: "Use Node $(NodeVersion)"
@@ -8,10 +5,10 @@ steps:
       version: "$(NodeVersion)"
 
   - task: Cache@2
-      inputs:
-        key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
-        path: $(pnpm_config_cache)
-      displayName: Cache pnpm
+    displayName: Cache pnpm
+    inputs:
+      key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+      path: $(pnpm_config_cache)
 
   - script: |
       corepack enable

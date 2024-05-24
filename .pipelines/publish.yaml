@@ -20,6 +20,8 @@ variables:
     value: github.com/iTwin/viewer-components-react
   - name: NodeVersion
     value: 18.16.0
+  - name: pnpm_config_cache
+    value: $(Pipeline.Workspace)/.pnpm-store
 
 steps:
   - checkout: self
