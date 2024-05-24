@@ -117,7 +117,6 @@ export function createHierarchyBasedVisibilityHandler(props: HierarchyBasedVisib
 
 class VisibilityHandlerImplementation implements IVisibilityHandler {
   public filteredDataProvider?: IFilteredPresentationTreeDataProvider;
-  public readonly isHierarchyBased = true;
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _queryHandler: ModelsTreeQueryHandler;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
@@ -398,39 +397,22 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return undefined;
   }
 
-  private getElementDefaultVisibility(props: GetElementStateProps): VisibilityStatus {
-    const viewport = this._props.viewport;
-    const { elementId, modelId, categoryId } = props;
-
-    if (!viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatus("hidden", "element.hiddenThroughModel");
-    }
-
-    let status = this.getElementOverriddenVisibility(elementId);
-    if (status) {
-      return status;
-    }
-
-    status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-    return createVisibilityStatus(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "hiddenThroughCategory");
-  }
-
   private getElementDisplayStatus(props: GetElementStateProps): Observable<VisibilityStatus> {
     const result = defer(() => {
-      const { hasChildren } = props;
-      if (hasChildren === false) {
-        return of(this.getElementDefaultVisibility(props));
+      const viewport = this._props.viewport;
+      const { elementId, modelId, categoryId } = props;
+
+      if (!viewport.view.viewsModel(modelId)) {
+        return createVisibilityStatusObs("hidden", "element.hiddenThroughModel");
       }
 
-      return this._queryHandler.queryElements({ rootElementId: props.elementId }).pipe(
-        map((elementId) => this.getElementDefaultVisibility({ ...props, elementId }).state),
-        getVisibilityStatusFromTreeChildren({
-          visible: "element.allElementsVisible",
-          hidden: "element.allElementsHidden",
-          partial: "element.someElementsAreHidden",
-          empty: () => this.getElementDefaultVisibility(props),
-        }),
-      );
+      let status = this.getElementOverriddenVisibility(elementId);
+      if (status) {
+        return of(status);
+      }
+
+      status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+      return createVisibilityStatusObs(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "hiddenThroughCategory");
     });
 
     const ovr = this._props.overrides?.getElementDisplayStatus;

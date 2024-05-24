@@ -851,7 +851,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           expect(result).to.include({ state: "hidden" });
         });
 
-        it("is partially visible when at least one element is displayed and at least one element is hidden", async () => {
+        it("is FULLY visible when at least one element is displayed and at least one element is hidden", async () => {
           const modelId = "0x1";
           const categoryId = "0x2";
           const elementId = "0x10";
@@ -867,7 +867,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             }),
           });
           const result = await handler.getVisibilityStatus(node);
-          expect(result).to.include({ state: "partial" });
+          expect(result).to.include({ state: "visible" });
         });
 
         describe("no children", () => {
