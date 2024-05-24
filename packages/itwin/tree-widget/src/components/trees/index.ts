@@ -25,4 +25,4 @@ export * from "./models-tree/ModelsTree";
 export * from "./models-tree/ModelsTreeComponent";
 export * from "./models-tree/ModelsVisibilityHandler";
 
-export * from "./experimental";
+export * from "./stateless";
