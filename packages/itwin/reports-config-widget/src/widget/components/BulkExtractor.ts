@@ -3,10 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { ExtractionState } from "@itwin/insights-client";
-import { STATUS_CHECK_INTERVAL } from "./Constants";
-import { ExtractionStates } from "./ExtractionStatus";
 import { handleError } from "./utils";
-
+import { ExtractionStates } from "./ExtractionStatus";
+import { STATUS_CHECK_INTERVAL } from "./Constants";
 import type {
   ExtractionClient,
   ExtractionMapping,
@@ -70,7 +69,7 @@ export class BulkExtractor {
   }
 
   public async getReportState(reportId: string): Promise<ExtractionStates> {
-    if (new Date().getTime() - this._timeFetched.getTime() > STATUS_CHECK_INTERVAL) {
+    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
       this._timeFetched = new Date();
       await this.fetchStates();
     }
@@ -87,7 +86,7 @@ export class BulkExtractor {
   }
 
   public async getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates> {
-    if (new Date().getTime() - this._timeFetched.getTime() > STATUS_CHECK_INTERVAL) {
+    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
       this._timeFetched = new Date();
       await this.fetchStates();
     }
@@ -109,13 +108,17 @@ export class BulkExtractor {
   }
 
   private static getFinalState(states: ExtractionState[]): ExtractionStates {
-    if (states.includes(ExtractionState.Failed)) return ExtractionStates.Failed;
+    if (states.includes(ExtractionState.Failed))
+      return ExtractionStates.Failed;
 
-    if (states.includes(ExtractionState.Queued)) return ExtractionStates.Queued;
+    if (states.includes(ExtractionState.Queued))
+      return ExtractionStates.Queued;
 
-    if (states.includes(ExtractionState.Running)) return ExtractionStates.Running;
+    if (states.includes(ExtractionState.Running))
+      return ExtractionStates.Running;
 
-    if (states.includes(ExtractionState.Succeeded)) return ExtractionStates.Succeeded;
+    if (states.includes(ExtractionState.Succeeded))
+      return ExtractionStates.Succeeded;
 
     return ExtractionStates.Failed;
   }
@@ -200,7 +203,10 @@ export class BulkExtractor {
   }
 
   private async fetchReportIModels(reportId: string): Promise<string[]> {
-    const reportMappings = await this._reportsClientApi.getReportMappings(await this._accessToken(), reportId);
+    const reportMappings = await this._reportsClientApi.getReportMappings(
+      await this._accessToken(),
+      reportId
+    );
     return reportMappings.map((x) => x.imodelId);
   }
 }

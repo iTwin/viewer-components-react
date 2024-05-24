@@ -1,21 +1,38 @@
-import "@testing-library/jest-dom";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import * as moq from "typemoq";
-import { EmptyLocalization } from "@itwin/core-common";
-import { ExtractionClient, MappingsClient, ReportsClient } from "@itwin/insights-client";
-import { Text } from "@itwin/itwinui-react";
+import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import { BulkExtractor } from "../widget/components/BulkExtractor";
+import {
+  act,
+  mockIModelId1,
+  mockIModelId2,
+  mockIModelsResponse,
+  mockReportId,
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+  within,
+} from "./test-utils";
+import * as moq from "typemoq";
+import type {
+  MappingContainer,
+  Report,
+  ReportMappingCollection,
+} from "@itwin/insights-client";
+import {
+  ExtractionClient,
+  MappingsClient,
+  ReportsClient} from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
-import { act, mockIModelId1, mockIModelId2, mockIModelsResponse, mockReportId, render, screen, waitFor, waitForElementToBeRemoved, within } from "./test-utils";
-
-import type { MappingContainer, Report, ReportMappingCollection } from "@itwin/insights-client";
 import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
+import { BulkExtractor } from "../widget/components/BulkExtractor";
 import type { ReportMappingHorizontalTileProps } from "../widget/components/ReportMappingHorizontalTile";
+import { Text } from "@itwin/itwinui-react";
+import { EmptyLocalization } from "@itwin/core-common";
 import type { AddMappingsModalProps } from "../widget/components/AddMappingsModal";
 import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management/lib/operations";
 
@@ -90,25 +107,29 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
   };
 };
 
-const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): MappingContainer[] => {
-  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map((mapping, index) => ({
-    mapping: {
-      id: mapping.mappingId,
-      mappingName: `mOcKMaPpIngNaMe${index}`,
-      description: `mOcKmApPInGDeScRiPtIoN${index}`,
-      extractionEnabled: false,
-      createdOn: "",
-      createdBy: "",
-      modifiedOn: "",
-      modifiedBy: "",
-      _links: {
-        iModel: {
-          // Tie the mapping to to the iModel Id
-          href: mapping.imodelId,
+const mockMappingsFactory = (
+  mockReportMappings: ReportMappingCollection
+): MappingContainer[] => {
+  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map(
+    (mapping, index) => ({
+      mapping: {
+        id: mapping.mappingId,
+        mappingName: `mOcKMaPpIngNaMe${index}`,
+        description: `mOcKmApPInGDeScRiPtIoN${index}`,
+        extractionEnabled: false,
+        createdOn: "",
+        createdBy: "",
+        modifiedOn: "",
+        modifiedBy: "",
+        _links: {
+          iModel: {
+            // Tie the mapping to to the iModel Id
+            href: mapping.imodelId,
+          },
         },
       },
-    },
-  }));
+    })
+  );
 
   return mockMappings;
 };
@@ -120,12 +141,10 @@ jest.mock("../widget/components/Constants.ts", () => ({
 
 jest.mock("../widget/components/ReportMappingHorizontalTile", () => ({
   ReportMappingHorizontalTile: (props: ReportMappingHorizontalTileProps) => {
-    return (
-      <div data-testid="horizontal-tile">
-        <Text>{props.mapping.mappingName}</Text>
-        <Text title={props.mapping.mappingDescription}>{props.mapping.iModelName}</Text>
-      </div>
-    );
+    return (<div data-testid="horizontal-tile">
+      <Text>{props.mapping.mappingName}</Text>
+      <Text title={props.mapping.mappingDescription}>{props.mapping.iModelName}</Text>
+    </div>);
   },
 }));
 
@@ -221,20 +240,29 @@ describe("Report Mappings View", () => {
     // Be an exact match on display name.
     await user.type(searchInput, mockMappings[0].mapping.mappingName);
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(screen.getByText(mockMappings[0].mapping.mappingName)).toBeInTheDocument();
+    expect(
+      screen.getByText(mockMappings[0].mapping.mappingName)
+    ).toBeInTheDocument();
 
     // Be an exact match on description.
     await user.clear(searchInput);
     await user.type(searchInput, mockMappings[0].mapping.description ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(screen.getByTitle(mockMappings[0].mapping.description ?? "")).toBeInTheDocument();
+    expect(
+      screen.getByTitle(mockMappings[0].mapping.description ?? "")
+    ).toBeInTheDocument();
 
     // Be an exact match on iModel Name.
-    const iModel = mockIModelsResponse.find((mockIModel) => mockIModel.iModel.id === mockMappings[0].mapping._links.iModel.href);
+    const iModel = mockIModelsResponse.find(
+      (mockIModel) =>
+        mockIModel.iModel.id === mockMappings[0].mapping._links.iModel.href
+    );
     await user.clear(searchInput);
     await user.type(searchInput, iModel?.iModel.displayName ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(screen.getByText(iModel?.iModel.displayName ?? "")).toBeInTheDocument();
+    expect(
+      screen.getByText(iModel?.iModel.displayName ?? "")
+    ).toBeInTheDocument();
   });
 
   it("add mapping", async () => {
@@ -286,7 +314,11 @@ describe("Report Mappings View", () => {
       name: /odatafeedurl/i,
     });
     expect(urlTextbox).toBeInTheDocument();
-    expect(screen.getByDisplayValue(`https://api.bentley.com/insights/reporting/odata/${mockReport.id}`)).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(
+        `https://api.bentley.com/insights/reporting/odata/${mockReport.id}`
+      )
+    ).toBeInTheDocument();
 
     const copyButton = screen.getByRole("button", {
       name: /copy/i,
@@ -340,10 +372,23 @@ describe("Report Mappings View", () => {
 
     for (const [index, horizontalTile] of horizontalTiles.entries()) {
       const reportMappingTile = within(horizontalTile);
-      const mockiModel = mockIModelsResponse.find((iModel) => iModel.iModel.id === mockMappings[index].mapping._links.iModel.href);
-      expect(reportMappingTile.getByText(mockMappings[index].mapping.mappingName)).toBeInTheDocument();
-      expect(reportMappingTile.getByTitle(mockMappings[index].mapping.description ?? "")).toBeInTheDocument();
-      expect(reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")).toBeInTheDocument();
+      const mockiModel = mockIModelsResponse.find(
+        (iModel) =>
+          iModel.iModel.id === mockMappings[index].mapping._links.iModel.href
+      );
+      expect(
+        reportMappingTile.getByText(
+          mockMappings[index].mapping.mappingName
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByTitle(
+          mockMappings[index].mapping.description ?? ""
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
+      ).toBeInTheDocument();
     }
   };
 });

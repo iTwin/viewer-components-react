@@ -1,19 +1,25 @@
-import "./Templates.scss";
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { SvgAdd, SvgDelete, SvgMore, SvgRefresh } from "@itwin/itwinui-icons-react";
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, DropdownMenu, IconButton, MenuItem, toaster } from "@itwin/itwinui-react";
-import { useApiContext } from "./api/APIContext";
-import { DeleteModal } from "./DeleteModal";
-import { ExportModal } from "./ExportModal";
-import { HorizontalTile } from "./HorizontalTile";
-import { SearchBar } from "./SearchBar";
+import {
+  SvgAdd,
+  SvgDelete,
+  SvgMore,
+  SvgRefresh,
+} from "@itwin/itwinui-icons-react";
 import { EmptyMessage, LoadingOverlay } from "./utils";
-
+import "./Templates.scss";
 import type { Configuration } from "./EC3/Template";
+import { SearchBar } from "./SearchBar";
+import { HorizontalTile } from "./HorizontalTile";
+import React from "react";
+import { useApiContext } from "./api/APIContext";
+import { ExportModal } from "./ExportModal";
+import { DeleteModal } from "./DeleteModal";
+
 /**
  * Template props
  * @beta
@@ -28,9 +34,7 @@ export interface TemplateProps {
  * @beta
  */
 export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => {
-  const {
-    config: { getAccessToken, iTwinId, getEC3AccessToken },
-  } = useApiContext();
+  const { config: { getAccessToken, iTwinId, getEC3AccessToken } } = useApiContext();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Configuration[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -67,25 +71,32 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
   }, [load]);
 
   const filteredTemplates = useMemo(
-    () => templates.filter((x) => [x.displayName, x.description].join(" ").toLowerCase().includes(searchValue.toLowerCase())),
-    [templates, searchValue],
+    () =>
+      templates.filter((x) =>
+        [x.displayName, x.description]
+          .join(" ")
+          .toLowerCase()
+          .includes(searchValue.toLowerCase())
+      ),
+    [templates, searchValue]
   );
 
   const clickedOnClassname = (e: Element, ...classNames: string[]) => {
-    for (const className of classNames) if (e.className.toString().split(" ").includes(className)) return true;
+    for (const className of classNames)
+      if (e.className.toString().split(" ").includes(className))
+        return true;
     return false;
   };
 
-  const selectTemplateCallback = useCallback(
-    (template: Configuration, e: React.MouseEvent) => {
-      const element = e.target as EventTarget & Element;
+  const selectTemplateCallback = useCallback((template: Configuration, e: React.MouseEvent) => {
+    const element = e.target as (EventTarget & Element);
 
-      if (selectedTemplate && selectedTemplate?.id === template.id && clickedOnClassname(element, "ec3w-horizontal-tile-container", "ec3w-body"))
-        setSelectedTemplate(undefined);
-      else setSelectedTemplate(template);
-    },
-    [selectedTemplate],
-  );
+    if (selectedTemplate && selectedTemplate?.id === template.id &&
+      clickedOnClassname(element, "ec3w-horizontal-tile-container", "ec3w-body"))
+      setSelectedTemplate(undefined);
+    else
+      setSelectedTemplate(template);
+  }, [selectedTemplate]);
 
   const onExport = useCallback(async () => {
     const newToken = await getEC3AccessToken();
@@ -102,26 +113,47 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
       <div className="ec3w-templates-list-container">
         <div className="ec3w-toolbar" data-testid="ec3-templates">
           <div className="ec3w-toolbar-left">
-            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
+            <Button
+              startIcon={<SvgAdd />}
+              onClick={onClickCreate}
+              styleType="high-visibility"
+              title="New Template"
+            >
               New
             </Button>
-            <Button data-testid="ec3-export-button" styleType="default" onClick={onExport} disabled={!selectedTemplate}>
+            <Button
+              data-testid="ec3-export-button"
+              styleType="default"
+              onClick={onExport}
+              disabled={!selectedTemplate}
+            >
               Export
             </Button>
           </div>
           <div className="ec3w-search-bar-container">
-            <IconButton title="Refresh" onClick={refresh} disabled={isLoading} styleType="borderless">
+            <IconButton
+              title="Refresh"
+              onClick={refresh}
+              disabled={isLoading}
+              styleType="borderless"
+            >
               <SvgRefresh />
             </IconButton>
             <div className="ec3w-search-button" data-testid="ec3-search-bar">
-              <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+              <SearchBar
+                searchValue={searchValue}
+                setSearchValue={setSearchValue}
+                disabled={isLoading}
+              />
             </div>
           </div>
         </div>
         {isLoading ? (
           <LoadingOverlay />
         ) : templates.length === 0 ? (
-          <EmptyMessage message="No templates available" />
+          <EmptyMessage
+            message="No templates available"
+          />
         ) : (
           <div className="ec3w-templates-list">
             {filteredTemplates.map((template) => (
