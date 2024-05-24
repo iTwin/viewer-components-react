@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { DrawingMetaDataProps } from "./Measurement";
+import type { DrawingMetadataProps } from "./Measurement";
 
 /** Properties for a Measurement that can be serialized. */
 export interface MeasurementProps {
@@ -35,7 +35,7 @@ export interface MeasurementProps {
   displayLabels?: boolean;
 
   /** Contains data to display world values for sheet measurements */
-  drawingMetaData?: DrawingMetaDataProps;
+  drawingMetaData?: DrawingMetadataProps;
 }
 
 /** Defines a serializable representation of a MeasurementViewTarget. */

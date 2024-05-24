@@ -50,9 +50,9 @@ export interface MeasurementWidgetData {
   properties: WidgetValue[];
 }
 
-export namespace DrawingMetaData {
+export namespace DrawingMetadata {
 
-  export function toJSON(obj: DrawingMetaData | undefined): DrawingMetaDataProps | undefined {
+  export function toJSON(obj: DrawingMetadata | undefined): DrawingMetadataProps | undefined {
     if (obj === undefined)
       return undefined;
     const origin = obj.origin?.toJSONXY();
@@ -62,7 +62,7 @@ export namespace DrawingMetaData {
     return undefined;
   }
 
-  export function fromJSON(json: DrawingMetaDataProps): DrawingMetaData {
+  export function fromJSON(json: DrawingMetadataProps): DrawingMetadata {
 
     return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
 
@@ -252,12 +252,12 @@ export interface MeasurementEqualityOptions {
   angleTolerance?: number;
 }
 
-export interface DrawingMetaDataProps extends Omit<DrawingMetaData, "origin" | "extents"> {
+export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents"> {
   origin: XYProps;
   extents?: XYProps;
 }
 
-export interface DrawingMetaData {
+export interface DrawingMetadata {
   /** Id of the drawing */
   drawingId?: string;
 
@@ -298,7 +298,7 @@ export abstract class Measurement {
   private _isVisible: boolean; // Not serialized
 
   // Used for sheet measurements
-  private _drawingMetaData?: DrawingMetaData;
+  private _drawingMetaData?: DrawingMetadata;
   private _sheetViewId?: string;
 
   /** Default drawing style name. */
@@ -329,13 +329,13 @@ export abstract class Measurement {
     this.onTransientIdChanged(prevId);
   }
 
-  public get drawingMetaData(): DrawingMetaData | undefined {
+  public get drawingMetaData(): DrawingMetadata | undefined {
     return this._drawingMetaData;
   }
 
-  public set drawingMetaData(data: DrawingMetaData | undefined) {
+  public set drawingMetaData(data: DrawingMetadata | undefined) {
     this._drawingMetaData = data;
-    this.onDrawingMetaDataChanged();
+    this.onDrawingMetadataChanged();
   }
 
   public set sheetViewId(id: string | undefined) {
@@ -349,7 +349,7 @@ export abstract class Measurement {
   public set drawingId(id: string | undefined) {
     if (this._drawingMetaData) {
       this._drawingMetaData.drawingId = id;
-      this.onDrawingMetaDataChanged();
+      this.onDrawingMetadataChanged();
     }
   }
 
@@ -360,7 +360,7 @@ export abstract class Measurement {
   public set drawingOrigin(origin: Point2d | undefined) {
     if (this._drawingMetaData && origin) {
       this._drawingMetaData.origin = origin;
-      this.onDrawingMetaDataChanged();
+      this.onDrawingMetadataChanged();
     }
   }
 
@@ -371,7 +371,7 @@ export abstract class Measurement {
   public set drawingExtents(extents: Point2d | undefined) {
     if (this._drawingMetaData) {
       this._drawingMetaData.extents = extents;
-      this.onDrawingMetaDataChanged();
+      this.onDrawingMetadataChanged();
     }
   }
 
@@ -382,7 +382,7 @@ export abstract class Measurement {
   public set worldScale(scale: number) {
     if (this._drawingMetaData && scale > 0) {
       this._drawingMetaData.worldScale = scale;
-      this.onDrawingMetaDataChanged();
+      this.onDrawingMetadataChanged();
     }
   }
 
@@ -824,9 +824,9 @@ export abstract class Measurement {
   protected onTransientIdChanged(_prevId?: Id64String): void { }
 
   /**
-   * Notify subclasses when DrawingMetaData changes
+   * Notify subclasses when DrawingMetadata changes
    */
-  protected onDrawingMetaDataChanged(): void { }
+  protected onDrawingMetadataChanged(): void { }
 
   /**
    * Notify subclasses when the display labels property has changed.

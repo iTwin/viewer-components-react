@@ -6,7 +6,7 @@
 import type { Point3d } from "@itwin/core-geometry";
 import { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
-import type { DrawingMetaData } from "../api/Measurement";
+import type { DrawingMetadata } from "../api/Measurement";
 
 enum State {
   SetMeasurementViewport,
@@ -25,11 +25,11 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     this._currentState = State.SetMeasurementViewport;
   }
 
-  public get drawingMetaData(): DrawingMetaData | undefined {
+  public get drawingMetaData(): DrawingMetadata | undefined {
     return this._currentMeasurement?.drawingMetaData;
   }
 
-  public set drawingMetaData(data: DrawingMetaData | undefined) {
+  public set drawingMetaData(data: DrawingMetadata | undefined) {
     if (this._currentMeasurement)
       this._currentMeasurement.drawingMetaData = data;
   }

@@ -27,7 +27,7 @@ import type { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
-import type { DrawingMetaData } from "../api/Measurement";
+import type { DrawingMetadata } from "../api/Measurement";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -135,7 +135,7 @@ MeasureAreaToolModel
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
 
         if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
-          const data: DrawingMetaData = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
+          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
           this.toolModel.drawingMetaData = data;
           this.toolModel.setPolygonWorldScale(drawingInfo.worldScale);
           this.toolModel.sheetViewId = ev.viewport.view.id;
