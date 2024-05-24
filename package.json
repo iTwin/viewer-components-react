@@ -5,6 +5,9 @@
     "url": "https://github.com/iTwin/viewer-components-react.git"
   },
   "packageManager": "pnpm@9.1.2",
+  "engines": {
+    "pnpm": "^9.0.0"
+  },
   "scripts": {
     "build": "lage build --grouped",
     "cover": "lage cover --grouped --continue",
