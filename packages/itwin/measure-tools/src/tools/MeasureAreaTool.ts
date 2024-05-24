@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Point3d} from "@itwin/core-geometry";
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import type {
   DecorateContext,
@@ -36,7 +35,6 @@ MeasureAreaToolModel
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
   private _enableSheetMeasurements;
-  private _currentMousePoint?: Point3d;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -206,7 +204,6 @@ MeasureAreaToolModel
     if (!ev.viewport) return;
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
-    this._currentMousePoint = ev.point;
     if (this.toolModel.addPoint(viewType, ev.point, true))
       ev.viewport.invalidateDecorations();
   }

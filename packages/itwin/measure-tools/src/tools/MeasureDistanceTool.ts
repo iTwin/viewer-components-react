@@ -25,7 +25,6 @@ import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
-import type { Point3d } from "@itwin/core-geometry";
 import type { DrawingMetadata } from "../api/Measurement";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
@@ -35,7 +34,6 @@ MeasureDistanceToolModel
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
   private _enableSheetMeasurements;
-  private _currentMousePoint?: Point3d;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -155,7 +153,6 @@ MeasureDistanceToolModel
       return;
     const type = MeasurementViewTarget.classifyViewport(ev.viewport);
     this.toolModel.setEndPoint(type, ev.point, true);
-    this._currentMousePoint = ev.point;
     ev.viewport.invalidateDecorations();
   }
 
