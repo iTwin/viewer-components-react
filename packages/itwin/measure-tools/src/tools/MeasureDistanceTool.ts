@@ -67,14 +67,8 @@ MeasureDistanceToolModel
     return this.exitTool();
   }
 
-  private resetSheetData(): void {
-    this.toolModel.drawingMetaData = undefined;
-    this.toolModel.sheetViewId = undefined;
-  }
-
   public override async onReinitialize(): Promise<void> {
     await super.onReinitialize();
-    this.resetSheetData();
     AccuDrawHintBuilder.deactivate();
   }
 
