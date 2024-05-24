@@ -508,11 +508,13 @@ export abstract class Measurement {
   public get allowActions(): boolean { return true; }
 
   /** Protected constructor */
-  protected constructor() {
+  protected constructor(props?: MeasurementProps) {
     this._isLocked = false;
     this._isVisible = true;
     this._displayLabels = MeasurementPreferences.current.displayMeasurementLabels;
     this._viewTarget = new MeasurementViewTarget();
+    if (props?.drawingMetadata)
+      this.drawingMetaData = DrawingMetadata.fromJSON(props.drawingMetadata);
   }
 
   /** Copies the measurement data into a new instance.

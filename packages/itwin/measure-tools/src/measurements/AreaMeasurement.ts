@@ -118,7 +118,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   constructor(props?: AreaMeasurementProps) {
-    super();
+    super(props);
 
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(

@@ -29,7 +29,6 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement";
 import {
-  DrawingMetadata,
   Measurement,
   MeasurementPickContext,
   MeasurementSerializer,
@@ -139,13 +138,11 @@ export class DistanceMeasurement extends Measurement {
   }
 
   constructor(props?: DistanceMeasurementProps) {
-    super();
+    super(props);
 
     this._startPoint = Point3d.createZero();
     this._endPoint = Point3d.createZero();
     this._isDynamic = false;
-    if (props?.drawingMetadata)
-      this.drawingMetaData = DrawingMetadata.fromJSON(props.drawingMetadata);
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
 
