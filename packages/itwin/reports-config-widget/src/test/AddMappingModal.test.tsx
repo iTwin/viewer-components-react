@@ -175,7 +175,7 @@ describe("Add Mapping Modal", () => {
     const mockMappings = mockMappingsFactory(mockReportMappings);
     const mockReportMappingsAndMappings = mockReportMappingsAndMappingsFactory(mockMappings, mockReportMappings);
 
-    mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingContainer) => m.mapping));
+    mockGetMappings.mockReturnValueOnce({mappings: mockMappings.map((m: MappingContainer) => m.mapping)});
 
     const { user } = render(
       <AddMappingsModal
