@@ -4,37 +4,32 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ComponentPropsWithoutRef, ReactElement, useCallback, useMemo } from "react";
-import { IModelConnection, Viewport } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { Text } from "@itwin/itwinui-react";
+import { Viewport } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
+import { Text } from "@itwin/itwinui-react";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
-import { VisibilityTree } from "../common/components/VisibilityTree";
 import { HierarchyLevelConfig } from "../../common/Types";
-import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
+import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 
-interface ExperimentalModelsTreeProps {
-  imodel: IModelConnection;
-  height: number;
-  width: number;
+interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
-  filter: string;
-  density?: "default" | "enlarged";
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
-  selectionMode?: SelectionMode;
+  filter?: string;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
-type SelectionMode = VisibilityTreeProps["selectionMode"];
+
+type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
-export function ExperimentalModelsTree({
+export function StatelessModelsTree({
   imodel,
   getSchemaContext,
   height,
@@ -44,7 +39,7 @@ export function ExperimentalModelsTree({
   density,
   hierarchyLevelConfig,
   selectionMode,
-}: ExperimentalModelsTreeProps) {
+}: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new ExperimentalModelsVisibilityHandler({ viewport: activeView });
     return {
@@ -77,6 +72,7 @@ export function ExperimentalModelsTree({
       height={height}
       width={width}
       imodel={imodel}
+      treeName="StatelessModelsTree"
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
       getHierarchyDefinition={getHierarchyDefinition}
@@ -90,7 +86,7 @@ export function ExperimentalModelsTree({
   );
 }
 
-function getNoDataMessage(filter: string) {
+function getNoDataMessage(filter?: string) {
   if (filter) {
     return <Text>There are no nodes matching filter - "{filter}"</Text>;
   }

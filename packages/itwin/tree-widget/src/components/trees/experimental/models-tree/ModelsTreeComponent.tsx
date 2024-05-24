@@ -4,40 +4,34 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ComponentPropsWithoutRef, Fragment, useState } from "react";
-import { ExperimentalModelsTree } from "./ModelsTree";
-import {
-  HideAllButton,
-  InvertButton,
-  ModelsTreeHeaderButtonProps,
-  ShowAllButton,
-  View2DButton,
-  View3DButton,
-  useAvailableModels,
-} from "../../models-tree/ModelsTreeButtons";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { SvgCursorClick } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { SelectionStorage, UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeHeader } from "../../../tree-header/TreeHeader";
 import { AutoSizer } from "../../../utils/AutoSizer";
-import { IconButton } from "@itwin/itwinui-react";
-import { SvgCursorClick } from "@itwin/itwinui-icons-react";
-import { SelectionStorage, UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
-import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
+import {
+  HideAllButton, InvertButton, ModelsTreeHeaderButtonProps, ShowAllButton, useAvailableModels, View2DButton, View3DButton,
+} from "../../models-tree/ModelsTreeButtons";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
+import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
+import { StatelessModelsTree } from "./ModelsTree";
 
-type ExperimentalModelsTreeProps = ComponentPropsWithoutRef<typeof ExperimentalModelsTree>;
+type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsTree>;
 
-interface ExperimentalModelsTreeComponentProps
-  extends Pick<ExperimentalModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface StatelessModelsTreeComponentProps
+  extends Pick<StatelessModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
 }
 
 /**
- * A component that renders [[ModelsTree]] and a header with filtering capabilities
+ * A component that renders [[StatelessModelsTree]] and a header with filtering capabilities
  * and header buttons.
- * @public
+ * @beta
  */
-export const ExperimentalModelsTreeComponent = (props: ExperimentalModelsTreeComponentProps) => {
+export const StatelessModelsTreeComponent = (props: StatelessModelsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
@@ -54,7 +48,7 @@ function ModelsTreeComponentImpl({
   headerButtons,
   selectionStorage,
   ...treeProps
-}: ExperimentalModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
+}: StatelessModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const availableModels = useAvailableModels(iModel);
   const [filter, setFilter] = useState("");
   const density = treeProps.density;
@@ -77,7 +71,7 @@ function ModelsTreeComponentImpl({
           </TreeHeader>
           <AutoSizer>
             {({ width, height }) => (
-              <ExperimentalModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />
+              <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />
             )}
           </AutoSizer>
         </FocusedInstancesContextProvider>

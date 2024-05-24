@@ -3,4 +3,4 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-export { ExperimentalModelsTreeComponent } from "./models-tree/ModelsTreeComponent";
+export { StatelessModelsTreeComponent } from "./models-tree/ModelsTreeComponent";

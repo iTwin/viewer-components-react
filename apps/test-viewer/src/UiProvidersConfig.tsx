@@ -4,9 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { SelectionMode } from "@itwin/components-react";
+import { IModelConnection } from "@itwin/core-frontend";
 import { EC3Provider } from "@itwin/ec3-widget-react";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
+import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
@@ -23,6 +27,7 @@ import {
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
   CategoriesTreeComponent,
+  StatelessModelsTreeComponent,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
@@ -30,13 +35,8 @@ import {
   TreeRenderProps,
   TreeWidget,
   TreeWidgetComponent,
-  ExperimentalModelsTreeComponent,
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
-import { IModelConnection } from "@itwin/core-frontend";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { unifiedSelectionStorage } from "./SelectionStorage";
 
 export interface UiProvidersConfig {
@@ -155,10 +155,10 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
-                id: `experimental-${ModelsTreeComponent.id}`,
-                getLabel: () => `${ModelsTreeComponent.getLabel()} (Experimental)`,
+                id: `stateless-${ModelsTreeComponent.id}`,
+                getLabel: () => `${ModelsTreeComponent.getLabel()} (Beta)`,
                 render: (props: TreeRenderProps) => (
-                  <ExperimentalModelsTreeComponent
+                  <StatelessModelsTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}

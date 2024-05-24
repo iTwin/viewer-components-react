@@ -359,7 +359,7 @@ export class ExperimentalModelsVisibilityHandler {
   }
 
   // istanbul ignore next
-  private getGroupedElementIds(node: GroupingHierarchyNode & { key: GroupingNodeKey }) {
+  private getGroupedElementIds(node: GroupingHierarchyNode) {
     const modelId = this.getElementModelId(node);
     const categoryId = this.getElementCategoryId(node);
 

@@ -17,15 +17,15 @@ import { InstanceKey } from "@itwin/presentation-shared";
 
 type UseTreeResult = ReturnType<typeof useTree>;
 
-interface UseHierarchyFilteringOwnProps {
+interface UseHierarchyLevelFilteringOwnProps {
   imodel: IModelConnection;
   defaultHierarchyLevelSizeLimit: number;
 }
 
-type UseHierarchyFilteringProps = UseHierarchyFilteringOwnProps & Pick<UseTreeResult, "getHierarchyLevelDetails">;
+type UseHierarchyLevelFilteringProps = UseHierarchyLevelFilteringOwnProps & Pick<UseTreeResult, "getHierarchyLevelDetails">;
 
 /** @internal */
-export function useHierarchyFiltering({ imodel, defaultHierarchyLevelSizeLimit, getHierarchyLevelDetails }: UseHierarchyFilteringProps) {
+export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit, getHierarchyLevelDetails }: UseHierarchyLevelFilteringProps) {
   const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string | undefined; hierarchyDetails: HierarchyLevelDetails }>();
   const onFilterClick = useCallback(
     (nodeId: string | undefined) => {
@@ -141,14 +141,16 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
         if (e instanceof RowsLimitExceededError) {
           return `Current filter exceeds instances count of ${e.limit}`;
         }
+        return "Failed to calculate matching instances count";
       }
 
-      return undefined;
     }, [filter, hierarchyLevelDetails]),
   );
+
   if (!value) {
     return null;
   }
+
   return <>{value}</>;
 }
 
