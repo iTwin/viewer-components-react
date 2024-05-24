@@ -35,7 +35,7 @@ export interface MeasurementProps {
   displayLabels?: boolean;
 
   /** Contains data to display world values for sheet measurements */
-  drawingMetaData?: DrawingMetadataProps;
+  drawingMetadata?: DrawingMetadataProps;
 }
 
 /** Defines a serializable representation of a MeasurementViewTarget. */

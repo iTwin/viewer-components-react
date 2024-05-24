@@ -742,6 +742,9 @@ export abstract class Measurement {
     this._lockStyle = (json.style !== undefined) ? json.lockStyle : undefined;
     this._displayLabels = (json.displayLabels !== undefined) ? json.displayLabels : MeasurementPreferences.current.displayMeasurementLabels;
 
+    if (json.drawingMetadata !== undefined)
+      this.drawingMetaData = DrawingMetadata.fromJSON(json.drawingMetadata);
+
     if (json.viewTarget !== undefined) {
       this._viewTarget.loadFromJSON(json.viewTarget);
     } else {
@@ -783,6 +786,9 @@ export abstract class Measurement {
     json.lockStyle = this._lockStyle;
     json.viewTarget = this._viewTarget.toJSON();
     json.displayLabels = this._displayLabels;
+    const drawingMetaDataJson = DrawingMetadata.toJSON(this.drawingMetaData);
+    if (drawingMetaDataJson)
+      json.drawingMetadata = drawingMetaDataJson;
   }
 
   /** Notify subclasses that style options have changed. This is to allow implementations to regenerate any cached graphics.

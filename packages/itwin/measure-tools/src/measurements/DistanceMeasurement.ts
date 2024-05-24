@@ -144,8 +144,8 @@ export class DistanceMeasurement extends Measurement {
     this._startPoint = Point3d.createZero();
     this._endPoint = Point3d.createZero();
     this._isDynamic = false;
-    if (props?.drawingMetaData)
-      this.drawingMetaData = DrawingMetadata.fromJSON(props.drawingMetaData);
+    if (props?.drawingMetadata)
+      this.drawingMetaData = DrawingMetadata.fromJSON(props.drawingMetadata);
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
 
@@ -651,9 +651,6 @@ export class DistanceMeasurement extends Measurement {
         ? jsonDist.showAxes
         : MeasurementPreferences.current.displayMeasurementAxes;
 
-    if (jsonDist.drawingMetaData !== undefined)
-      this.drawingMetaData = DrawingMetadata.fromJSON(jsonDist.drawingMetaData);
-
     this.buildRunRiseAxes();
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
@@ -669,9 +666,6 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.startPoint = this._startPoint.toJSON();
     jsonDist.endPoint = this._endPoint.toJSON();
     jsonDist.showAxes = this._showAxes;
-    const drawingMetaDataJson = DrawingMetadata.toJSON(this.drawingMetaData);
-    if (drawingMetaDataJson)
-      jsonDist.drawingMetaData = drawingMetaDataJson;
   }
 
   public static create(start: Point3d, end: Point3d, viewType?: string) {

@@ -26,7 +26,6 @@ import type {
   MeasurementWidgetData,
 } from "../api/Measurement";
 import {
-  DrawingMetadata,
   Measurement,
   MeasurementPickContext,
   MeasurementSerializer,
@@ -121,8 +120,6 @@ export class AreaMeasurement extends Measurement {
   constructor(props?: AreaMeasurementProps) {
     super();
 
-    if (props?.drawingMetaData)
-      this.drawingMetaData = DrawingMetadata.fromJSON(props.drawingMetaData);
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
       this.handleTextMarkerButtonEvent.bind(this)
@@ -575,9 +572,6 @@ export class AreaMeasurement extends Measurement {
 
       this._polygon.setPoints(pts, false, true);
 
-      if (jsonArea.drawingMetaData !== undefined)
-        this.drawingMetaData = DrawingMetadata.fromJSON(jsonArea.drawingMetaData);
-
       if (this.isDynamic && this._dynamicEdge)
         this.updateDynamicPolygon(this._dynamicEdge.endPointRef);
     }
@@ -595,9 +589,6 @@ export class AreaMeasurement extends Measurement {
 
     const jsonArea = json as AreaMeasurementProps;
     jsonArea.polygonPoints = pts;
-    const drawingMetaDataJson = DrawingMetadata.toJSON(this.drawingMetaData);
-    if (drawingMetaDataJson)
-      jsonArea.drawingMetaData = drawingMetaDataJson;
   }
 
   public static create(pts: Point3d[], viewType?: string): AreaMeasurement {
