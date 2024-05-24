@@ -305,6 +305,10 @@ export class AreaMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
+  public override onDrawingMetadataChanged(): void {
+    this._polygon.recomputeFromPoints();
+  }
+
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
