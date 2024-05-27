@@ -3,5 +3,5 @@
   "comment": "Update map-layers and measure-tools to AppUI 4.10",
   "packageName": "@itwin/map-layers",
   "email": "17436829+GintV@users.noreply.github.com",
-  "dependentChangeType": "patch"
+  "dependentChangeType": "minor"
 }
