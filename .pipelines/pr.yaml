@@ -9,7 +9,10 @@ pr:
       - master
 
 variables:
-  pnpm_config_cache: $(Pipeline.Workspace)/.pnpm-store
+  - name: NodeVersion
+    value: 18.16.0
+  - name: pnpm_config_cache
+    value: $(Pipeline.Workspace)/.pnpm-store
 
 jobs:
   - job: Build
@@ -20,13 +23,10 @@ jobs:
     strategy:
       matrix:
         "Windows - Node 18.16.0":
-          NodeVersion: 18.16.0
           OS: windows-latest
         "Linux - Node 18.16.0":
-          NodeVersion: 18.16.0
           OS: ubuntu-latest
         "Mac - Node 18.16.0":
-          NodeVersion: 18.16.0
           OS: macOS-latest
 
     pool:

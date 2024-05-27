@@ -2,7 +2,7 @@ steps:
   - task: UseNode@1
     displayName: "Use Node $(NodeVersion)"
     inputs:
-      version: 18.16.0
+      version: "$(NodeVersion)"
 
   - task: Cache@2
     displayName: Cache pnpm
