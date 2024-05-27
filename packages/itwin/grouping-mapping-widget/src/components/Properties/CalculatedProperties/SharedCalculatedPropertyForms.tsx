@@ -38,7 +38,7 @@ export const SharedCalculatedPropertyForms = ({
         options.push({ value: indexableEnum[key] as CalculatedPropertyType, label });
       }
     }
-    options.push({value: undefined, label: "No Calculated Type"});
+    options.push({value: undefined, label: "No Calculated Property Type"});
     return options;
   }, []);
 

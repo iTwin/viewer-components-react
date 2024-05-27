@@ -96,11 +96,13 @@ export const CalculatedPropertyActionWithVisuals = ({
           BboxDimension[calculatedPropertyType as keyof typeof BboxDimension],
         )
         : bboxDecorator.clearContext();
+    } else {
+      bboxDecorator?.clearContext();
     }
   }, [bboxDecorator, colorProperty, inferredSpatialData, calculatedPropertyType]);
 
-  const getSpatialData = (value: string) =>
-    inferredSpatialData?.has(
+  const getSpatialData = (value: string | undefined) =>
+    value && inferredSpatialData?.has(
       BboxDimension[value as keyof typeof BboxDimension],
     ) && (
       <div>
@@ -129,14 +131,14 @@ export const CalculatedPropertyActionWithVisuals = ({
             <MenuItem>
               <div className='gmw-gr-cp-menu-item'>
                 <div>{option.label}</div>
-                {option.value ? getSpatialData(option.value) : undefined}
+                {getSpatialData(option.value)}
               </div>
             </MenuItem>
           )}
           selectedItemRenderer={(option: SelectOption<string | undefined>) => (
             <div className='gmw-select-item'>
               <div>{option.label}</div>
-              {option.value ? getSpatialData(option.value) : undefined}
+              {getSpatialData(option.value)}
             </div>
           )}
         />
