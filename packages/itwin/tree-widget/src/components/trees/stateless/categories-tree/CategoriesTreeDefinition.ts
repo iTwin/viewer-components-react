@@ -20,13 +20,13 @@ import type {
 
 interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
-  view2d: boolean;
+  viewType: "2d" | "3d";
 }
 
 interface CategoriesTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   label: string;
-  view2d: boolean;
+  viewType: "2d" | "3d";
 }
 
 export class CategoriesTreeDefinition implements HierarchyDefinition {
@@ -38,7 +38,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     this._impl = createClassBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
-        rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition({ ...requestProps, view2d: props.view2d }),
+        rootNodes: async (requestProps) => this.createRootHierarchyLevelDefinition({ ...requestProps, viewType: props.viewType }),
         childNodes: [
           {
             parentNodeClassName: "BisCore.Category",
@@ -55,8 +55,8 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
     return this._impl.defineHierarchyLevel(props);
   }
 
-  private async createRootHierarchyLevelDefinition(props: DefineRootHierarchyLevelProps & { view2d: boolean }): Promise<HierarchyLevelDefinition> {
-    const { categoryClass, relationshipClass } = getClassesByView(props.view2d);
+  private async createRootHierarchyLevelDefinition(props: DefineRootHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
+    const { categoryClass, categoryElementClass } = getClassesByView(props.viewType);
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: props.instanceFilter,
       contentClass: { fullName: categoryClass, alias: "this" },
@@ -90,7 +90,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
-                  description: { selector: "printf('%s', this.Description)" },
+                  description: { selector: "this.Description" },
                 },
                 supportsFiltering: true,
               })}
@@ -100,7 +100,7 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
             WHERE
               NOT this.IsPrivate
               AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
-              AND EXISTS (SELECT 1 FROM ${relationshipClass} r WHERE r.TargetECInstanceId = this.ECInstanceId)
+              AND EXISTS (SELECT 1 FROM ${categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
         },
@@ -132,15 +132,14 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                   }),
                 },
                 extendedData: {
-                  categoryId: { selector: "printf('0x%x', cosc.SourceECInstanceId)" },
+                  categoryId: { selector: "printf('0x%x', this.Parent.Id)" },
                 },
                 supportsFiltering: false,
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
-            JOIN BisCore.CategoryOwnsSubCategories cosc ON cosc.TargetECInstanceId = this.ECInstanceId
             WHERE
-              NOT this.IsPrivate AND cosc.SourceECInstanceId IN (${elementIds.map(() => "?").join(",")})
+              NOT this.IsPrivate AND this.Parent.Id IN (${elementIds.map(() => "?").join(",")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: elementIds.map((id) => ({ type: "id", value: id })),
@@ -155,16 +154,16 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function getClassesByView(view2d: boolean) {
-  return view2d
-    ? { categoryClass: "BisCore.DrawingCategory", relationshipClass: "BisCore:GeometricElement2dIsInCategory" }
-    : { categoryClass: "BisCore.SpatialCategory", relationshipClass: "BisCore:GeometricElement3dIsInCategory" };
+function getClassesByView(viewType: "2d" | "3d") {
+  return viewType === "2d"
+    ? { categoryClass: "BisCore.DrawingCategory", categoryElementClass: "BisCore:GeometricElement2d" }
+    : { categoryClass: "BisCore.SpatialCategory", categoryElementClass: "BisCore:GeometricElement3d" };
 }
 
 async function createInstanceKeyPathsFromInstanceLabel(
   props: CategoriesTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
 ) {
-  const { categoryClass, relationshipClass } = getClassesByView(props.view2d);
+  const { categoryClass, categoryElementClass } = getClassesByView(props.viewType);
   const reader = props.imodelAccess.createQueryReader(
     {
       ctes: [
@@ -172,20 +171,21 @@ async function createInstanceKeyPathsFromInstanceLabel(
           SELECT
             ec_classname(this.ECClassId, 's.c'),
             this.ECInstanceId,
-            COUNT(cosc.TargetECInstanceId)
+            COUNT(sc.ECInstanceId)
           FROM ${categoryClass} this
           JOIN BisCore.Model m ON m.ECInstanceId = this.Model.Id
-          JOIN BisCore.CategoryOwnsSubCategories cosc ON cosc.SourceECInstanceId = this.ECInstanceId
+          JOIN BisCore.SubCategory sc ON sc.Parent.Id = this.ECInstanceId
           WHERE
             NOT this.IsPrivate
             AND (NOT m.IsPrivate OR m.ECClassId IS (BisCore.DictionaryModel))
-            AND EXISTS (SELECT 1 FROM ${relationshipClass} r WHERE r.TargetECInstanceId = this.ECInstanceId)
+            AND EXISTS (SELECT 1 FROM ${categoryElementClass} e WHERE e.Category.Id = this.ECInstanceId)
           GROUP BY this.ECInstanceId
         )`,
-        `SubCategoriesWithLabels(ClassName, ECInstanceId, DisplayLabel) as (
+        `SubCategoriesWithLabels(ClassName, ECInstanceId, ParentId, DisplayLabel) as (
           SELECT
             ec_classname(this.ECClassId, 's.c'),
             this.ECInstanceId,
+            this.Parent.Id,
             ${await props.labelsFactory.createSelectClause({
               classAlias: "this",
               className: "BisCore.SubCategory",
@@ -201,13 +201,12 @@ async function createInstanceKeyPathsFromInstanceLabel(
           IIF(c.ChildCount > 1, sc.ClassName, NULL) AS SubcategoryClass,
           IIF(c.ChildCount > 1, sc.ECInstanceId, NULL) AS SubcategoryId
         FROM RootCategories c
-        JOIN BisCore.CategoryOwnsSubCategories cosc ON cosc.SourceECInstanceId = c.ECInstanceId
-        JOIN SubCategoriesWithLabels sc ON sc.ECInstanceId = cosc.TargetECInstanceId
+        JOIN SubCategoriesWithLabels sc ON sc.ParentId = c.ECInstanceId
         WHERE sc.DisplayLabel LIKE '%' || ? || '%'
       `,
       bindings: [{ type: "string", value: props.label }],
     },
-    { restartToken: "FilterByLabelQuery" },
+    { restartToken: "tree-widget/categories-tree/filter-by-label-query" },
   );
   const paths = new Array<HierarchyNodeIdentifiersPath>();
   for await (const row of reader) {

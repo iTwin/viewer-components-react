@@ -11,7 +11,7 @@ import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
 import type { VisibilityChangeListener, VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 
-interface ExperimentalCategoriesVisibilityHandlerProps {
+interface StatelessCategoriesVisibilityHandlerProps {
   viewManager: ViewManager;
   imodel: IModelConnection;
   categories: CategoryInfo[];
@@ -20,14 +20,14 @@ interface ExperimentalCategoriesVisibilityHandlerProps {
 }
 
 /** @internal */
-export class ExperimentalCategoriesVisibilityHandler {
+export class StatelessCategoriesVisibilityHandler {
   private _viewManager: ViewManager;
   private _imodel: IModelConnection;
   private _pendingVisibilityChange: any | undefined;
   private _viewport: Viewport;
   private _useAllViewports: boolean;
 
-  constructor(props: ExperimentalCategoriesVisibilityHandlerProps) {
+  constructor(props: StatelessCategoriesVisibilityHandlerProps) {
     this._viewManager = props.viewManager;
     this._imodel = props.imodel;
     this._viewport = props.viewport;
@@ -60,7 +60,7 @@ export class ExperimentalCategoriesVisibilityHandler {
 
     // handle subcategory visibility change
     if (node.parentKeys.length) {
-      const childId = ExperimentalCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
+      const childId = StatelessCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
       const parentCategoryId = node.extendedData?.categoryId;
 
       // make sure parent category is enabled
@@ -72,7 +72,7 @@ export class ExperimentalCategoriesVisibilityHandler {
       return;
     }
 
-    const instanceId = ExperimentalCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
+    const instanceId = StatelessCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
     await this.enableCategory([instanceId], on, true);
   }
 
@@ -82,13 +82,13 @@ export class ExperimentalCategoriesVisibilityHandler {
       return "hidden";
     }
 
-    const subcategoryId = ExperimentalCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
+    const subcategoryId = StatelessCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
     const isVisible = this._viewport.view.viewsCategory(parentCategoryId) && this._viewport.isSubCategoryVisible(subcategoryId);
     return isVisible ? "visible" : "hidden";
   }
 
   public getCategoryVisibility(node: HierarchyNode) {
-    const instanceId = ExperimentalCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
+    const instanceId = StatelessCategoriesVisibilityHandler.getInstanceIdFromHierarchyNode(node);
     return this._viewport.view.viewsCategory(instanceId) ? "visible" : "hidden";
   }
 

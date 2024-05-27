@@ -18,19 +18,19 @@ import type { Keys } from "@itwin/presentation-common";
 import type { GroupingHierarchyNode, GroupingNodeKey } from "@itwin/presentation-hierarchies";
 import type { VisibilityChangeListener, VisibilityStatus } from "../../VisibilityTreeEventHandler";
 
-interface ExperimentalModelsVisibilityHandlerProps {
+interface StatelessModelsVisibilityHandlerProps {
   viewport: Viewport;
 }
 
 /** @internal */
-export class ExperimentalModelsVisibilityHandler {
+export class StatelessModelsVisibilityHandler {
   private _viewport: Viewport;
   private _pendingVisibilityChange: any | undefined;
   private _subjectModelIdsCache: SubjectModelIdsCache;
   private _elementIdsCache: ElementIdsCache;
   private _listeners = new Array<() => void>();
 
-  constructor(props: ExperimentalModelsVisibilityHandlerProps) {
+  constructor(props: StatelessModelsVisibilityHandlerProps) {
     this._viewport = props.viewport;
     this._subjectModelIdsCache = new SubjectModelIdsCache(props.viewport.iModel);
     this._elementIdsCache = new ElementIdsCache(props.viewport.iModel);

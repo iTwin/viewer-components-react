@@ -74,7 +74,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
           },
           {
             parentNodeClassName: "BisCore.GroupInformationElement",
-            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGroupInformationElementChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createGroupInformationElementChildElementsQuery(requestProps),
           },
           {
             customParentNodeKey: "ChildrenNode",
@@ -82,7 +82,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
           },
           {
             customParentNodeKey: "MembersNode",
-            definitions: async (requestProps: DefineCustomNodeChildHierarchyLevelProps) => this.createMembersNodeChildrenQuery(requestProps),
+            definitions: async (requestProps: DefineCustomNodeChildHierarchyLevelProps) => this.createGroupInformationElementMemberElementsQuery(requestProps),
           },
           {
             parentNodeClassName: "BisCore.Element",
@@ -319,9 +319,13 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     viewType,
   }: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
     const { categoryClass, elementClass } = getClassNameByViewType(viewType);
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+    const categoryFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: categoryClass, alias: "this" },
+    });
+    const informationContentElementFilterClauses = await this._selectQueryFactory.createFilterClauses({
+      filter: instanceFilter,
+      contentClass: { fullName: "BisCore.InformationContentElement", alias: "this" },
     });
     return [
       {
@@ -347,12 +351,12 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: true,
               })}
-            FROM ${instanceFilterClauses.from} this
+            FROM ${categoryFilterClauses.from} this
             JOIN ${elementClass} e ON e.Category.Id = this.ECInstanceId
-            ${instanceFilterClauses.joins}
+            ${categoryFilterClauses.joins}
             WHERE
               e.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ${categoryFilterClauses.where ? `AND ${categoryFilterClauses.where}` : ""}
           `,
           bindings: modelIds.map((id) => ({ type: "id", value: id })),
         },
@@ -380,11 +384,11 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 },
                 supportsFiltering: true,
               })}
-            FROM ${instanceFilterClauses.from} this
-            ${instanceFilterClauses.joins}
+            FROM ${informationContentElementFilterClauses.from} this
+            ${informationContentElementFilterClauses.joins}
             WHERE
               this.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
+              ${informationContentElementFilterClauses.where ? `AND ${informationContentElementFilterClauses.where}` : ""}
           `,
           bindings: modelIds.map((id) => ({ type: "id", value: id })),
         },
@@ -527,7 +531,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private async createGroupInformationElementChildrenQuery({
+  private async createGroupInformationElementChildElementsQuery({
     parentNodeInstanceIds: groupIds,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     return [
@@ -602,7 +606,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  private async createMembersNodeChildrenQuery({ parentNode, instanceFilter }: DefineCustomNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
+  private async createGroupInformationElementMemberElementsQuery({
+    parentNode,
+    instanceFilter,
+  }: DefineCustomNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const groupIds: string[] = parentNode.extendedData?.groupIds;
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,

@@ -8,7 +8,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { Text } from "@itwin/itwinui-react";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
-import { ExperimentalCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
+import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
@@ -49,7 +49,7 @@ export function StatelessCategoriesTree({
   selectionMode,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
-    const visibilityHandler = new ExperimentalCategoriesVisibilityHandler({
+    const visibilityHandler = new StatelessCategoriesVisibilityHandler({
       imodel,
       viewport: activeView,
       viewManager: viewManager ?? IModelApp.viewManager,
@@ -66,7 +66,7 @@ export function StatelessCategoriesTree({
 
   const getDefinitionsProvider = useCallback(
     (props: Parameters<GetHierarchyDefinitionCallback>[0]) => {
-      return new CategoriesTreeDefinition({ ...props, view2d: activeView.view.is2d() });
+      return new CategoriesTreeDefinition({ ...props, viewType: activeView.view.is2d() ? "2d" : "3d" });
     },
     [activeView],
   );
@@ -75,7 +75,8 @@ export function StatelessCategoriesTree({
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) => CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, view2d: activeView.view.is2d() });
+    return async ({ imodelAccess }) =>
+      CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
   }, [filter, activeView]);
 
   return (

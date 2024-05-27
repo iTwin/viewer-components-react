@@ -122,8 +122,8 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                   selector: `
                     IFNULL((
                       SELECT 1
-                      FROM BisCore.ExternalSourceAttachmentAttachesSource esaas
-                      WHERE esaas.TargetECInstanceId = this.ECInstanceId
+                      FROM BisCore.ExternalSourceAttachment esa
+                      WHERE esa.Attaches.Id = this.ECInstanceId
                       LIMIT 1
                     ), 0)
                   `,
@@ -171,8 +171,8 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                   selector: `
                     IFNULL((
                       SELECT 1
-                      FROM BisCore.ExternalSourceAttachmentAttachesSource esaas
-                      WHERE esaas.TargetECInstanceId = this.ECInstanceId
+                      FROM BisCore.ExternalSourceAttachment esa
+                      WHERE esa.Attaches.Id = this.ECInstanceId
                       LIMIT 1
                     ), 0)
                   `,
@@ -183,12 +183,11 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN BisCore.ExternalSourceAttachmentAttachesSource esaas ON esaas.TargetECInstanceId = this.ECInstanceId
-            JOIN BisCore.ExternalSourceAttachment a ON a.ECInstanceId = esaas.SourceECInstanceId
+            JOIN BisCore.ExternalSourceAttachment esa ON esa.Attaches.Id = this.ECInstanceId
             JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             WHERE
-              a.Parent.Id IN (${sourceIds.map(() => "?").join(",")})
+              esa.Parent.Id IN (${sourceIds.map(() => "?").join(",")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: sourceIds.map((id) => ({ type: "id", value: id })),

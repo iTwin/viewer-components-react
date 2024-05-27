@@ -9,7 +9,7 @@ import { Text } from "@itwin/itwinui-react";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
-import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
+import { StatelessModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -43,7 +43,7 @@ export function StatelessModelsTree({
   selectionMode,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
-    const visibilityHandler = new ExperimentalModelsVisibilityHandler({ viewport: activeView });
+    const visibilityHandler = new StatelessModelsVisibilityHandler({ viewport: activeView });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
       changeVisibility: async (node: HierarchyNode, on: boolean) => visibilityHandler.changeVisibility(node, on),

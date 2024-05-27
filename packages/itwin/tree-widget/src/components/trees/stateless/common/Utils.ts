@@ -7,7 +7,7 @@ import type { Id64String } from "@itwin/core-bentley";
 
 /** @internal */
 export function createIdsSelector(ids: string[]): string {
-  // Note: `json_array` function only accepts up to 127 arguments and we may have more `modelIds` than that. As a workaround,
+  // Note: `json_array` function only accepts up to 127 arguments and we may have more `ids` than that. As a workaround,
   // we're creating an array of arrays
   const slices = new Array<Id64String[]>();
   for (let sliceStartIndex = 0; sliceStartIndex < ids.length; sliceStartIndex += 127) {
