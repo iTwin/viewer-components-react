@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Update map-layers and measure-tools to AppUI 4.10",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "17436829+GintV@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
