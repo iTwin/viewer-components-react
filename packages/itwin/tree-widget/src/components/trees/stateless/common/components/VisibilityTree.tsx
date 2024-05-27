@@ -3,13 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ReactElement, ReactNode, useEffect, useState } from "react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
+import { useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { PresentationHierarchyNode, useSelectionHandler, useTree, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility";
@@ -17,6 +15,11 @@ import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 import { VisibilityTreeRenderer } from "./VisibilityTreeRenderer";
+
+import type { ReactElement, ReactNode } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
+import type { PresentationHierarchyNode, useTree } from "@itwin/presentation-hierarchies-react";
 
 interface VisibilityTreeOwnProps {
   imodel: IModelConnection;
@@ -79,9 +82,9 @@ function VisibilityTreeImpl({
   const {
     rootNodes,
     isLoading,
-    reloadTree,
+    reloadTree: _reloadTree,
     selectNodes,
-    setFormatter: _,
+    setFormatter: _setFormatter,
     ...treeProps
   } = useUnifiedSelectionTree({
     imodelAccess,

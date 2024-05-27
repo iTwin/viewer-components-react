@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ComponentPropsWithoutRef } from "react";
 import cx from "classnames";
 import { TreeNodeRenderer } from "@itwin/presentation-hierarchies-react";
 import { VisibilityTreeNodeCheckbox } from "./VisibilityTreeNodeCheckbox";
+
+import type { ComponentPropsWithoutRef } from "react";
 
 type VisibilityTreeNodeCheckboxProps = ComponentPropsWithoutRef<typeof VisibilityTreeNodeCheckbox>;
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;

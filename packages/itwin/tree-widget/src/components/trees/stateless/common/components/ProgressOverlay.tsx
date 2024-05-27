@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ProgressLinear } from "@itwin/itwinui-react";
 import "./ProgressOverlay.scss";
+import { ProgressLinear } from "@itwin/itwinui-react";
 
 /** @internal */
 export function ProgressOverlay() {

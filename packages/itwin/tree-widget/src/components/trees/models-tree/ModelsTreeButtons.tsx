@@ -3,14 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useEffect, useMemo, useState } from "react";
+import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
-import { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import { TreeWidget } from "../../../TreeWidget";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
-import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { useEffect, useMemo, useState } from "react";
-import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { queryModelsForHeaderActions } from "./Utils";
+
+import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 /**
  * Information about a single Model.

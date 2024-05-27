@@ -3,7 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { PresentationHierarchyNode, PresentationTreeNode, isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+
+import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 
 interface UseMultiCheckboxHandlerProps {
   rootNodes: PresentationTreeNode[] | undefined;

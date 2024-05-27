@@ -3,14 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Tree } from "@itwin/itwinui-react";
-import { PresentationTreeNode, RenderedTreeNode, createRenderedTreeNodeData } from "@itwin/presentation-hierarchies-react";
-import { ComponentPropsWithoutRef, useCallback } from "react";
-import { VisibilityTreeNodeRenderer } from "./VisibilityTreeNodeRenderer";
 import "./VisibilityTreeRenderer.scss";
+import { useCallback } from "react";
+import { Tree } from "@itwin/itwinui-react";
+import { createRenderedTreeNodeData } from "@itwin/presentation-hierarchies-react";
+import { VisibilityTreeNodeRenderer } from "./VisibilityTreeNodeRenderer";
 
-type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
-type VisibilityTreeNodeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeNodeRenderer>;
+import type { ComponentPropsWithoutRef } from "react";
+import type { PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
 
 interface VisibilityTreeRendererOwnProps {
   rootNodes: PresentationTreeNode[];
@@ -70,3 +70,6 @@ export function VisibilityTreeRenderer({
     />
   );
 }
+
+type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
+type VisibilityTreeNodeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeNodeRenderer>;

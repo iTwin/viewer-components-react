@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useContext } from "react";
-import { InstanceKey } from "@itwin/presentation-shared";
+
+import type { InstanceKey } from "@itwin/presentation-shared";
 
 /** @internal */
 export interface FocusedInstancesContext {

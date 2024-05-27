@@ -3,7 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { PropsWithChildren, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
+
+import type { PropsWithChildren } from "react";
 
 /** @internal */
 export function Delayed({ show, children }: PropsWithChildren<{ show: boolean }>) {

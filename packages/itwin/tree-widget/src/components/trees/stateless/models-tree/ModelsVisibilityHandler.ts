@@ -8,13 +8,14 @@ import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import { GroupingHierarchyNode, GroupingNodeKey, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
 import { CachingElementIdsContainer } from "../../models-tree/Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { Keys } from "@itwin/presentation-common";
+import type { GroupingHierarchyNode, GroupingNodeKey } from "@itwin/presentation-hierarchies";
 import type { VisibilityChangeListener, VisibilityStatus } from "../../VisibilityTreeEventHandler";
 
 interface ExperimentalModelsVisibilityHandlerProps {
@@ -91,7 +92,7 @@ export class ExperimentalModelsVisibilityHandler {
     } else if (isCategoryNode(node)) {
       this.changeCategoryState(node.key.instanceKeys[0].id, this.getCategoryParentModelId(node), on);
     } else {
-      this.changeElementState(node.key.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on, node.children);
+      await this.changeElementState(node.key.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on, node.children);
     }
   }
 
@@ -368,7 +369,7 @@ export class ExperimentalModelsVisibilityHandler {
     return {
       modelId,
       categoryId,
-      elementIds: async function* () {
+      async *elementIds() {
         for (const key of node.groupedInstanceKeys) {
           yield key.id;
           const assemblyElements = getAssemblyElementIds(key.id);

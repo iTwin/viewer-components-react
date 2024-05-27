@@ -3,15 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
-import type { IModelConnection } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 
 import type { Id64String } from "@itwin/core-bentley";
+import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { ChildNodeSpecification, Node, Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
-import { ModelInfo } from "./ModelsTreeButtons";
+import type { ModelInfo } from "./ModelsTreeButtons";
 
 /** @internal */
 export class CachingElementIdsContainer {

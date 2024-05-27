@@ -3,17 +3,19 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ComponentPropsWithoutRef, ReactElement, useCallback, useMemo } from "react";
-import { Viewport } from "@itwin/core-frontend";
+import { useCallback, useMemo } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import { HierarchyLevelConfig } from "../../common/Types";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 import { ExperimentalModelsVisibilityHandler } from "./ModelsVisibilityHandler";
+
+import type { ComponentPropsWithoutRef, ReactElement } from "react";
+import type { Viewport } from "@itwin/core-frontend";
+import type { HierarchyNode } from "@itwin/presentation-hierarchies";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { HierarchyLevelConfig } from "../../common/Types";
 
 interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
@@ -88,7 +90,7 @@ export function StatelessModelsTree({
 
 function getNoDataMessage(filter?: string) {
   if (filter) {
-    return <Text>There are no nodes matching filter - "{filter}"</Text>;
+    return <Text>{`There are no nodes matching filter - "${filter}"`}</Text>;
   }
   return undefined;
 }

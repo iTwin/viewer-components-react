@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Checkbox } from "@itwin/itwinui-react";
-import { PresentationHierarchyNode, RenderedTreeNode, isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
+import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+
+import type { PresentationHierarchyNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
+import type { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
 
 interface VisibilityTreeNodeCheckboxProps {
   node: RenderedTreeNode;
@@ -22,7 +24,7 @@ export function VisibilityTreeNodeCheckbox({ node, onCheckboxClicked, getCheckbo
   const checkboxStatus = getCheckboxStatus(node);
   return (
     <Checkbox
-      className="visibility-tree-node-checkbox"
+      className="tw-visibility-tree-node-checkbox"
       variant="eyeball"
       checked={checkboxStatus.state === "visible"}
       onClick={(e) => {

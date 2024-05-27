@@ -144,7 +144,7 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
         }
         return "Failed to calculate matching instances count";
       }
-    }, [filter, hierarchyLevelDetails]),
+    }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit]),
   );
 
   if (!value) {

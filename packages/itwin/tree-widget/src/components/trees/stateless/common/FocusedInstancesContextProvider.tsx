@@ -3,11 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { InstanceKey } from "@itwin/presentation-common";
-import { SelectionStorage } from "@itwin/presentation-hierarchies-react";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Selectable, Selectables } from "@itwin/unified-selection";
-import { FocusedInstancesContext, focusedInstancesContext } from "./FocusedInstancesContext";
+import { focusedInstancesContext } from "./FocusedInstancesContext";
+
+import type { PropsWithChildren } from "react";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
+import type { FocusedInstancesContext } from "./FocusedInstancesContext";
 
 /** @internal */
 export function FocusedInstancesContextProvider({

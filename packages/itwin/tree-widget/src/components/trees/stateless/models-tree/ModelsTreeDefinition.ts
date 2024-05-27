@@ -3,31 +3,25 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
 import {
-  createClassBasedHierarchyDefinition,
+  createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
+} from "@itwin/presentation-hierarchies";
+import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+
+import type { Id64String } from "@itwin/core-bentley";
+import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
   HierarchyDefinition,
   HierarchyLevelDefinition,
-  HierarchyNode,
   HierarchyNodeIdentifiersPath,
   LimitingECSqlQueryExecutor,
-  NodeSelectClauseColumnNames,
-  createNodesQueryClauseFactory,
-  ProcessedHierarchyNode,
   NodesQueryClauseFactory,
+  ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import {
-  createBisInstanceLabelSelectClauseFactory,
-  ECSql,
-  ECSqlBinding,
-  ECClassHierarchyInspector,
-  ECSchemaProvider,
-  IInstanceLabelSelectClauseFactory,
-  InstanceKey,
-} from "@itwin/presentation-shared";
+
+import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
 
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
