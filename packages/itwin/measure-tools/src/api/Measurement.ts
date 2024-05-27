@@ -306,7 +306,6 @@ export abstract class Measurement {
 
   // Used for sheet measurements
   private _drawingMetaData?: DrawingMetadata;
-  private _sheetViewId?: string;
 
   /** Default drawing style name. */
   public static readonly defaultStyle: string = WellKnownMeasurementStyle.Default;
