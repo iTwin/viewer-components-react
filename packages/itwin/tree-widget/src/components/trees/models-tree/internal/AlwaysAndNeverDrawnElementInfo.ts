@@ -4,14 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Observable, Subscription } from "rxjs";
-import { BehaviorSubject, concat, debounceTime, defer, EMPTY, first, fromEventPattern, map, of, reduce, share, Subject, switchMap } from "rxjs";
+import {
+  BehaviorSubject, debounceTime, EMPTY, first, fromEventPattern, map, reduce, share, startWith, Subject, switchMap, takeUntil, tap,
+} from "rxjs";
 import { pushToMap } from "./Utils";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { ElementsByParentQueryProps, ElementsQueryProps, ModelsTreeQueryHandler } from "./ModelsTreeQueryHandler";
 import type { BeEvent, Id64Set, Id64String, IDisposable } from "@itwin/core-bentley";
 const SET_CHANGE_DEBOUNCE_TIME = 20;
-const EMPTY_ID_SET = new Set<Id64String>();
 
 interface CacheEntry {
   byModel: Map<Id64String, Id64Set>;
@@ -24,7 +25,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
   private _subscriptions?: Subscription[];
   private _alwaysDrawn?: Observable<CacheEntry>;
   private _neverDrawn?: Observable<CacheEntry>;
-  private _subject = new Subject<boolean>();
+  private _disposeSubject = new Subject<boolean>();
 
   constructor(
     private readonly _viewport: Viewport,
@@ -39,35 +40,41 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     const getElements =
       "categoryId" in props
         ? (entry: CacheEntry | undefined) => {
-            return entry?.byCategory.get(this.createCategoryCacheKey(props.categoryId, props.modelId)) ?? EMPTY_ID_SET;
+            return entry?.byCategory.get(this.createCategoryCacheKey(props.categoryId, props.modelId)) ?? new Set();
           }
         : (entry: CacheEntry | undefined) => {
-            return entry?.byModel.get(props.modelId) ?? EMPTY_ID_SET;
+            return entry?.byModel.get(props.modelId) ?? new Set();
           };
 
     return cache!.pipe(map(getElements));
   }
 
-  private initialQuery(props: { getEvent(): BeEvent<() => void>; getSet(): Id64Set | undefined }) {
-    const obs = concat(
-      defer(() => {
-        const set = props.getSet();
-        return set?.size ? of(undefined) : EMPTY;
-      }),
-      fromEventPattern(
-        (handler) => props.getEvent().addListener(handler),
-        (handler) => props.getEvent().removeListener(handler),
-      ).pipe(debounceTime(this._debounceTime)),
+  private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Id64Set | undefined }) {
+    const event = props.event;
+    const resultSubject = new BehaviorSubject<CacheEntry | undefined>(undefined);
+    const obs = fromEventPattern(
+      (handler) => event.addListener(handler),
+      (handler) => event.removeListener(handler),
     ).pipe(
-      switchMap(() => {
-        const set = props.getSet();
-        return this.queryAlwaysOrNeverDrawnElementInfo(set);
-      }),
+      // Fire the observable once at the beginning
+      startWith(undefined),
+      // Stop listening to events when dispose() is called
+      takeUntil(this._disposeSubject),
+      // Reset result subject as soon as a new event is emitted.
+      // This will make newly subscribed observers wait for the debounce period to pass
+      // instead of consuming the cached value which at this point becomes invalid.
+      tap(() => resultSubject.next(undefined)),
+      debounceTime(this._debounceTime),
+      // Cancel pending request if dispose() is called.
+      takeUntil(this._disposeSubject),
+      // If multiple requests are sent at once, preserve only the result of the newest.
+      switchMap(() => this.queryAlwaysOrNeverDrawnElementInfo(props.getSet())),
+      // Share the result by using a subject which always emits the saved result.
       share({
-        // Share only the last emitted value
-        connector: () => new BehaviorSubject<CacheEntry | undefined>(undefined),
-        resetOnRefCountZero: () => this._subject,
+        connector: () => resultSubject,
+        resetOnRefCountZero: false,
       }),
+      // Wait until the result is available.
       first((x): x is CacheEntry => !!x),
     );
     return obs;
@@ -75,12 +82,12 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
 
   public reset() {
     this.clearCache();
-    this._alwaysDrawn = this.initialQuery({
-      getEvent: () => this._viewport.onAlwaysDrawnChanged,
+    this._alwaysDrawn = this.createCacheEntryObservable({
+      event: this._viewport.onAlwaysDrawnChanged,
       getSet: () => this._viewport.alwaysDrawn,
     });
-    this._neverDrawn = this.initialQuery({
-      getEvent: () => this._viewport.onNeverDrawnChanged,
+    this._neverDrawn = this.createCacheEntryObservable({
+      event: this._viewport.onNeverDrawnChanged,
       getSet: () => this._viewport.neverDrawn,
     });
     this._subscriptions = [this._alwaysDrawn.subscribe(), this._neverDrawn.subscribe()];
@@ -94,9 +101,9 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
   public dispose(): void {
     this.clearCache();
     // istanbul ignore else
-    if (!this._subject.closed) {
-      this._subject.next(true);
-      this._subject.unsubscribe();
+    if (!this._disposeSubject.closed) {
+      this._disposeSubject.next(true);
+      this._disposeSubject.unsubscribe();
     }
   }
 

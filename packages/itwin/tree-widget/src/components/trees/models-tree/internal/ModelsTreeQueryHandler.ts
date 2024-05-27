@@ -79,8 +79,6 @@ export interface ModelsTreeQueryHandler {
   invalidateCache(): void;
 }
 
-const EMPTY_ID_SET = new Set<Id64String>();
-
 /**
  * @internal
  */
@@ -184,7 +182,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
   }
 
   public queryModelCategories(modelId: Id64String): Observable<Id64String> {
-    return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? /* istanbul ignore next */ EMPTY_ID_SET));
+    return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? /* istanbul ignore next */ new Set<Id64String>()));
   }
 
   public queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds> {
@@ -303,13 +301,10 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
 
     const query = /* sql */ `
       WITH RECURSIVE
-        RootElements(id) AS (
+        ChildElements(id) AS (
           SELECT e.ECInstanceId id
           FROM bis.GeometricElement3d e
           ${whereClause}
-        ),
-        ChildElements(id) AS (
-          SELECT * FROM RootElements
 
           UNION ALL
 
@@ -327,9 +322,9 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     const bindings = new Array<QueryBindable>();
     const query = /* sql */ `
       WITH RECURSIVE
-        ElementInfo(Id, ModelId, CategoryId, ParentId) AS (
+        ElementInfo(ElementId, ModelId, CategoryId, ParentId) AS (
           SELECT
-            ECInstanceId Id,
+            ECInstanceId ElementId,
             Model.Id ModelId,
             Category.Id CategoryId,
             Parent.Id ParentId
@@ -339,14 +334,14 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
           UNION ALL
 
           SELECT
-            e.Id,
+            e.ElementId,
             e.ModelId,
             p.Category.Id CategoryId,
             p.Parent.Id ParentId
           FROM bis.GeometricElement3d p
           JOIN ElementInfo e ON p.ECInstanceId = e.ParentId
         )
-      SELECT Id, ModelId, CategoryId
+      SELECT ElementId, ModelId, CategoryId
       FROM ElementInfo
       WHERE ParentId IS NULL
     `;

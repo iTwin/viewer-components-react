@@ -32,7 +32,10 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { ECClassGroupingNodeKey, Node, Ruleset } from "@itwin/presentation-common";
 import type { GeometricElement3dProps } from "@itwin/core-common";
 import type { StubbedFactoryFunction } from "../Common";
-import type { HierarchyBasedVisibilityHandlerProps } from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
+import type {
+  HierarchyBasedVisibilityHandlerProps,
+  IHierarchyBasedVisibilityHandler,
+} from "../../../components/trees/models-tree/HierarchyBasedVisibilityHandler";
 import type { Visibility } from "../../../components/trees/models-tree/internal/Tooltip";
 import type { ModelsTreeQueryHandler } from "../../../components/trees/models-tree/internal/ModelsTreeQueryHandler";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -70,6 +73,12 @@ describe("HierarchyBasedVisibilityHandler", () => {
     });
 
     let queryHandlerStub: StubbedFactoryFunction<ModelsTreeQueryHandler>;
+    let createdHandlers = new Array<IHierarchyBasedVisibilityHandler>();
+
+    afterEach(() => {
+      createdHandlers.forEach((x) => x.dispose());
+      createdHandlers = [];
+    });
 
     function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: ModelsTreeQueryHandler; viewport?: Viewport }) {
       const queryHandler = props?.queryHandler ?? createFakeModelsTreeQueryHandler();
@@ -98,11 +107,12 @@ describe("HierarchyBasedVisibilityHandler", () => {
       };
 
       props?.queryHandler && queryHandlerStub.stub(() => queryHandler);
+      const handler = createHierarchyBasedVisibilityHandler({
+        viewport: props?.viewport ?? createFakeSinonViewport(),
+        overrides,
+      });
       return {
-        handler: createHierarchyBasedVisibilityHandler({
-          viewport: props?.viewport ?? createFakeSinonViewport(),
-          overrides,
-        }),
+        handler,
         overrides,
       };
     }
@@ -1659,6 +1669,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
     });
 
+    afterEach(() => {
+      handler.dispose();
+    });
+
     function filterMatches(id: string, idsFilter: undefined | string | ((id: string) => boolean)) {
       if (!idsFilter) {
         return true;
@@ -1806,6 +1820,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         const element = getFirstValue(categories.get(categoryId)!.values());
         viewport.setNeverDrawn(new Set([element]));
         viewport.renderFrame();
+        await new Promise((r) => setTimeout(r, 30));
         await assertModelVisibility({ modelId: firstModelId, viewportVisibility: true, handlerVisibility: "partial" });
       });
 

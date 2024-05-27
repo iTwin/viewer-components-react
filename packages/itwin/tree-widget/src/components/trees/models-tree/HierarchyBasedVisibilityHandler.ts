@@ -127,10 +127,13 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport, this._queryHandler);
     // eslint-disable-next-line @itwin/no-internal
-    this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(() => {
-      this._queryHandler.invalidateCache();
-      this._alwaysAndNeverDrawnElements.reset();
-    });
+    this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(
+      // istanbul ignore next
+      () => {
+        this._queryHandler.invalidateCache();
+        this._alwaysAndNeverDrawnElements.reset();
+      },
+    );
   }
 
   // istanbul ignore next
@@ -298,7 +301,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     );
   }
 
-  private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String | undefined): NonPartialVisibilityStatus {
+  private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String): NonPartialVisibilityStatus {
     const viewport = this._props.viewport;
     const getCategoryViewportVisibilityStatus = (): NonPartialVisibilityStatus => {
       const isVisible = viewport.view.viewsCategory(categoryId);
@@ -306,10 +309,6 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
         ? createVisibilityStatus("visible", "category.displayedThroughCategorySelector")
         : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
     };
-
-    if (!modelId) {
-      return getCategoryViewportVisibilityStatus();
-    }
 
     if (!viewport.view.viewsModel(modelId)) {
       return createVisibilityStatus("hidden", "category.hiddenThroughModel");
@@ -328,7 +327,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
   private getCategoryDisplayStatus(props: GetCategoryStatusProps): Observable<VisibilityStatus> {
     const result = defer(() => {
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
-        queryProps: { categoryId: props.categoryId, modelId: props.modelId },
+        queryProps: props,
         tooltips: {
           allElementsInAlwaysDrawnList: "category.allElementsVisible",
           allElementsInNeverDrawnList: "category.allElementsHidden",
@@ -458,7 +457,9 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     }
 
     const categoryId = NodeUtils.getElementCategoryId(node);
+    // istanbul ignore if
     if (!categoryId) {
+      // istanbul ignore next
       return EMPTY;
     }
 
@@ -818,19 +819,11 @@ function getVisibilityFromTreeChildren(obs: Observable<Visibility>): Observable<
   );
 }
 
-function getVisibilityStatusFromTreeChildren<TEmpty = never>(
-  tooltipMap: { [key in Visibility]: string | undefined } & {
-    empty?: () => TEmpty;
-  },
-): OperatorFunction<Visibility, VisibilityStatus | TEmpty> {
+function getVisibilityStatusFromTreeChildren(tooltipMap: { [key in Visibility]: string | undefined }): OperatorFunction<Visibility, VisibilityStatus> {
   return (obs) => {
     return getVisibilityFromTreeChildren(obs).pipe(
       map((visibility) => {
         if (visibility === "empty") {
-          const res = tooltipMap.empty;
-          if (res) {
-            return res();
-          }
           visibility = "visible";
         }
 
