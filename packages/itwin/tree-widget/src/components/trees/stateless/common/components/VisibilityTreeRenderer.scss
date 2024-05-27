@@ -1,0 +1,45 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.tw-visibility-tree-renderer {
+  width: fit-content;
+  min-width: 100%;
+
+  div:has(> .tw-visibility-tree-node-checkbox) {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--iui-color-background);
+  }
+
+  .tw-visibility-tree-node-action-buttons {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background-color: var(--iui-color-background);
+  }
+
+  div:has(> .tw-visibility-tree-node-action-buttons) {
+    overflow: visible;
+  }
+
+  .tw-visibility-tree-node:not(.selected) {
+    div:has(> .tw-visibility-tree-node-checkbox),
+    .tw-visibility-tree-node-action-buttons {
+      background-color: var(--iui-color-background-hover);
+    }
+  }
+
+  .tw-visibility-tree-node.selected {
+    div:has(> .tw-visibility-tree-node-checkbox),
+    .tw-visibility-tree-node-action-buttons {
+      background-color: var(--iui-color-background-accent-muted);
+    }
+  }
+}
+
+
+// .tw-visibility-tree-renderer .tw-visibility-tree-node.selected div:has(> .tw-visibility-tree-node-checkbox)
+// .tw-visibility-tree-renderer .tw-visibility-tree-node:not(.selected) > div div:has(> .tw-visibility-tree-node-checkbox)

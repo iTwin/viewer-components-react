@@ -2,13 +2,5 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-const base = require("./beachball.config.js");
 
-/** @type {import("beachball").BeachballConfig } */
-module.exports = {
-  ...base,
-  scope: ["packages/itwin/tree-widget"],
-  tag: "dev",
-  prereleasePrefix: "dev",
-  generateChangelog: false,
-};
+export { StatelessModelsTreeComponent } from "./models-tree/ModelsTreeComponent";
