@@ -350,11 +350,7 @@ export abstract class Measurement {
   }
 
   public set sheetViewId(id: string | undefined) {
-    this._sheetViewId = id;
-  }
-
-  public get sheetViewId(): string | undefined {
-    return this._sheetViewId;
+    this.viewTarget.setViewIds(id ?? []);
   }
 
   /** Gets or sets if the measurement should be drawn. */
@@ -567,6 +563,10 @@ export abstract class Measurement {
     }
 
     return true;
+  }
+
+  protected shouldDraw(context: DecorateContext): boolean {
+    return this.viewTarget.isValidViewId(context.viewport.view.id);
   }
 
   /** Draw the measurement. This is called every frame, e.g. when the mouse moves. This is suitable for small or dynamic graphics, but if the measurement

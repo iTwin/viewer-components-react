@@ -83,6 +83,7 @@ export class MeasurementViewTarget {
 
   private _included: Set<string>;
   private _excluded: Set<string>;
+  private _viewIds: Set<string>;
 
   /** Gets all the registered view classifiers. */
   public static get classifiers(): ReadonlyMap<string, MeasurementViewTypeClassifier> {
@@ -111,20 +112,38 @@ export class MeasurementViewTarget {
     return this._excluded;
   }
 
+  /** Gets the viewIds that the measurement will draw in */
+  public get viewIds(): ReadonlySet<string> {
+    return this._viewIds;
+  }
+
   /**
    * Constructs a new MeasurementViewTarget.
    * @param included Optional, one or more view type names where the view is valid. If none, then "Any" is the default type meaning any viewport can be valid.
    * @param excluded Optional, one or more view type names where the view is not valid.
+   * @param viewIds Optional, one or more view ids where the measurement should display. If none, will not consider for display
    */
-  public constructor(included?: string | string[], excluded?: string | string[]) {
+  public constructor(included?: string | string[], excluded?: string | string[], viewIds?: string | string[]) {
     this._included = new Set<string>();
     this._excluded = new Set<string>();
+    this._viewIds = new Set<string>();
 
     if (included)
       this.include(included);
 
     if (excluded)
       this.exclude(excluded);
+
+    if (viewIds)
+      this.setViewIds(viewIds);
+  }
+
+  public setViewIds(viewIds: string | string[]) {
+    const arr = Array.isArray(viewIds) ? viewIds : [viewIds];
+    this._viewIds.clear();
+    for (const id of arr) {
+      this._viewIds.add(id);
+    }
   }
 
   /**
@@ -463,6 +482,13 @@ export class MeasurementViewTarget {
    */
   public static findClassifier(typeName: string): MeasurementViewTypeClassifier | undefined {
     return MeasurementViewTarget._classifiers.get(typeName);
+  }
+
+  public isValidViewId(viewId: string) {
+    if (this._viewIds.size > 0)
+      return this._viewIds.has(viewId);
+    else
+      return true;
   }
 }
 
