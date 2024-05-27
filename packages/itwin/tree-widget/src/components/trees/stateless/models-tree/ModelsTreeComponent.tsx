@@ -3,25 +3,26 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { ComponentPropsWithoutRef, Fragment, useState } from "react";
+import { Fragment, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { SvgCursorClick } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { SelectionStorage, UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
+import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeHeader } from "../../../tree-header/TreeHeader";
 import { AutoSizer } from "../../../utils/AutoSizer";
-import {
-  HideAllButton, InvertButton, ModelsTreeHeaderButtonProps, ShowAllButton, useAvailableModels, View2DButton, View3DButton,
-} from "../../models-tree/ModelsTreeButtons";
+import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "../../models-tree/ModelsTreeButtons";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
 import { StatelessModelsTree } from "./ModelsTree";
 
+import type { ComponentPropsWithoutRef } from "react";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
+import type { ModelsTreeHeaderButtonProps } from "../../models-tree/ModelsTreeButtons";
+
 type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsTree>;
 
-interface StatelessModelsTreeComponentProps
-  extends Pick<StatelessModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface StatelessModelsTreeComponentProps extends Pick<StatelessModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
 }
@@ -70,9 +71,7 @@ function ModelsTreeComponentImpl({
                 ]}
           </TreeHeader>
           <AutoSizer>
-            {({ width, height }) => (
-              <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />
-            )}
+            {({ width, height }) => <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
           </AutoSizer>
         </FocusedInstancesContextProvider>
       </UnifiedSelectionProvider>

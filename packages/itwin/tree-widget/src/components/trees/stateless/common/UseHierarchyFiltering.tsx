@@ -5,15 +5,16 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedAsyncValue } from "@itwin/components-react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { ClassInfo, DefaultContentDisplayTypes, Descriptor, KeySet } from "@itwin/presentation-common";
-import {
-  PresentationInstanceFilter, PresentationInstanceFilterDialog, PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource,
-} from "@itwin/presentation-components";
+import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
+import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
-import { HierarchyLevelDetails, useTree } from "@itwin/presentation-hierarchies-react";
-import { InstanceKey } from "@itwin/presentation-shared";
+
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
+import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
+import type { HierarchyLevelDetails, useTree } from "@itwin/presentation-hierarchies-react";
+import type { InstanceKey } from "@itwin/presentation-shared";
 
 type UseTreeResult = ReturnType<typeof useTree>;
 
@@ -143,7 +144,6 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
         }
         return "Failed to calculate matching instances count";
       }
-
     }, [filter, hierarchyLevelDetails]),
   );
 
