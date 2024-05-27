@@ -180,8 +180,8 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
-    if (this.drawingOrigin)
-      this._dynamicEdge.drawingMetaData = { origin: this.drawingOrigin, worldScale: this.worldScale };
+    if (this.drawingMetaData?.origin)
+      this._dynamicEdge.drawingMetaData = { origin: this.drawingMetaData.origin, worldScale: this.worldScale };
     this._dynamicEdge.sheetViewId = this.sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;

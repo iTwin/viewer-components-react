@@ -329,7 +329,7 @@ export abstract class Measurement {
     this.onTransientIdChanged(prevId);
   }
 
-  public get drawingMetaData(): DrawingMetadata | undefined {
+  public get drawingMetaData(): Readonly<DrawingMetadata | undefined> {
     return this._drawingMetaData;
   }
 
@@ -338,56 +338,16 @@ export abstract class Measurement {
     this.onDrawingMetadataChanged();
   }
 
+  public get worldScale(): Readonly<number> {
+    return this.drawingMetaData?.worldScale ?? 1.0;
+  }
+
   public set sheetViewId(id: string | undefined) {
     this._sheetViewId = id;
   }
 
   public get sheetViewId(): string | undefined {
     return this._sheetViewId;
-  }
-
-  public set drawingId(id: string | undefined) {
-    if (this._drawingMetaData) {
-      this._drawingMetaData.drawingId = id;
-      this.onDrawingMetadataChanged();
-    }
-  }
-
-  public get drawingId(): string | undefined {
-    return this._drawingMetaData?.drawingId;
-  }
-
-  public set drawingOrigin(origin: Point2d | undefined) {
-    if (this._drawingMetaData && origin) {
-      this._drawingMetaData.origin = origin;
-      this.onDrawingMetadataChanged();
-    }
-  }
-
-  public get drawingOrigin(): Point2d | undefined {
-    return this._drawingMetaData?.origin;
-  }
-
-  public set drawingExtents(extents: Point2d | undefined) {
-    if (this._drawingMetaData) {
-      this._drawingMetaData.extents = extents;
-      this.onDrawingMetadataChanged();
-    }
-  }
-
-  public get drawingExtents(): Point2d | undefined {
-    return this._drawingMetaData?.extents;
-  }
-
-  public set worldScale(scale: number) {
-    if (this._drawingMetaData && scale > 0) {
-      this._drawingMetaData.worldScale = scale;
-      this.onDrawingMetadataChanged();
-    }
-  }
-
-  public get worldScale(): number {
-    return this._drawingMetaData?.worldScale ?? 1.0;
   }
 
   /** Gets or sets if the measurement should be drawn. */
@@ -729,7 +689,7 @@ export abstract class Measurement {
     this.viewTarget.copyFrom(other.viewTarget);
     this.displayLabels = other.displayLabels;
     if (other.drawingMetaData)
-      this._drawingMetaData = { origin: other.drawingMetaData.origin.clone(), worldScale: other.worldScale, drawingId: other.drawingId, extents: other.drawingExtents};
+      this._drawingMetaData = { origin: other.drawingMetaData.origin.clone(), worldScale: other.drawingMetaData.worldScale, drawingId: other.drawingMetaData.drawingId, extents: other.drawingMetaData.extents};
   }
 
   /**
