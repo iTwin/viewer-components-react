@@ -74,6 +74,9 @@ test.describe("tree widget", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
+      // wait until filter is applied
+      await treeWidget.getByText("There are no child nodes matching current filter").waitFor();
+
       // hover the node for the button to appear
       await physicalModelNode.hover();
       await treeWidget.getByTitle("Clear active filter").waitFor();
