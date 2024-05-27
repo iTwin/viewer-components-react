@@ -84,9 +84,94 @@ describe("QueryHandler", () => {
     }
 
     await runTest();
-    stub.resetHistory();
-    handler.invalidateCache();
     await runTest();
+  });
+
+  it("reruns query when `invalidateCache` is called", async () => {
+    const parentSubject = "0x1";
+    const childSubject = "0x2";
+    const models = new Map([
+      [parentSubject, ["0x10", "0x20"]],
+      [childSubject, ["0x30", "0x40"]],
+    ]);
+
+    const subjectsQueryRegex = /FROM bis\.Subject/;
+    const modelsQueryRegex = /FROM bis\.InformationPartitionElement/;
+    const modelCategoriesQueryRegex = /FROM bis\.GeometricElement3d/;
+
+    const stub = sinon.fake((query: string) => {
+      if (subjectsQueryRegex.test(query)) {
+        return [{ id: parentSubject }, { id: childSubject, parentId: parentSubject }];
+      }
+      if (modelsQueryRegex.test(query)) {
+        return [...models.entries()].flatMap(([subjectId, modelIds]) => modelIds.map((id) => ({ id, parentId: subjectId })));
+      }
+      if (modelCategoriesQueryRegex.test(query)) {
+        return [];
+      }
+      throw new Error(`Unexpected query: ${query}`);
+    });
+
+    const handler = createModelsTreeQueryHandler(createIModelMock(stub));
+
+    let result = await collect(handler.querySubjectModels("0x1"));
+    const allModels = [...models.values()].flat();
+    expect(stub).to.be.calledThrice;
+    expect(result).to.deep.eq(allModels);
+    result = await collect(handler.querySubjectModels("0x1"));
+    expect(stub).to.be.calledThrice;
+    expect(result).to.deep.eq(allModels);
+
+    handler.invalidateCache();
+
+    result = await collect(handler.querySubjectModels("0x1"));
+    expect(stub).to.have.callCount(6);
+    expect(result).to.deep.eq(allModels);
+  });
+
+  it("caches model and category element count", async () => {
+    const elementIds = ["0x10", "0x20", "0x30"];
+    const stub = sinon.fake((query: string) => {
+      if (/Elements\(id\)/.test(query)) {
+        return [[elementIds.length]];
+      }
+      throw new Error(`Unexpected query: ${query}`);
+    });
+    const handler = createModelsTreeQueryHandler(createIModelMock(stub));
+    await expect(firstValueFrom(handler.queryElementsCount({ modelId: "0x1" }))).to.eventually.deep.eq(elementIds.length);
+    expect(stub).to.be.calledOnce;
+    await expect(firstValueFrom(handler.queryElementsCount({ modelId: "0x1" }))).to.eventually.deep.eq(elementIds.length);
+    expect(stub).to.be.calledOnce;
+
+    await expect(firstValueFrom(handler.queryElementsCount({ modelId: "0x1", categoryId: "0x2" }))).to.eventually.deep.eq(elementIds.length);
+    expect(stub).to.be.calledTwice;
+    await expect(firstValueFrom(handler.queryElementsCount({ modelId: "0x1", categoryId: "0x2" }))).to.eventually.deep.eq(elementIds.length);
+    expect(stub).to.be.calledTwice;
+  });
+
+  it("doesn't cache element children count", async () => {
+    const elementIds = ["0x10", "0x20", "0x30"];
+    const stub = sinon.fake((query: string) => {
+      if (/Elements\(id\)/.test(query)) {
+        return [[elementIds.length]];
+      }
+      throw new Error(`Unexpected query: ${query}`);
+    });
+    const handler = createModelsTreeQueryHandler(createIModelMock(stub));
+    await expect(firstValueFrom(handler.queryElementsCount({ rootElementId: "0x1" }))).to.eventually.deep.eq(elementIds.length);
+    expect(stub).to.be.calledOnce;
+
+    await expect(firstValueFrom(handler.queryElementsCount({ rootElementId: "0x1" }))).to.eventually.deep.eq(elementIds.length);
+    expect(stub).to.be.calledTwice;
+  });
+
+  it("uses InVirtualSet when 1000 or more ids passed", async () => {
+    const elementIds = [...Array(1001).keys()].map((i) => `0x${i}`);
+    const stub = sinon.fake.returns([]);
+    const handler = createModelsTreeQueryHandler(createIModelMock(stub));
+    await firstValueFrom(handler.queryElementInfo(new Set(elementIds)).pipe(toArray()));
+
+    expect(stub).to.be.calledOnceWith(sinon.match(/InVirtualSet/));
   });
 });
 

@@ -1558,7 +1558,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
     let firstModelId: Id64String;
     let otherModelId: Id64String;
     const models = new Map<Id64String, Id64String[]>();
-    const categories = new Map<Id64String, Id64String[]>();
+    const categoryParentElements = new Map<Id64String, Id64String[]>();
     const elementHierarchy = new Map<Id64String, Set<Id64String>>();
 
     before(async () => {
@@ -1580,7 +1580,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       iModel = await buildTestIModel("ModelsTreeTest", async (builder) => {
         const schemaName = "VisibilityHandlerIntegrationTests";
         const schemaAlias = "test";
-        const classNames = [...Array(6).keys()].map((i) => `ElementClass${i}`);
+        const classNames = [...Array(3).keys()].map((i) => `ElementClass${i}`);
         const schema = `
           <?xml version="1.0" encoding="UTF-8"?>
           <ECSchema schemaName="${schemaName}" alias="${schemaAlias}" version="01.00.00" xmlns="http://www.bentley.com/schemas/Bentley.ECXML.3.2">
@@ -1636,19 +1636,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
               }
               elementHierarchy.set(parent, elements);
             }
-            categories.set(categoryId, parents);
+            categoryParentElements.set(categoryId, parents);
           }
           models.set(modelId, modelCategories);
         }
 
         [firstModelId, otherModelId] = [...models.keys()];
       });
-
-      /* eslint-disable no-console */
-      console.log("Models to categories:", models);
-      console.log("Categories to parent elements:", categories);
-      console.log("Elements to their children:", elementHierarchy);
-      /* eslint-enable no-console */
     });
 
     after(async () => {
@@ -1755,7 +1749,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           return from(categoryIds).pipe(
             filter((id) => filterMatches(id, props.categoryIdFilter)),
             mergeMap((categoryId) => {
-              return from(categories.get(categoryId)!).pipe(
+              return from(categoryParentElements.get(categoryId)!).pipe(
                 filter(([id]) => filterMatches(id, props.elementIdFilter)),
                 mergeMap(([_, elementIds]) => elementIds),
                 mergeMap(async (elementId) => {
@@ -1816,8 +1810,8 @@ describe("HierarchyBasedVisibilityHandler", () => {
       it("gets partial when it's visible and elements are added to never drawn list", async () => {
         await handler.changeVisibility(createModelNode(firstModelId), true);
 
-        const categoryId = getFirstValue(models.get(firstModelId)!.values());
-        const element = getFirstValue(categories.get(categoryId)!.values());
+        const categoryId = getFirstValue(models.get(firstModelId)!);
+        const element = getFirstValue(categoryParentElements.get(categoryId)!);
         viewport.setNeverDrawn(new Set([element]));
         viewport.renderFrame();
         await new Promise((r) => setTimeout(r, 30));
@@ -1828,8 +1822,8 @@ describe("HierarchyBasedVisibilityHandler", () => {
         await handler.changeVisibility(createModelNode(firstModelId), true);
         await handler.changeVisibility(createModelNode(otherModelId), true);
 
-        const categoryId = getFirstValue(models.get(otherModelId)!.values());
-        const element = getFirstValue(categories.get(categoryId)!.values());
+        const categoryId = getFirstValue(models.get(otherModelId)!);
+        const element = getFirstValue(categoryParentElements.get(categoryId)!);
         viewport.setAlwaysDrawn(new Set([element]), true);
         viewport.renderFrame();
 
@@ -1910,7 +1904,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       it("gets partial when it's visible and elements are added to never drawn list", async () => {
         await handler.changeVisibility(createModelNode(modelId), true);
         await handler.changeVisibility(createCategoryNode(modelId, categoryId), true);
-        const element = getFirstValue(categories.get(categoryId)!.values());
+        const element = getFirstValue(categoryParentElements.get(categoryId)!.values());
         viewport.setNeverDrawn(new Set([element]));
         viewport.renderFrame();
         await assertCategoryVisibility({ categoryIdFilter: categoryId, perModelVisibilityOverride: true, handlerVisibility: "partial" });
@@ -1926,14 +1920,45 @@ describe("HierarchyBasedVisibilityHandler", () => {
       before(() => {
         modelId = firstModelId;
         categoryId = getFirstValue(models.get(modelId)!.values());
-        elementId = getFirstValue(categories.get(categoryId)!.values());
+        elementId = getFirstValue(categoryParentElements.get(categoryId)!.values());
         childElementId = getFirstValue(elementHierarchy.get(elementId)!.values());
       });
 
       it("if model is hidden, showing element makes model and category partially visible", async () => {
         const elementNode = createElementNode(modelId, categoryId, true, elementId);
         await handler.changeVisibility(elementNode, true);
-        expect(viewport.alwaysDrawn).to.contain(elementId);
+        expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId, ...elementHierarchy.get(elementId)!]));
+        viewport.renderFrame();
+        await Promise.all([
+          assertModelVisibility({
+            modelId,
+            viewportVisibility: true,
+            handlerVisibility: "partial",
+          }),
+          assertCategoryVisibility({
+            categoryIdFilter: categoryId,
+            handlerVisibility: "partial",
+          }),
+          assertCategoryVisibility({
+            modelIdFilter: modelId,
+            categoryIdFilter: (id) => id !== categoryId,
+            handlerVisibility: "hidden",
+          }),
+          assertElementsVisibility({
+            elementIdFilter: elementId,
+            visibility: "visible",
+          }),
+        ]);
+      });
+
+      it("if model is hidden, showing element removes all model elements from the always drawn list", async () => {
+        const elementIds = categoryParentElements.get(categoryId);
+        viewport.setAlwaysDrawn(new Set(elementIds));
+
+        const elementNode = createElementNode(modelId, categoryId, true, elementId);
+        await handler.changeVisibility(elementNode, true);
+
+        expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId, ...elementHierarchy.get(elementId)!]));
         viewport.renderFrame();
         await Promise.all([
           assertModelVisibility({
@@ -2136,8 +2161,9 @@ function createBlankViewState(iModel: IModelConnection) {
   return viewState;
 }
 
-function getFirstValue<T>(iterator: Iterator<T>): T {
-  const iterResult = iterator.next();
+function getFirstValue<T>(iterable: Iterable<T>): T {
+  const iter = iterable[Symbol.iterator]();
+  const iterResult = iter.next();
   if (iterResult.done) {
     throw new Error("Iterator is empty");
   }

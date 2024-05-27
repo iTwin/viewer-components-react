@@ -45,10 +45,6 @@ export interface ElementsByParentQueryProps {
  */
 export type ElementsQueryProps = ModelElementsQueryProps | CategoryElementsQueryProps | ElementsByParentQueryProps;
 
-export type FilterableQueryProps<TProps extends {} = ElementsQueryProps> = TProps & {
-  elementIdFilter?: Id64Set;
-};
-
 export interface ElementInfo {
   parentId?: Id64String;
   elementId: Id64String;
@@ -70,9 +66,9 @@ export interface ModelsTreeQueryHandler {
    * Retrieves all elements that match given model, category and root (parent) element IDs,
    * then recursively retrieves all children of those elements by the "ElementOwnsChildElements" relationship.
    */
-  queryElements(props: FilterableQueryProps): Observable<Id64String>;
+  queryElements(props: ElementsQueryProps): Observable<Id64String>;
   /** Analogous to `queryElements` but returns a count instead of values */
-  queryElementsCount(props: FilterableQueryProps): Observable<number>;
+  queryElementsCount(props: ElementsQueryProps): Observable<number>;
   /** Returns information about given elements */
   queryElementInfo(elementIds: Id64Set): Observable<ElementInfo>;
   /** Clears cached query results */
@@ -254,14 +250,14 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     });
   }
 
-  public queryElementsCount(props: FilterableQueryProps): Observable<number> {
+  public queryElementsCount(props: ElementsQueryProps): Observable<number> {
     const runQuery = () =>
       this.runElementsQuery({
         ...props,
         type: "count",
       });
 
-    if ("rootElementId" in props || props.elementIdFilter !== undefined) {
+    if ("rootElementId" in props) {
       return runQuery();
     }
 
@@ -277,17 +273,17 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
   }
 
   private runElementsQuery(
-    props: FilterableQueryProps & {
+    props: ElementsQueryProps & {
       type: "ids";
     },
   ): Observable<Id64String>;
   private runElementsQuery(
-    props: FilterableQueryProps & {
+    props: ElementsQueryProps & {
       type: "count";
     },
   ): Observable<number>;
   private runElementsQuery(
-    props: FilterableQueryProps & {
+    props: ElementsQueryProps & {
       type: "ids" | "count";
     },
   ): Observable<Id64String | number> {
@@ -301,7 +297,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
 
     const query = /* sql */ `
       WITH RECURSIVE
-        ChildElements(id) AS (
+        Elements(id) AS (
           SELECT e.ECInstanceId id
           FROM bis.GeometricElement3d e
           ${whereClause}
@@ -309,11 +305,11 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
           UNION ALL
 
           SELECT c.ECInstanceId id
-          FROM ChildElements e
+          FROM Elements e
           JOIN bis.GeometricElement3d c ON c.Parent.Id = e.id
         )
-        SELECT ${props.type === "ids" ? "*" : "COUNT(*)"} FROM ChildElements
-        ${props.elementIdFilter ? `WHERE ${bind("id", props.elementIdFilter, bindings)}` : ""}
+        SELECT ${props.type === "ids" ? "*" : "COUNT(*)"}
+        FROM Elements
     `;
     return this.runQuery(query, bindings, (row) => row[0]);
   }
@@ -379,30 +375,27 @@ function bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>)
   }
 
   const maxBindings = 1000;
-  // istanbul ignore else
   if (value.size < maxBindings) {
     const values = [...value];
     bindings.push(...values);
     return `${key} IN (${values.join(",")})`;
   }
 
-  // istanbul ignore next
   bindings.push(value);
-  return `inVirtualSet(?, ${key})`;
+  return `InVirtualSet(?, ${key})`;
 }
 
-// istanbul ignore next
 function createBinder(bindings: Array<QueryBindable>): QueryBinder | undefined {
   const binder = new QueryBinder();
-  bindings.forEach((x, idx) => {
+  bindings.forEach((idOrIdSet, idx) => {
     // Binder expect index to start from 1
     idx++;
-    if (typeof x === "string") {
-      binder.bindId(idx, x);
+    if (typeof idOrIdSet === "string") {
+      binder.bindId(idx, idOrIdSet);
       return;
     }
 
-    binder.bindIdSet(idx, Array.isArray(x) ? new Set(x) : x);
+    binder.bindIdSet(idx, idOrIdSet);
   });
   return binder;
 }

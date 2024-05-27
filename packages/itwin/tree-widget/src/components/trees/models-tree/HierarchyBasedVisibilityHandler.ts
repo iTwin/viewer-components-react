@@ -224,7 +224,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
 
       return statuses.pipe(
         map((x) => x.state),
-        getVisibilityStatusFromTreeChildren({
+        getVisibilityStatusFromTreeNodeChildren({
           visible: "subject.allModelsVisible",
           hidden: "subject.allModelsHidden",
           partial: "subject.someModelsHidden",
@@ -260,7 +260,7 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return this._queryHandler.queryModelCategories(modelId).pipe(
       map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
       map((x) => x.state),
-      getVisibilityFromTreeChildren,
+      getVisibilityFromTreeNodeChildren,
       mergeMap((visibilityByCategories) => {
         // istanbul ignore if
         if (visibilityByCategories === "empty") {
@@ -538,16 +538,17 @@ class VisibilityHandlerImplementation implements IVisibilityHandler {
     return forkJoin({
       categories: this._queryHandler.queryModelCategories(modelId).pipe(toArray()),
       alwaysDrawnElements: this.getAlwaysDrawnElements({ modelId }),
-      _: viewport.addViewedModels(modelId),
     }).pipe(
-      mergeMap(({ categories, alwaysDrawnElements }) => {
+      mergeMap(async ({ categories, alwaysDrawnElements }) => {
         const alwaysDrawn = this._props.viewport.alwaysDrawn;
         if (alwaysDrawn && alwaysDrawnElements) {
           viewport.setAlwaysDrawn(setDifference(alwaysDrawn, alwaysDrawnElements));
         }
-        return categories;
+        categories.forEach((categoryId) => {
+          this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false);
+        });
+        return viewport.addViewedModels(modelId);
       }),
-      map((categoryId) => this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false)),
     );
   }
 
@@ -799,7 +800,7 @@ interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
 
 const createVisibilityStatusObs = (status: Visibility | "disabled", tooltipStringId?: string) => of(createVisibilityStatus(status, tooltipStringId));
 
-function getVisibilityFromTreeChildren(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
+function getVisibilityFromTreeNodeChildren(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
   return obs.pipe(
     reduceWhile(
       (x) => x.allVisible || x.allHidden,
@@ -819,9 +820,9 @@ function getVisibilityFromTreeChildren(obs: Observable<Visibility>): Observable<
   );
 }
 
-function getVisibilityStatusFromTreeChildren(tooltipMap: { [key in Visibility]: string | undefined }): OperatorFunction<Visibility, VisibilityStatus> {
+function getVisibilityStatusFromTreeNodeChildren(tooltipMap: { [key in Visibility]: string | undefined }): OperatorFunction<Visibility, VisibilityStatus> {
   return (obs) => {
-    return getVisibilityFromTreeChildren(obs).pipe(
+    return getVisibilityFromTreeNodeChildren(obs).pipe(
       map((visibility) => {
         if (visibility === "empty") {
           visibility = "visible";
