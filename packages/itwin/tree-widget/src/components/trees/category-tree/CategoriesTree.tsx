@@ -17,6 +17,7 @@ import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import type { CategoryInfo } from "./CategoriesTreeButtons";
 import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
@@ -25,7 +26,6 @@ import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
-import type { CategoryInfo } from "./CategoryVisibilityHandler";
 const PAGING_SIZE = 20;
 
 /**

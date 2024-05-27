@@ -29,6 +29,7 @@ interface VisibilityTreeOwnProps {
   treeName: string;
   hierarchyLevelSizeLimit?: number;
   getIcon?: (node: PresentationHierarchyNode) => ReactElement | undefined;
+  getSublabel?: (node: PresentationHierarchyNode) => ReactElement | undefined;
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
 }
@@ -76,6 +77,7 @@ function VisibilityTreeImpl({
   noDataMessage,
   treeName,
   getIcon,
+  getSublabel,
   density,
   selectionMode,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
@@ -132,6 +134,7 @@ function VisibilityTreeImpl({
           onCheckboxClicked={onCheckboxClicked}
           onFilterClick={onFilterClick}
           getIcon={getIcon}
+          getSublabel={getSublabel}
           size={density === "enlarged" ? "default" : "small"}
         />
         {filteringDialog}

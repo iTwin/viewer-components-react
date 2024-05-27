@@ -18,22 +18,10 @@ import { AutoSizer } from "../../utils/AutoSizer";
 import { CategoryTree } from "./CategoriesTree";
 import { CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories } from "./CategoryVisibilityHandler";
 
+import type { CategoriesTreeHeaderButtonProps, CategoryInfo } from "./CategoriesTreeButtons";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { CategoryTreeProps } from "./CategoriesTree";
-import type { CategoryInfo } from "./CategoryVisibilityHandler";
-/**
- * Props that get passed to [[CategoriesTreeComponent]] header button renderer.
- * @see CategoriesTreeComponentProps.headerButtons
- * @public
- */
-export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
-  /** A list of categories available in the iModel */
-  categories: CategoryInfo[];
-  /** In case the tree is filtered, a list of filtered categories. */
-  filteredCategories?: CategoryInfo[];
-}
 
 /**
  * Props for [[CategoriesTreeComponent]].

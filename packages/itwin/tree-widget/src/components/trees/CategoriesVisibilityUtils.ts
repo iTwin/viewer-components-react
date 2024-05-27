@@ -5,10 +5,9 @@
 
 import { QueryRowFormat } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
+import type { CategoryInfo } from "./category-tree/CategoriesTreeButtons";
 
 import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { CategoryInfo } from "./category-tree/CategoryVisibilityHandler";
-
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 /**
