@@ -103,11 +103,8 @@ export const CalculatedPropertyAction = ({
             </Text>
           </div>
           <SharedCalculatedPropertyForms
-            validator={validator}
-            propertyName={propertyName}
-            setPropertyName={setPropertyName}
-            type={type}
-            setType={setType}
+            calculatedPropertyType={type}
+            setCalculatedPropertyType={setType}
           />
         </Fieldset>
       </div>

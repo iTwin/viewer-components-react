@@ -11,7 +11,6 @@ import { RouteStep } from "../GroupingMapping";
 import { GroupPropertyAction } from "../../components/Properties/GroupProperties/GroupPropertyAction";
 import { Mappings } from "../../components/Mappings/Mappings";
 import { MappingAction } from "../../components/Mappings/Editing/MappingAction";
-import { CalculatedPropertyActionWithVisuals } from "../../components/Properties/CalculatedProperties/CalculatedPropertyActionWithVisuals";
 import { PropertyMenuWithVisualization } from "../../components/Properties/PropertyMenuWithVisualization";
 import { GroupsVisualization } from "../../components/Groups/GroupsVisualization";
 
@@ -25,7 +24,7 @@ export const GroupingMappingRouter = ({
   goBack: () => void;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
-  const { mapping, group, property, calculatedProperty, customCalculation, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
+  const { mapping, group, property, customCalculation, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
 
   switch (currentRoute.step) {
     case RouteStep.Mappings:
@@ -151,20 +150,6 @@ export const GroupingMappingRouter = ({
             mappingId={mapping.id}
             group={group}
             groupProperty={property}
-            onSaveSuccess={goBack}
-            onClickCancel={goBack}
-          />
-        );
-      }
-      return null;
-    }
-    case RouteStep.CalculatedPropertyAction: {
-      if (mapping && group) {
-        return (
-          <CalculatedPropertyActionWithVisuals
-            mappingId={mapping.id}
-            group={group}
-            calculatedProperty={calculatedProperty}
             onSaveSuccess={goBack}
             onClickCancel={goBack}
           />

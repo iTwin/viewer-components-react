@@ -20,6 +20,7 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
+  CalculatedPropertyType,
   GroupMinimal,
   Property,
   PropertyModify,
@@ -38,7 +39,9 @@ import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
-import { SvgLabel } from "@itwin/itwinui-icons-react";
+import { SvgLabel, SvgMeasure } from "@itwin/itwinui-icons-react";
+import { CalculatedPropertyActionWithVisuals } from "../CalculatedProperties/CalculatedPropertyActionWithVisuals";
+import { handleError } from "../../../common/utils";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -87,8 +90,10 @@ export const GroupPropertyAction = ({
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
 
+  const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType);
+
   const [mappedPropertiesSelected, setMappedPropertiesSelected] = useState<boolean>(false);
-  // const [calculatedPropertySelected, setCalculatedPropertySelected] = useState<boolean>(false);
+  const [calculatedPropertySelected, setCalculatedPropertySelected] = useState<boolean>(false);
   // const [customCalculationSelected, setCustomCalculationSelected] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
@@ -97,6 +102,7 @@ export const GroupPropertyAction = ({
     setPropertyName("");
     setDataType(DataType.String);
     setSelectedProperties([]);
+    setCalculatedPropertyType(undefined);
   }, []);
 
   const fetchPropertiesMetadata = useCallback(async () => {
@@ -159,6 +165,7 @@ export const GroupPropertyAction = ({
         dataType,
         quantityType,
         ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
+        calculatedPropertyType,
       };
 
       return groupProperty
@@ -180,6 +187,9 @@ export const GroupPropertyAction = ({
       onSaveSuccess();
       reset();
       await queryClient.invalidateQueries(["properties", iModelId, mappingId, group.id]);
+    },
+    onError(error: any) {
+      handleError(error.status);
     },
   });
 
@@ -206,7 +216,7 @@ export const GroupPropertyAction = ({
       setMappedPropertiesSelected(true);
     }
     if(groupProperty?.calculatedPropertyType){
-      // setCalculatedPropertySelected(true);
+      setCalculatedPropertySelected(true);
     }
     if(groupProperty?.formula){
       // setCustomCalculationSelected(true);
@@ -324,6 +334,19 @@ export const GroupPropertyAction = ({
               </div>
             </Fieldset>
           </ExpandableBlock>
+          <ExpandableBlock
+            title={"Calculated Property"}
+            endIcon={
+              <Icon fill={calculatedPropertySelected === true ? "informational" : "default"}>
+                <SvgMeasure />
+              </Icon>
+            }
+            isExpanded={calculatedPropertySelected}>
+            <CalculatedPropertyActionWithVisuals
+              group={group}
+              calculatedPropertyType={calculatedPropertyType}
+              setCalculatedPropertyType={setCalculatedPropertyType}/>
+          </ExpandableBlock>
         </div>
       </div>
       <ActionPanel
@@ -331,7 +354,7 @@ export const GroupPropertyAction = ({
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
-          selectedProperties.length === 0 || !propertyName || dataType === undefined
+          !propertyName || dataType === undefined
         }
       />
       <GroupsPropertiesSelectionModal
