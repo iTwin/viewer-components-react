@@ -6,7 +6,6 @@
 import "./CustomParamsSettings.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import type { ListboxValue } from "@itwin/core-react";
 import { Listbox, ListboxItem } from "@itwin/core-react";
 import { SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
@@ -14,9 +13,10 @@ import { Icon, IconButton } from "@itwin/itwinui-react";
 import { CustomParamsMappingStorage } from "../../CustomParamsMappingStorage";
 import { CustomParamsStorage } from "../../CustomParamsStorage";
 import { MapLayersUI } from "../../mapLayers";
-import type { CustomParamItem } from "../Interfaces";
 import { CustomParamEditDialog } from "./CustomParamEditDialog";
 
+import type { ListboxValue } from "@itwin/core-react";
+import type { CustomParamItem } from "../Interfaces";
 interface CustomParamsMap {
   [paramName: string]: CustomParamItem;
 }
@@ -142,8 +142,10 @@ export function CustomParamsSettingsPanel() {
         </IconButton>
       </div>
       <div className="customParamsSettings-content">
+      {/* eslint-disable-next-line @itwin/no-internal */}
         <Listbox selectedValue={selectedValue} onListboxValueChange={onListboxValueChange} className="customParamsSettings-content-listbox">
           {Object.keys(params).map((keyName) => (
+            // eslint-disable-next-line @itwin/no-internal
             <ListboxItem
               key={keyName}
               className="customParamsSettings-content-entry"

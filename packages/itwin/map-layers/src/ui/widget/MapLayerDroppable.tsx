@@ -9,24 +9,30 @@
 
 import "./MapLayerManager.scss";
 import * as React from "react";
-import type { DraggableChildrenFn, DroppableProvided, DroppableStateSnapshot } from "react-beautiful-dnd";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { UiFramework } from "@itwin/appui-react";
 import { assert } from "@itwin/core-bentley";
-import type { SubLayerId } from "@itwin/core-common";
 import { ImageMapLayerSettings } from "@itwin/core-common";
-import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
-import { IModelApp, MapLayerImageryProviderStatus, MapTileTreeScaleRangeVisibility, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
+import {
+  IModelApp,
+  MapLayerImageryProviderStatus,
+  MapTileTreeScaleRangeVisibility,
+  NotifyMessageDetails,
+  OutputMessagePriority,
+} from "@itwin/core-frontend";
 import { Icon } from "@itwin/core-react";
 import { Button, Checkbox } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
-import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
 import { AttachLayerButtonType, AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
-import type { SourceState } from "./MapUrlDialog";
 import { MapUrlDialog } from "./MapUrlDialog";
 import { SubLayersPopupButton } from "./SubLayersPopupButton";
 
+import type { DraggableChildrenFn, DroppableProvided, DroppableStateSnapshot } from "react-beautiful-dnd";
+import type { SubLayerId } from "@itwin/core-common";
+import type { MapLayerIndex, ScreenViewport } from "@itwin/core-frontend";
+import type { MapLayerOptions, StyleMapLayerSettings } from "../Interfaces";
+import type { SourceState } from "./MapUrlDialog";
 /** @internal */
 interface MapLayerDroppableProps {
   isOverlay: boolean;
@@ -150,6 +156,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           {...dragProvided.dragHandleProps}
         >
           {activeLayer.name}
+          {/* eslint-disable-next-line @itwin/no-internal */}
           {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
             <Button
               disabled={props.disabled}
@@ -201,6 +208,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             />
           )}
         </div>
+        {/* eslint-disable-next-line @itwin/no-internal */}
         {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth && (
           <Button
             disabled={props.disabled}

@@ -5,8 +5,6 @@
 import * as React from "react";
 import { RelativePosition } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
-import type { MapSubLayerProps } from "@itwin/core-common";
-import type { MapLayerSourceValidation } from "@itwin/core-frontend";
 import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import * as UiCore from "@itwin/core-react";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
@@ -16,9 +14,11 @@ import { MapLayersUI } from "../../mapLayers";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
 import { useSourceMapContext } from "./MapLayerManager";
 import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
-import type { SourceState } from "./MapUrlDialog";
 import { MapUrlDialog } from "./MapUrlDialog";
 
+import type { MapSubLayerProps } from "@itwin/core-common";
+import type { MapLayerSourceValidation } from "@itwin/core-frontend";
+import type { SourceState } from "./MapUrlDialog";
 // cSpell:ignore droppable Sublayer
 
 enum LayerAction {
@@ -479,6 +479,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         </Button>
       </div>
       <div className="map-manager-sources">
+        {/* eslint-disable-next-line @itwin/no-internal */}
         <UiCore.Listbox
           id="map-sources"
           selectedValue={layerNameToAdd}
@@ -487,6 +488,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           onListboxValueChange={onListboxValueChange}
         >
           {filteredOptions?.map((source) => (
+            // eslint-disable-next-line @itwin/no-internal
             <UiCore.ListboxItem
               key={source.name}
               className="map-source-list-entry"

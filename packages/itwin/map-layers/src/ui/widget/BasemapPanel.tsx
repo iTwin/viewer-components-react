@@ -8,17 +8,17 @@
 import "./BasemapPanel.scss";
 import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
-import type { BaseLayerSettings, MapImagerySettings, MapLayerProps } from "@itwin/core-common";
 import { BackgroundMapType, BaseMapLayerSettings, ColorByName, ColorDef, ImageMapLayerSettings } from "@itwin/core-common";
-import type { Viewport } from "@itwin/core-frontend";
 import { WebFontIcon } from "@itwin/core-react";
 import { ColorPickerDialog, ColorSwatch } from "@itwin/imodel-components-react";
-import type { SelectOption } from "@itwin/itwinui-react";
 import { Button, Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { useSourceMapContext } from "./MapLayerManager";
 import { TransparencyPopupButton } from "./TransparencyPopupButton";
 
+import type { BaseLayerSettings, MapImagerySettings, MapLayerProps } from "@itwin/core-common";
+import type { Viewport } from "@itwin/core-frontend";
+import type { SelectOption } from "@itwin/itwinui-react";
 const customBaseMapValue = "customBaseMap";
 const getSelectKeyFromProvider = (base: BaseMapLayerSettings) =>
   `${base.provider ? `${base.provider.name}.${BackgroundMapType[base.provider.type]}` : `${base.name}`}`;
@@ -254,7 +254,7 @@ export function BasemapPanel(props: BasemapPanelProps) {
         />,
       );
     },
-    [presetColors, handleBackgroundColorDialogOk],
+    [colorDialogTitle, presetColors, handleBackgroundColorDialogOk, handleBackgroundColorDialogCancel],
   ); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBaseMapSelection = React.useCallback(
