@@ -272,6 +272,13 @@ export interface DrawingMetadata {
 
 }
 
+export namespace DrawingMetadata {
+  // Returns a new DrawingMetaData object with one or more properties changed.
+  export function withOverrides(current: DrawingMetadata, overrides?: Partial<DrawingMetadata>): DrawingMetadata {
+    return { ...current, ...overrides };
+  }
+}
+
 /** Handler function that modifies the data sent to the widget for display. */
 export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData: MeasurementWidgetData) => Promise<void>;
 /** Handler for modifying the data sent to the widget for display. The highest priority will execute last. */
