@@ -27,6 +27,7 @@ import type { IModelConnection, ViewManager, Viewport, ViewState } from "@itwin/
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { CategoryVisibilityHandlerParams } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {
     type: StandardNodeTypes.ECInstancesNode,

@@ -23,7 +23,6 @@ import {
   terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
-import type { CategoryInfo } from "../../../components/trees/category-tree/CategoriesTreeButtons";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory } from "../../IModelUtils";
 import { mockPresentationManager, mockViewport, render, stubDOMMatrix, TestUtils, waitFor } from "../../TestUtils";
@@ -38,6 +37,7 @@ import {
   createTestPropertyInfo,
 } from "../Common";
 
+import type { CategoryInfo } from "../../../components/trees/category-tree/CategoriesTreeButtons";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
@@ -45,6 +45,7 @@ import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentat
 import type { PresentationInstanceFilterInfo, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
+
 describe("CategoryTree", () => {
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };

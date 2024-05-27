@@ -10,11 +10,12 @@ import { IModelApp } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
-import type { CategoryInfo } from "./CategoriesTreeButtons";
 
+import type { CategoryInfo } from "./CategoriesTreeButtons";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
+
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 /**

@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import { useCallback, useMemo } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Text } from "@itwin/itwinui-react";
@@ -11,11 +10,13 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { ExperimentalCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
+import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
 import type { ViewManager, Viewport } from "@itwin/core-frontend";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
+
 interface StatelessCategoriesTreeOwnProps {
   filter: string;
   activeView: Viewport;

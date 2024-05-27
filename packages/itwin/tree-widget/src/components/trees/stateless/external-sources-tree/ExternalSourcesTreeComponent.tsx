@@ -3,13 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ComponentPropsWithoutRef } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { AutoSizer } from "../../../utils/AutoSizer";
 import { StatelessExternalSourcesTree } from "./ExternalSourcesTree";
 
+import type { ComponentPropsWithoutRef } from "react";
 import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
+
 type StatelessExternalSourcesTreeProps = ComponentPropsWithoutRef<typeof StatelessExternalSourcesTree>;
 interface StatelessExternalSourcesTreeComponentProps
   extends Pick<StatelessExternalSourcesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {

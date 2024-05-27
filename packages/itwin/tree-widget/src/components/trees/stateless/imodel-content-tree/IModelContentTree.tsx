@@ -3,13 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ReactElement } from "react";
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { FilterableTree } from "../common/components/FilterableTree";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
 
+import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
+
 interface StatelessIModelContentTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
 }
@@ -20,7 +21,7 @@ type StatelessIModelContentTreeProps = StatelessIModelContentTreeOwnProps &
   Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
-export const StatelessIModelContentTree = (props: StatelessIModelContentTreeProps) => {
+export function StatelessIModelContentTree(props: StatelessIModelContentTreeProps) {
   return (
     <FilterableTree
       {...props}

@@ -3,6 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+
+import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type {
   DefineCustomNodeChildHierarchyLevelProps,
   DefineHierarchyLevelProps,
@@ -13,10 +17,7 @@ import type {
   NodesQueryClauseFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 
-import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 interface ExternalSourcesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
 }

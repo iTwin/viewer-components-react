@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ComponentPropsWithoutRef } from "react";
 import { Fragment, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -14,9 +13,11 @@ import { HideAllButton, InvertAllButton, ShowAllButton } from "../../category-tr
 import { useCategories } from "../../category-tree/CategoryVisibilityHandler";
 import { StatelessCategoriesTree } from "./CategoriesTree";
 
+import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { CategoriesTreeHeaderButtonProps } from "../../category-tree/CategoriesTreeButtons";
+
 type StatelessCategoriesTreeProps = ComponentPropsWithoutRef<typeof StatelessCategoriesTree>;
 
 interface StatelessCategoriesTreeComponentProps

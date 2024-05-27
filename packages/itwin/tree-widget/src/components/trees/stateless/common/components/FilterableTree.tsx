@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ReactElement, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -14,9 +13,11 @@ import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 
+import type { ReactElement, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { PresentationHierarchyNode, useSelectionHandler, useTree } from "@itwin/presentation-hierarchies-react";
+
 interface FilterableTreeOwnProps {
   imodel: IModelConnection;
   getSchemaContext: (imodel: IModelConnection) => SchemaContext;

@@ -10,6 +10,7 @@ import { enableCategory, enableSubCategory } from "../../CategoriesVisibilityUti
 import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
 import type { VisibilityChangeListener, VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+
 interface ExperimentalCategoriesVisibilityHandlerProps {
   viewManager: ViewManager;
   imodel: IModelConnection;
