@@ -1,6 +1,6 @@
 {
   "include": ["src/**/*", "lib/cjs/**/*"],
-  "exclude": ["src/test/**", "lib/cjs/test/**"],
+  "exclude": ["src/test/**", "lib/cjs/test/**", "src/components/trees/stateless/**/*"],
   "extension": [".ts", ".tsx"],
   "temp-dir": "./lib/cjs/test/coverage/.nyc_output",
   "report-dir": "./lib/cjs/test/coverage",

@@ -3,23 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defer, EMPTY, expand, first, forkJoin, from, last, map, mergeMap, shareReplay, toArray } from "rxjs";
+import { defer, EMPTY, expand, forkJoin, from, last, map, mergeMap, shareReplay, toArray } from "rxjs";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import { pushToMap } from "./Utils";
+import { pushToMap } from "../../../models-tree/Utils";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type { QueryRowProxy } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { GroupingNodeKey } from "@itwin/presentation-common";
-
-interface GroupedElementIds {
-  modelId: string;
-  categoryId: string;
-  elementIds: Observable<Id64String>;
-}
 
 interface InitialInfo {
   subjectsHierarchy: Map<Id64String, Id64Set>;
@@ -61,7 +54,7 @@ export interface ModelsTreeQueryHandler {
   /** Retrieves all unique categories of elements under a given model */
   queryModelCategories(modelId: Id64String): Observable<Id64String>;
   /** Retrieves elements of a class grouping node */
-  queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds>;
+  queryGroupingNodeElements(assemblyId: Id64String): Observable<Id64String>;
   /**
    * Retrieves all elements that match given model, category and root (parent) element IDs,
    * then recursively retrieves all children of those elements by the "ElementOwnsChildElements" relationship.
@@ -83,7 +76,7 @@ export function createModelsTreeQueryHandler(iModel: IModelConnection): ModelsTr
 }
 
 class QueryHandlerImplementation implements ModelsTreeQueryHandler {
-  private readonly _groupedElementIdsCache = new Map<string, Observable<GroupedElementIds>>();
+  private readonly _groupedElementIdsCache = new Map<string, Observable<Id64String>>();
   private readonly _elementsCountCache = new Map<string, Observable<number>>();
   private _initialInfoObs?: Observable<InitialInfo>;
 
@@ -181,14 +174,13 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? /* istanbul ignore next */ new Set<Id64String>()));
   }
 
-  public queryGroupingNodeChildren(node: GroupingNodeKey): Observable<GroupedElementIds> {
-    const cacheKey = JSON.stringify(node);
-    let obs = this._groupedElementIdsCache.get(cacheKey);
+  public queryGroupingNodeElements(assemblyId: Id64String): Observable<Id64String> {
+    let obs = this._groupedElementIdsCache.get(assemblyId);
     if (obs) {
       return obs;
     }
 
-    const elementIds = from(
+    obs = from(
       Presentation.presentation.getContentInstanceKeys({
         imodel: this._iModel,
         rulesetOrId: {
@@ -217,7 +209,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
             },
           ],
         },
-        keys: new KeySet([node]),
+        keys: new KeySet([{ className: "BisCore:Element", id: assemblyId }]),
       }),
     ).pipe(
       mergeMap((x) => x.items()),
@@ -225,21 +217,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
       shareReplay(),
     );
 
-    obs = elementIds.pipe(
-      first(),
-      mergeMap((id) => {
-        const bindings = new Array<string>();
-        const query = `
-          SELECT Model.Id AS modelId, Category.Id AS categoryId
-          FROM bis.GeometricElement3d
-          WHERE ${bind("ECInstanceId", id, bindings)}
-          LIMIT 1
-        `;
-        return this.runQuery(query, bindings, (row) => ({ modelId: row.modelId, categoryId: row.categoryId, elementIds }));
-      }),
-      shareReplay(),
-    );
-    this._groupedElementIdsCache.set(cacheKey, obs);
+    this._groupedElementIdsCache.set(assemblyId, obs);
     return obs;
   }
 

@@ -22,6 +22,10 @@ export enum ModelsTreeNodeType {
   Grouping,
 }
 
+interface Node {
+  extendedData?: any;
+}
+
 /**
  * @public
  */
@@ -59,29 +63,29 @@ export namespace NodeUtils {
    * Determines if a node represents a subject.
    * @public
    */
-  export const isSubjectNode = (node: TreeNodeItem) => !!node.extendedData?.isSubject;
+  export const isSubjectNode = (node: Node) => !!node.extendedData?.isSubject;
 
   /**
    * Determines if a node represents a model.
    * @public
    */
-  export const isModelNode = (node: TreeNodeItem) => !!node.extendedData?.isModel;
+  export const isModelNode = (node: Node) => !!node.extendedData?.isModel;
 
   /**
    * Determines if a node represents a category.
    * @public
    */
-  export const isCategoryNode = (node: TreeNodeItem) => !!node.extendedData?.isCategory;
+  export const isCategoryNode = (node: Node) => !!node.extendedData?.isCategory;
 
   /**
    * Retrieves model ID from node's extended data.
    * @public
    */
-  export const getModelId = (node: TreeNodeItem): Id64String | undefined => node.extendedData?.modelId;
+  export const getModelId = (node: Node): Id64String | undefined => node.extendedData?.modelId;
 
   /**
    * Retrieves category ID from node's extended data.
    * @public
    */
-  export const getElementCategoryId = (node: TreeNodeItem): Id64String | undefined => node.extendedData?.categoryId;
+  export const getElementCategoryId = (node: Node): Id64String | undefined => node.extendedData?.categoryId;
 }

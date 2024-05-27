@@ -3,93 +3,98 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { firstValueFrom, from, map, mergeMap, toArray } from "rxjs";
+import { BeEvent } from "@itwin/core-bentley";
+import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { NodeKey } from "@itwin/presentation-common";
+import { KeySet, NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
+import { TreeWidget } from "../../../TreeWidget";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
-import { eachValueFrom } from "./internal/EachValueFrom";
-import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
-import { createTooltip } from "./internal/Tooltip";
-import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
-import { NodeUtils } from "./NodeUtils";
+import { NodeUtils } from "../common/NodeUtils";
+import { CachingElementIdsContainer } from "./Utils";
 
-import type { ModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { Viewport } from "@itwin/core-frontend";
-import type { ECClassGroupingNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { IVisibilityHandler, VisibilityStatus } from "../VisibilityTreeEventHandler";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
+import type { ModelsTreeNodeType } from "../common/NodeUtils";
+/**
+ * Type definition of predicate used to decide if node can be selected
+ * @public
+ */
+export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
 
 /**
  * Props for [[ModelsVisibilityHandler]]
  * @public
- * @deprecated in 3.x. Use [[createHierarchyBasedVisibilityHandler]] instead.
  */
 export interface ModelsVisibilityHandlerProps {
   rulesetId: string;
   viewport: Viewport;
-  /** @deprecated in 2.3. Hierarchy auto update is always enabled */
   hierarchyAutoUpdateEnabled?: boolean;
+  /** @internal */
+  subjectModelIdsCache?: SubjectModelIdsCache;
 }
 
 /**
  * Visibility handler used by [[ModelsTree]] to control visibility of the tree items.
  * @public
- * @deprecated in 3.x. Use [[createHierarchyBasedVisibilityHandler]] instead.
  */
 export class ModelsVisibilityHandler implements IVisibilityHandler {
-  // eslint-disable-next-line deprecation/deprecation
-  private readonly _props: ModelsVisibilityHandlerProps;
-  private readonly _queryHandler: ModelsTreeQueryHandler;
-  private readonly _eventListener: IVisibilityChangeEventListener;
+  private _props: ModelsVisibilityHandlerProps;
+  private _pendingVisibilityChange: any | undefined;
+  private _subjectModelIdsCache: SubjectModelIdsCache;
   private _filteredDataProvider?: IFilteredPresentationTreeDataProvider;
-  private _removePresentationHierarchyListener?: () => void;
+  private _elementIdsCache: ElementIdsCache;
+  private _listeners = new Array<() => void>();
 
-  // eslint-disable-next-line deprecation/deprecation
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
-    this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
-    this._eventListener = createVisibilityChangeEventListener(this._props.viewport);
-    // eslint-disable-next-line @itwin/no-internal
-    this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(
-      /* istanbul ignore next */ () => this._queryHandler.invalidateCache(),
+    this._subjectModelIdsCache = props.subjectModelIdsCache ?? new SubjectModelIdsCache(this._props.viewport.iModel);
+    this._elementIdsCache = new ElementIdsCache(this._props.viewport.iModel);
+    this._listeners.push(this._props.viewport.onViewedCategoriesPerModelChanged.addListener(this.onViewChanged));
+    this._listeners.push(this._props.viewport.onViewedCategoriesChanged.addListener(this.onViewChanged));
+    this._listeners.push(this._props.viewport.onViewedModelsChanged.addListener(this.onViewChanged));
+    this._listeners.push(this._props.viewport.onAlwaysDrawnChanged.addListener(this.onElementAlwaysDrawnChanged));
+    this._listeners.push(this._props.viewport.onNeverDrawnChanged.addListener(this.onElementNeverDrawnChanged));
+    this._listeners.push(
+      // eslint-disable-next-line @itwin/no-internal
+      Presentation.presentation.onIModelHierarchyChanged.addListener(
+        /* istanbul ignore next */ () => {
+          this._elementIdsCache.clear();
+          this._subjectModelIdsCache.clear();
+        },
+      ),
     );
   }
 
   public dispose() {
-    this._eventListener.dispose();
-    this._removePresentationHierarchyListener?.();
+    this._listeners.forEach((remove) => remove());
+    clearTimeout(this._pendingVisibilityChange);
   }
 
-  public get onVisibilityChange() {
-    return this._eventListener.onVisibilityChange;
-  }
+  public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
   /** Sets data provider that is used to get filtered tree hierarchy. */
   public setFilteredDataProvider(provider: IFilteredPresentationTreeDataProvider | undefined) {
     this._filteredDataProvider = provider;
   }
 
-  // istanbul ignore next
   public static getNodeType(item: TreeNodeItem) {
     return NodeUtils.getNodeType(item);
   }
 
-  // istanbul ignore next
   public static isSubjectNode(node: TreeNodeItem) {
     return NodeUtils.isSubjectNode(node);
   }
 
-  // istanbul ignore next
   public static isModelNode(node: TreeNodeItem) {
     return NodeUtils.isModelNode(node);
   }
 
-  // istanbul ignore next
   public static isCategoryNode(node: TreeNodeItem) {
     return NodeUtils.isCategoryNode(node);
   }
@@ -109,17 +114,17 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return { state: "hidden", isDisabled: true };
     }
 
-    if (NodeUtils.isSubjectNode(node)) {
+    if (ModelsVisibilityHandler.isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
       return this.getSubjectNodeVisibility(
         nodeKey.instanceKeys.map((key) => key.id),
         node,
       );
     }
-    if (NodeUtils.isModelNode(node)) {
+    if (ModelsVisibilityHandler.isModelNode(node)) {
       return this.getModelDisplayStatus(nodeKey.instanceKeys[0].id);
     }
-    if (NodeUtils.isCategoryNode(node)) {
+    if (ModelsVisibilityHandler.isCategoryNode(node)) {
       return this.getCategoryDisplayStatus(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node));
     }
     return this.getElementDisplayStatus(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node));
@@ -141,15 +146,15 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return;
     }
 
-    if (NodeUtils.isSubjectNode(node)) {
+    if (ModelsVisibilityHandler.isSubjectNode(node)) {
       await this.changeSubjectNodeState(
         nodeKey.instanceKeys.map((key) => key.id),
         node,
         on,
       );
-    } else if (NodeUtils.isModelNode(node)) {
+    } else if (ModelsVisibilityHandler.isModelNode(node)) {
       await this.changeModelState(nodeKey.instanceKeys[0].id, on);
-    } else if (NodeUtils.isCategoryNode(node)) {
+    } else if (ModelsVisibilityHandler.isCategoryNode(node)) {
       this.changeCategoryState(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node), on);
     } else {
       await this.changeElementState(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on, node.hasChildren);
@@ -366,11 +371,8 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return;
     }
 
-    // istanbul ignore if
-    if (!modelId || !categoryId) {
-      return;
-    }
-    for await (const childId of this.getAssemblyElementIds(id)) {
+    const childIdsContainer = this.getAssemblyElementIds(id);
+    for await (const childId of childIdsContainer.getElementIds()) {
       this.changeElementStateInternal(childId, on, isDisplayedByDefault, isHiddenDueToExclusiveAlwaysDrawnElements);
     }
   }
@@ -426,6 +428,32 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     return this._props.viewport.isAlwaysDrawnExclusive && 0 !== this._props.viewport.alwaysDrawn?.size;
   }
 
+  private onVisibilityChangeInternal() {
+    if (this._pendingVisibilityChange) {
+      return;
+    }
+
+    this._pendingVisibilityChange = setTimeout(() => {
+      this.onVisibilityChange.raiseEvent();
+      this._pendingVisibilityChange = undefined;
+    }, 0);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  private onViewChanged = (_vp: Viewport) => {
+    this.onVisibilityChangeInternal();
+  };
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  private onElementAlwaysDrawnChanged = () => {
+    this.onVisibilityChangeInternal();
+  };
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  private onElementNeverDrawnChanged = () => {
+    this.onVisibilityChangeInternal();
+  };
+
   private getCategoryParentModelId(categoryNode: TreeNodeItem): Id64String | undefined {
     return categoryNode.extendedData ? categoryNode.extendedData.modelId : /* istanbul ignore next */ undefined;
   }
@@ -438,47 +466,236 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     return elementNode.extendedData ? elementNode.extendedData.categoryId : /* istanbul ignore next */ undefined;
   }
 
-  private async getSubjectModelIds(subjectIds: Id64String[]): Promise<Id64Array> {
-    return firstValueFrom(
-      from(subjectIds).pipe(
-        mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId)),
-        toArray(),
-      ),
+  private async getSubjectModelIds(subjectIds: Id64String[]) {
+    return (await Promise.all(subjectIds.map(async (id) => this._subjectModelIdsCache.getSubjectModelIds(id)))).reduce(
+      (allModelIds: Id64String[], curr: Id64String[]) => [...allModelIds, ...curr],
+      [],
     );
   }
 
-  /**
-   * Wrapper for element IDs cache access which allows for easier stubbing in tests.
-   */
   // istanbul ignore next
-  private getAssemblyElementIds(elementId: string) {
-    const elementIds = this._queryHandler.queryElements({ rootElementId: elementId });
-    return eachValueFrom(elementIds);
+  private getAssemblyElementIds(assemblyId: Id64String) {
+    return this._elementIdsCache.getAssemblyElementIds(assemblyId);
   }
 
-  /**
-   * Wrapper for element IDs cache access which allows for easier stubbing in tests.
-   */
   // istanbul ignore next
   private async getGroupedElementIds(groupingNodeKey: GroupingNodeKey) {
-    return firstValueFrom(
-      this._queryHandler.queryGroupingNodeChildren(groupingNodeKey).pipe(
-        map((x) => {
-          return {
-            ...x,
-            elementIds: {
-              async *getElementIds() {
-                for await (const item of eachValueFrom(x.elementIds)) {
-                  yield item;
-                }
-              },
-            },
-          };
-        }),
-      ),
-    );
+    return this._elementIdsCache.getGroupedElementIds(groupingNodeKey);
   }
 }
+
+/** @internal */
+export class SubjectModelIdsCache {
+  private _imodel: IModelConnection;
+  private _subjectsHierarchy: Map<Id64String, Id64String[]> | undefined;
+  private _subjectModels: Map<Id64String, Id64String[]> | undefined;
+  private _init: Promise<void> | undefined;
+
+  constructor(imodel: IModelConnection) {
+    this._imodel = imodel;
+  }
+
+  private async initSubjectModels() {
+    const querySubjects = async (): Promise<Array<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String }>> => {
+      const subjectsQuery = `
+        SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
+        FROM bis.Subject
+      `;
+      return this._imodel.createQueryReader(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+    };
+    const queryModels = async (): Promise<Array<{ id: Id64String; parentId: Id64String }>> => {
+      const modelsQuery = `
+        SELECT p.ECInstanceId id, p.Parent.Id parentId
+        FROM bis.InformationPartitionElement p
+        INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
+        WHERE NOT m.IsPrivate
+      `;
+      return this._imodel.createQueryReader(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+    };
+
+    function pushToMap<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue) {
+      let list = map.get(key);
+      if (!list) {
+        list = [];
+        map.set(key, list);
+      }
+      list.push(value);
+    }
+
+    this._subjectsHierarchy = new Map();
+    const targetPartitionSubjects = new Map<Id64String, Id64String[]>();
+    for (const subject of await querySubjects()) {
+      // istanbul ignore else
+      if (subject.parentId) {
+        pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
+      }
+      // istanbul ignore if
+      if (subject.targetPartitionId) {
+        pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
+      }
+    }
+
+    this._subjectModels = new Map();
+    for (const model of await queryModels()) {
+      // istanbul ignore next
+      const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
+      // istanbul ignore else
+      if (!subjectIds.includes(model.parentId)) {
+        subjectIds.push(model.parentId);
+      }
+
+      subjectIds.forEach((subjectId) => {
+        pushToMap(this._subjectModels!, subjectId, model.id);
+      });
+    }
+  }
+
+  private async initCache() {
+    if (!this._init) {
+      this._init = this.initSubjectModels().then(() => {});
+    }
+    return this._init;
+  }
+
+  private appendSubjectModelsRecursively(modelIds: Id64String[], subjectId: Id64String) {
+    const subjectModelIds = this._subjectModels!.get(subjectId);
+    if (subjectModelIds) {
+      modelIds.push(...subjectModelIds);
+    }
+
+    const childSubjectIds = this._subjectsHierarchy!.get(subjectId);
+    if (childSubjectIds) {
+      childSubjectIds.forEach((cs) => this.appendSubjectModelsRecursively(modelIds, cs));
+    }
+  }
+
+  // istanbul ignore next
+  public clear() {
+    this._subjectsHierarchy?.clear();
+    this._subjectModels?.clear();
+    this._init = undefined;
+  }
+
+  public async getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]> {
+    await this.initCache();
+    const modelIds = new Array<Id64String>();
+    this.appendSubjectModelsRecursively(modelIds, subjectId);
+    return modelIds;
+  }
+}
+
+interface GroupedElementIds {
+  modelId?: string;
+  categoryId?: string;
+  elementIds: CachingElementIdsContainer;
+}
+
+// istanbul ignore next
+class ElementIdsCache {
+  private _assemblyElementIdsCache = new Map<string, CachingElementIdsContainer>();
+  private _groupedElementIdsCache = new Map<string, GroupedElementIds>();
+
+  constructor(private _imodel: IModelConnection) {}
+
+  public clear() {
+    this._assemblyElementIdsCache.clear();
+    this._groupedElementIdsCache.clear();
+  }
+
+  public getAssemblyElementIds(assemblyId: Id64String) {
+    const ids = this._assemblyElementIdsCache.get(assemblyId);
+    if (ids) {
+      return ids;
+    }
+
+    const container = createAssemblyElementIdsContainer(this._imodel, assemblyId);
+    this._assemblyElementIdsCache.set(assemblyId, container);
+    return container;
+  }
+
+  public async getGroupedElementIds(groupingNodeKey: GroupingNodeKey): Promise<GroupedElementIds> {
+    const keyString = JSON.stringify(groupingNodeKey);
+    const ids = this._groupedElementIdsCache.get(keyString);
+    if (ids) {
+      return ids;
+    }
+    const info = await createGroupedElementsInfo(this._imodel, groupingNodeKey);
+    this._groupedElementIdsCache.set(keyString, info);
+    return info;
+  }
+}
+
+// istanbul ignore next
+async function* createInstanceIdsGenerator(imodel: IModelConnection, inputKeys: Keys) {
+  const res = await Presentation.presentation.getContentInstanceKeys({
+    imodel,
+    rulesetOrId: {
+      id: "ModelsTree/AssemblyElements",
+      rules: [
+        {
+          ruleType: "Content",
+          specifications: [
+            {
+              specType: "SelectedNodeInstances",
+            },
+            {
+              specType: "ContentRelatedInstances",
+              relationshipPaths: [
+                {
+                  relationship: {
+                    schemaName: "BisCore",
+                    className: "ElementOwnsChildElements",
+                  },
+                  direction: "Forward",
+                  count: "*",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    keys: new KeySet(inputKeys),
+  });
+  for await (const key of res.items()) {
+    yield key.id;
+  }
+}
+
+// istanbul ignore next
+function createAssemblyElementIdsContainer(imodel: IModelConnection, assemblyId: Id64String) {
+  return new CachingElementIdsContainer(createInstanceIdsGenerator(imodel, [{ className: "BisCore:Element", id: assemblyId }]));
+}
+
+// istanbul ignore next
+async function createGroupedElementsInfo(imodel: IModelConnection, groupingNodeKey: GroupingNodeKey) {
+  const groupedElementIdsContainer = new CachingElementIdsContainer(createInstanceIdsGenerator(imodel, [groupingNodeKey]));
+  const elementId = await groupedElementIdsContainer.getElementIds().next();
+  if (elementId.done) {
+    throw new Error("Invalid grouping node key");
+  }
+
+  let modelId, categoryId;
+  const query = `SELECT Model.Id AS modelId, Category.Id AS categoryId FROM bis.GeometricElement3d WHERE ECInstanceId = ? LIMIT 1`;
+  const reader = imodel.createQueryReader(query, QueryBinder.from([elementId.value]), { rowFormat: QueryRowFormat.UseJsPropertyNames });
+  if (await reader.step()) {
+    modelId = reader.current.modelId;
+    categoryId = reader.current.categoryId;
+  }
+  return { modelId, categoryId, elementIds: groupedElementIdsContainer };
+}
+
+const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringId: string | undefined): string => {
+  const statusStringId = `modelTree.status.${status}`;
+  const statusString = TreeWidget.translate(statusStringId);
+  if (!tooltipStringId) {
+    return statusString;
+  }
+
+  tooltipStringId = `modelTree.tooltips.${tooltipStringId}`;
+  const tooltipString = TreeWidget.translate(tooltipStringId);
+  return `${statusString}: ${tooltipString}`;
+};
 
 /**
  * Enables display of all given models. Also enables display of all categories and clears always and

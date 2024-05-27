@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Observable } from "rxjs";
-import { concatAll, concatMap, concatWith, count, EMPTY, expand, filter, find, from, map, mergeMap, of } from "rxjs";
+import { concatAll, concatMap, concatWith, count, distinct, EMPTY, expand, filter, find, from, map, mergeMap, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
@@ -27,7 +27,6 @@ import type {
   EditorDescription,
   Field,
   InstanceKey,
-  NodeKey,
   PrimitiveTypeDescription,
   Property,
   PropertyInfo,
@@ -36,15 +35,16 @@ import type {
   TypeDescription,
 } from "@itwin/presentation-common";
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { ModelsTreeQueryHandler } from "../../components/trees/models-tree/internal/ModelsTreeQueryHandler";
+import type { ModelsTreeQueryHandler } from "../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
 import type { Viewport, ViewState } from "@itwin/core-frontend";
+import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 interface SubjectModelIdsMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
   subjectModels?: Map<Id64String, Id64String[]>;
   modelCategories?: Map<Id64String, Id64Array>;
   categoryElements?: Map<Id64String, Id64Array>;
   elementChildren?: Map<Id64String, Array<Id64String>>;
-  groupingNodeChildren?: Map<NodeKey, { modelId: string; categoryId: string; elementIds: Array<string> }>;
+  groupingNodeChildren?: Id64Array;
 }
 
 export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProps): ModelsTreeQueryHandler {
@@ -76,13 +76,9 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
       return categoryObs.pipe(
         concatMap((id) => props?.categoryElements?.get(id) ?? []),
         expand((id) => props?.elementChildren?.get(id) ?? []),
-        concatWith(
-          from(props?.groupingNodeChildren?.values() ?? []).pipe(
-            filter((group) => (!modelId || group.modelId === modelId) && (!categoryId || group.categoryId === categoryId)),
-            concatMap((group) => group.elementIds),
-          ),
-        ),
+        concatWith(from(props?.groupingNodeChildren?.values() ?? []).pipe(concatAll())),
         filter((id) => !elementIds || elementIds.has(id)),
+        distinct(),
       );
     },
   );
@@ -98,14 +94,9 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
     queryModelCategories: sinon.fake((x) => {
       return from(props?.modelCategories?.get(x) ?? []);
     }),
-    queryGroupingNodeChildren: sinon.fake((node) => {
-      const groupingInfo = props?.groupingNodeChildren?.get(node);
-      return groupingInfo
-        ? of({
-            ...groupingInfo,
-            elementIds: from(groupingInfo.elementIds),
-          })
-        : of({ modelId: "", categoryId: "", elementIds: EMPTY });
+    queryGroupingNodeElements: sinon.fake(() => {
+      return from(props?.groupingNodeChildren ?? []);
+      // return from(props?.groupingNodeChildren?.get(id) ?? []);
     }),
     queryElements,
     queryElementInfo: sinon.fake((elementIds) => {
@@ -429,7 +420,7 @@ export function createFakeSinonViewport(
       }
     }),
     clearNeverDrawn: sinon.fake(() => {
-      if(neverDrawn?.size) {
+      if (neverDrawn?.size) {
         neverDrawn.clear();
         onNeverDrawnChanged.raiseEvent(result);
       }
@@ -462,5 +453,88 @@ export function stubFactoryFunction<T>(modulePath: string, functionName: string,
     reset() {
       _module[functionName] = originalFunc;
     },
+  };
+}
+
+export function createSubjectHierarchyNode(...ids: Id64String[]): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: ids.map((id) => ({ className: "Bis:Subject", id })),
+    },
+    children: false,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isSubject: true,
+    },
+  };
+}
+
+export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
+    },
+    children: !!hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isModel: true,
+      modelId: modelId ?? "0x1",
+    },
+  };
+}
+
+export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId ?? "" }],
+    },
+    children: !!hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      isCategory: true,
+      modelId: modelId ?? "0x1",
+      categoryId: categoryId ?? "0x2",
+    },
+  };
+}
+
+export function createElementHierarchyNode(
+  modelId?: Id64String,
+  categoryId?: Id64String,
+  hasChildren?: boolean,
+  elementId?: Id64String,
+): NonGroupingHierarchyNode {
+  return {
+    key: {
+      type: "instances",
+      instanceKeys: [{ className: "bis:GeometricalElement3d", id: elementId ?? "" }],
+    },
+    children: !!hasChildren,
+    label: "",
+    parentKeys: [],
+    extendedData: {
+      modelId: modelId ?? "0x1",
+      categoryId: categoryId ?? "0x2",
+    },
+  };
+}
+
+export function createClassGroupingHierarchyNode(props?: { modelId: Id64String; categoryId: Id64String; elements: Id64Array }): GroupingHierarchyNode {
+  return {
+    key: {
+      type: "class-grouping",
+      className: "",
+    },
+    children: !!props?.elements?.length,
+    groupedInstanceKeys: props?.elements ? props.elements.map((id) => ({ className: "Bis:Element", id })) : [],
+    label: "",
+    parentKeys: [],
+    extendedData: props,
   };
 }

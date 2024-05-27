@@ -13,7 +13,7 @@ import {
 import { waitFor } from "@testing-library/react";
 import {
   addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset, queryModelsForHeaderActions,
-} from "../../../components/trees/models-tree/internal/Utils";
+} from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition } from "../../IModelUtils";
 
 import type { RepositoryLinkProps } from "@itwin/core-common";

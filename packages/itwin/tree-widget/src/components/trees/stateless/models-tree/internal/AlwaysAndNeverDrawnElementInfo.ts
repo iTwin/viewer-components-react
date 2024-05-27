@@ -7,7 +7,7 @@ import type { Observable, Subscription } from "rxjs";
 import {
   BehaviorSubject, debounceTime, EMPTY, first, fromEventPattern, map, reduce, share, startWith, Subject, switchMap, takeUntil, tap,
 } from "rxjs";
-import { pushToMap } from "./Utils";
+import { pushToMap } from "../../../models-tree/Utils";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { ElementsByParentQueryProps, ElementsQueryProps, ModelsTreeQueryHandler } from "./ModelsTreeQueryHandler";

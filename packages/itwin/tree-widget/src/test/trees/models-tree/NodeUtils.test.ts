@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { StandardNodeTypes } from "@itwin/presentation-common";
-import { ModelsTreeNodeType, NodeUtils } from "../../../../components/trees/models-tree/NodeUtils";
+import { ModelsTreeNodeType, NodeUtils } from "../../../components/trees/common/NodeUtils";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";

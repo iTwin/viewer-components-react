@@ -7,12 +7,12 @@ import { expect } from "chai";
 import { firstValueFrom, of, Subject } from "rxjs";
 import sinon from "sinon";
 import { using } from "@itwin/core-bentley";
-import { AlwaysAndNeverDrawnElementInfo } from "../../../../components/trees/models-tree/internal/AlwaysAndNeverDrawnElementInfo";
-import { createModelsTreeQueryHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeQueryHandler";
+import { AlwaysAndNeverDrawnElementInfo } from "../../../../components/trees/stateless/models-tree/internal/AlwaysAndNeverDrawnElementInfo";
+import { createModelsTreeQueryHandler } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
 import { createFakeModelsTreeQueryHandler, createFakeSinonViewport } from "../../Common";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
-import type { ElementInfo } from "../../../../components/trees/models-tree/internal/ModelsTreeQueryHandler";
+import type { ElementInfo } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("AlwaysAndNeverDrawnElementInfo", () => {

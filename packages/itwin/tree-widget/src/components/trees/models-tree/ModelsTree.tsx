@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SelectionMode } from "@itwin/components-react";
 import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
+import { NodeUtils } from "../common/NodeUtils";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
@@ -16,32 +17,21 @@ import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { createHierarchyBasedVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
-import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
-import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./internal/Utils";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
 import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
-import { ModelsVisibilityHandler } from "./ModelsVisibilityHandler";
-import { NodeUtils } from "./NodeUtils";
+import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
+import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
 
 import type { FilterableTreeNodeRendererProps } from "../common/TreeRenderer";
 import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
-import type { HierarchyBasedVisibilityHandlerProps, IHierarchyBasedVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
-import type { ModelsTreeNodeType } from "./NodeUtils";
 import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
-import type { NodeKey, Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
+import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
-import type { ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
+import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
 const PAGING_SIZE = 20;
-
-/**
- * Type definition of predicate used to decide if node can be selected
- * @public
- */
-export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
 
 /**
  * Props for configuring the hierarchy in [[ModelsTree]].
@@ -84,14 +74,8 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
   enableHierarchyAutoUpdate?: boolean;
   /**
    * Custom visibility handler.
-   * @deprecated in 3.x. Use [[hierarchyBasedVisibilityHandler]] instead.
    */
-  // eslint-disable-next-line deprecation/deprecation
   modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
-  /**
-   * Custom visibility handler.
-   */
-  hierarchyBasedVisibilityHandler?: IHierarchyBasedVisibilityHandler | ((props: HierarchyBasedVisibilityHandlerProps) => IHierarchyBasedVisibilityHandler);
   /**
    * Props for configuring hierarchy level.
    * @beta
@@ -110,12 +94,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
    * @beta
    */
   onFeatureUsed?: (feature: string) => void;
-
-  /**
-   * Whether to create hierarchy based visibility handler by default.
-   * @deprecated in 3.x. When legacy visibility handler is removed, this option will also be removed.
-   */
-  hierarchyBased?: boolean;
 }
 
 /**
@@ -245,21 +223,8 @@ interface UseTreeProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
   reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
-interface UseVisibilityHandlerProps {
-  rulesetId: string;
-  iModel: IModelConnection;
-  activeView: Viewport;
-  hierarchyAutoUpdateEnabled?: boolean;
-  legacyHandler?: UseTreeProps["modelsVisibilityHandler"];
-  hierarchyBasedHandler?: UseTreeProps["hierarchyBasedVisibilityHandler"];
-}
-
 function useTreeState({
-  // eslint-disable-next-line deprecation/deprecation
   modelsVisibilityHandler,
-  hierarchyBasedVisibilityHandler,
-  // eslint-disable-next-line deprecation/deprecation
-  hierarchyBased,
   activeView,
   selectionPredicate,
   hierarchyConfig,
@@ -271,25 +236,7 @@ function useTreeState({
   onPerformanceMeasured,
   reportUsage,
 }: UseTreeProps) {
-  const commonHandlerProps = {
-    rulesetId: ruleset.id,
-    iModel,
-    activeView,
-  };
-  const legacyVisibilityHandler = useLegacyVisibilityHandler({
-    ...commonHandlerProps,
-    legacyHandler: modelsVisibilityHandler,
-    hierarchyBasedHandler: hierarchyBasedVisibilityHandler,
-    hierarchyAutoUpdateEnabled: true,
-  });
-
-  const hierarchyVisibilityHandler = useHierarchyBasedVisibilityHandler({
-    ...commonHandlerProps,
-    legacyHandler: modelsVisibilityHandler,
-    hierarchyBasedHandler: hierarchyBasedVisibilityHandler,
-    hierarchyAutoUpdateEnabled: true,
-  });
-
+  const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
   const selectionPredicateRef = useRef(selectionPredicate);
   useEffect(() => {
     selectionPredicateRef.current = selectionPredicate;
@@ -302,16 +249,11 @@ function useTreeState({
         onFilterApplied?.(dataProvider, matchesCount);
       }
 
-      // eslint-disable-next-line deprecation/deprecation
-      if (legacyVisibilityHandler) {
-        legacyVisibilityHandler.setFilteredDataProvider(dataProvider);
-      }
-
-      if (hierarchyVisibilityHandler) {
-        hierarchyVisibilityHandler.filteredDataProvider = dataProvider;
+      if (visibilityHandler) {
+        visibilityHandler.setFilteredDataProvider(dataProvider);
       }
     },
-    [onFilterApplied, reportUsage, legacyVisibilityHandler, hierarchyVisibilityHandler],
+    [onFilterApplied, reportUsage, visibilityHandler],
   );
 
   const { onNodeLoaded } = usePerformanceReporting({
@@ -333,7 +275,7 @@ function useTreeState({
     appendChildrenCountForGroupingNodes: hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts,
     enableHierarchyAutoUpdate: true,
     customizeTreeNodeItem,
-    visibilityHandler: hierarchyBased ? hierarchyVisibilityHandler : legacyVisibilityHandler,
+    visibilityHandler,
     filterInfo,
     onFilterChange,
     selectionPredicate: useCallback(
@@ -349,64 +291,34 @@ function useTreeState({
   });
 }
 
-function useLegacyVisibilityHandler({ legacyHandler, hierarchyBasedHandler, rulesetId, activeView, iModel }: UseVisibilityHandlerProps) {
-  const subjectModelIdsCache = useMemo(() => createModelsTreeQueryHandler(iModel), [iModel]);
-  // eslint-disable-next-line deprecation/deprecation
+function useVisibilityHandler(
+  rulesetId: string,
+  iModel: IModelConnection,
+  activeView: Viewport,
+  visibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler),
+) {
+  const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
   const [state, setState] = useState<ModelsVisibilityHandler>();
 
   useEffect(() => {
-    // eslint-disable-next-line deprecation/deprecation
-    if (hierarchyBasedHandler || (legacyHandler && typeof legacyHandler !== "function")) {
+    if (visibilityHandler && typeof visibilityHandler !== "function") {
       return;
     }
 
-    // eslint-disable-next-line deprecation/deprecation
     const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
       rulesetId,
       viewport: activeView,
+      subjectModelIdsCache,
     };
 
-    // eslint-disable-next-line deprecation/deprecation
-    const handler = legacyHandler ? legacyHandler(visibilityHandlerProps) : new ModelsVisibilityHandler(visibilityHandlerProps);
+    const handler = visibilityHandler ? visibilityHandler(visibilityHandlerProps) : new ModelsVisibilityHandler(visibilityHandlerProps);
     setState(handler);
     return () => {
       handler.dispose();
     };
-  }, [rulesetId, activeView, subjectModelIdsCache, legacyHandler, hierarchyBasedHandler]);
+  }, [rulesetId, activeView, subjectModelIdsCache, visibilityHandler]);
 
-  return legacyHandler && typeof legacyHandler !== "function" ? legacyHandler : state;
-}
-
-function useHierarchyBasedVisibilityHandler({
-  legacyHandler,
-  hierarchyBasedHandler,
-  activeView,
-}: UseVisibilityHandlerProps & {
-  hierarchyBasedHandler?: UseTreeProps["hierarchyBasedVisibilityHandler"];
-}) {
-  const [state, setState] = useState<IHierarchyBasedVisibilityHandler>();
-
-  useEffect(() => {
-    if (legacyHandler || (hierarchyBasedHandler && typeof hierarchyBasedHandler !== "function")) {
-      return;
-    }
-
-    const visibilityHandlerProps: HierarchyBasedVisibilityHandlerProps = {
-      viewport: activeView,
-    };
-
-    const handler = hierarchyBasedHandler ? hierarchyBasedHandler(visibilityHandlerProps) : createHierarchyBasedVisibilityHandler(visibilityHandlerProps);
-    setState(handler);
-    return () => {
-      handler.dispose();
-    };
-  }, [activeView, legacyHandler, hierarchyBasedHandler]);
-
-  if (legacyHandler) {
-    return undefined;
-  }
-
-  return hierarchyBasedHandler && typeof hierarchyBasedHandler !== "function" ? hierarchyBasedHandler : state;
+  return visibilityHandler && typeof visibilityHandler !== "function" ? visibilityHandler : state;
 }
 
 const customizeTreeNodeItem = combineTreeNodeItemCustomizations([addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, addModelsTreeNodeItemIcons]);
