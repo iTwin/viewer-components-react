@@ -96,18 +96,20 @@ MeasureAreaToolModel
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
 
-    let first = false;
+    // We only want the sheetMeasurement logic to trigger when the first point is set but it needs to be after the measurement is created
+    // this boolean helps us ensure that this is the case
+    let isFirstPoint = false;
 
     if (
       MeasureAreaToolModel.State.SetMeasurementViewport ===
       this.toolModel.currentState
     ) {
       this.toolModel.setMeasurementViewport(viewType);
-      first = true;
+      isFirstPoint = true;
     }
 
     this.toolModel.addPoint(viewType, ev.point, false);
-    await this.sheetMeasurementsDataButtonDown(ev, first);
+    await this.sheetMeasurementsDataButtonDown(ev, isFirstPoint);
     if (undefined === this.toolModel.dynamicMeasurement) {
       await this.onReinitialize();
     } else {
@@ -119,11 +121,11 @@ MeasureAreaToolModel
     return EventHandled.Yes;
   }
 
-  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent, initial: boolean) {
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent, isFirstPoint: boolean) {
     if (!ev.viewport) return;
 
     if (this._enableSheetMeasurements) {
-      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined && initial) {
+      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined && isFirstPoint) {
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
         this.toolModel.sheetViewId = ev.viewport.view.id;
 

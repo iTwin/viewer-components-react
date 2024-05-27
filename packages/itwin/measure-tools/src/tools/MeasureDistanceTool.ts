@@ -85,13 +85,12 @@ MeasureDistanceToolModel
     ) {
       this.toolModel.setMeasurementViewport(viewType);
       this.toolModel.setStartPoint(viewType, ev.point);
-      await this.sheetMeasurementsDataButtonDown(ev, true);
+      await this.sheetMeasurementsDataButtonDown(ev);
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
     } else if (
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
-      await this.sheetMeasurementsDataButtonDown(ev, false);
       this.toolModel.setEndPoint(viewType, ev.point, false);
       await this.onReinitialize();
     }
@@ -100,11 +99,11 @@ MeasureDistanceToolModel
     return EventHandled.Yes;
   }
 
-  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent, initial: boolean) {
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent) {
     if (!ev.viewport) return;
 
     if (this._enableSheetMeasurements) {
-      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined && initial) {
+      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined) {
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
         this.toolModel.sheetViewId = ev.viewport.view.id;
 
