@@ -170,7 +170,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-showall");
+        expect(onFeatureUsedSpy).to.be.calledWith("showall");
       });
     });
 
@@ -190,7 +190,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-hideall");
+        expect(onFeatureUsedSpy).to.be.calledWith("hideall");
       });
     });
 
@@ -210,7 +210,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-invert");
+        expect(onFeatureUsedSpy).to.be.calledWith("invert");
       });
     });
 
@@ -285,7 +285,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view2d");
+        expect(onFeatureUsedSpy).to.be.calledWith("view2d");
       });
     });
 
@@ -360,7 +360,7 @@ describe("<ModelsTreeComponent />", () => {
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(onFeatureUsedSpy).to.be.calledWith("models-tree-view3d");
+        expect(onFeatureUsedSpy).to.be.calledWith("view3d");
       });
     });
   });

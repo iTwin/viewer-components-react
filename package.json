@@ -19,7 +19,7 @@
     "publish": "beachball publish --new",
     "bump": "beachball bump",
     "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write ."
+    "prettier:fix": "prettier --write ./packages/itwin/tree-widget/**/*"
   },
   "devDependencies": {
     "beachball": "^2.39.0",

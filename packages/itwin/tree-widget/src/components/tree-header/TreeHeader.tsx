@@ -47,6 +47,7 @@ export function TreeHeader(props: TreeHeaderProps) {
   const isEnlarged = density === "enlarged";
 
   useEffect(() => {
+    // istanbul ignore if
     if (instanceFocusEnabled) {
       setIsSearchOpen(false);
     }

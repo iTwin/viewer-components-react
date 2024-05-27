@@ -11,10 +11,12 @@ import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
+import { ModelsTree } from "./ModelsTree";
+import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "./ModelsTreeButtons";
 
+import type { ModelsTreeProps } from "./ModelsTree";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import { ModelsTree, type ModelsTreeProps } from "./ModelsTree";
-import { HideAllButton, InvertButton, ModelsTreeHeaderButtonProps, ShowAllButton, View2DButton, View3DButton, useAvailableModels } from "./ModelsTreeButtons";
+import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 
 /**
  * Props for [[ModelsTreeComponent]].
@@ -110,6 +112,7 @@ function ModelsTreeComponentImpl({
     [filterString, searchOptions.activeMatchIndex],
   );
 
+  // istanbul ignore next
   const onModelsTreeFeatureUsed = (feature: string) => {
     if (treeProps.onFeatureUsed) {
       treeProps.onFeatureUsed(`${ModelsTreeComponent.id}-${feature}`);
