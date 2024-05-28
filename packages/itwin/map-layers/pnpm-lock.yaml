@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@itwin/itwinui-icons-color-react':
     specifier: ^2.1.0
@@ -21,9 +25,6 @@ devDependencies:
   '@itwin/appui-abstract':
     specifier: ^4.3.0
     version: 4.3.0(@itwin/core-bentley@4.3.0)
-  '@itwin/appui-layout-react':
-    specifier: ^4.0.1
-    version: 4.0.1(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-react@4.0.1)(@types/react@17.0.37)(react-dom@17.0.2)(react@17.0.2)
   '@itwin/appui-react':
     specifier: ^4.0.1
     version: 4.0.1(@itwin/appui-abstract@4.3.0)(@itwin/appui-layout-react@4.0.1)(@itwin/components-react@4.0.1)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-frontend@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-quantity@4.3.0)(@itwin/core-react@4.0.1)(@itwin/core-telemetry@4.3.0)(@itwin/imodel-components-react@4.0.1)(react-dom@17.0.2)(react-redux@7.2.2)(react@17.0.2)(redux@4.1.0)
@@ -41,7 +42,7 @@ devDependencies:
     version: 4.3.0(@itwin/core-bentley@4.3.0)(@itwin/core-geometry@4.3.0)
   '@itwin/core-frontend':
     specifier: ^4.3.0
-    version: 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)
+    version: 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)(inversify@6.0.2)(reflect-metadata@0.1.14)
   '@itwin/core-geometry':
     specifier: ^4.3.0
     version: 4.3.0
@@ -260,7 +261,7 @@ packages:
       '@babel/traverse': 7.23.6
       '@babel/types': 7.23.6
       convert-source-map: 2.0.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -414,7 +415,7 @@ packages:
       '@babel/helper-split-export-declaration': 7.22.6
       '@babel/parser': 7.23.6
       '@babel/types': 7.23.6
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -469,7 +470,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       espree: 9.6.1
       globals: 13.24.0
       ignore: 5.3.0
@@ -491,7 +492,7 @@ packages:
     engines: {node: '>=10.10.0'}
     dependencies:
       '@humanwhocodes/object-schema': 2.0.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -580,7 +581,7 @@ packages:
       '@itwin/components-react': 4.0.1(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-react@4.0.1)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/core-bentley': 4.3.0
       '@itwin/core-common': 4.3.0(@itwin/core-bentley@4.3.0)(@itwin/core-geometry@4.3.0)
-      '@itwin/core-frontend': 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)
+      '@itwin/core-frontend': 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)(inversify@6.0.2)(reflect-metadata@0.1.14)
       '@itwin/core-geometry': 4.3.0
       '@itwin/core-quantity': 4.3.0(@itwin/core-bentley@4.3.0)
       '@itwin/core-react': 4.0.1(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(react-dom@17.0.2)(react@17.0.2)
@@ -614,7 +615,7 @@ packages:
       mocha-junit-reporter: 2.2.1(mocha@10.2.0)
       rimraf: 3.0.2
       tree-kill: 1.2.2
-      typedoc: 0.23.28(typescript@5.0.4)
+      typedoc: 0.23.28(typescript@4.6.2)
       typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28)
       typescript: 5.0.4
       wtfnode: 0.9.1
@@ -624,12 +625,15 @@ packages:
       - supports-color
     dev: true
 
-  /@itwin/cloud-agnostic-core@2.2.1:
+  /@itwin/cloud-agnostic-core@2.2.1(inversify@6.0.2)(reflect-metadata@0.1.14):
     resolution: {integrity: sha512-Macw2d7d8VTa7B/xy/YWAbYKxiCu8XXtAT1s9yqcV9tQw5Z/6E97kimz/IWjBi6P+4rHLtEXZfF2wuR8mmr8Bw==}
     engines: {node: '>=12.20 <19.0.0'}
     peerDependencies:
       inversify: ^6.0.1
       reflect-metadata: ^0.1.13
+    dependencies:
+      inversify: 6.0.2
+      reflect-metadata: 0.1.14
     dev: true
 
   /@itwin/components-react@4.0.1(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-react@4.0.1)(react-dom@17.0.2)(react@17.0.2):
@@ -677,7 +681,7 @@ packages:
       js-base64: 3.7.5
     dev: true
 
-  /@itwin/core-frontend@4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0):
+  /@itwin/core-frontend@4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)(inversify@6.0.2)(reflect-metadata@0.1.14):
     resolution: {integrity: sha512-PaMcTBXdl1vjPWoXgTCJYoA5U7uBfC+IYu5/ubQ3K2vawheAMx48wGd8YkzqmfEJR4p40n7KqBzVLNKJGzficg==}
     peerDependencies:
       '@itwin/appui-abstract': ^4.3.0
@@ -688,7 +692,7 @@ packages:
       '@itwin/core-quantity': ^4.3.0
     dependencies:
       '@itwin/appui-abstract': 4.3.0(@itwin/core-bentley@4.3.0)
-      '@itwin/cloud-agnostic-core': 2.2.1
+      '@itwin/cloud-agnostic-core': 2.2.1(inversify@6.0.2)(reflect-metadata@0.1.14)
       '@itwin/core-bentley': 4.3.0
       '@itwin/core-common': 4.3.0(@itwin/core-bentley@4.3.0)(@itwin/core-geometry@4.3.0)
       '@itwin/core-geometry': 4.3.0
@@ -696,7 +700,7 @@ packages:
       '@itwin/core-orbitgt': 4.3.0
       '@itwin/core-quantity': 4.3.0(@itwin/core-bentley@4.3.0)
       '@itwin/core-telemetry': 4.3.0(@itwin/core-geometry@4.3.0)
-      '@itwin/object-storage-core': 2.2.1
+      '@itwin/object-storage-core': 2.2.1(inversify@6.0.2)(reflect-metadata@0.1.14)
       '@itwin/webgl-compatibility': 4.3.0
       '@loaders.gl/core': 3.4.14
       '@loaders.gl/draco': 3.4.14
@@ -819,7 +823,7 @@ packages:
       '@itwin/components-react': 4.0.1(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-react@4.0.1)(react-dom@17.0.2)(react@17.0.2)
       '@itwin/core-bentley': 4.3.0
       '@itwin/core-common': 4.3.0(@itwin/core-bentley@4.3.0)(@itwin/core-geometry@4.3.0)
-      '@itwin/core-frontend': 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)
+      '@itwin/core-frontend': 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)(inversify@6.0.2)(reflect-metadata@0.1.14)
       '@itwin/core-geometry': 4.3.0
       '@itwin/core-quantity': 4.3.0(@itwin/core-bentley@4.3.0)
       '@itwin/core-react': 4.0.1(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(react-dom@17.0.2)(react@17.0.2)
@@ -899,20 +903,22 @@ packages:
       '@itwin/appui-abstract': 4.3.0(@itwin/core-bentley@4.3.0)
       '@itwin/core-bentley': 4.3.0
       '@itwin/core-common': 4.3.0(@itwin/core-bentley@4.3.0)(@itwin/core-geometry@4.3.0)
-      '@itwin/core-frontend': 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)
+      '@itwin/core-frontend': 4.3.0(@itwin/appui-abstract@4.3.0)(@itwin/core-bentley@4.3.0)(@itwin/core-common@4.3.0)(@itwin/core-geometry@4.3.0)(@itwin/core-orbitgt@4.3.0)(@itwin/core-quantity@4.3.0)(inversify@6.0.2)(reflect-metadata@0.1.14)
       '@itwin/core-geometry': 4.3.0
       google-protobuf: 3.20.1
     dev: true
 
-  /@itwin/object-storage-core@2.2.1:
+  /@itwin/object-storage-core@2.2.1(inversify@6.0.2)(reflect-metadata@0.1.14):
     resolution: {integrity: sha512-DHyjg3Z8/SExS2LV7gOgiQqjTebH8pPihGszP2b9nly9IXo+diK8U3xwszb2qOBX6KZzfBAkNfnbY/P7kHmYhw==}
     engines: {node: '>=12.20 <19.0.0'}
     peerDependencies:
       inversify: ^6.0.1
       reflect-metadata: ^0.1.13
     dependencies:
-      '@itwin/cloud-agnostic-core': 2.2.1
+      '@itwin/cloud-agnostic-core': 2.2.1(inversify@6.0.2)(reflect-metadata@0.1.14)
       axios: 1.6.2
+      inversify: 6.0.2
+      reflect-metadata: 0.1.14
     transitivePeerDependencies:
       - debug
     dev: true
@@ -1373,7 +1379,7 @@ packages:
       '@typescript-eslint/experimental-utils': 5.3.1(eslint@8.41.0)(typescript@4.6.2)
       '@typescript-eslint/parser': 5.10.1(eslint@8.41.0)(typescript@4.6.2)
       '@typescript-eslint/scope-manager': 5.3.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.41.0
       functional-red-black-tree: 1.0.1
       ignore: 5.3.0
@@ -1401,7 +1407,7 @@ packages:
       '@typescript-eslint/scope-manager': 5.55.0
       '@typescript-eslint/type-utils': 5.55.0(eslint@8.41.0)(typescript@4.6.2)
       '@typescript-eslint/utils': 5.55.0(eslint@8.41.0)(typescript@4.6.2)
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.41.0
       grapheme-splitter: 1.0.4
       ignore: 5.3.0
@@ -1444,7 +1450,7 @@ packages:
       '@typescript-eslint/scope-manager': 5.10.1
       '@typescript-eslint/types': 5.10.1
       '@typescript-eslint/typescript-estree': 5.10.1(typescript@4.6.2)
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.41.0
       typescript: 4.6.2
     transitivePeerDependencies:
@@ -1464,7 +1470,7 @@ packages:
       '@typescript-eslint/scope-manager': 5.55.0
       '@typescript-eslint/types': 5.55.0
       '@typescript-eslint/typescript-estree': 5.55.0(typescript@4.6.2)
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.41.0
       typescript: 4.6.2
     transitivePeerDependencies:
@@ -1523,7 +1529,7 @@ packages:
     dependencies:
       '@typescript-eslint/typescript-estree': 5.55.0(typescript@4.6.2)
       '@typescript-eslint/utils': 5.55.0(eslint@8.41.0)(typescript@4.6.2)
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.41.0
       tsutils: 3.21.0(typescript@4.6.2)
       typescript: 4.6.2
@@ -1567,7 +1573,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 5.10.1
       '@typescript-eslint/visitor-keys': 5.10.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.5.4
@@ -1588,7 +1594,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 5.3.1
       '@typescript-eslint/visitor-keys': 5.3.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.5.4
@@ -1609,7 +1615,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 5.55.0
       '@typescript-eslint/visitor-keys': 5.55.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.5.4
@@ -1630,7 +1636,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 5.62.0
       '@typescript-eslint/visitor-keys': 5.62.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.5.4
@@ -1651,7 +1657,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 6.15.0
       '@typescript-eslint/visitor-keys': 6.15.0
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.5.4
@@ -1838,7 +1844,7 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2481,7 +2487,7 @@ packages:
     dependencies:
       co: 4.6.0
       debounce: 1.2.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       duplexer: 0.1.2
       fs-extra: 9.1.0
       glob: 7.2.3
@@ -2595,18 +2601,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.3
-    dev: true
-
-  /debug@4.3.4:
-    resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-    dependencies:
-      ms: 2.1.2
     dev: true
 
   /debug@4.3.4(supports-color@8.1.1):
@@ -3052,7 +3046,7 @@ packages:
       eslint: '*'
       eslint-plugin-import: '*'
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.41.0
       eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.55.0)(eslint-import-resolver-typescript@2.7.1)(eslint@8.41.0)
       glob: 7.2.3
@@ -3247,7 +3241,7 @@ packages:
       '@es-joy/jsdoccomment': 0.38.0
       are-docs-informative: 0.0.2
       comment-parser: 1.3.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       escape-string-regexp: 4.0.0
       eslint: 8.41.0
       esquery: 1.5.0
@@ -3446,7 +3440,7 @@ packages:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
@@ -4033,7 +4027,7 @@ packages:
     dependencies:
       '@tootallnate/once': 2.0.0
       agent-base: 6.0.2
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4043,7 +4037,7 @@ packages:
     engines: {node: '>= 6'}
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4156,6 +4150,10 @@ packages:
   /interpret@1.4.0:
     resolution: {integrity: sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==}
     engines: {node: '>= 0.10'}
+    dev: true
+
+  /inversify@6.0.2:
+    resolution: {integrity: sha512-i9m8j/7YIv4mDuYXUAcrpKPSaju/CIly9AHK5jvCBeoiM/2KEsuCQTTP+rzSWWpLYWRukdXFSl6ZTk2/uumbiA==}
     dev: true
 
   /is-array-buffer@3.0.2:
@@ -4459,7 +4457,7 @@ packages:
     resolution: {integrity: sha512-n3s8EwkdFIJCG3BPKBYvskgXGoy88ARzvegkitk60NxRdwltLOTaH7CUiMRXvwYorl0Q712iEjcWB+fK/MrWVw==}
     engines: {node: '>=10'}
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       istanbul-lib-coverage: 3.2.2
       source-map: 0.6.1
     transitivePeerDependencies:
@@ -4907,7 +4905,7 @@ packages:
     peerDependencies:
       mocha: '>=2.2.5'
     dependencies:
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@8.1.1)
       md5: 2.3.0
       mkdirp: 3.0.1
       mocha: 10.2.0
@@ -5630,6 +5628,10 @@ packages:
     resolution: {integrity: sha512-uI2dQN43zqLWCt6B/BMGRMY6db7TTY4qeHHfGeKb3EOhmOKjU3KdWvNLJyqaHRksv/ErdNH7cFZWg9jXtewy4g==}
     dependencies:
       '@babel/runtime': 7.23.6
+
+  /reflect-metadata@0.1.14:
+    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
+    dev: true
 
   /reflect.getprototypeof@1.0.4:
     resolution: {integrity: sha512-ECkTw8TmJwW60lOTR+ZkODISW6RQ8+2CL3COqtiJKLd6MmB45hN51HprHFziKLGkAuTGQhBb91V8cy+KHlaCjw==}
@@ -6418,10 +6420,10 @@ packages:
     peerDependencies:
       typedoc: 0.23.x || 0.24.x
     dependencies:
-      typedoc: 0.23.28(typescript@5.0.4)
+      typedoc: 0.23.28(typescript@4.6.2)
     dev: true
 
-  /typedoc@0.23.28(typescript@5.0.4):
+  /typedoc@0.23.28(typescript@4.6.2):
     resolution: {integrity: sha512-9x1+hZWTHEQcGoP7qFmlo4unUoVJLB0H/8vfO/7wqTnZxg4kPuji9y3uRzEu0ZKez63OJAUmiGhUrtukC6Uj3w==}
     engines: {node: '>= 14.14'}
     hasBin: true
@@ -6432,7 +6434,7 @@ packages:
       marked: 4.3.0
       minimatch: 7.4.6
       shiki: 0.14.7
-      typescript: 5.0.4
+      typescript: 4.6.2
     dev: true
 
   /typemoq@2.1.0:
@@ -6881,7 +6883,3 @@ packages:
       react: 17.0.2
       use-sync-external-store: 1.2.0(react@17.0.2)
     dev: true
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false

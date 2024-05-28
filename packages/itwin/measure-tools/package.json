@@ -44,7 +44,6 @@
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
-    "@itwin/appui-layout-react": "^4.4.0",
     "@itwin/appui-react": "^4.4.0",
     "@itwin/components-react": "^4.4.0",
     "@itwin/core-bentley": "^4.0.0",
@@ -52,13 +51,13 @@
     "@itwin/core-frontend": "^4.0.0",
     "@itwin/core-geometry": "^4.0.0",
     "@itwin/core-react": "^4.4.0",
+    "@itwin/imodel-components-react": "^4.4.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "redux": "^4.2.1"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
-    "@itwin/appui-layout-react": "^4.4.0",
     "@itwin/appui-react": "^4.4.0",
     "@itwin/build-tools": "^4.0.0",
     "@itwin/certa": "^4.0.0",
