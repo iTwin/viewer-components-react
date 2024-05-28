@@ -309,9 +309,6 @@ export class AreaMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (!this.viewTarget.isViewportCompatible(context.viewport))
-      return;
-
     if (this.polygonPoints.length === 0)
       return;
 

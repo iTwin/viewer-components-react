@@ -250,9 +250,6 @@ export class DistanceMeasurement extends Measurement {
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (!this.viewTarget.isViewportCompatible(context.viewport))
-      return;
-
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
     const points = [this._startPoint, this._endPoint];
 
