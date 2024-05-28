@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
+import { TreeWidget } from "../../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
@@ -90,7 +91,7 @@ export function StatelessModelsTree({
 
 function getNoDataMessage(filter?: string) {
   if (filter) {
-    return <Text>{`There are no nodes matching filter - "${filter}"`}</Text>;
+    return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
   return undefined;
 }

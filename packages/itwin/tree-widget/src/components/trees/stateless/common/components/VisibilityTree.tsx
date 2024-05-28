@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { LocalizationContextProvider, useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { TreeWidget } from "../../../../../TreeWidget";
+import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
@@ -81,6 +83,7 @@ function VisibilityTreeImpl({
   density,
   selectionMode,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
+  const localizedStrings = useHierarchiesLocalization();
   const {
     rootNodes,
     isLoading,
@@ -94,6 +97,7 @@ function VisibilityTreeImpl({
     getFilteredPaths,
     imodelKey: imodel.key,
     sourceName: treeName,
+    localizedStrings,
   });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes, selectionMode: selectionMode ?? "single" });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
@@ -117,7 +121,7 @@ function VisibilityTreeImpl({
   if (rootNodes.length === 0 && !isLoading) {
     return (
       <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
-        {noDataMessage ? noDataMessage : <Text>The data required for this tree layout is not available in this iModel.</Text>}
+        {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("stateless.dataIsNotAvailable")}</Text>}
       </Flex>
     );
   }
@@ -125,18 +129,20 @@ function VisibilityTreeImpl({
   return (
     <div style={{ position: "relative", height, overflow: "hidden" }}>
       <div style={{ overflow: "auto", height: "100%" }}>
-        <VisibilityTreeRenderer
-          rootNodes={rootNodes}
-          {...treeProps}
-          onNodeClick={onNodeClick}
-          onNodeKeyDown={onNodeKeyDown}
-          getCheckboxStatus={getCheckboxStatus}
-          onCheckboxClicked={onCheckboxClicked}
-          onFilterClick={onFilterClick}
-          getIcon={getIcon}
-          getSublabel={getSublabel}
-          size={density === "enlarged" ? "default" : "small"}
-        />
+        <LocalizationContextProvider localizedStrings={localizedStrings}>
+          <VisibilityTreeRenderer
+            rootNodes={rootNodes}
+            {...treeProps}
+            onNodeClick={onNodeClick}
+            onNodeKeyDown={onNodeKeyDown}
+            getCheckboxStatus={getCheckboxStatus}
+            onCheckboxClicked={onCheckboxClicked}
+            onFilterClick={onFilterClick}
+            getIcon={getIcon}
+            getSublabel={getSublabel}
+            size={density === "enlarged" ? "default" : "small"}
+          />
+        </LocalizationContextProvider>
         {filteringDialog}
       </div>
       <Delayed show={isLoading}>

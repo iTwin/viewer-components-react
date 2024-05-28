@@ -3,12 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Localization } from "@itwin/core-common";
 import { BentleyError, BentleyStatus } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 import { registerRenderers } from "./components/trees/common/Utils";
 
-import type { LocalizationOptions } from "@itwin/core-i18n";
+import type { Localization, TranslationOptions } from "@itwin/core-common";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -64,7 +63,7 @@ export class TreeWidget {
 
   /** Calls i18n.translateWithNamespace with the "TreeWidget" namespace. Do NOT include the namespace in the key.
    */
-  public static translate(key: string | string[], options?: LocalizationOptions): string {
+  public static translate(key: string | string[], options?: TranslationOptions): string {
     const stringKey = `${TreeWidget.i18nNamespace}:${key}`;
     return TreeWidget.i18n.getLocalizedString(stringKey, options);
   }

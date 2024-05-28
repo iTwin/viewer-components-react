@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Text } from "@itwin/itwinui-react";
+import { TreeWidget } from "../../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
@@ -101,7 +102,7 @@ export function StatelessCategoriesTree({
 
 function getNoDataMessage(filter: string) {
   if (filter) {
-    return <Text>{`There are no nodes matching filter - "${filter}"`}</Text>;
+    return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
   return undefined;
 }
