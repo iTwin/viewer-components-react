@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { useGroupingMappingApiConfig } from "../../components/context/GroupingApiConfigContext";
-import { CustomCalculationAction } from "../../components/Properties/CustomCalculations/CustomCalculationAction";
 import { GroupAction } from "../../components/Groups/Editing/GroupAction";
 import type { Route } from "../GroupingMapping";
 import { RouteStep } from "../GroupingMapping";
@@ -24,7 +23,7 @@ export const GroupingMappingRouter = ({
   goBack: () => void;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
-  const { mapping, group, property, customCalculation, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
+  const { mapping, group, property, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
 
   switch (currentRoute.step) {
     case RouteStep.Mappings:
@@ -150,20 +149,6 @@ export const GroupingMappingRouter = ({
             mappingId={mapping.id}
             group={group}
             groupProperty={property}
-            onSaveSuccess={goBack}
-            onClickCancel={goBack}
-          />
-        );
-      }
-      return null;
-    }
-    case RouteStep.CustomCalculationPropertyAction: {
-      if (mapping && group) {
-        return (
-          <CustomCalculationAction
-            mappingId={mapping.id}
-            groupId={group.id}
-            customCalculation={customCalculation}
             onSaveSuccess={goBack}
             onClickCancel={goBack}
           />

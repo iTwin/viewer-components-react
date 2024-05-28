@@ -39,9 +39,10 @@ import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
-import { SvgLabel, SvgMeasure } from "@itwin/itwinui-icons-react";
+import { SvgFunction, SvgLabel, SvgMeasure } from "@itwin/itwinui-icons-react";
 import { CalculatedPropertyActionWithVisuals } from "../CalculatedProperties/CalculatedPropertyActionWithVisuals";
 import { handleError } from "../../../common/utils";
+import { CustomCalculationAction } from "../CustomCalculations/CustomCalculationAction";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -90,11 +91,8 @@ export const GroupPropertyAction = ({
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
 
-  const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType);
-
-  const [mappedPropertiesSelected, setMappedPropertiesSelected] = useState<boolean>(false);
-  const [calculatedPropertySelected, setCalculatedPropertySelected] = useState<boolean>(false);
-  // const [customCalculationSelected, setCustomCalculationSelected] = useState<boolean>(false);
+  const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType ?? undefined);
+  const [formula, setFormula] = useState<string | undefined>(groupProperty?.formula ?? undefined);
 
   const queryClient = useQueryClient();
 
@@ -166,6 +164,7 @@ export const GroupPropertyAction = ({
         quantityType,
         ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
         calculatedPropertyType,
+        formula,
       };
 
       return groupProperty
@@ -210,22 +209,6 @@ export const GroupPropertyAction = ({
   };
 
   const isLoading = isLoadingProperties || isSaving;
-
-  const setSelectedPropertyType = useCallback(()=> {
-    if(groupProperty?.ecProperties){
-      setMappedPropertiesSelected(true);
-    }
-    if(groupProperty?.calculatedPropertyType){
-      setCalculatedPropertySelected(true);
-    }
-    if(groupProperty?.formula){
-      // setCustomCalculationSelected(true);
-    }
-  }, [groupProperty?.calculatedPropertyType, groupProperty?.ecProperties, groupProperty?.formula]);
-
-  useEffect(() => {
-    setSelectedPropertyType();
-  }, [setSelectedPropertyType]);
 
   return (
     <>
@@ -303,11 +286,11 @@ export const GroupPropertyAction = ({
           <ExpandableBlock
             title={"Mapped Properties"}
             endIcon={
-              <Icon fill={mappedPropertiesSelected === true ? "informational" : "default"}>
+              <Icon fill={groupProperty?.ecProperties ? "informational" : "default"}>
                 <SvgLabel />
               </Icon>
             }
-            isExpanded={mappedPropertiesSelected}>
+            isExpanded={groupProperty?.ecProperties ? true : false}>
             <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
               <div className="gmw-property-view-button">
                 <Button
@@ -337,15 +320,31 @@ export const GroupPropertyAction = ({
           <ExpandableBlock
             title={"Calculated Property"}
             endIcon={
-              <Icon fill={calculatedPropertySelected === true ? "informational" : "default"}>
+              <Icon fill={groupProperty?.calculatedPropertyType ? "informational" : "default"}>
                 <SvgMeasure />
               </Icon>
             }
-            isExpanded={calculatedPropertySelected}>
+            isExpanded={groupProperty?.calculatedPropertyType ? true : false}>
             <CalculatedPropertyActionWithVisuals
               group={group}
               calculatedPropertyType={calculatedPropertyType}
               setCalculatedPropertyType={setCalculatedPropertyType}/>
+          </ExpandableBlock>
+          <ExpandableBlock
+            title={"Calculated Property"}
+            endIcon={
+              <Icon fill={groupProperty?.formula ? "informational" : "default"}>
+                <SvgFunction />
+              </Icon>
+            }
+            isExpanded={groupProperty?.formula ? true : false}>
+            <CustomCalculationAction
+              mappingId={mappingId}
+              groupId={group.id}
+              propertyName={propertyName}
+              formula={formula}
+              setFormula={setFormula}
+              isSaving={isSaving}/>
           </ExpandableBlock>
         </div>
       </div>
