@@ -5,8 +5,6 @@
 
 import { defer, EMPTY, expand, forkJoin, from, last, map, mergeMap, shareReplay, toArray } from "rxjs";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
-import { KeySet } from "@itwin/presentation-common";
-import { Presentation } from "@itwin/presentation-frontend";
 import { pushToMap } from "../../../models-tree/Utils";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
@@ -30,7 +28,7 @@ export interface CategoryElementsQueryProps {
 }
 
 export interface ElementsByParentQueryProps {
-  rootElementId: Id64String;
+  rootElementIds: Id64String | Id64Set;
 }
 
 /**
@@ -53,8 +51,6 @@ export interface ModelsTreeQueryHandler {
   querySubjectModels(subjectId: Id64String): Observable<Id64String>;
   /** Retrieves all unique categories of elements under a given model */
   queryModelCategories(modelId: Id64String): Observable<Id64String>;
-  /** Retrieves elements of a class grouping node */
-  queryGroupingNodeElements(assemblyId: Id64String): Observable<Id64String>;
   /**
    * Retrieves all elements that match given model, category and root (parent) element IDs,
    * then recursively retrieves all children of those elements by the "ElementOwnsChildElements" relationship.
@@ -63,7 +59,7 @@ export interface ModelsTreeQueryHandler {
   /** Analogous to `queryElements` but returns a count instead of values */
   queryElementsCount(props: ElementsQueryProps): Observable<number>;
   /** Returns information about given elements */
-  queryElementInfo(elementIds: Id64Set): Observable<ElementInfo>;
+  queryElementInfo(props: { elementIds: Id64String | Id64Set; recursive?: boolean }): Observable<ElementInfo>;
   /** Clears cached query results */
   invalidateCache(): void;
 }
@@ -174,56 +170,10 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? /* istanbul ignore next */ new Set<Id64String>()));
   }
 
-  public queryGroupingNodeElements(assemblyId: Id64String): Observable<Id64String> {
-    let obs = this._groupedElementIdsCache.get(assemblyId);
-    if (obs) {
-      return obs;
-    }
-
-    obs = from(
-      Presentation.presentation.getContentInstanceKeys({
-        imodel: this._iModel,
-        rulesetOrId: {
-          id: "ModelsTree/AssemblyElements",
-          rules: [
-            {
-              ruleType: "Content",
-              specifications: [
-                {
-                  specType: "SelectedNodeInstances",
-                },
-                {
-                  specType: "ContentRelatedInstances",
-                  relationshipPaths: [
-                    {
-                      relationship: {
-                        schemaName: "BisCore",
-                        className: "ElementOwnsChildElements",
-                      },
-                      direction: "Forward",
-                      count: "*",
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        keys: new KeySet([{ className: "BisCore:Element", id: assemblyId }]),
-      }),
-    ).pipe(
-      mergeMap((x) => x.items()),
-      map((x) => x.id),
-      shareReplay(),
-    );
-
-    this._groupedElementIdsCache.set(assemblyId, obs);
-    return obs;
-  }
-
   public queryElements(props: ElementsQueryProps): Observable<string> {
     return this.runElementsQuery({
       ...props,
+      recursive: true,
       type: "ids",
     });
   }
@@ -232,10 +182,11 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     const runQuery = () =>
       this.runElementsQuery({
         ...props,
+        recursive: false,
         type: "count",
       });
 
-    if ("rootElementId" in props) {
+    if ("rootElementIds" in props) {
       return runQuery();
     }
 
@@ -252,11 +203,13 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
 
   private runElementsQuery(
     props: ElementsQueryProps & {
+      recursive: boolean;
       type: "ids";
     },
   ): Observable<Id64String>;
   private runElementsQuery(
     props: ElementsQueryProps & {
+      recursive: boolean;
       type: "count";
     },
   ): Observable<number>;
@@ -269,16 +222,18 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     const conditions = new Array<string>();
     "modelId" in props && props.modelId && conditions.push(bind("Model.Id", props.modelId, bindings));
     "categoryId" in props && conditions.push(bind("Category.Id", props.categoryId, bindings));
-    "rootElementId" in props && conditions.push(bind("Parent.Id", props.rootElementId, bindings));
+    "rootElementIds" in props && conditions.push(bind("Parent.Id", props.rootElementIds, bindings));
 
     const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : /* istanbul ignore next */ "";
-
     const query = /* sql */ `
       WITH RECURSIVE
-        Elements(id) AS (
+        InitialElements(id) AS (
           SELECT e.ECInstanceId id
           FROM bis.GeometricElement3d e
           ${whereClause}
+        ),
+        Elements(id) AS (
+          SELECT * FROM InitialElements
 
           UNION ALL
 
@@ -292,18 +247,25 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     return this.runQuery(query, bindings, (row) => row[0]);
   }
 
-  public queryElementInfo(elementIds: Id64Set): Observable<ElementInfo> {
+  public queryElementInfo(props: { elementIds: Id64String | Id64Set; recursive?: boolean }): Observable<ElementInfo> {
     const bindings = new Array<QueryBindable>();
-    const query = /* sql */ `
+    const initialQuery = /* sql */ `
+      SELECT
+        ECInstanceId ElementId,
+        Model.Id ModelId,
+        Category.Id CategoryId,
+        Parent.Id ParentId
+      FROM bis.GeometricElement3d
+      WHERE ${bind("ECInstanceId", props.elementIds, bindings)}
+    `;
+    const query = props.recursive
+      ? /* sql */ `
       WITH RECURSIVE
+        InitialElementInfo(ElementId, ModelId, CategoryId, ParentId) AS (
+          ${initialQuery}
+        ),
         ElementInfo(ElementId, ModelId, CategoryId, ParentId) AS (
-          SELECT
-            ECInstanceId ElementId,
-            Model.Id ModelId,
-            Category.Id CategoryId,
-            Parent.Id ParentId
-          FROM bis.GeometricElement3d
-          WHERE ${bind("ECInstanceId", elementIds, bindings)}
+          SELECT * FROM InitialElementInfo
 
           UNION ALL
 
@@ -315,10 +277,11 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
           FROM bis.GeometricElement3d p
           JOIN ElementInfo e ON p.ECInstanceId = e.ParentId
         )
-      SELECT ElementId, ModelId, CategoryId
-      FROM ElementInfo
-      WHERE ParentId IS NULL
-    `;
+        SELECT ElementId, ModelId, CategoryId
+        FROM ElementInfo
+        WHERE ParentId IS NULL
+    `
+      : initialQuery;
     return this.runQuery(query, bindings, ["elementId", "modelId", "categoryId", "parentId"]);
   }
 
@@ -356,7 +319,7 @@ function bind(key: string, value: QueryBindable, bindings: Array<QueryBindable>)
   if (value.size < maxBindings) {
     const values = [...value];
     bindings.push(...values);
-    return `${key} IN (${values.join(",")})`;
+    return `${key} IN (${values.map(() => "?").join(",")})`;
   }
 
   bindings.push(value);

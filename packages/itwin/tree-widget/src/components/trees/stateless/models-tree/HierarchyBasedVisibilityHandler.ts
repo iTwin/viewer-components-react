@@ -3,7 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatWith, defer, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce, toArray } from "rxjs";
+import type { Observable, OperatorFunction } from "rxjs";
+import {
+  concat, concatWith, defaultIfEmpty, defer, EMPTY, first, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce, shareReplay, toArray,
+} from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -22,7 +25,7 @@ import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "../../common/Tooltip";
-import type { Observable, OperatorFunction } from "rxjs";
+
 interface GetCategoryStatusProps {
   categoryId: Id64String;
   modelId: Id64String;
@@ -36,7 +39,7 @@ interface GetElementStateProps {
   elementId: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
-  hasChildren?: boolean;
+  hasChildren: boolean;
 }
 
 interface ChangeElementStateProps extends GetElementStateProps {
@@ -121,6 +124,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _queryHandler: ModelsTreeQueryHandler;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
+  private readonly _groupingNodeElementsCache = new Map<string, Observable<undefined | { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>>();
   private _removePresentationHierarchyListener?: () => void;
 
   constructor(private readonly _props: HierarchyVisibilityHandlerProps) {
@@ -133,6 +137,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
       () => {
         this._queryHandler.invalidateCache();
         this._alwaysAndNeverDrawnElements.reset();
+        this._groupingNodeElementsCache.clear();
       },
     );
   }
@@ -344,35 +349,37 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
   }
 
   private getElementGroupingNodeDisplayStatus(node: GroupingHierarchyNode): Observable<VisibilityStatus> {
-    const result = defer(() => {
-      const { modelId, categoryId, elementIds } = this.getGroupedElementIds(node);
-      if (!modelId || !categoryId) {
-        return createVisibilityStatusObs("disabled");
-      }
+    const result = this.getGroupedElementIds(node).pipe(
+      mergeMap((group) => {
+        if (!group) {
+          return createVisibilityStatusObs("disabled");
+        }
 
-      if (!this._props.viewport.view.viewsModel(modelId)) {
-        return createVisibilityStatusObs("hidden");
-      }
+        const { modelId, categoryId, elementIds } = group;
+        if (!this._props.viewport.view.viewsModel(modelId)) {
+          return createVisibilityStatusObs("hidden");
+        }
 
-      return elementIds.pipe(
-        toSet(),
-        mergeMap((ids) => {
-          return this.getVisibilityFromAlwaysAndNeverDrawnElements({
-            elements: ids,
-            defaultStatus: () => {
-              const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-              return createVisibilityStatus(status.state, `groupingNode.${status}DueToCategory`);
-            },
-            tooltips: {
-              allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
-              allElementsInNeverDrawnList: "groupingNode.allElementsHidden",
-              elementsInBothAlwaysAndNeverDrawn: "groupingNode.someElementsAreHidden",
-              noElementsInExclusiveAlwaysDrawnList: "groupingNode.allElementsHidden",
-            },
-          });
-        }),
-      );
-    });
+        return elementIds.pipe(
+          toSet(),
+          mergeMap((ids) => {
+            return this.getVisibilityFromAlwaysAndNeverDrawnElements({
+              elements: ids,
+              defaultStatus: () => {
+                const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+                return createVisibilityStatus(status.state, `groupingNode.${status}DueToCategory`);
+              },
+              tooltips: {
+                allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
+                allElementsInNeverDrawnList: "groupingNode.allElementsHidden",
+                elementsInBothAlwaysAndNeverDrawn: "groupingNode.someElementsAreHidden",
+                noElementsInExclusiveAlwaysDrawnList: "groupingNode.allElementsHidden",
+              },
+            });
+          }),
+        );
+      }),
+    );
 
     const ovr = this._props.overrides?.getElementGroupingNodeDisplayStatus;
     return ovr ? from(ovr(this.createOverrideProps({ node }, result))) : result;
@@ -586,21 +593,23 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
    * @see `changeElementState`
    */
   private changeElementGroupingNodeState(node: GroupingHierarchyNode, on: boolean): Observable<void> {
-    const result = defer(() => {
-      const { modelId, categoryId, elementIds } = this.getGroupedElementIds(node);
-      if (!modelId || !categoryId) {
-        return EMPTY;
-      }
-      const viewport = this._props.viewport;
-      return concat(
-        on && !viewport.view.viewsModel(modelId) ? from(viewport.addViewedModels(modelId)) : EMPTY,
-        defer(() => {
-          const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-          const isDisplayedByDefault = categoryVisibility.state === "visible";
-          return from(elementIds).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
-        }),
-      );
-    });
+    const result = this.getGroupedElementIds(node).pipe(
+      mergeMap((group) => {
+        if (!group) {
+          return EMPTY;
+        }
+        const { modelId, categoryId, elementIds } = group;
+        const viewport = this._props.viewport;
+        return concat(
+          on && !viewport.view.viewsModel(modelId) ? from(viewport.addViewedModels(modelId)) : EMPTY,
+          defer(() => {
+            const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+            const isDisplayedByDefault = categoryVisibility.state === "visible";
+            return from(elementIds).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
+          }),
+        );
+      }),
+    );
 
     const ovr = this._props.overrides?.changeElementGroupingNodeState;
     return ovr ? from(ovr(this.createVoidOverrideProps({ node, on }, result))) : result;
@@ -620,7 +629,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return of(elementId).pipe(
-            concatWith(hasChildren === false ? EMPTY : from(this._queryHandler.queryElements({ rootElementId: props.elementId }))),
+            concatWith(hasChildren ? from(this._queryHandler.queryElements({ rootElementIds: props.elementId })) : EMPTY),
             this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }),
           );
         }),
@@ -782,17 +791,29 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
   }
 
   private getGroupedElementIds(node: GroupingHierarchyNode) {
-    const modelId = NodeUtils.getModelId(node);
-    const categoryId = NodeUtils.getModelId(node);
-    return {
-      modelId,
-      categoryId,
-      elementIds: from(node.groupedInstanceKeys).pipe(
-        mergeMap((key) => {
-          return concat(of(key.id), this._queryHandler.queryElements({ rootElementId: key.id }));
-        }),
-      ),
-    };
+    const cacheKey = JSON.stringify(node.key);
+    let obs = this._groupingNodeElementsCache.get(cacheKey);
+    if (obs) {
+      return obs;
+    }
+
+    const ids = node.groupedInstanceKeys.map((key) => key.id);
+    const elementIds = from(ids).pipe(
+      mergeWith(this._queryHandler.queryElements({
+        rootElementIds: new Set(ids),
+      })),
+      shareReplay(),
+    );
+
+    obs = elementIds.pipe(
+      defaultIfEmpty(undefined),
+      first(),
+      mergeMap((id) => id ? this._queryHandler.queryElementInfo({ elementIds: id }) : of(undefined)),
+      map((info) => info && ({ modelId: info.modelId, categoryId: info.categoryId, elementIds })),
+      shareReplay(),
+    );
+    this._groupingNodeElementsCache.set(cacheKey, obs);
+    return obs;
   }
 }
 

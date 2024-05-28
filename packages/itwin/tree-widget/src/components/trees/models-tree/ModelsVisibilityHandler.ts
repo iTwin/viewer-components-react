@@ -83,6 +83,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._filteredDataProvider = provider;
   }
 
+  // istanbul ignore next
   public static getNodeType(item: TreeNodeItem) {
     return NodeUtils.getNodeType(item);
   }

@@ -158,10 +158,10 @@ describe("QueryHandler", () => {
       throw new Error(`Unexpected query: ${query}`);
     });
     const handler = createModelsTreeQueryHandler(createIModelMock(stub));
-    await expect(firstValueFrom(handler.queryElementsCount({ rootElementId: "0x1" }))).to.eventually.deep.eq(elementIds.length);
+    await expect(firstValueFrom(handler.queryElementsCount({ rootElementIds: "0x1" }))).to.eventually.deep.eq(elementIds.length);
     expect(stub).to.be.calledOnce;
 
-    await expect(firstValueFrom(handler.queryElementsCount({ rootElementId: "0x1" }))).to.eventually.deep.eq(elementIds.length);
+    await expect(firstValueFrom(handler.queryElementsCount({ rootElementIds: "0x1" }))).to.eventually.deep.eq(elementIds.length);
     expect(stub).to.be.calledTwice;
   });
 
@@ -169,7 +169,7 @@ describe("QueryHandler", () => {
     const elementIds = [...Array(1001).keys()].map((i) => `0x${i}`);
     const stub = sinon.fake.returns([]);
     const handler = createModelsTreeQueryHandler(createIModelMock(stub));
-    await firstValueFrom(handler.queryElementInfo(new Set(elementIds)).pipe(toArray()));
+    await firstValueFrom(handler.queryElementInfo({ elementIds: new Set(elementIds) }).pipe(toArray()));
 
     expect(stub).to.be.calledOnceWith(sinon.match(/InVirtualSet/));
   });

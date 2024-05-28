@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Observable } from "rxjs";
-import { concatAll, concatMap, concatWith, count, distinct, EMPTY, expand, filter, find, from, map, mergeMap, of } from "rxjs";
+import { concatAll, concatMap, concatWith, count, distinct, EMPTY, filter, find, from, map, mergeMap, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
@@ -44,7 +44,6 @@ interface SubjectModelIdsMockProps {
   modelCategories?: Map<Id64String, Id64Array>;
   categoryElements?: Map<Id64String, Id64Array>;
   elementChildren?: Map<Id64String, Array<Id64String>>;
-  groupingNodeChildren?: Id64Array;
 }
 
 export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProps): ModelsTreeQueryHandler {
@@ -53,17 +52,13 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
       modelId,
       categoryId,
       elementIds,
-      rootElementId,
+      rootElementIds,
     }: {
       modelId?: string;
       categoryId?: string;
       elementIds?: Id64Set;
-      rootElementId?: Id64String;
+      rootElementIds?: Id64String | Id64Set;
     }): Observable<string> => {
-      if (rootElementId) {
-        return from(props?.elementChildren?.get(rootElementId) ?? []).pipe(expand((id) => props?.elementChildren?.get(id) ?? []));
-      }
-
       const categoryObs = from(props?.modelCategories ?? []).pipe(
         filter(([id]) => !modelId || id === modelId),
         concatMap(([_, categoryIds]) => categoryIds),
@@ -73,10 +68,11 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
         filter((id) => !categoryId || id === categoryId),
       );
 
-      return categoryObs.pipe(
-        concatMap((id) => props?.categoryElements?.get(id) ?? []),
-        expand((id) => props?.elementChildren?.get(id) ?? []),
-        concatWith(from(props?.groupingNodeChildren?.values() ?? []).pipe(concatAll())),
+      return (
+        rootElementIds
+          ? (typeof rootElementIds === "string" ? of(rootElementIds) : from(rootElementIds)).pipe(mergeMap((id) => props?.elementChildren?.get(id) ?? []))
+          : categoryObs.pipe(concatMap((id) => props?.categoryElements?.get(id) ?? []))
+      ).pipe(
         filter((id) => !elementIds || elementIds.has(id)),
         distinct(),
       );
@@ -94,12 +90,8 @@ export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProp
     queryModelCategories: sinon.fake((x) => {
       return from(props?.modelCategories?.get(x) ?? []);
     }),
-    queryGroupingNodeElements: sinon.fake(() => {
-      return from(props?.groupingNodeChildren ?? []);
-      // return from(props?.groupingNodeChildren?.get(id) ?? []);
-    }),
     queryElements,
-    queryElementInfo: sinon.fake((elementIds) => {
+    queryElementInfo: sinon.fake(({ elementIds }) => {
       return from(elementIds).pipe(
         mergeMap((elementId) => {
           return from(props?.categoryElements ?? []).pipe(
@@ -504,28 +496,32 @@ export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: I
   };
 }
 
-export function createElementHierarchyNode(
-  modelId?: Id64String,
-  categoryId?: Id64String,
-  hasChildren?: boolean,
-  elementId?: Id64String,
-): NonGroupingHierarchyNode {
+export function createElementHierarchyNode(props: {
+  modelId: Id64String | undefined;
+  categoryId: Id64String | undefined;
+  hasChildren?: boolean;
+  elementId?: Id64String;
+}): NonGroupingHierarchyNode {
   return {
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: elementId ?? "" }],
+      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
     },
-    children: !!hasChildren,
+    children: !!props.hasChildren,
     label: "",
     parentKeys: [],
     extendedData: {
-      modelId: modelId ?? "0x1",
-      categoryId: categoryId ?? "0x2",
+      modelId: props.modelId,
+      categoryId: props.categoryId,
     },
   };
 }
 
-export function createClassGroupingHierarchyNode(props?: { modelId: Id64String; categoryId: Id64String; elements: Id64Array }): GroupingHierarchyNode {
+export function createClassGroupingHierarchyNode(props: {
+  modelId: Id64String | undefined;
+  categoryId: Id64String | undefined;
+  elements: Id64Array;
+}): GroupingHierarchyNode {
   return {
     key: {
       type: "class-grouping",

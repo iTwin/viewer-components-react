@@ -94,9 +94,6 @@ devDependencies:
   '@itwin/ecschema-metadata':
     specifier: ^4.5.1
     version: 4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-quantity@4.5.1)
-  '@itwin/ecschema-rpcinterface-common':
-    specifier: ^4.5.1
-    version: 4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1)(@itwin/core-geometry@4.5.1)(@itwin/ecschema-metadata@4.5.1)
   '@itwin/eslint-plugin':
     specifier: ^4.0.0-dev.38
     version: 4.0.0-dev.38(eslint@8.41.0)(typescript@5.0.2)
@@ -1166,20 +1163,6 @@ packages:
       '@itwin/core-bentley': 4.5.1
       '@itwin/core-quantity': 4.5.1(@itwin/core-bentley@4.5.1)
       almost-equal: 1.1.0
-
-  /@itwin/ecschema-rpcinterface-common@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1)(@itwin/core-geometry@4.5.1)(@itwin/ecschema-metadata@4.5.1):
-    resolution: {integrity: sha512-NHXWupNKhTf1BBg8UZ2NM33Ne0vphbUflwkPpJGOAtFWuGWJREMi0jE3jIBBnzGqdtWmy/y8NkPT+knyp43+Qw==}
-    peerDependencies:
-      '@itwin/core-bentley': 4.5.1
-      '@itwin/core-common': 4.5.1
-      '@itwin/core-geometry': 4.5.1
-      '@itwin/ecschema-metadata': 4.5.1
-    dependencies:
-      '@itwin/core-bentley': 4.5.1
-      '@itwin/core-common': 4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-geometry@4.5.1)
-      '@itwin/core-geometry': 4.5.1
-      '@itwin/ecschema-metadata': 4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-quantity@4.5.1)
-    dev: true
 
   /@itwin/eslint-plugin@4.0.0-dev.38(eslint@8.41.0)(typescript@5.0.2):
     resolution: {integrity: sha512-u/R5hnG48GCqL20nsesHeMsKxfJHljUI/6EZGFxSHtt+R7zYdp5dLYT6vNn9HmpQsRNrjyXEkWpA5hSjb/MOIw==}

@@ -89,7 +89,6 @@
     "@itwin/core-react": "^4.10.0",
     "@itwin/core-telemetry": "^4.5.1",
     "@itwin/ecschema-metadata": "^4.5.1",
-    "@itwin/ecschema-rpcinterface-common": "^4.5.1",
     "@itwin/eslint-plugin": "^4.0.0-dev.38",
     "@itwin/imodel-components-react": "^4.10.0",
     "@itwin/presentation-backend": "^4.5.1",

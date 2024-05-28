@@ -56,7 +56,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const queryProvider = createFakeModelsTreeQueryHandler();
       await using(new AlwaysAndNeverDrawnElementInfo(vp, queryProvider), async (_) => {
         await fakeTimers.runAllAsync();
-        expect(queryProvider.queryElementInfo).to.be.calledOnceWith(set);
+        expect(queryProvider.queryElementInfo).to.be.calledOnceWith(sinon.match({ elementIds: set, recursive: true }));
       });
     });
 
@@ -237,7 +237,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         updateSet(finalSet);
         await fakeTimers.tickAsync(debounceTime);
 
-        expect(queryHandler.queryElementInfo).to.be.calledOnceWith(finalSet);
+        expect(queryHandler.queryElementInfo).to.be.calledOnceWith(sinon.match({ elementIds: finalSet, recursive: true }));
         await expect(firstValueFrom(info.getElements({ setType, modelId, categoryId }))).to.eventually.deep.eq(finalSet);
       });
     });
@@ -250,14 +250,14 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const categoryId = "0x2";
       const queryHandler = sinon.stub(createModelsTreeQueryHandler({} as unknown as IModelConnection));
 
-      queryHandler.queryElementInfo.callsFake((idSet) => {
-        if (idSet === firstSet) {
+      queryHandler.queryElementInfo.callsFake(({ elementIds }) => {
+        if (elementIds === firstSet) {
           return of({ elementId: elements[0], modelId, categoryId });
         }
-        if (idSet === secondSet) {
+        if (elementIds === secondSet) {
           return of({ elementId: elements[1], modelId, categoryId });
         }
-        throw new Error(`Unexpected set in query: ${idSet}`);
+        throw new Error(`Unexpected set in query: ${elementIds}`);
       });
 
       const viewport = createFakeSinonViewport();
@@ -285,14 +285,14 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
 
       const firstSetInfoSubject = new Subject<ElementInfo>();
       const secondSetInfoSubject = new Subject<ElementInfo>();
-      queryHandler.queryElementInfo.callsFake((idSet) => {
-        if (idSet === firstSet) {
+      queryHandler.queryElementInfo.callsFake(({ elementIds }) => {
+        if (elementIds === firstSet) {
           return firstSetInfoSubject;
         }
-        if (idSet === secondSet) {
+        if (elementIds === secondSet) {
           return secondSetInfoSubject;
         }
-        throw new Error(`Unexpected set in query: ${idSet}`);
+        throw new Error(`Unexpected set in query: ${elementIds}`);
       });
 
       const viewport = createFakeSinonViewport();
@@ -328,14 +328,14 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
 
       const firstSetInfoSubject = new Subject<ElementInfo>();
       const secondSetInfoSubject = new Subject<ElementInfo>();
-      queryHandler.queryElementInfo.callsFake((idSet) => {
-        if (idSet === firstSet) {
+      queryHandler.queryElementInfo.callsFake(({ elementIds }) => {
+        if (elementIds === firstSet) {
           return firstSetInfoSubject;
         }
-        if (idSet === secondSet) {
+        if (elementIds === secondSet) {
           return secondSetInfoSubject;
         }
-        throw new Error(`Unexpected set in query: ${idSet}`);
+        throw new Error(`Unexpected set in query: ${elementIds}`);
       });
 
       const viewport = createFakeSinonViewport({
