@@ -186,6 +186,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 grouping: { byLabel: { action: "merge", groupId: "subject" } },
                 extendedData: {
                   imageId: "icon-folder",
+                  isSubject: true,
                 },
                 supportsFiltering: true,
               })}
@@ -232,6 +233,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   hasChildren: true,
                   extendedData: {
                     imageId: "icon-model",
+                    isModel: true,
                   },
                   supportsFiltering: true,
                 })}
