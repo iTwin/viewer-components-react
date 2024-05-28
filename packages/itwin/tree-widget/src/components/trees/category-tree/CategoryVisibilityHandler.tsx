@@ -11,6 +11,7 @@ import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
 
+import type { CategoryInfo } from "./CategoriesTreeButtons";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
@@ -25,15 +26,6 @@ export function useCategories(viewManager: ViewManager, imodel: IModelConnection
   const currentView = view || viewManager.getFirstOpenView();
   const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(imodel, currentView), [imodel, currentView]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
-}
-
-/**
- * Data structure that describes category.
- * @public
- */
-export interface CategoryInfo {
-  categoryId: string;
-  subCategoryIds?: string[];
 }
 
 /**
