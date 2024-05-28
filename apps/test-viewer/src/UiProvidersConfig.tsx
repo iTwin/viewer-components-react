@@ -16,28 +16,14 @@ import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
-  AddFavoritePropertyContextMenuItem,
-  AncestorsNavigationControls,
-  CopyPropertyTextContextMenuItem,
-  PropertyGridManager,
-  PropertyGridUiItemsProvider,
-  RemoveFavoritePropertyContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
+  AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
+  RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent,
-  ExternalSourcesTreeComponent,
-  IModelContentTreeComponent,
-  ModelsTreeComponent,
-  SelectableTreeProps,
-  StatelessCategoriesTreeComponent,
-  StatelessExternalSourcesTreeComponent,
-  StatelessIModelContentTreeComponent,
-  StatelessModelsTreeComponent,
-  TreeRenderProps,
-  TreeWidget,
-  TreeWidgetComponent,
+  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps,
+  StatelessCategoriesTreeComponent, StatelessExternalSourcesTreeComponent, StatelessIModelContentTreeComponent, StatelessModelsTreeComponent,
+  TreeRenderProps, TreeWidget, TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
@@ -118,21 +104,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
                     density={props.density}
-                  />
-                ),
-              },
-              {
-                id: `${ModelsTreeComponent.id}-hierarchy`,
-                getLabel: () => `${ModelsTreeComponent.getLabel()} (Hierarchy-based display states)`,
-                render: (props: TreeRenderProps) => (
-                  <ModelsTreeComponent
-                    selectionPredicate={() => true}
-                    selectionMode={SelectionMode.Multiple}
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                    hierarchyBased
                   />
                 ),
               },
