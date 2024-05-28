@@ -16,15 +16,23 @@ import type {
   HierarchyDefinition,
   HierarchyLevelDefinition,
   HierarchyNodeIdentifiersPath,
+  HierarchyNodesDefinition,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type {
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlBinding,
+  ECSqlQueryExecutor,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
 
 interface ModelsTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
+  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & ECSqlQueryExecutor;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
@@ -48,6 +56,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
+  private _subjectModelIdsCache: SubjectModelIdsCache;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 
@@ -80,6 +89,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
+    this._subjectModelIdsCache = new SubjectModelIdsCache(props.imodelAccess);
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
@@ -141,91 +151,62 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: subjectIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const selectColumnNames = Object.values(NodeSelectClauseColumnNames).join(", ");
-    const subjectFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: "BisCore.Subject", alias: "this" },
-    });
-    const modelFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: "BisCore.GeometricModel3d", alias: "this" },
-    });
-    const ctes = [
-      `
-        subjects(${selectColumnNames}, ParentId) AS (
-          SELECT
-            ${await this._selectQueryFactory.createSelectClause({
-              ecClassId: { selector: "this.ECClassId" },
-              ecInstanceId: { selector: "this.ECInstanceId" },
-              nodeLabel: {
-                selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
-                  classAlias: "this",
-                  className: "BisCore.Subject",
-                }),
-              },
-              hideNodeInHierarchy: {
-                selector: `
-                  CASE
-                    WHEN (
-                      json_extract(this.JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
-                      OR json_extract(this.JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
-                    ) THEN 1
-                    ELSE 0
-                  END
-                `,
-              },
-              hideIfNoChildren: true,
-              grouping: { byLabel: { action: "merge", groupId: "subject" } },
-              extendedData: {
-                imageId: "icon-folder",
-                isSubject: true,
-              },
-              supportsFiltering: true,
-            })},
-            this.Parent.Id ParentId
-          FROM
-            BisCore.Subject this
-        )
-      `,
-      `
-        child_subjects(${selectColumnNames}, ParentId, RootId) AS (
-          SELECT *, s.ParentId RootId FROM subjects s
-          UNION ALL
-          SELECT s.*, p.RootId
-          FROM child_subjects p
-          JOIN subjects s ON s.ParentId = p.ECInstanceId
-          WHERE p.${NodeSelectClauseColumnNames.HideNodeInHierarchy} = 1
-        )
-      `,
-    ];
-    return [
-      {
+    const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
+      this._selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: "BisCore.Subject", alias: "this" },
+      }),
+      this._selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: "BisCore.GeometricModel3d", alias: "this" },
+      }),
+    ]);
+    const [childSubjectIds, childModelIds] = await Promise.all([
+      this._subjectModelIdsCache.getChildSubjectIds(subjectIds),
+      this._subjectModelIdsCache.getSubjectModelIds(subjectIds),
+    ]);
+    const defs = new Array<HierarchyNodesDefinition>();
+    childSubjectIds.length &&
+      defs.push({
         fullClassName: "BisCore.Subject",
         query: {
-          ctes,
           ecsql: `
             SELECT
-              ${Object.values(NodeSelectClauseColumnNames)
-                .map((name: string) => `cs.${name} AS ${name}`)
-                .join(", ")},
-              ParentId
-            FROM child_subjects cs
-            JOIN ${subjectFilterClauses.from} this ON this.ECInstanceId = cs.ECInstanceId
+              ${await this._selectQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                    classAlias: "this",
+                    className: "BisCore.Subject",
+                  }),
+                },
+                hideIfNoChildren: true,
+                hasChildren: { selector: `InVirtualSet(?, this.ECInstanceId)` },
+                grouping: { byLabel: { action: "merge", groupId: "subject" } },
+                extendedData: {
+                  imageId: "icon-folder",
+                },
+                supportsFiltering: true,
+              })}
+            FROM ${subjectFilterClauses.from} this
             ${subjectFilterClauses.joins}
             WHERE
-              cs.RootId IN (${subjectIds.map(() => "?").join(",")})
-              AND NOT cs.${NodeSelectClauseColumnNames.HideNodeInHierarchy}
+              this.ECInstanceId IN (${childSubjectIds.map(() => "?").join(",")})
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
           `,
-          bindings: [...subjectIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
+          bindings: [
+            { type: "idset", value: await this._subjectModelIdsCache.getParentSubjectIds() },
+            ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+          ],
         },
-      },
-      {
+      });
+    childModelIds.length &&
+      defs.push({
         fullClassName: "BisCore.GeometricModel3d",
         query: {
-          ctes,
           ecsql: `
-            SELECT childModel.ECInstanceId AS ECInstanceId, childModel.*
+            SELECT model.ECInstanceId AS ECInstanceId, model.*
             FROM (
               SELECT
                 ${await this._selectQueryFactory.createSelectClause({
@@ -251,41 +232,22 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   hasChildren: true,
                   extendedData: {
                     imageId: "icon-model",
-                    isModel: true,
                   },
                   supportsFiltering: true,
                 })}
-              FROM BisCore.GeometricModel3d model
+              FROM Bis.GeometricModel3d model
               JOIN bis.InformationPartitionElement [partition] ON [partition].ECInstanceId = model.ModeledElement.Id
-              JOIN bis.Subject [subject] ON [subject].ECInstanceId = [partition].Parent.Id OR json_extract([subject].JsonProperties,'$.Subject.Model.TargetPartition') = printf('0x%x', [partition].ECInstanceId)
               WHERE
-                NOT model.IsPrivate
-                AND EXISTS (
-                  SELECT 1
-                  FROM bis.ModelContainsElements a
-                  JOIN bis.GeometricElement3d b ON b.ECClassId = a.TargetECClassId AND b.ECInstanceId = a.TargetECInstanceId
-                  WHERE a.SourceECInstanceId = +model.ECInstanceId
-                )
-                AND (
-                  [subject].ECInstanceId IN (${subjectIds.map(() => "?").join(",")})
-                  OR [subject].ECInstanceId IN (
-                    SELECT s.ECInstanceId
-                    FROM child_subjects s
-                    WHERE s.RootId IN (${subjectIds.map(() => "?").join(",")}) AND s.${NodeSelectClauseColumnNames.HideNodeInHierarchy}
-                  )
-                )
-            ) childModel
-            JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = childModel.ECInstanceId
+                model.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
+            ) model
+            JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
-            ${modelFilterClauses.where ? `AND (childModel.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
+            ${modelFilterClauses.where ? `AND (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
           `,
-          bindings: [
-            ...subjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
-            ...subjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
-          ],
+          bindings: childModelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
-      },
-    ];
+      });
+    return defs;
   }
 
   private async createISubModeledElementChildrenQuery({
@@ -519,6 +481,169 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     }
     return createInstanceKeyPathsFromInstanceKeys(props);
   }
+}
+
+class SubjectModelIdsCache {
+  private _subjectsHierarchy: Map<Id64String, Set<Id64String>> | undefined;
+  private _subjectModels: Map<Id64String, Set<Id64String>> | undefined;
+  private _subjectInfos: Map<Id64String, { hideInHierarchy: boolean }> | undefined;
+  private _parentSubjectIds: Promise<Id64String[]> | undefined; // the list should contain a subject id if its node should be shown as having children
+  private _init: Promise<void> | undefined;
+
+  constructor(private _queryExecutor: ECSqlQueryExecutor) {}
+
+  private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
+    const subjectsQuery = `
+      SELECT
+        ECInstanceId id,
+        Parent.Id parentId,
+        json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId,
+        CASE
+          WHEN (
+            json_extract(JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
+            OR json_extract(JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
+          ) THEN 1
+          ELSE 0
+        END hideInHierarchy
+      FROM bis.Subject
+    `;
+    for await (const row of this._queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames" })) {
+      yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };
+    }
+  }
+
+  private async *queryModels(): AsyncIterableIterator<{ id: Id64String; parentId: Id64String }> {
+    const modelsQuery = `
+      SELECT p.ECInstanceId id, p.Parent.Id parentId
+      FROM bis.InformationPartitionElement p
+      INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
+      WHERE NOT m.IsPrivate AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
+    `;
+    for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames" })) {
+      yield { id: row.id, parentId: row.parentId };
+    }
+  }
+
+  private async initSubjectModels() {
+    this._subjectsHierarchy = new Map();
+    this._subjectModels = new Map();
+    this._subjectInfos = new Map();
+    const targetPartitionSubjects = new Map<Id64String, Set<Id64String>>();
+    await Promise.all([
+      (async () => {
+        for await (const subject of this.querySubjects()) {
+          this._subjectInfos!.set(subject.id, { hideInHierarchy: subject.hideInHierarchy });
+          if (subject.parentId) {
+            pushToMap(this._subjectsHierarchy!, subject.parentId, subject.id);
+          }
+          if (subject.targetPartitionId) {
+            pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
+          }
+        }
+      })(),
+      (async () => {
+        for await (const model of this.queryModels()) {
+          pushToMap(targetPartitionSubjects, model.id, model.parentId);
+        }
+      })(),
+    ]);
+    for (const [partitionId, subjectIds] of targetPartitionSubjects) {
+      subjectIds.forEach((subjectId) => {
+        pushToMap(this._subjectModels!, subjectId, partitionId);
+      });
+    }
+  }
+
+  private async initCache() {
+    if (!this._init) {
+      this._init = this.initSubjectModels();
+    }
+    return this._init;
+  }
+
+  private forEachChildSubject(parentSubjectId: Id64String, cb: (childSubjectId: Id64String) => "break" | "continue") {
+    const childSubjectIds = this._subjectsHierarchy!.get(parentSubjectId);
+    childSubjectIds &&
+      childSubjectIds.forEach((childSubjectId) => {
+        if (cb(childSubjectId) === "break") {
+          return;
+        }
+        this.forEachChildSubject(childSubjectId, cb);
+      });
+  }
+
+  public async getParentSubjectIds(): Promise<Id64String[]> {
+    this._parentSubjectIds ??= (async () => {
+      await this.initCache();
+      const hasChildModels = (subjectId: Id64String) => {
+        if ((this._subjectModels!.get(subjectId)?.size ?? 0) > 0) {
+          return true;
+        }
+        const childSubjectIds = this._subjectsHierarchy!.get(subjectId);
+        return childSubjectIds && [...childSubjectIds].some(hasChildModels);
+      };
+      const parentSubjectIds = new Set<Id64String>();
+      const addIfHasChildren = (subjectId: Id64String) => {
+        if (hasChildModels(subjectId)) {
+          parentSubjectIds.add(subjectId);
+        }
+      };
+      this._subjectsHierarchy!.forEach((childSubjectIds, parentSubjectId) => {
+        addIfHasChildren(parentSubjectId);
+        childSubjectIds.forEach(addIfHasChildren);
+      });
+      return [...parentSubjectIds];
+    })();
+    return this._parentSubjectIds;
+  }
+
+  public async getChildSubjectIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
+    await this.initCache();
+    const childSubjectIds = new Array<Id64String>();
+    parentSubjectIds.forEach((subjectId) => {
+      this.forEachChildSubject(subjectId, (childSubjectId) => {
+        const { hideInHierarchy } = this._subjectInfos!.get(childSubjectId)!;
+        if (!hideInHierarchy) {
+          childSubjectIds.push(childSubjectId);
+          return "break";
+        }
+        return "continue";
+      });
+    });
+    return childSubjectIds;
+  }
+
+  public async getSubjectModelIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
+    await this.initCache();
+
+    const hiddenSubjectIds = new Array<Id64String>();
+    parentSubjectIds.forEach((subjectId) => {
+      this.forEachChildSubject(subjectId, (childSubjectId) => {
+        const { hideInHierarchy } = this._subjectInfos!.get(childSubjectId)!;
+        if (hideInHierarchy) {
+          hiddenSubjectIds.push(childSubjectId);
+          return "continue";
+        }
+        return "break";
+      });
+    });
+
+    const modelIds = new Array<Id64String>();
+    [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
+      const subjectModelIds = this._subjectModels!.get(subjectId);
+      subjectModelIds && modelIds.push(...subjectModelIds);
+    });
+    return modelIds;
+  }
+}
+
+function pushToMap<TKey, TValue>(map: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
+  let list = map.get(key);
+  if (!list) {
+    list = new Set();
+    map.set(key, list);
+  }
+  list.add(value);
 }
 
 function createECInstanceKeySelectClause(
