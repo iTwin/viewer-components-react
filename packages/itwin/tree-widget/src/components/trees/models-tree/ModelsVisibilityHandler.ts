@@ -716,6 +716,9 @@ export async function showAllModels(models: string[], viewport: Viewport) {
  */
 export async function hideAllModels(models: string[], viewport: Viewport) {
   viewport.changeModelDisplay(models, false);
+  viewport.perModelCategoryVisibility.clearOverrides(models);
+  viewport.clearAlwaysDrawn();
+  viewport.clearNeverDrawn();
 }
 
 /**
