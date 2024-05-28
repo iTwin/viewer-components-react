@@ -27,11 +27,14 @@ import {
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
   CategoriesTreeComponent,
-  StatelessModelsTreeComponent,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
   SelectableTreeProps,
+  StatelessCategoriesTreeComponent,
+  StatelessExternalSourcesTreeComponent,
+  StatelessIModelContentTreeComponent,
+  StatelessModelsTreeComponent,
   TreeRenderProps,
   TreeWidget,
   TreeWidgetComponent,
@@ -181,6 +184,32 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionMode={"extended"}
                   />
                 ),
+              },
+              {
+                id: `stateless-${CategoriesTreeComponent.id}`,
+                getLabel: () => `${CategoriesTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessCategoriesTreeComponent getSchemaContext={getSchemaContext} density={props.density} selectionStorage={unifiedSelectionStorage} />
+                ),
+              },
+              {
+                id: `stateless-${IModelContentTreeComponent.id}`,
+                getLabel: () => `${IModelContentTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessIModelContentTreeComponent getSchemaContext={getSchemaContext} density={props.density} selectionStorage={unifiedSelectionStorage} />
+                ),
+              },
+              {
+                id: `stateless-${ExternalSourcesTreeComponent.id}`,
+                getLabel: () => `${ExternalSourcesTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessExternalSourcesTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                  />
+                ),
+                startIcon: <SvgTechnicalPreviewMiniBw />,
               },
             ];
             return [

@@ -14,6 +14,7 @@ export * from "./VisibilityTreeRenderer";
 export * from "./imodel-content-tree/IModelContentTree";
 export * from "./imodel-content-tree/IModelContentTreeComponent";
 
+export { CategoryInfo, CategoriesTreeHeaderButtonProps } from "./category-tree/CategoriesTreeButtons";
 export * from "./category-tree/CategoriesTree";
 export * from "./category-tree/CategoriesTreeComponent";
 export * from "./category-tree/CategoryVisibilityHandler";
