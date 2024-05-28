@@ -98,7 +98,6 @@ export function SubLayersTree(props: SubLayersTreeProps) {
   // it selects/deselects node when checkbox is checked/unchecked and vice versa.
   // `useDisposable` takes care of disposing old event handler when new is created in case 'nodeLoader' has changed
   // `React.useCallback` is used to avoid creating new callback that creates handler on each render
-  // eslint-disable-next-line deprecation/deprecation
   const eventHandler = useDisposable(React.useCallback(() => new SubLayerCheckboxHandler(subLayers, props.singleVisibleSubLayer ?? false, nodeLoader, props.onSubLayerStateChange),
     [nodeLoader, subLayers, props.onSubLayerStateChange, props.singleVisibleSubLayer]));
 
