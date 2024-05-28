@@ -19,7 +19,6 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IPropertyValueRenderer } from '@itwin/components-react';
 import type { Localization } from '@itwin/core-common';
-import type { LocalizationOptions } from '@itwin/core-i18n';
 import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
@@ -39,6 +38,7 @@ import type { SingleSchemaClassSpecification } from '@itwin/presentation-common'
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import { Subscription } from '@itwin/components-react';
+import type { TranslationOptions } from '@itwin/core-common';
 import type { TreeCheckboxStateChangeEventArgs } from '@itwin/components-react';
 import type { TreeModelNode } from '@itwin/components-react';
 import type { TreeNodeItem } from '@itwin/components-react';
@@ -463,6 +463,15 @@ export function showAllCategories(categories: string[], viewport: Viewport): Pro
 export function showAllModels(models: string[], viewport: Viewport): Promise<void>;
 
 // @beta
+export const StatelessCategoriesTreeComponent: (props: StatelessCategoriesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessExternalSourcesTreeComponent: (props: StatelessExternalSourcesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessIModelContentTreeComponent: (props: StatelessIModelContentTreeComponentProps) => JSX.Element | null;
+
+// @beta
 export const StatelessModelsTreeComponent: (props: StatelessModelsTreeComponentProps) => JSX.Element | null;
 
 // @internal (undocumented)
@@ -562,7 +571,7 @@ export class TreeWidget {
     static get i18nNamespace(): string;
     static initialize(i18n?: Localization): Promise<void>;
     static terminate(): void;
-    static translate(key: string | string[], options?: LocalizationOptions): string;
+    static translate(key: string | string[], options?: TranslationOptions): string;
 }
 
 // @public

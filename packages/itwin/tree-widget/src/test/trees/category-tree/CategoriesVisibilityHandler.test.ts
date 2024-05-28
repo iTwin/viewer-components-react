@@ -19,13 +19,14 @@ import {
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { act, createResolvablePromise, mockViewport, renderHook, waitFor } from "../../TestUtils";
 
+import type { CategoryInfo } from "../../../components/trees/category-tree/CategoriesTreeButtons";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IModelConnection, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { CategoryInfo, CategoryVisibilityHandlerParams } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import type { CategoryVisibilityHandlerParams } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {

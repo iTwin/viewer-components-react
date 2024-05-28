@@ -4,24 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo } from "react";
-import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
+import { IModelApp } from "@itwin/core-frontend";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
-import { StatelessModelsVisibilityHandler } from "./ModelsVisibilityHandler";
+import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
+import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import type { Viewport } from "@itwin/core-frontend";
+import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
+import type { ViewManager, Viewport } from "@itwin/core-frontend";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
 
-interface StatelessModelsTreeOwnProps {
+interface StatelessCategoriesTreeOwnProps {
+  filter: string;
   activeView: Viewport;
+  categories: CategoryInfo[];
+  viewManager?: ViewManager;
+  allViewports?: boolean;
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
-  filter?: string;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
@@ -29,14 +32,17 @@ type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
-type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
+type StatelessModelsTreeProps = StatelessCategoriesTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-const StatelessModelsTreeId = "models-tree-v2";
+const StatelessCategoriesTreeId = "categories-tree-v2";
 
 /** @internal */
-export function StatelessModelsTree({
+export function StatelessCategoriesTree({
   imodel,
+  viewManager,
+  categories,
+  allViewports,
   getSchemaContext,
   height,
   width,
@@ -48,84 +54,71 @@ export function StatelessModelsTree({
   onPerformanceMeasured,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
-    const visibilityHandler = new StatelessModelsVisibilityHandler({ viewport: activeView });
+    const visibilityHandler = new StatelessCategoriesVisibilityHandler({
+      imodel,
+      viewport: activeView,
+      viewManager: viewManager ?? IModelApp.viewManager,
+      categories,
+      allViewports,
+    });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
       changeVisibility: async (node: HierarchyNode, on: boolean) => visibilityHandler.changeVisibility(node, on),
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView]);
-  const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
+  }, [activeView, allViewports, categories, imodel, viewManager]);
 
-  const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
-    if (!focusedInstancesKeys) {
-      return undefined;
-    }
-    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys });
-  }, [focusedInstancesKeys]);
+  const getDefinitionsProvider = useCallback(
+    (props: Parameters<GetHierarchyDefinitionCallback>[0]) => {
+      return new CategoriesTreeDefinition({ ...props, viewType: activeView.view.is2d() ? "2d" : "3d" });
+    },
+    [activeView],
+  );
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
-  }, [filter]);
-
-  const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
+    return async ({ imodelAccess }) =>
+      CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
+  }, [filter, activeView]);
 
   return (
     <VisibilityTree
       height={height}
       width={width}
       imodel={imodel}
-      treeName="StatelessModelsTree"
+      treeName="StatelessCategoriesTree"
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
-      getHierarchyDefinition={getHierarchyDefinition}
-      getFilteredPaths={getFilteredPaths}
+      getHierarchyDefinition={getDefinitionsProvider}
+      getFilteredPaths={getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       getIcon={getIcon}
+      getSublabel={getSublabel}
       density={density}
       noDataMessage={getNoDataMessage(filter)}
-      selectionMode={selectionMode}
+      selectionMode={selectionMode ?? "none"}
       onPerformanceMeasured={(action, duration) => {
-        onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
+        onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
       }}
     />
   );
 }
 
-function getNoDataMessage(filter?: string) {
+function getNoDataMessage(filter: string) {
   if (filter) {
     return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
   return undefined;
 }
 
-function getHierarchyDefinition(props: Parameters<GetHierarchyDefinitionCallback>[0]) {
-  return new ModelsTreeDefinition(props);
+function getSublabel(node: PresentationHierarchyNode): ReactElement | undefined {
+  return <div style={{ marginBottom: "10px" }}>{node.extendedData?.description}</div>;
 }
 
-function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
-  if (node.extendedData?.imageId === undefined) {
-    return undefined;
-  }
-
-  switch (node.extendedData.imageId) {
-    case "icon-layers":
-      return <SvgLayers />;
-    case "icon-item":
-      return <SvgItem />;
-    case "icon-ec-class":
-      return <SvgItem />;
-    case "icon-imodel-hollow-2":
-      return <SvgImodelHollow />;
-    case "icon-folder":
-      return <SvgFolder />;
-    case "icon-model":
-      return <SvgModel />;
-  }
-
-  return undefined;
+function getIcon(): ReactElement | undefined {
+  // empty icon aligns nodes with and without an expander
+  return <></>;
 }

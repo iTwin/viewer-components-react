@@ -20,12 +20,13 @@ import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, Vis
 import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
+import type { CategoryInfo } from "./CategoriesTreeButtons";
 import type { FilterableTreeNodeRendererProps } from "../common/TreeRenderer";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
-import type { CategoryInfo } from "./CategoryVisibilityHandler";
+
 const PAGING_SIZE = 20;
 
 /**

@@ -19,7 +19,15 @@ interface VisibilityTreeRendererOwnProps {
 
 type VisibilityTreeRendererProps = Pick<
   VisibilityTreeNodeRendererProps,
-  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getCheckboxStatus" | "onCheckboxClicked" | "getHierarchyLevelDetails"
+  | "expandNode"
+  | "onNodeClick"
+  | "onNodeKeyDown"
+  | "onFilterClick"
+  | "getIcon"
+  | "getSublabel"
+  | "getCheckboxStatus"
+  | "onCheckboxClicked"
+  | "getHierarchyLevelDetails"
 > &
   Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
   VisibilityTreeRendererOwnProps;
@@ -33,6 +41,7 @@ export function VisibilityTreeRenderer({
   isNodeSelected,
   onFilterClick,
   getIcon,
+  getSublabel,
   getCheckboxStatus,
   onCheckboxClicked,
   getHierarchyLevelDetails,
@@ -47,6 +56,7 @@ export function VisibilityTreeRenderer({
           onNodeClick={onNodeClick}
           onNodeKeyDown={onNodeKeyDown}
           getIcon={getIcon}
+          getSublabel={getSublabel}
           getCheckboxStatus={getCheckboxStatus}
           onCheckboxClicked={onCheckboxClicked}
           onFilterClick={onFilterClick}
@@ -54,7 +64,7 @@ export function VisibilityTreeRenderer({
         />
       );
     },
-    [expandNode, onNodeClick, onNodeKeyDown, getHierarchyLevelDetails, getIcon, getCheckboxStatus, onCheckboxClicked, onFilterClick],
+    [expandNode, onNodeClick, onNodeKeyDown, getHierarchyLevelDetails, getIcon, getSublabel, getCheckboxStatus, onCheckboxClicked, onFilterClick],
   );
 
   const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
