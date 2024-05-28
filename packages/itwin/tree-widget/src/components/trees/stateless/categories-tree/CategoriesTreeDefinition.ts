@@ -81,9 +81,9 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
                     IFNULL((
                       SELECT 1
                       FROM (
-                        SELECT COUNT(TargetECInstanceId) AS ChildCount
-                        FROM BisCore.CategoryOwnsSubCategories
-                        WHERE SourceECInstanceId = this.ECInstanceId
+                        SELECT COUNT(1) AS ChildCount
+                        FROM BisCore.SubCategory sc
+                        WHERE sc.Parent.Id = this.ECInstanceId
                       )
                       WHERE ChildCount > 1
                     ), 0)
