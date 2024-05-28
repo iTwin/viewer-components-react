@@ -562,10 +562,6 @@ export abstract class Measurement {
     return true;
   }
 
-  protected shouldDraw(context: DecorateContext): boolean {
-    return this.viewTarget.isValidViewId(context.viewport.view.id);
-  }
-
   /** Draw the measurement. This is called every frame, e.g. when the mouse moves. This is suitable for small or dynamic graphics, but if the measurement
    * has complicated graphics, consider using the decorateCached method.
    * @param context Decorate context for drawing to a viewport.

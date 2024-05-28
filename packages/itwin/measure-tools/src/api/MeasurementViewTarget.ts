@@ -327,6 +327,10 @@ export class MeasurementViewTarget {
   public isViewportCompatible(vp: Viewport): boolean {
     const viewType = MeasurementViewTarget.classifyViewport(vp);
 
+    // Is the viewId valid
+    if (this._viewIds.size > 0 && !this.viewIds.has(vp.view.id))
+      return false;
+
     // Is this type excluded?
     if (this.excluded.has(viewType))
       return false;
