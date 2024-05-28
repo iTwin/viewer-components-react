@@ -9,6 +9,8 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { isPresentationHierarchyNode, TreeRenderer, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { TreeWidget } from "../../../../../TreeWidget";
+import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
@@ -76,6 +78,7 @@ function FilterableTreeRenderer({
   selectionMode,
   onPerformanceMeasured,
 }: Omit<FilterableTreeProps, "getSchemaContext"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
+  const localizedStrings = useHierarchiesLocalization();
   const {
     rootNodes,
     isLoading,
@@ -88,6 +91,7 @@ function FilterableTreeRenderer({
     imodelAccess,
     getHierarchyDefinition,
     onPerformanceMeasured,
+    localizedStrings,
   });
 
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
@@ -110,7 +114,7 @@ function FilterableTreeRenderer({
     if ((rootNodes.length === 0 && !isLoading) || (rootNodes.length === 1 && !isPresentationHierarchyNode(rootNodes[0]) && rootNodes[0].type === "Unknown")) {
       return (
         <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
-          {noDataMessage ? noDataMessage : <Text>The data required for this tree layout is not available in this iModel.</Text>}
+          {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("stateless.dataIsNotAvailable")}</Text>}
         </Flex>
       );
     }
@@ -124,6 +128,7 @@ function FilterableTreeRenderer({
           getIcon={getIcon}
           getSublabel={getSublabel}
           selectionMode={selectionMode}
+          localizedStrings={localizedStrings}
         />
       </Flex.Item>
     );
