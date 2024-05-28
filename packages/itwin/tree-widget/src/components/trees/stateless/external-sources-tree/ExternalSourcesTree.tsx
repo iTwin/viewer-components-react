@@ -21,7 +21,7 @@ type GetHierarchyDefinitionsProviderCallback = FilterableTreeProps["getHierarchy
 type StatelessExternalSourcesTreeProps = StatelessExternalSourcesTreeOwnProps &
   Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-const StatelessExternalSourcesTreeId = "external-source-tree-v2";
+const StatelessExternalSourcesTreeId = "external-sources-tree-v2";
 
 /** @internal */
 export function StatelessExternalSourcesTree({ onPerformanceMeasured, ...props }: StatelessExternalSourcesTreeProps) {

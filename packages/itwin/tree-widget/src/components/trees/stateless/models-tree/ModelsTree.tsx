@@ -31,7 +31,7 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-const StatelessModelsTreeId = "model-tree-v2";
+const StatelessModelsTreeId = "models-tree-v2";
 
 /** @internal */
 export function StatelessModelsTree({
