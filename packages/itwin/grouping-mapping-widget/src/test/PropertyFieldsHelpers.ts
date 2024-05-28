@@ -1,9 +1,21 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { Field, NestedContentField, PropertiesField, PropertyValueFormat } from "@itwin/presentation-common";
-import type { CategoryDescription, ClassInfo, EditorDescription, Property, PropertyInfo, RelatedClassInfo, RelationshipMeaning, RelationshipPath, RendererDescription, StructTypeDescription, TypeDescription } from "@itwin/presentation-common";
+import type {
+  CategoryDescription,
+  ClassInfo,
+  EditorDescription,
+  Property,
+  PropertyInfo,
+  RelatedClassInfo,
+  RelationshipMeaning,
+  RelationshipPath,
+  RendererDescription,
+  StructTypeDescription,
+  TypeDescription,
+} from "@itwin/presentation-common";
 
 export const createTestPropertyInfo = (props?: Partial<PropertyInfo>) => ({
   classInfo: createTestECClassInfo(),
@@ -30,8 +42,7 @@ export const createTestECClassInfo = (props?: Partial<ClassInfo>) => ({
 
 export const createTestRelationshipPath = (length: number = 2) => {
   const path = new Array<RelatedClassInfo>();
-  while (length--)
-    path.push(createTestRelatedClassInfo());
+  while (length--) path.push(createTestRelatedClassInfo());
   return path;
 };
 
@@ -66,7 +77,7 @@ export const createTestSimpleContentField = (props?: {
     props?.isReadonly ?? false,
     props?.priority ?? 0,
     props?.editor,
-    props?.renderer
+    props?.renderer,
   );
 };
 
@@ -90,7 +101,7 @@ export const createTestPropertiesContentField = (props: {
     props.priority ?? 0,
     props.properties,
     props.editor,
-    props.renderer
+    props.renderer,
   );
 };
 
@@ -131,8 +142,7 @@ export const createTestNestedContentField = (props: {
     !!props.autoExpand,
     props.renderer,
   );
-  if (props.relationshipMeaning)
-    field.relationshipMeaning = props.relationshipMeaning;
+  if (props.relationshipMeaning) field.relationshipMeaning = props.relationshipMeaning;
   field.rebuildParentship();
   return field;
 };

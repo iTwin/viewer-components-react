@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { ITwin, ITwinsAccessClient } from "@itwin/itwins-client";
 import { ITwinSubClass } from "@itwin/itwins-client";
 import { SvgCalendar, SvgList, SvgStarHollow } from "@itwin/itwinui-icons-react";
@@ -37,11 +37,7 @@ const tabsWithIcons = [
   <Tab key="all" label="My iTwins" startIcon={<SvgList />} />,
 ];
 
-const fetchITwins = async (
-  getAccessToken: GetAccessTokenFn,
-  iTwinsClient: ITwinsAccessClient,
-  iTwinType: ITwinType,
-) => {
+const fetchITwins = async (getAccessToken: GetAccessTokenFn, iTwinsClient: ITwinsAccessClient, iTwinType: ITwinType) => {
   const accessToken = await getAccessToken();
   switch (iTwinType) {
     case ITwinType.Favorite:
@@ -77,10 +73,7 @@ const SelectITwin = ({
     queryFn: async () => (await fetchITwins(getAccessToken, iTwinsClient, iTwinType)).data!,
   });
 
-  const displayStrings = React.useMemo(
-    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
-    [userDisplayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
 
   const iTwinsColumns = useMemo<Column<IITwinTyped>[]>(
     () => [
@@ -103,16 +96,11 @@ const SelectITwin = ({
         Filter: tableFilters.TextFilter(),
       },
     ],
-    [displayStrings.iTwinNumber, displayStrings.iTwinName, displayStrings.iTwinStatus]
+    [displayStrings.iTwinNumber, displayStrings.iTwinName, displayStrings.iTwinStatus],
   );
 
   const pageSizeList = useMemo(() => [10, 25, 50], []);
-  const paginator = useCallback(
-    (props: TablePaginatorRendererProps) => (
-      <TablePaginator {...props} pageSizeList={pageSizeList} />
-    ),
-    [pageSizeList]
-  );
+  const paginator = useCallback((props: TablePaginatorRendererProps) => <TablePaginator {...props} pageSizeList={pageSizeList} />, [pageSizeList]);
 
   return (
     <div className="gmw-select-itwin-table-container">
@@ -125,12 +113,12 @@ const SelectITwin = ({
         }}
         activeIndex={iTwinType}
         type={"borderless"}
-        contentClassName="gmw-table-holding-tab">
-      </Tabs>
+        contentClassName="gmw-table-holding-tab"
+      ></Tabs>
       <Table<IITwinTyped>
         data={iTwins ?? []}
         columns={iTwinsColumns}
-        className='gmw-select-itwin-table'
+        className="gmw-select-itwin-table"
         emptyTableContent={`No ${displayStrings.iTwins} available.`}
         isSortable
         isLoading={isLoading}

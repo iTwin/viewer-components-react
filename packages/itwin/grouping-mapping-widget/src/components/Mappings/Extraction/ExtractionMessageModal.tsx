@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { Button, DefaultCell, Icon, Modal, ModalButtonBar, ModalContent, Table, tableFilters, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../../../common/utils";
@@ -47,7 +47,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   }, []);
 
   const extractionInfo = useMemo(() => {
-    const infoMap = new Map<string, { mappingId: string, groupId: string }>();
+    const infoMap = new Map<string, { mappingId: string; groupId: string }>();
 
     extractionMessageData.forEach((message) => {
       const splittedMessage = message.message.split(" ");
@@ -109,16 +109,22 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
   useEffect(() => {
     const newDateTime: Date = new Date(timestamp);
     const options: Intl.DateTimeFormatOptions = {
-      day: "numeric", month: "numeric", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     };
     setFormattedTimestamp(newDateTime.toLocaleString(undefined, options));
   }, [timestamp]);
 
-  const translatedLabels = useMemo(() => ({
-    filter: "Filter",
-    clear: "Clear",
-  }), []);
+  const translatedLabels = useMemo(
+    () => ({
+      filter: "Filter",
+      clear: "Clear",
+    }),
+    [],
+  );
 
   const columns = useMemo(
     (): Column<CreateTypeFromInterface<ExtractionMessageData>>[] => [
@@ -142,12 +148,14 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
               cellProps={cellProps}
               startIcon={
                 level === "Error" ? (
-                  <StatusIcon status='error' />
+                  <StatusIcon status="error" />
                 ) : level === "Warning" ? (
-                  <StatusIcon status='warning' />
+                  <StatusIcon status="warning" />
                 ) : level === "Info" ? (
-                  <StatusIcon status='informational' />
-                ) : <StatusIcon status='trace' />
+                  <StatusIcon status="informational" />
+                ) : (
+                  <StatusIcon status="trace" />
+                )
               }
             >
               {level}
@@ -166,23 +174,15 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
         Filter: tableFilters.TextFilter(translatedLabels),
       },
     ],
-    [translatedLabels]
+    [translatedLabels],
   );
   const isLoading = pickedResult.some((query) => query.isLoading) || isMappingsLoading;
 
   return (
-    <Modal className="gmw-message-modal-container"
-      title="Extraction Logs"
-      isOpen={isOpen}
-      onClose={onClose}
-      closeOnExternalClick={false}
-    >
+    <Modal className="gmw-message-modal-container" title="Extraction Logs" isOpen={isOpen} onClose={onClose} closeOnExternalClick={false}>
       <ModalContent>
         <div className="gmw-timestamp-icon">
-          <Icon
-            title="Extraction Timestamp"
-            size="medium"
-          >
+          <Icon title="Extraction Timestamp" size="medium">
             <SvgClock />
           </Icon>
           <Text>{formattedTimestamp}</Text>
@@ -197,10 +197,7 @@ export const ExtractionMessageModal = ({ isOpen, onClose, extractionMessageData,
         />
       </ModalContent>
       <ModalButtonBar>
-        <Button
-          onClick={onClose}
-          styleType="high-visibility"
-        >
+        <Button onClick={onClose} styleType="high-visibility">
           Close
         </Button>
       </ModalButtonBar>

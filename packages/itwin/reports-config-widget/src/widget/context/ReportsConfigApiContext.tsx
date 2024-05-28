@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelsClient } from "@itwin/imodels-client-management";
 import { MappingsClient, ReportsClient } from "@itwin/insights-client";
@@ -31,9 +31,7 @@ export const ReportsConfigApiContext = createContext<ReportsConfigApiProps>({
 export const useReportsConfigApi = () => {
   const context = React.useContext(ReportsConfigApiContext);
   if (!context) {
-    throw new Error(
-      "useReportsConfigApi should be used within a ReportsConfigApiContext provider"
-    );
+    throw new Error("useReportsConfigApi should be used within a ReportsConfigApiContext provider");
   }
   return context;
 };

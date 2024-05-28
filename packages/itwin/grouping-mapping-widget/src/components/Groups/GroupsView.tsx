@@ -1,21 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import type {
-  Alert,
-} from "@itwin/itwinui-react";
-import {
-  ButtonGroup,
-  IconButton,
-  InformationPanelWrapper,
-  List,
-  ProgressLinear,
-} from "@itwin/itwinui-react";
-import {
-  SvgRefresh,
-} from "@itwin/itwinui-icons-react";
+import type { Alert } from "@itwin/itwinui-react";
+import { ButtonGroup, IconButton, InformationPanelWrapper, List, ProgressLinear } from "@itwin/itwinui-react";
+import { SvgRefresh } from "@itwin/itwinui-icons-react";
 import DeleteModal from "../SharedComponents/DeleteModal";
 import "./GroupsView.scss";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
@@ -31,9 +21,7 @@ export interface ActionButtonRendererProps {
   group: GroupMinimal;
 }
 
-export type ActionButtonRenderer = (
-  props: ActionButtonRendererProps
-) => React.ReactNode;
+export type ActionButtonRenderer = (props: ActionButtonRendererProps) => React.ReactNode;
 
 export interface ProgressConfig {
   hilitedGroupsProgress?: {
@@ -59,11 +47,7 @@ export interface GroupsViewProps {
   onClickAddGroup?: (queryGenerationType: string) => void;
   onClickGroupTitle?: (group: GroupMinimal) => void;
   onClickGroupModify?: (group: GroupMinimal, queryGenerationType: string) => void;
-  onClickRenderContextCustomUI?: (
-    contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>,
-    group: GroupMinimal,
-    displayLabel: string,
-  ) => void;
+  onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: GroupMinimal, displayLabel: string) => void;
   disableActions?: boolean;
   selectedGroupForDeletion?: GroupMinimal;
   setSelectedGroupForDeletion: (group: GroupMinimal) => void;
@@ -115,32 +99,22 @@ export const GroupsView = ({
   return (
     <InformationPanelWrapper className="gmw-groups-container">
       <div className="gmw-toolbar">
-        {onClickAddGroup && groupUIs.length > 0 && (
-          <GroupsAddButton
-            disabled={disableActions}
-            groupUIs={groupUIs}
-            onClickAddGroup={onClickAddGroup}
-          />
-        )}
+        {onClickAddGroup && groupUIs.length > 0 && <GroupsAddButton disabled={disableActions} groupUIs={groupUIs} onClickAddGroup={onClickAddGroup} />}
         <ButtonGroup className="gmw-toolbar-buttons">
-          <IconButton
-            title="Refresh"
-            onClick={onRefresh}
-            disabled={isLoading || disableActions}
-            styleType="borderless"
-          >
+          <IconButton title="Refresh" onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
             <SvgRefresh />
           </IconButton>
         </ButtonGroup>
       </div>
       {alert}
-      <div className='gmw-groups-border' />
-      {!!hilitedGroupsProgress &&
+      <div className="gmw-groups-border" />
+      {!!hilitedGroupsProgress && (
         <div className="gmw-group-progress-bar">
           <ProgressLinear
-            value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups * maxDynamicProgress)}
+            value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups) * maxDynamicProgress}
           />
-        </div>}
+        </div>
+      )}
       {isLoading ? (
         <LoadingOverlay />
       ) : groups.length === 0 ? (
@@ -165,13 +139,14 @@ export const GroupsView = ({
           ))}
         </List>
       )}
-      {overlappedElementsInfo && setActiveOverlapInfoPanelGroup &&
+      {overlappedElementsInfo && setActiveOverlapInfoPanelGroup && (
         <OverlappedElementsInformationPanel
           group={activeOverlapInfoPanelGroup}
           onClose={() => setActiveOverlapInfoPanelGroup(undefined)}
           overlappedElementsInfo={overlappedElementsInfo}
           groups={groups}
-        />}
+        />
+      )}
       {selectedGroupForDeletion && (
         <DeleteModal
           entityName={selectedGroupForDeletion.groupName}

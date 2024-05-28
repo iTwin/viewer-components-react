@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type {GroupMinimal, Mapping } from "@itwin/insights-client";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { GroupMinimal, Mapping } from "@itwin/insights-client";
 import type { ReactElement } from "react";
 
 /**
@@ -116,5 +116,4 @@ export interface GroupingCustomUIProps {
    * The initial query for the Group being edited.
    */
   initialEditModeQuery?: string;
-
 }

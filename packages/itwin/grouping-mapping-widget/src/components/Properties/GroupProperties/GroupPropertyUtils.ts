@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECPropertyReference } from "@itwin/insights-client";
 import type {
@@ -14,13 +14,7 @@ import type {
   RulesetVariable,
   StructFieldMemberDescription,
 } from "@itwin/presentation-common";
-import {
-  ContentSpecificationTypes,
-  DefaultContentDisplayTypes,
-  PropertyValueFormat,
-  RelationshipMeaning,
-  RuleTypes,
-} from "@itwin/presentation-common";
+import { ContentSpecificationTypes, DefaultContentDisplayTypes, PropertyValueFormat, RelationshipMeaning, RuleTypes } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { deepEqual } from "fast-equals";
 
@@ -36,28 +30,21 @@ export interface PropertyMetaData {
   key: string;
 }
 
-const generateKey = (
-  parentPropertyClassName: string | undefined,
-  actualECClassName: string,
-  propertyTraversal: string[]
-): string => {
+const generateKey = (parentPropertyClassName: string | undefined, actualECClassName: string, propertyTraversal: string[]): string => {
   return `${parentPropertyClassName}|${actualECClassName}|${propertyTraversal.join("|")}`;
 };
 
-const extractPrimitives = (
-  propertyTraversal: string[],
-  propertyField: PropertiesField
-): PropertyMetaData[] => propertyField.properties.map((property) => {
-  const propertyName = property.property.name;
-  const displayLabel = propertyField.label;
-  // It belongs to this parent class
-  const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
-  const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
-  const actualECClassName = property.property.classInfo.name;
-  const newPropertyTraversal = [...propertyTraversal, propertyName];
+const extractPrimitives = (propertyTraversal: string[], propertyField: PropertiesField): PropertyMetaData[] =>
+  propertyField.properties.map((property) => {
+    const propertyName = property.property.name;
+    const displayLabel = propertyField.label;
+    // It belongs to this parent class
+    const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
+    const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
+    const actualECClassName = property.property.classInfo.name;
+    const newPropertyTraversal = [...propertyTraversal, propertyName];
 
-  return (
-    {
+    return {
       displayLabel,
       sourceSchema: "*",
       sourceClassName: "*",
@@ -67,9 +54,8 @@ const extractPrimitives = (
       parentPropertyClassName,
       key: generateKey(parentPropertyClassName, actualECClassName, newPropertyTraversal),
       categoryLabel: propertyField.category.label,
-    }
-  );
-});
+    };
+  });
 
 const extractPrimitiveStructProperties = (
   propertyTraversal: string[],
@@ -77,52 +63,46 @@ const extractPrimitiveStructProperties = (
   categoryLabel: string,
   actualECClassName: string,
   parentPropertyClassName?: string,
-): PropertyMetaData[] => members.flatMap((member) => {
-  if (member.type.valueFormat === PropertyValueFormat.Primitive) {
-    const propertyName = member.name;
-    const displayLabel = member.label;
-    const newPropertyTraversal = [...propertyTraversal, propertyName];
+): PropertyMetaData[] =>
+  members.flatMap((member) => {
+    if (member.type.valueFormat === PropertyValueFormat.Primitive) {
+      const propertyName = member.name;
+      const displayLabel = member.label;
+      const newPropertyTraversal = [...propertyTraversal, propertyName];
 
-    return ({
-      displayLabel,
-      sourceSchema: "*",
-      sourceClassName: "*",
-      ecPropertyTraversal: newPropertyTraversal,
-      primitiveNavigationClass: "",
-      actualECClassName,
-      parentPropertyClassName,
-      key: generateKey(parentPropertyClassName, actualECClassName, newPropertyTraversal),
-      categoryLabel,
-    });
+      return {
+        displayLabel,
+        sourceSchema: "*",
+        sourceClassName: "*",
+        ecPropertyTraversal: newPropertyTraversal,
+        primitiveNavigationClass: "",
+        actualECClassName,
+        parentPropertyClassName,
+        key: generateKey(parentPropertyClassName, actualECClassName, newPropertyTraversal),
+        categoryLabel,
+      };
+    } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
+      const structName = member.name;
+      return extractPrimitiveStructProperties(
+        [...propertyTraversal, structName],
+        member.type.members,
+        categoryLabel,
+        actualECClassName,
+        parentPropertyClassName,
+      );
+    }
 
-  } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
-    const structName = member.name;
-    return extractPrimitiveStructProperties(
-      [...propertyTraversal, structName],
-      member.type.members,
-      categoryLabel,
-      actualECClassName,
-      parentPropertyClassName
-    );
-  }
-
-  return [];
-});
+    return [];
+  });
 
 const extractStruct = (property: Field) => {
   if (property.type.valueFormat !== PropertyValueFormat.Struct) {
     return [];
   }
 
-  const columnName = (property as PropertiesField).properties[0]
-    .property.name;
+  const columnName = (property as PropertiesField).properties[0].property.name;
   const actualECClassName = (property as PropertiesField).properties[0].property.classInfo.name;
-  return extractPrimitiveStructProperties(
-    [columnName],
-    property.type.members,
-    property.category.label,
-    actualECClassName
-  );
+  return extractPrimitiveStructProperties([columnName], property.type.members, property.category.label, actualECClassName);
 };
 
 const extractNested = (propertyTraversal: string[], propertyFields: Field[]): PropertyMetaData[] =>
@@ -136,10 +116,7 @@ const extractNested = (propertyTraversal: string[], propertyFields: Field[]): Pr
       case PropertyValueFormat.Struct: {
         const nestedContentField = property as NestedContentField;
         // Only handling single path and not handling nested content fields within navigations
-        if (
-          nestedContentField.pathToPrimaryClass &&
-          nestedContentField.pathToPrimaryClass.length > 1
-        ) {
+        if (nestedContentField.pathToPrimaryClass && nestedContentField.pathToPrimaryClass.length > 1) {
           // Hardcoded navigation to external source repository metadata.
           if (nestedContentField.contentClassInfo.name === "BisCore:RepositoryLink") {
             return extractNested([...propertyTraversal, "Source", "Repository"], nestedContentField.nestedFields);
@@ -153,8 +130,7 @@ const extractNested = (propertyTraversal: string[], propertyFields: Field[]): Pr
           case RelationshipMeaning.RelatedInstance: {
             if (
               // Deal with a TypeDefinition
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-              "BisCore:GeometricElement3dHasTypeDefinition"
+              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
               return extractNested([...propertyTraversal, "TypeDefinition"], nestedContentField.nestedFields);
             }
@@ -192,20 +168,15 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
         // Get structs
         const nestedContentField = property as NestedContentField;
         // Only handling single path and not handling nested content fields within navigations
-        if (
-          nestedContentField.pathToPrimaryClass &&
-            nestedContentField.pathToPrimaryClass.length > 1
-        ) {
+        if (nestedContentField.pathToPrimaryClass && nestedContentField.pathToPrimaryClass.length > 1) {
           break;
         }
         switch (nestedContentField.relationshipMeaning) {
           case RelationshipMeaning.SameInstance: {
             // Check for aspects.
             if (
-              (nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                .name === "BisCore:ElementOwnsUniqueAspect" ||
-                  nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                    .name === "BisCore:ElementOwnsMultiAspects")
+              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:ElementOwnsUniqueAspect" ||
+              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:ElementOwnsMultiAspects"
             ) {
               const fullClassName = nestedContentField.contentClassInfo.name;
               const sourceSchema = fullClassName.split(":")[0];
@@ -221,9 +192,8 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
           case RelationshipMeaning.RelatedInstance: {
             // Navigation properties
             if (
-            // Deal with a TypeDefinition
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-                "BisCore:GeometricElement3dHasTypeDefinition"
+              // Deal with a TypeDefinition
+              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name === "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
               const extractedNested = extractNested(["TypeDefinition"], nestedContentField.nestedFields);
               extractedNested.forEach((ecProperty) => {
@@ -262,19 +232,11 @@ export const convertToECProperties = (property: PropertyMetaData): ECPropertyRef
       return [
         {
           ...ecProperty,
-          ecPropertyName: [
-            ...property.ecPropertyTraversal,
-            "ModeledElement",
-            "UserLabel",
-          ].join("."),
+          ecPropertyName: [...property.ecPropertyTraversal, "ModeledElement", "UserLabel"].join("."),
         },
         {
           ...ecProperty,
-          ecPropertyName: [
-            ...property.ecPropertyTraversal,
-            "ModeledElement",
-            "CodeValue",
-          ].join("."),
+          ecPropertyName: [...property.ecPropertyTraversal, "ModeledElement", "CodeValue"].join("."),
         },
       ];
     }
@@ -284,17 +246,11 @@ export const convertToECProperties = (property: PropertyMetaData): ECPropertyRef
       return [
         {
           ...ecProperty,
-          ecPropertyName: [
-            ...property.ecPropertyTraversal,
-            "UserLabel",
-          ].join("."),
+          ecPropertyName: [...property.ecPropertyTraversal, "UserLabel"].join("."),
         },
         {
           ...ecProperty,
-          ecPropertyName: [
-            ...property.ecPropertyTraversal,
-            "CodeValue",
-          ].join("."),
+          ecPropertyName: [...property.ecPropertyTraversal, "CodeValue"].join("."),
         },
       ];
     default: {
@@ -325,8 +281,7 @@ export const findProperties = (ecProperties: ECPropertyReference[], propertiesMe
         notFound = true;
       }
     }
-    if (notFound)
-      break;
+    if (notFound) break;
   }
   return notFound ? [] : propertiesMetaDataResult;
 };
@@ -340,13 +295,16 @@ export const fetchPresentationDescriptor = async (iModelConnection: IModelConnec
         specifications: [
           {
             specType: ContentSpecificationTypes.SelectedNodeInstances,
-            propertyOverrides: [{
-              name: "*",
-              isDisplayed: true,
-            }],
+            propertyOverrides: [
+              {
+                name: "*",
+                isDisplayed: true,
+              },
+            ],
           },
         ],
-      }],
+      },
+    ],
   };
   const requestOptions: ContentDescriptorRequestOptions<IModelConnection, KeySet, RulesetVariable> = {
     imodel: iModelConnection,
@@ -354,8 +312,6 @@ export const fetchPresentationDescriptor = async (iModelConnection: IModelConnec
     rulesetOrId: ruleSet,
     displayType: DefaultContentDisplayTypes.PropertyPane,
   };
-  const descriptor = await Presentation.presentation.getContentDescriptor(
-    requestOptions
-  );
+  const descriptor = await Presentation.presentation.getContentDescriptor(requestOptions);
   return descriptor;
 };
