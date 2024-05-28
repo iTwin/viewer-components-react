@@ -219,7 +219,7 @@ export class MeasurementViewTarget {
 
   /** Tests if this view target is equal to the other one. Equality means they both have the same number and types of views in their include/exclude sets. */
   public equals(other: MeasurementViewTarget): boolean {
-    if (this._included.size !== other._included.size || this._excluded.size !== other._excluded.size)
+    if (this._included.size !== other._included.size || this._excluded.size !== other._excluded.size || this._viewIds.size !== other._viewIds.size)
       return false;
 
     for (const include of this._included) {
