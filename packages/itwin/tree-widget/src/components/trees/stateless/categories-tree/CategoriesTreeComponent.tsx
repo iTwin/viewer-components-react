@@ -21,7 +21,7 @@ import type { CategoriesTreeHeaderButtonProps } from "../../category-tree/Catego
 type StatelessCategoriesTreeProps = ComponentPropsWithoutRef<typeof StatelessCategoriesTree>;
 
 interface StatelessCategoriesTreeComponentProps
-  extends Pick<StatelessCategoriesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<StatelessCategoriesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured"> {
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
 }

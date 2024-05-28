@@ -167,6 +167,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     selectionMode={"extended"}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
                   />
                 ),
               },
@@ -174,14 +175,24 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: `stateless-${CategoriesTreeComponent.id}`,
                 getLabel: () => `${CategoriesTreeComponent.getLabel()} (Beta)`,
                 render: (props: TreeRenderProps) => (
-                  <StatelessCategoriesTreeComponent getSchemaContext={getSchemaContext} density={props.density} selectionStorage={unifiedSelectionStorage} />
+                  <StatelessCategoriesTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                  />
                 ),
               },
               {
                 id: `stateless-${IModelContentTreeComponent.id}`,
                 getLabel: () => `${IModelContentTreeComponent.getLabel()} (Beta)`,
                 render: (props: TreeRenderProps) => (
-                  <StatelessIModelContentTreeComponent getSchemaContext={getSchemaContext} density={props.density} selectionStorage={unifiedSelectionStorage} />
+                  <StatelessIModelContentTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                  />
                 ),
               },
               {
@@ -192,6 +203,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
                   />
                 ),
                 startIcon: <SvgTechnicalPreviewMiniBw />,

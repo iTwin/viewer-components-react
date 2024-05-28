@@ -22,6 +22,7 @@ interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   filter?: string;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -30,6 +31,8 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+
+const StatelessModelsTreeId = "models-tree-v2";
 
 /** @internal */
 export function StatelessModelsTree({
@@ -42,6 +45,7 @@ export function StatelessModelsTree({
   density,
   hierarchyLevelConfig,
   selectionMode,
+  onPerformanceMeasured,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessModelsVisibilityHandler({ viewport: activeView });
@@ -85,6 +89,9 @@ export function StatelessModelsTree({
       density={density}
       noDataMessage={getNoDataMessage(filter)}
       selectionMode={selectionMode}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
+      }}
     />
   );
 }

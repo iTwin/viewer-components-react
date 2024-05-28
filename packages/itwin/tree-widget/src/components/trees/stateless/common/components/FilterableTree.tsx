@@ -38,7 +38,7 @@ type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
 
 type FilterableTreeProps = FilterableTreeOwnProps &
-  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> &
+  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
   Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
 
 /** @internal */
@@ -76,6 +76,7 @@ function FilterableTreeRenderer({
   defaultHierarchyLevelSizeLimit,
   getHierarchyDefinition,
   selectionMode,
+  onPerformanceMeasured,
 }: Omit<FilterableTreeProps, "getSchemaContext"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const {
@@ -89,6 +90,7 @@ function FilterableTreeRenderer({
     sourceName: treeName,
     imodelAccess,
     getHierarchyDefinition,
+    onPerformanceMeasured,
     localizedStrings,
   });
 

@@ -13,7 +13,7 @@ import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 
 type StatelessIModelContentTreeProps = ComponentPropsWithoutRef<typeof StatelessIModelContentTree>;
 interface StatelessIModelContentTreeComponentProps
-  extends Pick<StatelessIModelContentTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<StatelessIModelContentTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured"> {
   selectionStorage: SelectionStorage;
 }
 

@@ -13,6 +13,7 @@ import type { HierarchyLevelConfig } from "../../common/Types";
 
 interface StatelessExternalSourcesTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
 type FilterableTreeProps = Parameters<typeof FilterableTree>[0];
@@ -20,8 +21,10 @@ type GetHierarchyDefinitionsProviderCallback = FilterableTreeProps["getHierarchy
 type StatelessExternalSourcesTreeProps = StatelessExternalSourcesTreeOwnProps &
   Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
+const StatelessExternalSourcesTreeId = "external-sources-tree-v2";
+
 /** @internal */
-export function StatelessExternalSourcesTree(props: StatelessExternalSourcesTreeProps) {
+export function StatelessExternalSourcesTree({ onPerformanceMeasured, ...props }: StatelessExternalSourcesTreeProps) {
   return (
     <FilterableTree
       {...props}
@@ -29,6 +32,9 @@ export function StatelessExternalSourcesTree(props: StatelessExternalSourcesTree
       getHierarchyDefinition={getDefinitionsProvider}
       getIcon={getIcon}
       selectionMode={props.selectionMode ?? "none"}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${StatelessExternalSourcesTreeId}-${action}`, duration);
+      }}
     />
   );
 };
