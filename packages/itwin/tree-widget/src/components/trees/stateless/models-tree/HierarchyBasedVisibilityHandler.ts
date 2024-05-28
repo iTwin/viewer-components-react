@@ -367,7 +367,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
               elements: ids,
               defaultStatus: () => {
                 const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-                return createVisibilityStatus(status.state, `groupingNode.${status}DueToCategory`);
+                return createVisibilityStatus(status.state, `groupingNode.${status.state}ThroughCategory`);
               },
               tooltips: {
                 allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
