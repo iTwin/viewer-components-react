@@ -1,23 +1,22 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { assert, expect } from "chai";
 import * as enzyme from "enzyme";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
-import { ImageMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
-import {
-  DisplayStyle3dState, IModelApp, IModelConnection, MapLayerSource, MapLayerSourceStatus, MapLayerTokenEndpoint, MockRender, NotifyMessageDetails,
-  OutputMessagePriority, ScreenViewport, ViewState3d,
-} from "@itwin/core-frontend";
+import type { MapSubLayerProps } from "@itwin/core-common";
+import { ImageMapLayerSettings } from "@itwin/core-common";
+import type { DisplayStyle3dState, IModelConnection, MapLayerTokenEndpoint, ScreenViewport, ViewState3d } from "@itwin/core-frontend";
+import { IModelApp, MapLayerSource, MapLayerSourceStatus, MockRender, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { Select } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../mapLayers";
-import { MapUrlDialog, SourceState } from "../ui/widget/MapUrlDialog";
+import type { SourceState } from "../ui/widget/MapUrlDialog";
+import { MapUrlDialog } from "../ui/widget/MapUrlDialog";
 import { AccessClientMock, TokenEndpointMock } from "./AccessClientMock";
 import { TestUtils } from "./TestUtils";
-import * as React from "react";
 
 describe("MapUrlDialog", () => {
   const sandbox = sinon.createSandbox();
@@ -50,7 +49,6 @@ describe("MapUrlDialog", () => {
   };
 
   const testAddAuthLayer = async (isOAuth: boolean, format: string) => {
-
     const sampleLayerSettings = getSampleLayerSettings(format, true);
     let endPoint: MapLayerTokenEndpoint | undefined;
     if (isOAuth) {
@@ -63,7 +61,7 @@ describe("MapUrlDialog", () => {
       });
     });
 
-    const spyOnOkResult= sandbox.fake();
+    const spyOnOkResult = sandbox.fake();
     const component = enzyme.mount(<MapUrlDialog isOverlay={false} activeViewport={viewportMock.object} onOkResult={spyOnOkResult} />);
     const layerTypeSelect = component.find(Select).at(0);
     await (layerTypeSelect.props() as any).onChange(format);
@@ -107,8 +105,9 @@ describe("MapUrlDialog", () => {
 
     await TestUtils.flushAsyncOperations();
 
-    if (!sampleLayerSettings)
+    if (!sampleLayerSettings) {
       assert.fail("Invalid layer settings");
+    }
 
     if (!isOAuth) {
       // Make sure credentials are returned part of the source object
@@ -131,7 +130,6 @@ describe("MapUrlDialog", () => {
   before(async () => {
     await MockRender.App.startup();
     await TestUtils.initialize();
-
   });
 
   after(async () => {
@@ -156,11 +154,9 @@ describe("MapUrlDialog", () => {
     viewportMock.setup((viewport) => viewport.iModel).returns(() => viewMock.object.iModel);
     viewportMock.setup((viewport) => viewport.view).returns(() => viewMock.object);
     viewportMock.setup((viewport) => viewport.displayStyle).returns(() => displayStyleMock.object);
-
   });
 
-  const mockModalUrlDialogOk = (_result?: SourceState) => {
-  };
+  const mockModalUrlDialogOk = (_result?: SourceState) => {};
 
   it("renders", () => {
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
@@ -179,11 +175,12 @@ describe("MapUrlDialog", () => {
 
   it("attach a valid WMS layer (with sublayers)", async () => {
     const sampleWmsLayerSettings = getSampleLayerSettings("WMS", false);
-    if (!sampleWmsLayerSettings)
+    if (!sampleWmsLayerSettings) {
       assert.fail("Invalid layer settings");
+    }
 
     const spyMessage = sandbox.spy(IModelApp.notifications, "outputMessage");
-    const spyOnOkResult= sandbox.fake();
+    const spyOnOkResult = sandbox.fake();
 
     sandbox.stub(MapLayerSource.prototype, "validateSource").callsFake(async function (_ignoreCache?: boolean) {
       return Promise.resolve({ status: MapLayerSourceStatus.Valid, subLayers: sampleWmsLayerSettings.subLayers });
@@ -235,7 +232,9 @@ describe("MapUrlDialog", () => {
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
     const allRadios = component.find('input[type="radio"]');
     expect(allRadios.length).equals(0);
-    allRadios.forEach((radio) => {expect(radio.props().disabled).to.be.true;});
+    allRadios.forEach((radio) => {
+      expect(radio.props().disabled).to.be.true;
+    });
   });
 
   it("should not display user preferences options if iTwinConfig is defined but the option is OFF ", () => {
@@ -247,7 +246,9 @@ describe("MapUrlDialog", () => {
     const component = enzyme.mount(<MapUrlDialog activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
     const allRadios = component.find('input[type="radio"]');
     expect(allRadios.length).equals(0);
-    allRadios.forEach((radio) => {expect(radio.props().disabled).to.be.true;});
+    allRadios.forEach((radio) => {
+      expect(radio.props().disabled).to.be.true;
+    });
   });
 
   it("should display user preferences options if iTwinConfig is defined AND option is ON", () => {
@@ -256,8 +257,15 @@ describe("MapUrlDialog", () => {
       save: undefined,
       delete: undefined,
     }));
-    const component = enzyme.mount(<MapUrlDialog mapLayerOptions={{showUserPreferencesStorageOptions: true}} activeViewport={viewportMock.object} isOverlay={false} onOkResult={mockModalUrlDialogOk} />);
-    const allRadios= component.find('input[type="radio"]');
+    const component = enzyme.mount(
+      <MapUrlDialog
+        mapLayerOptions={{ showUserPreferencesStorageOptions: true }}
+        activeViewport={viewportMock.object}
+        isOverlay={false}
+        onOkResult={mockModalUrlDialogOk}
+      />,
+    );
+    const allRadios = component.find('input[type="radio"]');
     expect(allRadios.length).to.equals(2);
   });
 
@@ -302,5 +310,4 @@ describe("MapUrlDialog", () => {
 
     component.unmount();
   });
-
 });

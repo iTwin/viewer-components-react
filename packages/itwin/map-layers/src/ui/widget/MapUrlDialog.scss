@@ -9,7 +9,7 @@ $hovered-icon-color: $buic-foreground-primary-tone;
 $default-font-size: --iui-font-size-1;
 
 .map-layer-url-dialog {
-  z-Index: 21000;
+  z-index: 21000;
 }
 
 .map-layer-url-dialog-content {
@@ -19,7 +19,7 @@ $default-font-size: --iui-font-size-1;
 
 .map-layer-source-previewBadge-icon {
   margin-left: 4px;
-  display:inline;
+  display: inline;
   vertical-align: middle;
 }
 .map-layer-source-select-previewBadge {
@@ -102,7 +102,7 @@ $default-font-size: --iui-font-size-1;
 }
 
 .map-layer-features-footer {
-display: flex;
+  display: flex;
 }
 
 .map-layer-features-footer-buttons {
@@ -111,16 +111,15 @@ display: flex;
 
 .map-layer-features-footer-button {
   margin-left: 5px;
- }
+}
 
- .map-layer-features-footer-warnMessage {
+.map-layer-features-footer-warnMessage {
   flex: 1 1;
   margin-left: 2px;
   height: 3rem;
- }
+}
 
 .map-layer-source-warnMessage {
-
   .map-layer-source-warnMessage-label {
     margin-left: 5px;
   }

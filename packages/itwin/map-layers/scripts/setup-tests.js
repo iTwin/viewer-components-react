@@ -1,31 +1,34 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 // Node 15+ using MessageChannel prevents node.js process from exiting
 // This becomes an issue when testing React code within JSDOM environment, as the test process cannot exit properly.
 // https://github.com/facebook/react/issues/20756
-const commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
-if (commonjsGlobal.MessageChannel)
-  delete commonjsGlobal.MessageChannel;
+const commonjsGlobal =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof window !== "undefined"
+      ? window
+      : typeof global !== "undefined"
+        ? global
+        : typeof self !== "undefined"
+          ? self
+          : {};
+if (commonjsGlobal.MessageChannel) delete commonjsGlobal.MessageChannel;
 
 const path = require("path");
 
 // A workaround to @testing-library/react {@testing-library/dom {wait-for-expect}} breaking somewhere,
 // because somewhere (most likely in jsdom) window.Date becomes undefined.
 // Similar issue mentioned in https://github.com/vuejs/vue-test-utils/issues/936
-require('jsdom-global')(
-  undefined,
-  {
-      url: "https://dev.wue-theme.test"
-  }
-);
+require("jsdom-global")(undefined, {
+  url: "https://dev.wue-theme.test",
+});
 window.Date = Date;
 document.elementFromPoint = () => null;
 
-const {
-  JSDOM
-} = require('jsdom');
+const { JSDOM } = require("jsdom");
 global.DOMParser = new JSDOM().window.DOMParser;
 
 /** Enzyme mount with automatic unmount after the test. */
@@ -42,7 +45,7 @@ global.enzymeMount = (...args) => {
   };
   mounted.push(result);
   return result;
-}
+};
 
 const chai = require("chai");
 const sinonChai = require("sinon-chai");
@@ -61,7 +64,7 @@ m._load = (request, parent, isMain) => {
 
 // setup enzyme (testing utils for React)
 enzyme.configure({
-  adapter: new (require("@wojtekmaj/enzyme-adapter-react-17/build"))()
+  adapter: new (require("@wojtekmaj/enzyme-adapter-react-17/build"))(),
 });
 chaiJestSnapshot.addSerializer(require("enzyme-to-json/serializer"));
 
@@ -73,7 +76,7 @@ chai.use(spies);
 chai.use(sinonChai);
 try {
   chai.use(require("chai-string"));
-} catch (e) { }
+} catch (e) {}
 
 before(function () {
   chaiJestSnapshot.resetSnapshotRegistry();
@@ -90,8 +93,7 @@ beforeEach(function () {
     // we want snapshot tests to use the same random data between runs
     const faker = require("faker");
     let seed = 0;
-    for (let i = 0; i < currentTest.fullTitle().length; ++i)
-      seed += currentTest.fullTitle().charCodeAt(i);
+    for (let i = 0; i < currentTest.fullTitle().length; ++i) seed += currentTest.fullTitle().charCodeAt(i);
     faker.seed(seed);
   } catch (e) {
     // may throw if package doesn't use faker - ignore
@@ -108,20 +110,19 @@ beforeEach(function () {
 
 afterEach(async () => {
   for (const m of mounted) {
-    if (!m[isMounted])
-      continue;
+    if (!m[isMounted]) continue;
     m.unmount();
   }
   mounted = [];
   try {
     const rtl = require("@testing-library/react");
     rtl.cleanup();
-  } catch (e) { }
+  } catch (e) {}
   await rhtl.cleanup();
   try {
     const sinon = require("sinon");
     sinon.restore();
-  } catch (e) { }
+  } catch (e) {}
 });
 
 global.DOMMatrix = class DOMMatrix {

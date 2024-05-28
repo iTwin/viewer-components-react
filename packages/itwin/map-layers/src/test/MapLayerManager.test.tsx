@@ -1,29 +1,25 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable deprecation/deprecation */
+/* eslint-disable @itwin/no-internal */
 
 import { expect, should } from "chai";
-import * as React from "react";
 import * as sinon from "sinon";
+import { ImageMapLayerSettings } from "@itwin/core-common";
 import * as coreFrontend from "@itwin/core-frontend";
 import { fireEvent, getAllByTestId, getByTestId, getByTitle, queryByText, render } from "@testing-library/react";
+import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { MapLayerManager } from "../ui/widget/MapLayerManager";
 import { TestUtils } from "./TestUtils";
-import { GuidString } from "@itwin/core-bentley";
-import { MapLayerPreferences, MapLayerSourceChangeType } from "../MapLayerPreferences";
 import { ViewportMock } from "./ViewportMock";
-import { ImageMapLayerSettings } from "@itwin/core-common";
 
+import type { GuidString } from "@itwin/core-bentley";
 describe("MapLayerManager", () => {
   const sourceDataset: any = [
-    { formatId: "ArcGIS",
-      name: "source2",
-      url: "https://test.com/Mapserver" },
-    { formatId: "ArcGIS",
-      name: "source1",
-      url: "https://test.com/Mapserver" },
+    { formatId: "ArcGIS", name: "source2", url: "https://test.com/Mapserver" },
+    { formatId: "ArcGIS", name: "source1", url: "https://test.com/Mapserver" },
   ];
 
   const sandbox = sinon.createSandbox();
@@ -52,27 +48,40 @@ describe("MapLayerManager", () => {
     viewportMock.setup();
   });
 
-  async function  testSourceItems(testFunc: (menuItems: NodeListOf<HTMLLIElement>)  => void, customDataset?: any, nbRender?: number, extraFunc?: () => void) {
-    sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function ( _iTwinId: GuidString, _iModelId?: GuidString) {
+  async function testSourceItems(testFunc: (menuItems: NodeListOf<HTMLLIElement>) => void, customDataset?: any, nbRender?: number, extraFunc?: () => void) {
+    sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function (_iTwinId: GuidString, _iModelId?: GuidString) {
       const dataset = customDataset ? customDataset : sourceDataset;
-      return dataset.map((source: any)=> coreFrontend.MapLayerSource.fromJSON(source)!);
+      return dataset.map((source: any) => coreFrontend.MapLayerSource.fromJSON(source)!);
     });
 
-    render(<div><MapLayerManager getContainerForClone={() => document.body}  activeViewport={viewportMock.object} ></MapLayerManager></div>);
-    let renderResult = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
+    render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
+    let renderResult = render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
 
     // Make additional render if needed
-    const renderTimes = nbRender && nbRender > 2 ? nbRender-1 : 0;
+    const renderTimes = nbRender && nbRender > 2 ? nbRender - 1 : 0;
     if (renderTimes > 0) {
       Array.from(Array(renderTimes)).forEach(() => {
-        renderResult = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
+        renderResult = render(
+          <div>
+            <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+          </div>,
+        );
       });
     }
-    const {container} = renderResult;
+    const { container } = renderResult;
     await TestUtils.flushAsyncOperations();
 
-    if (extraFunc)
+    if (extraFunc) {
       extraFunc();
+    }
 
     const addButton = container.querySelector(attachLAyerButtonSelector) as HTMLElement;
     should().exist(addButton);
@@ -81,11 +90,14 @@ describe("MapLayerManager", () => {
     const sourceList = document.querySelector(sourceListSelector) as HTMLUListElement;
     should().exist(sourceList);
     testFunc(sourceList.querySelectorAll("li"));
-
   }
 
   it("renders base maps", async () => {
-    const { container } = render(<div><MapLayerManager getContainerForClone={() => document.body}  activeViewport={viewportMock.object} ></MapLayerManager></div>);
+    const { container } = render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
 
     await TestUtils.flushAsyncOperations();
 
@@ -103,7 +115,6 @@ describe("MapLayerManager", () => {
     expect(menuItems[1].textContent).to.eql("WellKnownBaseMaps.BingProvider.Aerial");
     expect(menuItems[2].textContent).to.eql("WellKnownBaseMaps.BingProvider.Hybrid");
     expect(menuItems[3].textContent).to.eql("WellKnownBaseMaps.BingProvider.Street");
-
   });
 
   it("renders source list", async () => {
@@ -117,22 +128,31 @@ describe("MapLayerManager", () => {
   });
 
   it("renders source list once when loaded twice  ", async () => {
-
-    await testSourceItems(async (sourceItems: NodeListOf<HTMLLIElement>) => {
-      expect(sourceItems.length).to.eq(2);
-    },
-    undefined,
-    2);
+    await testSourceItems(
+      async (sourceItems: NodeListOf<HTMLLIElement>) => {
+        expect(sourceItems.length).to.eq(2);
+      },
+      undefined,
+      2,
+    );
   });
 
   it("renders source list without duplicates", async () => {
     const customDataset: coreFrontend.MapLayerSources[] = [...sourceDataset, sourceDataset[0]];
-    sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function ( _iTwinId: GuidString, _iModelId?: GuidString) {
-      return customDataset.map((source: any)=> coreFrontend.MapLayerSource.fromJSON(source)!);
+    sandbox.stub(MapLayerPreferences, "getSources").callsFake(async function (_iTwinId: GuidString, _iModelId?: GuidString) {
+      return customDataset.map((source: any) => coreFrontend.MapLayerSource.fromJSON(source)!);
     });
 
-    render(<div><MapLayerManager getContainerForClone={() => document.body}  activeViewport={viewportMock.object} ></MapLayerManager></div>);
-    const { container } = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
+    render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
+    const { container } = render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
 
     await TestUtils.flushAsyncOperations();
 
@@ -149,49 +169,57 @@ describe("MapLayerManager", () => {
   });
 
   it("should remove source item after 'onLayerSourceChanged' delete event", async () => {
-    await testSourceItems(async (sourceItems: NodeListOf<HTMLLIElement>) => {
-      expect(sourceItems.length).to.eq(1);
-      expect(sourceItems[0].textContent).to.eql(sourceDataset[1].name);
-    },
-    undefined,
-    1,
-    () => {
-      MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Removed, coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]));
-    });
+    await testSourceItems(
+      async (sourceItems: NodeListOf<HTMLLIElement>) => {
+        expect(sourceItems.length).to.eq(1);
+        expect(sourceItems[0].textContent).to.eql(sourceDataset[1].name);
+      },
+      undefined,
+      1,
+      () => {
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Removed, coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]));
+      },
+    );
   });
 
   it("should rename source item after 'onLayerSourceChanged' renamed event", async () => {
     const renamedName = "RenamedSource";
-    await testSourceItems(async (sourceItems: NodeListOf<HTMLLIElement>) => {
-      expect(sourceItems.length).to.eq(2);
-      expect(sourceItems[0].textContent).to.eql(sourceDataset[1].name);
-      expect(sourceItems[1].textContent).to.eql(renamedName);
-    },
-    undefined,
-    1,
-    () => {
-      MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Replaced,
-        coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]),
-        coreFrontend.MapLayerSource.fromJSON({...sourceDataset[0], name: renamedName}));
-    });
+    await testSourceItems(
+      async (sourceItems: NodeListOf<HTMLLIElement>) => {
+        expect(sourceItems.length).to.eq(2);
+        expect(sourceItems[0].textContent).to.eql(sourceDataset[1].name);
+        expect(sourceItems[1].textContent).to.eql(renamedName);
+      },
+      undefined,
+      1,
+      () => {
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(
+          MapLayerSourceChangeType.Replaced,
+          coreFrontend.MapLayerSource.fromJSON(sourceDataset[0]),
+          coreFrontend.MapLayerSource.fromJSON({ ...sourceDataset[0], name: renamedName }),
+        );
+      },
+    );
   });
 
   it("should add source item after 'onLayerSourceChanged' added event", async () => {
     const newSourceProps = {
       formatId: "ArcGIS",
       name: "source3",
-      url: "https://test.com/Mapserver" };
+      url: "https://test.com/Mapserver",
+    };
 
-    await testSourceItems(async (sourceItems: NodeListOf<HTMLLIElement>) => {
-      expect(sourceItems.length).to.eq(3);
-      expect(sourceItems[2].textContent).to.eql(newSourceProps.name);
-    },
-    undefined,
-    1,
-    () => {
-      MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added,
-        coreFrontend.MapLayerSource.fromJSON(newSourceProps) );
-    });
+    await testSourceItems(
+      async (sourceItems: NodeListOf<HTMLLIElement>) => {
+        expect(sourceItems.length).to.eq(3);
+        expect(sourceItems[2].textContent).to.eql(newSourceProps.name);
+      },
+      undefined,
+      1,
+      () => {
+        MapLayerPreferences.onLayerSourceChanged.raiseEvent(MapLayerSourceChangeType.Added, coreFrontend.MapLayerSource.fromJSON(newSourceProps));
+      },
+    );
   });
 
   it("should maintain checkboxes in synch", async () => {
@@ -206,13 +234,17 @@ describe("MapLayerManager", () => {
       transparency: 0,
       url: "https://server/MapServer",
     });
-    const layer2 = ImageMapLayerSettings.fromJSON({...layer1.toJSON(), name: "layer2"});
+    const layer2 = ImageMapLayerSettings.fromJSON({ ...layer1.toJSON(), name: "layer2" });
     viewportMock.backgroundLayers = [layer1, layer2];
     viewportMock.overlayLayers = [layer1, layer2];
     viewportMock.setup();
 
-    const renderResult = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
-    const {container} = renderResult;
+    const renderResult = render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
+    const { container } = renderResult;
     await TestUtils.flushAsyncOperations();
 
     const layerSections = getAllByTestId(container, "map-manager-layer-section");
@@ -222,17 +254,17 @@ describe("MapLayerManager", () => {
       const layerCheckboxes = getAllByTestId<HTMLInputElement>(section, "select-item-checkbox");
 
       // Make sure that initially all checkboxes are not checked
-      layerCheckboxes.every((value)=>!value.checked);
+      layerCheckboxes.every((value) => !value.checked);
       expect(selectAllCheckbox.checked).to.be.false;
 
       // Clicking on the 'select all' checkbox in the header, should check all layer checkboxes
       selectAllCheckbox.click();
-      expect(layerCheckboxes.every((value)=>value.checked)).to.be.true;
+      expect(layerCheckboxes.every((value) => value.checked)).to.be.true;
       expect(selectAllCheckbox.checked).to.be.true;
 
       // Clicking again should deselect all layer checkboxes
       selectAllCheckbox.click();
-      expect(layerCheckboxes.every((value)=>!value.checked)).to.be.true;
+      expect(layerCheckboxes.every((value) => !value.checked)).to.be.true;
       expect(selectAllCheckbox.checked).to.be.false;
 
       // 'Select all checkbox' should be check when a single layer is checked
@@ -242,11 +274,10 @@ describe("MapLayerManager", () => {
 
       // Clicking 'Select all checkbox' at this point should deselect all layers checkbox
       selectAllCheckbox.click();
-      expect(layerCheckboxes.every((value)=>value.checked)).to.be.false;
+      expect(layerCheckboxes.every((value) => value.checked)).to.be.false;
     };
     doLayerSectionTests(layerSections[0]);
     doLayerSectionTests(layerSections[1]);
-
   });
 
   it("should detach layers", async () => {
@@ -261,13 +292,19 @@ describe("MapLayerManager", () => {
       transparency: 0,
       url: "https://server/MapServer",
     });
-    const overlayLayerSetting = ImageMapLayerSettings.fromJSON({...backgroundLayerSettings.toJSON(), name: "overlay"});
+    const overlayLayerSetting = ImageMapLayerSettings.fromJSON({ ...backgroundLayerSettings.toJSON(), name: "overlay" });
     viewportMock.backgroundLayers = [backgroundLayerSettings];
     viewportMock.overlayLayers = [overlayLayerSetting];
-    viewportMock.detachMapLayerByIndexFunc = (mapLayerIndex: coreFrontend.MapLayerIndex)=> {( mapLayerIndex.isOverlay? viewportMock.overlayLayers = [] : viewportMock.backgroundLayers = []);};
+    viewportMock.detachMapLayerByIndexFunc = (mapLayerIndex: coreFrontend.MapLayerIndex) => {
+      mapLayerIndex.isOverlay ? (viewportMock.overlayLayers = []) : (viewportMock.backgroundLayers = []);
+    };
     viewportMock.setup();
-    const renderResult = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
-    const {container} = renderResult;
+    const renderResult = render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
+    const { container } = renderResult;
     await TestUtils.flushAsyncOperations();
 
     const checkLayerSection = async (section: HTMLElement, sectionName: string) => {
@@ -310,13 +347,17 @@ describe("MapLayerManager", () => {
       transparency: 0,
       url: "https://server/MapServer",
     });
-    const overlayLayerSetting = ImageMapLayerSettings.fromJSON({...backgroundLayerSettings.toJSON(), name: "overlay"});
+    const overlayLayerSetting = ImageMapLayerSettings.fromJSON({ ...backgroundLayerSettings.toJSON(), name: "overlay" });
     viewportMock.backgroundLayers = [backgroundLayerSettings];
     viewportMock.overlayLayers = [overlayLayerSetting];
 
     viewportMock.setup();
-    const renderResult = render(<div><MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object} ></MapLayerManager></div>);
-    const {container} = renderResult;
+    const renderResult = render(
+      <div>
+        <MapLayerManager getContainerForClone={() => document.body} activeViewport={viewportMock.object}></MapLayerManager>
+      </div>,
+    );
+    const { container } = renderResult;
     await TestUtils.flushAsyncOperations();
 
     const checkLayerSection = async (section: HTMLElement) => {
