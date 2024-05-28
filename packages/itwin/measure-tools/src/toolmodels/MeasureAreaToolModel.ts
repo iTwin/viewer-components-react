@@ -52,11 +52,6 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     return this._currentMeasurement.isValidPolygon;
   }
 
-  public setPolygonWorldScale(scale: number | undefined) {
-    if (this._currentMeasurement)
-      this._currentMeasurement.setPolygonWorldScale(scale);
-  }
-
   public override get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }
 
   public setMeasurementViewport(viewType: string): boolean {

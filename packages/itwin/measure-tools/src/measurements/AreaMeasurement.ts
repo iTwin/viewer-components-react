@@ -131,10 +131,6 @@ export class AreaMeasurement extends Measurement {
     if (props) this.readFromJSON(props);
   }
 
-  public setPolygonWorldScale(worldScale: number | undefined) {
-    this.polygon.worldScale = worldScale;
-  }
-
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
     if (this.isDynamic) return false;
 
@@ -306,6 +302,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   public override onDrawingMetadataChanged(): void {
+    this.polygon.worldScale = this.worldScale;
     this._polygon.recomputeFromPoints();
   }
 

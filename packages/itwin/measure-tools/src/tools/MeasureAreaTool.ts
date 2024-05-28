@@ -132,7 +132,6 @@ MeasureAreaToolModel
         if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
           const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
           this.toolModel.drawingMetaData = data;
-          this.toolModel.setPolygonWorldScale(drawingInfo.worldScale);
         }
       }
     }
