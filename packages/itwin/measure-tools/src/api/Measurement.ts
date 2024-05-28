@@ -67,6 +67,11 @@ export namespace DrawingMetadata {
     return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
 
   }
+
+  // Returns a new DrawingMetaData object with one or more properties changed.
+  export function withOverrides(current: DrawingMetadata, overrides?: Partial<DrawingMetadata>): DrawingMetadata {
+    return { ...current, ...overrides };
+  }
 }
 
 /** Abstract class for serializers that read/write measurements from JSON. */
@@ -270,13 +275,6 @@ export interface DrawingMetadata {
   /** Extents of the drawing in sheet coordinates */
   extents?: Point2d;
 
-}
-
-export namespace DrawingMetadata {
-  // Returns a new DrawingMetaData object with one or more properties changed.
-  export function withOverrides(current: DrawingMetadata, overrides?: Partial<DrawingMetadata>): DrawingMetadata {
-    return { ...current, ...overrides };
-  }
 }
 
 /** Handler function that modifies the data sent to the widget for display. */
