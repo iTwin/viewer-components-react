@@ -135,12 +135,11 @@ export class MeasurementViewTarget {
       this.exclude(excluded);
 
     if (viewIds)
-      this.setViewIds(viewIds);
+      this.addViewIds(viewIds);
   }
 
-  public setViewIds(viewIds: string | string[]) {
+  public addViewIds(viewIds: string | string[]) {
     const arr = Array.isArray(viewIds) ? viewIds : [viewIds];
-    this._viewIds.clear();
     for (const id of arr) {
       this._viewIds.add(id);
     }
@@ -210,6 +209,7 @@ export class MeasurementViewTarget {
   public clear() {
     this._included.clear();
     this._excluded.clear();
+    this._viewIds.clear();
   }
 
   /** Creates a deep copy of the view type object. */
@@ -232,6 +232,11 @@ export class MeasurementViewTarget {
         return false;
     }
 
+    for (const viewId of this._viewIds) {
+      if (!other.viewIds.has(viewId))
+        return false;
+    }
+
     return true;
   }
 
@@ -243,6 +248,7 @@ export class MeasurementViewTarget {
     this.clear();
     this.include(Array.from(other.included));
     this.exclude(Array.from(other.excluded));
+    this.addViewIds(Array.from(other.viewIds));
   }
 
   /**
@@ -252,6 +258,7 @@ export class MeasurementViewTarget {
   public merge(other: MeasurementViewTarget) {
     this.include(Array.from(other.included));
     this.exclude(Array.from(other.excluded));
+    this.addViewIds(Array.from(other.viewIds));
   }
 
   /**
@@ -328,7 +335,7 @@ export class MeasurementViewTarget {
     const viewType = MeasurementViewTarget.classifyViewport(vp);
 
     // Is the viewId valid
-    if (this._viewIds.size > 0 && !this.viewIds.has(vp.view.id))
+    if (this._viewIds.size > 0 && !this.isValidViewId(vp.view.id))
       return false;
 
     // Is this type excluded?
@@ -382,7 +389,8 @@ export class MeasurementViewTarget {
   public toJSON(): MeasurementViewTargetProps {
     const included = Array.from(this._included);
     const excluded = Array.from(this._excluded);
-    return { included, excluded };
+    const viewIds = Array.from(this._viewIds);
+    return { included, excluded, viewIds };
   }
 
   /**
@@ -397,6 +405,9 @@ export class MeasurementViewTarget {
 
     if (props.excluded !== undefined && Array.isArray(props.excluded))
       this.add(props.excluded, false);
+
+    if (props.viewIds !== undefined && Array.isArray(props.viewIds))
+      this.addViewIds(props.viewIds);
   }
 
   /**
@@ -405,7 +416,7 @@ export class MeasurementViewTarget {
    * @returns constructed view type.
    */
   public static fromJSON(props: MeasurementViewTargetProps): MeasurementViewTarget {
-    return new MeasurementViewTarget(props.included, props.excluded);
+    return new MeasurementViewTarget(props.included, props.excluded, props.viewIds);
   }
 
   /**

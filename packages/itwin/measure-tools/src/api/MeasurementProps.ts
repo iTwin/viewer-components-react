@@ -42,4 +42,5 @@ export interface MeasurementProps {
 export interface MeasurementViewTargetProps {
   included: string[];
   excluded: string[];
+  viewIds: string[];
 }

@@ -347,7 +347,7 @@ export abstract class Measurement {
   }
 
   public set sheetViewId(id: string | undefined) {
-    this.viewTarget.setViewIds(id ?? []);
+    this.viewTarget.addViewIds(id ?? []);
   }
 
   /** Gets or sets if the measurement should be drawn. */
