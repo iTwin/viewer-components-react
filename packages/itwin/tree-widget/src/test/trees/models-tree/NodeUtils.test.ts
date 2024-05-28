@@ -5,6 +5,7 @@ import { ModelsTreeNodeType, NodeUtils } from "../../../components/trees/common/
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
+
 describe("Node utils", () => {
   it("getNodeType", () => {
     expect(NodeUtils.getNodeType({} as TreeNodeItem)).to.be.eq(ModelsTreeNodeType.Unknown);
