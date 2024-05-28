@@ -13,6 +13,7 @@ import type { HierarchyLevelConfig } from "../../common/Types";
 
 interface StatelessIModelContentTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
 type FilterableTreeProps = Parameters<typeof FilterableTree>[0];
@@ -20,8 +21,10 @@ type GetHierarchyDefinitionsProviderCallback = FilterableTreeProps["getHierarchy
 type StatelessIModelContentTreeProps = StatelessIModelContentTreeOwnProps &
   Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
+const StatelessIModelContentTreeId = "imodel-content-tree-v2";
+
 /** @internal */
-export function StatelessIModelContentTree(props: StatelessIModelContentTreeProps) {
+export function StatelessIModelContentTree({ onPerformanceMeasured, ...props }: StatelessIModelContentTreeProps) {
   return (
     <FilterableTree
       {...props}
@@ -29,6 +32,9 @@ export function StatelessIModelContentTree(props: StatelessIModelContentTreeProp
       getHierarchyDefinition={getDefinitionsProvider}
       getIcon={getIcon}
       selectionMode={props.selectionMode ?? "none"}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${StatelessIModelContentTreeId}-${action}`, duration);
+      }}
     />
   );
 };

@@ -13,7 +13,7 @@ import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 
 type StatelessExternalSourcesTreeProps = ComponentPropsWithoutRef<typeof StatelessExternalSourcesTree>;
 interface StatelessExternalSourcesTreeComponentProps
-  extends Pick<StatelessExternalSourcesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<StatelessExternalSourcesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured"> {
   selectionStorage: SelectionStorage;
 }
 
