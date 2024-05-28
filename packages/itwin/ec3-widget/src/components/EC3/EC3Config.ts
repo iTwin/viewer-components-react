@@ -19,6 +19,7 @@ export interface EC3ConfigCommonProps {
    */
   clientId: string;
   iTwinId: string;
+  iModelId: string;
 
   /**
    * A callback function that returns an access token for authenticating API requests.
@@ -81,6 +82,7 @@ export class EC3Config {
   public readonly reportingBasePath: string;
   public readonly carbonCalculationBasePath: string;
   public readonly iTwinId: string;
+  public readonly iModelId: string;
   public readonly getAccessToken: GetAccessTokenFn;
   public readonly getEC3AccessToken: GetAccessTokenFn;
   private token?: EC3Token;
@@ -90,6 +92,7 @@ export class EC3Config {
     this.clientId = props.clientId;
     this.ec3Uri = getDefaultEC3Uri(props.ec3Uri);
     this.iTwinId = props.iTwinId;
+    this.iModelId = props.iModelId;
 
     this.reportingBasePath = (props.reportingBasePath)
       ? REPORTING_BASE_PATH.replace("https://api.bentley.com", props.reportingBasePath)

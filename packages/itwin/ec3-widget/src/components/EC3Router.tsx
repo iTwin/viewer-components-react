@@ -5,8 +5,8 @@
 import React from "react";
 import type { Route } from "./EC3Widget";
 import { RouteStep } from "./EC3Widget";
-import { TemplateMenu } from "./TemplateMenu";
 import { Templates } from "./Templates";
+import { ReportCreationComponent } from "./TemplateMenuV2";
 export interface EC3RouterProps {
   currentRoute: Route;
   navigateTo: (getNextRoute: (prev: Route | undefined) => Route) => void;
@@ -26,9 +26,10 @@ export const EC3Router = ({
           onClickCreate={() =>
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
-              title: "Create Template",
+              title: "Create Report",
               routingFields: {},
-            }))}
+            }))
+          }
           onClickTemplateTitle={(t) =>
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
@@ -39,9 +40,7 @@ export const EC3Router = ({
         />
       );
     case RouteStep.TemplateMenu:
-      return (
-        <TemplateMenu template={template} onClickCancel={goBack} onSaveSuccess={goBack} />
-      );
+      return <ReportCreationComponent template={template} onClickCancel={goBack} onSaveSuccess={goBack} />;
     default:
       return null;
   }

@@ -231,6 +231,7 @@ const configuredUiItems = new Map<string, UiItem>([
           redirectUri: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
           reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
           carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
+          iModelId: process.env.IMJS_IMODEL_ID ?? "",
         }),
       ],
     },
