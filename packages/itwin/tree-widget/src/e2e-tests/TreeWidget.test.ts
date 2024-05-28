@@ -149,7 +149,7 @@ test.describe("tree widget", () => {
       await treeWidget.getByRole("combobox").click();
       await page.getByRole("listbox").waitFor();
 
-      const externalSourcesTree = page.getByText("External Sources");
+      const externalSourcesTree = page.getByText("External Sources", { exact: true });
       await externalSourcesTree.click();
       await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
 

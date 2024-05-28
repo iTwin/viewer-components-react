@@ -463,6 +463,15 @@ export function showAllCategories(categories: string[], viewport: Viewport): Pro
 export function showAllModels(models: string[], viewport: Viewport): Promise<void>;
 
 // @beta
+export const StatelessCategoriesTreeComponent: (props: StatelessCategoriesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessExternalSourcesTreeComponent: (props: StatelessExternalSourcesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessIModelContentTreeComponent: (props: StatelessIModelContentTreeComponentProps) => JSX.Element | null;
+
+// @beta
 export const StatelessModelsTreeComponent: (props: StatelessModelsTreeComponentProps) => JSX.Element | null;
 
 // @internal (undocumented)
