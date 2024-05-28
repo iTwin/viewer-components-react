@@ -12,10 +12,10 @@
     flex-direction: column;
 
     .core-tree-node {
-      >.contents {
+      > .contents {
         padding-left: 31px;
 
-        >.core-image-checkbox {
+        > .core-image-checkbox {
           top: 5px;
         }
       }
@@ -33,10 +33,9 @@
 .map-layer-select-features-dialog {
   .map-manager-sublayer-tree-content {
     .core-tree-node {
-    // Revert margin added by ControlledTree on each node (there is no options to disable it)
+      // Revert margin added by ControlledTree on each node (there is no options to disable it)
       margin-left: -28px;
     }
-
   }
 }
 
@@ -49,13 +48,11 @@
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-
   }
 
   .tree-toolbar-searchbox {
     margin-left: 6px;
     width: 100%;
-    ;
   }
 }
 

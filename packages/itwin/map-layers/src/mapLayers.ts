@@ -1,9 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import { Localization, TranslationOptions } from "@itwin/core-common";
-import { IModelApp, UserPreferencesAccess } from "@itwin/core-frontend";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { Localization, TranslationOptions } from "@itwin/core-common";
+import type { UserPreferencesAccess } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 
 export interface MapLayersConfig {
   localization?: Localization;
@@ -31,9 +32,7 @@ export class MapLayersUI {
   public static async initialize(config?: MapLayersConfig): Promise<void> {
     // register namespace containing localized strings for this package
     MapLayersUI.localization = config?.localization ?? IModelApp.localization;
-    await MapLayersUI.localization.registerNamespace(
-      MapLayersUI.localizationNamespace
-    );
+    await MapLayersUI.localization.registerNamespace(MapLayersUI.localizationNamespace);
 
     MapLayersUI._iTwinConfig = config?.iTwinConfig;
   }
@@ -49,6 +48,6 @@ export class MapLayersUI {
   }
 
   public static translate(key: string | string[], options?: TranslationOptions): string {
-    return MapLayersUI.localization.getLocalizedString(key, {...options, ns: MapLayersUI._defaultNs});
+    return MapLayersUI.localization.getLocalizedString(key, { ...options, ns: MapLayersUI._defaultNs });
   }
 }

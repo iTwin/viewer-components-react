@@ -3,15 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { PrimitiveValue } from "@itwin/appui-abstract";
+import type { PrimitiveValue } from "@itwin/appui-abstract";
 import { useActiveFrontstageDef, WidgetState } from "@itwin/appui-react";
-import { ActionButtonRendererProps, VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
+import type { ActionButtonRendererProps } from "@itwin/components-react";
+import { VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
 import { FillCentered, Orientation, ResizableContainerObserver } from "@itwin/core-react";
 import { SvgCopy } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { MapLayersUI } from "../../mapLayers";
 import { FeatureInfoUiItemsProvider } from "../FeatureInfoUiItemsProvider";
-import { MapFeatureInfoOptions } from "../Interfaces";
+import type { MapFeatureInfoOptions } from "../Interfaces";
 import { FeatureInfoDataProvider } from "./FeatureInfoDataProvider";
 
 export function useSpecificWidgetDef(id: string) {
@@ -26,7 +27,6 @@ interface MapFeatureInfoWidgetProps {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetProps) {
-
   const dataProvider = React.useRef<FeatureInfoDataProvider>();
   const [hasData, setHasData] = React.useState<boolean>(false);
 
@@ -62,16 +62,22 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
   }, []);
 
   const copyButton = React.useCallback(
-    (props: ActionButtonRendererProps) => props.isPropertyHovered &&
-      <div>
-        <IconButton styleType="borderless" onClick={() => {
-          const value = props.property.value;
-          if (value !== undefined && value.hasOwnProperty("displayValue"))
-            navigator.clipboard.writeText((value as PrimitiveValue).displayValue ?? "").catch((_) => { });
-        }}>
-          <SvgCopy/>
-        </IconButton>
-      </div>,
+    (props: ActionButtonRendererProps) =>
+      props.isPropertyHovered && (
+        <div>
+          <IconButton
+            styleType="borderless"
+            onClick={() => {
+              const value = props.property.value;
+              if (value !== undefined && value.hasOwnProperty("displayValue")) {
+                navigator.clipboard.writeText((value as PrimitiveValue).displayValue ?? "").catch((_) => {});
+              }
+            }}
+          >
+            <SvgCopy />
+          </IconButton>
+        </div>
+      ),
     [],
   );
 
@@ -84,7 +90,7 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
           dataProvider={dataProvider.current}
           orientation={Orientation.Vertical}
           isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled}
-          isPropertyHoverEnabled   // This need to be turned on to have the action button appears only when property hovered
+          isPropertyHoverEnabled // This need to be turned on to have the action button appears only when property hovered
           actionButtonRenderers={[copyButton]}
         />
       </ResizableContainerObserver>
