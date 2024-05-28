@@ -59,7 +59,7 @@ export interface ModelsTreeQueryHandler {
   /** Analogous to `queryElements` but returns a count instead of values */
   queryElementsCount(props: ElementsQueryProps): Observable<number>;
   /** Returns information about given elements */
-  queryElementInfo(props: { elementIds: Id64String | Id64Set; recursive?: boolean }): Observable<ElementInfo>;
+  queryElementInfo(props: { elementIds: Id64String | Id64Set; useRootElementCategoryId?: boolean }): Observable<ElementInfo>;
   /** Clears cached query results */
   invalidateCache(): void;
 }
@@ -247,7 +247,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     return this.runQuery(query, bindings, (row) => row[0]);
   }
 
-  public queryElementInfo(props: { elementIds: Id64String | Id64Set; recursive?: boolean }): Observable<ElementInfo> {
+  public queryElementInfo(props: { elementIds: Id64String | Id64Set; useRootElementCategoryId?: boolean }): Observable<ElementInfo> {
     const bindings = new Array<QueryBindable>();
     const initialQuery = /* sql */ `
       SELECT
@@ -258,7 +258,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
       FROM bis.GeometricElement3d
       WHERE ${bind("ECInstanceId", props.elementIds, bindings)}
     `;
-    const query = props.recursive
+    const query = props.useRootElementCategoryId
       ? /* sql */ `
       WITH RECURSIVE
         InitialElementInfo(ElementId, ModelId, CategoryId, ParentId) AS (

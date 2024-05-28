@@ -30,15 +30,14 @@ import {
   createSimpleTreeModelNode, createSubjectNode, createTestContentDescriptor, createTestPropertiesContentField, createTestPropertyInfo,
 } from "../Common";
 
-import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { PresentationInstanceFilterInfo } from "@itwin/presentation-components";
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
+import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { DelayLoadedTreeNodeItem, PageOptions, TreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTree";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { PresentationManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-
 describe("ModelsTree", () => {
   const sizeProps = { width: 200, height: 200 };
 
@@ -104,7 +103,6 @@ describe("ModelsTree", () => {
       const visibilityHandlerMock = {
         onVisibilityChange: visibilityChangeEvent,
         setFilteredDataProvider: () => {},
-        // eslint-disable-next-line deprecation/deprecation
       } as unknown as ModelsVisibilityHandler;
 
       beforeEach(() => {

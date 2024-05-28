@@ -83,11 +83,11 @@ export namespace NodeUtils {
    */
   export const getModelId = (node: Node): Id64String | undefined => {
     if (node.extendedData?.modelId) {
-      node.extendedData?.modelId;
+      return node.extendedData?.modelId;
     }
 
     const modelIds = node.extendedData?.modelIds?.[0];
-    return modelIds && (Array.isArray(modelIds[0]) ? modelIds[0][0] : modelIds[0]);
+    return modelIds && (Array.isArray(modelIds) ? modelIds[0] : modelIds);
   };
 
   /**

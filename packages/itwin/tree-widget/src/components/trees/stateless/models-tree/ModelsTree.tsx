@@ -9,10 +9,10 @@ import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { createHierarchyVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
+import { createHierarchyVisibilityHandler } from "./HierarchyVisibilityHandler";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
-import type { HierarchyVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
+import type { HierarchyVisibilityHandler } from "./HierarchyVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";

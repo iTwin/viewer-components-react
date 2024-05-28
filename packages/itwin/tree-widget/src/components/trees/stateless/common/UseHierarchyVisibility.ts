@@ -9,7 +9,7 @@ import { defer, distinct, mergeMap, Subject, takeUntil } from "rxjs";
 import type { MutableRefObject } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
-import type { HierarchyVisibilityHandler } from "../models-tree/HierarchyBasedVisibilityHandler";
+import type { HierarchyVisibilityHandler } from "../models-tree/HierarchyVisibilityHandler";
 
 interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;

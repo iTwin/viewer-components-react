@@ -115,7 +115,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     const elementInfo = set?.size
       ? this._queryHandler.queryElementInfo({
           elementIds: set,
-          recursive: true,
+          useRootElementCategoryId: true,
         })
       : EMPTY;
     return elementInfo.pipe(
