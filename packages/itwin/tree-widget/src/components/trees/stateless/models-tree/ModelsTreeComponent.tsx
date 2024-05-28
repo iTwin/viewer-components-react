@@ -8,6 +8,7 @@ import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react
 import { SvgCursorClick } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
+import { TreeWidget } from "../../../../TreeWidget";
 import { TreeHeader } from "../../../tree-header/TreeHeader";
 import { AutoSizer } from "../../../utils/AutoSizer";
 import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "../../models-tree/ModelsTreeButtons";
@@ -22,7 +23,8 @@ import type { ModelsTreeHeaderButtonProps } from "../../models-tree/ModelsTreeBu
 
 type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsTree>;
 
-interface StatelessModelsTreeComponentProps extends Pick<StatelessModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface StatelessModelsTreeComponentProps
+  extends Pick<StatelessModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured"> {
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
 }
@@ -81,7 +83,7 @@ function ModelsTreeComponentImpl({
 
 function ToggleInstancesFocusButton({ density }: { density?: "default" | "enlarged" }) {
   const { enabled, toggle } = useFocusedInstancesContext();
-  const title = enabled ? "Disabled Instances Focus" : "Enable Instances Focus";
+  const title = enabled ? TreeWidget.translate("stateless.disableInstanceFocus") : TreeWidget.translate("stateless.enableInstanceFocus");
   return (
     <IconButton styleType="borderless" size={density === "enlarged" ? "large" : "small"} title={title} onClick={() => toggle()} isActive={enabled}>
       <SvgCursorClick />

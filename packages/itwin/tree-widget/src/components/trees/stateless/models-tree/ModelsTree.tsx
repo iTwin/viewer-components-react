@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
+import { TreeWidget } from "../../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { createHierarchyVisibilityHandler } from "./HierarchyBasedVisibilityHandler";
@@ -21,6 +22,7 @@ interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   filter?: string;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -29,6 +31,8 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+
+const StatelessModelsTreeId = "models-tree-v2";
 
 /** @internal */
 export function StatelessModelsTree({
@@ -41,6 +45,7 @@ export function StatelessModelsTree({
   density,
   hierarchyLevelConfig,
   selectionMode,
+  onPerformanceMeasured,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback((): HierarchyVisibilityHandler => {
     return createHierarchyVisibilityHandler({ viewport: activeView });
@@ -78,13 +83,16 @@ export function StatelessModelsTree({
       density={density}
       noDataMessage={getNoDataMessage(filter)}
       selectionMode={selectionMode}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
+      }}
     />
   );
 }
 
 function getNoDataMessage(filter?: string) {
   if (filter) {
-    return <Text>{`There are no nodes matching filter - "${filter}"`}</Text>;
+    return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
   return undefined;
 }

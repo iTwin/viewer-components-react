@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Text } from "@itwin/itwinui-react";
+import { TreeWidget } from "../../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
@@ -24,6 +25,7 @@ interface StatelessCategoriesTreeOwnProps {
   viewManager?: ViewManager;
   allViewports?: boolean;
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -32,6 +34,8 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 
 type StatelessModelsTreeProps = StatelessCategoriesTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+
+const StatelessCategoriesTreeId = "categories-tree-v2";
 
 /** @internal */
 export function StatelessCategoriesTree({
@@ -47,6 +51,7 @@ export function StatelessCategoriesTree({
   density,
   hierarchyLevelConfig,
   selectionMode,
+  onPerformanceMeasured,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessCategoriesVisibilityHandler({
@@ -95,13 +100,16 @@ export function StatelessCategoriesTree({
       density={density}
       noDataMessage={getNoDataMessage(filter)}
       selectionMode={selectionMode ?? "none"}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
+      }}
     />
   );
 }
 
 function getNoDataMessage(filter: string) {
   if (filter) {
-    return <Text>{`There are no nodes matching filter - "${filter}"`}</Text>;
+    return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
   return undefined;
 }

@@ -9,6 +9,7 @@ import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
 import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
+import { TreeWidget } from "../../../../TreeWidget";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
@@ -137,12 +138,12 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
             hierarchyLevelSizeLimit: hierarchyLevelDetails.sizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
-        return `Current filter matching instances count: ${instanceKeys.length}`;
+        return TreeWidget.translate("stateless.matchingInstancesCount", { count: instanceKeys.length });
       } catch (e) {
         if (e instanceof RowsLimitExceededError) {
-          return `Current filter exceeds instances count of ${e.limit}`;
+          return TreeWidget.translate("stateless.filterExceedsLimit", { limit: e.limit });
         }
-        return "Failed to calculate matching instances count";
+        return TreeWidget.translate("stateless.failedToCalculateMatchingInstances");
       }
     }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit]),
   );
