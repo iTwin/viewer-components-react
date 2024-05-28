@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { TreeRenderer, useTree } from "@itwin/presentation-hierarchies-react";
-import { useEffect, useRef } from "react";
+import { useMemo } from "react";
 import { TreeWidget } from "../../../../TreeWidget";
+
+import type { TreeRenderer, useTree } from "@itwin/presentation-hierarchies-react";
 
 type UseTreeLocalizedStrings = Parameters<typeof useTree>[0]["localizedStrings"];
 type TreeRendererLocalizedStrings = Parameters<typeof TreeRenderer>[0]["localizedStrings"];
@@ -14,14 +15,10 @@ type useHierarchiesLocalizationResult = UseTreeLocalizedStrings & TreeRendererLo
 
 /** @internal */
 export function useHierarchiesLocalization(): useHierarchiesLocalizationResult {
-  const localizedStrings = JSON.stringify(getLocalizedStrings());
-  const localizedStringsRef = useRef(getLocalizedStrings());
+  const stringValues = Object.values(getLocalizedStrings()!);
+  const localizedStrings = useMemo(getLocalizedStrings, stringValues);
 
-  useEffect(() => {
-    localizedStringsRef.current = getLocalizedStrings();
-  }, [localizedStrings]);
-
-  return localizedStringsRef.current;
+  return localizedStrings;
 }
 
 function getLocalizedStrings(): useHierarchiesLocalizationResult {
