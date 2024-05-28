@@ -8,32 +8,19 @@ import classNames from "classnames";
 import { Fragment, useEffect, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { CategoryTree } from "./CategoriesTree";
-import { CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories } from "./CategoryVisibilityHandler";
+import { HideAllButton, InvertAllButton, ShowAllButton } from "./CategoriesTreeButtons";
+import { CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
 
+import type { CategoriesTreeHeaderButtonProps, CategoryInfo } from "./CategoriesTreeButtons";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { CategoryTreeProps } from "./CategoriesTree";
-import type { CategoryInfo } from "./CategoryVisibilityHandler";
-/**
- * Props that get passed to [[CategoriesTreeComponent]] header button renderer.
- * @see CategoriesTreeComponentProps.headerButtons
- * @public
- */
-export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
-  /** A list of categories available in the iModel */
-  categories: CategoryInfo[];
-  /** In case the tree is filtered, a list of filtered categories. */
-  filteredCategories?: CategoryInfo[];
-}
 
 /**
  * Props for [[CategoriesTreeComponent]].
@@ -197,58 +184,4 @@ async function getFilteredCategories(filteredProvider: IPresentationTreeDataProv
     filteredCategories.push({ categoryId: filteredCategoryId, subCategoryIds: filteredSubCategoriesIds });
   }
   return filteredCategories;
-}
-
-function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
-  return (
-    <IconButton
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
-      title={TreeWidget.translate("showAll")}
-      onClick={() => {
-        props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-showall`);
-        void showAllCategories(
-          (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
-          props.viewport,
-        );
-      }}
-    >
-      <SvgVisibilityShow />
-    </IconButton>
-  );
-}
-
-function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
-  return (
-    <IconButton
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
-      title={TreeWidget.translate("hideAll")}
-      onClick={() => {
-        props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-hideall`);
-        void hideAllCategories(
-          (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
-          props.viewport,
-        );
-      }}
-    >
-      <SvgVisibilityHide />
-    </IconButton>
-  );
-}
-
-function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
-  return (
-    <IconButton
-      title={TreeWidget.translate("invert")}
-      size={props.density === "enlarged" ? "large" : "small"}
-      styleType="borderless"
-      onClick={() => {
-        props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-invert`);
-        void invertAllCategories(props.filteredCategories ?? props.categories, props.viewport);
-      }}
-    >
-      <SvgVisibilityHalf />
-    </IconButton>
-  );
 }
