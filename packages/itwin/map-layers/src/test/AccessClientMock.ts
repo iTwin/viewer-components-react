@@ -1,9 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import { BeEvent, Listener } from "@itwin/core-bentley";
-import {  MapLayerAccessClient, MapLayerAccessToken, MapLayerAccessTokenParams,  MapLayerTokenEndpoint } from "@itwin/core-frontend";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { Listener } from "@itwin/core-bentley";
+import { BeEvent } from "@itwin/core-bentley";
+import type { MapLayerAccessClient, MapLayerAccessToken, MapLayerAccessTokenParams, MapLayerTokenEndpoint } from "@itwin/core-frontend";
 
 export class TokenEndpointMock implements MapLayerTokenEndpoint {
   public static readonly url = "https://fake.com/server/auth";
@@ -19,7 +20,7 @@ export class TokenEndpointMock implements MapLayerTokenEndpoint {
 
 export class AccessClientMock implements MapLayerAccessClient {
   public async getAccessToken(_params: MapLayerAccessTokenParams): Promise<MapLayerAccessToken | undefined> {
-    return Promise.resolve({token: "fakeToken"});
+    return Promise.resolve({ token: "fakeToken" });
   }
 
   public async getTokenServiceEndPoint(_mapLayerUrl: string): Promise<MapLayerTokenEndpoint | undefined> {

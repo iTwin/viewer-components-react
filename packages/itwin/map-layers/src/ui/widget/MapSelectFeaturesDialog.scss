@@ -4,8 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 .map-layer-select-features-dialog {
-  z-Index: 21000;
-
+  z-index: 21000;
 }
 
 .map-layer-select-features-dialog.core-dialog .core-dialog-container .core-dialog-area > .core-dialog-content {
@@ -14,4 +13,3 @@
 .map-layer-select-features-dialog .map-manager-sublayer-tree-content {
   min-height: 200px;
 }
-
