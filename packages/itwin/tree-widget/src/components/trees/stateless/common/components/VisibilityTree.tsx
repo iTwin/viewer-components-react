@@ -40,7 +40,7 @@ type IModelAccess = UseTreeProps["imodelAccess"];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
 
 type VisibilityTreeProps = VisibilityTreeOwnProps &
-  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> &
+  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
   UseHierarchyVisibilityProps &
   Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
 
@@ -80,6 +80,7 @@ function VisibilityTreeImpl({
   getSublabel,
   density,
   selectionMode,
+  onPerformanceMeasured,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
   const {
     rootNodes,
@@ -94,6 +95,7 @@ function VisibilityTreeImpl({
     getFilteredPaths,
     imodelKey: imodel.key,
     sourceName: treeName,
+    onPerformanceMeasured,
   });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes, selectionMode: selectionMode ?? "single" });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });

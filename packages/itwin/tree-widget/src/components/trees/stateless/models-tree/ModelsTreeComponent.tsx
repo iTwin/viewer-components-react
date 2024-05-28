@@ -22,7 +22,8 @@ import type { ModelsTreeHeaderButtonProps } from "../../models-tree/ModelsTreeBu
 
 type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsTree>;
 
-interface StatelessModelsTreeComponentProps extends Pick<StatelessModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface StatelessModelsTreeComponentProps
+  extends Pick<StatelessModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured"> {
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
 }
