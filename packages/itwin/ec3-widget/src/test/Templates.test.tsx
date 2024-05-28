@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
 import { act, fireEvent, screen } from "@testing-library/react";
@@ -18,24 +18,21 @@ const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
 const ec3JobsClient = moq.Mock.ofType<EC3JobsClient>();
 
 describe("Templates", () => {
-  const mockedConfigurations = Array.from(
-    { length: faker.datatype.number({ min: 3, max: 5 }) },
-    (_, index) => ({
-      displayName: `config_${index}`,
-      description: `config_decription_${index}`,
-      id: index.toString(),
-      labels: [],
-      createdOn: "",
-      createdBy: "",
-      modifiedBy: "",
-      modifiedOn: "",
-      _links: {
-        report: {
-          href: `base_path/reports/reportId`,
-        },
+  const mockedConfigurations = Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, (_, index) => ({
+    displayName: `config_${index}`,
+    description: `config_decription_${index}`,
+    id: index.toString(),
+    labels: [],
+    createdOn: "",
+    createdBy: "",
+    modifiedBy: "",
+    modifiedOn: "",
+    _links: {
+      report: {
+        href: `base_path/reports/reportId`,
       },
-    })
-  );
+    },
+  }));
 
   const job: EC3Job = {
     id: faker.datatype.uuid(),
@@ -77,9 +74,7 @@ describe("Templates", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    mockedConfigurations.forEach((c) =>
-      expect(screen.getByText(c.displayName)).toBeInTheDocument()
-    );
+    mockedConfigurations.forEach((c) => expect(screen.getByText(c.displayName)).toBeInTheDocument());
   });
 
   it("Templates view should have mocked templates", async () => {
@@ -89,9 +84,7 @@ describe("Templates", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    mockedConfigurations.forEach((c) =>
-      expect(screen.getByText(c.displayName)).toBeInTheDocument()
-    );
+    mockedConfigurations.forEach((c) => expect(screen.getByText(c.displayName)).toBeInTheDocument());
   });
 
   it("Clicking on template should use callback", async () => {
@@ -212,8 +205,7 @@ describe("Templates", () => {
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
 
-    const dropdown = screen.getAllByTestId("ec3-tile-action-button")[0]
-      .querySelector(".iui-button") as HTMLInputElement;
+    const dropdown = screen.getAllByTestId("ec3-tile-action-button")[0].querySelector(".iui-button") as HTMLInputElement;
     await simulateClick(dropdown);
     const button = screen.getByTestId("ec3-templates-delete-button");
     await simulateClick(button);

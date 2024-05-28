@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { QueryBuilder } from "../Groups/QueryBuilder/QueryBuilder";
@@ -24,9 +24,7 @@ export const PropertyGridWrapperContext = React.createContext<PropertySelection>
 export const usePropertyGridWrapper = (): PropertySelection => {
   const context = React.useContext(PropertyGridWrapperContext);
   if (!context) {
-    throw new Error(
-      "usePropertyGridWrapperContext should be used within a PropertyGridWrapperContext provider"
-    );
+    throw new Error("usePropertyGridWrapperContext should be used within a PropertyGridWrapperContext provider");
   }
   return context;
 };

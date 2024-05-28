@@ -84,6 +84,7 @@ Mon, 29 Jan 2024 21:37:20 GMT
 - Presentation is now correctly localized. ([#745](https://github.com/iTwin/viewer-components-react/pull/745))
 
 ## 0.22.0
+
 Mon, 18 Dec 2023 18:31:01 GMT
 
 ### Minor changes
@@ -95,6 +96,7 @@ Mon, 18 Dec 2023 18:31:01 GMT
 - Added new functions for Custom Calculations in FormulaFunctionProvider.ts
 
 ## 0.21.1
+
 Fri, 01 Dec 2023 13:46:38 GMT
 
 ### Patches
@@ -102,6 +104,7 @@ Fri, 01 Dec 2023 13:46:38 GMT
 - Fixed extraction error message not showing.
 
 ## 0.21.0
+
 Fri, 10 Nov 2023 14:46:30 GMT
 
 ### Minor changes
@@ -109,6 +112,7 @@ Fri, 10 Nov 2023 14:46:30 GMT
 - iTwin.js minimum version bumped to 4.1
 
 ## 0.20.1
+
 Tue, 07 Nov 2023 13:43:31 GMT
 
 ### Patches
@@ -116,6 +120,7 @@ Tue, 07 Nov 2023 13:43:31 GMT
 - Kept extraction status data consistent when navigating through Mapping and Group components.
 
 ## 0.20.0
+
 Thu, 26 Oct 2023 13:09:22 GMT
 
 ### Minor changes
@@ -128,6 +133,7 @@ Thu, 26 Oct 2023 13:09:22 GMT
 - Only allowed one selection for radio buttons for the custom filter of the Extraction Error Log.
 
 ## 0.19.2
+
 Mon, 02 Oct 2023 20:32:55 GMT
 
 ### Patches
@@ -135,6 +141,7 @@ Mon, 02 Oct 2023 20:32:55 GMT
 - Changed filter radio buttons to checkboxes
 
 ## 0.19.1
+
 Fri, 29 Sep 2023 20:08:20 GMT
 
 ### Patches
@@ -143,6 +150,7 @@ Fri, 29 Sep 2023 20:08:20 GMT
 - Added an icon and modal to expose extraction log messages.
 
 ## 0.19.0
+
 Tue, 19 Sep 2023 14:55:43 GMT
 
 ### Minor changes
@@ -155,6 +163,7 @@ Tue, 19 Sep 2023 14:55:43 GMT
 - Enabled query experimental features e.g '$->'.
 
 ## 0.18.1
+
 Thu, 24 Aug 2023 21:32:34 GMT
 
 ### Patches
@@ -162,6 +171,7 @@ Thu, 24 Aug 2023 21:32:34 GMT
 - Added missing state to restore missing import mapping button to default UI.
 
 ## 0.18.0
+
 Thu, 17 Aug 2023 14:42:37 GMT
 
 ### Minor changes
@@ -174,6 +184,7 @@ Thu, 17 Aug 2023 14:42:37 GMT
 - Added a Progress bar when Color By Group
 
 ## 0.17.5
+
 Wed, 02 Aug 2023 12:11:30 GMT
 
 ### Patches
@@ -181,6 +192,7 @@ Wed, 02 Aug 2023 12:11:30 GMT
 - Modified operator validation delay time and behavior
 
 ## 0.17.4
+
 Wed, 26 Jul 2023 21:49:07 GMT
 
 ### Patches
@@ -188,6 +200,7 @@ Wed, 26 Jul 2023 21:49:07 GMT
 - Adds an informational icon that the user can hover over to learn about custom calculation formulas. Also adds a placeholder to the formula Textarea with an example formula.
 
 ## 0.17.3
+
 Mon, 24 Jul 2023 17:26:29 GMT
 
 ### Patches
@@ -195,6 +208,7 @@ Mon, 24 Jul 2023 17:26:29 GMT
 - Added tooltips to buttons.
 
 ## 0.17.2
+
 Thu, 20 Jul 2023 20:15:04 GMT
 
 ### Patches
@@ -204,6 +218,7 @@ Thu, 20 Jul 2023 20:15:04 GMT
 - Fixed unicode bug to meet OData simple identifier requirement
 
 ## 0.17.1
+
 Tue, 18 Jul 2023 14:40:24 GMT
 
 ### Patches
@@ -214,6 +229,7 @@ Tue, 18 Jul 2023 14:40:24 GMT
 - Added a modal to confirm a property name change.
 
 ## 0.17.0
+
 Fri, 09 Jun 2023 17:54:42 GMT
 
 ### Minor changes
@@ -221,6 +237,7 @@ Fri, 09 Jun 2023 17:54:42 GMT
 - New version of the package targeting iTwin.js 4.x and iTwinUI 2.x!
 
 ## 0.16.1
+
 Tue, 06 Jun 2023 10:57:06 GMT
 
 ### Patches
@@ -228,14 +245,16 @@ Tue, 06 Jun 2023 10:57:06 GMT
 - Fixed small overflow style issue.
 
 ## 0.16.0
+
 Mon, 15 May 2023 16:32:30 GMT
 
 ### Minor changes
 
-- Refactored Copy Mapping modal UI to remove dependency on @itwin/imodel-browser-react. The widget now additionally requires the `itwins:read` scope to support the changes. 
+- Refactored Copy Mapping modal UI to remove dependency on @itwin/imodel-browser-react. The widget now additionally requires the `itwins:read` scope to support the changes.
 - @itwin/grouping-mapping-widget updated to itwinjs 3.7.4.
 
 ## 0.15.1
+
 Thu, 04 May 2023 23:59:19 GMT
 
 ### Patches
@@ -243,6 +262,7 @@ Thu, 04 May 2023 23:59:19 GMT
 - Resolved a bug that prevented Group Properties from being displayed when GroupPropertyAction was utilized without a viewer.
 
 ## 0.15.0
+
 Thu, 27 Apr 2023 16:44:34 GMT
 
 ### Minor changes
@@ -256,6 +276,7 @@ Thu, 27 Apr 2023 16:44:34 GMT
 - Fixed Group By not visualizing queries.
 
 ## 0.14.0
+
 Mon, 24 Apr 2023 19:57:10 GMT
 
 ### Minor changes
@@ -272,6 +293,7 @@ Mon, 24 Apr 2023 19:57:10 GMT
 - Fixed header not appearing while in ContextCustomUI
 
 ## 0.13.0
+
 Tue, 18 Apr 2023 17:46:22 GMT
 
 ### Minor changes
@@ -281,9 +303,10 @@ Tue, 18 Apr 2023 17:46:22 GMT
 ### Patches
 
 - Fixed a visualization race condition that caused some Groups to not visualize.
-- Fixed Select Query Builder reset button. No longer fails to visualize. 
+- Fixed Select Query Builder reset button. No longer fails to visualize.
 
 ## 0.12.0
+
 Mon, 03 Apr 2023 15:34:07 GMT
 
 ### Minor changes
@@ -291,6 +314,7 @@ Mon, 03 Apr 2023 15:34:07 GMT
 - Improved modularity to PropertyMenu, GroupPropertyAction, CalculatedPropertyAction, CustomCalculationAction components.
 
 ## 0.11.1
+
 Mon, 27 Mar 2023 10:30:56 GMT
 
 ### Patches
@@ -298,6 +322,7 @@ Mon, 27 Mar 2023 10:30:56 GMT
 - Fixed a crash that occurred while creating a Group by Selection.
 
 ## 0.11.0
+
 Thu, 23 Mar 2023 15:12:36 GMT
 
 ### Minor changes
@@ -305,6 +330,7 @@ Thu, 23 Mar 2023 15:12:36 GMT
 - Added support to override Mappings name in Mappings component.
 
 ## 0.10.0
+
 Tue, 07 Mar 2023 15:47:41 GMT
 
 ### Minor changes
@@ -320,6 +346,7 @@ Tue, 07 Mar 2023 15:47:41 GMT
 - Change itwinui-react dependency version control to caret.
 
 ## 0.9.3
+
 Thu, 19 Jan 2023 10:29:18 GMT
 
 ### Patches
@@ -328,6 +355,7 @@ Thu, 19 Jan 2023 10:29:18 GMT
 - Exposed GroupingMappingApiConfig context, related hooks and types.
 
 ## 0.9.2
+
 Fri, 16 Dec 2022 13:51:28 GMT
 
 ### Patches
@@ -336,6 +364,7 @@ Fri, 16 Dec 2022 13:51:28 GMT
 - QueryBuilder: separated relational classes from properties, transferred properties from JOIN to WHERE clauses
 
 ## 0.9.1
+
 Wed, 16 Nov 2022 19:55:30 GMT
 
 ### Patches
@@ -344,6 +373,7 @@ Wed, 16 Nov 2022 19:55:30 GMT
 - Fixed group properties UI traversal to nested structs
 
 ## 0.9.0
+
 Wed, 16 Nov 2022 16:49:55 GMT
 
 ### Minor changes
@@ -357,6 +387,7 @@ Wed, 16 Nov 2022 16:49:55 GMT
 - Added support for external source repository information (name/path) in group properties
 
 ## 0.8.3
+
 Mon, 31 Oct 2022 19:03:27 GMT
 
 ### Patches
@@ -364,6 +395,7 @@ Mon, 31 Oct 2022 19:03:27 GMT
 - Fixed duplication of JOIN statements in query builder
 
 ## 0.8.2
+
 Mon, 17 Oct 2022 17:36:46 GMT
 
 ### Patches
@@ -373,6 +405,7 @@ Mon, 17 Oct 2022 17:36:46 GMT
 - Fixed formula interpreter sometimes not recognising unary operators leading to errors in formula order.
 
 ## 0.8.1
+
 Thu, 29 Sep 2022 19:04:42 GMT
 
 ### Patches
@@ -380,6 +413,7 @@ Thu, 29 Sep 2022 19:04:42 GMT
 - Fixed text overflow issue.
 
 ## 0.8.0
+
 Wed, 28 Sep 2022 20:44:12 GMT
 
 ### Minor changes
@@ -387,6 +421,7 @@ Wed, 28 Sep 2022 20:44:12 GMT
 - Redesigned group properties UI.
 
 ## 0.7.0
+
 Mon, 26 Sep 2022 17:13:11 GMT
 
 ### Minor changes
@@ -395,6 +430,7 @@ Mon, 26 Sep 2022 17:13:11 GMT
 - Add custom UI extensibility for grouping and mapping and refactor default UI accordingly
 
 ## 0.6.0
+
 Mon, 12 Sep 2022 19:50:36 GMT
 
 ### Minor changes
@@ -406,6 +442,7 @@ Mon, 12 Sep 2022 19:50:36 GMT
 - Added border to the color legend for group hiliting
 
 ## 0.5.8
+
 Wed, 24 Aug 2022 14:01:03 GMT
 
 ### Patches
@@ -413,6 +450,7 @@ Wed, 24 Aug 2022 14:01:03 GMT
 - Exporting GetAccessTokenFn type from GroupingApiConfigContext for consuming applications to use when setting up the GroupingMappingProvider
 
 ## 0.5.7
+
 Mon, 22 Aug 2022 19:37:22 GMT
 
 ### Patches
@@ -420,6 +458,7 @@ Mon, 22 Aug 2022 19:37:22 GMT
 - Updated the classNames within the grouping and mapping components to use `gmw-` prefix, added quick update to property-grid to return code to working state
 
 ## 0.5.6
+
 Mon, 22 Aug 2022 18:03:47 GMT
 
 ### Patches
@@ -431,6 +470,7 @@ Mon, 22 Aug 2022 18:03:47 GMT
 - Updated css classnames to be scoped to this package only
 
 ## 0.5.5
+
 Mon, 08 Aug 2022 11:57:54 GMT
 
 ### Patches
@@ -439,6 +479,7 @@ Mon, 08 Aug 2022 11:57:54 GMT
 - Optimized group hiliting
 
 ## 0.5.4
+
 Thu, 28 Jul 2022 13:50:39 GMT
 
 ### Patches
@@ -447,6 +488,7 @@ Thu, 28 Jul 2022 13:50:39 GMT
 - add color legends for groups
 
 ## 0.5.3
+
 Fri, 22 Jul 2022 18:27:54 GMT
 
 ### Patches
@@ -454,6 +496,7 @@ Fri, 22 Jul 2022 18:27:54 GMT
 - group ordering by name
 
 ## 0.5.2
+
 Mon, 18 Jul 2022 13:24:31 GMT
 
 ### Patches
@@ -462,6 +505,7 @@ Mon, 18 Jul 2022 13:24:31 GMT
 - Fixed incorrect prefix being applied on first render
 
 ## 0.5.1
+
 Fri, 24 Jun 2022 21:18:52 GMT
 
 ### Patches
@@ -469,6 +513,7 @@ Fri, 24 Jun 2022 21:18:52 GMT
 - Removed unneeded import
 
 ## 0.5.0
+
 Fri, 24 Jun 2022 16:51:25 GMT
 
 ### Minor changes
@@ -478,10 +523,11 @@ Fri, 24 Jun 2022 16:51:25 GMT
 ### Patches
 
 - fix category bug and reset button
-- fix category query 
+- fix category query
 - Exposed CustomCalculation formula DataType resolver.
 
 ## 0.4.0
+
 Thu, 16 Jun 2022 14:09:35 GMT
 
 ### Minor changes
@@ -495,6 +541,7 @@ Thu, 16 Jun 2022 14:09:35 GMT
 - Added extension point to provide a custom IMappingClient implementation.
 
 ## 0.3.5
+
 Wed, 08 Jun 2022 20:23:10 GMT
 
 ### Patches
@@ -503,6 +550,7 @@ Wed, 08 Jun 2022 20:23:10 GMT
 - Formula validation fixes
 
 ## 0.3.4
+
 Thu, 26 May 2022 15:54:07 GMT
 
 ### Patches
@@ -510,6 +558,7 @@ Thu, 26 May 2022 15:54:07 GMT
 - Adds a toggle for enabling extraction in the add/edit mapping view and the three dot menu in the mappings table
 
 ## 0.3.3
+
 Wed, 18 May 2022 15:36:43 GMT
 
 ### Patches
@@ -519,6 +568,7 @@ Wed, 18 May 2022 15:36:43 GMT
 - Import mappings modal converted to full page modal
 
 ## 0.3.2
+
 Mon, 09 May 2022 18:04:58 GMT
 
 ### Patches
@@ -526,6 +576,7 @@ Mon, 09 May 2022 18:04:58 GMT
 - Added optional access token and enviroment props and switched to insights-client
 
 ## 0.3.1
+
 Tue, 19 Apr 2022 14:15:57 GMT
 
 ### Patches
@@ -533,6 +584,7 @@ Tue, 19 Apr 2022 14:15:57 GMT
 - Improved query generation from query keywords
 
 ## 0.3.0
+
 Wed, 06 Apr 2022 13:48:44 GMT
 
 ### Minor changes
@@ -546,6 +598,7 @@ Wed, 06 Apr 2022 13:48:44 GMT
 - Add transitive peers as dev deps
 
 ## 0.2.3
+
 Mon, 14 Mar 2022 19:46:44 GMT
 
 ### Patches
@@ -557,6 +610,7 @@ Mon, 14 Mar 2022 19:46:44 GMT
 - Added ability to search for elements using search terms
 
 ## 0.2.2
+
 Wed, 02 Mar 2022 21:38:51 GMT
 
 ### Patches
@@ -565,6 +619,7 @@ Wed, 02 Mar 2022 21:38:51 GMT
 - Fixed invalid query generated from aspects
 
 ## 0.2.1
+
 Tue, 15 Feb 2022 15:51:36 GMT
 
 ### Patches
@@ -577,6 +632,7 @@ Tue, 15 Feb 2022 15:51:36 GMT
 - Fixed missing struct properties in group properties
 
 ## 0.2.0
+
 Fri, 04 Feb 2022 00:43:35 GMT
 
 ### Minor changes

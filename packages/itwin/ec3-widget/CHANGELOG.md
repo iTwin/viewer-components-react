@@ -13,6 +13,7 @@ Mon, 29 Apr 2024 14:59:26 GMT
 - Replaced duplicate types with types from @itwin/insights-client. ([#818](https://github.com/iTwin/viewer-components-react/pull/818))
 
 ## 0.4.1
+
 Thu, 24 Aug 2023 21:32:34 GMT
 
 ### Patches
@@ -21,6 +22,7 @@ Thu, 24 Aug 2023 21:32:34 GMT
 - Truncated long assembly name when in narrow width.
 
 ## 0.4.0
+
 Fri, 18 Aug 2023 11:01:29 GMT
 
 ### Minor changes
@@ -32,6 +34,7 @@ Fri, 18 Aug 2023 11:01:29 GMT
 - Removed frame around Add Assembly button and changed button type.
 
 ## 0.3.0
+
 Thu, 17 Aug 2023 14:42:37 GMT
 
 ### Minor changes
@@ -39,6 +42,7 @@ Thu, 17 Aug 2023 14:42:37 GMT
 - Typescript version bump to ^4.5.0
 
 ## 0.2.0
+
 Tue, 18 Jul 2023 14:40:24 GMT
 
 ### Minor changes
@@ -49,6 +53,7 @@ Tue, 18 Jul 2023 14:40:24 GMT
 - A new property iTwinId was introduced in EC3Config, enabling the configuration to be tied to a specific iTwin instance.
 
 ## 0.1.1
+
 Fri, 23 Jun 2023 15:11:15 GMT
 
 ### Patches
@@ -56,6 +61,7 @@ Fri, 23 Jun 2023 15:11:15 GMT
 - Fixed horizontal tiles not having consistent sizing.
 
 ## 0.1.0
+
 Mon, 20 Mar 2023 14:48:35 GMT
 
 ### Minor changes

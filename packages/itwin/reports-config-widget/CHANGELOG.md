@@ -13,6 +13,7 @@ Mon, 29 Jan 2024 21:37:20 GMT
 - Updated iModels client ([#747](https://github.com/iTwin/viewer-components-react/pull/747))
 
 ## 0.4.0
+
 Thu, 17 Aug 2023 14:42:37 GMT
 
 ### Minor changes
@@ -27,6 +28,7 @@ Thu, 17 Aug 2023 14:42:37 GMT
 - Changed update dataset icon
 
 ## 0.3.0
+
 Tue, 23 May 2023 13:16:11 GMT
 
 ### Minor changes
@@ -36,6 +38,7 @@ Tue, 23 May 2023 13:16:11 GMT
 - The view of the widget is now handled by a routing component that displays different views based on the "step" of the current route.
 
 ## 0.2.1
+
 Tue, 07 Mar 2023 15:47:41 GMT
 
 ### Patches
@@ -44,6 +47,7 @@ Tue, 07 Mar 2023 15:47:41 GMT
 - Change itwinui-react dependency version control to caret.
 
 ## 0.2.0
+
 Thu, 19 Jan 2023 10:29:18 GMT
 
 ### Minor changes
@@ -52,6 +56,7 @@ Thu, 19 Jan 2023 10:29:18 GMT
 - IModel extraction dropdown removed.
 
 ## 0.1.0
+
 Mon, 31 Oct 2022 19:03:27 GMT
 
 ### Minor changes
@@ -59,6 +64,7 @@ Mon, 31 Oct 2022 19:03:27 GMT
 - Datasets can be updated in the Reports page. Reports tiles are now selectable
 
 ## 0.0.8
+
 Thu, 29 Sep 2022 19:04:42 GMT
 
 ### Patches
@@ -66,6 +72,7 @@ Thu, 29 Sep 2022 19:04:42 GMT
 - Fixed text overflow issue.
 
 ## 0.0.7
+
 Mon, 12 Sep 2022 19:50:36 GMT
 
 ### Patches
@@ -73,6 +80,7 @@ Mon, 12 Sep 2022 19:50:36 GMT
 - updated insights client to 0.3.0
 
 ## 0.0.6
+
 Mon, 08 Aug 2022 11:57:54 GMT
 
 ### Patches
@@ -80,6 +88,7 @@ Mon, 08 Aug 2022 11:57:54 GMT
 - Added missing dev dependencies
 
 ## 0.0.5
+
 Thu, 04 Aug 2022 20:07:49 GMT
 
 ### Patches
@@ -87,6 +96,7 @@ Thu, 04 Aug 2022 20:07:49 GMT
 - Added a missing dev dep
 
 ## 0.0.4
+
 Thu, 28 Jul 2022 13:50:39 GMT
 
 ### Patches
@@ -94,14 +104,16 @@ Thu, 28 Jul 2022 13:50:39 GMT
 - Fixed infinite loop in Report Mappings
 
 ## 0.0.3
+
 Fri, 24 Jun 2022 16:51:25 GMT
 
 ### Patches
 
 - Unit tests fix
-- More unit test refinements 
+- More unit test refinements
 
 ## 0.0.2
+
 Thu, 16 Jun 2022 14:09:35 GMT
 
 ### Patches
@@ -111,6 +123,7 @@ Thu, 16 Jun 2022 14:09:35 GMT
 - ReadMe update
 
 ## 0.0.1
+
 Tue, 14 Jun 2022 16:01:06 GMT
 
 ### Patches

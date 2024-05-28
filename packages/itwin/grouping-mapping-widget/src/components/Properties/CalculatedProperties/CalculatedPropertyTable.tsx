@@ -3,11 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { SvgDelete, SvgEdit, SvgMore } from "@itwin/itwinui-icons-react";
-import {
-  DropdownMenu,
-  IconButton,
-  MenuItem,
-} from "@itwin/itwinui-react";
+import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
 import type { Property } from "@itwin/insights-client";
@@ -47,12 +43,7 @@ export const CalculatedPropertyTable = ({
         id: "propertyName",
         Header: "Calculated Property",
         accessor: "propertyName",
-        Cell: (value: CellProps<Property>) => (
-          <PropertyNameCell
-            property={value.row.original}
-            onClickModify={onClickModify}
-          />
-        ),
+        Cell: (value: CellProps<Property>) => <PropertyNameCell property={value.row.original} onClickModify={onClickModify} />,
       },
       {
         id: "dropdown",
@@ -65,20 +56,17 @@ export const CalculatedPropertyTable = ({
                 [
                   onClickModify
                     ? [
-                      <MenuItem
-                        key={0}
-                        onClick={() => {
-                          onClickModify(
-                            value.row.original
-                          );
-                          close();
-                        }
-                        }
-                        icon={<SvgEdit />}
-                      >
-                        Modify
-                      </MenuItem>,
-                    ]
+                        <MenuItem
+                          key={0}
+                          onClick={() => {
+                            onClickModify(value.row.original);
+                            close();
+                          }}
+                          icon={<SvgEdit />}
+                        >
+                          Modify
+                        </MenuItem>,
+                      ]
                     : [],
                   <MenuItem
                     key={1}
@@ -101,18 +89,13 @@ export const CalculatedPropertyTable = ({
         },
       },
     ],
-    [onClickModify]
+    [onClickModify],
   );
 
   const { mutateAsync: deleteProperty } = useMutation({
     mutationFn: async (propertyId: string) => {
       const accessToken = await getAccessToken();
-      await propertiesClient.deleteProperty(
-        accessToken,
-        mappingId,
-        groupId,
-        propertyId,
-      );
+      await propertiesClient.deleteProperty(accessToken, mappingId, groupId, propertyId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, groupId] });

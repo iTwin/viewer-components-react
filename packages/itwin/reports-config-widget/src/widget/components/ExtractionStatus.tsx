@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { useEffect, useState } from "react";
 import "./ExtractionStatus.scss";
@@ -26,10 +26,7 @@ interface ExtractionStatusProps {
   clearExtractionState: () => void;
 }
 
-export const ExtractionStatus = ({
-  state,
-  clearExtractionState,
-}: ExtractionStatusProps) => {
+export const ExtractionStatus = ({ state, clearExtractionState }: ExtractionStatusProps) => {
   const [fadeOut, setFadeOut] = useState<boolean>(false);
 
   const onAnimationEnd = () => {
@@ -49,21 +46,15 @@ export const ExtractionStatus = ({
 
   switch (state) {
     case ExtractionStates.Starting:
-      return (<StartingExtractionState />);
+      return <StartingExtractionState />;
     case ExtractionStates.Queued:
-      return (<QueuedExtractionState />);
+      return <QueuedExtractionState />;
     case ExtractionStates.Running:
-      return (<RunningExtractionState />);
+      return <RunningExtractionState />;
     case ExtractionStates.Succeeded:
-      return (<SucceededExtractionState
-        animation={fadeOut}
-        onAnimationEnd={onAnimationEnd}
-      />);
+      return <SucceededExtractionState animation={fadeOut} onAnimationEnd={onAnimationEnd} />;
     case ExtractionStates.Failed:
-      return (<FailedExtractionState
-        animation={fadeOut}
-        onAnimationEnd={onAnimationEnd}
-      />);
+      return <FailedExtractionState animation={fadeOut} onAnimationEnd={onAnimationEnd} />;
     default:
       return <></>;
   }

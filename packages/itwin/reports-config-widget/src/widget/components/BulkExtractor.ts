@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { ExtractorState } from "@itwin/insights-client";
 import type { ExtractionClient, ReportMapping, ReportsClient } from "@itwin/insights-client";
 import { handleError } from "./utils";
@@ -58,7 +58,7 @@ export class BulkExtractor {
   }
 
   public async getReportState(reportId: string): Promise<ExtractionStates> {
-    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
+    if (new Date().getTime() - this._timeFetched.getTime() > STATUS_CHECK_INTERVAL) {
       this._timeFetched = new Date();
       await this.fetchStates();
     }
@@ -75,7 +75,7 @@ export class BulkExtractor {
   }
 
   public async getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates> {
-    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
+    if (new Date().getTime() - this._timeFetched.getTime() > STATUS_CHECK_INTERVAL) {
       this._timeFetched = new Date();
       await this.fetchStates();
     }
@@ -97,17 +97,13 @@ export class BulkExtractor {
   }
 
   private static getFinalState(states: ExtractorState[]): ExtractionStates {
-    if (states.includes(ExtractorState.Failed))
-      return ExtractionStates.Failed;
+    if (states.includes(ExtractorState.Failed)) return ExtractionStates.Failed;
 
-    if (states.includes(ExtractorState.Queued))
-      return ExtractionStates.Queued;
+    if (states.includes(ExtractorState.Queued)) return ExtractionStates.Queued;
 
-    if (states.includes(ExtractorState.Running))
-      return ExtractionStates.Running;
+    if (states.includes(ExtractorState.Running)) return ExtractionStates.Running;
 
-    if (states.includes(ExtractorState.Succeeded))
-      return ExtractionStates.Succeeded;
+    if (states.includes(ExtractorState.Succeeded)) return ExtractionStates.Succeeded;
 
     return ExtractionStates.Failed;
   }
@@ -153,10 +149,7 @@ export class BulkExtractor {
 
   private async runExtraction(iModelId: string): Promise<string | undefined> {
     try {
-      const response = await this._extractionClientApi.runExtraction(
-        await this._accessToken(),
-        iModelId
-      );
+      const response = await this._extractionClientApi.runExtraction(await this._accessToken(), iModelId);
       this._iModelToast.delete(iModelId);
       return response.id;
     } catch (error: any) {
@@ -187,10 +180,7 @@ export class BulkExtractor {
   }
 
   private async fetchReportIModels(reportId: string): Promise<string[]> {
-    const reportMappings = await this._reportsClientApi.getReportMappings(
-      await this._accessToken(),
-      reportId
-    );
+    const reportMappings = await this._reportsClientApi.getReportMappings(await this._accessToken(), reportId);
     return reportMappings.map((x) => x.imodelId);
   }
 }

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
 import { EC3ConfigurationsClient, EC3JobsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
@@ -36,18 +36,20 @@ export const createApiContext = (config: EC3Config) => {
   };
 };
 
-export const ApiContext = createContext<EC3ApiContext>(createApiContext(new EC3Config({
-  iTwinId: "",
-  clientId: "",
-  redirectUri: "",
-})));
+export const ApiContext = createContext<EC3ApiContext>(
+  createApiContext(
+    new EC3Config({
+      iTwinId: "",
+      clientId: "",
+      redirectUri: "",
+    }),
+  ),
+);
 
 export const useApiContext = () => {
   const context = useContext(ApiContext);
   if (!context) {
-    throw new Error(
-      "useAPIContext should be used within an APIContext provider"
-    );
+    throw new Error("useAPIContext should be used within an APIContext provider");
   }
   return context;
 };

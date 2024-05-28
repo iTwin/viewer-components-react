@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
 import { screen } from "@testing-library/react";
@@ -21,39 +21,38 @@ const oDataClient = moq.Mock.ofType<ODataClient>();
 jest.mock("@itwin/itwinui-react", () => ({
   ...jest.requireActual("@itwin/itwinui-react"),
   toaster: {
-    positive: (_: string) => { },
-    negative: (_: string) => { },
+    positive: (_: string) => {},
+    negative: (_: string) => {},
   },
 }));
 
 describe("TemplateMenu", () => {
-  const mockedReports = Array.from(
-    { length: 5 },
-    (_, index) => ({
-      id: index.toString(),
-      displayName: `report_${index}`,
-      description: "desc",
-      deleted: false,
-      _links: {
-        project: {
-          href: "reportLink",
-        },
+  const mockedReports = Array.from({ length: 5 }, (_, index) => ({
+    id: index.toString(),
+    displayName: `report_${index}`,
+    description: "desc",
+    deleted: false,
+    _links: {
+      project: {
+        href: "reportLink",
       },
-    })
-  );
+    },
+  }));
 
   const configId = "1234-1234-1234-1234";
   const config: EC3Configuration = {
     id: configId,
     displayName: "mocked_configuration",
     description: "mocked_description",
-    labels: [{
-      name: "mocked_label",
-      reportTable: "",
-      elementNameColumn: "",
-      elementQuantityColumn: "",
-      materials: [],
-    }],
+    labels: [
+      {
+        name: "mocked_label",
+        reportTable: "",
+        elementNameColumn: "",
+        elementQuantityColumn: "",
+        materials: [],
+      },
+    ],
     createdBy: "",
     modifiedBy: "",
     createdOn: "",
@@ -92,10 +91,7 @@ describe("TemplateMenu", () => {
 
   it("Template Menu should render successfully for creating template", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
     });
     expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
@@ -103,11 +99,7 @@ describe("TemplateMenu", () => {
 
   it("Template Menu should render successfully for updating template", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        template={template}
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-      />,
+      component: <TemplateMenu template={template} onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn,
@@ -118,10 +110,7 @@ describe("TemplateMenu", () => {
 
   it("Mocked reports should appear in comboBox", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
       reportsClient: reportsClient.object,
       getAccessTokenFn,
     });
@@ -137,10 +126,7 @@ describe("TemplateMenu", () => {
 
   it("Selecting name and report should enable save button, saving calls client", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn,
@@ -162,10 +148,7 @@ describe("TemplateMenu", () => {
 
   it("Add assembly button in enabled after selecting report and it opens label action menu", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
       reportsClient: reportsClient.object,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
@@ -186,11 +169,7 @@ describe("TemplateMenu", () => {
 
   it("Template menu displays the data of the selected template", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-        template={template}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn,
@@ -211,11 +190,7 @@ describe("TemplateMenu", () => {
 
   it("Clicking on label opens label action menu", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-        template={template}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
       oDataClient: oDataClient.object,
@@ -232,11 +207,7 @@ describe("TemplateMenu", () => {
 
   it("Deleting label opens delete modal", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-        template={template}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn,
@@ -253,11 +224,7 @@ describe("TemplateMenu", () => {
 
   it("Saving existing template updates it", async () => {
     await renderWithContext({
-      component: <TemplateMenu
-        onSaveSuccess={jest.fn}
-        onClickCancel={async () => { }}
-        template={template}
-      />,
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn,

@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type { IMappingsClient} from "@itwin/insights-client";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { IMappingsClient } from "@itwin/insights-client";
 import { GROUPING_AND_MAPPING_BASE_PATH, MappingsClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 import type { ClientPrefix } from "./GroupingApiConfigContext";
@@ -43,9 +43,7 @@ export const MappingClientContext = createContext<IMappingsClient>(createDefault
 export const useMappingClient = () => {
   const context = useContext(MappingClientContext);
   if (!context) {
-    throw new Error(
-      "useMappingClient should be used within a MappingClientContext provider"
-    );
+    throw new Error("useMappingClient should be used within a MappingClientContext provider");
   }
   return context;
 };

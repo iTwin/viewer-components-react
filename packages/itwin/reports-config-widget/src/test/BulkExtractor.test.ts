@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { BulkExtractor } from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { assert } from "chai";
@@ -49,7 +49,6 @@ const mockRunId = "mockRunId";
 const mockRunId1 = "mockRunId1";
 
 describe("BulkExtractor", () => {
-
   it("should return status none for unknown iModel", async () => {
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     const result = await sut.getIModelState(mockIModelId, "", "");
@@ -57,13 +56,9 @@ describe("BulkExtractor", () => {
   });
 
   it("should return running status for started extraction", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Running })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Running }));
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     await sut.runIModelExtraction(mockIModelId);
@@ -72,13 +67,9 @@ describe("BulkExtractor", () => {
   });
 
   it("should return failed status for failed extraction", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Failed })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Failed }));
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     await sut.runIModelExtraction(mockIModelId);
@@ -87,21 +78,13 @@ describe("BulkExtractor", () => {
   });
 
   it("full status check cycle", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Queued })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Queued }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Running })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Running }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Succeeded })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Succeeded }));
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     await sut.runIModelExtraction(mockIModelId);
@@ -119,21 +102,13 @@ describe("BulkExtractor", () => {
   it("two started jobs should return status", async () => {
     const mockIModelIds = [mockIModelId, mockIModelId1];
 
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
-      async () => ({ id: mockRunId1 })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(async () => ({ id: mockRunId1 }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Queued })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Queued }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
-      async () => ({ state: ExtractorState.Queued })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(async () => ({ state: ExtractorState.Queued }));
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -153,17 +128,11 @@ describe("BulkExtractor", () => {
   });
 
   it("should return status running for running report", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Running })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Running }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
-      async () => ([{ imodelId: mockIModelId }])
-    );
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -174,25 +143,15 @@ describe("BulkExtractor", () => {
   });
 
   it("should return status running for both iModels in report", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
-      async () => ({ id: mockRunId1 })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(async () => ({ id: mockRunId1 }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Running })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Running }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
-      async () => ({ state: ExtractorState.Running })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(async () => ({ state: ExtractorState.Running }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
-      async () => ([{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }])
-    );
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -206,25 +165,15 @@ describe("BulkExtractor", () => {
   });
 
   it("should return lowest progress status for extractions in report", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
-      async () => ({ id: mockRunId1 })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(async () => ({ id: mockRunId1 }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Running })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Running }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
-      async () => ({ state: ExtractorState.Queued })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(async () => ({ state: ExtractorState.Queued }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
-      async () => ([{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }])
-    );
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -235,25 +184,15 @@ describe("BulkExtractor", () => {
   });
 
   it("should return status failed if one of the extractions in report failed", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
-      async () => ({ id: mockRunId1 })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(async () => ({ id: mockRunId1 }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Succeeded })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Succeeded }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
-      async () => ({ state: ExtractorState.Failed })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(async () => ({ state: ExtractorState.Failed }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
-      async () => ([{ imodelId: mockIModelId1 }, { imodelId: mockIModelId1 }])
-    );
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId1 }, { imodelId: mockIModelId1 }]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -264,25 +203,15 @@ describe("BulkExtractor", () => {
   });
 
   it("full report extraction status check cycle", async () => {
-    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
-      async () => ({ id: mockRunId })
-    );
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ id: mockRunId }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Queued })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Queued }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Running })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Running }));
 
-    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
-      async () => ({ state: ExtractorState.Succeeded })
-    );
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractorState.Succeeded }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
-      async () => ([{ imodelId: mockIModelId }])
-    );
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     await sut.runReportExtractions([mockReportId]);

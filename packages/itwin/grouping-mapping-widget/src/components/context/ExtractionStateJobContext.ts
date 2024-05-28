@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 
 export interface ExtractionStatusJob {
@@ -11,15 +11,13 @@ export interface ExtractionStatusJob {
 
 export const ExtractionStatusJobContext = React.createContext<ExtractionStatusJob>({
   mappingIdJobInfo: new Map(),
-  setMappingIdJobInfo: () => { },
+  setMappingIdJobInfo: () => {},
 });
 
 export const useExtractionStateJobContext = (): ExtractionStatusJob => {
   const context = React.useContext(ExtractionStatusJobContext);
   if (!context) {
-    throw new Error(
-      "useExtractionStateJobContext should be used within a ExtractionStatusJobContext provider"
-    );
+    throw new Error("useExtractionStateJobContext should be used within a ExtractionStatusJobContext provider");
   }
   return context;
 };

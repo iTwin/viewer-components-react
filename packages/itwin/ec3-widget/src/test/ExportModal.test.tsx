@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
 import { act, screen } from "@testing-library/react";
@@ -15,8 +15,8 @@ import { ExportModal } from "../components/ExportModal";
 jest.mock("@itwin/itwinui-react", () => ({
   ...jest.requireActual("@itwin/itwinui-react"),
   toaster: {
-    positive: (_: string) => { },
-    negative: (_: string) => { },
+    positive: (_: string) => {},
+    negative: (_: string) => {},
   },
 }));
 
@@ -60,13 +60,7 @@ describe("ExportModal", () => {
 
   it("Export modal with the isOpen prop should render successfully and be visible", async () => {
     await renderWithContext({
-      component: <ExportModal
-        projectName=""
-        isOpen={true}
-        close={() => { }}
-        templateId={templateId}
-        token={undefined}
-      />,
+      component: <ExportModal projectName="" isOpen={true} close={() => {}} templateId={templateId} token={undefined} />,
     });
     expect(screen.getByTestId("ec3-export-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
@@ -74,13 +68,7 @@ describe("ExportModal", () => {
 
   it("Export modal without the isOpen prop should be invisible", async () => {
     await renderWithContext({
-      component: <ExportModal
-        projectName=""
-        isOpen={false}
-        close={() => { }}
-        templateId={templateId}
-        token={undefined}
-      />,
+      component: <ExportModal projectName="" isOpen={false} close={() => {}} templateId={templateId} token={undefined} />,
     });
     expect(document.querySelector(".ec3-export-modal")).toBeDefined();
     expect(document.querySelector(".iui-dialog-visible")).toBeNull();
@@ -90,18 +78,12 @@ describe("ExportModal", () => {
     let event: Function | undefined;
     jest.spyOn(window, "setInterval").mockImplementation((callback, _) => {
       event = callback;
-      return setTimeout(() => { });
+      return setTimeout(() => {});
     });
 
     expect(event).toBe(undefined);
     await renderWithContext({
-      component: <ExportModal
-        projectName=""
-        isOpen={true}
-        close={() => { }}
-        templateId={templateId}
-        token={ec3Token}
-      />,
+      component: <ExportModal projectName="" isOpen={true} close={() => {}} templateId={templateId} token={ec3Token} />,
       ec3JobsClient: jobsClient.object,
       getAccessTokenFn,
     });
@@ -115,18 +97,12 @@ describe("ExportModal", () => {
     let event: Function | undefined;
     jest.spyOn(window, "setInterval").mockImplementation((callback, _) => {
       event = callback;
-      return setTimeout(() => { });
+      return setTimeout(() => {});
     });
 
     expect(event).toBe(undefined);
     await renderWithContext({
-      component: <ExportModal
-        projectName=""
-        isOpen={true}
-        close={() => { }}
-        templateId={templateId}
-        token={ec3Token}
-      />,
+      component: <ExportModal projectName="" isOpen={true} close={() => {}} templateId={templateId} token={ec3Token} />,
       ec3JobsClient: jobsClient.object,
       getAccessTokenFn,
     });
@@ -137,19 +113,27 @@ describe("ExportModal", () => {
     expect(event).not.toBe(undefined);
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Queued));
-    await act(async () => { await event!(); });
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export queued");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Running));
-    await act(async () => { await event!(); });
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export running");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Succeeded));
-    await act(async () => { await event!(); });
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".ec3w-report-button")).toHaveTextContent("Open in EC3");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Failed));
-    await act(async () => { await event!(); });
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export failed");
   });
 });

@@ -1,17 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
-import type {
-  GetIModelListParams,
-  IModelsClient,
-  MinimalIModel,
-} from "@itwin/imodels-client-management";
-import {
-  toArray,
-} from "@itwin/imodels-client-management";
+import type { GetIModelListParams, IModelsClient, MinimalIModel } from "@itwin/imodels-client-management";
+import { toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
@@ -22,7 +16,7 @@ const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
   iModelsClient: IModelsClient,
-  getAccessToken: () => Promise<AccessToken>
+  getAccessToken: () => Promise<AccessToken>,
 ) => {
   const accessToken = await getAccessToken();
   const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
@@ -30,9 +24,7 @@ const fetchIModels = async (
     urlParams: { iTwinId },
     authorization,
   };
-  const iModels = await toArray(
-    iModelsClient.iModels.getMinimalList(getiModelListParams)
-  );
+  const iModels = await toArray(iModelsClient.iModels.getMinimalList(getiModelListParams));
   setiModels(iModels);
 };
 
@@ -41,10 +33,7 @@ interface SelectedIModelProps {
   setSelectedIModelId: (iModelId: string) => void;
 }
 
-export const SelectIModel = ({
-  selectedIModelId,
-  setSelectedIModelId,
-}: SelectedIModelProps) => {
+export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
   const { iTwinId, getAccessToken, iModelsClient } = useReportsConfigApi();
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
@@ -61,11 +50,7 @@ export const SelectIModel = ({
 
   return (
     <div className="rcw-select-imodel">
-      <Label htmlFor="combo-input">
-        {ReportsConfigWidget.localization.getLocalizedString(
-          "ReportsConfigWidget:SelectIModel"
-        )}
-      </Label>
+      <Label htmlFor="combo-input">{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:SelectIModel")}</Label>
       <div className="rcw-combobox">
         <ComboBox<string>
           options={iModelOptions}

@@ -1,51 +1,20 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  Button,
-  Icon,
-  IconButton,
-  Label,
-  LabeledInput,
-  Modal,
-  ModalButtonBar,
-  Surface,
-  Text,
-} from "@itwin/itwinui-react";
+import { Button, Icon, IconButton, Label, LabeledInput, Modal, ModalButtonBar, Surface, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  SvgClose,
-  SvgDragHandleVertical,
-  SvgMoreVerticalSmall,
-  SvgRemove,
-  SvgSearch,
-} from "@itwin/itwinui-icons-react";
-import {
-  DragOverlay,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { SvgClose, SvgDragHandleVertical, SvgMoreVerticalSmall, SvgRemove, SvgSearch } from "@itwin/itwinui-icons-react";
+import { DragOverlay } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableHorizontalTile } from "./SortableHorizontalTile";
 import Split from "react-split";
 import "./GroupsPropertiesSelectionModal.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import { getLocalizedStringPresentation } from "../../../common/utils";
-import {
-  closestCenter,
-  DndContext,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
+import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 
@@ -57,15 +26,13 @@ export interface GroupPropertiesSelectionModalProps {
   propertiesMetaData: PropertyMetaData[];
 }
 
-export const GroupsPropertiesSelectionModal = (
-  {
-    showModal,
-    setShowModal,
-    selectedProperties,
-    setSelectedProperties,
-    propertiesMetaData,
-  }: GroupPropertiesSelectionModalProps
-) => {
+export const GroupsPropertiesSelectionModal = ({
+  showModal,
+  setShowModal,
+  selectedProperties,
+  setSelectedProperties,
+  propertiesMetaData,
+}: GroupPropertiesSelectionModalProps) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
   const [searched, setSearched] = useState<boolean>(false);
@@ -73,30 +40,36 @@ export const GroupsPropertiesSelectionModal = (
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
   const [activeDragProperty, setActiveDragProperty] = useState<PropertyMetaData | undefined>();
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    const { active } = event;
-    const activeProperty = selectedProperties.find((p) => active.id === p.key);
-    setActiveDragProperty(activeProperty);
-  }, [selectedProperties]);
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const { active } = event;
+      const activeProperty = selectedProperties.find((p) => active.id === p.key);
+      setActiveDragProperty(activeProperty);
+    },
+    [selectedProperties],
+  );
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (over && (active.id !== over.id)) {
-      setSelectedProperties((items) => {
-        const oldIndex = selectedProperties.findIndex((p) => active.id === p.key);
-        const newIndex = selectedProperties.findIndex((p) => over.id === p.key);
+      if (over && active.id !== over.id) {
+        setSelectedProperties((items) => {
+          const oldIndex = selectedProperties.findIndex((p) => active.id === p.key);
+          const newIndex = selectedProperties.findIndex((p) => over.id === p.key);
 
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
+          return arrayMove(items, oldIndex, newIndex);
+        });
+      }
 
-    setActiveDragProperty(undefined);
-  }, [selectedProperties, setSelectedProperties]);
+      setActiveDragProperty(undefined);
+    },
+    [selectedProperties, setSelectedProperties],
+  );
 
   const clearSearch = useCallback(() => {
     setSearchInput("");
@@ -113,11 +86,9 @@ export const GroupsPropertiesSelectionModal = (
   const filteredProperties = useMemo(
     () =>
       propertiesMetaData.filter((p) =>
-        [p.displayLabel, p.categoryLabel, p.actualECClassName]
-          .map((l) => l.toLowerCase())
-          .some((l) => l.includes(activeSearchInput.toLowerCase()))
+        [p.displayLabel, p.categoryLabel, p.actualECClassName].map((l) => l.toLowerCase()).some((l) => l.includes(activeSearchInput.toLowerCase())),
       ),
-    [activeSearchInput, propertiesMetaData]
+    [activeSearchInput, propertiesMetaData],
   );
 
   useEffect(() => {
@@ -128,12 +99,7 @@ export const GroupsPropertiesSelectionModal = (
   }, [searchInput, setSearched, clearSearch]);
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <Modal
         title="Properties Selection"
         isOpen={showModal}
@@ -153,14 +119,15 @@ export const GroupsPropertiesSelectionModal = (
             const dragHangle = renderToStaticMarkup(
               <Icon className="gmw-gutter-drag-icon" size="large">
                 <SvgMoreVerticalSmall />
-              </Icon>
+              </Icon>,
             );
             const gutter = document.createElement("div");
             gutter.className = `gmw-gutter`;
             gutter.innerHTML = dragHangle;
             return gutter;
           }}
-          direction="horizontal">
+          direction="horizontal"
+        >
           <Surface className="gmw-available-properties" elevation={1}>
             <div className="gmw-available-properties-header">
               <Label as="span">Available Properties</Label>
@@ -184,56 +151,49 @@ export const GroupsPropertiesSelectionModal = (
                 }}
                 svgIcon={
                   searched ? (
-                    <IconButton onClick={clearSearch} styleType="borderless" title='Clear Search'>
+                    <IconButton onClick={clearSearch} styleType="borderless" title="Clear Search">
                       <SvgClose />
                     </IconButton>
                   ) : (
-                    <IconButton onClick={startSearch} styleType="borderless" title='Search'>
+                    <IconButton onClick={startSearch} styleType="borderless" title="Search">
                       <SvgSearch />
                     </IconButton>
                   )
                 }
               />
             </div>
-            {filteredProperties.length === 0 ?
+            {filteredProperties.length === 0 ? (
               <div className="gmw-empty-selection">
                 <Text>No properties available. </Text>
-              </div> :
+              </div>
+            ) : (
               <div className="gmw-properties-list">
-                {
-                  filteredProperties.map((property) => (
-                    <GroupPropertyListItem
-                      key={property.key}
-                      content={`${property.displayLabel}`}
-                      title={`${property.actualECClassName}`}
-                      description={getLocalizedStringPresentation(property.categoryLabel)}
-                      selected={selectedProperties.some((p) => property.key === p.key)}
-                      onClick={() =>
-                        setSelectedProperties((sp) =>
-                          sp.some((p) => property.key === p.key)
-                            ? sp.filter(
-                              (p) => property.key !== p.key
-                            )
-                            : [...sp, property]
-                        )
-                      }
-                    />
-                  ))}
-              </div>}
+                {filteredProperties.map((property) => (
+                  <GroupPropertyListItem
+                    key={property.key}
+                    content={`${property.displayLabel}`}
+                    title={`${property.actualECClassName}`}
+                    description={getLocalizedStringPresentation(property.categoryLabel)}
+                    selected={selectedProperties.some((p) => property.key === p.key)}
+                    onClick={() =>
+                      setSelectedProperties((sp) => (sp.some((p) => property.key === p.key) ? sp.filter((p) => property.key !== p.key) : [...sp, property]))
+                    }
+                  />
+                ))}
+              </div>
+            )}
           </Surface>
           <Surface className="gmw-selected-properties" elevation={1}>
             <Label as="span">Selected Properties</Label>
-            {selectedProperties.length === 0 ?
+            {selectedProperties.length === 0 ? (
               <div className="gmw-empty-selection">
                 <Text>No properties selected.</Text>
                 <Text>Add some by clicking on the properties shown left.</Text>
-              </div> :
-              <div className="gmw-properties-list" >
-                <SortableContext
-                  items={selectedProperties.map((p) => p.key)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {selectedProperties.map((property) =>
+              </div>
+            ) : (
+              <div className="gmw-properties-list">
+                <SortableContext items={selectedProperties.map((p) => p.key)} strategy={verticalListSortingStrategy}>
+                  {selectedProperties.map((property) => (
                     <SortableHorizontalTile
                       key={property.key}
                       id={property.key}
@@ -246,18 +206,18 @@ export const GroupsPropertiesSelectionModal = (
                             styleType="borderless"
                             title="Remove"
                             onClick={() => {
-                              setSelectedProperties((sp) => sp.filter(
-                                (p) => property.key !== p.key
-                              ));
-                            }
-                            }>
+                              setSelectedProperties((sp) => sp.filter((p) => property.key !== p.key));
+                            }}
+                          >
                             <SvgRemove />
                           </IconButton>
                         </div>
                       }
-                    />)}
+                    />
+                  ))}
                 </SortableContext>
-              </div>}
+              </div>
+            )}
           </Surface>
         </Split>
         <ModalButtonBar>
@@ -273,22 +233,23 @@ export const GroupsPropertiesSelectionModal = (
         </ModalButtonBar>
       </Modal>
       <DragOverlay zIndex={9999}>
-        {activeDragProperty ?
+        {activeDragProperty ? (
           <GroupPropertyListItem
             content={`${activeDragProperty.displayLabel}`}
             title={`${activeDragProperty.actualECClassName}`}
             description={getLocalizedStringPresentation(activeDragProperty.categoryLabel)}
             action={
-              <IconButton
-                styleType="borderless">
+              <IconButton styleType="borderless">
                 <SvgRemove />
-              </IconButton>}
+              </IconButton>
+            }
             dragHandle={
               <Icon className="gmw-drag-icon" size="large">
                 <SvgDragHandleVertical />
               </Icon>
             }
-          /> : null}
+          />
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

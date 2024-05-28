@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -16,30 +16,20 @@ describe("Widget Header Component", function () {
   });
 
   it("with return function", function () {
-    const { container } = render(
-      <WidgetHeader title="hello" returnFn={async () => {}} />
-    );
+    const { container } = render(<WidgetHeader title="hello" returnFn={async () => {}} />);
     expect(container.firstChild?.firstChild).toHaveClass("oclca-chevron");
-    expect(container.firstChild?.firstChild).not.toHaveClass(
-      "oclca-chevron-disabled"
-    );
+    expect(container.firstChild?.firstChild).not.toHaveClass("oclca-chevron-disabled");
   });
 
   it("with disabled", function () {
-    const { container } = render(
-      <WidgetHeader title="hello" disabled={true} returnFn={async () => {}} />
-    );
+    const { container } = render(<WidgetHeader title="hello" disabled={true} returnFn={async () => {}} />);
     expect(container.firstChild?.firstChild).not.toHaveClass("oclca-chevron");
-    expect(container.firstChild?.firstChild).toHaveClass(
-      "oclca-chevron-disabled"
-    );
+    expect(container.firstChild?.firstChild).toHaveClass("oclca-chevron-disabled");
   });
 
   it("with mocked return function", function () {
     const mockReturnFn = jest.fn();
-    const { container } = render(
-      <WidgetHeader title="hello" returnFn={mockReturnFn} />
-    );
+    const { container } = render(<WidgetHeader title="hello" returnFn={mockReturnFn} />);
 
     const toTestElement = container.querySelector("SvgChevronLeft");
     if (toTestElement !== null) {

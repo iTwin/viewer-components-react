@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /**
  * @public
  */
@@ -24,4 +24,6 @@ export type PossibleDataType = DataType | "Undefined";
 /**
  * @public
  */
-export interface PropertyMap { [key: string]: PossibleDataType }
+export interface PropertyMap {
+  [key: string]: PossibleDataType;
+}

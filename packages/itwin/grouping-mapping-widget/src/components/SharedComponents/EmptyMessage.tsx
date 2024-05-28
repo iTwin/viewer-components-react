@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { Text } from "@itwin/itwinui-react";
 import React from "react";
 import "./EmptyMessage.scss";
@@ -11,7 +11,7 @@ export interface EmptyMessageProps {
 }
 
 export const EmptyMessage = ({ message }: EmptyMessageProps) => (
-  <div className='gmw-empty-message-center-overlay'>
+  <div className="gmw-empty-message-center-overlay">
     <Text>{message}</Text>
   </div>
 );

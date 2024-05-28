@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useEffect } from "react";
 import { useGroupHilitedElementsContext } from "../components/context/GroupHilitedElementsContext";
 import { usePropertiesGroupColorContext } from "../components/context/PropertiesGroupColorContext";
@@ -34,11 +34,5 @@ export const GroupingMappingContent = ({
     }
   }, [routingHistory, setHiddenGroupsIds, setPropertiesShowGroup, setShowGroupColor]);
 
-  return (
-    <GroupingMappingRouter
-      currentRoute={currentRoute}
-      navigateTo={navigateTo}
-      goBack={goBack}
-    />
-  );
+  return <GroupingMappingRouter currentRoute={currentRoute} navigateTo={navigateTo} goBack={goBack} />;
 };

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
@@ -29,9 +29,7 @@ export const ReportsRouter = ({
           onClickAddReport={() =>
             navigateTo(() => ({
               step: RouteStep.ReportAction,
-              title: ReportsConfigWidget.localization.getLocalizedString(
-                "ReportsConfigWidget:ITwinReports"
-              ),
+              title: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ITwinReports"),
               reportsRoutingFields: {},
             }))
           }

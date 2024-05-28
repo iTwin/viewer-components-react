@@ -1,22 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useMemo, useState } from "react";
-import type {
-  Alert,
-} from "@itwin/itwinui-react";
-import {
-  Button,
-  IconButton,
-  List,
-} from "@itwin/itwinui-react";
-import {
-  SvgAdd,
-  SvgImport,
-  SvgPlay,
-  SvgRefresh,
-} from "@itwin/itwinui-icons-react";
+import type { Alert } from "@itwin/itwinui-react";
+import { Button, IconButton, List } from "@itwin/itwinui-react";
+import { SvgAdd, SvgImport, SvgPlay, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
 import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
 import "./MappingsView.scss";
@@ -99,19 +88,13 @@ export const MappingsView = ({
   onClickMappingModify,
   alert,
 }: MappingsViewProps) => {
-  const displayStrings = React.useMemo(
-    () => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }),
-    [userDisplayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
   const { runExtraction } = useRunExtraction(groupingMappingApiConfig);
 
-  const jobStartEvent = useMemo(
-    () => new BeEvent<(mappingId: string) => void>(),
-    []
-  );
+  const jobStartEvent = useMemo(() => new BeEvent<(mappingId: string) => void>(), []);
 
   const refreshAll = useCallback(async () => {
     await Promise.all([onRefreshMappings(), onRefreshExtractionStatus()]);
@@ -122,8 +105,7 @@ export const MappingsView = ({
       return mappingIdList.some((eachId) => mapping.id === eachId.id)
         ? mappingIdList.filter((eachId) => mapping.id !== eachId.id)
         : [...mappingIdList, mapping];
-    }
-    );
+    });
   };
 
   const onRunExtraction = useCallback(async () => {
@@ -140,28 +122,17 @@ export const MappingsView = ({
       <div className="gmw-mappings-view-container">
         <div className="gmw-table-toolbar">
           <div className="gmw-button-spacing">
-            {onClickAddMapping &&
-              <Button
-                startIcon={<SvgAdd />}
-                onClick={onClickAddMapping}
-                styleType="high-visibility"
-                title="New Mapping"
-              >
+            {onClickAddMapping && (
+              <Button startIcon={<SvgAdd />} onClick={onClickAddMapping} styleType="high-visibility" title="New Mapping">
                 New
               </Button>
-            }
-            {showImportModal !== undefined && setShowImportModal && <IconButton
-              title={`Import ${displayStrings.mappings}`}
-              onClick={() => setShowImportModal(true)}
-            >
-              <SvgImport />
-            </IconButton>
-            }
-            <IconButton
-              title="Run extraction"
-              onClick={onRunExtraction}
-              disabled={selectedMappings.length === 0}
-            >
+            )}
+            {showImportModal !== undefined && setShowImportModal && (
+              <IconButton title={`Import ${displayStrings.mappings}`} onClick={() => setShowImportModal(true)}>
+                <SvgImport />
+              </IconButton>
+            )}
+            <IconButton title="Run extraction" onClick={onRunExtraction} disabled={selectedMappings.length === 0}>
               <SvgPlay />
             </IconButton>
           </div>
@@ -175,18 +146,13 @@ export const MappingsView = ({
               }}
               iconMessage={extractionStatusData.iconMessage}
             />
-            <IconButton
-              title="Refresh"
-              onClick={refreshAll}
-              disabled={isLoading}
-              styleType='borderless'
-            >
+            <IconButton title="Refresh" onClick={refreshAll} disabled={isLoading} styleType="borderless">
               <SvgRefresh />
             </IconButton>
           </div>
         </div>
         {alert}
-        <div className='gmw-mappings-border' />
+        <div className="gmw-mappings-border" />
         {isLoading ? (
           <LoadingOverlay />
         ) : mappings.length === 0 ? (
@@ -201,9 +167,7 @@ export const MappingsView = ({
                 jobStartEvent={jobStartEvent}
                 onClickMappingTitle={onClickMappingTitle}
                 onSelectionChange={onSelectionChange}
-                selected={selectedMappings.some(
-                  (eachMapping) => mapping.id === eachMapping.id
-                )}
+                selected={selectedMappings.some((eachMapping) => mapping.id === eachMapping.id)}
                 onToggleExtraction={onToggleExtraction}
                 onRefreshMappings={onRefreshMappings}
                 onClickMappingModify={onClickMappingModify}
@@ -213,13 +177,15 @@ export const MappingsView = ({
           </List>
         )}
       </div>
-      {showExtractionMessageModal && <ExtractionMessageModal
-        isOpen={showExtractionMessageModal}
-        onClose={() => setShowExtractionMessageModal(false)}
-        extractionMessageData={extractionMessageData}
-        timestamp={extractionMessageData.length === 0 ? "" : extractionMessageData[0].date}
-      />}
-      {showDeleteModal &&
+      {showExtractionMessageModal && (
+        <ExtractionMessageModal
+          isOpen={showExtractionMessageModal}
+          onClose={() => setShowExtractionMessageModal(false)}
+          extractionMessageData={extractionMessageData}
+          timestamp={extractionMessageData.length === 0 ? "" : extractionMessageData[0].date}
+        />
+      )}
+      {showDeleteModal && (
         <DeleteModal
           entityName={showDeleteModal?.mappingName}
           onClose={() => setShowDeleteModal(undefined)}
@@ -227,13 +193,10 @@ export const MappingsView = ({
             await onDelete(showDeleteModal);
           }}
         />
-      }
-      {showImportModal && setShowImportModal && <MappingImportWizardModal
-        show={showImportModal}
-        setShow={setShowImportModal}
-        onFinish={onRefreshMappings}
-        displayStrings={displayStrings}
-      />}
+      )}
+      {showImportModal && setShowImportModal && (
+        <MappingImportWizardModal show={showImportModal} setShow={setShowImportModal} onFinish={onRefreshMappings} displayStrings={displayStrings} />
+      )}
     </>
   );
 };

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useEffect, useState } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
@@ -14,11 +14,7 @@ export interface PropertyActionProps {
   property: PropertyRecord;
 }
 
-const usePropertySelection = (
-  property: PropertyRecord,
-  currentPropertyList: PropertyRecord[],
-  queryBuilder: QueryBuilder | undefined
-) => {
+const usePropertySelection = (property: PropertyRecord, currentPropertyList: PropertyRecord[], queryBuilder: QueryBuilder | undefined) => {
   const [isCheckboxLoading, setIsCheckboxLoading] = useState(false);
 
   const checkIfPropertyIsSelected = useCallback(
@@ -28,33 +24,24 @@ const usePropertySelection = (
       }
 
       if (property.value.valueFormat === PropertyValueFormat.Array) {
-        return (
-          property.value.items.length === 0 &&
-          currentPropertyList.includes(property)
-        );
+        return property.value.items.length === 0 && currentPropertyList.includes(property);
       }
-      return Object.values(property.value.members).every(
-        (subProp: PropertyRecord) => checkIfPropertyIsSelected(subProp)
-      );
+      return Object.values(property.value.members).every((subProp: PropertyRecord) => checkIfPropertyIsSelected(subProp));
     },
-    [currentPropertyList]
+    [currentPropertyList],
   );
 
   const isPropertySelected = checkIfPropertyIsSelected(property);
 
   const addProperty = useCallback(
     async (prop: PropertyRecord) => {
-      if (
-        prop.value.valueFormat === PropertyValueFormat.Primitive &&
-        !currentPropertyList.includes(prop) &&
-        (await queryBuilder?.addProperty(prop))
-      ) {
+      if (prop.value.valueFormat === PropertyValueFormat.Primitive && !currentPropertyList.includes(prop) && (await queryBuilder?.addProperty(prop))) {
         setIsCheckboxLoading(false);
         return true;
       }
       return false;
     },
-    [currentPropertyList, queryBuilder]
+    [currentPropertyList, queryBuilder],
   );
 
   const removeProperty = useCallback(
@@ -64,7 +51,7 @@ const usePropertySelection = (
         setIsCheckboxLoading(false);
       }
     },
-    [currentPropertyList, queryBuilder]
+    [currentPropertyList, queryBuilder],
   );
 
   return {
@@ -77,21 +64,13 @@ const usePropertySelection = (
 };
 
 export const PropertyAction = ({ property }: PropertyActionProps) => {
-  const {
+  const { currentPropertyList, queryBuilder, setCurrentPropertyList, setQuery, isUpdating } = usePropertyGridWrapper();
+
+  const { isPropertySelected, addProperty, removeProperty, isCheckboxLoading, setIsCheckboxLoading } = usePropertySelection(
+    property,
     currentPropertyList,
     queryBuilder,
-    setCurrentPropertyList,
-    setQuery,
-    isUpdating,
-  } = usePropertyGridWrapper();
-
-  const {
-    isPropertySelected,
-    addProperty,
-    removeProperty,
-    isCheckboxLoading,
-    setIsCheckboxLoading,
-  } = usePropertySelection(property, currentPropertyList, queryBuilder);
+  );
 
   useEffect(() => {
     setIsCheckboxLoading(isPropertySelected && isUpdating);
@@ -100,9 +79,7 @@ export const PropertyAction = ({ property }: PropertyActionProps) => {
   const onPropertySelectionChanged = useCallback(async () => {
     if (isPropertySelected) {
       await removeProperty(property);
-      setCurrentPropertyList((prevList) =>
-        prevList.filter((x) => x !== property)
-      );
+      setCurrentPropertyList((prevList) => prevList.filter((x) => x !== property));
       setQuery(queryBuilder?.buildQueryString() ?? "");
     } else {
       if (await addProperty(property)) {
@@ -110,26 +87,12 @@ export const PropertyAction = ({ property }: PropertyActionProps) => {
         setQuery(queryBuilder?.buildQueryString() ?? "");
       }
     }
-  }, [
-    addProperty,
-    isPropertySelected,
-    property,
-    removeProperty,
-    queryBuilder,
-    setCurrentPropertyList,
-    setQuery,
-  ]);
+  }, [addProperty, isPropertySelected, property, removeProperty, queryBuilder, setCurrentPropertyList, setQuery]);
 
   return (
     <div className="gmw-property-selection-checkbox">
-      {property.value.valueFormat === PropertyValueFormat.Primitive &&
-        property.value.value !== undefined && (
-        <Checkbox
-          checked={isPropertySelected}
-          onChange={onPropertySelectionChanged}
-          disabled={isUpdating}
-          isLoading={isCheckboxLoading}
-        />
+      {property.value.valueFormat === PropertyValueFormat.Primitive && property.value.value !== undefined && (
+        <Checkbox checked={isPropertySelected} onChange={onPropertySelectionChanged} disabled={isUpdating} isLoading={isCheckboxLoading} />
       )}
     </div>
   );
