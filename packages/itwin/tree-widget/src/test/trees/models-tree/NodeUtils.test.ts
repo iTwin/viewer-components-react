@@ -41,4 +41,26 @@ describe("Node utils", () => {
     const elementNode = { ...instanceNode, extendedData: { isElement: true } };
     expect(NodeUtils.getNodeType(elementNode)).to.be.eq(ModelsTreeNodeType.Element);
   });
+
+  it("getModelId", () => {
+    const node = {
+      extendedData: {},
+    };
+    expect(NodeUtils.getModelId(node)).to.be.undefined;
+    node.extendedData = { modelId: "0x1" };
+    expect(NodeUtils.getModelId(node)).to.eq("0x1");
+    node.extendedData = { modelIds: ["0x1", "0x2"] };
+    expect(NodeUtils.getModelId(node)).to.eq("0x1");
+    node.extendedData = { modelIds: [["0x1"], "0x2"] };
+    expect(NodeUtils.getModelId(node)).to.eq("0x1");
+  });
+
+  it("getElementCategoryId", () => {
+    const node = {
+      extendedData: {},
+    };
+    expect(NodeUtils.getElementCategoryId(node)).to.be.undefined;
+    node.extendedData = { categoryId: "0x1" };
+    expect(NodeUtils.getElementCategoryId(node)).to.eq("0x1");
+  });
 });
