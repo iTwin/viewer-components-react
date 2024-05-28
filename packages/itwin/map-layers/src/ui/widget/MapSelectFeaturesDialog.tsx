@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
 import { Dialog } from "@itwin/core-react";
@@ -9,8 +9,8 @@ import * as React from "react";
 import "./MapSelectFeaturesDialog.scss";
 
 import { MapLayersUI } from "../../mapLayers";
-import { MapLayerSource } from "@itwin/core-frontend";
-import { MapSubLayerProps } from "@itwin/core-common";
+import type { MapLayerSource } from "@itwin/core-frontend";
+import type { MapSubLayerProps } from "@itwin/core-common";
 import { SubLayersTree } from "./SubLayersTree";
 import { Button, Icon } from "@itwin/itwinui-react";
 import { SvgStatusWarning } from "@itwin/itwinui-icons-color-react";
@@ -38,8 +38,8 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
     props.handleCancel();
   }, [props]);
 
-  const hasVisibleLayers = () => subLayers.some((entry)=>entry.visible);
-  const hasTooManyVisibleLayers = () => subLayers.filter((entry)=>entry.visible).length > maxSubLayers;
+  const hasVisibleLayers = () => subLayers.some((entry) => entry.visible);
+  const hasTooManyVisibleLayers = () => subLayers.filter((entry) => entry.visible).length > maxSubLayers;
   const readyToSave = () => hasVisibleLayers();
 
   function renderWarningMessage(): React.ReactNode {
@@ -49,40 +49,33 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
     if (!hasVisibleLayers()) {
       warningMessage = MapLayersUI.translate("CustomAttach.NoLayersSelected");
     } else if (hasTooManyVisibleLayers()) {
-      warningMessage = MapLayersUI.translate("CustomAttach.TooManyLayersSelected", { layerCount: subLayers.filter((entry)=>entry.visible).length});
+      warningMessage = MapLayersUI.translate("CustomAttach.TooManyLayersSelected", { layerCount: subLayers.filter((entry) => entry.visible).length });
     }
 
     return (
       <div className="map-layer-source-warnMessage">
-        {warningMessage !== undefined && <>
-          <Icon size="small"><SvgStatusWarning></SvgStatusWarning></Icon>
-          <span className="map-layer-source-warnMessage-label">{warningMessage}</span >
-        </>}
-      </div>);
-
+        {warningMessage !== undefined && (
+          <>
+            <Icon size="small">
+              <SvgStatusWarning></SvgStatusWarning>
+            </Icon>
+            <span className="map-layer-source-warnMessage-label">{warningMessage}</span>
+          </>
+        )}
+      </div>
+    );
   }
 
   function getFooter() {
     return (
       <div className="map-layer-features-footer">
-        <div className="map-layer-features-footer-warnMessage">
-          {renderWarningMessage()}
-        </div>
+        <div className="map-layer-features-footer-warnMessage">{renderWarningMessage()}</div>
 
         <div className="map-layer-features-footer-buttons">
-          <Button
-            className="map-layer-features-footer-button"
-            styleType='high-visibility'
-            onClick={handleOk}
-            disabled={!readyToSave()}
-          >
+          <Button className="map-layer-features-footer-button" styleType="high-visibility" onClick={handleOk} disabled={!readyToSave()}>
             {MapLayersUI.translate("Dialog.Add")}
           </Button>
-          <Button
-            className="map-layer-features-footer-button"
-            styleType='default'
-            onClick={handleCancel}
-          >
+          <Button className="map-layer-features-footer-button" styleType="default" onClick={handleCancel}>
             {MapLayersUI.translate("Dialog.Cancel")}
           </Button>
         </div>
@@ -109,9 +102,8 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         trapFocus={false}
       >
         {/* 'onSubLayerStateChange' is used to trigger hook state change only, no need to update subLayer objects */}
-        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])}/>
-
+        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])} />
       </Dialog>
-    </div >
+    </div>
   );
 }

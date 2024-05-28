@@ -1,10 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as chai from "chai";
 import * as sinon from "sinon";
-import { Guid, GuidString } from "@itwin/core-bentley";
+import type { GuidString } from "@itwin/core-bentley";
+import { Guid } from "@itwin/core-bentley";
 import { MapLayerSource, MockRender } from "@itwin/core-frontend";
 
 import { MapLayerPreferences } from "../MapLayerPreferences";
@@ -35,18 +36,24 @@ describe("MapLayerPreferences", () => {
     });
     chai.assert.isDefined(layer);
     let sources = await MapLayerPreferences.getSources(iTwinId, iModelId);
-    let foundSource = sources.some((value) => { return value.name === testName; });
+    let foundSource = sources.some((value) => {
+      return value.name === testName;
+    });
     chai.assert.isFalse(foundSource, "expect not to find the source as it has not been stored yet");
 
     sources = await MapLayerPreferences.getSources(iTwinId);
-    foundSource = sources.some((value) => { return value.name === testName; });
+    foundSource = sources.some((value) => {
+      return value.name === testName;
+    });
     chai.assert.isFalse(foundSource, "expect not to find the source as it has not been stored yet");
 
     const success = await MapLayerPreferences.storeSource(layer!, iTwinId, iModelId, false);
     chai.assert.isTrue(success);
 
     sources = await MapLayerPreferences.getSources(iTwinId, iModelId);
-    foundSource = sources.some((value) => { return value.name === testName; });
+    foundSource = sources.some((value) => {
+      return value.name === testName;
+    });
     chai.assert.isTrue(foundSource);
   });
 
@@ -60,14 +67,18 @@ describe("MapLayerPreferences", () => {
 
     chai.assert.isDefined(layer);
     let sources = await MapLayerPreferences.getSources(iTwinId);
-    let foundSource = sources.some((value) => { return value.name === testName; });
+    let foundSource = sources.some((value) => {
+      return value.name === testName;
+    });
     chai.assert.isFalse(foundSource, "expect not to find the source as it has not been stored yet");
 
     const success = await MapLayerPreferences.storeSource(layer!, iTwinId);
     chai.assert.isTrue(success);
 
     sources = await MapLayerPreferences.getSources(iTwinId);
-    foundSource = sources.some((value) => { return value.name === testName; });
+    foundSource = sources.some((value) => {
+      return value.name === testName;
+    });
     chai.assert.isTrue(foundSource);
   });
 
