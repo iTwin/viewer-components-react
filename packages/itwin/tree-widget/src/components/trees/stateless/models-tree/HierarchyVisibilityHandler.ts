@@ -417,7 +417,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
       }
 
       status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-      return of(createVisibilityStatus(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "hiddenThroughCategory"));
+      return of(createVisibilityStatus(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "element.hiddenThroughCategory"));
     });
 
     const ovr = this._props.overrides?.getElementDisplayStatus;
