@@ -3,20 +3,21 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable, OperatorFunction } from "rxjs";
 import {
-  concat, concatWith, defaultIfEmpty, defer, EMPTY, first, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce, shareReplay, toArray,
+  concat, concatWith, defaultIfEmpty, defer, distinct, EMPTY, first, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce,
+  shareReplay, toArray,
 } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
-import { NodeUtils } from "../../common/NodeUtils";
 import { reduceWhile, toSet, toVoidPromise } from "../../common/Rxjs";
-import { createVisibilityStatus } from "../../common/Tooltip";
 import { AlwaysAndNeverDrawnElementInfo } from "./internal/AlwaysAndNeverDrawnElementInfo";
 import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
+import { NodeUtils } from "./internal/NodeUtils";
+import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 
+import type { Observable, OperatorFunction } from "rxjs";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./internal/AlwaysAndNeverDrawnElementInfo";
 import type { BeEvent, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -24,7 +25,7 @@ import type { ModelsTreeQueryHandler as ModelsTreeQueryHandler } from "./interna
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
-import type { NonPartialVisibilityStatus, Visibility } from "../../common/Tooltip";
+import type { NonPartialVisibilityStatus, Visibility } from "./internal/Tooltip";
 
 interface GetCategoryStatusProps {
   categoryId: Id64String;
@@ -52,7 +53,7 @@ interface ChangeModelStateProps {
 }
 
 /**
- * Properties for a method of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
+ * Properties for a method of [[HierarchyVisibilityHandler]] that can be overridden.
  */
 type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
   ? TProps & {
@@ -67,13 +68,13 @@ type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infe
   : never;
 
 /**
- * Function type for an overridden method of [[IHierarchyBasedVisibilityHandler]].
+ * Function type for an overridden method of [[HierarchyVisibilityHandler]].
  */
 type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverridableMethodProps<TFunc>) => TResult : never;
 
 /**
- * Functionality of [[IHierarchyBasedVisibilityHandler]] that can be overridden.
- * Each callback will be provided original implementation and reference to a [[IHierarchyBasedVisibilityHandler]].
+ * Functionality of [[HierarchyVisibilityHandler]] that can be overridden.
+ * Each callback will be provided original implementation and reference to a [[HierarchyVisibilityHandler]].
  */
 interface VisibilityHandlerOverrides {
   getSubjectNodeVisibility?: OverridableMethod<(props: { node: HierarchyNode; ids: Id64Set }) => Promise<VisibilityStatus>>;
@@ -90,8 +91,8 @@ interface VisibilityHandlerOverrides {
 }
 
 /**
- * Properties for [[IHierarchyBasedVisibilityHandler]].
- * @public
+ * Properties for [[HierarchyVisibilityHandler]].
+ * @internal
  */
 export interface HierarchyVisibilityHandlerProps {
   viewport: Viewport;
@@ -101,7 +102,7 @@ export interface HierarchyVisibilityHandlerProps {
 /**
  * Hierarchy based visibility handler.
  * When determining visibility for nodes, it should take into account the visibility of their children.
- * @public
+ * @internal
  */
 export interface HierarchyVisibilityHandler {
   getVisibilityStatus: (node: HierarchyNode) => Promise<VisibilityStatus>;
@@ -112,8 +113,8 @@ export interface HierarchyVisibilityHandler {
 }
 
 /**
- * Creates an instance if [[IHierarchyBasedVisibilityHandler]].
- * @public
+ * Creates an instance if [[HierarchyVisibilityHandler]].
+ * @internal
  */
 export function createHierarchyVisibilityHandler(props: HierarchyVisibilityHandlerProps): HierarchyVisibilityHandler {
   return new VisibilityHandlerImplementation(props);
@@ -124,7 +125,10 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _queryHandler: ModelsTreeQueryHandler;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
-  private readonly _groupingNodeElementsCache = new Map<string, Observable<undefined | { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>>();
+  private readonly _groupingNodeElementsCache = new Map<
+    string,
+    Observable<undefined | { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>
+  >();
   private _removePresentationHierarchyListener?: () => void;
 
   constructor(private readonly _props: HierarchyVisibilityHandlerProps) {
@@ -164,11 +168,11 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
     if (HierarchyNode.isGroupingNode(node)) {
-      return from(this.getElementGroupingNodeDisplayStatus(node));
+      return this.getElementGroupingNodeDisplayStatus(node);
     }
 
     if (!HierarchyNode.isInstancesNode(node)) {
-      return createVisibilityStatusObs("disabled");
+      return of(createVisibilityStatus("disabled"));
     }
 
     if (NodeUtils.isSubjectNode(node)) {
@@ -182,7 +186,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
 
     const modelId = NodeUtils.getModelId(node);
     if (!modelId) {
-      return createVisibilityStatusObs("disabled");
+      return of(createVisibilityStatus("disabled"));
     }
 
     if (NodeUtils.isCategoryNode(node)) {
@@ -194,7 +198,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
 
     const categoryId = NodeUtils.getElementCategoryId(node);
     if (!categoryId) {
-      return createVisibilityStatusObs("disabled");
+      return of(createVisibilityStatus("disabled"));
     }
 
     return this.getElementDisplayStatus({
@@ -213,6 +217,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
 
       const statuses = subjectIds.pipe(
         mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId)),
+        distinct(),
         mergeMap((modelId) => this.getModelVisibilityStatus(modelId)),
       );
 
@@ -248,66 +253,59 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
   }
 
   private getModelVisibilityStatus(modelId: Id64String): Observable<VisibilityStatus> {
-    const result = defer(() => this.getModelVisibilityStatusImpl(modelId));
+    const result = defer(() => {
+      const viewport = this._props.viewport;
+      if (!viewport.view.isSpatialView()) {
+        return of(createVisibilityStatus("disabled", "model.nonSpatialView"));
+      }
+
+      if (!viewport.view.viewsModel(modelId)) {
+        return of(createVisibilityStatus("hidden", "model.hiddenThroughModelSelector"));
+      }
+
+      return this._queryHandler.queryModelCategories(modelId).pipe(
+        map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
+        map((x) => x.state),
+        getVisibilityFromTreeNodeChildren,
+        mergeMap((visibilityByCategories) => {
+          // istanbul ignore if
+          if (visibilityByCategories === "empty") {
+            return of(createVisibilityStatus("visible"));
+          }
+
+          // If different categories have different visibilities,
+          // then there's no need to check for their elements.
+          if (visibilityByCategories === "partial") {
+            return of(createVisibilityStatus("partial", "model.someCategoriesHidden"));
+          }
+
+          const createStatusByCategories = () => {
+            return createVisibilityStatus(
+              visibilityByCategories,
+              visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden",
+            );
+          };
+
+          return this.getVisibilityFromAlwaysAndNeverDrawnElements({
+            queryProps: { modelId },
+            tooltips: {
+              allElementsInAlwaysDrawnList: "model.allElementsInAlwaysDrawnList",
+              allElementsInNeverDrawnList: "model.allElementsHidden",
+              elementsInBothAlwaysAndNeverDrawn: "model.elementsInAlwaysAndNeverDrawnList",
+              noElementsInExclusiveAlwaysDrawnList: "model.noElementsInExclusiveAlwaysDrawnList",
+            },
+            defaultStatus: createStatusByCategories,
+          });
+        }),
+      );
+    });
+
     const ovr = this._props.overrides?.getModelDisplayStatus;
     return ovr ? from(ovr(this.createOverrideProps({ id: modelId }, result))) : result;
   }
 
-  private getModelVisibilityStatusImpl(modelId: Id64String): Observable<VisibilityStatus> {
-    const viewport = this._props.viewport;
-    if (!viewport.view.isSpatialView()) {
-      return createVisibilityStatusObs("disabled", "model.nonSpatialView");
-    }
-
-    if (!viewport.view.viewsModel(modelId)) {
-      return createVisibilityStatusObs("hidden", "model.hiddenThroughModelSelector");
-    }
-
-    return this._queryHandler.queryModelCategories(modelId).pipe(
-      map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
-      map((x) => x.state),
-      getVisibilityFromTreeNodeChildren,
-      mergeMap((visibilityByCategories) => {
-        // istanbul ignore if
-        if (visibilityByCategories === "empty") {
-          return createVisibilityStatusObs("visible");
-        }
-
-        // If different categories have different visibilities,
-        // then there's no need to check for their elements.
-        if (visibilityByCategories === "partial") {
-          return createVisibilityStatusObs("partial", "model.someCategoriesHidden");
-        }
-
-        const createStatusByCategories = () => {
-          return createVisibilityStatus(
-            visibilityByCategories,
-            visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden",
-          );
-        };
-
-        return this.getVisibilityFromAlwaysAndNeverDrawnElements({
-          queryProps: { modelId },
-          tooltips: {
-            allElementsInAlwaysDrawnList: "model.allElementsInAlwaysDrawnList",
-            allElementsInNeverDrawnList: "model.allElementsHidden",
-            elementsInBothAlwaysAndNeverDrawn: "model.elementsInAlwaysAndNeverDrawnList",
-            noElementsInExclusiveAlwaysDrawnList: "model.noElementsInExclusiveAlwaysDrawnList",
-          },
-          defaultStatus: createStatusByCategories,
-        });
-      }),
-    );
-  }
-
   private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String): NonPartialVisibilityStatus {
     const viewport = this._props.viewport;
-    const getCategoryViewportVisibilityStatus = (): NonPartialVisibilityStatus => {
-      const isVisible = viewport.view.viewsCategory(categoryId);
-      return isVisible
-        ? createVisibilityStatus("visible", "category.displayedThroughCategorySelector")
-        : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
-    };
 
     if (!viewport.view.viewsModel(modelId)) {
       return createVisibilityStatus("hidden", "category.hiddenThroughModel");
@@ -320,7 +318,10 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
         return createVisibilityStatus("hidden", "category.hiddenThroughPerModelOverride");
     }
 
-    return getCategoryViewportVisibilityStatus();
+    const isVisible = viewport.view.viewsCategory(categoryId);
+    return isVisible
+      ? createVisibilityStatus("visible", "category.displayedThroughCategorySelector")
+      : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
   }
 
   private getCategoryDisplayStatus(props: GetCategoryStatusProps): Observable<VisibilityStatus> {
@@ -345,12 +346,12 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
     const result = this.getGroupedElementIds(node).pipe(
       mergeMap((group) => {
         if (!group) {
-          return createVisibilityStatusObs("disabled");
+          return of(createVisibilityStatus("disabled"));
         }
 
         const { modelId, categoryId, elementIds } = group;
         if (!this._props.viewport.view.viewsModel(modelId)) {
-          return createVisibilityStatusObs("hidden");
+          return of(createVisibilityStatus("hidden"));
         }
 
         return elementIds.pipe(
@@ -403,7 +404,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
       const { elementId, modelId, categoryId } = props;
 
       if (!viewport.view.viewsModel(modelId)) {
-        return createVisibilityStatusObs("hidden", "element.hiddenThroughModel");
+        return of(createVisibilityStatus("hidden", "element.hiddenThroughModel"));
       }
 
       let status = this.getElementOverriddenVisibility(elementId);
@@ -412,7 +413,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
       }
 
       status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-      return createVisibilityStatusObs(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "hiddenThroughCategory");
+      return of(createVisibilityStatus(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "hiddenThroughCategory"));
     });
 
     const ovr = this._props.overrides?.getElementDisplayStatus;
@@ -711,7 +712,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
     const viewport = this._props.viewport;
     if (viewport.isAlwaysDrawnExclusive) {
       if (!viewport?.alwaysDrawn?.size) {
-        return createVisibilityStatusObs("hidden", props.tooltips.noElementsInExclusiveAlwaysDrawnList);
+        return of(createVisibilityStatus("hidden", props.tooltips.noElementsInExclusiveAlwaysDrawnList));
       }
     } else if (!viewport?.neverDrawn?.size && !viewport?.alwaysDrawn?.size) {
       return of(props.defaultStatus());
@@ -799,17 +800,19 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
 
     const ids = node.groupedInstanceKeys.map((key) => key.id);
     const elementIds = from(ids).pipe(
-      mergeWith(this._queryHandler.queryElements({
-        rootElementIds: new Set(ids),
-      })),
+      mergeWith(
+        this._queryHandler.queryElements({
+          rootElementIds: new Set(ids),
+        }),
+      ),
       shareReplay(),
     );
 
     obs = elementIds.pipe(
       defaultIfEmpty(undefined),
       first(),
-      mergeMap((id) => id ? this._queryHandler.queryElementInfo({ elementIds: id }) : of(undefined)),
-      map((info) => info && ({ modelId: info.modelId, categoryId: info.categoryId, elementIds })),
+      mergeMap((id) => (id ? this._queryHandler.queryElementInfo({ elementIds: id }) : of(undefined))),
+      map((info) => info && { modelId: info.modelId, categoryId: info.categoryId, elementIds }),
       shareReplay(),
     );
     this._groupingNodeElementsCache.set(cacheKey, obs);
@@ -827,8 +830,6 @@ interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   /** Status when always/never lists are empty and exclusive mode is off */
   defaultStatus: () => NonPartialVisibilityStatus;
 }
-
-const createVisibilityStatusObs = (status: Visibility | "disabled", tooltipStringId?: string) => of(createVisibilityStatus(status, tooltipStringId));
 
 function getVisibilityFromTreeNodeChildren(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
   return obs.pipe(

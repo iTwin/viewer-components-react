@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { TreeWidget } from "../../../TreeWidget";
+import { TreeWidget } from "../../../../../TreeWidget";
 
-import type { VisibilityStatus } from "../VisibilityTreeEventHandler";
+import type { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
 
 /** @internal */
 export type Visibility = "visible" | "hidden" | "partial";

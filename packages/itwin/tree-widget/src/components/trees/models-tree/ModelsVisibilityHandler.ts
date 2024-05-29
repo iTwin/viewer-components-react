@@ -11,7 +11,6 @@ import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
-import { NodeUtils } from "../common/NodeUtils";
 import { CachingElementIdsContainer } from "./Utils";
 
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -20,7 +19,20 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
-import type { ModelsTreeNodeType } from "../common/NodeUtils";
+
+/**
+ * Models tree node types.
+ * @public
+ */
+export enum ModelsTreeNodeType {
+  Unknown,
+  Subject,
+  Model,
+  Category,
+  Element,
+  Grouping,
+}
+
 /**
  * Type definition of predicate used to decide if node can be selected
  * @public
@@ -83,21 +95,41 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._filteredDataProvider = provider;
   }
 
-  // istanbul ignore next
   public static getNodeType(item: TreeNodeItem) {
-    return NodeUtils.getNodeType(item);
+    if (!isPresentationTreeNodeItem(item)) {
+      return ModelsTreeNodeType.Unknown;
+    }
+
+    if (NodeKey.isClassGroupingNodeKey(item.key)) {
+      return ModelsTreeNodeType.Grouping;
+    }
+
+    if (!item.extendedData) {
+      return ModelsTreeNodeType.Unknown;
+    }
+
+    if (this.isSubjectNode(item)) {
+      return ModelsTreeNodeType.Subject;
+    }
+    if (this.isModelNode(item)) {
+      return ModelsTreeNodeType.Model;
+    }
+    if (this.isCategoryNode(item)) {
+      return ModelsTreeNodeType.Category;
+    }
+    return ModelsTreeNodeType.Element;
   }
 
   public static isSubjectNode(node: TreeNodeItem) {
-    return NodeUtils.isSubjectNode(node);
+    return node.extendedData && node.extendedData.isSubject;
   }
 
   public static isModelNode(node: TreeNodeItem) {
-    return NodeUtils.isModelNode(node);
+    return node.extendedData && node.extendedData.isModel;
   }
 
   public static isCategoryNode(node: TreeNodeItem) {
-    return NodeUtils.isCategoryNode(node);
+    return node.extendedData && node.extendedData.isCategory;
   }
 
   /** Returns visibility status of the tree node. */
@@ -716,9 +748,6 @@ export async function showAllModels(models: string[], viewport: Viewport) {
  */
 export async function hideAllModels(models: string[], viewport: Viewport) {
   viewport.changeModelDisplay(models, false);
-  viewport.perModelCategoryVisibility.clearOverrides(models);
-  viewport.clearAlwaysDrawn();
-  viewport.clearNeverDrawn();
 }
 
 /**

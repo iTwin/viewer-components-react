@@ -24,8 +24,8 @@ import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { toVoidPromise } from "../../../components/trees/common/Rxjs";
-import { createVisibilityStatus } from "../../../components/trees/common/Tooltip";
 import { createHierarchyVisibilityHandler } from "../../../components/trees/stateless/models-tree/HierarchyVisibilityHandler";
+import { createVisibilityStatus } from "../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../IModelUtils";
 import { TestUtils } from "../../TestUtils";
 import {
@@ -40,7 +40,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricElement3dProps } from "@itwin/core-common";
 import type { StubbedFactoryFunction } from "../Common";
 import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerProps } from "../../../components/trees/stateless/models-tree/HierarchyVisibilityHandler";
-import type { Visibility } from "../../../components/trees/common/Tooltip";
+import type { Visibility } from "../../../components/trees/stateless/models-tree/internal/Tooltip";
 import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 import type { IModelDb } from "@itwin/core-backend";
 interface VisibilityOverrides {
@@ -49,7 +49,7 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-describe.only("HierarchyBasedVisibilityHandler", () => {
+describe("HierarchyBasedVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();

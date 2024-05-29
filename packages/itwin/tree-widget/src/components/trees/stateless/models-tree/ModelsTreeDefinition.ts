@@ -7,6 +7,7 @@ import {
   createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { pushToMap } from "../common/Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type {
@@ -637,15 +638,6 @@ class SubjectModelIdsCache {
     });
     return modelIds;
   }
-}
-
-function pushToMap<TKey, TValue>(map: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  let list = map.get(key);
-  if (!list) {
-    list = new Set();
-    map.set(key, list);
-  }
-  list.add(value);
 }
 
 function createECInstanceKeySelectClause(

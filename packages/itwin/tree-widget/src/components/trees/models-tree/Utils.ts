@@ -5,13 +5,13 @@
 
 import { NodeKey } from "@itwin/presentation-common";
 
+import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ChildNodeSpecification, Node, Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
 import type { ModelInfo } from "./ModelsTreeButtons";
-import type { Id64String } from "@itwin/core-bentley";
 
 /** @internal */
 export class CachingElementIdsContainer {
@@ -592,14 +592,4 @@ export async function queryModelsForHeaderActions(iModel: IModelConnection) {
 
   const modelProps = await iModel.models.queryProps(queryParams);
   return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
-}
-
-/** @internal */
-export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
-  let set = targetMap.get(key);
-  if (!set) {
-    set = new Set();
-    targetMap.set(key, set);
-  }
-  set.add(value);
 }

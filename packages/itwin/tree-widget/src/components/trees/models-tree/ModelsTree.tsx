@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SelectionMode } from "@itwin/components-react";
 import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { NodeUtils } from "../common/NodeUtils";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
@@ -280,7 +279,9 @@ function useTreeState({
     onFilterChange,
     selectionPredicate: useCallback(
       (node: TreeNodeItem) =>
-        !selectionPredicateRef.current || !isPresentationTreeNodeItem(node) ? true : selectionPredicateRef.current(node.key, NodeUtils.getNodeType(node)),
+        !selectionPredicateRef.current || !isPresentationTreeNodeItem(node)
+          ? true
+          : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
       [],
     ),
     eventHandler: eventHandlerFactory,

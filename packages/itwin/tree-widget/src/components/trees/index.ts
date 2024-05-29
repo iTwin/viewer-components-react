@@ -7,7 +7,6 @@ export * from "./common/Types";
 export * from "./common/ContextMenu";
 export * from "./common/TreeRenderer";
 export * from "./common/TreeNodeRenderer";
-export * from "./common/NodeUtils";
 export * from "./VisibilityTreeEventHandler";
 export * from "./VisibilityTreeRenderer";
 

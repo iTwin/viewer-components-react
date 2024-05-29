@@ -26,6 +26,7 @@ import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
+import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyValueRendererContext } from '@itwin/components-react';
@@ -431,11 +432,11 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     protected getSubjectNodeVisibility(ids: Id64String[], node: TreeNodeItem): Promise<VisibilityStatus>;
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
     // (undocumented)
-    static isCategoryNode(node: TreeNodeItem): boolean;
+    static isCategoryNode(node: TreeNodeItem): any;
     // (undocumented)
-    static isModelNode(node: TreeNodeItem): boolean;
+    static isModelNode(node: TreeNodeItem): any;
     // (undocumented)
-    static isSubjectNode(node: TreeNodeItem): boolean;
+    static isSubjectNode(node: TreeNodeItem): any;
     // (undocumented)
     onVisibilityChange: BeEvent<VisibilityChangeListener>;
     setFilteredDataProvider(provider: IFilteredPresentationTreeDataProvider | undefined): void;
@@ -456,16 +457,6 @@ export interface ModelsVisibilityHandlerProps {
 // @public
 export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied"> {
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
-}
-
-// @public (undocumented)
-export namespace NodeUtils {
-    export function getNodeType(item: TreeNodeItem): ModelsTreeNodeType;
-    const isSubjectNode: (node: Node_2) => boolean;
-    const isModelNode: (node: Node_2) => boolean;
-    const isCategoryNode: (node: Node_2) => boolean;
-    const getModelId: (node: Node_2) => Id64String | undefined;
-    const getElementCategoryId: (node: Node_2) => Id64String | undefined;
 }
 
 // @internal

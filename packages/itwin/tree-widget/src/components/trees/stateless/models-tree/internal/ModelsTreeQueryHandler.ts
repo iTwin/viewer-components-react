@@ -5,7 +5,7 @@
 
 import { defer, EMPTY, expand, forkJoin, from, last, map, mergeMap, shareReplay, toArray } from "rxjs";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
-import { pushToMap } from "../../../models-tree/Utils";
+import { pushToMap } from "../../common/Utils";
 
 import type { Id64Set, Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";

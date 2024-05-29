@@ -51,7 +51,6 @@ public;ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) =
 public;ModelsVisibilityHandler 
 public;ModelsVisibilityHandlerProps
 public;ModelTreeComponentProps 
-public;NodeUtils
 internal;RULESET_CATEGORIES: Ruleset
 internal;RULESET_EXTERNAL_SOURCES: Ruleset
 internal;RULESET_IMODEL_CONTENT: Ruleset
