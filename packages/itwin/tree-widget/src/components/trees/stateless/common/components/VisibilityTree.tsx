@@ -33,7 +33,7 @@ interface VisibilityTreeOwnProps {
   getSublabel?: (node: PresentationHierarchyNode) => ReactElement | undefined;
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
@@ -101,6 +101,7 @@ function VisibilityTreeImpl({
     imodelKey: imodel.key,
     sourceName: treeName,
     onPerformanceMeasured,
+    onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
   const reportingSelectNodes = useCallback<SelectNodesCallback>(
     (nodeIds, changeType) => {
