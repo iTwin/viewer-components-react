@@ -18,8 +18,8 @@ dependencies:
     specifier: ^3.5.0
     version: 3.5.0(react-dom@18.0.0)(react@18.0.0)
   '@itwin/presentation-core-interop':
-    specifier: ^0.1.2
-    version: 0.1.2(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1)(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1)(@itwin/ecschema-metadata@4.5.1)
+    specifier: ^0.2.0
+    version: 0.2.0(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1)(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1)(@itwin/ecschema-metadata@4.5.1)
   '@itwin/presentation-hierarchies':
     specifier: ^0.1.1
     version: 0.1.1
@@ -27,8 +27,8 @@ dependencies:
     specifier: ^0.2.0
     version: 0.2.0(@itwin/itwinui-react@3.5.0)(react-dom@18.0.0)(react@18.0.0)
   '@itwin/presentation-shared':
-    specifier: ^0.1.1
-    version: 0.1.1
+    specifier: ^0.2.0
+    version: 0.2.0
   '@itwin/unified-selection':
     specifier: ^0.4.1
     version: 0.4.1
@@ -1385,8 +1385,8 @@ packages:
       - '@types/react'
     dev: true
 
-  /@itwin/presentation-core-interop@0.1.2(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1)(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1)(@itwin/ecschema-metadata@4.5.1):
-    resolution: {integrity: sha512-SP9GVTsyf+MSvBXSNGkYyKNmOeiaoHuHT7uMquuQisXqSIV9wJEdDPbfP2qlOH1WvNBzxXE0xWa7jpwpbM93UQ==}
+  /@itwin/presentation-core-interop@0.2.0(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1)(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1)(@itwin/ecschema-metadata@4.5.1):
+    resolution: {integrity: sha512-N5llS44zwJ9Bh8ihGfYF5cVZ6Y6VxXfrzVPwTrPC7urqh+bN13zOl4u18FhjHeMJgC3AFtiCpt9Ub/CmIR4KuA==}
     peerDependencies:
       '@itwin/core-bentley': ^4.1.0
       '@itwin/core-common': ^4.1.0
@@ -1399,7 +1399,7 @@ packages:
       '@itwin/core-geometry': 4.5.1
       '@itwin/core-quantity': 4.5.1(@itwin/core-bentley@4.5.1)
       '@itwin/ecschema-metadata': 4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-quantity@4.5.1)
-      '@itwin/presentation-shared': 0.1.1
+      '@itwin/presentation-shared': 0.2.0
       rxjs: 7.8.1
     dev: false
 
