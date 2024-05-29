@@ -283,16 +283,6 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
           return createVisibilityStatus(visibilityByCategories, visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "allCategoriesHidden");
         };
 
-        // We need to check if model's state is partially visible.
-        // Instead of recursively checking each element of each category,
-        // we only have to look at the always and never drawn lists.
-
-        const alwaysDrawn = viewport.alwaysDrawn;
-        const neverDrawn = viewport.neverDrawn;
-        if (!alwaysDrawn?.size && !neverDrawn?.size) {
-          return of(createStatusByCategories());
-        }
-
         return this.getVisibilityFromAlwaysAndNeverDrawnElements({
           queryProps: { modelId },
           tooltips: {
@@ -716,6 +706,13 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
     props: GetVisibilityFromAlwaysAndNeverDrawnElementsProps & ({ elements: Id64Set } | { queryProps: AlwaysOrNeverDrawnElementsQueryProps }),
   ): Observable<VisibilityStatus> {
     const viewport = this._props.viewport;
+    if (viewport.isAlwaysDrawnExclusive) {
+      if (!viewport?.alwaysDrawn?.size) {
+        return createVisibilityStatusObs("hidden", props.tooltips.noElementsInExclusiveAlwaysDrawnList);
+      }
+    } else if (!viewport?.neverDrawn?.size && !viewport?.alwaysDrawn?.size) {
+      return of(props.defaultStatus());
+    }
 
     if ("elements" in props) {
       return of(

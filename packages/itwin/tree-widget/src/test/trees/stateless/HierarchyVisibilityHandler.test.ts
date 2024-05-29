@@ -49,7 +49,7 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-describe("HierarchyBasedVisibilityHandler", () => {
+describe.only("HierarchyBasedVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -293,6 +293,26 @@ describe("HierarchyBasedVisibilityHandler", () => {
           expect(result).to.include({ state: "hidden", isDisabled: true });
         });
 
+        it("doesn't query model element count if always/never drawn sets are empty and exclusive mode is off", async () => {
+          const modelId = "0x1";
+          const categories = ["0x10", "0x20"];
+          const node = createModelHierarchyNode(modelId);
+          const queryHandler = createFakeModelsTreeQueryHandler({
+            modelCategories: new Map([[modelId, categories]]),
+            categoryElements: new Map([
+              ["0x10", ["0x100", "0x200"]],
+              ["0x20", ["0x300", "0x400"]],
+            ]),
+          });
+          const { handler } = createVisibilityHandlerWrapper({
+            queryHandler,
+          });
+
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "visible" });
+          expect(queryHandler.queryElementsCount).not.to.be.called;
+        });
+
         describe("visible", () => {
           it("when all categories are displayed", async () => {
             const modelId = "0x1";
@@ -408,7 +428,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             expect(result).to.include({ state: "hidden" });
           });
 
-          it("when all nested child elements are in never drawn list", async () => {
+          it("when all elements are in never drawn list", async () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
             const modelCategories = new Map([[modelId, ["0x10", "0x20"]]]);
@@ -430,7 +450,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             expect(result).to.include({ state: "hidden" });
           });
 
-          it("when none of the nested child elements are in exclusive drawn list", async () => {
+          it("when none of the elements are in exclusive always drawn list", async () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
             const modelCategories = new Map([[modelId, ["0x10", "0x20"]]]);
@@ -446,6 +466,28 @@ describe("HierarchyBasedVisibilityHandler", () => {
               queryHandler,
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set(["0xffff"]),
+                isAlwaysDrawnExclusive: true,
+              }),
+            });
+            const result = await handler.getVisibilityStatus(node);
+            expect(result).to.include({ state: "hidden" });
+          });
+
+          it("when in exclusive always drawn list is empty", async () => {
+            const modelId = "0x1";
+            const node = createModelHierarchyNode(modelId);
+            const modelCategories = new Map([[modelId, ["0x10", "0x20"]]]);
+            const categoryElements = new Map([
+              ["0x10", ["0x100", "0x200"]],
+              ["0x20", ["0x300", "0x400"]],
+            ]);
+            const queryHandler = createFakeModelsTreeQueryHandler({
+              modelCategories,
+              categoryElements,
+            });
+            const { handler } = createVisibilityHandlerWrapper({
+              queryHandler,
+              viewport: createFakeSinonViewport({
                 isAlwaysDrawnExclusive: true,
               }),
             });
@@ -497,7 +539,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             expect(result).to.include({ state: "partial" });
           });
 
-          it("when some of the nested child elements are in never drawn list", async () => {
+          it("when some of the elements are in never drawn list", async () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
             const queryHandler = createFakeModelsTreeQueryHandler({
@@ -517,7 +559,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             expect(result).to.include({ state: "partial" });
           });
 
-          it("when some of the nested child elements are not in the exclusive always drawn list", async () => {
+          it("when some of the elements are not in the exclusive always drawn list", async () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
             const queryHandler = createFakeModelsTreeQueryHandler({
