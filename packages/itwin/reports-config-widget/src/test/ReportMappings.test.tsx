@@ -20,12 +20,12 @@ import {
 import * as moq from "typemoq";
 import type {
   MappingContainer,
+  MappingsClient,
   Report,
-  ReportMappingCollection,
-} from "@itwin/insights-client";
+
+  ReportMappingCollection} from "@itwin/insights-client";
 import {
   ExtractionClient,
-  MappingsClient,
   ReportsClient} from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
 import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
@@ -340,7 +340,6 @@ describe("Report Mappings View", () => {
     const bulkExtractor = new BulkExtractor(
       new ReportsClient(),
       new ExtractionClient(),
-      new MappingsClient(),
       jest.fn().mockResolvedValue("mockAccessToken"),
       jest.fn,
       jest.fn,

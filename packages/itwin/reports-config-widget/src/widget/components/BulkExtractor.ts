@@ -10,8 +10,6 @@ import type {
   ExtractionClient,
   ExtractionMapping,
   ExtractionRequestDetails,
-  Mapping,
-  MappingsClient,
   ReportMapping,
   ReportsClient,
 } from "@itwin/insights-client";
@@ -29,7 +27,6 @@ export type ReportMappingAndMapping = ReportMapping & {
 export class BulkExtractor {
   private _reportsClientApi: ReportsClient;
   private _extractionClientApi: ExtractionClient;
-  private _mappingClientApi: MappingsClient;
   private _accessToken: () => Promise<string>;
 
   private _reportIModels = new Map<string, string[]>(); // key: reportId, value: iModels
@@ -45,14 +42,12 @@ export class BulkExtractor {
   constructor(
     reportsClient: ReportsClient,
     extractionClient: ExtractionClient,
-    mappingsClient: MappingsClient,
     getAccessToken: () => Promise<AccessToken>,
     successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void,
     failedExtractionToast: (iModelName: string) => void,
   ) {
     this._reportsClientApi = reportsClient;
     this._extractionClientApi = extractionClient;
-    this._mappingClientApi = mappingsClient;
     this._accessToken = getAccessToken;
     this._successfulExtractionToast = successfulExtractionToast;
     this._failedExtractionToast = failedExtractionToast;
@@ -150,30 +145,32 @@ export class BulkExtractor {
 
   public async runReportExtractions(reportIds: string[]): Promise<void> {
     const reportIModelIds = new Map<string, string[]>();
+    const extractionDetailsIModelIdMap = new Map<string, ExtractionMapping[]>();
     for (const reportId of reportIds) {
-      const reportIModels = await this.fetchReportIModels(reportId);
+      const reportExtractionDetails = await this.fetchReportExtractionRequestDetails(reportId);
+      const reportIModels = reportExtractionDetails.map((reportExtractionDetail) => reportExtractionDetail.iModelId);
       reportIModelIds.set(reportId, reportIModels);
       this._reportIModels.set(reportId, reportIModels);
+      reportExtractionDetails.forEach((extractionDetail) => {
+        extractionDetailsIModelIdMap.set(
+          extractionDetail.iModelId,
+          extractionDetailsIModelIdMap.get(extractionDetail.iModelId)?.concat(extractionDetail.mappings) || extractionDetail.mappings);
+      });
     }
-    const iModels = new Set(Array.from(reportIModelIds.values()).flat());
 
-    for (const iModel of iModels) {
-      await this.runIModelExtractions([iModel]);
+    const extractionDetails: ExtractionRequestDetails[] = Array.from(
+      extractionDetailsIModelIdMap.entries()).map(([iModelId, mappings]) => {
+      return {iModelId, mappings};
+    });
+    for (const extractionDetail of extractionDetails) {
+      await this.runIModelExtractions([extractionDetail]);
     }
   }
 
-  private async runExtraction(iModelId: string): Promise<string | undefined> {
+  private async runExtraction(extractionRequestDetails: ExtractionRequestDetails): Promise<string | undefined> {
     try {
-      const mappings: Mapping[] = (await this._mappingClientApi.getMappings(await this._accessToken(), iModelId)).mappings;
-      const mappingIds: ExtractionMapping[] = mappings.map((mapping) => {
-        return { id: mapping.id };
-      });
-      const extractionRequest: ExtractionRequestDetails = {
-        mappings: mappingIds,
-        iModelId,
-      };
-      const response = await this._extractionClientApi.runExtraction(await this._accessToken(), extractionRequest);
-      this._iModelToast.delete(iModelId);
+      const response = await this._extractionClientApi.runExtraction(await this._accessToken(), extractionRequestDetails);
+      this._iModelToast.delete(extractionRequestDetails.iModelId);
       return response.id;
     } catch (error: any) {
       handleError(error.status);
@@ -181,8 +178,8 @@ export class BulkExtractor {
     return undefined;
   }
 
-  public async runIModelExtraction(iModelId: string): Promise<void> {
-    return this.runIModelExtractions([iModelId]);
+  public async runIModelExtraction(extractionRequestDetails: ExtractionRequestDetails): Promise<void> {
+    return this.runIModelExtractions([extractionRequestDetails]);
   }
 
   public setHook(setJobRunning: React.Dispatch<React.SetStateAction<boolean>>, iModels: string[]): void {
@@ -191,22 +188,28 @@ export class BulkExtractor {
     this.checkRunning();
   }
 
-  public async runIModelExtractions(iModels: string[]): Promise<void> {
-    for (const iModelId of iModels) {
-      const run = await this.runExtraction(iModelId);
+  public async runIModelExtractions(extractionRequestsDetails: ExtractionRequestDetails[]): Promise<void> {
+    for (const extractionRequestDetails of extractionRequestsDetails) {
+      const run = await this.runExtraction(extractionRequestDetails);
       if (run) {
-        this._iModelStates.set(iModelId, ExtractionState.Queued);
-        this._iModelRun.set(iModelId, run);
+        this._iModelStates.set(extractionRequestDetails.iModelId, ExtractionState.Queued);
+        this._iModelRun.set(extractionRequestDetails.iModelId, run);
       }
       this.checkRunning();
     }
   }
 
-  private async fetchReportIModels(reportId: string): Promise<string[]> {
+  private async fetchReportExtractionRequestDetails(reportId: string): Promise<ExtractionRequestDetails[]> {
     const reportMappings = await this._reportsClientApi.getReportMappings(
       await this._accessToken(),
       reportId
     );
-    return reportMappings.map((x) => x.imodelId);
+    const extractionRequestDetails: ExtractionRequestDetails[] = reportMappings.map((reportMapping) => {
+      return {
+        iModelId: reportMapping.imodelId,
+        mappings: [{id: reportMapping.mappingId}],
+      };
+    });
+    return extractionRequestDetails;
   }
 }

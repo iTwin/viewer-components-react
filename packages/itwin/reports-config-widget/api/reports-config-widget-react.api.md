@@ -8,6 +8,7 @@
 
 import type { AccessToken } from '@itwin/core-bentley';
 import { ExtractionClient } from '@itwin/insights-client';
+import type { ExtractionRequestDetails } from '@itwin/insights-client';
 import { IModelsClient } from '@itwin/imodels-client-management';
 import type { Localization } from '@itwin/core-common';
 import { MappingsClient } from '@itwin/insights-client';
@@ -21,15 +22,15 @@ import type { Widget } from '@itwin/appui-react';
 
 // @public (undocumented)
 export class BulkExtractor {
-    constructor(reportsClient: ReportsClient, extractionClient: ExtractionClient, mappingsClient: MappingsClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
+    constructor(reportsClient: ReportsClient, extractionClient: ExtractionClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
     // (undocumented)
     getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates>;
     // (undocumented)
     getReportState(reportId: string): Promise<ExtractionStates>;
     // (undocumented)
-    runIModelExtraction(iModelId: string): Promise<void>;
+    runIModelExtraction(extractionRequestDetails: ExtractionRequestDetails): Promise<void>;
     // (undocumented)
-    runIModelExtractions(iModels: string[]): Promise<void>;
+    runIModelExtractions(extractionRequestsDetails: ExtractionRequestDetails[]): Promise<void>;
     // (undocumented)
     runReportExtractions(reportIds: string[]): Promise<void>;
     // (undocumented)

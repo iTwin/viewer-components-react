@@ -85,13 +85,12 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
         new BulkExtractor(
           apiConfig.reportsClient,
           extractionClient,
-          apiConfig.mappingsClient,
           apiConfig.getAccessToken,
           successfulExtractionToast,
           failedExtractionToast,
         ),
     }),
-    [apiConfig.getAccessToken, apiConfig.reportsClient, apiConfig.mappingsClient, extractionClient, props.bulkExtractor],
+    [apiConfig.getAccessToken, apiConfig.reportsClient, extractionClient, props.bulkExtractor],
   );
 
   useEffect(() => {

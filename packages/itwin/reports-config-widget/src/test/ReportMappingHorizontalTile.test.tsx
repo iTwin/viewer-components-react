@@ -184,9 +184,13 @@ describe("Report Mapping Horizontal Tile", () => {
 
   it("starting extraction sends request", async () => {
     const firstMockMapping = mockReportMappingsAndMappingsFactory()[0];
+    const firstMockExtractionRequest = {
+      mappings: [{ id: firstMockMapping.mappingId }],
+      iModelId: firstMockMapping.imodelId,
+    };
 
     mockBulkExtractor
-      .setup(async (x) => x.runIModelExtraction(firstMockMapping.imodelId))
+      .setup(async (x) => x.runIModelExtraction(firstMockExtractionRequest))
       .returns(async () => {
         return Promise.resolve();
       });
@@ -213,14 +217,18 @@ describe("Report Mapping Horizontal Tile", () => {
     const startExtractionButton = screen.getByRole("button", { name: /UpdateDataset/i });
     await user.click(startExtractionButton);
 
-    mockBulkExtractor.verify(async (x) => x.runIModelExtraction(firstMockMapping.imodelId), moq.Times.once());
+    mockBulkExtractor.verify(async (x) => x.runIModelExtraction(firstMockExtractionRequest), moq.Times.once());
   });
 
   it("on delete is called when remove is pressed", async () => {
     const firstMockMapping = mockReportMappingsAndMappingsFactory()[0];
+    const firstMockExtractionRequest = {
+      mappings: [{ id: firstMockMapping.mappingId }],
+      iModelId: firstMockMapping.imodelId,
+    };
 
     mockBulkExtractor
-      .setup(async (x) => x.runIModelExtraction(firstMockMapping.imodelId))
+      .setup(async (x) => x.runIModelExtraction(firstMockExtractionRequest))
       .returns(async () => {
         return Promise.resolve();
       });
@@ -253,13 +261,17 @@ describe("Report Mapping Horizontal Tile", () => {
 
   it("full extraction status cycle", async () => {
     const firstMockMapping = mockReportMappingsAndMappingsFactory()[0];
+    const firstMockExtractionRequest = {
+      mappings: [{ id: firstMockMapping.mappingId }],
+      iModelId: firstMockMapping.imodelId,
+    };
 
     mockIModelsClient
       .setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
       .returns(async () => mockIModelsResponse[0].iModel);
 
     mockBulkExtractor
-      .setup(async (x) => x.runIModelExtraction(firstMockMapping.imodelId))
+      .setup(async (x) => x.runIModelExtraction(firstMockExtractionRequest))
       .returns(async () => {
         return Promise.resolve();
       });
@@ -291,7 +303,7 @@ describe("Report Mapping Horizontal Tile", () => {
     const startExtractionButton = screen.getByRole("button", { name: /UpdateDataset/i });
     await user.click(startExtractionButton);
 
-    mockBulkExtractor.verify(async (x) => x.runIModelExtraction(firstMockMapping.imodelId), moq.Times.once());
+    mockBulkExtractor.verify(async (x) => x.runIModelExtraction(firstMockExtractionRequest), moq.Times.once());
 
     expect(screen.getByTitle(/Starting/i)).toBeInTheDocument();
 
@@ -323,6 +335,10 @@ describe("Report Mapping Horizontal Tile", () => {
     const mockReportMappingsAndMappings = mockReportMappingsAndMappingsFactory();
     const firstMockMapping = mockReportMappingsAndMappings[0];
     const secondMockMapping = mockReportMappingsAndMappings[1];
+    const firstMockExtractionRequest = {
+      mappings: [{ id: firstMockMapping.mappingId }],
+      iModelId: firstMockMapping.imodelId,
+    };
 
     mockBulkExtractor
       .setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
@@ -362,7 +378,7 @@ describe("Report Mapping Horizontal Tile", () => {
       .returns(async () => ExtractionStates.Queued);
 
     mockBulkExtractor
-      .setup(async (x) => x.runIModelExtraction(firstMockMapping.imodelId))
+      .setup(async (x) => x.runIModelExtraction(firstMockExtractionRequest))
       .returns(async () => {
         return Promise.resolve();
       });

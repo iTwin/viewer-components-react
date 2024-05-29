@@ -6,7 +6,7 @@ import { BulkExtractor } from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { assert } from "chai";
 import * as moq from "typemoq";
-import { ExtractionClient, ExtractionState, MappingsClient, ReportsClient } from "@itwin/insights-client";
+import { ExtractionClient, ExtractionState, ReportsClient } from "@itwin/insights-client";
 import type { AccessToken } from "@itwin/core-bentley";
 import type { ExtractionRequestDetails } from "@itwin/insights-client";
 
@@ -66,7 +66,7 @@ const mockExtractionRequest1 = {
 
 describe("BulkExtractor", () => {
   it("should return status none for unknown iModel", async () => {
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     const result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.None);
   });
@@ -78,8 +78,8 @@ describe("BulkExtractor", () => {
 
     mockGetMappings.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ mappings: [{ id: mockMappingId }] }));
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
-    await sut.runIModelExtraction(mockIModelId);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    await sut.runIModelExtraction(mockExtractionRequest);
     const result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.Running);
   });
@@ -91,8 +91,8 @@ describe("BulkExtractor", () => {
 
     mockGetMappings.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ mappings: [{ id: mockMappingId }] }));
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
-    await sut.runIModelExtraction(mockIModelId);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    await sut.runIModelExtraction(mockExtractionRequest);
     const result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.Failed);
   });
@@ -108,8 +108,8 @@ describe("BulkExtractor", () => {
 
     mockGetMappings.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(async () => ({ mappings: [{ id: mockMappingId }] }));
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
-    await sut.runIModelExtraction(mockIModelId);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    await sut.runIModelExtraction(mockExtractionRequest);
 
     let result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.Queued);
@@ -122,7 +122,7 @@ describe("BulkExtractor", () => {
   });
 
   it("two started jobs should return status", async () => {
-    const mockIModelIds = [mockIModelId, mockIModelId1];
+    const mockExtractionRequests = [mockExtractionRequest, mockExtractionRequest1];
 
     mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockExtractionRequest)).returns(async () => ({ id: mockRunId }));
 
@@ -136,9 +136,9 @@ describe("BulkExtractor", () => {
 
     mockGetMappings.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(async () => ({ mappings: [{ id: mockMappingId1 }] }));
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
-    await sut.runIModelExtractions(mockIModelIds);
+    await sut.runIModelExtractions(mockExtractionRequests);
 
     const result1 = await sut.getIModelState(mockIModelId, "", "");
     const result2 = await sut.getIModelState(mockIModelId1, "", "");
@@ -148,7 +148,7 @@ describe("BulkExtractor", () => {
   });
 
   it("should return status none for unknown report", async () => {
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     const result = await sut.getReportState(mockReportId);
     assert.strictEqual(result, ExtractionStates.None);
   });
@@ -162,7 +162,7 @@ describe("BulkExtractor", () => {
 
     mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }]);
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
     await sut.runReportExtractions([mockReportId]);
 
@@ -185,7 +185,7 @@ describe("BulkExtractor", () => {
 
     mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }]);
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
     await sut.runReportExtractions([mockReportId]);
 
@@ -211,7 +211,7 @@ describe("BulkExtractor", () => {
 
     mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }]);
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
     await sut.runReportExtractions([mockReportId]);
 
@@ -234,7 +234,7 @@ describe("BulkExtractor", () => {
 
     mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId1 }, { imodelId: mockIModelId1 }]);
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
     await sut.runReportExtractions([mockReportId]);
 
@@ -255,7 +255,7 @@ describe("BulkExtractor", () => {
 
     mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId }]);
 
-    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), new MappingsClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
+    const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     await sut.runReportExtractions([mockReportId]);
 
     let result = await sut.getReportState(mockReportId);

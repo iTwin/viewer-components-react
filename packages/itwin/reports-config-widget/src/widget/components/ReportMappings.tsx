@@ -25,7 +25,7 @@ import {
 } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import type { MappingsClient, Report, ReportMapping, ReportsClient } from "@itwin/insights-client";
+import type { ExtractionRequestDetails, MappingsClient, Report, ReportMapping, ReportsClient } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { AddMappingsModal } from "./AddMappingsModal";
 import type {
@@ -312,7 +312,17 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
           onClick={async () => {
             setJobRunning(true);
             const uniqueIModels = Array.from(new Set(reportMappings.map((x) => x.imodelId)));
-            await bulkExtractor.runIModelExtractions(uniqueIModels);
+            const iModelsAndMappings: ExtractionRequestDetails[] = uniqueIModels.map((iModelId) => {
+              return {
+                iModelId,
+                mappings: reportMappings
+                  .filter((reportMapping) => reportMapping.imodelId === iModelId)
+                  .map((reportMappingForIModel) => ({
+                    id: reportMappingForIModel.mappingId,
+                  })),
+              };
+            });
+            await bulkExtractor.runIModelExtractions(iModelsAndMappings);
             reportMappings.forEach((reportMapping) => {
               jobStartEvent.raiseEvent(reportMapping.imodelId);
             });
