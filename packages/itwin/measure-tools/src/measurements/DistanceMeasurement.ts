@@ -547,7 +547,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
 
-    if (this.drawingMetaData?.worldScale !== undefined === undefined) {
+    if (this.drawingMetaData?.worldScale !== undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(
