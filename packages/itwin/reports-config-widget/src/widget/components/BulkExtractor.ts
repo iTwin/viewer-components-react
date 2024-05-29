@@ -160,7 +160,11 @@ export class BulkExtractor {
 
     const extractionDetails: ExtractionRequestDetails[] = Array.from(
       extractionDetailsIModelIdMap.entries()).map(([iModelId, mappings]) => {
-      return {iModelId, mappings};
+      const mappingSetArray: ExtractionMapping[] = Array.from(new Set(mappings.map((m) => m.id))).map((id) => ({id}));
+      return {
+        iModelId,
+        mappings: mappingSetArray,
+      };
     });
     for (const extractionDetail of extractionDetails) {
       await this.runIModelExtractions([extractionDetail]);

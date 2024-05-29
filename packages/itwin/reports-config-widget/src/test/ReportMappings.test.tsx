@@ -7,6 +7,7 @@ import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
   act,
+  mockExtractionRequestDetails,
   mockIModelId1,
   mockIModelId2,
   mockIModelsResponse,
@@ -335,8 +336,6 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const iModels = mockIModelsResponse.map((iModel) => iModel.iModel.id);
-
     const bulkExtractor = new BulkExtractor(
       new ReportsClient(),
       new ExtractionClient(),
@@ -363,7 +362,7 @@ describe("Report Mappings View", () => {
     await waitFor(() => expect(extractAllButton).toBeEnabled());
 
     // Check that the mocked method was called with the expected arguments
-    expect(runIModelExtractionsMock).toHaveBeenCalledWith(iModels);
+    expect(runIModelExtractionsMock).toHaveBeenCalledWith(mockExtractionRequestDetails);
   });
 
   const assertHorizontalTiles = (horizontalTiles: HTMLElement[], mockMappings: MappingContainer[]) => {
