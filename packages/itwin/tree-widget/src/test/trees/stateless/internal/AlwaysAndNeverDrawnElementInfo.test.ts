@@ -56,7 +56,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       const queryProvider = createFakeModelsTreeQueryHandler();
       await using(new AlwaysAndNeverDrawnElementInfo(vp, queryProvider), async (_) => {
         await fakeTimers.runAllAsync();
-        expect(queryProvider.queryElementInfo).to.be.calledOnceWith(sinon.match({ elementIds: set, recursive: true }));
+        expect(queryProvider.queryElementInfo).to.be.calledOnceWith(sinon.match({ elementIds: set, useRootElementCategoryId: true }));
       });
     });
 
@@ -237,7 +237,7 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
         updateSet(finalSet);
         await fakeTimers.tickAsync(debounceTime);
 
-        expect(queryHandler.queryElementInfo).to.be.calledOnceWith(sinon.match({ elementIds: finalSet, recursive: true }));
+        expect(queryHandler.queryElementInfo).to.be.calledOnceWith(sinon.match({ elementIds: finalSet, useRootElementCategoryId: true }));
         await expect(firstValueFrom(info.getElements({ setType, modelId, categoryId }))).to.eventually.deep.eq(finalSet);
       });
     });

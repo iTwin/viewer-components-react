@@ -59,7 +59,7 @@ describe("QueryHandler", () => {
 
     async function runTest() {
       let result = await collect(handler.querySubjectModels("0x1"));
-      expect(stub).to.be.calledThrice;
+      expect(stub).to.have.callCount(4);
       expect(stub).to.be.calledWithMatch(subjectsQueryRegex);
       expect(stub).to.be.calledWithMatch(modelsQueryRegex);
       expect(stub).to.be.calledWithMatch(modelCategoriesQueryRegex);
@@ -67,19 +67,19 @@ describe("QueryHandler", () => {
       expect(result).to.deep.eq(allModels);
 
       result = await collect(handler.querySubjectModels("0x1"));
-      expect(stub).to.be.calledThrice;
+      expect(stub).to.have.callCount(4);
       expect(result).to.deep.eq(allModels);
 
       result = await collect(handler.querySubjectModels("0x2"));
-      expect(stub).to.be.calledThrice;
+      expect(stub).to.have.callCount(4);
       expect(result).to.deep.eq(models.get("0x2"));
 
       result = await collect(handler.queryModelCategories("0x10"));
-      expect(stub).to.be.calledThrice;
+      expect(stub).to.have.callCount(4);
       expect(result).to.deep.eq(modelCategories.get("0x10"));
 
       result = await collect(handler.queryModelCategories("0x40"));
-      expect(stub).to.be.calledThrice;
+      expect(stub).to.have.callCount(4);
       expect(result).to.deep.eq(modelCategories.get("0x40"));
     }
 
@@ -116,23 +116,23 @@ describe("QueryHandler", () => {
 
     let result = await collect(handler.querySubjectModels("0x1"));
     const allModels = [...models.values()].flat();
-    expect(stub).to.be.calledThrice;
+    expect(stub).to.have.callCount(4);
     expect(result).to.deep.eq(allModels);
     result = await collect(handler.querySubjectModels("0x1"));
-    expect(stub).to.be.calledThrice;
+    expect(stub).to.have.callCount(4);
     expect(result).to.deep.eq(allModels);
 
     handler.invalidateCache();
 
     result = await collect(handler.querySubjectModels("0x1"));
-    expect(stub).to.have.callCount(6);
+    expect(stub).to.have.callCount(8);
     expect(result).to.deep.eq(allModels);
   });
 
   it("caches model and category element count", async () => {
     const elementIds = ["0x10", "0x20", "0x30"];
     const stub = sinon.fake((query: string) => {
-      if (/Elements\(id\)/.test(query)) {
+      if (query.includes("COUNT(*)")) {
         return [[elementIds.length]];
       }
       throw new Error(`Unexpected query: ${query}`);

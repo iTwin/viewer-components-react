@@ -15,7 +15,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 interface InitialInfo {
   subjectsHierarchy: Map<Id64String, Id64Set>;
   subjectModels: Map<Id64String, Id64Set>;
-  modelCategories: Map<Id64String, Id64Set>;
+  modelInfo: Map<Id64String, { categories: Id64Set; elementCount: number }>;
 }
 
 export interface ModelElementsQueryProps {
@@ -104,6 +104,7 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
       subjects: this.runSubjectsQuery().pipe(toArray()),
       models: this.runModelsQuery().pipe(toArray()),
       modelCategories: this.runModelCategoriesQuery().pipe(toArray()),
+      modelElementCount: this.runModelsElementCountQuery().pipe(toArray()),
     }).pipe(
       map((info) => {
         const subjectsHierarchy = new Map<Id64String, Id64Set>();
@@ -127,12 +128,26 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
           });
         });
 
-        const modelCategories = new Map<Id64String, Id64Set>();
+        const modelInfo = new Map<Id64String, { categories: Id64Set; elementCount: number }>();
         info.modelCategories.forEach(({ modelId, categoryId }) => {
-          pushToMap(modelCategories, modelId, categoryId);
+          const entry = modelInfo.get(modelId);
+          if (entry) {
+            entry.categories.add(categoryId);
+          } else {
+            modelInfo.set(modelId, { categories: new Set([categoryId]), elementCount: 0 });
+          }
         });
 
-        return { subjectsHierarchy, subjectModels, modelCategories };
+        info.modelElementCount.forEach(([modelId, count]) => {
+          const entry = modelInfo.get(modelId);
+          if (entry) {
+            entry.elementCount = count;
+          } else {
+            modelInfo.set(modelId, { categories: new Set(), elementCount: count });
+          }
+        });
+
+        return { subjectsHierarchy, subjectModels, modelInfo };
       }),
       shareReplay(),
     ));
@@ -157,17 +172,25 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
   }
 
   private runModelCategoriesQuery(): Observable<{ modelId: Id64String; categoryId: string }> {
-    const bindings = new Array<QueryBindable>();
     const query = /* sql */ `
       SELECT Model.Id modelId, Category.Id categoryId
-      FROM bis.GeometricElement3d e
+      FROM bis.GeometricElement3d
       GROUP BY modelId, categoryId
     `;
-    return this.runQuery(query, bindings, ["modelId", "categoryId"]);
+    return this.runQuery(query, undefined, ["modelId", "categoryId"]);
+  }
+
+  private runModelsElementCountQuery(): Observable<[Id64String, number]> {
+    const query = /* sql */ `
+      SELECT Model.Id, COUNT(*)
+      FROM bis.GeometricElement3d
+      GROUP BY Model.Id
+    `;
+    return this.runQuery(query, undefined, (row) => [row.modelId, row.count]);
   }
 
   public queryModelCategories(modelId: Id64String): Observable<Id64String> {
-    return this.initialInfoObs.pipe(mergeMap(({ modelCategories }) => modelCategories.get(modelId) ?? /* istanbul ignore next */ new Set<Id64String>()));
+    return this.initialInfoObs.pipe(mergeMap(({ modelInfo }) => modelInfo.get(modelId)?.categories ?? /* istanbul ignore next */ new Set<Id64String>()));
   }
 
   public queryElements(props: ElementsQueryProps): Observable<string> {
@@ -192,12 +215,10 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
 
     const cacheKey = `${props.modelId}${"categoryId" in props ? props.categoryId : ""}`;
     let obs = this._elementsCountCache.get(cacheKey);
-    if (obs) {
-      return obs;
+    if (!obs) {
+      obs = runQuery().pipe(shareReplay());
+      this._elementsCountCache.set(cacheKey, obs);;
     }
-
-    obs = runQuery().pipe(shareReplay());
-    this._elementsCountCache.set(cacheKey, obs);
     return obs;
   }
 
@@ -219,31 +240,40 @@ class QueryHandlerImplementation implements ModelsTreeQueryHandler {
     },
   ): Observable<Id64String | number> {
     const bindings = new Array<QueryBindable>();
-    const conditions = new Array<string>();
-    "modelId" in props && props.modelId && conditions.push(bind("Model.Id", props.modelId, bindings));
-    "categoryId" in props && conditions.push(bind("Category.Id", props.categoryId, bindings));
-    "rootElementIds" in props && conditions.push(bind("Parent.Id", props.rootElementIds, bindings));
+    let query: string;
 
-    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : /* istanbul ignore next */ "";
-    const query = /* sql */ `
-      WITH RECURSIVE
-        InitialElements(id) AS (
-          SELECT e.ECInstanceId id
-          FROM bis.GeometricElement3d e
-          ${whereClause}
-        ),
-        Elements(id) AS (
-          SELECT * FROM InitialElements
-
-          UNION ALL
-
-          SELECT c.ECInstanceId id
-          FROM Elements e
-          JOIN bis.GeometricElement3d c ON c.Parent.Id = e.id
-        )
+    if ("modelId" in props && !("categoryId" in props)) {
+      query = /* sql */ `
         SELECT ${props.type === "ids" ? "*" : "COUNT(*)"}
-        FROM Elements
-    `;
+        FROM bis.GeometricElement3d
+        WHERE ${bind("Model.Id", props.modelId, bindings)}
+      `;
+    } else {
+      const conditions = new Array<string>();
+      "modelId" in props && conditions.push(bind("Model.Id", props.modelId, bindings));
+      "categoryId" in props && conditions.push(bind("Category.Id", props.categoryId, bindings));
+      "rootElementIds" in props && conditions.push(bind("Parent.Id", props.rootElementIds, bindings));
+      query = /* sql */ `
+        WITH RECURSIVE
+          InitialElements(id) AS (
+            SELECT e.ECInstanceId id
+            FROM bis.GeometricElement3d e
+            ${conditions.length ? `WHERE ${conditions.join(" AND ")}` : /* istanbul ignore next */ ""}
+          ),
+          Elements(id) AS (
+            SELECT * FROM InitialElements
+
+            UNION ALL
+
+            SELECT c.ECInstanceId id
+            FROM Elements e
+            JOIN bis.GeometricElement3d c ON c.Parent.Id = e.id
+          )
+          SELECT ${props.type === "ids" ? "*" : "COUNT(*)"}
+          FROM Elements
+      `;
+    }
+
     return this.runQuery(query, bindings, (row) => row[0]);
   }
 
