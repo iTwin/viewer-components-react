@@ -3,13 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { isPresentationHierarchyNode, TreeRenderer, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { TreeWidget } from "../../../../../TreeWidget";
+import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { Delayed } from "./Delayed";
@@ -37,7 +38,6 @@ interface FilterableTreeOwnProps {
 
 type UseTreeProps = Parameters<typeof useTree>[0];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
-type SelectNodesCallback = UseSelectionHandlerProps["selectNodes"];
 type IModelAccess = UseTreeProps["imodelAccess"];
 
 type FilterableTreeProps = FilterableTreeOwnProps &
@@ -100,19 +100,15 @@ function FilterableTreeRenderer({
     onPerformanceMeasured,
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
-  const reportingSelectNodes = useCallback<SelectNodesCallback>(
-    (nodeIds, changeType) => {
-      reportUsage?.({ reportInteraction: true });
-      return selectNodes(nodeIds, changeType);
-    },
-    [selectNodes, reportUsage],
-  );
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     getHierarchyLevelDetails: treeProps.getHierarchyLevelDetails,
     defaultHierarchyLevelSizeLimit,
     reportUsage,
   });
+  const reportingExpandNode = useReportingAction(expandNode, reportUsage);
+  const reportingSelectNodes = useReportingAction(selectNodes, reportUsage);
+  const reportingOnFilterClicked = useReportingAction(onFilterClick, reportUsage);
 
   const renderContent = () => {
     if (rootNodes === undefined) {
@@ -138,15 +134,9 @@ function FilterableTreeRenderer({
         <TreeRenderer
           rootNodes={rootNodes}
           {...treeProps}
-          expandNode={(nodeId, isExpanded) => {
-            reportUsage?.({ reportInteraction: true });
-            expandNode(nodeId, isExpanded);
-          }}
+          expandNode={reportingExpandNode}
           selectNodes={reportingSelectNodes}
-          onFilterClick={(nodeId) => {
-            reportUsage?.({ reportInteraction: true });
-            onFilterClick(nodeId);
-          }}
+          onFilterClick={reportingOnFilterClicked}
           getIcon={getIcon}
           getSublabel={getSublabel}
           selectionMode={selectionMode}

@@ -3,13 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { LocalizationContextProvider, useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { TreeWidget } from "../../../../../TreeWidget";
+import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility";
@@ -42,7 +43,6 @@ type UseTreeProps = Parameters<typeof useTree>[0];
 type UseHierarchyVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
-type SelectNodesCallback = UseSelectionHandlerProps["selectNodes"];
 
 type VisibilityTreeProps = VisibilityTreeOwnProps &
   Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
@@ -107,13 +107,7 @@ function VisibilityTreeImpl({
     onPerformanceMeasured,
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
-  const reportingSelectNodes = useCallback<SelectNodesCallback>(
-    (nodeIds, changeType) => {
-      reportUsage?.({ reportInteraction: true });
-      return selectNodes(nodeIds, changeType);
-    },
-    [selectNodes, reportUsage],
-  );
+  const reportingSelectNodes = useReportingAction(selectNodes, reportUsage);
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
@@ -123,6 +117,9 @@ function VisibilityTreeImpl({
     defaultHierarchyLevelSizeLimit,
     reportUsage,
   });
+  const reportingExpandNode = useReportingAction(expandNode, reportUsage);
+  const reportingOnCheckboxClicked = useReportingAction(onCheckboxClicked, reportUsage);
+  const reportingOnFilterClicked = useReportingAction(onFilterClick, reportUsage);
 
   if (rootNodes === undefined) {
     return (
@@ -149,21 +146,12 @@ function VisibilityTreeImpl({
           <VisibilityTreeRenderer
             rootNodes={rootNodes}
             {...treeProps}
-            expandNode={(node, isExpanded) => {
-              reportUsage?.({ reportInteraction: true });
-              expandNode(node, isExpanded);
-            }}
+            expandNode={reportingExpandNode}
             onNodeClick={onNodeClick}
             onNodeKeyDown={onNodeKeyDown}
             getCheckboxStatus={getCheckboxStatus}
-            onCheckboxClicked={(node, checked) => {
-              reportUsage?.({ featureId: "visibility-change", reportInteraction: true });
-              onCheckboxClicked(node, checked);
-            }}
-            onFilterClick={(nodeId) => {
-              reportUsage?.({ reportInteraction: true });
-              onFilterClick(nodeId);
-            }}
+            onCheckboxClicked={reportingOnCheckboxClicked}
+            onFilterClick={reportingOnFilterClicked}
             getIcon={getIcon}
             getSublabel={getSublabel}
             size={density === "enlarged" ? "default" : "small"}
