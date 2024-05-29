@@ -280,7 +280,10 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
         }
 
         const createStatusByCategories = () => {
-          return createVisibilityStatus(visibilityByCategories, visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "allCategoriesHidden");
+          return createVisibilityStatus(
+            visibilityByCategories,
+            visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden",
+          );
         };
 
         return this.getVisibilityFromAlwaysAndNeverDrawnElements({
