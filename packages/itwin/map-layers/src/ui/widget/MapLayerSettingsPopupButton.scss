@@ -7,7 +7,7 @@
 $hovered-icon-color: $buic-foreground-primary;
 
 .maplayers-settings-popup {
-  z-index: 900;   // Used to be higher, but we want this be less than modal dialog z-index
+  z-index: 900; // Used to be higher, but we want this be less than modal dialog z-index
 }
 
 .maplayers-settings-popup-panel {
@@ -17,8 +17,8 @@ $hovered-icon-color: $buic-foreground-primary;
 }
 
 .map-manager-header-buttons-group {
-.maplayers-settings-popup-button {
-  position: relative;
-  top: 1px;
-}
+  .maplayers-settings-popup-button {
+    position: relative;
+    top: 1px;
+  }
 }

@@ -1,9 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { ButtonGroup } from "@itwin/itwinui-react";
-import * as React from "react";
 import { AttachLayerPopupButton } from "./AttachLayerPopupButton";
 import "./MapLayerManager.scss";
 
@@ -19,7 +18,6 @@ export function MapManagerLayersHeader(props: MapManagerLayersHeaderProps) {
       <span className="map-manager-layers-label">{props.label}</span>
       <ButtonGroup>
         <AttachLayerPopupButton disabled={props.disabled} isOverlay={props.isOverlay} />
-
       </ButtonGroup>
     </div>
   );
