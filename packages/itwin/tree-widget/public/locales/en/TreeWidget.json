@@ -61,5 +61,26 @@
     "close": "Close",
     "next": "Next",
     "previous": "Previous"
+  },
+  "stateless": {
+    "enableInstanceFocus": "Enable Instance Focus",
+    "disableInstanceFocus": "Disable Instance Focus",
+    "noNodesMatchFilter": "There are no nodes matching filter - \"{{filter}}\"",
+    "failedToCalculateMatchingInstances": "Failed to calculate matching instances count",
+    "matchingInstancesCount": "Current filter matching instances count: {{count}}",
+    "filterExceedsLimit": "Current filter exceeds instances count of {{limit}}",
+    "dataIsNotAvailable": "The data required for this tree layout is not available in this iModel.",
+    "hierarchies": {
+      "unspecified": "Unspecified",
+      "other": "Other",
+      "loading": "Loading...",
+      "filterHierarchyLevel": "Apply filter",
+      "clearHierarchyLevelFilter": "Clear active filter",
+      "noFilteredChildren": "No child nodes match current filter",
+      "resultLimitExceeded": "There are more items than allowed limit of {{limit}}.",
+      "resultLimitExceededWithFiltering": "Please provide <link>additional filtering</link> - there are more items than allowed limit of {{limit}}.",
+      "increaseHierarchyLimit": "<link>Increase the hierarchy level size limit to {{limit}}.</link>",
+      "increaseHierarchyLimitWithFiltering": "Or, <link>increase the hierarchy level size limit to {{limit}}.</link>"
+    }
   }
 }

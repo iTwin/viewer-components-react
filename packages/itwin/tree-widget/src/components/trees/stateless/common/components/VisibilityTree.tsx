@@ -7,8 +7,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { LocalizationContextProvider, useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { TreeWidget } from "../../../../../TreeWidget";
+import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
@@ -86,6 +88,7 @@ function VisibilityTreeImpl({
   onPerformanceMeasured,
   reportUsage,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
+  const localizedStrings = useHierarchiesLocalization();
   const {
     rootNodes,
     isLoading,
@@ -100,6 +103,7 @@ function VisibilityTreeImpl({
     getFilteredPaths,
     imodelKey: imodel.key,
     sourceName: treeName,
+    localizedStrings,
     onPerformanceMeasured,
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
@@ -133,7 +137,7 @@ function VisibilityTreeImpl({
   if (rootNodes.length === 0 && !isLoading) {
     return (
       <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
-        {noDataMessage ? noDataMessage : <Text>The data required for this tree layout is not available in this iModel.</Text>}
+        {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("stateless.dataIsNotAvailable")}</Text>}
       </Flex>
     );
   }
@@ -141,28 +145,30 @@ function VisibilityTreeImpl({
   return (
     <div style={{ position: "relative", height, overflow: "hidden" }}>
       <div style={{ overflow: "auto", height: "100%" }}>
-        <VisibilityTreeRenderer
-          rootNodes={rootNodes}
-          {...treeProps}
-          expandNode={(node, isExpanded) => {
-            reportUsage?.({ reportInteraction: true });
-            expandNode(node, isExpanded);
-          }}
-          onNodeClick={onNodeClick}
-          onNodeKeyDown={onNodeKeyDown}
-          getCheckboxStatus={getCheckboxStatus}
-          onCheckboxClicked={(node, checked) => {
-            reportUsage?.({ featureId: "visibility-change", reportInteraction: true });
-            onCheckboxClicked(node, checked);
-          }}
-          onFilterClick={(nodeId) => {
-            reportUsage?.({ reportInteraction: true });
-            onFilterClick(nodeId);
-          }}
-          getIcon={getIcon}
-          getSublabel={getSublabel}
-          size={density === "enlarged" ? "default" : "small"}
-        />
+        <LocalizationContextProvider localizedStrings={localizedStrings}>
+          <VisibilityTreeRenderer
+            rootNodes={rootNodes}
+            {...treeProps}
+            expandNode={(node, isExpanded) => {
+              reportUsage?.({ reportInteraction: true });
+              expandNode(node, isExpanded);
+            }}
+            onNodeClick={onNodeClick}
+            onNodeKeyDown={onNodeKeyDown}
+            getCheckboxStatus={getCheckboxStatus}
+            onCheckboxClicked={(node, checked) => {
+              reportUsage?.({ featureId: "visibility-change", reportInteraction: true });
+              onCheckboxClicked(node, checked);
+            }}
+            onFilterClick={(nodeId) => {
+              reportUsage?.({ reportInteraction: true });
+              onFilterClick(nodeId);
+            }}
+            getIcon={getIcon}
+            getSublabel={getSublabel}
+            size={density === "enlarged" ? "default" : "small"}
+          />
+        </LocalizationContextProvider>
         {filteringDialog}
       </div>
       <Delayed show={isLoading}>
