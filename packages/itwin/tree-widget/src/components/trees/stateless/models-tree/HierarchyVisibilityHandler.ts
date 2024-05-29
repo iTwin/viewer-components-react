@@ -326,6 +326,10 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
 
   private getCategoryDisplayStatus(props: GetCategoryStatusProps): Observable<VisibilityStatus> {
     const result = defer(() => {
+      if (!this._props.viewport.view.viewsModel(props.modelId)) {
+        return of(createVisibilityStatus("hidden", "category.hiddenThroughModel"));
+      }
+
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         queryProps: props,
         tooltips: {

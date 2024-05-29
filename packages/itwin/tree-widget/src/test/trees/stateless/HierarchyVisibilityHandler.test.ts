@@ -620,6 +620,29 @@ describe("HierarchyBasedVisibilityHandler", () => {
           expect(status.state).to.eq("visible");
         });
 
+        it("doesn't query elements if model is hidden", async () => {
+          const modelId = "0x1";
+          const categoryId = "0x2";
+          const node = createCategoryHierarchyNode(modelId, categoryId);
+          const queryHandler = createFakeModelsTreeQueryHandler({
+            modelCategories: new Map([[modelId, [categoryId]]]),
+            categoryElements: new Map([[categoryId, ["0x100", "0x200"]]]),
+          });
+          const { handler } = createVisibilityHandlerWrapper({
+            queryHandler,
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0x400"]),
+              view: {
+                viewsModel: sinon.fake.returns(false),
+              },
+            }),
+          });
+
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "hidden" });
+          expect(queryHandler.queryElementsCount).not.to.be.called;
+        });
+
         describe("is visible", () => {
           it("when `viewport.view.viewsCategory` returns TRUE and there are NO CHILD elements in the NEVER drawn list", async () => {
             const categoryId = "0x2";
