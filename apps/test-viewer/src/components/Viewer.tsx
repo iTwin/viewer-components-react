@@ -3,16 +3,18 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp } from "@itwin/core-frontend";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
 import { Viewer as WebViewer } from "@itwin/web-viewer-react";
-import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
+import { unifiedSelectionStorage } from "../SelectionStorage";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -45,6 +47,10 @@ function ViewerWithOptions() {
   const { client: authClient } = useAuthorizationContext();
   const { iTwinId, iModelId } = useIModelInfo();
 
+  if (!iTwinId || !iModelId) {
+    return null;
+  }
+
   return (
     <WebViewer
       iTwinId={iTwinId}
@@ -61,20 +67,26 @@ function ViewerWithOptions() {
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
       theme="light"
+      backendConfiguration={{
+        defaultBackend: {
+          rpcInterfaces: [ECSchemaRpcInterface],
+        },
+      }}
+      presentationProps={{
+        selection: {
+          selectionStorage: unifiedSelectionStorage,
+        },
+      }}
     />
   );
 }
 
 function useIModelInfo() {
-  const [state, setState] = useState({ iTwinId: "", iModelId: "" });
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const currITwinId = urlParams.get("iTwinId");
-    const currIModelId = urlParams.get("iModelId");
-
-    if (currITwinId && currIModelId) {
-      setState({ iTwinId: currITwinId, iModelId: currIModelId });
+    if (searchParams.has("iTwinId") && searchParams.has("iModelId")) {
       return;
     }
 
@@ -84,10 +96,11 @@ function useIModelInfo() {
       );
     }
 
-    const configuredITwinId = process.env.IMJS_ITWIN_ID;
-    const configuredIModelId = process.env.IMJS_IMODEL_ID;
-    history.push(`?iTwinId=${configuredITwinId}&iModelId=${configuredIModelId}`);
-  }, []);
+    navigate(`/?iTwinId=${process.env.IMJS_ITWIN_ID}&iModelId=${process.env.IMJS_IMODEL_ID}`);
+  }, [searchParams, navigate]);
 
-  return state;
+  return {
+    iTwinId: searchParams.get("iTwinId"),
+    iModelId: searchParams.get("iModelId"),
+  };
 }

@@ -297,7 +297,6 @@ function useVisibilityHandler(
   iModel: IModelConnection,
   activeView: Viewport,
   visibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler),
-  hierarchyAutoUpdateEnabled?: boolean,
 ) {
   const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
   const [state, setState] = useState<ModelsVisibilityHandler>();
@@ -310,7 +309,6 @@ function useVisibilityHandler(
     const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
       rulesetId,
       viewport: activeView,
-      hierarchyAutoUpdateEnabled,
       subjectModelIdsCache,
     };
 
@@ -319,7 +317,7 @@ function useVisibilityHandler(
     return () => {
       handler.dispose();
     };
-  }, [rulesetId, activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache, visibilityHandler]);
+  }, [rulesetId, activeView, subjectModelIdsCache, visibilityHandler]);
 
   return visibilityHandler && typeof visibilityHandler !== "function" ? visibilityHandler : state;
 }
