@@ -3,12 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable, Subscription } from "rxjs";
 import {
   BehaviorSubject, debounceTime, EMPTY, first, fromEventPattern, map, reduce, share, startWith, Subject, switchMap, takeUntil, tap,
 } from "rxjs";
 import { pushToMap } from "../../common/Utils";
 
+import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ElementsByParentQueryProps, ElementsQueryProps, ModelsTreeQueryHandler } from "./ModelsTreeQueryHandler";
 import type { BeEvent, Id64Set, Id64String, IDisposable } from "@itwin/core-bentley";
@@ -17,18 +17,17 @@ type CacheEntry = Map<Id64String, Map<Id64String, Id64Set>>;
 
 export type AlwaysOrNeverDrawnElementsQueryProps = Exclude<ElementsQueryProps, ElementsByParentQueryProps>;
 
-const SET_CHANGE_DEBOUNCE_TIME = 20;
+export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
 export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
   private _subscriptions?: Subscription[];
   private _alwaysDrawn?: Observable<CacheEntry>;
   private _neverDrawn?: Observable<CacheEntry>;
-  private _disposeSubject = new Subject<boolean>();
+  private _disposeSubject = new Subject<void>();
 
   constructor(
     private readonly _viewport: Viewport,
     private readonly _queryHandler: ModelsTreeQueryHandler,
-    private readonly _debounceTime = SET_CHANGE_DEBOUNCE_TIME,
   ) {
     this.reset();
   }
@@ -67,7 +66,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
       // This will make newly subscribed observers wait for the debounce period to pass
       // instead of consuming the cached value which at this point becomes invalid.
       tap(() => resultSubject.next(undefined)),
-      debounceTime(this._debounceTime),
+      debounceTime(SET_CHANGE_DEBOUNCE_TIME),
       // Cancel pending request if dispose() is called.
       takeUntil(this._disposeSubject),
       // If multiple requests are sent at once, preserve only the result of the newest.
@@ -84,7 +83,7 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
   }
 
   public reset() {
-    this.clearCache();
+    this.dispose();
     this._alwaysDrawn = this.createCacheEntryObservable({
       event: this._viewport.onAlwaysDrawnChanged,
       getSet: () => this._viewport.alwaysDrawn,
@@ -96,22 +95,10 @@ export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
     this._subscriptions = [this._alwaysDrawn.subscribe(), this._neverDrawn.subscribe()];
   }
 
-  private clearCache() {
+  public dispose(): void {
     this._subscriptions?.forEach((x) => x.unsubscribe());
     this._subscriptions = [];
-  }
-
-  public dispose(): void {
-    this.clearCache();
-    // istanbul ignore else
-    if (!this._disposeSubject.closed) {
-      this._disposeSubject.next(true);
-      this._disposeSubject.unsubscribe();
-    }
-  }
-
-  private createCategoryCacheKey(categoryId: string, modelId: string) {
-    return `${categoryId}${modelId}`;
+    this._disposeSubject.next();
   }
 
   private queryAlwaysOrNeverDrawnElementInfo(set: Id64Set | undefined): Observable<CacheEntry> {

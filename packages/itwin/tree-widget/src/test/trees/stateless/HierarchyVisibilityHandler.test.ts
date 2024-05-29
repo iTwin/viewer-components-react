@@ -43,6 +43,7 @@ import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerProps } from
 import type { Visibility } from "../../../components/trees/stateless/models-tree/internal/Tooltip";
 import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 import type { IModelDb } from "@itwin/core-backend";
+
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;

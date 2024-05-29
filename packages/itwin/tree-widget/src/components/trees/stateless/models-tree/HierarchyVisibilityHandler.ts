@@ -639,7 +639,7 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
   }
 
   private changeElementStateNoChildrenOperator(props: { on: boolean; isDisplayedByDefault: boolean }): OperatorFunction<string, void> {
-    return (elementIds: Observable<string>) => {
+    return (elementIds: Observable<Id64String>) => {
       const { on, isDisplayedByDefault } = props;
       const isAlwaysDrawnExclusive = this._props.viewport.isAlwaysDrawnExclusive;
       return elementIds.pipe(
