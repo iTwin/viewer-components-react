@@ -43,7 +43,7 @@ export class SubjectModelIdsCache {
       INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
       WHERE NOT m.IsPrivate AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
     `;
-    for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames" })) {
+    for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId };
     }
   }
