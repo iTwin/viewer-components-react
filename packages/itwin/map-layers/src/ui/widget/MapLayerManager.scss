@@ -176,7 +176,7 @@ $default-font-size: --iui-font-size-1;
       height: 2em;
     }
 
-    .core-split-button>.core-split-button-arrow>.core-split-button-arrow-icon {
+    .core-split-button > .core-split-button-arrow > .core-split-button-arrow-icon {
       line-height: 16px;
     }
   }
@@ -189,8 +189,6 @@ $default-font-size: --iui-font-size-1;
       background-color: $buic-background-5;
     }
   }
-
-
 }
 
 .map-manager-source-header {
@@ -303,7 +301,7 @@ $default-font-size: --iui-font-size-1;
 }
 
 .map-manager-sublayer-panel {
-  width: 400px;     // Ideally I would let the popup's content drives the width, unfortunately without an explicit width, the popup location is not consistent.
+  width: 400px; // Ideally I would let the popup's content drives the width, unfortunately without an explicit width, the popup location is not consistent.
   color: $buic-foreground-body;
   font-size: $default-font-size;
   padding: 4px;
@@ -428,6 +426,5 @@ $default-font-size: --iui-font-size-1;
         }
       }
     }
-
   }
 }

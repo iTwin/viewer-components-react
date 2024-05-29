@@ -15,17 +15,17 @@ This package can also be installed into an application and the method MapLayersU
 2. The dependencies are installed as part of "rush install" in the iTwin.js repository.
 3. Build the extension as part of the "rush build" in the iTwin.js repository, or separately build using the npm build command.
 
-    ```sh
-    npm run build
-    ```
+   ```sh
+   npm run build
+   ```
 
 4. Start the host application - go to its directory and run:
 
-    ```sh
-    npm run start:servers
-    ```
+   ```sh
+   npm run start:servers
+   ```
 
-5. Open a web browser (e.g., Chrome), and browse to http://localhost:3000. 
+5. Open a web browser (e.g., Chrome), and browse to http://localhost:3000.
 
 ## Contributing
 
