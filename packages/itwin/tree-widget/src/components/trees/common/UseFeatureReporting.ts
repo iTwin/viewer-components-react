@@ -53,13 +53,12 @@ export function useFeatureReporting(props: UseFeatureReportingProps): UseFeature
 export function useReportingAction<T extends (...args: any[]) => void>(
   action: T,
   reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void,
-): T {
-  const reportingAction = useCallback(
-    (...args: any[]) => {
+) {
+  return useCallback<(...args: Parameters<T>) => void>(
+    (...args) => {
       reportUsage?.({ reportInteraction: true });
       action(...args);
     },
     [action, reportUsage],
   );
-  return reportingAction as T;
 }
