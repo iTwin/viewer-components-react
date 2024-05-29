@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
@@ -13,6 +13,7 @@ import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 
+import type { UsageTrackedFeatures } from "../../../common/UseFeatureReporting";
 import type { ReactElement, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
@@ -29,10 +30,12 @@ interface FilterableTreeOwnProps {
   getSublabel?: (node: PresentationHierarchyNode) => ReactElement | undefined;
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
+type SelectNodesCallback = UseSelectionHandlerProps["selectNodes"];
 type IModelAccess = UseTreeProps["imodelAccess"];
 
 type FilterableTreeProps = FilterableTreeOwnProps &
@@ -75,12 +78,15 @@ function FilterableTreeRenderer({
   getHierarchyDefinition,
   selectionMode,
   onPerformanceMeasured,
+  reportUsage,
 }: Omit<FilterableTreeProps, "getSchemaContext"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
   const {
     rootNodes,
     isLoading,
     reloadTree: _reloadTree,
     setFormatter: _setFormatter,
+    selectNodes,
+    expandNode,
     ...treeProps
   } = useUnifiedSelectionTree({
     imodelKey: imodel.key,
@@ -89,11 +95,18 @@ function FilterableTreeRenderer({
     getHierarchyDefinition,
     onPerformanceMeasured,
   });
-
+  const reportingSelectNodes = useCallback<SelectNodesCallback>(
+    (nodeIds, changeType) => {
+      reportUsage?.({ reportInteraction: true });
+      return selectNodes(nodeIds, changeType);
+    },
+    [selectNodes, reportUsage],
+  );
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     getHierarchyLevelDetails: treeProps.getHierarchyLevelDetails,
     defaultHierarchyLevelSizeLimit,
+    reportUsage,
   });
 
   const renderContent = () => {
@@ -120,7 +133,15 @@ function FilterableTreeRenderer({
         <TreeRenderer
           rootNodes={rootNodes}
           {...treeProps}
-          onFilterClick={onFilterClick}
+          expandNode={(nodeId, isExpanded) => {
+            reportUsage?.({ reportInteraction: true });
+            expandNode(nodeId, isExpanded);
+          }}
+          selectNodes={reportingSelectNodes}
+          onFilterClick={(nodeId) => {
+            reportUsage?.({ reportInteraction: true });
+            onFilterClick(nodeId);
+          }}
           getIcon={getIcon}
           getSublabel={getSublabel}
           selectionMode={selectionMode}

@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
+import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
@@ -22,6 +23,7 @@ interface StatelessModelsTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   filter?: string;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -31,7 +33,8 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-const StatelessModelsTreeId = "models-tree-v2";
+/** @internal */
+export const StatelessModelsTreeId = "models-tree-v2";
 
 /** @internal */
 export function StatelessModelsTree({
@@ -45,6 +48,7 @@ export function StatelessModelsTree({
   hierarchyLevelConfig,
   selectionMode,
   onPerformanceMeasured,
+  onFeatureUsed,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessModelsVisibilityHandler({ viewport: activeView });
@@ -56,6 +60,7 @@ export function StatelessModelsTree({
     };
   }, [activeView]);
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!focusedInstancesKeys) {
@@ -68,8 +73,11 @@ export function StatelessModelsTree({
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
-  }, [filter]);
+    return async ({ imodelAccess }) => {
+      reportUsage?.({ featureId: "filtering", reportInteraction: true });
+      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
+    };
+  }, [filter, reportUsage]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -91,6 +99,7 @@ export function StatelessModelsTree({
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
       }}
+      reportUsage={reportUsage}
     />
   );
 }

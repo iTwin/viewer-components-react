@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
@@ -16,6 +16,7 @@ import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 import { VisibilityTreeRenderer } from "./VisibilityTreeRenderer";
 
+import type { UsageTrackedFeatures } from "../../../common/UseFeatureReporting";
 import type { ReactElement, ReactNode } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
@@ -32,12 +33,14 @@ interface VisibilityTreeOwnProps {
   getSublabel?: (node: PresentationHierarchyNode) => ReactElement | undefined;
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
 type UseHierarchyVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
+type SelectNodesCallback = UseSelectionHandlerProps["selectNodes"];
 
 type VisibilityTreeProps = VisibilityTreeOwnProps &
   Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
@@ -81,6 +84,7 @@ function VisibilityTreeImpl({
   density,
   selectionMode,
   onPerformanceMeasured,
+  reportUsage,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
   const {
     rootNodes,
@@ -88,6 +92,7 @@ function VisibilityTreeImpl({
     reloadTree: _reloadTree,
     selectNodes,
     setFormatter: _setFormatter,
+    expandNode,
     ...treeProps
   } = useUnifiedSelectionTree({
     imodelAccess,
@@ -97,13 +102,21 @@ function VisibilityTreeImpl({
     sourceName: treeName,
     onPerformanceMeasured,
   });
-  const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes, selectionMode: selectionMode ?? "single" });
+  const reportingSelectNodes = useCallback<SelectNodesCallback>(
+    (nodeIds, changeType) => {
+      reportUsage?.({ reportInteraction: true });
+      return selectNodes(nodeIds, changeType);
+    },
+    [selectNodes, reportUsage],
+  );
+  const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     getHierarchyLevelDetails: treeProps.getHierarchyLevelDetails,
     defaultHierarchyLevelSizeLimit,
+    reportUsage,
   });
 
   if (rootNodes === undefined) {
@@ -130,11 +143,21 @@ function VisibilityTreeImpl({
         <VisibilityTreeRenderer
           rootNodes={rootNodes}
           {...treeProps}
+          expandNode={(node, isExpanded) => {
+            reportUsage?.({ reportInteraction: true });
+            expandNode(node, isExpanded);
+          }}
           onNodeClick={onNodeClick}
           onNodeKeyDown={onNodeKeyDown}
           getCheckboxStatus={getCheckboxStatus}
-          onCheckboxClicked={onCheckboxClicked}
-          onFilterClick={onFilterClick}
+          onCheckboxClicked={(node, checked) => {
+            reportUsage?.({ featureId: "visibility-change", reportInteraction: true });
+            onCheckboxClicked(node, checked);
+          }}
+          onFilterClick={(nodeId) => {
+            reportUsage?.({ reportInteraction: true });
+            onFilterClick(nodeId);
+          }}
           getIcon={getIcon}
           getSublabel={getSublabel}
           size={density === "enlarged" ? "default" : "small"}

@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Text } from "@itwin/itwinui-react";
+import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
@@ -25,6 +26,7 @@ interface StatelessCategoriesTreeOwnProps {
   allViewports?: boolean;
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -34,7 +36,8 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 type StatelessModelsTreeProps = StatelessCategoriesTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-const StatelessCategoriesTreeId = "categories-tree-v2";
+/** @internal */
+export const StatelessCategoriesTreeId = "categories-tree-v2";
 
 /** @internal */
 export function StatelessCategoriesTree({
@@ -51,6 +54,7 @@ export function StatelessCategoriesTree({
   hierarchyLevelConfig,
   selectionMode,
   onPerformanceMeasured,
+  onFeatureUsed,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessCategoriesVisibilityHandler({
@@ -68,6 +72,8 @@ export function StatelessCategoriesTree({
     };
   }, [activeView, allViewports, categories, imodel, viewManager]);
 
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessCategoriesTreeId });
+
   const getDefinitionsProvider = useCallback(
     (props: Parameters<GetHierarchyDefinitionCallback>[0]) => {
       return new CategoriesTreeDefinition({ ...props, viewType: activeView.view.is2d() ? "2d" : "3d" });
@@ -79,9 +85,11 @@ export function StatelessCategoriesTree({
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) =>
-      CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
-  }, [filter, activeView]);
+    return async ({ imodelAccess }) => {
+      reportUsage?.({ featureId: "filtering", reportInteraction: true });
+      return CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
+    };
+  }, [filter, activeView, reportUsage]);
 
   return (
     <VisibilityTree
@@ -102,6 +110,7 @@ export function StatelessCategoriesTree({
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
       }}
+      reportUsage={reportUsage}
     />
   );
 }
