@@ -5,6 +5,7 @@
 
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import type {
+  DecorateContext,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -24,6 +25,8 @@ import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
+import type { DrawingMetadata } from "../api/Measurement";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -31,6 +34,7 @@ MeasureAreaToolModel
 > {
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
+  private _enableSheetMeasurements: boolean;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -52,12 +56,13 @@ MeasureAreaToolModel
     return MeasureToolsFeatures.Tools_MeasureArea;
   }
 
-  constructor() {
+  constructor(enableSheetMeasurements = false) {
     super();
+    this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureAreaTool();
+    const tool = new MeasureAreaTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -91,14 +96,20 @@ MeasureAreaToolModel
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
 
+    // We only want the sheetMeasurement logic to trigger when the first point is set but it needs to be after the measurement is created
+    // this boolean helps us ensure that this is the case
+    let isFirstPoint = false;
+
     if (
       MeasureAreaToolModel.State.SetMeasurementViewport ===
       this.toolModel.currentState
     ) {
       this.toolModel.setMeasurementViewport(viewType);
+      isFirstPoint = true;
     }
 
     this.toolModel.addPoint(viewType, ev.point, false);
+    await this.sheetMeasurementsDataButtonDown(ev, isFirstPoint);
     if (undefined === this.toolModel.dynamicMeasurement) {
       await this.onReinitialize();
     } else {
@@ -108,6 +119,29 @@ MeasureAreaToolModel
 
     ev.viewport.invalidateDecorations();
     return EventHandled.Yes;
+  }
+
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent, isFirstPoint: boolean) {
+    if (!ev.viewport) return;
+
+    if (this._enableSheetMeasurements) {
+      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined && isFirstPoint) {
+        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.sheetViewId = ev.viewport.view.id;
+
+        if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
+          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
+          this.toolModel.drawingMetaData = data;
+        }
+      }
+    }
+  }
+
+  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+    if (!this._enableSheetMeasurements || this.toolModel.drawingMetaData?.drawingId === undefined || this.toolModel.drawingMetaData?.origin === undefined || this.toolModel.drawingMetaData?.extents === undefined)
+      return true;
+
+    return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents);
   }
 
   private _sendHintsToAccuDraw(ev: BeButtonEvent): void {
@@ -170,6 +204,14 @@ MeasureAreaToolModel
 
   protected createToolModel(): MeasureAreaToolModel {
     return new MeasureAreaToolModel();
+  }
+
+  public override decorate(context: DecorateContext): void {
+    super.decorate(context);
+
+    if (this._enableSheetMeasurements && this.toolModel.drawingMetaData?.origin !== undefined && this.toolModel.drawingMetaData?.extents !== undefined) {
+      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents));
+    }
   }
 
   protected override updateToolAssistance(): void {

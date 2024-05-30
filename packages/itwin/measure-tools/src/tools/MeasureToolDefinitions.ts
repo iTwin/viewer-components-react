@@ -19,6 +19,10 @@ import { MeasureTools } from "../MeasureTools";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 
 export class MeasureToolDefinitions {
+
+  /**
+   * @deprecated in 0.14.2 use getMeasureDistanceToolCommand(enableSheetMeasurements: boolean) instead
+   */
   public static get measureDistanceToolCommand() {
     return new ToolItemDef({
       toolId: MeasureDistanceTool.toolId,
@@ -31,6 +35,22 @@ export class MeasureToolDefinitions {
     });
   }
 
+  public static getMeasureDistanceToolCommand(enableSheetMeasurements: boolean) {
+    return new ToolItemDef({
+      toolId: MeasureDistanceTool.toolId,
+      iconSpec: MeasureDistanceTool.iconSpec,
+      label: () => MeasureDistanceTool.flyover,
+      tooltip: () => MeasureDistanceTool.description,
+      execute: () => {
+        const tool = new MeasureDistanceTool(enableSheetMeasurements);
+        void tool.run();
+      },
+    });
+  }
+
+  /**
+   * @deprecated in 0.14.2 use getMeasureAreaToolCommand(enableSheetMeasurements: boolean) instead
+   */
   public static get measureAreaToolCommand() {
     return new ToolItemDef({
       toolId: MeasureAreaTool.toolId,
@@ -39,6 +59,19 @@ export class MeasureToolDefinitions {
       tooltip: () => MeasureAreaTool.description,
       execute: () => {
         void IModelApp.tools.run(MeasureAreaTool.toolId);
+      },
+    });
+  }
+
+  public static getMeasureAreaToolCommand(enableSheetMeasurements: boolean) {
+    return new ToolItemDef({
+      toolId: MeasureAreaTool.toolId,
+      iconSpec: MeasureAreaTool.iconSpec,
+      label: () => MeasureAreaTool.flyover,
+      tooltip: () => MeasureAreaTool.description,
+      execute: () => {
+        const tool = new MeasureAreaTool(enableSheetMeasurements);
+        void tool.run();
       },
     });
   }

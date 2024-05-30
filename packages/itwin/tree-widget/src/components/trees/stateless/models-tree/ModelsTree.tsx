@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
@@ -11,10 +11,12 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 import { createModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
+import { SubjectModelIdsCache } from "./SubjectModelIdsCache";
 
 import type { ModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
+import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
 
@@ -47,25 +49,34 @@ export function StatelessModelsTree({
   selectionMode,
   onPerformanceMeasured,
 }: StatelessModelsTreeProps) {
+  const { getSubjectModelIdsCache } = useSubjectModelIdsCache();
+
   const visibilityHandlerFactory = useCallback((): ModelsTreeVisibilityHandler => {
     return createModelsTreeVisibilityHandler({ viewport: activeView });
     // return new StatelessModelsVisibilityHandler({ viewport: activeView }) as unknown as HierarchyVisibilityHandler;
   }, [activeView]);
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
 
+  const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) }),
+    [getSubjectModelIdsCache],
+  );
+
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!focusedInstancesKeys) {
       return undefined;
     }
-    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys });
-  }, [focusedInstancesKeys]);
+    return async ({ imodelAccess }) =>
+      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
+  }, [focusedInstancesKeys, getSubjectModelIdsCache]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) => ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter });
-  }, [filter]);
+    return async ({ imodelAccess }) =>
+      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
+  }, [filter, getSubjectModelIdsCache]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -98,10 +109,6 @@ function getNoDataMessage(filter?: string) {
   return undefined;
 }
 
-function getHierarchyDefinition(props: Parameters<GetHierarchyDefinitionCallback>[0]) {
-  return new ModelsTreeDefinition(props);
-}
-
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   if (node.extendedData?.imageId === undefined) {
     return undefined;
@@ -123,4 +130,24 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   }
 
   return undefined;
+}
+
+function useSubjectModelIdsCache() {
+  const cacheRef = useRef<SubjectModelIdsCache>();
+  const prevImodelAccessRef = useRef<LimitingECSqlQueryExecutor>();
+
+  const getSubjectModelIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
+    if (prevImodelAccessRef.current !== imodelAccess) {
+      cacheRef.current = undefined;
+      prevImodelAccessRef.current = imodelAccess;
+    }
+    if (!cacheRef.current) {
+      cacheRef.current = new SubjectModelIdsCache(imodelAccess);
+    }
+    return cacheRef.current;
+  }, []);
+
+  return {
+    getSubjectModelIdsCache,
+  };
 }

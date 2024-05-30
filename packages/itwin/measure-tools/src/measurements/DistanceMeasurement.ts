@@ -138,7 +138,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   constructor(props?: DistanceMeasurementProps) {
-    super();
+    super(props);
 
     this._startPoint = Point3d.createZero();
     this._endPoint = Point3d.createZero();
@@ -435,7 +435,7 @@ export class DistanceMeasurement extends Measurement {
       );
     const distance = this._startPoint.distance(this._endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
-      distance,
+      distance * this.worldScale,
       lengthSpec
     );
 
@@ -474,9 +474,9 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const distance = this._startPoint.distance(this._endPoint);
-    const run = this._startPoint.distanceXY(this._endPoint);
-    const rise = this._endPoint.z - this._startPoint.z;
+    const distance = this.worldScale * this._startPoint.distance(this._endPoint);
+    const run = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
@@ -545,35 +545,41 @@ export class DistanceMeasurement extends Measurement {
         name: "DistanceMeasurement_Slope",
         value: fSlope,
       },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.delta_x"
-        ),
-        name: "DistanceMeasurement_Dx",
-        value: fDeltaX,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.delta_y"
-        ),
-        name: "DistanceMeasurement_Dy",
-        value: fDeltaY,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.startCoordinates"
-        ),
-        name: "DistanceMeasurement_StartPoint",
-        value: fStartCoords,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureDistance.endCoordinates"
-        ),
-        name: "DistanceMeasurement_EndPoint",
-        value: fEndCoords,
-      }
     );
+
+    if (this.drawingMetaData?.worldScale === undefined) {
+      data.properties.push(
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.delta_x"
+          ),
+          name: "DistanceMeasurement_Dx",
+          value: fDeltaX,
+        },
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.delta_y"
+          ),
+          name: "DistanceMeasurement_Dy",
+          value: fDeltaY,
+        },
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.startCoordinates"
+          ),
+          name: "DistanceMeasurement_StartPoint",
+          value: fStartCoords,
+        },
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureDistance.endCoordinates"
+          ),
+          name: "DistanceMeasurement_EndPoint",
+          value: fEndCoords,
+        }
+      );
+    }
+
     return data;
   }
 

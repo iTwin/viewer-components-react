@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Wed, 29 May 2024 18:39:36 GMT",
+      "version": "5.4.4",
+      "tag": "@itwin/map-layers_v5.4.4",
+      "comments": {
+        "none": [
+          {
+            "author": "mdastous-bentley@users.noreply.github.com",
+            "package": "@itwin/map-layers",
+            "commit": "3cf4d181df078b62ea0484624fe2737f22243392",
+            "comment": "Styled map layers package's code with Prettier"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 21 May 2024 13:26:35 GMT",
       "version": "5.4.4",
       "tag": "@itwin/map-layers_v5.4.4",

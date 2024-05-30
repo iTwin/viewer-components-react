@@ -5,6 +5,7 @@
 
 import type {
   BeButtonEvent,
+  DecorateContext,
   ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
@@ -23,6 +24,8 @@ import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
+import type { DrawingMetadata } from "../api/Measurement";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
@@ -30,6 +33,7 @@ MeasureDistanceToolModel
 > {
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
+  private _enableSheetMeasurements: boolean;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -51,12 +55,13 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor() {
+  constructor(enableSheetMeasurements = false) {
     super();
+    this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureDistanceTool();
+    const tool = new MeasureDistanceTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -80,6 +85,7 @@ MeasureDistanceToolModel
     ) {
       this.toolModel.setMeasurementViewport(viewType);
       this.toolModel.setStartPoint(viewType, ev.point);
+      await this.sheetMeasurementsDataButtonDown(ev);
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
     } else if (
@@ -91,6 +97,37 @@ MeasureDistanceToolModel
 
     ev.viewport.invalidateDecorations();
     return EventHandled.Yes;
+  }
+
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent) {
+    if (!ev.viewport) return;
+
+    if (this._enableSheetMeasurements) {
+      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined) {
+        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.sheetViewId = ev.viewport.view.id;
+
+        if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
+          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
+          this.toolModel.drawingMetaData = data;
+        }
+      }
+    }
+  }
+
+  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+    if (!this._enableSheetMeasurements || this.toolModel.drawingMetaData?.drawingId === undefined || this.toolModel.drawingMetaData?.origin === undefined || this.toolModel.drawingMetaData?.extents === undefined)
+      return true;
+
+    return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents);
+  }
+
+  public override decorate(context: DecorateContext): void {
+    super.decorate(context);
+
+    if (this._enableSheetMeasurements && this.toolModel.drawingMetaData?.origin !== undefined && this.toolModel.drawingMetaData?.extents !== undefined) {
+      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents));
+    }
   }
 
   private _sendHintsToAccuDraw(ev: BeButtonEvent): void {
