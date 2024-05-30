@@ -7,6 +7,7 @@ import { useCallback, useMemo, useRef } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
+import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
@@ -24,6 +25,7 @@ interface StatelessModelsTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   filter?: string;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -33,7 +35,8 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-const StatelessModelsTreeId = "models-tree-v2";
+/** @internal */
+export const StatelessModelsTreeId = "models-tree-v2";
 
 /** @internal */
 export function StatelessModelsTree({
@@ -47,6 +50,7 @@ export function StatelessModelsTree({
   hierarchyLevelConfig,
   selectionMode,
   onPerformanceMeasured,
+  onFeatureUsed,
 }: StatelessModelsTreeProps) {
   const { getSubjectModelIdsCache } = useSubjectModelIdsCache();
 
@@ -60,6 +64,7 @@ export function StatelessModelsTree({
     };
   }, [activeView]);
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) }),
@@ -78,9 +83,11 @@ export function StatelessModelsTree({
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
-  }, [filter, getSubjectModelIdsCache]);
+    return async ({ imodelAccess }) => {
+      reportUsage?.({ featureId: "filtering", reportInteraction: true });
+      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
+    }
+  }, [filter, getSubjectModelIdsCache, reportUsage]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -102,6 +109,7 @@ export function StatelessModelsTree({
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
       }}
+      reportUsage={reportUsage}
     />
   );
 }

@@ -168,6 +168,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionStorage={unifiedSelectionStorage}
                     selectionMode={"extended"}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                   />
                 ),
               },
@@ -180,6 +181,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                   />
                 ),
               },
@@ -192,6 +194,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                   />
                 ),
               },
@@ -204,6 +207,7 @@ const configuredUiItems = new Map<string, UiItem>([
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
                     onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
                   />
                 ),
                 startIcon: <SvgTechnicalPreviewMiniBw />,
