@@ -12,19 +12,16 @@
   "ColorDialog": {
     "Title": "Specify Base Color"
   },
-  "Dialog":
-  {
-    "Add" : "Add",
-    "Cancel" : "Cancel",
-    "Edit" : "Edit"
+  "Dialog": {
+    "Add": "Add",
+    "Cancel": "Cancel",
+    "Edit": "Edit"
   },
-  "SelectFeaturesDialog":
-  {
+  "SelectFeaturesDialog": {
     "AllOn": "Select All",
     "AllOff": "Select None"
   },
-  "CustomParamEditDialog":
-  {
+  "CustomParamEditDialog": {
     "DialogTitleAdd": "Add custom query parameter",
     "DialogTitleEdit": "Edit custom query parameter",
     "NameExists": "Name already exists",
@@ -35,12 +32,10 @@
     "PrivateToggleTooltip": "Private query parameters won't be saved part of the iTwin",
     "PrivateToggleLabel": "Keep query parameter private"
   },
-  "CustomParamSelect":
-  {
+  "CustomParamSelect": {
     "DisabledTitle": "Custom query parameter can be configured in the advanced settings"
   },
-  "CustomParamSettings":
-  {
+  "CustomParamSettings": {
     "DeleteButtonTitle": "Delete custom parameter",
     "EditButtonTitle": "Edit custom parameter",
     "SectionLabel": "Custom parameters"
@@ -103,7 +98,7 @@
     "Username": "Username",
     "UsernameRequired": "Username required"
   },
-  "Labels" : {
+  "Labels": {
     "TechPreviewBadgeTooltip": "Technology preview"
   },
   "Messages": {
@@ -174,11 +169,11 @@
   "TransparencyPopup": {
     "SetTransparency": "Set transparency"
   },
-  "WellKnownBaseMaps" : {
-    "BingProvider" : {
-      "Aerial" : "Bing Maps: Aerial Imagery",
-      "Hybrid" : "Bing Maps: Aerial Imagery with labels",
-      "Street" : "Bing Maps: Streets"
+  "WellKnownBaseMaps": {
+    "BingProvider": {
+      "Aerial": "Bing Maps: Aerial Imagery",
+      "Hybrid": "Bing Maps: Aerial Imagery with labels",
+      "Street": "Bing Maps: Streets"
     }
   }
 }
