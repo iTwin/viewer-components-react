@@ -11,7 +11,7 @@ import { TreeHeader } from "../../../tree-header/TreeHeader";
 import { AutoSizer } from "../../../utils/AutoSizer";
 import { HideAllButton, InvertAllButton, ShowAllButton } from "../../category-tree/CategoriesTreeButtons";
 import { useCategories } from "../../category-tree/CategoryVisibilityHandler";
-import { StatelessCategoriesTree } from "./CategoriesTree";
+import { StatelessCategoriesTree, StatelessCategoriesTreeId } from "./CategoriesTree";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
@@ -21,7 +21,10 @@ import type { CategoriesTreeHeaderButtonProps } from "../../category-tree/Catego
 type StatelessCategoriesTreeProps = ComponentPropsWithoutRef<typeof StatelessCategoriesTree>;
 
 interface StatelessCategoriesTreeComponentProps
-  extends Pick<StatelessCategoriesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured"> {
+  extends Pick<
+    StatelessCategoriesTreeProps,
+    "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured" | "onFeatureUsed"
+  > {
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
 }
@@ -52,16 +55,28 @@ function CategoriesTreeComponentImpl({
   const [filter, setFilter] = useState("");
   const density = treeProps.density;
 
+  const onCategoriesTreeFeatureUsed = (feature: string) => {
+    if (treeProps.onFeatureUsed) {
+      treeProps.onFeatureUsed(`${StatelessCategoriesTreeId}-${feature}`);
+    }
+  };
+
   return (
     <div className="tree-widget-tree-with-header">
       <UnifiedSelectionProvider storage={selectionStorage}>
         <TreeHeader onFilterClear={() => setFilter("")} onFilterStart={(newFilter) => setFilter(newFilter)} onSelectedChanged={() => {}} density={density}>
           {headerButtons
-            ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories })}</Fragment>)
+            ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories, onFeatureUsed: onCategoriesTreeFeatureUsed })}</Fragment>)
             : [
-                <ShowAllButton viewport={viewport} categories={categories} key="show-all-btn" density={density} />,
-                <HideAllButton viewport={viewport} categories={categories} key="hide-all-btn" density={density} />,
-                <InvertAllButton viewport={viewport} categories={categories} key="invert-all-btn" density={density} />,
+                <ShowAllButton viewport={viewport} categories={categories} key="show-all-btn" density={density} onFeatureUsed={onCategoriesTreeFeatureUsed} />,
+                <HideAllButton viewport={viewport} categories={categories} key="hide-all-btn" density={density} onFeatureUsed={onCategoriesTreeFeatureUsed} />,
+                <InvertAllButton
+                  viewport={viewport}
+                  categories={categories}
+                  key="invert-all-btn"
+                  density={density}
+                  onFeatureUsed={onCategoriesTreeFeatureUsed}
+                />,
               ]}
         </TreeHeader>
         <AutoSizer>
