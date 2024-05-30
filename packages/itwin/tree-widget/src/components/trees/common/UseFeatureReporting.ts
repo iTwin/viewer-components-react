@@ -56,6 +56,7 @@ interface UseReportingActionProps<T> {
 }
 
 /** @internal */
+// istanbul ignore next
 export function useReportingAction<T extends (...args: any[]) => void>({ action, featureId, reportUsage }: UseReportingActionProps<T>) {
   return useCallback<(...args: Parameters<T>) => void>(
     (...args) => {
