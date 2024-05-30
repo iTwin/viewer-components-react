@@ -7,7 +7,6 @@ import {
   createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { SubjectModelIdsCache } from "./SubjectModelIdsCache";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type {
@@ -22,8 +21,9 @@ import type {
   NodesQueryClauseFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type { SubjectModelIdsCache } from "./SubjectModelIdsCache";
+
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   subjectModelIdsCache: SubjectModelIdsCache;
