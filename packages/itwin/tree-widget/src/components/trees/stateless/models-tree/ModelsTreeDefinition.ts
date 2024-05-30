@@ -85,7 +85,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
-    this._subjectModelIdsCache = props.subjectModelIdsCache ?? new SubjectModelIdsCache(props.imodelAccess);
+    this._subjectModelIdsCache = props.subjectModelIdsCache;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
