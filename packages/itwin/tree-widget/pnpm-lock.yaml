@@ -24,8 +24,8 @@ dependencies:
     specifier: ^0.1.1
     version: 0.1.1
   '@itwin/presentation-hierarchies-react':
-    specifier: ^0.2.0
-    version: 0.2.0(@itwin/itwinui-react@3.5.0)(react-dom@18.0.0)(react@18.0.0)
+    specifier: ^0.3.0
+    version: 0.3.0(@itwin/itwinui-react@3.5.0)(react-dom@18.0.0)(react@18.0.0)
   '@itwin/presentation-shared':
     specifier: ^0.1.1
     version: 0.1.1
@@ -1424,8 +1424,8 @@ packages:
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
     dev: true
 
-  /@itwin/presentation-hierarchies-react@0.2.0(@itwin/itwinui-react@3.5.0)(react-dom@18.0.0)(react@18.0.0):
-    resolution: {integrity: sha512-041r4SCi2OWjLK7Z8RUGKQj6AusE3t0t0igCfP5pG16ok2DAZLuI7smBUoY+Vm4OFPE7ZVDicyDwnE7XjSIAsA==}
+  /@itwin/presentation-hierarchies-react@0.3.0(@itwin/itwinui-react@3.5.0)(react-dom@18.0.0)(react@18.0.0):
+    resolution: {integrity: sha512-+KMIBPoNGXmGPIsGHeDwrDOEL3TrzLP593dX5xF5wFMmsRWqKnq7KHVbpP6gempei48bIAI0Qp8uXkP1TyghaQ==}
     peerDependencies:
       '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0

@@ -106,9 +106,9 @@ function FilterableTreeRenderer({
     defaultHierarchyLevelSizeLimit,
     reportUsage,
   });
-  const reportingExpandNode = useReportingAction(expandNode, reportUsage);
-  const reportingSelectNodes = useReportingAction(selectNodes, reportUsage);
-  const reportingOnFilterClicked = useReportingAction(onFilterClick, reportUsage);
+  const reportingExpandNode = useReportingAction({ action: expandNode, reportUsage });
+  const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
+  const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
 
   const renderContent = () => {
     if (rootNodes === undefined) {

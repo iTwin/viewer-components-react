@@ -2527,10 +2527,10 @@ packages:
   /@itwin/ecschema-rpcinterface-common@4.6.0(@itwin/core-bentley@4.6.0)(@itwin/core-common@4.6.0)(@itwin/core-geometry@4.6.0)(@itwin/ecschema-metadata@4.6.0):
     resolution: {integrity: sha512-IFa1bg4j8wjvx+NpM8rA6ecpZM65dFIu5t1ciFA3ymi/myBszvGizJooFYwKO2HuOGTYxE5VN/DQFDyO8I9irQ==}
     peerDependencies:
-      '@itwin/core-bentley': 4.5.1
-      '@itwin/core-common': 4.5.1
-      '@itwin/core-geometry': 4.5.1
-      '@itwin/ecschema-metadata': 4.5.1
+      '@itwin/core-bentley': 4.6.0
+      '@itwin/core-common': 4.6.0
+      '@itwin/core-geometry': 4.6.0
+      '@itwin/ecschema-metadata': 4.6.0
     dependencies:
       '@itwin/core-bentley': 4.6.0
       '@itwin/core-common': 4.6.0(@itwin/core-bentley@4.6.0)(@itwin/core-geometry@4.6.0)
@@ -2904,8 +2904,8 @@ packages:
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
     dev: false
 
-  /@itwin/presentation-hierarchies-react@0.1.0(@itwin/itwinui-react@3.8.1)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-qc4HlCbt5j3vUry9/dC7aCATyLHXiIQFKGXWAwb6Q2IsDR8HSTZkGoOXXX9UR9tDdgkDuGLoZv2ugTvXFD/tXw==}
+  /@itwin/presentation-hierarchies-react@0.3.0(@itwin/itwinui-react@3.8.1)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-+KMIBPoNGXmGPIsGHeDwrDOEL3TrzLP593dX5xF5wFMmsRWqKnq7KHVbpP6gempei48bIAI0Qp8uXkP1TyghaQ==}
     peerDependencies:
       '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
@@ -2917,7 +2917,7 @@ packages:
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.2.0)(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0)(react@18.2.0)
       '@itwin/itwinui-react': 3.8.1(react-dom@18.2.0)(react@18.2.0)
-      '@itwin/presentation-hierarchies': 0.1.0
+      '@itwin/presentation-hierarchies': 0.1.1
       '@itwin/presentation-shared': 0.2.0
       '@itwin/unified-selection': 0.4.2
       classnames: 2.5.1
@@ -2928,8 +2928,8 @@ packages:
       rxjs: 7.8.1
     dev: false
 
-  /@itwin/presentation-hierarchies@0.1.0:
-    resolution: {integrity: sha512-VK+YC8rWsFmSqfK0q1nFpP+9ENI3o0mKVhzqkKJg21E/A65bhKlHxdLnKThXcM4Yge43ZA2EiunFqhx3bNgFBg==}
+  /@itwin/presentation-hierarchies@0.1.1:
+    resolution: {integrity: sha512-3lQSViRkU/UVea2RNXHl36AlFTuPt2b5uU3smWdFk+O27buR77HXm1WoxxX2mqXJlQSwBOE6JaJNIlJjd9kMmg==}
     dependencies:
       '@itwin/core-bentley': 4.6.0
       '@itwin/core-common': 4.6.0(@itwin/core-bentley@4.6.0)(@itwin/core-geometry@4.6.0)
@@ -14471,8 +14471,8 @@ packages:
       '@itwin/itwinui-react': 3.8.1(react-dom@18.2.0)(react@18.2.0)
       '@itwin/presentation-components': 5.2.0(@itwin/appui-abstract@4.6.0)(@itwin/components-react@4.11.0)(@itwin/core-bentley@4.6.0)(@itwin/core-common@4.6.0)(@itwin/core-frontend@4.6.0)(@itwin/core-quantity@4.6.0)(@itwin/core-react@4.11.0)(@itwin/ecschema-metadata@4.6.0)(@itwin/imodel-components-react@4.11.0)(@itwin/presentation-common@4.6.0)(@itwin/presentation-frontend@4.6.0)(@types/react@18.2.57)(react-dom@18.2.0)(react@18.2.0)
       '@itwin/presentation-core-interop': 0.1.2(@itwin/core-bentley@4.6.0)(@itwin/core-common@4.6.0)(@itwin/core-geometry@4.6.0)(@itwin/core-quantity@4.6.0)(@itwin/ecschema-metadata@4.6.0)
-      '@itwin/presentation-hierarchies': 0.1.0
-      '@itwin/presentation-hierarchies-react': 0.1.0(@itwin/itwinui-react@3.8.1)(react-dom@18.2.0)(react@18.2.0)
+      '@itwin/presentation-hierarchies': 0.1.1
+      '@itwin/presentation-hierarchies-react': 0.3.0(@itwin/itwinui-react@3.8.1)(react-dom@18.2.0)(react@18.2.0)
       '@itwin/presentation-shared': 0.1.1
       '@itwin/unified-selection': 0.4.1
       classnames: 2.5.1

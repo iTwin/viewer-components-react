@@ -107,7 +107,7 @@ function VisibilityTreeImpl({
     onPerformanceMeasured,
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
-  const reportingSelectNodes = useReportingAction(selectNodes, reportUsage);
+  const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
@@ -117,9 +117,9 @@ function VisibilityTreeImpl({
     defaultHierarchyLevelSizeLimit,
     reportUsage,
   });
-  const reportingExpandNode = useReportingAction(expandNode, reportUsage);
-  const reportingOnCheckboxClicked = useReportingAction(onCheckboxClicked, reportUsage);
-  const reportingOnFilterClicked = useReportingAction(onFilterClick, reportUsage);
+  const reportingExpandNode = useReportingAction({ action: expandNode, reportUsage });
+  const reportingOnCheckboxClicked = useReportingAction({ featureId: "visibility-change", action: onCheckboxClicked, reportUsage });
+  const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
 
   if (rootNodes === undefined) {
     return (
