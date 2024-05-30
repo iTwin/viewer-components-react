@@ -251,30 +251,6 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "partial" });
         });
-
-        // describe("filtered", () => {
-        //   it("uses filtered data provider", async () => {
-        //     const { handler } = createVisibilityHandlerWrapper({
-        //       overrides: {
-        //         models: new Map([
-        //           ["0x10", "visible"],
-        //           ["0x20", "visible"],
-        //         ]),
-        //       },
-        //     });
-        //     const filteredDataProvider = {
-        //       nodeMatchesFilter: sinon.fake.returns(false),
-        //       getNodes: sinon.fake.resolves([createModelHierarchyNode("0x10"), createModelHierarchyNode("0x20")]),
-        //     } as unknown as IFilteredPresentationTreeDataProvider;
-        //     handler.filteredDataProvider = filteredDataProvider;
-
-        //     const node = createSubjectHierarchyNode(["0x1", "0x2"]);
-        //     const visibility = await handler.getVisibilityStatus(node);
-        //     expect(filteredDataProvider.nodeMatchesFilter).to.be.calledWith(node);
-        //     expect(filteredDataProvider.getNodes).to.be.calledWith(node);
-        //     expect(visibility.state).to.eq("visible");
-        //   });
-        // });
       });
 
       describe("model", () => {
@@ -1145,23 +1121,6 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
             expect(overrides.changeModelState).to.be.calledOnceWith(sinon.match({ ids: sinon.match.set.deepEquals(new Set(modelIds.flat())), on: false }));
           });
         });
-
-        // describe("filtered", () => {
-        //   it("uses filtered data provider", async () => {
-        //     const { handler } = createVisibilityHandlerWrapper();
-        //     const filteredDataProvider = {
-        //       nodeMatchesFilter: sinon.fake.returns(false),
-        //       getNodes: sinon.fake.resolves([createElementHierarchyNode(undefined, undefined, false, "0x10"), createElementHierarchyNode(undefined, undefined, false, "0x20")]),
-        //     } as unknown as IFilteredPresentationTreeDataProvider;
-        //     handler.filteredDataProvider = filteredDataProvider;
-
-        //     const node = createSubjectHierarchyNode(["0x1", "0x2"]);
-        //     await handler.changeVisibility(node, false);
-
-        //     expect(filteredDataProvider.nodeMatchesFilter).to.be.called;
-        //     expect(filteredDataProvider.getNodes).to.be.called;
-        //   });
-        // });
       });
 
       describe("model", () => {

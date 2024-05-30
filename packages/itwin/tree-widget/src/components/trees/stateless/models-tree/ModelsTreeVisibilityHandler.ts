@@ -13,8 +13,8 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { reduceWhile, toSet, toVoidPromise } from "../../common/Rxjs";
 import { AlwaysAndNeverDrawnElementInfo } from "./internal/AlwaysAndNeverDrawnElementInfo";
+import { ModelsTreeNode } from "./internal/ModelsTreeNode";
 import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
-import { NodeUtils } from "./internal/NodeUtils";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 
@@ -166,28 +166,28 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       return of(createVisibilityStatus("disabled"));
     }
 
-    if (NodeUtils.isSubjectNode(node)) {
+    if (ModelsTreeNode.isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
       return this.getSubjectNodeVisibilityStatus(node, from(node.key.instanceKeys).pipe(map((key) => key.id)));
     }
 
-    if (NodeUtils.isModelNode(node)) {
+    if (ModelsTreeNode.isModelNode(node)) {
       return this.getModelVisibilityStatus(node.key.instanceKeys[0].id);
     }
 
-    const modelId = NodeUtils.getModelId(node);
+    const modelId = ModelsTreeNode.getModelId(node);
     if (!modelId) {
       return of(createVisibilityStatus("disabled"));
     }
 
-    if (NodeUtils.isCategoryNode(node)) {
+    if (ModelsTreeNode.isCategoryNode(node)) {
       return this.getCategoryDisplayStatus({
         categoryId: node.key.instanceKeys[0].id,
         modelId,
       });
     }
 
-    const categoryId = NodeUtils.getCategoryId(node);
+    const categoryId = ModelsTreeNode.getCategoryId(node);
     if (!categoryId) {
       return of(createVisibilityStatus("disabled"));
     }
@@ -408,20 +408,20 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       return EMPTY;
     }
 
-    if (NodeUtils.isSubjectNode(node)) {
+    if (ModelsTreeNode.isSubjectNode(node)) {
       return this.changeSubjectNodeState(from(node.key.instanceKeys).pipe(map((key) => key.id)), node, on);
     }
 
-    if (NodeUtils.isModelNode(node)) {
+    if (ModelsTreeNode.isModelNode(node)) {
       return this.changeModelState({ ids: node.key.instanceKeys[0].id, on });
     }
 
-    const modelId = NodeUtils.getModelId(node);
+    const modelId = ModelsTreeNode.getModelId(node);
     if (!modelId) {
       return EMPTY;
     }
 
-    if (NodeUtils.isCategoryNode(node)) {
+    if (ModelsTreeNode.isCategoryNode(node)) {
       return this.changeCategoryState({
         categoryId: node.key.instanceKeys[0].id,
         modelId,
@@ -429,7 +429,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       });
     }
 
-    const categoryId = NodeUtils.getCategoryId(node);
+    const categoryId = ModelsTreeNode.getCategoryId(node);
     // istanbul ignore if
     if (!categoryId) {
       // istanbul ignore next
@@ -764,8 +764,8 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       return res;
     }
 
-    const modelId = NodeUtils.getModelId(node);
-    const categoryId = NodeUtils.getCategoryId(node);
+    const modelId = ModelsTreeNode.getModelId(node);
+    const categoryId = ModelsTreeNode.getCategoryId(node);
     assert(!!modelId && !!categoryId);
 
     const ids = node.groupedInstanceKeys.map((key) => key.id);

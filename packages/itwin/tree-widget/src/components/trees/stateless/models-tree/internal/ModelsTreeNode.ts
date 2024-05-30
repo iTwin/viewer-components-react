@@ -5,33 +5,33 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 
-interface Node {
+interface ModelsTreeNode {
   extendedData?: any;
 }
 
 /**
- * @public
+ * @internal
  */
-export namespace NodeUtils {
+export namespace ModelsTreeNode {
   /**
    * Determines if a node represents a subject.
    */
-  export const isSubjectNode = (node: Node) => !!node.extendedData?.isSubject;
+  export const isSubjectNode = (node: ModelsTreeNode) => !!node.extendedData?.isSubject;
 
   /**
    * Determines if a node represents a model.
    */
-  export const isModelNode = (node: Node) => !!node.extendedData?.isModel;
+  export const isModelNode = (node: ModelsTreeNode) => !!node.extendedData?.isModel;
 
   /**
    * Determines if a node represents a category.
    */
-  export const isCategoryNode = (node: Node) => !!node.extendedData?.isCategory;
+  export const isCategoryNode = (node: ModelsTreeNode) => !!node.extendedData?.isCategory;
 
   /**
    * Retrieves model ID from node's extended data.
    */
-  export const getModelId = (node: Node): Id64String | undefined => {
+  export const getModelId = (node: ModelsTreeNode): Id64String | undefined => {
     if (node.extendedData?.modelId) {
       return node.extendedData?.modelId;
     }
@@ -43,5 +43,5 @@ export namespace NodeUtils {
   /**
    * Retrieves category ID from node's extended data.
    */
-  export const getCategoryId = (node: Node): Id64String | undefined => node.extendedData?.categoryId;
+  export const getCategoryId = (node: ModelsTreeNode): Id64String | undefined => node.extendedData?.categoryId;
 }

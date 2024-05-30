@@ -26,7 +26,6 @@ import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
-import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyValueRendererContext } from '@itwin/components-react';
@@ -177,8 +176,8 @@ export interface ContextMenuItemProps {
     node: TreeModelNode;
 }
 
-// @public
-export function createHierarchyVisibilityHandler(props: HierarchyVisibilityHandlerProps): HierarchyVisibilityHandler;
+// @internal
+export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): ModelsTreeVisibilityHandler;
 
 // @public
 export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
@@ -261,26 +260,6 @@ export interface HierarchyLevelConfig {
     isFilteringEnabled: true;
     // (undocumented)
     sizeLimit?: number;
-}
-
-// @public
-export interface HierarchyVisibilityHandler {
-    // (undocumented)
-    changeVisibility: (node: HierarchyNode, on: boolean) => Promise<void>;
-    // (undocumented)
-    dispose: () => void;
-    // (undocumented)
-    getVisibilityStatus: (node: HierarchyNode) => Promise<VisibilityStatus>;
-    // (undocumented)
-    onVisibilityChange: BeEvent<() => void>;
-}
-
-// @public
-export interface HierarchyVisibilityHandlerProps {
-    // (undocumented)
-    overrides?: VisibilityHandlerOverrides;
-    // (undocumented)
-    viewport: Viewport;
 }
 
 // @public
@@ -397,6 +376,17 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
 
 // @public
 export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
+
+// @internal
+export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
+
+// @internal
+export interface ModelsTreeVisibilityHandlerProps {
+    // (undocumented)
+    overrides?: VisibilityHandlerOverrides;
+    // (undocumented)
+    viewport: Viewport;
+}
 
 // @public
 export class ModelsVisibilityHandler implements IVisibilityHandler {
