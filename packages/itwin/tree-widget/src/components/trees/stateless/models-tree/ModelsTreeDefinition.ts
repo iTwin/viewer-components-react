@@ -31,7 +31,7 @@ interface ModelsTreeDefinitionProps {
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache?: SubjectModelIdsCache;
+  subjectModelIdsCache: SubjectModelIdsCache;
   keys: InstanceKey[];
 }
 
