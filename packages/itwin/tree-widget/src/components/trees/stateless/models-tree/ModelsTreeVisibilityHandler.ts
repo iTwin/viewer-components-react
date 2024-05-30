@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import type { Observable, OperatorFunction } from "rxjs";
 import {
-  concat, concatWith, defaultIfEmpty, defer, distinct, EMPTY, first, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce,
-  shareReplay, toArray,
+  catchError, concat, concatWith, defaultIfEmpty, defer, distinct, EMPTY, first, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce,
+  shareReplay, Subject, toArray,
 } from "rxjs";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -17,15 +18,15 @@ import { NodeUtils } from "./internal/NodeUtils";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 
-import type { Observable, OperatorFunction } from "rxjs";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./internal/AlwaysAndNeverDrawnElementInfo";
-import type { BeEvent, Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ModelsTreeQueryHandler as ModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./internal/Tooltip";
+import type { HierarchyVisibilityHandler } from "../common/HierarchyVisibilityHandler";
 
 interface GetCategoryStatusProps {
   categoryId: Id64String;
@@ -63,7 +64,7 @@ type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infe
        * Reference to the hierarchy based handler.
        * @note Calling `getVisibility` or `changeVisibility` of this object invokes the overridden implementation as well.
        */
-      readonly handler: HierarchyVisibilityHandler;
+      readonly handler: ModelsTreeVisibilityHandler;
     }
   : never;
 
@@ -94,7 +95,7 @@ interface VisibilityHandlerOverrides {
  * Properties for [[HierarchyVisibilityHandler]].
  * @internal
  */
-export interface HierarchyVisibilityHandlerProps {
+export interface ModelsTreeVisibilityHandlerProps {
   viewport: Viewport;
   overrides?: VisibilityHandlerOverrides;
 }
@@ -104,24 +105,17 @@ export interface HierarchyVisibilityHandlerProps {
  * When determining visibility for nodes, it should take into account the visibility of their children.
  * @internal
  */
-export interface HierarchyVisibilityHandler {
-  getVisibilityStatus: (node: HierarchyNode) => Promise<VisibilityStatus>;
-  changeVisibility: (node: HierarchyNode, on: boolean) => Promise<void>;
-  onVisibilityChange: BeEvent<() => void>;
-  // filteredDataProvider?: IFilteredPresentationTreeDataProvider;
-  dispose: () => void;
-}
+export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
 
 /**
  * Creates an instance if [[HierarchyVisibilityHandler]].
  * @internal
  */
-export function createHierarchyVisibilityHandler(props: HierarchyVisibilityHandlerProps): HierarchyVisibilityHandler {
-  return new VisibilityHandlerImplementation(props);
+export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): ModelsTreeVisibilityHandler {
+  return new ModelsTreeVisibilityHandlerImpl(props);
 }
 
-class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
-  // public filteredDataProvider?: IFilteredPresentationTreeDataProvider;
+class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _queryHandler: ModelsTreeQueryHandler;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
@@ -129,9 +123,10 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
     string,
     Observable<undefined | { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>
   >();
+  private readonly _filteredSubjectIdsChangeSubject = new Subject<void>();
   private _removePresentationHierarchyListener?: () => void;
 
-  constructor(private readonly _props: HierarchyVisibilityHandlerProps) {
+  constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
     this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport, this._queryHandler);
@@ -215,31 +210,17 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
         return of(createVisibilityStatus("disabled", "subject.nonSpatialView"));
       }
 
-      const statuses = subjectIds.pipe(
+      return subjectIds.pipe(
         mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId)),
         distinct(),
         mergeMap((modelId) => this.getModelVisibilityStatus(modelId)),
-      );
-
-      // const provider = this.filteredDataProvider;
-      // const statuses =
-      //   provider && !provider.nodeMatchesFilter(node)
-      //     ? from(provider.getNodes(node)).pipe(
-      //         concatAll(),
-      //         mergeMap((filteredNode) => this.getVisibilityStatusObs(filteredNode)),
-      //       )
-      //     : subjectIds.pipe(
-      //         mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId)),
-      //         mergeMap((modelId) => this.getModelVisibilityStatus(modelId)),
-      //       );
-
-      return statuses.pipe(
         map((x) => x.state),
         getVisibilityStatusFromTreeNodeChildren({
           visible: "subject.allModelsVisible",
           hidden: "subject.allModelsHidden",
           partial: "subject.someModelsHidden",
         }),
+        catchError(() => of(createVisibilityStatus("disabled"))),
       );
     });
 
@@ -478,14 +459,6 @@ class VisibilityHandlerImplementation implements HierarchyVisibilityHandler {
       if (!this._props.viewport.view.isSpatialView()) {
         return EMPTY;
       }
-
-      // const provider = this.filteredDataProvider;
-      // if (provider && !provider.nodeMatchesFilter(node)) {
-      //   return from(provider.getNodes(node)).pipe(
-      //     concatAll(),
-      //     mergeMap((filteredNode) => this.changeVisibilityObs(filteredNode, on)),
-      //   );
-      // }
 
       return ids.pipe(
         mergeMap((id) => this._queryHandler.querySubjectModels(id)),

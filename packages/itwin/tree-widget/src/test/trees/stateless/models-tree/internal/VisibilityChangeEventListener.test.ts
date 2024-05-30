@@ -6,8 +6,8 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { BeEvent, using } from "@itwin/core-bentley";
-import { createVisibilityChangeEventListener } from "../../../../components/trees/stateless/models-tree/internal/VisibilityChangeEventListener";
-import { createFakeSinonViewport } from "../../Common";
+import { createVisibilityChangeEventListener } from "../../../../../components/trees/stateless/models-tree/internal/VisibilityChangeEventListener";
+import { createFakeSinonViewport } from "../../../Common";
 
 import type { Viewport } from "@itwin/core-frontend";
 describe("VisibilityChangeEventListener", () => {

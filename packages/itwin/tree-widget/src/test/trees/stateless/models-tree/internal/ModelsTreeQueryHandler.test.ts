@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import { firstValueFrom, toArray } from "rxjs";
 import sinon from "sinon";
-import { createModelsTreeQueryHandler } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
+import { createModelsTreeQueryHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
 
 import type { Observable } from "rxjs";
 import type { ECSqlReader } from "@itwin/core-common";

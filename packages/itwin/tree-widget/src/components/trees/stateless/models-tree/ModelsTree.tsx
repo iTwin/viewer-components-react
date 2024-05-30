@@ -9,10 +9,10 @@ import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { createHierarchyVisibilityHandler } from "./HierarchyVisibilityHandler";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { createModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 
-import type { HierarchyVisibilityHandler } from "./HierarchyVisibilityHandler";
+import type { ModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
@@ -47,8 +47,9 @@ export function StatelessModelsTree({
   selectionMode,
   onPerformanceMeasured,
 }: StatelessModelsTreeProps) {
-  const visibilityHandlerFactory = useCallback((): HierarchyVisibilityHandler => {
-    return createHierarchyVisibilityHandler({ viewport: activeView });
+  const visibilityHandlerFactory = useCallback((): ModelsTreeVisibilityHandler => {
+    return createModelsTreeVisibilityHandler({ viewport: activeView });
+    // return new StatelessModelsVisibilityHandler({ viewport: activeView }) as unknown as HierarchyVisibilityHandler;
   }, [activeView]);
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
 

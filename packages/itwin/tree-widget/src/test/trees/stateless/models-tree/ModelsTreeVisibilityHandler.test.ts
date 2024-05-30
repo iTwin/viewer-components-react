@@ -23,24 +23,27 @@ import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shar
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { toVoidPromise } from "../../../components/trees/common/Rxjs";
-import { createHierarchyVisibilityHandler } from "../../../components/trees/stateless/models-tree/HierarchyVisibilityHandler";
-import { createVisibilityStatus } from "../../../components/trees/stateless/models-tree/internal/Tooltip";
-import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../IModelUtils";
-import { TestUtils } from "../../TestUtils";
+import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
+import { createVisibilityStatus } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
+import { createModelsTreeVisibilityHandler } from "../../../../components/trees/stateless/models-tree/ModelsTreeVisibilityHandler";
+import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../../IModelUtils";
+import { TestUtils } from "../../../TestUtils";
 import {
   createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeModelsTreeQueryHandler,
   createFakeSinonViewport, createModelHierarchyNode, createSubjectHierarchyNode, stubFactoryFunction,
-} from "../Common";
+} from "../../Common";
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { ModelsTreeQueryHandler } from "../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
+import type { ModelsTreeQueryHandler } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricElement3dProps } from "@itwin/core-common";
-import type { StubbedFactoryFunction } from "../Common";
-import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerProps } from "../../../components/trees/stateless/models-tree/HierarchyVisibilityHandler";
-import type { Visibility } from "../../../components/trees/stateless/models-tree/internal/Tooltip";
+import type { StubbedFactoryFunction } from "../../Common";
+import type {
+  ModelsTreeVisibilityHandler,
+  ModelsTreeVisibilityHandlerProps,
+} from "../../../../components/trees/stateless/models-tree/ModelsTreeVisibilityHandler";
+import type { Visibility } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 import type { IModelDb } from "@itwin/core-backend";
 
@@ -74,16 +77,16 @@ describe("HierarchyBasedVisibilityHandler", () => {
     });
 
     let queryHandlerStub: StubbedFactoryFunction<ModelsTreeQueryHandler>;
-    let createdHandlers = new Array<HierarchyVisibilityHandler>();
+    let createdHandlers = new Array<ModelsTreeVisibilityHandler>();
 
     afterEach(() => {
       createdHandlers.forEach((x) => x.dispose());
       createdHandlers = [];
     });
 
-    function createVisibilityHandlerWrapper(props?: { overrides?: VisibilityOverrides; queryHandler?: ModelsTreeQueryHandler; viewport?: Viewport }) {
+    function createHandler(props?: { overrides?: VisibilityOverrides; queryHandler?: ModelsTreeQueryHandler; viewport?: Viewport }) {
       const queryHandler = props?.queryHandler ?? createFakeModelsTreeQueryHandler();
-      const overrides: HierarchyVisibilityHandlerProps["overrides"] = {
+      const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
         getModelDisplayStatus:
           props?.overrides?.models &&
           (async ({ id, originalImplementation }) => {
@@ -108,7 +111,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       };
 
       props?.queryHandler && queryHandlerStub.stub(() => queryHandler);
-      const handler = createHierarchyVisibilityHandler({
+      const handler = createModelsTreeVisibilityHandler({
         viewport: props?.viewport ?? createFakeSinonViewport(),
         overrides,
       });
@@ -142,7 +145,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           parentKeys: [],
         };
 
-        const { handler } = createVisibilityHandlerWrapper();
+        const { handler } = createHandler();
         const result = await handler.getVisibilityStatus(node);
         expect(result).to.include({ state: "hidden", isDisabled: true });
       });
@@ -152,7 +155,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides = {
             getSubjectNodeVisibility: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
-          const handler = createHierarchyVisibilityHandler({
+          const handler = createModelsTreeVisibilityHandler({
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -169,7 +172,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               isSpatialView: sinon.fake.returns(false),
             },
           });
-          const { handler } = createVisibilityHandlerWrapper({ viewport });
+          const { handler } = createHandler({ viewport });
           const result = await handler.getVisibilityStatus(node);
           expect(viewport.view.isSpatialView).to.be.called;
           expect(result).to.include({ state: "hidden", isDisabled: true });
@@ -181,7 +184,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const queryHandler = createFakeModelsTreeQueryHandler({
             subjectsHierarchy: new Map([["0x0", subjectIds]]),
           });
-          const { handler } = createVisibilityHandlerWrapper({ queryHandler });
+          const { handler } = createHandler({ queryHandler });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
@@ -196,7 +199,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               [subjectIds[1], ["0x4"]],
             ]),
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler,
             overrides: {
               models: new Map([
@@ -219,7 +222,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               [subjectIds[1], ["0x4"]],
             ]),
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler,
             overrides: {
               models: new Map([
@@ -242,7 +245,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               [subjectIds[1], ["0x4"]],
             ]),
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler,
             overrides: {
               models: new Map([
@@ -288,7 +291,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               isSpatialView: sinon.fake.returns(false),
             },
           });
-          const { handler } = createVisibilityHandlerWrapper({ viewport });
+          const { handler } = createHandler({ viewport });
           const result = await handler.getVisibilityStatus(node);
           expect(viewport.view.isSpatialView).to.be.called;
           expect(result).to.include({ state: "hidden", isDisabled: true });
@@ -305,7 +308,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               ["0x20", ["0x300", "0x400"]],
             ]),
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler,
           });
 
@@ -322,7 +325,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
             });
             const result = await handler.getVisibilityStatus(node);
@@ -340,7 +343,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 ["0x20", ["0x300", "0x400"]],
               ]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 isAlwaysDrawnExclusive: true,
@@ -362,7 +365,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 ["0x20", ["0x300", "0x400"]],
               ]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set(),
@@ -383,7 +386,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 ["0x20", ["0x300", "0x400"]],
               ]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set(["0xfff"]),
@@ -399,7 +402,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           it("when `viewport.view.viewsModel` returns false", async () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               viewport: createFakeSinonViewport({
                 view: {
                   viewsModel: sinon.fake.returns(false),
@@ -417,7 +420,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 view: {
@@ -441,7 +444,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               modelCategories,
               categoryElements,
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set([...categoryElements.values()].flat()),
@@ -463,7 +466,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               modelCategories,
               categoryElements,
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 alwaysDrawn: new Set(["0xffff"]),
@@ -486,7 +489,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               modelCategories,
               categoryElements,
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 isAlwaysDrawnExclusive: true,
@@ -507,7 +510,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 ["0x20", ["0x300", "0x400"]],
               ]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 view: { viewsCategory: sinon.fake.returns(false) },
@@ -528,7 +531,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const queryHandler = createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, categories]]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 view: {
@@ -550,7 +553,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 ["0x20", ["0x300", "0x400"]],
               ]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set(["0x100"]),
@@ -570,7 +573,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 ["0x20", ["0x300", "0x400"]],
               ]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 isAlwaysDrawnExclusive: true,
@@ -592,7 +595,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 ["0x20", ["0x300", "0x400"]],
               ]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport: createFakeSinonViewport({
                 view: { viewsCategory: sinon.fake((id) => id === categories[0]) },
@@ -608,10 +611,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
       describe("category", () => {
         it("can be overridden", async () => {
-          const overrides: HierarchyVisibilityHandlerProps["overrides"] = {
+          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             getCategoryDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
-          const handler = createHierarchyVisibilityHandler({
+          const handler = createModelsTreeVisibilityHandler({
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -629,7 +632,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             modelCategories: new Map([[modelId, [categoryId]]]),
             categoryElements: new Map([[categoryId, ["0x100", "0x200"]]]),
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler,
             viewport: createFakeSinonViewport({
               alwaysDrawn: new Set(["0x400"]),
@@ -648,7 +651,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           it("when `viewport.view.viewsCategory` returns TRUE and there are NO CHILD elements in the NEVER drawn list", async () => {
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode("0x1", categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
@@ -666,7 +669,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
@@ -686,7 +689,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
@@ -703,7 +706,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           it("`viewport.view.viewsCategory` returns FALSE and there ARE NO CHILD elements in the ALWAYS drawn list", async () => {
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode("0x1", categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
@@ -720,7 +723,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           it("when `viewport.view.viewsCategory` returns TRUE and there ARE UNRELATED elements in the EXCLUSIVE ALWAYS drawn list", async () => {
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode("0x1", categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
@@ -740,7 +743,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
@@ -760,7 +763,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
@@ -778,7 +781,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
               }),
@@ -800,7 +803,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
@@ -820,7 +823,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
@@ -840,7 +843,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
@@ -860,7 +863,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, [categoryId]]]),
                 categoryElements: new Map([[categoryId, ["0x2", "0x3"]]]),
@@ -884,7 +887,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         const elementId = "0x3";
 
         it("is disabled when has no category or model", async () => {
-          const { handler } = createVisibilityHandlerWrapper();
+          const { handler } = createHandler();
           let result = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: undefined, categoryId: undefined }));
           expect(result.isDisabled).to.be.true;
           result = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: undefined }));
@@ -898,7 +901,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               viewsModel: sinon.fake.returns(false),
             },
           });
-          const { handler } = createVisibilityHandlerWrapper({ viewport });
+          const { handler } = createHandler({ viewport });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "hidden" });
         });
@@ -911,7 +914,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               viewsCategory: sinon.fake.returns(true),
             },
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             viewport,
           });
           const result = await handler.getVisibilityStatus(node);
@@ -920,7 +923,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("is visible if present in the always drawn list", async () => {
           const node = createElementHierarchyNode({ modelId, categoryId, elementId });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             viewport: createFakeSinonViewport({
               alwaysDrawn: new Set([elementId]),
             }),
@@ -930,7 +933,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         });
 
         it("is hidden if present in the never drawn list", async () => {
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             viewport: createFakeSinonViewport({
               neverDrawn: new Set([elementId]),
             }),
@@ -941,7 +944,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         });
 
         it("is hidden if other elements are present in the always drawn list and exclusive mode is enabled", async () => {
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             viewport: createFakeSinonViewport({
               alwaysDrawn: new Set(["0x20"]),
               isAlwaysDrawnExclusive: true,
@@ -953,7 +956,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         });
 
         it("is visible when not present in always/never drawn sets", async () => {
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             viewport: createFakeSinonViewport({
               alwaysDrawn: new Set(),
               neverDrawn: new Set(),
@@ -965,14 +968,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
         });
 
         it("is visible when always/never drawn sets are undefined", async () => {
-          const { handler } = createVisibilityHandlerWrapper();
+          const { handler } = createHandler();
           const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
         });
 
         it("is hidden if category has per model override to hide", async () => {
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             viewport: createFakeSinonViewport({
               perModelCategoryVisibility: {
                 getOverride: () => PerModelCategoryVisibility.Override.Hide,
@@ -990,10 +993,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
         const categoryId = "0x2";
 
         it("can be overridden", async () => {
-          const overrides: HierarchyVisibilityHandlerProps["overrides"] = {
+          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             getElementGroupingNodeDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
-          const handler = createHierarchyVisibilityHandler({
+          const handler = createModelsTreeVisibilityHandler({
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1016,7 +1019,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             categoryId,
             elements: elementIds,
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler: createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
@@ -1036,7 +1039,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             categoryId,
             elements: elementIds,
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler: createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
@@ -1056,7 +1059,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             categoryId,
             elements: elementIds,
           });
-          const { handler } = createVisibilityHandlerWrapper({
+          const { handler } = createHandler({
             queryHandler: createFakeModelsTreeQueryHandler({
               modelCategories: new Map([[modelId, [categoryId]]]),
               categoryElements: new Map([[categoryId, elementIds]]),
@@ -1078,7 +1081,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           });
 
           for (const categoryOn of [true, false]) {
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               viewport: createFakeSinonViewport({
                 view: { viewsCategory: sinon.fake.returns(categoryOn) },
               }),
@@ -1097,10 +1100,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
     describe("changeVisibilityStatus", () => {
       describe("subject", () => {
         it("can be overridden", async () => {
-          const overrides: HierarchyVisibilityHandlerProps["overrides"] = {
+          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeSubjectNodeState: sinon.fake.resolves(undefined),
           };
-          const handler = createHierarchyVisibilityHandler({
+          const handler = createModelsTreeVisibilityHandler({
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1118,7 +1121,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             ];
             const node = createSubjectHierarchyNode(...subjectIds);
             const viewport = createFakeSinonViewport();
-            const { handler, overrides } = createVisibilityHandlerWrapper({
+            const { handler, overrides } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
               }),
@@ -1138,7 +1141,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               ["0x5", "0x6"],
             ];
             const node = createSubjectHierarchyNode(...subjectIds);
-            const { handler, overrides } = createVisibilityHandlerWrapper({
+            const { handler, overrides } = createHandler({
               queryHandler: createFakeModelsTreeQueryHandler({
                 subjectModels: new Map(subjectIds.map((id, idx) => [id, modelIds[idx]])),
               }),
@@ -1176,7 +1179,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               alwaysDrawn: new Set(["abcd", "efgh"]),
               neverDrawn: new Set(["1234", "3456"]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               viewport,
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
@@ -1200,7 +1203,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               alwaysDrawn: new Set(["0x100", "0x200", "abcd"]),
               neverDrawn: new Set(["0x300", "0x400", "1234"]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               viewport,
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, ["0x10", "0x20"]]]),
@@ -1221,7 +1224,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
             const viewport = createFakeSinonViewport();
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, true);
             expect(viewport.addViewedModels).to.be.calledOnceWith(modelId);
           });
@@ -1233,7 +1236,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const categoryIds = ["0x2", "0x3", "0x4"];
             const node = createModelHierarchyNode(modelId);
             const viewport = createFakeSinonViewport();
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               viewport,
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, categoryIds]]),
@@ -1250,7 +1253,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const modelId = "0x1";
             const node = createModelHierarchyNode(modelId);
             const viewport = createFakeSinonViewport();
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, false);
             expect(viewport.changeModelDisplay).to.be.calledOnceWith(modelId, false);
           });
@@ -1262,7 +1265,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const categoryIds = ["0x2", "0x3", "0x4"];
             const node = createModelHierarchyNode(modelId);
             const viewport = createFakeSinonViewport();
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               viewport,
               queryHandler: createFakeModelsTreeQueryHandler({
                 modelCategories: new Map([[modelId, categoryIds]]),
@@ -1277,10 +1280,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
       describe("category", () => {
         it("can be overridden", async () => {
-          const overrides: HierarchyVisibilityHandlerProps["overrides"] = {
+          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeCategoryState: sinon.fake.resolves(undefined),
           };
-          const handler = createHierarchyVisibilityHandler({
+          const handler = createModelsTreeVisibilityHandler({
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1300,7 +1303,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.Hide),
               },
             });
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
 
             await handler.changeVisibility(node, true);
             expect(viewport.perModelCategoryVisibility.setOverride).to.be.calledWith(modelId, categoryId, PerModelCategoryVisibility.Override.None);
@@ -1315,7 +1318,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               viewsModel: sinon.fake.returns(true),
             });
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
 
             await handler.changeVisibility(node, false);
             expect(viewport.perModelCategoryVisibility.setOverride).to.be.calledWith(modelId, categoryId, PerModelCategoryVisibility.Override.Hide);
@@ -1328,10 +1331,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const modelId = "0x1";
           const categoryId = "0x2";
           const elementId = "0x10";
-          const overrides: HierarchyVisibilityHandlerProps["overrides"] = {
+          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeElementState: sinon.fake.resolves(undefined),
           };
-          const handler = createHierarchyVisibilityHandler({
+          const handler = createModelsTreeVisibilityHandler({
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1349,7 +1352,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               neverDrawn: new Set([elementId]),
             });
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, true);
             expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
           });
@@ -1365,7 +1368,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 viewsCategory: sinon.fake.returns(false),
               },
             });
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, true);
             expect(viewport.addViewedModels).to.be.calledWith(modelId);
             expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
@@ -1381,7 +1384,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 viewsCategory: sinon.fake.returns(false),
               },
             });
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, true);
             expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
           });
@@ -1394,7 +1397,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               isAlwaysDrawnExclusive: true,
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               viewport,
               overrides: {
                 models: new Map([[modelId, "hidden"]]),
@@ -1415,7 +1418,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               neverDrawn: new Set(childElements),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport,
             });
@@ -1437,7 +1440,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 viewsCategory: sinon.fake.returns(false),
               },
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport,
             });
@@ -1456,7 +1459,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               alwaysDrawn: new Set([elementId]),
             });
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, false);
             expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
           });
@@ -1467,7 +1470,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const elementId = "0x3";
             const node = createElementHierarchyNode({ modelId, categoryId, elementId });
             const viewport = createFakeSinonViewport();
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, false);
             expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
           });
@@ -1484,7 +1487,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 viewsModel: sinon.fake.returns(true),
               },
             });
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, false);
             expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
             expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
@@ -1496,7 +1499,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const elementId = "0x3";
             const node = createElementHierarchyNode({ modelId, categoryId, elementId });
             const viewport = createFakeSinonViewport();
-            const { handler } = createVisibilityHandlerWrapper({ viewport });
+            const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, false);
             expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
           });
@@ -1512,7 +1515,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               alwaysDrawn: new Set([elementId, ...childElements]),
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport,
             });
@@ -1531,7 +1534,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               elementChildren: new Map([[elementId, childElements]]),
             });
             const viewport = createFakeSinonViewport();
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport,
             });
@@ -1545,10 +1548,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
       describe("grouping node", () => {
         it("can be overridden", async () => {
-          const overrides: HierarchyVisibilityHandlerProps["overrides"] = {
+          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeElementGroupingNodeState: sinon.fake.resolves(undefined),
           };
-          const handler = createHierarchyVisibilityHandler({
+          const handler = createModelsTreeVisibilityHandler({
             viewport: createFakeSinonViewport(),
             overrides,
           });
@@ -1588,7 +1591,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 viewsCategory: sinon.fake.returns(!on),
               },
             });
-            const { handler } = createVisibilityHandlerWrapper({
+            const { handler } = createHandler({
               queryHandler,
               viewport,
             });
@@ -1712,14 +1715,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
     });
 
     let viewport: Viewport;
-    let handler: HierarchyVisibilityHandler;
+    let handler: ModelsTreeVisibilityHandler;
 
     beforeEach(async () => {
       viewport = OffScreenViewport.create({
         view: createBlankViewState(iModelConnection),
         viewRect: new ViewRect(),
       });
-      handler = createHierarchyVisibilityHandler({
+      handler = createModelsTreeVisibilityHandler({
         viewport,
       });
     });

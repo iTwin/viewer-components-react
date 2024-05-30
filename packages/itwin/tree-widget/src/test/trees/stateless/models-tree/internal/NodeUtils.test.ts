@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { NodeUtils } from "../../../../components/trees/stateless/models-tree/internal/NodeUtils";
+import { NodeUtils } from "../../../../../components/trees/stateless/models-tree/internal/NodeUtils";
 
 describe("Node utils", () => {
   it("getModelId", () => {
