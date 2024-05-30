@@ -28,6 +28,8 @@ export interface MeasureToolsUiProviderOptions {
     location: StagePanelLocation;
     section?: StagePanelSection;
   };
+  // If we check for sheet to 3d transformation when measuring in sheets
+  enableSheetMeasurement?: boolean;
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -48,10 +50,10 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.measureDistanceToolCommand);
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement ?? true));
       }
       if (!featureFlags?.hideAreaTool) {
-        tools.push(MeasureToolDefinitions.measureAreaToolCommand);
+        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props?.enableSheetMeasurement ?? true));
       }
       if (!featureFlags?.hideLocationTool) {
         tools.push(MeasureToolDefinitions.measureLocationToolCommand);

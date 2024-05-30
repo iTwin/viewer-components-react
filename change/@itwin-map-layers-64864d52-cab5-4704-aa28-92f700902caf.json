@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "Styled map layers package's code with Prettier",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "none"
-}
