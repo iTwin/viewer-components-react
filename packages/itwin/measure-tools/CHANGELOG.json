@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 29 May 2024 18:39:36 GMT",
+      "version": "0.15.0",
+      "tag": "@itwin/measure-tools-react_v0.15.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "125395992+Maxime-Brassard@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "3a16c4317883afeaa611455cf85fc638b0326015",
+            "comment": "Measurement in sheets"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.2",
       "tag": "@itwin/measure-tools-react_v0.14.2",
       "date": "Thu, 05 Oct 2023 18:48:11 GMT",

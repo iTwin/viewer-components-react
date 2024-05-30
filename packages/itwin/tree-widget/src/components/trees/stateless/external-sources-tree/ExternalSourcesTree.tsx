@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
+import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { FilterableTree } from "../common/components/FilterableTree";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 
@@ -14,6 +15,7 @@ import type { HierarchyLevelConfig } from "../../common/Types";
 interface StatelessExternalSourcesTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 type FilterableTreeProps = Parameters<typeof FilterableTree>[0];
@@ -24,7 +26,8 @@ type StatelessExternalSourcesTreeProps = StatelessExternalSourcesTreeOwnProps &
 const StatelessExternalSourcesTreeId = "external-sources-tree-v2";
 
 /** @internal */
-export function StatelessExternalSourcesTree({ onPerformanceMeasured, ...props }: StatelessExternalSourcesTreeProps) {
+export function StatelessExternalSourcesTree({ onPerformanceMeasured, onFeatureUsed, ...props }: StatelessExternalSourcesTreeProps) {
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessExternalSourcesTreeId });
   return (
     <FilterableTree
       {...props}
@@ -35,6 +38,7 @@ export function StatelessExternalSourcesTree({ onPerformanceMeasured, ...props }
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessExternalSourcesTreeId}-${action}`, duration);
       }}
+      reportUsage={reportUsage}
     />
   );
 };
