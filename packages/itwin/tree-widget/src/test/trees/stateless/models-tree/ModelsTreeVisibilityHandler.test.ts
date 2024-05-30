@@ -22,6 +22,7 @@ import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
 import { createVisibilityStatus } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { createModelsTreeVisibilityHandler } from "../../../../components/trees/stateless/models-tree/ModelsTreeVisibilityHandler";
+import { SubjectModelIdsCache } from "../../../../components/trees/stateless/models-tree/SubjectModelIdsCache";
 import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../../IModelUtils";
 import { TestUtils } from "../../../TestUtils";
 import {
@@ -2054,9 +2055,10 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
           ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModelConnection), 1000),
         };
 
+        const subjectModelIdsCache = new SubjectModelIdsCache(imodelAccess);
         const provider = createHierarchyProvider({
           imodelAccess,
-          hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess }),
+          hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, subjectModelIdsCache }),
         });
 
         from(provider.getNodes({ parentNode: undefined }))

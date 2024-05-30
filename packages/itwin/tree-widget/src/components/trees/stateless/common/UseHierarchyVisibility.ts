@@ -6,10 +6,10 @@
 import { useEffect, useRef, useState } from "react";
 import { defer, distinct, mergeMap, Subject, takeUntil } from "rxjs";
 
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { MutableRefObject } from "react";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
-import type { ModelsTreeVisibilityHandler as HierarchyVisibilityHandler } from "../models-tree/ModelsTreeVisibilityHandler";
+import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 
 interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
@@ -107,4 +107,10 @@ function createStatusGetter(
 
     return status.status;
   };
+}
+export interface HierarchyVisibilityHandler extends IDisposable {
+  readonly onVisibilityChange: BeEvent<() => void>;
+
+  getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
+  changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
 }

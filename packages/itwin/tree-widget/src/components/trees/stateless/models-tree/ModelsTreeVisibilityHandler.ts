@@ -26,7 +26,7 @@ import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./internal/Tooltip";
-import type { HierarchyVisibilityHandler } from "../common/HierarchyVisibilityHandler";
+import type { HierarchyVisibilityHandler } from "../common/UseHierarchyVisibility";
 
 interface GetCategoryStatusProps {
   categoryId: Id64String;
