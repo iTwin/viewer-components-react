@@ -8,7 +8,8 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
-import type { Point3d } from "@itwin/core-geometry";
+import type { Point3d, XYProps } from "@itwin/core-geometry";
+import { Point2d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
@@ -47,6 +48,30 @@ export interface MeasurementWidgetData {
 
   // UI properties
   properties: WidgetValue[];
+}
+
+export namespace DrawingMetadata {
+
+  export function toJSON(obj: DrawingMetadata | undefined): DrawingMetadataProps | undefined {
+    if (obj === undefined)
+      return undefined;
+    const origin = obj.origin?.toJSONXY();
+    const extents = obj.extents?.toJSONXY();
+    if (origin !== undefined)
+      return { origin, extents, worldScale: obj.worldScale, drawingId: obj.drawingId };
+    return undefined;
+  }
+
+  export function fromJSON(json: DrawingMetadataProps): DrawingMetadata {
+
+    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
+
+  }
+
+  // Returns a new DrawingMetaData object with one or more properties changed.
+  export function withOverrides(current: DrawingMetadata, overrides?: Partial<DrawingMetadata>): DrawingMetadata {
+    return { ...current, ...overrides };
+  }
 }
 
 /** Abstract class for serializers that read/write measurements from JSON. */
@@ -232,6 +257,26 @@ export interface MeasurementEqualityOptions {
   angleTolerance?: number;
 }
 
+export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents"> {
+  origin: XYProps;
+  extents?: XYProps;
+}
+
+export interface DrawingMetadata {
+  /** Id of the drawing */
+  drawingId?: string;
+
+  /** Scaling from sheet to world distance */
+  worldScale: number;
+
+  /** Origin of the drawing in sheet coordinates */
+  origin: Point2d;
+
+  /** Extents of the drawing in sheet coordinates */
+  extents?: Point2d;
+
+}
+
 /** Handler function that modifies the data sent to the widget for display. */
 export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData: MeasurementWidgetData) => Promise<void>;
 /** Handler for modifying the data sent to the widget for display. The highest priority will execute last. */
@@ -256,6 +301,9 @@ export abstract class Measurement {
   private _displayLabels: boolean;
   private _transientId?: Id64String; // Not serialized
   private _isVisible: boolean; // Not serialized
+
+  // Used for sheet measurements
+  private _drawingMetaData?: DrawingMetadata;
 
   /** Default drawing style name. */
   public static readonly defaultStyle: string = WellKnownMeasurementStyle.Default;
@@ -283,6 +331,23 @@ export abstract class Measurement {
     const prevId = this._transientId;
     this._transientId = newId;
     this.onTransientIdChanged(prevId);
+  }
+
+  public get drawingMetaData(): Readonly<DrawingMetadata | undefined> {
+    return this._drawingMetaData;
+  }
+
+  public set drawingMetaData(data: DrawingMetadata | undefined) {
+    this._drawingMetaData = data;
+    this.onDrawingMetadataChanged();
+  }
+
+  public get worldScale(): Readonly<number> {
+    return this.drawingMetaData?.worldScale ?? 1.0;
+  }
+
+  public set sheetViewId(id: string | undefined) {
+    this.viewTarget.addViewIds(id ?? []);
   }
 
   /** Gets or sets if the measurement should be drawn. */
@@ -403,11 +468,13 @@ export abstract class Measurement {
   public get allowActions(): boolean { return true; }
 
   /** Protected constructor */
-  protected constructor() {
+  protected constructor(props?: MeasurementProps) {
     this._isLocked = false;
     this._isVisible = true;
     this._displayLabels = MeasurementPreferences.current.displayMeasurementLabels;
     this._viewTarget = new MeasurementViewTarget();
+    if (props?.drawingMetadata)
+      this.drawingMetaData = DrawingMetadata.fromJSON(props.drawingMetadata);
   }
 
   /** Copies the measurement data into a new instance.
@@ -621,6 +688,8 @@ export abstract class Measurement {
     this.lockStyle = other.lockStyle;
     this.viewTarget.copyFrom(other.viewTarget);
     this.displayLabels = other.displayLabels;
+    if (other.drawingMetaData)
+      this._drawingMetaData = { origin: other.drawingMetaData.origin.clone(), worldScale: other.drawingMetaData.worldScale, drawingId: other.drawingMetaData.drawingId, extents: other.drawingMetaData.extents};
   }
 
   /**
@@ -636,6 +705,9 @@ export abstract class Measurement {
     this._style = (json.style !== undefined) ? json.style : undefined;
     this._lockStyle = (json.style !== undefined) ? json.lockStyle : undefined;
     this._displayLabels = (json.displayLabels !== undefined) ? json.displayLabels : MeasurementPreferences.current.displayMeasurementLabels;
+
+    if (json.drawingMetadata !== undefined)
+      this.drawingMetaData = DrawingMetadata.fromJSON(json.drawingMetadata);
 
     if (json.viewTarget !== undefined) {
       this._viewTarget.loadFromJSON(json.viewTarget);
@@ -678,6 +750,9 @@ export abstract class Measurement {
     json.lockStyle = this._lockStyle;
     json.viewTarget = this._viewTarget.toJSON();
     json.displayLabels = this._displayLabels;
+    const drawingMetaDataJson = DrawingMetadata.toJSON(this.drawingMetaData);
+    if (drawingMetaDataJson)
+      json.drawingMetadata = drawingMetaDataJson;
   }
 
   /** Notify subclasses that style options have changed. This is to allow implementations to regenerate any cached graphics.
@@ -717,6 +792,11 @@ export abstract class Measurement {
    * @param _prevId The previous ID, if any.
    */
   protected onTransientIdChanged(_prevId?: Id64String): void { }
+
+  /**
+   * Notify subclasses when DrawingMetadata changes
+   */
+  protected onDrawingMetadataChanged(): void { }
 
   /**
    * Notify subclasses when the display labels property has changed.

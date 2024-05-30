@@ -83,6 +83,7 @@ export class MeasurementViewTarget {
 
   private _included: Set<string>;
   private _excluded: Set<string>;
+  private _viewIds: Set<string>;
 
   /** Gets all the registered view classifiers. */
   public static get classifiers(): ReadonlyMap<string, MeasurementViewTypeClassifier> {
@@ -111,20 +112,37 @@ export class MeasurementViewTarget {
     return this._excluded;
   }
 
+  /** Gets the viewIds that the measurement will draw in */
+  public get viewIds(): ReadonlySet<string> {
+    return this._viewIds;
+  }
+
   /**
    * Constructs a new MeasurementViewTarget.
    * @param included Optional, one or more view type names where the view is valid. If none, then "Any" is the default type meaning any viewport can be valid.
    * @param excluded Optional, one or more view type names where the view is not valid.
+   * @param viewIds Optional, one or more view ids where the measurement should display. If none, will not consider for display
    */
-  public constructor(included?: string | string[], excluded?: string | string[]) {
+  public constructor(included?: string | string[], excluded?: string | string[], viewIds?: string | string[]) {
     this._included = new Set<string>();
     this._excluded = new Set<string>();
+    this._viewIds = new Set<string>();
 
     if (included)
       this.include(included);
 
     if (excluded)
       this.exclude(excluded);
+
+    if (viewIds)
+      this.addViewIds(viewIds);
+  }
+
+  public addViewIds(viewIds: string | string[]) {
+    const arr = Array.isArray(viewIds) ? viewIds : [viewIds];
+    for (const id of arr) {
+      this._viewIds.add(id);
+    }
   }
 
   /**
@@ -191,6 +209,7 @@ export class MeasurementViewTarget {
   public clear() {
     this._included.clear();
     this._excluded.clear();
+    this._viewIds.clear();
   }
 
   /** Creates a deep copy of the view type object. */
@@ -200,7 +219,7 @@ export class MeasurementViewTarget {
 
   /** Tests if this view target is equal to the other one. Equality means they both have the same number and types of views in their include/exclude sets. */
   public equals(other: MeasurementViewTarget): boolean {
-    if (this._included.size !== other._included.size || this._excluded.size !== other._excluded.size)
+    if (this._included.size !== other._included.size || this._excluded.size !== other._excluded.size || this._viewIds.size !== other._viewIds.size)
       return false;
 
     for (const include of this._included) {
@@ -210,6 +229,11 @@ export class MeasurementViewTarget {
 
     for (const exclude of this._excluded) {
       if (!other.excluded.has(exclude))
+        return false;
+    }
+
+    for (const viewId of this._viewIds) {
+      if (!other.viewIds.has(viewId))
         return false;
     }
 
@@ -224,6 +248,7 @@ export class MeasurementViewTarget {
     this.clear();
     this.include(Array.from(other.included));
     this.exclude(Array.from(other.excluded));
+    this.addViewIds(Array.from(other.viewIds));
   }
 
   /**
@@ -233,6 +258,7 @@ export class MeasurementViewTarget {
   public merge(other: MeasurementViewTarget) {
     this.include(Array.from(other.included));
     this.exclude(Array.from(other.excluded));
+    this.addViewIds(Array.from(other.viewIds));
   }
 
   /**
@@ -308,6 +334,10 @@ export class MeasurementViewTarget {
   public isViewportCompatible(vp: Viewport): boolean {
     const viewType = MeasurementViewTarget.classifyViewport(vp);
 
+    // Is the viewId valid
+    if (this._viewIds.size > 0 && !this.isValidViewId(vp.view.id))
+      return false;
+
     // Is this type excluded?
     if (this.excluded.has(viewType))
       return false;
@@ -359,7 +389,8 @@ export class MeasurementViewTarget {
   public toJSON(): MeasurementViewTargetProps {
     const included = Array.from(this._included);
     const excluded = Array.from(this._excluded);
-    return { included, excluded };
+    const viewIds = Array.from(this._viewIds);
+    return { included, excluded, viewIds };
   }
 
   /**
@@ -374,6 +405,9 @@ export class MeasurementViewTarget {
 
     if (props.excluded !== undefined && Array.isArray(props.excluded))
       this.add(props.excluded, false);
+
+    if (props.viewIds !== undefined && Array.isArray(props.viewIds))
+      this.addViewIds(props.viewIds);
   }
 
   /**
@@ -382,7 +416,7 @@ export class MeasurementViewTarget {
    * @returns constructed view type.
    */
   public static fromJSON(props: MeasurementViewTargetProps): MeasurementViewTarget {
-    return new MeasurementViewTarget(props.included, props.excluded);
+    return new MeasurementViewTarget(props.included, props.excluded, props.viewIds);
   }
 
   /**
@@ -463,6 +497,13 @@ export class MeasurementViewTarget {
    */
   public static findClassifier(typeName: string): MeasurementViewTypeClassifier | undefined {
     return MeasurementViewTarget._classifiers.get(typeName);
+  }
+
+  public isValidViewId(viewId: string) {
+    if (this._viewIds.size > 0)
+      return this._viewIds.has(viewId);
+    else
+      return true;
   }
 }
 
