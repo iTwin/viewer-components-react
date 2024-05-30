@@ -5,8 +5,7 @@
 
 import { expect } from "chai";
 import fs from "fs";
-import path from "path";
-import { filter, from, mergeMap } from "rxjs";
+import { EMPTY, expand, filter, first, from, mergeMap, shareReplay } from "rxjs";
 import sinon from "sinon";
 import { assert, BeEvent } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
@@ -16,15 +15,12 @@ import {
 import { SchemaContext, SchemaJsonLocater } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { Presentation } from "@itwin/presentation-frontend";
-import {
-  createHierarchyProvider, createLimitingECSqlQueryExecutor, createNodesQueryClauseFactory, HierarchyNode,
-} from "@itwin/presentation-hierarchies";
+import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
 import { createVisibilityStatus } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
+import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { createModelsTreeVisibilityHandler } from "../../../../components/trees/stateless/models-tree/ModelsTreeVisibilityHandler";
 import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../../IModelUtils";
 import { TestUtils } from "../../../TestUtils";
@@ -33,6 +29,7 @@ import {
   createFakeSinonViewport, createModelHierarchyNode, createSubjectHierarchyNode, stubFactoryFunction,
 } from "../../Common";
 
+import type { Observable } from "rxjs";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { ModelsTreeQueryHandler } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
 import type { PresentationManager } from "@itwin/presentation-frontend";
@@ -46,14 +43,13 @@ import type {
 import type { Visibility } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 import type { IModelDb } from "@itwin/core-backend";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
   elements?: Map<Id64String, Visibility>;
 }
 
-describe("HierarchyBasedVisibilityHandler", () => {
+describe.only("HierarchyBasedVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -65,23 +61,32 @@ describe("HierarchyBasedVisibilityHandler", () => {
   });
 
   describe("#unit", () => {
+    let queryHandlerStub: StubbedFactoryFunction<ModelsTreeQueryHandler>;
+    let createdHandlers = new Array<ModelsTreeVisibilityHandler>();
+
     before(() => {
       const mockPresentationManager = {
         onIModelHierarchyChanged: new BeEvent<() => void>(),
       } as unknown as PresentationManager;
       sinon.stub(Presentation, "presentation").get(() => mockPresentationManager);
+
+      queryHandlerStub = stubFactoryFunction(
+        `${__dirname}/../../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler`,
+        "createModelsTreeQueryHandler",
+        () => createFakeModelsTreeQueryHandler(),
+      );
     });
 
     after(() => {
       sinon.restore();
     });
 
-    let queryHandlerStub: StubbedFactoryFunction<ModelsTreeQueryHandler>;
-    let createdHandlers = new Array<ModelsTreeVisibilityHandler>();
+    beforeEach(() => queryHandlerStub.stub());
 
     afterEach(() => {
       createdHandlers.forEach((x) => x.dispose());
       createdHandlers = [];
+      queryHandlerStub.reset();
     });
 
     function createHandler(props?: { overrides?: VisibilityOverrides; queryHandler?: ModelsTreeQueryHandler; viewport?: Viewport }) {
@@ -120,17 +125,6 @@ describe("HierarchyBasedVisibilityHandler", () => {
         overrides,
       };
     }
-
-    before(async () => {
-      queryHandlerStub = stubFactoryFunction(
-        `${__dirname}/../../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler`,
-        "createModelsTreeQueryHandler",
-        () => createFakeModelsTreeQueryHandler(),
-      );
-    });
-
-    beforeEach(() => queryHandlerStub.stub());
-    afterEach(() => queryHandlerStub.reset());
 
     describe("getVisibilityStatus", () => {
       it("returns disabled when node is not an instance node", async () => {
@@ -1618,19 +1612,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
     const elementHierarchy = new Map<Id64String, Set<Id64String>>();
 
     before(async () => {
-      await initializePresentationTesting({
-        backendProps: {
-          caching: {
-            hierarchies: {
-              mode: HierarchyCacheMode.Memory,
-            },
-          },
-        },
-        testOutputDir: path.join(__dirname, "output"),
-        backendHostProps: {
-          cacheDir: path.join(__dirname, "cache"),
-        },
-      });
+      await initializePresentationTesting();
 
       if (!fs.existsSync("temp")) {
         fs.mkdirSync("temp");
@@ -2099,10 +2081,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
     describe("grouping nodes", () => {
       const classGroups = new Array<{
         parent: HierarchyNode & { key: ClassGroupingNodeKey };
-        children: HierarchyNode[];
+        children: Observable<HierarchyNode>;
       }>();
 
-      before(async () => {
+      before((done) => {
         const schemas = new SchemaContext();
         const locater = new SchemaJsonLocater((schemaName) => iModel.getSchemaProps(schemaName));
         schemas.addLocater(locater);
@@ -2115,43 +2097,28 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         const provider = createHierarchyProvider({
           imodelAccess,
-          hierarchyDefinition: {
-            defineHierarchyLevel: async (props) => {
-              if (props.parentNode) {
-                return [];
-              }
-
-              const query = createNodesQueryClauseFactory({ imodelAccess });
-              return [
-                {
-                  fullClassName: "bis.GeometricElement3d",
-                  query: {
-                    ecsql: `
-                      SELECT ${await query.createSelectClause({
-                        ecClassId: { selector: `e.ECClassId` },
-                        ecInstanceId: { selector: `e.ECInstanceId` },
-                        nodeLabel: { selector: `e.UserLabel` },
-                        grouping: {
-                          byClass: true,
-                        },
-                      })}
-                      FROM bis.GeometricElement3d e
-                    `,
-                  },
-                },
-              ];
-            },
-          },
+          hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess }),
         });
 
-        for await (const parentNode of provider.getNodes({ parentNode: undefined })) {
-          assert(HierarchyNode.isClassGroupingNode(parentNode));
-          const children = new Array<HierarchyNode>();
-          for await (const node of provider.getNodes({ parentNode })) {
-            children.push(node);
-          }
-          classGroups.push({ parent: parentNode, children });
-        }
+        from(provider.getNodes({ parentNode: undefined }))
+          .pipe(
+            expand((parentNode) => {
+              if (!parentNode.children) {
+                return EMPTY;
+              }
+
+              let children = from(provider.getNodes({ parentNode }));
+              if (HierarchyNode.isClassGroupingNode(parentNode)) {
+                children = children.pipe(shareReplay());
+                classGroups.push({ parent: parentNode, children });
+              }
+              return children;
+            }),
+          )
+          .subscribe({
+            complete: done,
+            error: done,
+          });
       });
 
       it("is hidden by default", async () => {
@@ -2171,32 +2138,42 @@ describe("HierarchyBasedVisibilityHandler", () => {
             { state: "visible" },
             `Grouping node for ${parentClassName} has unexpected visibility`,
           );
-          await Promise.all(
-            children.map(async (node) => {
-              assert(HierarchyNode.isInstancesNode(node));
-              await expect(handler.getVisibilityStatus(node)).to.eventually.include(
-                { state: "visible" },
-                `element node ${JSON.stringify(node.key.instanceKeys[0])}, grouping by ${parentClassName}`,
-              );
-            }),
+
+          await toVoidPromise(
+            from(children).pipe(
+              mergeMap(async (node) => {
+                assert(HierarchyNode.isInstancesNode(node));
+                await expect(handler.getVisibilityStatus(node)).to.eventually.include(
+                  { state: "visible" },
+                  `element node ${JSON.stringify(node.key.instanceKeys[0])}, grouping by ${parentClassName}`,
+                );
+              }),
+            ),
           );
           await handler.changeVisibility(parent, false);
-          await Promise.all(
-            children.map(async (node) => {
-              assert(HierarchyNode.isInstancesNode(node));
-              await expect(handler.getVisibilityStatus(node)).to.eventually.include(
-                { state: "hidden" },
-                `element node ${JSON.stringify(node.key.instanceKeys[0])}, grouping by ${parentClassName}`,
-              );
-            }),
+          await toVoidPromise(
+            from(children).pipe(
+              mergeMap(async (node) => {
+                assert(HierarchyNode.isInstancesNode(node));
+                await expect(handler.getVisibilityStatus(node)).to.eventually.include(
+                  { state: "hidden" },
+                  `element node ${JSON.stringify(node.key.instanceKeys[0])}, grouping by ${parentClassName}`,
+                );
+              }),
+            ),
           );
         });
       });
 
       it("hiding child node makes grouping node partial", async () => {
         classGroups.forEach(async ({ parent, children }) => {
-          await handler.changeVisibility(children[0], false);
-          await expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "partial" });
+          await toVoidPromise(
+            children.pipe(
+              first(),
+              mergeMap(async (node) => handler.changeVisibility(node, false)),
+              mergeMap(() => expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "partial" })),
+            ),
+          );
         });
       });
     });

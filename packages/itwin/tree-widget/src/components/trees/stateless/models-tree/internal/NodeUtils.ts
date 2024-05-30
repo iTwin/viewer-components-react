@@ -43,5 +43,5 @@ export namespace NodeUtils {
   /**
    * Retrieves category ID from node's extended data.
    */
-  export const getElementCategoryId = (node: Node): Id64String | undefined => node.extendedData?.categoryId;
+  export const getCategoryId = (node: Node): Id64String | undefined => node.extendedData?.categoryId;
 }

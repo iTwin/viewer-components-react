@@ -5,9 +5,9 @@
 
 import type { Observable, OperatorFunction } from "rxjs";
 import {
-  catchError, concat, concatWith, defaultIfEmpty, defer, distinct, EMPTY, first, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce,
-  shareReplay, Subject, toArray,
+  catchError, concat, concatWith, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce, shareReplay, toArray,
 } from "rxjs";
+import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -18,9 +18,9 @@ import { NodeUtils } from "./internal/NodeUtils";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 
+import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./internal/AlwaysAndNeverDrawnElementInfo";
-import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { ModelsTreeQueryHandler as ModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
@@ -119,11 +119,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _queryHandler: ModelsTreeQueryHandler;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
-  private readonly _groupingNodeElementsCache = new Map<
-    string,
-    Observable<undefined | { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>
-  >();
-  private readonly _filteredSubjectIdsChangeSubject = new Subject<void>();
+  private readonly _groupingNodeElementsCache = new Map<string, { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>();
   private _removePresentationHierarchyListener?: () => void;
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
@@ -162,8 +158,8 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   }
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
-    if (HierarchyNode.isGroupingNode(node)) {
-      return this.getElementGroupingNodeDisplayStatus(node);
+    if (HierarchyNode.isClassGroupingNode(node)) {
+      return this.getClassGroupingNodeDisplayStatus(node);
     }
 
     if (!HierarchyNode.isInstancesNode(node)) {
@@ -191,7 +187,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       });
     }
 
-    const categoryId = NodeUtils.getElementCategoryId(node);
+    const categoryId = NodeUtils.getCategoryId(node);
     if (!categoryId) {
       return of(createVisibilityStatus("disabled"));
     }
@@ -327,38 +323,34 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     return ovr ? from(ovr(this.createOverrideProps(props, result))) : result;
   }
 
-  private getElementGroupingNodeDisplayStatus(node: GroupingHierarchyNode): Observable<VisibilityStatus> {
-    const result = this.getGroupedElementIds(node).pipe(
-      mergeMap((group) => {
-        if (!group) {
-          return of(createVisibilityStatus("disabled"));
-        }
+  private getClassGroupingNodeDisplayStatus(node: GroupingHierarchyNode): Observable<VisibilityStatus> {
+    const result = defer(() => {
+      const info = this.getGroupingNodeInfo(node);
 
-        const { modelId, categoryId, elementIds } = group;
-        if (!this._props.viewport.view.viewsModel(modelId)) {
-          return of(createVisibilityStatus("hidden"));
-        }
+      const { modelId, categoryId, elementIds } = info;
+      if (!this._props.viewport.view.viewsModel(modelId)) {
+        return of(createVisibilityStatus("hidden"));
+      }
 
-        return elementIds.pipe(
-          toSet(),
-          mergeMap((ids) => {
-            return this.getVisibilityFromAlwaysAndNeverDrawnElements({
-              elements: ids,
-              defaultStatus: () => {
-                const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-                return createVisibilityStatus(status.state, `groupingNode.${status.state}ThroughCategory`);
-              },
-              tooltips: {
-                allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
-                allElementsInNeverDrawnList: "groupingNode.allElementsHidden",
-                elementsInBothAlwaysAndNeverDrawn: "groupingNode.someElementsAreHidden",
-                noElementsInExclusiveAlwaysDrawnList: "groupingNode.allElementsHidden",
-              },
-            });
-          }),
-        );
-      }),
-    );
+      return elementIds.pipe(
+        toSet(),
+        mergeMap((ids) => {
+          return this.getVisibilityFromAlwaysAndNeverDrawnElements({
+            elements: ids,
+            defaultStatus: () => {
+              const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+              return createVisibilityStatus(status.state, `groupingNode.${status.state}ThroughCategory`);
+            },
+            tooltips: {
+              allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
+              allElementsInNeverDrawnList: "groupingNode.allElementsHidden",
+              elementsInBothAlwaysAndNeverDrawn: "groupingNode.someElementsAreHidden",
+              noElementsInExclusiveAlwaysDrawnList: "groupingNode.allElementsHidden",
+            },
+          });
+        }),
+      );
+    });
 
     const ovr = this._props.overrides?.getElementGroupingNodeDisplayStatus;
     return ovr ? from(ovr(this.createOverrideProps({ node }, result))) : result;
@@ -437,7 +429,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       });
     }
 
-    const categoryId = NodeUtils.getElementCategoryId(node);
+    const categoryId = NodeUtils.getCategoryId(node);
     // istanbul ignore if
     if (!categoryId) {
       // istanbul ignore next
@@ -564,23 +556,20 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
    * @see `changeElementState`
    */
   private changeElementGroupingNodeState(node: GroupingHierarchyNode, on: boolean): Observable<void> {
-    const result = this.getGroupedElementIds(node).pipe(
-      mergeMap((group) => {
-        if (!group) {
-          return EMPTY;
-        }
-        const { modelId, categoryId, elementIds } = group;
-        const viewport = this._props.viewport;
-        return concat(
-          on && !viewport.view.viewsModel(modelId) ? from(viewport.addViewedModels(modelId)) : EMPTY,
-          defer(() => {
-            const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-            const isDisplayedByDefault = categoryVisibility.state === "visible";
-            return from(elementIds).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
-          }),
-        );
-      }),
-    );
+    const result = defer(() => {
+      const info = this.getGroupingNodeInfo(node);
+
+      const { modelId, categoryId, elementIds } = info;
+      const viewport = this._props.viewport;
+      return concat(
+        on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
+        defer(() => {
+          const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+          const isDisplayedByDefault = categoryVisibility.state === "visible";
+          return from(elementIds).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
+        }),
+      );
+    });
 
     const ovr = this._props.overrides?.changeElementGroupingNodeState;
     return ovr ? from(ovr(this.createVoidOverrideProps({ node, on }, result))) : result;
@@ -768,12 +757,16 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     };
   }
 
-  private getGroupedElementIds(node: GroupingHierarchyNode) {
+  private getGroupingNodeInfo(node: GroupingHierarchyNode) {
     const cacheKey = JSON.stringify(node.key);
-    let obs = this._groupingNodeElementsCache.get(cacheKey);
-    if (obs) {
-      return obs;
+    let res = this._groupingNodeElementsCache.get(cacheKey);
+    if (res) {
+      return res;
     }
+
+    const modelId = NodeUtils.getModelId(node);
+    const categoryId = NodeUtils.getCategoryId(node);
+    assert(!!modelId && !!categoryId);
 
     const ids = node.groupedInstanceKeys.map((key) => key.id);
     const elementIds = from(ids).pipe(
@@ -784,16 +777,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       ),
       shareReplay(),
     );
+    res = { modelId, categoryId, elementIds };
 
-    obs = elementIds.pipe(
-      defaultIfEmpty(undefined),
-      first(),
-      mergeMap((id) => (id ? this._queryHandler.queryElementInfo({ elementIds: id }) : of(undefined))),
-      map((info) => info && { modelId: info.modelId, categoryId: info.categoryId, elementIds }),
-      shareReplay(),
-    );
-    this._groupingNodeElementsCache.set(cacheKey, obs);
-    return obs;
+    this._groupingNodeElementsCache.set(cacheKey, res);
+    return res;
   }
 }
 

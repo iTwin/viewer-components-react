@@ -15,12 +15,12 @@ describe("Node utils", () => {
     expect(NodeUtils.getModelId(node)).to.eq("0x1");
   });
 
-  it("getElementCategoryId", () => {
+  it("getCategoryId", () => {
     const node = {
       extendedData: {},
     };
-    expect(NodeUtils.getElementCategoryId(node)).to.be.undefined;
+    expect(NodeUtils.getCategoryId(node)).to.be.undefined;
     node.extendedData = { categoryId: "0x1" };
-    expect(NodeUtils.getElementCategoryId(node)).to.eq("0x1");
+    expect(NodeUtils.getCategoryId(node)).to.eq("0x1");
   });
 });
