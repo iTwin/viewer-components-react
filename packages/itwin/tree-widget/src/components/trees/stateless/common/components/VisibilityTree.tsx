@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
@@ -14,6 +14,7 @@ import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility";
+import { useIModelChangeListener } from "../UseIModelChangeListener";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
@@ -92,7 +93,7 @@ function VisibilityTreeImpl({
   const {
     rootNodes,
     isLoading,
-    reloadTree: _reloadTree,
+    reloadTree,
     selectNodes,
     setFormatter: _setFormatter,
     expandNode,
@@ -107,6 +108,8 @@ function VisibilityTreeImpl({
     onPerformanceMeasured,
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
+
+  useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
   const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
