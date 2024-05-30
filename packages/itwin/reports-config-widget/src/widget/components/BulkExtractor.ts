@@ -144,17 +144,14 @@ export class BulkExtractor {
   }
 
   public async runReportExtractions(reportIds: string[]): Promise<void> {
-    const reportIModelIds = new Map<string, string[]>();
     const extractionDetailsIModelIdMap = new Map<string, ExtractionMapping[]>();
     for (const reportId of reportIds) {
       const reportExtractionDetails = await this.fetchReportExtractionRequestDetails(reportId);
       const reportIModels = reportExtractionDetails.map((reportExtractionDetail) => reportExtractionDetail.iModelId);
-      reportIModelIds.set(reportId, reportIModels);
       this._reportIModels.set(reportId, reportIModels);
       reportExtractionDetails.forEach((extractionDetail) => {
-        extractionDetailsIModelIdMap.set(
-          extractionDetail.iModelId,
-          extractionDetailsIModelIdMap.get(extractionDetail.iModelId)?.concat(extractionDetail.mappings) || extractionDetail.mappings);
+        const existingMappings = extractionDetailsIModelIdMap.get(extractionDetail.iModelId) || [];
+        extractionDetailsIModelIdMap.set(extractionDetail.iModelId, [...existingMappings, ...extractionDetail.mappings]);
       });
     }
 
@@ -193,14 +190,14 @@ export class BulkExtractor {
   }
 
   public async runIModelExtractions(extractionRequestsDetails: ExtractionRequestDetails[]): Promise<void> {
-    for (const extractionRequestDetails of extractionRequestsDetails) {
-      const run = await this.runExtraction(extractionRequestDetails);
+    await Promise.all(extractionRequestsDetails.map(async (details) => {
+      const run = await this.runExtraction(details);
       if (run) {
-        this._iModelStates.set(extractionRequestDetails.iModelId, ExtractionState.Queued);
-        this._iModelRun.set(extractionRequestDetails.iModelId, run);
+        this._iModelStates.set(details.iModelId, ExtractionState.Queued);
+        this._iModelRun.set(details.iModelId, run);
       }
-      this.checkRunning();
-    }
+    }));
+    this.checkRunning();
   }
 
   private async fetchReportExtractionRequestDetails(reportId: string): Promise<ExtractionRequestDetails[]> {

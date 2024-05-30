@@ -23,7 +23,6 @@ import type {
   MappingContainer,
   MappingsClient,
   Report,
-
   ReportMappingCollection} from "@itwin/insights-client";
 import {
   ExtractionClient,
