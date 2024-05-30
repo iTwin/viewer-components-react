@@ -26,8 +26,8 @@
     "prettier:fix": "prettier --write ."
   },
   "devDependencies": {
-    "beachball": "^2.39.0",
-    "lage": "^2.7.11",
-    "prettier": "^3.2.4"
+    "beachball": "^2.43.1",
+    "lage": "^2.7.16",
+    "prettier": "^3.2.5"
   }
 }
