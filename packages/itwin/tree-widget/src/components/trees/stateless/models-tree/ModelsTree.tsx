@@ -10,9 +10,9 @@ import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
+import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 import { createModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
-import { SubjectModelIdsCache } from "./SubjectModelIdsCache";
 
 import type { ModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
@@ -82,7 +82,7 @@ export function StatelessModelsTree({
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
       return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
-    }
+    };
   }, [filter, getSubjectModelIdsCache, reportUsage]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
@@ -141,16 +141,17 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
 }
 
 function useSubjectModelIdsCache() {
-  const cacheRef = useRef<SubjectModelIdsCache>();
+  const cacheRef = useRef<ModelsTreeIdsCache>();
   const prevImodelAccessRef = useRef<LimitingECSqlQueryExecutor>();
 
   const getSubjectModelIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
     if (prevImodelAccessRef.current !== imodelAccess) {
+      cacheRef.current?.dispose();
       cacheRef.current = undefined;
       prevImodelAccessRef.current = imodelAccess;
     }
     if (!cacheRef.current) {
-      cacheRef.current = new SubjectModelIdsCache(imodelAccess);
+      cacheRef.current = new ModelsTreeIdsCache(imodelAccess);
     }
     return cacheRef.current;
   }, []);

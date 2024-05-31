@@ -22,22 +22,22 @@ import type {
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
-import type { SubjectModelIdsCache } from "./SubjectModelIdsCache";
+import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: SubjectModelIdsCache;
+  subjectModelIdsCache: ModelsTreeIdsCache;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: SubjectModelIdsCache;
+  subjectModelIdsCache: ModelsTreeIdsCache;
   keys: InstanceKey[];
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: SubjectModelIdsCache;
+  subjectModelIdsCache: ModelsTreeIdsCache;
   label: string;
 }
 
@@ -52,7 +52,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
-  private _subjectModelIdsCache: SubjectModelIdsCache;
+  private _subjectModelIdsCache: ModelsTreeIdsCache;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 

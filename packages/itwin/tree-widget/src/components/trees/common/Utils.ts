@@ -9,6 +9,7 @@ import { TREE_NODE_LABEL_RENDERER, TreeNodeLabelRenderer } from "./TreeNodeRende
 
 import type { DelayLoadedTreeNodeItem, IPropertyValueRenderer } from "@itwin/components-react";
 import type { Node } from "@itwin/presentation-common";
+import type { IDisposable } from "@itwin/core-bentley";
 
 /** @internal */
 export function combineTreeNodeItemCustomizations(customizations: Array<(item: Partial<DelayLoadedTreeNodeItem>, node: Partial<Node>) => void>) {
@@ -51,4 +52,9 @@ export function registerRenderers() {
       PropertyValueRendererManager.defaultManager.unregisterRenderer(name);
     }
   };
+}
+
+export interface CacheLike extends IDisposable {
+  /** Reset cache to default state (e.g. resubscribe to observables) */
+  invalidate(): void;
 }

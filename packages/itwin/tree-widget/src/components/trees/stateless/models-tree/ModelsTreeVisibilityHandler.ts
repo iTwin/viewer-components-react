@@ -5,23 +5,23 @@
 
 import type { Observable, OperatorFunction } from "rxjs";
 import {
-  catchError, concat, concatWith, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce, shareReplay, toArray,
+  catchError, concat, concatAll, concatWith, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce,
+  shareReplay,
 } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { Presentation } from "@itwin/presentation-frontend";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { reduceWhile, toSet, toVoidPromise } from "../../common/Rxjs";
 import { AlwaysAndNeverDrawnElementInfo } from "./internal/AlwaysAndNeverDrawnElementInfo";
+import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode";
-import { createModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import { createVisibilityStatus } from "./internal/Tooltip";
 import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 
-import type { Id64Arg, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./internal/AlwaysAndNeverDrawnElementInfo";
-import type { ModelsTreeQueryHandler as ModelsTreeQueryHandler } from "./internal/ModelsTreeQueryHandler";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
@@ -78,13 +78,13 @@ type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult 
  * Each callback will be provided original implementation and reference to a [[HierarchyVisibilityHandler]].
  */
 interface VisibilityHandlerOverrides {
-  getSubjectNodeVisibility?: OverridableMethod<(props: { node: HierarchyNode; ids: Id64Set }) => Promise<VisibilityStatus>>;
+  getSubjectNodeVisibility?: OverridableMethod<(props: { node: HierarchyNode; ids: Id64Array }) => Promise<VisibilityStatus>>;
   getModelDisplayStatus?: OverridableMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
   getCategoryDisplayStatus?: OverridableMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
   getElementGroupingNodeDisplayStatus?: OverridableMethod<(props: { node: GroupingHierarchyNode }) => Promise<VisibilityStatus>>;
   getElementDisplayStatus?: OverridableMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
 
-  changeSubjectNodeState?: OverridableMethod<(props: { node: HierarchyNode; ids: Id64Set; on: boolean }) => Promise<void>>;
+  changeSubjectNodeState?: OverridableMethod<(props: { node: HierarchyNode; ids: Id64Array; on: boolean }) => Promise<void>>;
   changeModelState?: OverridableMethod<(props: ChangeModelStateProps) => Promise<void>>;
   changeCategoryState?: OverridableMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
   changeElementGroupingNodeState?: OverridableMethod<(props: { node: GroupingHierarchyNode; on: boolean }) => Promise<void>>;
@@ -98,6 +98,7 @@ interface VisibilityHandlerOverrides {
 export interface ModelsTreeVisibilityHandlerProps {
   viewport: Viewport;
   overrides?: VisibilityHandlerOverrides;
+  idsCache?: ModelsTreeIdsCache;
 }
 
 /**
@@ -117,24 +118,15 @@ export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHan
 
 class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
-  private readonly _queryHandler: ModelsTreeQueryHandler;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _groupingNodeElementsCache = new Map<string, { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>();
-  private _removePresentationHierarchyListener?: () => void;
+  private readonly _idsCache: ModelsTreeIdsCache;
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
-    this._queryHandler = createModelsTreeQueryHandler(this._props.viewport.iModel);
-    this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport, this._queryHandler);
-    // eslint-disable-next-line @itwin/no-internal
-    this._removePresentationHierarchyListener = Presentation.presentation.onIModelHierarchyChanged.addListener(
-      // istanbul ignore next
-      () => {
-        this._queryHandler.invalidateCache();
-        this._alwaysAndNeverDrawnElements.reset();
-        this._groupingNodeElementsCache.clear();
-      },
-    );
+    this._idsCache =
+      this._props.idsCache ?? new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(this._props.viewport.iModel), "unbounded"));
+    this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
   }
 
   // istanbul ignore next
@@ -154,7 +146,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   public dispose(): void {
     this._eventListener.dispose();
     this._alwaysAndNeverDrawnElements.dispose();
-    this._removePresentationHierarchyListener?.();
+    this._idsCache.dispose();
   }
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
@@ -168,7 +160,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
     if (ModelsTreeNode.isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
-      return this.getSubjectNodeVisibilityStatus(node, from(node.key.instanceKeys).pipe(map((key) => key.id)));
+      return this.getSubjectNodeVisibilityStatus(
+        node,
+        node.key.instanceKeys.map((key) => key.id),
+      );
     }
 
     if (ModelsTreeNode.isModelNode(node)) {
@@ -200,14 +195,14 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
   }
 
-  private getSubjectNodeVisibilityStatus(node: HierarchyNode, subjectIds: Observable<Id64String>): Observable<VisibilityStatus> {
+  private getSubjectNodeVisibilityStatus(node: HierarchyNode, subjectIds: Id64Array): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.isSpatialView()) {
         return of(createVisibilityStatus("disabled", "subject.nonSpatialView"));
       }
 
-      return subjectIds.pipe(
-        mergeMap((subjectId) => this._queryHandler.querySubjectModels(subjectId)),
+      return from(this._idsCache.getSubjectModelIds(subjectIds)).pipe(
+        concatAll(),
         distinct(),
         mergeMap((modelId) => this.getModelVisibilityStatus(modelId)),
         map((x) => x.state),
@@ -221,12 +216,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
 
     const ovr = this._props.overrides?.getSubjectNodeVisibility;
-    return ovr
-      ? subjectIds.pipe(
-          toSet(),
-          mergeMap(async (ids) => ovr(this.createOverrideProps({ node, ids }, result))),
-        )
-      : result;
+    return ovr ? from(ovr(this.createOverrideProps({ node, ids: subjectIds }, result))) : result;
   }
 
   private getModelVisibilityStatus(modelId: Id64String): Observable<VisibilityStatus> {
@@ -240,7 +230,8 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         return of(createVisibilityStatus("hidden", "model.hiddenThroughModelSelector"));
       }
 
-      return this._queryHandler.queryModelCategories(modelId).pipe(
+      return from(this._idsCache.getModelCategories(modelId)).pipe(
+        concatAll(),
         map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
         map((x) => x.state),
         getVisibilityFromTreeNodeChildren,
@@ -409,7 +400,11 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     }
 
     if (ModelsTreeNode.isSubjectNode(node)) {
-      return this.changeSubjectNodeState(from(node.key.instanceKeys).pipe(map((key) => key.id)), node, on);
+      return this.changeSubjectNodeState(
+        node.key.instanceKeys.map((key) => key.id),
+        node,
+        on,
+      );
     }
 
     if (ModelsTreeNode.isModelNode(node)) {
@@ -445,27 +440,18 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
   }
 
-  private changeSubjectNodeState(ids: Observable<Id64String>, node: HierarchyNode, on: boolean): Observable<void> {
+  private changeSubjectNodeState(ids: Id64Array, node: HierarchyNode, on: boolean): Observable<void> {
     const result = defer(() => {
       // istanbul ignore if
       if (!this._props.viewport.view.isSpatialView()) {
         return EMPTY;
       }
 
-      return ids.pipe(
-        mergeMap((id) => this._queryHandler.querySubjectModels(id)),
-        toSet(),
-        mergeMap((modelIds) => this.changeModelState({ ids: modelIds, on })),
-      );
+      return from(this._idsCache.getSubjectModelIds(ids)).pipe(mergeMap((modelIds) => this.changeModelState({ ids: modelIds, on })));
     });
 
     const ovr = this._props.overrides?.changeSubjectNodeState;
-    return ovr
-      ? ids.pipe(
-          toSet(),
-          mergeMap(async (idSet) => ovr(this.createVoidOverrideProps({ ids: idSet, node, on }, result))),
-        )
-      : result;
+    return ovr ? from(ovr(this.createVoidOverrideProps({ ids, node, on }, result))) : result;
   }
 
   private changeModelState(props: ChangeModelStateProps): Observable<void> {
@@ -489,7 +475,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }),
         (typeof ids === "string" ? of(ids) : from(ids)).pipe(
           mergeMap((modelId) => {
-            return this._queryHandler.queryModelCategories(modelId).pipe(mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on })));
+            return from(this._idsCache.getModelCategories(modelId)).pipe(
+              concatAll(),
+              mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on })),
+            );
           }),
         ),
       );
@@ -501,7 +490,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private showModelWithoutAnyCategoriesOrElements(modelId: Id64String) {
     const viewport = this._props.viewport;
     return forkJoin({
-      categories: this._queryHandler.queryModelCategories(modelId).pipe(toArray()),
+      categories: this._idsCache.getModelCategories(modelId),
       alwaysDrawnElements: this.getAlwaysDrawnElements({ modelId }),
     }).pipe(
       mergeMap(async ({ categories, alwaysDrawnElements }) => {
@@ -512,7 +501,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         categories.forEach((categoryId) => {
           this.changeCategoryStateInViewportAccordingToModelVisibility(modelId, categoryId, false);
         });
-        return viewport.addViewedModels(modelId);
+        await viewport.addViewedModels(modelId);
       }),
     );
   }
@@ -589,7 +578,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return of(elementId).pipe(
-            concatWith(hasChildren ? from(this._queryHandler.queryElements({ rootElementIds: props.elementId })) : EMPTY),
+            concatWith(hasChildren ? from(this.getElementRecursiveChildren([props.elementId])) : EMPTY),
             this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }),
           );
         }),
@@ -695,8 +684,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       );
     }
 
+    const { modelId, categoryId } = props.queryProps;
+    const totalCount = categoryId ? this._idsCache.getCategoryElementsCount(modelId, categoryId) : this._idsCache.getModelElementCount(modelId);
     return forkJoin({
-      totalCount: this._queryHandler.queryElementsCount(props.queryProps),
+      totalCount,
       alwaysDrawn: this.getAlwaysDrawnElements(props.queryProps),
       neverDrawn: this.getNeverDrawnElements(props.queryProps),
     }).pipe(
@@ -769,18 +760,35 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     assert(!!modelId && !!categoryId);
 
     const ids = node.groupedInstanceKeys.map((key) => key.id);
-    const elementIds = from(ids).pipe(
-      mergeWith(
-        this._queryHandler.queryElements({
-          rootElementIds: new Set(ids),
-        }),
-      ),
-      shareReplay(),
-    );
+    const elementIds = from(ids).pipe(mergeWith(this.getElementRecursiveChildren(ids)), shareReplay());
     res = { modelId, categoryId, elementIds };
 
     this._groupingNodeElementsCache.set(cacheKey, res);
     return res;
+  }
+
+  private getElementRecursiveChildren(parentIds: Id64String | Id64Array): Observable<Id64String> {
+    const executor = createECSqlQueryExecutor(this._props.viewport.iModel);
+    const reader = executor.createQueryReader({
+      ctes: [
+        `
+        ChildElements(id) AS (
+          SELECT ECInstanceId id
+          FROM bis.GeometricElement3d
+          WHERE ${typeof parentIds === "string" ? "Parent.Id = ?" : "InVirtualSet(?, Parent.Id)"}
+
+          UNION ALL
+
+          SELECT c.ECInstanceId id
+          FROM bis.GeometricElement3d c
+          JOIN ChildElements p ON c.Parent.Id = p.id
+        )
+        `,
+      ],
+      ecsql: "SELECT * FROM ChildElements",
+      bindings: [typeof parentIds === "string" ? { type: "id", value: parentIds } : { type: "idset", value: parentIds }],
+    });
+    return from(reader).pipe(map((row) => row.id));
   }
 }
 

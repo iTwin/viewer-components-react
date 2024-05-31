@@ -3,8 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable } from "rxjs";
-import { concatAll, concatMap, concatWith, count, distinct, EMPTY, filter, find, from, map, mergeMap, of } from "rxjs";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
@@ -12,12 +10,11 @@ import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
 import { Descriptor, PropertiesField, StandardNodeTypes } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType } from "@itwin/presentation-components";
-import { toSet } from "../../components/trees/common/Rxjs";
 import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNodeRenderer";
 
-import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
+import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
+import type { Id64String } from "@itwin/core-bentley";
 import type {
   CategoryDescription,
   ClassInfo,
@@ -35,92 +32,7 @@ import type {
   TypeDescription,
 } from "@itwin/presentation-common";
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { ModelsTreeQueryHandler } from "../../components/trees/stateless/models-tree/internal/ModelsTreeQueryHandler";
-import type { Viewport, ViewState } from "@itwin/core-frontend";
-import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-interface SubjectModelIdsMockProps {
-  subjectsHierarchy?: Map<Id64String, Id64String[]>;
-  subjectModels?: Map<Id64String, Id64String[]>;
-  modelCategories?: Map<Id64String, Id64Array>;
-  categoryElements?: Map<Id64String, Id64Array>;
-  elementChildren?: Map<Id64String, Array<Id64String>>;
-}
-
-export function createFakeModelsTreeQueryHandler(props?: SubjectModelIdsMockProps): ModelsTreeQueryHandler {
-  const queryElements = sinon.fake(
-    ({
-      modelId,
-      categoryId,
-      elementIds,
-      rootElementIds,
-    }: {
-      modelId?: string;
-      categoryId?: string;
-      elementIds?: Id64Set;
-      rootElementIds?: Id64String | Id64Set;
-    }): Observable<string> => {
-      const categoryObs = from(props?.modelCategories ?? []).pipe(
-        filter(([id]) => !modelId || id === modelId),
-        concatMap(([_, categoryIds]) => categoryIds),
-        concatWith(props?.categoryElements?.keys() ?? EMPTY),
-        toSet(),
-        concatAll(),
-        filter((id) => !categoryId || id === categoryId),
-      );
-
-      return (
-        rootElementIds
-          ? (typeof rootElementIds === "string" ? of(rootElementIds) : from(rootElementIds)).pipe(mergeMap((id) => props?.elementChildren?.get(id) ?? []))
-          : categoryObs.pipe(concatMap((id) => props?.categoryElements?.get(id) ?? []))
-      ).pipe(
-        filter((id) => !elementIds || elementIds.has(id)),
-        distinct(),
-      );
-    },
-  );
-
-  const res: ModelsTreeQueryHandler = {
-    invalidateCache: sinon.fake(),
-    querySubjectModels: sinon.fake((subjectId) => {
-      return of(subjectId).pipe(
-        concatWith(from(props?.subjectsHierarchy?.get(subjectId) ?? [])),
-        concatMap((id) => props?.subjectModels?.get(id) ?? []),
-      );
-    }),
-    queryModelCategories: sinon.fake((x) => {
-      return from(props?.modelCategories?.get(x) ?? []);
-    }),
-    queryElements,
-    queryElementInfo: sinon.fake(({ elementIds }) => {
-      return from(elementIds).pipe(
-        mergeMap((elementId) => {
-          return from(props?.categoryElements ?? []).pipe(
-            find(([_, elements]) => elements.includes(elementId)),
-            mergeMap((categoryEntry) => {
-              const createDefaultElementInfo = () => ({
-                elementId,
-                modelId: "",
-                categoryId: "",
-              });
-              if (!categoryEntry) {
-                return of(createDefaultElementInfo());
-              }
-              const categoryId = categoryEntry[0];
-              return from(props?.modelCategories ?? []).pipe(
-                find(([_, categories]) => categories.includes(categoryId)),
-                map((modelEntry) => (modelEntry ? { elementId, modelId: modelEntry[0], categoryId } : createDefaultElementInfo())),
-              );
-            }),
-          );
-        }),
-      );
-    }),
-    queryElementsCount: sinon.fake((queryProps) => {
-      return queryElements(queryProps).pipe(count());
-    }),
-  };
-  return res;
-}
+import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
 
 export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: labelValue ?? "Node Label" });
@@ -353,10 +265,22 @@ function createPropertyRecord(value?: PropertyValue, description?: Partial<Prope
   return new PropertyRecord(propertyValue, propertyDescription);
 }
 
+export function createIModelMock(queryHandler?: (query: string) => any[] | Promise<any[]>) {
+  return {
+    createQueryReader: sinon.fake(async function* (query: string): AsyncIterableIterator<any> {
+      const result = (await queryHandler?.(query)) ?? [];
+      for (const item of result) {
+        yield { ...item, toRow: () => item, toArray: () => Object.values(item) };
+      }
+    }),
+  } as unknown as IModelConnection;
+}
+
 export function createFakeSinonViewport(
   props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
     view?: Partial<ViewState>;
     perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
+    queryHandler?: (query: string) => any[] | Promise<any[]>;
   },
 ): Viewport {
   let alwaysDrawn = props?.alwaysDrawn;
@@ -419,118 +343,8 @@ export function createFakeSinonViewport(
     }),
     perModelCategoryVisibility: perModelCategoryVisibility as PerModelCategoryVisibility.Overrides,
     view: view as ViewState,
+    iModel: createIModelMock(props?.queryHandler),
   };
 
   return result as Viewport;
-}
-
-export interface StubbedFactoryFunction<T> {
-  stub(customImplementation?: () => T): sinon.SinonSpy<[], T>;
-  reset(): void;
-}
-
-/**
- * Replaces a function in a module with a custom stub.
- * This is helpful for scenarios when there's no way to tell if an object factory has been called
- * or you want to override the behavior of the object without exposing it in the API.
- */
-export function stubFactoryFunction<T>(modulePath: string, functionName: string, defaultImplementation: () => T): StubbedFactoryFunction<T> {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const _module = require(modulePath);
-  const originalFunc = _module[functionName];
-  return {
-    stub(impl?: () => T) {
-      return (_module[functionName] = sinon.fake(impl ?? defaultImplementation));
-    },
-    reset() {
-      _module[functionName] = originalFunc;
-    },
-  };
-}
-
-export function createSubjectHierarchyNode(...ids: Id64String[]): NonGroupingHierarchyNode {
-  return {
-    key: {
-      type: "instances",
-      instanceKeys: ids.map((id) => ({ className: "Bis:Subject", id })),
-    },
-    children: false,
-    label: "",
-    parentKeys: [],
-    extendedData: {
-      isSubject: true,
-    },
-  };
-}
-
-export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
-  return {
-    key: {
-      type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
-    },
-    children: !!hasChildren,
-    label: "",
-    parentKeys: [],
-    extendedData: {
-      isModel: true,
-      modelId: modelId ?? "0x1",
-    },
-  };
-}
-
-export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
-  return {
-    key: {
-      type: "instances",
-      instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId ?? "" }],
-    },
-    children: !!hasChildren,
-    label: "",
-    parentKeys: [],
-    extendedData: {
-      isCategory: true,
-      modelId: modelId ?? "0x1",
-      categoryId: categoryId ?? "0x2",
-    },
-  };
-}
-
-export function createElementHierarchyNode(props: {
-  modelId: Id64String | undefined;
-  categoryId: Id64String | undefined;
-  hasChildren?: boolean;
-  elementId?: Id64String;
-}): NonGroupingHierarchyNode {
-  return {
-    key: {
-      type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
-    },
-    children: !!props.hasChildren,
-    label: "",
-    parentKeys: [],
-    extendedData: {
-      modelId: props.modelId,
-      categoryId: props.categoryId,
-    },
-  };
-}
-
-export function createClassGroupingHierarchyNode(props: {
-  modelId: Id64String | undefined;
-  categoryId: Id64String | undefined;
-  elements: Id64Array;
-}): GroupingHierarchyNode {
-  return {
-    key: {
-      type: "class-grouping",
-      className: "",
-    },
-    children: !!props?.elements?.length,
-    groupedInstanceKeys: props?.elements ? props.elements.map((id) => ({ className: "Bis:Element", id })) : [],
-    label: "",
-    parentKeys: [],
-    extendedData: props,
-  };
 }
