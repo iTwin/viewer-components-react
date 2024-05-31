@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { randomUUID } from "crypto";
 import fs from "fs";
+import path from "path";
 import { EMPTY, expand, filter, first, from, mergeMap, shareReplay } from "rxjs";
 import sinon from "sinon";
 import { assert } from "@itwin/core-bentley";
@@ -16,7 +18,9 @@ import { SchemaContext, SchemaJsonLocater } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import {
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
 import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
 import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { createVisibilityStatus } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
@@ -41,7 +45,6 @@ import type {
 import type { Visibility } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 import type { IModelDb } from "@itwin/core-backend";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -1601,7 +1604,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
     });
   });
 
-  describe("#integration", () => {
+  describe.only("#integration", () => {
     let iModelPath: string;
     let iModel: IModelDb;
     let iModelConnection: IModelConnection;
@@ -1612,12 +1615,25 @@ describe("HierarchyBasedVisibilityHandler", () => {
     const elementHierarchy = new Map<Id64String, Set<Id64String>>();
 
     before(async () => {
-      await initializePresentationTesting();
+      await initializePresentationTesting({
+        backendProps: {
+          caching: {
+            hierarchies: {
+              mode: HierarchyCacheMode.Memory,
+            },
+          },
+        },
+        testOutputDir: path.join(__dirname, "output"),
+        backendHostProps: {
+          cacheDir: path.join(__dirname, "cache"),
+        },
+      });
 
-      if (!fs.existsSync("temp")) {
-        fs.mkdirSync("temp");
+      const tempFolder = path.join(__dirname, "temp");
+      if (!fs.existsSync(tempFolder)) {
+        fs.mkdirSync(tempFolder);
       }
-      iModelPath = `temp/${new Date().toISOString()}.bim`;
+      iModelPath = path.join(tempFolder, `${randomUUID()}.bim`);
 
       iModel = await createLocalIModel("ModelsTreeTest", iModelPath, async (builder) => {
         const schemaName = "VisibilityHandlerIntegrationTests";
