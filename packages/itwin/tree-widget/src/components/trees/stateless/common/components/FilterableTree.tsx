@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "./FilterableTree.scss";
 import { useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -110,28 +111,29 @@ function FilterableTreeRenderer({
   const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
 
-  const renderContent = () => {
-    if (rootNodes === undefined) {
-      return (
-        <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
-          <Delayed show={true}>
-            <ProgressRadial size="large" />
-          </Delayed>
-        </Flex>
-      );
-    }
-
-    if ((rootNodes.length === 0 && !isLoading) || (rootNodes.length === 1 && !isPresentationHierarchyNode(rootNodes[0]) && rootNodes[0].type === "Unknown")) {
-      return (
-        <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
-          {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("stateless.dataIsNotAvailable")}</Text>}
-        </Flex>
-      );
-    }
-
+  if (rootNodes === undefined) {
     return (
-      <Flex.Item alignSelf="flex-start" style={{ width: "100%", overflow: "auto" }}>
+      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
+        <Delayed show={true}>
+          <ProgressRadial size="large" />
+        </Delayed>
+      </Flex>
+    );
+  }
+
+  if ((rootNodes.length === 0 && !isLoading) || (rootNodes.length === 1 && !isPresentationHierarchyNode(rootNodes[0]) && rootNodes[0].type === "Unknown")) {
+    return (
+      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
+        {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("stateless.dataIsNotAvailable")}</Text>}
+      </Flex>
+    );
+  }
+
+  return (
+    <div style={{ position: "relative", height, overflow: "hidden" }}>
+      <div style={{ overflow: "auto", height: "100%" }}>
         <TreeRenderer
+          className="tw-filterable-tree-renderer"
           rootNodes={rootNodes}
           {...treeProps}
           expandNode={reportingExpandNode}
@@ -142,17 +144,9 @@ function FilterableTreeRenderer({
           selectionMode={selectionMode}
           localizedStrings={localizedStrings}
         />
-      </Flex.Item>
-    );
-  };
-
-  return (
-    <div style={{ position: "relative", height, overflow: "hidden" }}>
-      <div style={{ overflow: "auto", height: "100%" }}>
-        {renderContent()}
         {filteringDialog}
       </div>
-      <Delayed show={isLoading && !!rootNodes}>
+      <Delayed show={isLoading}>
         <ProgressOverlay />
       </Delayed>
     </div>
