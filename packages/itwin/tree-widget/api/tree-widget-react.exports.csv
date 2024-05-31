@@ -13,7 +13,6 @@ public;CategoryVisibilityHandler
 public;CategoryVisibilityHandlerParams
 public;ClassGroupingOption
 public;ContextMenuItemProps
-internal;createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): ModelsTreeVisibilityHandler
 public;createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element
 public;createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element
 public;DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): React.JSX.Element
@@ -46,8 +45,6 @@ public;ModelsTreeHierarchyConfiguration
 public;ModelsTreeNodeType
 public;ModelsTreeProps 
 public;ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean
-internal;ModelsTreeVisibilityHandler = HierarchyVisibilityHandler
-internal;ModelsTreeVisibilityHandlerProps
 public;ModelsVisibilityHandler 
 public;ModelsVisibilityHandlerProps
 public;ModelTreeComponentProps 

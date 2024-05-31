@@ -10,18 +10,14 @@ import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react
 import { BeEvent } from '@itwin/core-bentley';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
-import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import { HighlightableTreeProps } from '@itwin/components-react';
-import type { Id64Arg } from '@itwin/core-bentley';
-import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IFilteredPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IPropertyValueRenderer } from '@itwin/components-react';
-import type { LimitingECSqlQueryExecutor } from '@itwin/presentation-hierarchies';
 import type { Localization } from '@itwin/core-common';
 import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
@@ -176,9 +172,6 @@ export interface ContextMenuItemProps {
     // (undocumented)
     node: TreeModelNode;
 }
-
-// @internal
-export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): ModelsTreeVisibilityHandler;
 
 // @public
 export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
@@ -377,19 +370,6 @@ export interface ModelsTreeProps extends BaseFilterableTreeProps {
 
 // @public
 export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
-
-// @internal
-export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
-
-// @internal
-export interface ModelsTreeVisibilityHandlerProps {
-    // (undocumented)
-    idsCache?: ModelsTreeIdsCache;
-    // (undocumented)
-    overrides?: VisibilityHandlerOverrides;
-    // (undocumented)
-    viewport: Viewport;
-}
 
 // @public
 export class ModelsVisibilityHandler implements IVisibilityHandler {

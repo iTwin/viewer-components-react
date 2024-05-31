@@ -1604,7 +1604,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
     });
   });
 
-  describe.only("#integration", () => {
+  describe("#integration", () => {
     let iModelPath: string;
     let iModel: IModelDb;
     let iModelConnection: IModelConnection;
