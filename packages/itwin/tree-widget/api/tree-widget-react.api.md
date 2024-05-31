@@ -12,7 +12,6 @@ import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
-import { HierarchyNode as HierarchyNode_2 } from '@itwin/presentation-hierarchies';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
