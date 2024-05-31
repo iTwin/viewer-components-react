@@ -17,7 +17,7 @@ import { createModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler
 
 import type { ModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import type { IModelConnection , Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
@@ -59,6 +59,7 @@ export function StatelessModelsTree({
   const visibilityHandlerFactory = useCallback((): ModelsTreeVisibilityHandler => {
     return createModelsTreeVisibilityHandler({ viewport: activeView });
   }, [activeView]);
+
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
@@ -72,7 +73,7 @@ export function StatelessModelsTree({
       return undefined;
     }
     return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
+      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, idsCache: getSubjectModelIdsCache(imodelAccess) });
   }, [focusedInstancesKeys, getSubjectModelIdsCache]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
@@ -81,7 +82,7 @@ export function StatelessModelsTree({
     }
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
-      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
+      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, idsCache: getSubjectModelIdsCache(imodelAccess) });
     };
   }, [filter, getSubjectModelIdsCache, reportUsage]);
 

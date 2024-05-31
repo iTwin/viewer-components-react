@@ -18,7 +18,7 @@ describe("ModelsTreeIdsCache", () => {
 
   // TODO: Merge with other tests if they will be added
 
-  it.only("caches model element count", async () => {
+  it("caches model element count", async () => {
     const modelId = "0x1";
     const categoryId = "0x2";
     const elementIds = ["0x10", "0x20", "0x30"];

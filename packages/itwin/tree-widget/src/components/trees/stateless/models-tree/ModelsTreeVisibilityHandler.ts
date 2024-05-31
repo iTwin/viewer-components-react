@@ -5,8 +5,7 @@
 
 import type { Observable, OperatorFunction } from "rxjs";
 import {
-  catchError, concat, concatAll, concatWith, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce,
-  shareReplay,
+  concat, concatAll, concatWith, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce, shareReplay,
 } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
@@ -78,13 +77,13 @@ type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult 
  * Each callback will be provided original implementation and reference to a [[HierarchyVisibilityHandler]].
  */
 interface VisibilityHandlerOverrides {
-  getSubjectNodeVisibility?: OverridableMethod<(props: { node: HierarchyNode; ids: Id64Array }) => Promise<VisibilityStatus>>;
+  getSubjectNodeVisibility?: OverridableMethod<(props: { ids: Id64Array }) => Promise<VisibilityStatus>>;
   getModelDisplayStatus?: OverridableMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
   getCategoryDisplayStatus?: OverridableMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
   getElementGroupingNodeDisplayStatus?: OverridableMethod<(props: { node: GroupingHierarchyNode }) => Promise<VisibilityStatus>>;
   getElementDisplayStatus?: OverridableMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
 
-  changeSubjectNodeState?: OverridableMethod<(props: { node: HierarchyNode; ids: Id64Array; on: boolean }) => Promise<void>>;
+  changeSubjectNodeState?: OverridableMethod<(props: { ids: Id64Array; on: boolean }) => Promise<void>>;
   changeModelState?: OverridableMethod<(props: ChangeModelStateProps) => Promise<void>>;
   changeCategoryState?: OverridableMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
   changeElementGroupingNodeState?: OverridableMethod<(props: { node: GroupingHierarchyNode; on: boolean }) => Promise<void>>;
@@ -160,10 +159,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
     if (ModelsTreeNode.isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
-      return this.getSubjectNodeVisibilityStatus(
-        node,
-        node.key.instanceKeys.map((key) => key.id),
-      );
+      return this.getSubjectNodeVisibilityStatus(node.key.instanceKeys.map((key) => key.id));
     }
 
     if (ModelsTreeNode.isModelNode(node)) {
@@ -195,7 +191,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
   }
 
-  private getSubjectNodeVisibilityStatus(node: HierarchyNode, subjectIds: Id64Array): Observable<VisibilityStatus> {
+  private getSubjectNodeVisibilityStatus(subjectIds: Id64Array): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.isSpatialView()) {
         return of(createVisibilityStatus("disabled", "subject.nonSpatialView"));
@@ -211,12 +207,11 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
           hidden: "subject.allModelsHidden",
           partial: "subject.someModelsHidden",
         }),
-        catchError(() => of(createVisibilityStatus("disabled"))),
       );
     });
 
     const ovr = this._props.overrides?.getSubjectNodeVisibility;
-    return ovr ? from(ovr(this.createOverrideProps({ node, ids: subjectIds }, result))) : result;
+    return ovr ? from(ovr(this.createOverrideProps({ ids: subjectIds }, result))) : result;
   }
 
   private getModelVisibilityStatus(modelId: Id64String): Observable<VisibilityStatus> {
@@ -402,7 +397,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     if (ModelsTreeNode.isSubjectNode(node)) {
       return this.changeSubjectNodeState(
         node.key.instanceKeys.map((key) => key.id),
-        node,
         on,
       );
     }
@@ -440,7 +434,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
   }
 
-  private changeSubjectNodeState(ids: Id64Array, node: HierarchyNode, on: boolean): Observable<void> {
+  private changeSubjectNodeState(ids: Id64Array, on: boolean): Observable<void> {
     const result = defer(() => {
       // istanbul ignore if
       if (!this._props.viewport.view.isSpatialView()) {
@@ -451,7 +445,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
 
     const ovr = this._props.overrides?.changeSubjectNodeState;
-    return ovr ? from(ovr(this.createVoidOverrideProps({ ids, node, on }, result))) : result;
+    return ovr ? from(ovr(this.createVoidOverrideProps({ ids, on }, result))) : result;
   }
 
   private changeModelState(props: ChangeModelStateProps): Observable<void> {

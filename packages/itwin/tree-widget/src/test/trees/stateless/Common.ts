@@ -23,6 +23,7 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
       );
       return firstValueFrom(obs);
     }),
+    getChildSubjectModelIds: sinon.stub(),
     getSubjectModelIds: sinon.stub<[string[]], Promise<string[]>>().callsFake(async (subjectIds) => {
       const obs = from(subjectIds).pipe(
         expand((id) => props?.subjectsHierarchy?.get(id) ?? EMPTY),

@@ -150,7 +150,25 @@ export class ModelsTreeIdsCache implements CacheLike {
     return childSubjectIds;
   }
 
-  public async getSubjectModelIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
+  public async getSubjectModelIds(subjectIds: Id64Array): Promise<Id64Array> {
+    const { subjectsHierarchy, subjectModels } = await this.getSubjectInfo();
+    const subjectStack = [...subjectIds];
+    const result = new Array<Id64String>();
+    while (true) {
+      const subject = subjectStack.pop();
+      if (subject === undefined) {
+        break;
+      }
+      const modelIds = subjectModels.get(subject);
+      modelIds && result.push(...modelIds);
+
+      const childSubjects = subjectsHierarchy.get(subject);
+      childSubjects && subjectStack.push(...childSubjects);
+    }
+    return result;
+  }
+
+  public async getChildSubjectModelIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
     const { subjectsHierarchy, subjectModels, hideInHierarchy } = await this.getSubjectInfo();
 
     const hiddenSubjectIds = new Array<Id64String>();
@@ -230,12 +248,12 @@ export class ModelsTreeIdsCache implements CacheLike {
 
   public async getModelCategories(modelId: Id64String): Promise<Id64Array> {
     const modelInfos = await this.getModelInfos();
-    return modelInfos.get(modelId)!.categories;
+    return modelInfos.get(modelId)?.categories ?? [];
   }
 
   public async getModelElementCount(modelId: Id64String): Promise<number> {
     const modelInfos = await this.getModelInfos();
-    return modelInfos.get(modelId)!.elementCount;
+    return modelInfos.get(modelId)?.elementCount ?? 0;
   }
 
   private async queryCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {

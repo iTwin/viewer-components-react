@@ -31,13 +31,13 @@ interface ModelsTreeDefinitionProps {
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: ModelsTreeIdsCache;
+  idsCache: ModelsTreeIdsCache;
   keys: InstanceKey[];
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: ModelsTreeIdsCache;
+  idsCache: ModelsTreeIdsCache;
   label: string;
 }
 
@@ -52,7 +52,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
-  private _subjectModelIdsCache: ModelsTreeIdsCache;
+  private _idsCache: ModelsTreeIdsCache;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 
@@ -85,7 +85,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
-    this._subjectModelIdsCache = props.subjectModelIdsCache;
+    this._idsCache = props.subjectModelIdsCache;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
@@ -158,8 +158,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       }),
     ]);
     const [childSubjectIds, childModelIds] = await Promise.all([
-      this._subjectModelIdsCache.getChildSubjectIds(subjectIds),
-      this._subjectModelIdsCache.getSubjectModelIds(subjectIds),
+      this._idsCache.getChildSubjectIds(subjectIds),
+      this._idsCache.getChildSubjectModelIds(subjectIds),
     ]);
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
@@ -193,7 +193,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
           `,
           bindings: [
-            { type: "idset", value: await this._subjectModelIdsCache.getParentSubjectIds() },
+            { type: "idset", value: await this._idsCache.getParentSubjectIds() },
             ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
           ],
         },
