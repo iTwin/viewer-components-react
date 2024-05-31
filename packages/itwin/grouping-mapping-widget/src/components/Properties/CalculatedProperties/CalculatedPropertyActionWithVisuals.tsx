@@ -7,7 +7,9 @@ import type {
   SelectOption,
 } from "@itwin/itwinui-react";
 import {
+  ExpandableBlock,
   Fieldset,
+  Icon,
   MenuItem,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
@@ -22,6 +24,7 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import type { CalculatedPropertyType, GroupMinimal} from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
+import { SvgMeasure } from "@itwin/itwinui-icons-react";
 
 /**
  * Props for the {@link CalculatedPropertyActionWithVisuals} component.
@@ -113,36 +116,44 @@ export const CalculatedPropertyActionWithVisuals = ({
     );
 
   return (
-    <div className='gmw-calculated-properties-action-container'>
-      <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
-        <div className='gmw-field-legend-container'>
-          <ToggleSwitch
-            label='Visualize Dimensions'
-            labelPosition='left'
-            disabled={isLoading}
-            checked={colorProperty}
-            onChange={() => setColorProperty((b) => !b)}
-          ></ToggleSwitch>
-        </div>
-        <SharedCalculatedPropertyForms
-          calculatedPropertyType={calculatedPropertyType}
-          setCalculatedPropertyType={setCalculatedPropertyType}
-          itemRenderer={(option: SelectOption<string | undefined>) => (
-            <MenuItem>
-              <div className='gmw-gr-cp-menu-item'>
+    <ExpandableBlock title={"Calculated Property"}
+      endIcon={
+        <Icon fill={calculatedPropertyType ? "informational" : "default"}>
+          <SvgMeasure />
+        </Icon>
+      }
+      isExpanded={calculatedPropertyType ? true : false}>
+      <div className='gmw-calculated-properties-action-container'>
+        <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
+          <div className='gmw-field-legend-container'>
+            <ToggleSwitch
+              label='Visualize Dimensions'
+              labelPosition='left'
+              disabled={isLoading}
+              checked={colorProperty}
+              onChange={() => setColorProperty((b) => !b)}
+            ></ToggleSwitch>
+          </div>
+          <SharedCalculatedPropertyForms
+            calculatedPropertyType={calculatedPropertyType}
+            setCalculatedPropertyType={setCalculatedPropertyType}
+            itemRenderer={(option: SelectOption<string | undefined>) => (
+              <MenuItem>
+                <div className='gmw-gr-cp-menu-item'>
+                  <div>{option.label}</div>
+                  {getSpatialData(option.value)}
+                </div>
+              </MenuItem>
+            )}
+            selectedItemRenderer={(option: SelectOption<string | undefined>) => (
+              <div className='gmw-select-item'>
                 <div>{option.label}</div>
                 {getSpatialData(option.value)}
               </div>
-            </MenuItem>
-          )}
-          selectedItemRenderer={(option: SelectOption<string | undefined>) => (
-            <div className='gmw-select-item'>
-              <div>{option.label}</div>
-              {getSpatialData(option.value)}
-            </div>
-          )}
-        />
-      </Fieldset>
-    </div>
+            )}
+          />
+        </Fieldset>
+      </div>
+    </ExpandableBlock>
   );
 };

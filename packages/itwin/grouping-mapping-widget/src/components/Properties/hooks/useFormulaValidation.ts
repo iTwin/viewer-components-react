@@ -4,13 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 import { useEffect, useState } from "react";
 import { resolveFormulaDataType } from "../../../formula/FormulaDataTypeResolver";
-import type { DataType, PropertyMap } from "../../../formula/Types";
+import type { DataType as FormulaDataType, PossibleDataType, PropertyMap } from "../../../formula/Types";
 import { debounce } from "../../../common/utils";
+import type { Property } from "@itwin/insights-client";
+import { DataType } from "@itwin/insights-client";
 
-function validate(formulaName: string, formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void, setIsValid: (b: boolean) => void, setDataType: (inferredDataType: DataType | undefined) => void ): boolean {
+function validate(formulaName: string, formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void, setIsFormulaValid: (b: boolean) => void, setDataType: (inferredDataType: DataType | undefined) => void ): boolean {
   if (!formula) {
     setFormulaErrorMessage("");
-    setIsValid(false);
+    setIsFormulaValid(false);
     setDataType(undefined);
     return false;
   }
@@ -18,16 +20,59 @@ function validate(formulaName: string, formula: string, properties: PropertyMap,
   const resolveFormulaType = resolveFormulaDataType(formulaName, formula, properties);
   const error = resolveFormulaType.errorMessage ?? "";
   setFormulaErrorMessage(error);
-  setIsValid(!error);
-  setDataType(resolveFormulaType.value);
+  setIsFormulaValid(!error);
+  setDataType(inferToPropertyDataType(resolveFormulaType.value));
   return !error;
 }
 
-const debouncedValidationFunc = debounce(validate, 5000);
+const debouncedValidationFunc = debounce(validate, 2000);
 
-export function useFormulaValidation(formulaName: string, formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void) {
-  const [isValid, setIsValid] = useState(false);
+export function useFormulaValidation(formulaName: string, formula: string, groupProperties: Property[], setFormulaErrorMessage: (s: string) => void) {
+  const [isFormulaValid, setIsFormulaValid] = useState(false);
   const [inferredDataType, setDataType] = useState<DataType | undefined>(undefined);
-  useEffect(() => debouncedValidationFunc(formulaName, formula, properties, setFormulaErrorMessage, setIsValid, setDataType), [formulaName, formula, properties, setFormulaErrorMessage]);
-  return { isValid, inferredDataType, forceValidation: () => validate(formulaName, formula, properties, setFormulaErrorMessage, setIsValid, setDataType) };
+  const [propertyMap, setPropertyMap] = useState<PropertyMap>({});
+  useEffect(() => setPropertyMap(convertToPropertyMap(groupProperties)), [groupProperties]);
+  useEffect(() => debouncedValidationFunc(formulaName, formula, propertyMap, setFormulaErrorMessage, setIsFormulaValid, setDataType), [formulaName, formula, groupProperties, setFormulaErrorMessage, propertyMap]);
+  return { isFormulaValid, inferredDataType, forceValidation: () => validate(formulaName, formula, propertyMap, setFormulaErrorMessage, setIsFormulaValid, setDataType) };
 }
+
+const inferToPropertyDataType = (value: FormulaDataType | undefined): DataType => {
+  switch(value){
+    case "Double":
+      return DataType.Double;
+    case "Integer":
+      return DataType.Integer;
+    case "String":
+      return DataType.String;
+    case "Boolean":
+      return DataType.Boolean;
+    default:
+      return DataType.String;
+  }
+};
+
+const convertToPropertyMap = (
+  properties: Property[],
+  selectedPropertyName?: string
+): PropertyMap => {
+  const map: PropertyMap = {};
+  const selectedLowerName = selectedPropertyName?.toLowerCase();
+
+  properties.forEach((p) => {
+    const lowerName = p.propertyName?.toLowerCase();
+    if (lowerName && lowerName !== selectedLowerName)
+      map[lowerName] = stringToPossibleDataType(p.dataType);
+  });
+
+  return map;
+};
+
+const stringToPossibleDataType = (str?: string): PossibleDataType => {
+  switch (str?.toLowerCase()) {
+    case "double": return "Double";
+    case "integer": return "Integer";
+    case "string": return "String";
+    case "boolean": return "Boolean";
+    default: return "Undefined";
+  }
+};
