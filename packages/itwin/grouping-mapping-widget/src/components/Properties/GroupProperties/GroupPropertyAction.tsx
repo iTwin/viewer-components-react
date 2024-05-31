@@ -97,10 +97,10 @@ export const GroupPropertyAction = ({
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
   const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType ?? undefined);
   const [formula, setFormula] = useState<string | undefined>(groupProperty?.formula ?? undefined);
-  const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
+  const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
 
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, group.id, getAccessToken, propertiesClient);
-  const { isFormulaValid, forceValidation, inferredDataType } = useFormulaValidation(propertyName.toLowerCase(), formula ?? "", groupProperties?.properties ?? [], setFormulaErrorMessage);
+  const { isFormulaValid, forceValidation, inferredDataType } = useFormulaValidation(propertyName.toLowerCase(), formula, groupProperties?.properties ?? [], setFormulaErrorMessage);
 
   const reset = useCallback(() => {
     setPropertyName("");

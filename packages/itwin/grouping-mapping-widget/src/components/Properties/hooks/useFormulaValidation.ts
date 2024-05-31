@@ -9,16 +9,16 @@ import { debounce } from "../../../common/utils";
 import type { Property } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
 
-function validate(formulaName: string, formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void, setIsFormulaValid: (b: boolean) => void, setDataType: (inferredDataType: DataType | undefined) => void ): boolean {
+function validate(formulaName: string, formula: string | undefined, properties: PropertyMap, setFormulaErrorMessage: (s: string | undefined) => void, setIsFormulaValid: (b: boolean) => void, setDataType: (inferredDataType: DataType | undefined) => void ): boolean {
   if (!formula) {
-    setFormulaErrorMessage("");
+    setFormulaErrorMessage(undefined);
     setIsFormulaValid(false);
     setDataType(undefined);
     return false;
   }
 
   const resolveFormulaType = resolveFormulaDataType(formulaName, formula, properties);
-  const error = resolveFormulaType.errorMessage ?? "";
+  const error = resolveFormulaType.errorMessage;
   setFormulaErrorMessage(error);
   setIsFormulaValid(!error);
   setDataType(inferToPropertyDataType(resolveFormulaType.value));
@@ -27,7 +27,7 @@ function validate(formulaName: string, formula: string, properties: PropertyMap,
 
 const debouncedValidationFunc = debounce(validate, 2000);
 
-export function useFormulaValidation(formulaName: string, formula: string, groupProperties: Property[], setFormulaErrorMessage: (s: string) => void) {
+export function useFormulaValidation(formulaName: string, formula: string | undefined, groupProperties: Property[], setFormulaErrorMessage: (s: string | undefined) => void) {
   const [isFormulaValid, setIsFormulaValid] = useState(false);
   const [inferredDataType, setDataType] = useState<DataType | undefined>(undefined);
   const [propertyMap, setPropertyMap] = useState<PropertyMap>({});
