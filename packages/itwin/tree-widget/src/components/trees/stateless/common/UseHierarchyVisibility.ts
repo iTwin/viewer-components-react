@@ -11,6 +11,13 @@ import type { MutableRefObject } from "react";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 
+export interface HierarchyVisibilityHandler extends IDisposable {
+  readonly onVisibilityChange: BeEvent<() => void>;
+
+  getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
+  changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
+}
+
 interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
@@ -107,10 +114,4 @@ function createStatusGetter(
 
     return status.status;
   };
-}
-export interface HierarchyVisibilityHandler extends IDisposable {
-  readonly onVisibilityChange: BeEvent<() => void>;
-
-  getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
-  changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
 }

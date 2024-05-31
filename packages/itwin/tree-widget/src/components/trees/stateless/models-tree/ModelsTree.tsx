@@ -58,7 +58,6 @@ export function StatelessModelsTree({
 
   const visibilityHandlerFactory = useCallback((): ModelsTreeVisibilityHandler => {
     return createModelsTreeVisibilityHandler({ viewport: activeView });
-    // return new StatelessModelsVisibilityHandler({ viewport: activeView }) as unknown as HierarchyVisibilityHandler;
   }, [activeView]);
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
