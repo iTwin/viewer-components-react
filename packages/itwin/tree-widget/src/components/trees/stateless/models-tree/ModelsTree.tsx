@@ -10,13 +10,14 @@ import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
+import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 import { createModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 
 import type { ModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import type { Viewport } from "@itwin/core-frontend";
+import type { IModelConnection , Viewport } from "@itwin/core-frontend";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
@@ -53,7 +54,7 @@ export function StatelessModelsTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const { getSubjectModelIdsCache } = useSubjectModelIdsCache();
+  const { getSubjectModelIdsCache } = useSubjectModelIdsCache(imodel);
 
   const visibilityHandlerFactory = useCallback((): ModelsTreeVisibilityHandler => {
     return createModelsTreeVisibilityHandler({ viewport: activeView });
@@ -140,9 +141,16 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
-function useSubjectModelIdsCache() {
+function useSubjectModelIdsCache(imodel: IModelConnection) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const prevImodelAccessRef = useRef<LimitingECSqlQueryExecutor>();
+
+  useIModelChangeListener({
+    imodel,
+    action: useCallback(() => {
+      cacheRef.current = undefined;
+    }, []),
+  });
 
   const getSubjectModelIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
     if (prevImodelAccessRef.current !== imodelAccess) {
