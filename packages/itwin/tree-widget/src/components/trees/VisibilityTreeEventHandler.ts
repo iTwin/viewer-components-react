@@ -6,11 +6,10 @@
  * @module IModelComponents
  */
 
-import { EMPTY, endWith, from, ignoreElements, map, mergeMap, Observable, of } from "rxjs";
+import { endWith, from, ignoreElements, map, mergeMap, Observable } from "rxjs";
 import { CheckBoxState } from "@itwin/core-react";
 import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
-import { toVoidPromise } from "./common/Rxjs";
 
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import type {
@@ -161,54 +160,62 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   private async updateCheckboxes(affectedNodes?: string[], visibilityStatus?: Map<string, VisibilityStatus>) {
-    const changes = affectedNodes ? this.getAffectedNodesCheckboxInfos(affectedNodes, visibilityStatus) : this.getAllNodesCheckboxInfos(visibilityStatus);
-    const obs = changes.pipe(
-      map(([nodeId, checkboxInfo]) => {
-        this.modelSource.modifyModel((model) => {
-          const node = model.getNode(nodeId);
-          // istanbul ignore if
-          if (!node) {
-            return;
-          }
-
-          node.checkbox.isDisabled = checkboxInfo.isDisabled;
-          node.checkbox.isVisible = checkboxInfo.isVisible;
-          node.checkbox.state = checkboxInfo.state;
-          node.checkbox.tooltip = checkboxInfo.tooltip;
-        });
-      }),
-    );
-    return toVoidPromise(obs);
+    const changes = await (affectedNodes
+      ? this.collectAffectedNodesCheckboxInfos(affectedNodes, visibilityStatus)
+      : this.collectAllNodesCheckboxInfos(visibilityStatus));
+    this.updateModel(changes);
   }
 
-  private getAffectedNodesCheckboxInfos(affectedNodes: string[], visibilityStatus?: Map<string, VisibilityStatus>) {
-    return from(affectedNodes).pipe(
-      mergeMap((nodeId) => {
-        const node = this.modelSource.getModel().getNode(nodeId);
+  private updateModel(changes: Map<string, CheckBoxInfo>) {
+    this.modelSource.modifyModel((model) => {
+      for (const [nodeId, checkboxInfo] of changes) {
+        const node = model.getNode(nodeId);
+        // istanbul ignore if
         if (!node) {
-          return EMPTY;
+          continue;
         }
-        return this.getNodeCheckBoxInfoObs(node, visibilityStatus).pipe(map((info) => [nodeId, info] as const));
+
+        node.checkbox.isDisabled = checkboxInfo.isDisabled;
+        node.checkbox.isVisible = checkboxInfo.isVisible;
+        node.checkbox.state = checkboxInfo.state;
+        node.checkbox.tooltip = checkboxInfo.tooltip;
+      }
+    });
+  }
+
+  private async collectAffectedNodesCheckboxInfos(affectedNodes: string[], visibilityStatus?: Map<string, VisibilityStatus>) {
+    const nodeStates = new Map<string, CheckBoxInfo>();
+    if (affectedNodes.length === 0) {
+      return nodeStates;
+    }
+
+    await Promise.all(
+      affectedNodes.map(async (nodeId) => {
+        const node = this.modelSource.getModel().getNode(nodeId);
+        // istanbul ignore else
+        if (node) {
+          nodeStates.set(nodeId, await this.getNodeCheckBoxInfo(node, visibilityStatus));
+        }
       }),
     );
+    return nodeStates;
   }
 
-  private getAllNodesCheckboxInfos(visibilityStatus?: Map<string, VisibilityStatus>) {
-    return from(this.modelSource.getModel().iterateTreeModelNodes()).pipe(
-      // Doing this without throttling can crash the browser when using hierarchy-based display states.
-      mergeMap((node) => {
-        return this.getNodeCheckBoxInfoObs(node, visibilityStatus).pipe(map((info) => [node.id, info] as const));
-      }, 4),
-    );
+  private async collectAllNodesCheckboxInfos(visibilityStatus?: Map<string, VisibilityStatus>) {
+    const nodeStates = new Map<string, CheckBoxInfo>();
+    for (const node of this.modelSource.getModel().iterateTreeModelNodes()) {
+      nodeStates.set(node.id, await this.getNodeCheckBoxInfo(node, visibilityStatus));
+    }
+    return nodeStates;
   }
 
-  private getNodeCheckBoxInfoObs(node: TreeModelNode, visibilityStatus?: Map<string, VisibilityStatus>): Observable<CheckBoxInfo> {
+  private async getNodeCheckBoxInfo(node: TreeModelNode, visibilityStatus?: Map<string, VisibilityStatus>): Promise<CheckBoxInfo> {
     const result = visibilityStatus?.get(node.id) ?? this._visibilityHandler.getVisibilityStatus(node.item);
 
     if (isPromiseLike(result)) {
-      return from(result).pipe(map((status) => this.createCheckboxInfo(status)));
+      return this.createCheckboxInfo(await result);
     }
-    return of(this.createCheckboxInfo(result));
+    return this.createCheckboxInfo(result);
   }
 
   private createCheckboxInfo(status: VisibilityStatus): CheckBoxInfo {
