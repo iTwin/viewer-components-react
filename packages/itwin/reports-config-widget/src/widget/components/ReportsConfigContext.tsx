@@ -5,7 +5,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 import type { IModelsClientOptions } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
-import { ExtractionClient, MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import { ExtractionClient, GROUPING_AND_MAPPING_BASE_PATH, MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BulkExtractorContext } from "../context/BulkExtractorContext";
@@ -48,6 +48,10 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     REPORTING_BASE_PATH,
     props.baseUrl || REPORTS_CONFIG_BASE_URL
   ), [props.baseUrl]);
+  const groupingMappingBaseUrl = useCallback(() => generateUrl(
+    GROUPING_AND_MAPPING_BASE_PATH,
+    props.baseUrl || REPORTS_CONFIG_BASE_URL
+  ), [props.baseUrl]);
   const iModelClientOptions: IModelsClientOptions = useMemo(() => ({
     api: { baseUrl: generateUrl(IMODELS_BASE_URL, props.baseUrl ?? REPORTS_CONFIG_BASE_URL) },
   }), [props.baseUrl]);
@@ -60,7 +64,7 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     baseUrl: reportsBaseUrl(),
     iTwinId: props.iTwinId,
     reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
-    mappingsClient: props.mappingsClient ?? new MappingsClient(reportsBaseUrl()),
+    mappingsClient: props.mappingsClient ?? new MappingsClient(groupingMappingBaseUrl()),
     iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
   });
 

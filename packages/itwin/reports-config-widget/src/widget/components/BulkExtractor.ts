@@ -163,9 +163,7 @@ export class BulkExtractor {
         mappings: mappingSetArray,
       };
     });
-    for (const extractionDetail of extractionDetails) {
-      await this.runIModelExtractions([extractionDetail]);
-    }
+    await this.runIModelExtractions(extractionDetails);
   }
 
   private async runExtraction(extractionRequestDetails: ExtractionRequestDetails): Promise<string | undefined> {
