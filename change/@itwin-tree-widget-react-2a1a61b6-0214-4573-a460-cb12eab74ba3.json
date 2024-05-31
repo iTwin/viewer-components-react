@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "Added support for custom start icons in `TreeSelector`.",
+  "comment": "Added localization support for stateless tree components.",
   "packageName": "@itwin/tree-widget-react",
   "email": "33428304+jasdom@users.noreply.github.com",
   "dependentChangeType": "patch"

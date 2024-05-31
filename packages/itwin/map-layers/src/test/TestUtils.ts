@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { MapLayersUI } from "../map-layers";
 
@@ -11,7 +11,6 @@ export class TestUtils {
 
   public static async initialize() {
     if (!TestUtils._uiComponentsInitialized) {
-
       await MapLayersUI.initialize();
       TestUtils._uiComponentsInitialized = true;
     }
@@ -26,5 +25,4 @@ export class TestUtils {
   public static async flushAsyncOperations() {
     return new Promise((resolve) => setTimeout(resolve));
   }
-
 }

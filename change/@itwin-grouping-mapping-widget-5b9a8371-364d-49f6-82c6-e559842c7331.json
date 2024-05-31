@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed overlap progress bar not appearing in Groups component.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

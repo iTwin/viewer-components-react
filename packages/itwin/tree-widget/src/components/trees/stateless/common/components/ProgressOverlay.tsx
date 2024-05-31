@@ -3,6 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createBrowserHistory } from "history";
+import "./ProgressOverlay.scss";
+import { ProgressLinear } from "@itwin/itwinui-react";
 
-export const history = createBrowserHistory();
+/** @internal */
+export function ProgressOverlay() {
+  return (
+    <div className="tw-progress-overlay-container">
+      <ProgressLinear indeterminate />
+      <div className="tw-progress-overlay-backdrop" />
+    </div>
+  );
+}

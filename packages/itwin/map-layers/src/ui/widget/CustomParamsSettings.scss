@@ -3,17 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 .customParamsSettings-previewBadge {
   margin-left: 4px;
-  display:inline;
+  display: inline;
   vertical-align: middle;
 }
 
-
 button.customParamsSettings-button {
   font-size: 12px;
-  }
+}
 
 .customParamsSettings-header {
   display: flex;
@@ -38,10 +36,10 @@ button.customParamsSettings-button {
     margin-right: 2px;
   }
 
-.customParamsSettings-content {
-  height: 100px;
-  min-height: 60px;
-  border-top: 1px solid #ccc;
+  .customParamsSettings-content {
+    height: 100px;
+    min-height: 60px;
+    border-top: 1px solid #ccc;
 
     .customParamsSettings-content-listbox {
       margin-top: 0;
@@ -49,7 +47,7 @@ button.customParamsSettings-button {
     }
 
     .customParamsSettings-content-entry {
-       margin-left: 4px;
+      margin-left: 4px;
 
       button.customParamsSettings-content-entry-button {
         height: auto;

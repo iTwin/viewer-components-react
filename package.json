@@ -4,6 +4,10 @@
   "repository": {
     "url": "https://github.com/iTwin/viewer-components-react.git"
   },
+  "packageManager": "pnpm@9.1.2",
+  "engines": {
+    "pnpm": "^9.0.0"
+  },
   "scripts": {
     "build": "lage build --grouped",
     "cover": "lage cover --grouped --continue",
@@ -22,8 +26,8 @@
     "prettier:fix": "prettier --write ."
   },
   "devDependencies": {
-    "beachball": "^2.39.0",
-    "lage": "^2.7.11",
-    "prettier": "^3.2.4"
+    "beachball": "^2.43.1",
+    "lage": "^2.7.16",
+    "prettier": "^3.2.5"
   }
 }

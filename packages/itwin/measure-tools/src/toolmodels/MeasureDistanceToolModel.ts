@@ -7,6 +7,7 @@ import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
+import type { DrawingMetadata } from "../api/Measurement";
 
 enum State {
   SetMeasurementViewport,
@@ -29,6 +30,24 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   public get currentState(): State { return this._currentState; }
 
   public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
+
+  public get drawingMetaData(): DrawingMetadata | undefined {
+    return this._currentMeasurement?.drawingMetaData;
+  }
+
+  public set drawingMetaData(data: DrawingMetadata | undefined) {
+    if (this._currentMeasurement)
+      this._currentMeasurement.drawingMetaData = data;
+  }
+
+  public set sheetViewId(id: string | undefined) {
+    if (this._currentMeasurement)
+      this._currentMeasurement.sheetViewId = id;
+  }
+
+  public get sheetViewId(): string | undefined {
+    return this._currentMeasurement?.sheetViewId;
+  }
 
   public setMeasurementViewport(viewType: string): boolean {
     if (State.SetMeasurementViewport !== this._currentState)

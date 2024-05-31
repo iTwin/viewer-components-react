@@ -2,6 +2,37 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Tue, 21 May 2024 13:26:35 GMT",
+      "version": "0.26.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.26.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "141143406+julioalvahash@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "4107234d385df4d25225335a560a0443771283bf",
+            "comment": "Updated insights client to 0.10.1"
+          }
+        ],
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "4c8b304ac22b7d0838934768ae8be502cbc9a7af",
+            "comment": "Fixed overlap progress bar not appearing in Groups component."
+          }
+        ],
+        "none": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "36734a75e79b4ad5d683393c4bc93ec3accea538",
+            "comment": ""
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 29 Apr 2024 14:59:26 GMT",
       "version": "0.25.2",
       "tag": "@itwin/grouping-mapping-widget_v0.25.2",

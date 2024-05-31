@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
 import { Select } from "@itwin/itwinui-react";
@@ -19,11 +19,15 @@ interface SelectCustomParamProps {
 export function SelectCustomParam(props: SelectCustomParamProps) {
   const [storage] = React.useState(() => new CustomParamsStorage());
 
-  const [paramValues, setParamValues] = React.useState<string[]|undefined>(props.value);
+  const [paramValues, setParamValues] = React.useState<string[] | undefined>(props.value);
 
   const getCustomParamsFromStorage = React.useCallback(() => {
     const params = storage.get(undefined);
-    return (params ? params.map((item) => {return {value: item.name, label: item.name};}) : []);
+    return params && Array.isArray(params)
+      ? params.map((item) => {
+          return { value: item.name, label: item.name };
+        })
+      : [];
   }, [storage]);
 
   const [customParams] = React.useState(() => getCustomParamsFromStorage());
@@ -32,26 +36,29 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
     setParamValues(props.value);
   }, [props.value]);
 
-  const handleOnChange = React.useCallback((val, event) => {
-    const stateSetter = (prev: string[] | undefined) => {
-      const getValue = (): string[] => {
-        if (!prev)
-          return [val];
+  const handleOnChange = React.useCallback(
+    (val, event) => {
+      const stateSetter = (prev: string[] | undefined) => {
+        const getValue = (): string[] => {
+          if (!prev) {
+            return [val];
+          }
 
-        return event === "removed" ? prev.filter((v) => val !== v) : [...prev, val];
+          return event === "removed" ? prev.filter((v) => val !== v) : [...prev, val];
+        };
+        const value = getValue();
+        if (props.onChange) {
+          props.onChange(value);
+        }
+        return value;
       };
-      const value = getValue();
-      if (props.onChange)
-        props.onChange(value);
-      return value;
-
-    };
-    setParamValues(stateSetter);
-
-  }, [props]);
+      setParamValues(stateSetter);
+    },
+    [props],
+  );
 
   const handleKeyDown = React.useCallback((e) => {
-    if (e.code === "Delete" ||  e.key === "Backspace") {
+    if (e.code === "Delete" || e.key === "Backspace") {
       setParamValues(undefined);
     }
   }, []);
@@ -62,13 +69,12 @@ export function SelectCustomParam(props: SelectCustomParamProps) {
         className="map-layer-source-select"
         options={customParams}
         value={paramValues}
-        disabled={props.disabled || customParams.length === 0 }
+        disabled={props.disabled || customParams.length === 0}
         onChange={handleOnChange}
         size="small"
         onKeyDown={handleKeyDown}
         multiple
-      >
-      </Select>
+      ></Select>
     </div>
   );
 }
