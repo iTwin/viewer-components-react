@@ -31,6 +31,28 @@ async function selectPropertyInDialog(page: Page, propertyText: string) {
   await page.getByRole("menuitem", { name: propertyText, exact: true }).click();
 }
 
+// make sure to open the filter dialog before calling this.
+async function selectOperatorInDialog(page: Page, operatorText: string) {
+  const filterBuilder = page.locator(".presentation-property-filter-builder");
+
+  await filterBuilder.getByText("Contains").click();
+  await page.getByRole("option", { name: operatorText, exact: true }).click();
+
+  await filterBuilder.getByText("Contains").waitFor({ state: "hidden" });
+  await filterBuilder.getByText(operatorText).waitFor();
+}
+
+// make sure to open the filter dialog before calling this.
+async function selectValueInDialog(page: Page, valueText: string) {
+  const filterBuilder = page.locator(".presentation-property-filter-builder");
+
+  // search for one character less to not have to differentiate between entered value and option in dropdown
+  await page.locator(".presentation-async-select-values-container input").fill(valueText.slice(0, -1));
+  await page.getByText(valueText, { exact: true }).click();
+
+  await filterBuilder.getByText(`option ${valueText}, selected.`).waitFor();
+}
+
 async function selectTree(page: Page, tree: string) {
   await treeWidget.getByText("BayTown").waitFor();
   await treeWidget.getByRole("combobox").click();
@@ -189,6 +211,31 @@ test.describe("tree widget", () => {
         await takeScreenshot(page, treeWidget);
       });
 
+      test("node with active filtering", async ({ page }) => {
+        const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
+
+        // hover the node for the button to appear
+        await physicalModelNode.hover();
+        await physicalModelNode.getByTitle("Apply filter").click();
+
+        await locateInstanceFilter(page).waitFor();
+        await selectPropertyInDialog(page, "Code");
+        await selectOperatorInDialog(page, "Equal");
+        await selectValueInDialog(page, "PipeSupport");
+
+        await page.getByRole("button", { name: "Apply" }).click();
+
+        // expand node to see children being filtered
+        await physicalModelNode.getByLabel("Expand").click();
+        await locateNode(treeWidget, "PipeSupport").waitFor();
+
+        // hover the node for the button to appear
+        await physicalModelNode.hover();
+        await treeWidget.getByTitle("Clear active filter").waitFor();
+
+        await takeScreenshot(page, treeWidget);
+      });
+
       test("node with active filtering - information message", async ({ page }) => {
         const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
 
@@ -290,6 +337,31 @@ test.describe("tree widget", () => {
         await takeScreenshot(page, treeWidget);
       });
 
+      test("node with active filtering", async ({ page }) => {
+        const node = locateNode(treeWidget, "Equipment", 1);
+
+        // hover the node for the button to appear
+        await node.hover();
+        await node.getByTitle("Apply filter").click();
+
+        await locateInstanceFilter(page).waitFor();
+        await selectPropertyInDialog(page, "Code");
+        await selectOperatorInDialog(page, "Equal");
+        await selectValueInDialog(page, "Equipment - Insulation");
+
+        await page.getByRole("button", { name: "Apply" }).click();
+        await node.getByLabel("Expand").click();
+
+        // wait until filter is applied
+        await locateNode(treeWidget, "Equipment - Insulation").waitFor();
+
+        // hover the node for the button to appear
+        await node.hover();
+        await treeWidget.getByTitle("Clear active filter").waitFor();
+
+        await takeScreenshot(page, treeWidget);
+      });
+
       test("node with active filtering - information message", async ({ page }) => {
         const node = locateNode(treeWidget, "Equipment");
 
@@ -371,6 +443,31 @@ test.describe("tree widget", () => {
 
         // wait for hierarchy level limit exceeded text to appear
         await treeWidget.getByText(/hierarchy level size limit/).waitFor();
+        await takeScreenshot(page, treeWidget);
+      });
+
+      test("node with active filtering", async ({ page }) => {
+        const node = locateNode(treeWidget, "ProcessPhysicalModel");
+
+        // hover the node for the button to appear
+        await node.hover();
+        await node.getByTitle("Apply filter").click();
+
+        await locateInstanceFilter(page).waitFor();
+        await selectPropertyInDialog(page, "Code");
+        await selectOperatorInDialog(page, "Equal");
+        await selectValueInDialog(page, "PipeSupport");
+
+        await page.getByRole("button", { name: "Apply" }).click();
+
+        // expand node to see children being filtered
+        await node.getByLabel("Expand").click();
+        await locateNode(treeWidget, "PipeSupport").waitFor();
+
+        // hover the node for the button to appear
+        await node.hover();
+        await treeWidget.getByTitle("Clear active filter").waitFor();
+
         await takeScreenshot(page, treeWidget);
       });
 
