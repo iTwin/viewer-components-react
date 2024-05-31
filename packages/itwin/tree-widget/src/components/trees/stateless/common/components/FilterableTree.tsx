@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./FilterableTree.scss";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
@@ -14,6 +14,7 @@ import { TreeWidget } from "../../../../../TreeWidget";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
+import { useIModelChangeListener } from "../UseIModelChangeListener";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 
@@ -87,7 +88,7 @@ function FilterableTreeRenderer({
   const {
     rootNodes,
     isLoading,
-    reloadTree: _reloadTree,
+    reloadTree,
     setFormatter: _setFormatter,
     selectNodes,
     expandNode,
@@ -101,6 +102,8 @@ function FilterableTreeRenderer({
     onPerformanceMeasured,
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
+
+  useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     getHierarchyLevelDetails: treeProps.getHierarchyLevelDetails,
