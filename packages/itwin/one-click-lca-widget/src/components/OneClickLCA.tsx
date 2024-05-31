@@ -1,15 +1,17 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import Reports from "./Reports";
+import { Reports } from "./Reports";
 import "./Reports.scss";
 
-const OneClickLCA = () => {
+import type { ReportProps } from "./Reports";
+
+const OneClickLCA = (props: ReportProps) => {
   return (
     <div className="oclca-container">
-      <Reports />
+      <Reports {...props} />
     </div>
   );
 };

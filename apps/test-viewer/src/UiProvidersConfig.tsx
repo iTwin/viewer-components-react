@@ -9,7 +9,7 @@ import { EC3Provider } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
+import { CARBON_CALCULATION_BASE_PATH, ClientPrefix, GroupingMappingProvider, REPORTING_BASE_PATH } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
@@ -320,7 +320,12 @@ const configuredUiItems = new Map<string, UiItem>([
     "one-click-lca-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new OneClickLCAProvider()],
+      createUiItemsProviders: () => [
+        new OneClickLCAProvider({
+          reportingBasePath: prefixUrl(REPORTING_BASE_PATH, process.env.IMJS_URL_PREFIX),
+          carbonCalculationBasePath: prefixUrl(CARBON_CALCULATION_BASE_PATH, process.env.IMJS_URL_PREFIX),
+        }),
+      ],
     },
   ],
 ]);

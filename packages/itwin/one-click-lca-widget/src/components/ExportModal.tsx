@@ -33,6 +33,7 @@ interface ExportProps {
   isOpen: boolean;
   close: () => void;
   reportId: string | undefined;
+  carbonCalculationBasePath?: string;
 }
 
 interface OclcaTokenCache {
@@ -43,7 +44,7 @@ interface OclcaTokenCache {
 const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
   const PIN_INTERVAL = 1000;
-  const oneClickLCAClientApi = useMemo(() => new OCLCAJobsClient(), []);
+  const oneClickLCAClientApi = useMemo(() => new OCLCAJobsClient(props.carbonCalculationBasePath), [props.carbonCalculationBasePath]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -19,9 +19,14 @@ type CreateTypeFromInterface<Interface> = {
 
 type Reporting = CreateTypeFromInterface<Report>;
 
-const Reports = () => {
+export interface ReportProps {
+  reportingBasePath?: string;
+  carbonCalculationBasePath?: string;
+}
+
+export const Reports = (props: ReportProps) => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportsClientApi = useMemo(() => new ReportsClient(), []);
+  const reportsClientApi = useMemo(() => new ReportsClient(props.reportingBasePath), [props.reportingBasePath]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useState<Report[]>([]);
@@ -157,9 +162,8 @@ const Reports = () => {
         isOpen={modalIsOpen}
         close={() => openModal(false)}
         reportId={selectedReport?.id}
+        carbonCalculationBasePath={props.carbonCalculationBasePath}
       />
     </>
   );
 };
-
-export default Reports;

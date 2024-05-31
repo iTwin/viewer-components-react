@@ -12,10 +12,13 @@ import {
   StageUsage,
 } from "@itwin/appui-react";
 import OneClickLCA from "../components/OneClickLCA";
+import type { ReportProps } from "../components/Reports";
 import React from "react";
 
 export class OneClickLCAProvider implements UiItemsProvider {
   public readonly id = "OneClickLCAProvider";
+
+  constructor(private readonly _props: ReportProps) {}
 
   public provideWidgets(
     _stageId: string,
@@ -32,7 +35,7 @@ export class OneClickLCAProvider implements UiItemsProvider {
       const OneClickLCAWidget: Widget = {
         id: "OneClickLCAWidget",
         label: "One Click LCA",
-        content: <OneClickLCA/>,
+        content: <OneClickLCA {...this._props} />,
       };
 
       widgets.push(OneClickLCAWidget);
