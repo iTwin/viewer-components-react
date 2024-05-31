@@ -6,7 +6,8 @@
 import { ColorDef, QueryBinder } from "@itwin/core-common";
 import type { DecorateContext, GraphicBuilder, IModelConnection } from "@itwin/core-frontend";
 import { GraphicType } from "@itwin/core-frontend";
-import type { Point3d } from "@itwin/core-geometry";
+import { Point3d} from "@itwin/core-geometry";
+import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { DrawingMetadata } from "./Measurement";
 
@@ -32,11 +33,13 @@ export namespace SheetMeasurementsHelper {
           // Within y extents
           const jsonProp = JSON.parse(row[3]);
           const scale = jsonProp.scale;
+          const transform = createsheetTo3dTransform(Point3d.fromJSON(jsonProp.masterOrigin), Transform.fromJSON(jsonProp.sheetToV8DrawingTransform), Transform.fromJSON(jsonProp.v8DrawingToDesignTransform));
           const result: DrawingMetadata = {
             drawingId: row[0],
             origin: new Point2d(row[1].X, row[1].Y),
             extents: new Point2d(row[2].X, row[2].Y),
             worldScale: scale,
+            transform,
           };
           return result;
         }
@@ -74,5 +77,12 @@ export namespace SheetMeasurementsHelper {
     areaBuilder.setSymbology(ColorDef.from(148, 190, 250), ColorDef.from(148, 190, 250), 2);
     areaBuilder.addLineString2d([origin, new Point2d(right, down), new Point2d(right, up), new Point2d(left, up), origin], 0);
     return areaBuilder;
+  }
+
+  function createsheetTo3dTransform(masterOrigin: Point3d, sheetTov8Drawing: Transform, v8DrawingToDesign: Transform): Transform {
+    const firstStep = Transform.createOriginAndMatrix(masterOrigin, sheetTov8Drawing.matrix);
+    const result = Transform.createIdentity();
+    firstStep.multiplyTransformTransform(v8DrawingToDesign, result);
+    return result;
   }
 }

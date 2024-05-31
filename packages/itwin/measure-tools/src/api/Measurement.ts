@@ -8,7 +8,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
-import type { Point3d, XYProps } from "@itwin/core-geometry";
+import type { Point3d, Transform, XYProps } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
@@ -274,6 +274,9 @@ export interface DrawingMetadata {
 
   /** Extents of the drawing in sheet coordinates */
   extents?: Point2d;
+
+  /** Represents the transform from sheet points to 3d points */
+  transform?: Transform;
 
 }
 
