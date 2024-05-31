@@ -11,16 +11,18 @@ import { BeEvent } from '@itwin/core-bentley';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
-import { HierarchyNode } from '@itwin/presentation-hierarchies';
+import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
+import { HierarchyNode as HierarchyNode_2 } from '@itwin/presentation-hierarchies';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64Arg } from '@itwin/core-bentley';
-import type { Id64Set } from '@itwin/core-bentley';
+import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IFilteredPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IPropertyValueRenderer } from '@itwin/components-react';
+import type { LimitingECSqlQueryExecutor } from '@itwin/presentation-hierarchies';
 import type { Localization } from '@itwin/core-common';
 import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
@@ -382,6 +384,8 @@ export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
 
 // @internal
 export interface ModelsTreeVisibilityHandlerProps {
+    // (undocumented)
+    idsCache?: ModelsTreeIdsCache;
     // (undocumented)
     overrides?: VisibilityHandlerOverrides;
     // (undocumented)
