@@ -5,8 +5,8 @@
 import {
   Alert,
   ExpandableBlock,
-  Fieldset,
   Icon,
+  InputGroup,
   LabeledTextarea,
 } from "@itwin/itwinui-react";
 import React from "react";
@@ -46,7 +46,7 @@ export const CustomCalculationAction = ({
       }
       isExpanded={formula ? true : false}>
       <div className='gmw-custom-calculation-action-container'>
-        <Fieldset legend='Custom Calculation Details' className='gmw-details-form'>
+        <InputGroup className='gmw-details-form'>
           <Alert
             type='informational'
             clickableText='Click here.'
@@ -68,7 +68,7 @@ export const CustomCalculationAction = ({
               forceValidation();
             }}
           />
-        </Fieldset>
+        </InputGroup>
       </div>
     </ExpandableBlock>
   );

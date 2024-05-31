@@ -53,7 +53,6 @@ export const GroupPropertyTable = ({
     (handleShowDeleteModal: (value: Property) => void): Column<Property>[] => [
       {
         id: "propertyName",
-        Header: "Property",
         accessor: "propertyName",
         Cell: (value: CellProps<Property>) => (
           <PropertyNameCell

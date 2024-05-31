@@ -10,6 +10,7 @@ import {
   ExpandableBlock,
   Fieldset,
   Icon,
+  InputGroup,
   LabeledInput,
   LabeledSelect,
   Text,
@@ -297,52 +298,50 @@ export const GroupPropertyAction = ({
             Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new selection is made and saved.
           </Alert>
         }
-        <div>
-          <ExpandableBlock
-            title={"Mapped Properties"}
-            endIcon={
-              <Icon fill={selectedProperties.length > 0 ? "informational" : "default"}>
-                <SvgLabel />
-              </Icon>
-            }
-            isExpanded={selectedProperties.length > 0 ? true : false}>
-            <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
-              <div className="gmw-property-view-button">
-                <Button
-                  onClick={async () => setShowPropertiesSelectionModal(true)}
-                  disabled={isLoading}
-                >
+        <ExpandableBlock
+          title={"Mapped Properties"}
+          endIcon={
+            <Icon fill={selectedProperties.length > 0 ? "informational" : "default"}>
+              <SvgLabel />
+            </Icon>
+          }
+          isExpanded={selectedProperties.length > 0 ? true : false}>
+          <InputGroup className='gmw-property-view-container'>
+            <div className="gmw-property-view-button">
+              <Button
+                onClick={async () => setShowPropertiesSelectionModal(true)}
+                disabled={isLoading}
+              >
               Select Properties
-                </Button>
-              </div>
-              <div className="gmw-properties-list">
-                {selectedProperties.length === 0 && !isLoading ?
-                  <div className="gmw-empty-selection">
-                    <Text>No properties selected.</Text>
-                    <Text>Press the &quot;Select Properties&quot; button for options.</Text>
-                  </div> :
-                  selectedProperties.map((property) => (
-                    <GroupPropertyListItem
-                      key={property.key}
-                      content={`${property.displayLabel}`}
-                      title={`${property.actualECClassName}`}
-                      description={property.categoryLabel}
-                    />
-                  ))}
-              </div>
-            </Fieldset>
-          </ExpandableBlock>
-          <CalculatedPropertyActionWithVisuals
-            group={group}
-            calculatedPropertyType={calculatedPropertyType}
-            setCalculatedPropertyType={setCalculatedPropertyType}/>
-          <CustomCalculationAction
-            formula={formula}
-            setFormula={setFormula}
-            formulaErrorMessage={formulaErrorMessage}
-            forceValidation={forceValidation}
-            disabled={isLoading}/>
-        </div>
+              </Button>
+            </div>
+            <div className="gmw-properties-list">
+              {selectedProperties.length === 0 && !isLoading ?
+                <div className="gmw-empty-selection">
+                  <Text>No properties selected.</Text>
+                  <Text>Press the &quot;Select Properties&quot; button for options.</Text>
+                </div> :
+                selectedProperties.map((property) => (
+                  <GroupPropertyListItem
+                    key={property.key}
+                    content={`${property.displayLabel}`}
+                    title={`${property.actualECClassName}`}
+                    description={property.categoryLabel}
+                  />
+                ))}
+            </div>
+          </InputGroup>
+        </ExpandableBlock>
+        <CalculatedPropertyActionWithVisuals
+          group={group}
+          calculatedPropertyType={calculatedPropertyType}
+          setCalculatedPropertyType={setCalculatedPropertyType}/>
+        <CustomCalculationAction
+          formula={formula}
+          setFormula={setFormula}
+          formulaErrorMessage={formulaErrorMessage}
+          forceValidation={forceValidation}
+          disabled={isLoading}/>
       </div>
       <ActionPanel
         onSave={handleSaveClick}

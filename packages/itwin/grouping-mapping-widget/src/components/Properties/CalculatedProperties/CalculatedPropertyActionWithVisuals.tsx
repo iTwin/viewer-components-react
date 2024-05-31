@@ -8,8 +8,8 @@ import type {
 } from "@itwin/itwinui-react";
 import {
   ExpandableBlock,
-  Fieldset,
   Icon,
+  InputGroup,
   MenuItem,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
@@ -124,7 +124,7 @@ export const CalculatedPropertyActionWithVisuals = ({
       }
       isExpanded={calculatedPropertyType ? true : false}>
       <div className='gmw-calculated-properties-action-container'>
-        <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
+        <InputGroup className='gmw-details-form'>
           <div className='gmw-field-legend-container'>
             <ToggleSwitch
               label='Visualize Dimensions'
@@ -152,7 +152,7 @@ export const CalculatedPropertyActionWithVisuals = ({
               </div>
             )}
           />
-        </Fieldset>
+        </InputGroup>
       </div>
     </ExpandableBlock>
   );
