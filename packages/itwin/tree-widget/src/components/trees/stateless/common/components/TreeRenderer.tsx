@@ -3,37 +3,30 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "./VisibilityTreeRenderer.scss";
+import "./TreeRenderer.scss";
 import { useCallback } from "react";
 import { Tree } from "@itwin/itwinui-react";
-import { createRenderedTreeNodeData } from "@itwin/presentation-hierarchies-react";
-import { VisibilityTreeNodeRenderer } from "./VisibilityTreeNodeRenderer";
+import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
+import { TreeNodeRenderer } from "./TreeNodeRenderer";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
 
-interface VisibilityTreeRendererOwnProps {
+interface TreeRendererOwnProps {
   rootNodes: PresentationTreeNode[];
   isNodeSelected: (nodeId: string) => boolean;
 }
 
-type VisibilityTreeRendererProps = Pick<
-  VisibilityTreeNodeRendererProps,
-  | "expandNode"
-  | "onNodeClick"
-  | "onNodeKeyDown"
-  | "onFilterClick"
-  | "getIcon"
-  | "getSublabel"
-  | "getCheckboxStatus"
-  | "onCheckboxClicked"
-  | "getHierarchyLevelDetails"
+type TreeRendererProps = Pick<
+  TreeNodeRendererProps,
+  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps"
 > &
   Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
-  VisibilityTreeRendererOwnProps;
+  Pick<LocalizationContextProviderProps, "localizedStrings"> &
+  TreeRendererOwnProps;
 
 /** @internal */
-export function VisibilityTreeRenderer({
+export function TreeRenderer({
   rootNodes,
   expandNode,
   onNodeClick,
@@ -42,44 +35,46 @@ export function VisibilityTreeRenderer({
   onFilterClick,
   getIcon,
   getSublabel,
-  getCheckboxStatus,
-  onCheckboxClicked,
   getHierarchyLevelDetails,
+  checkboxProps,
+  localizedStrings,
   ...props
-}: VisibilityTreeRendererProps) {
+}: TreeRendererProps) {
   const nodeRenderer = useCallback<TreeProps<RenderedTreeNode>["nodeRenderer"]>(
     (nodeProps) => {
       return (
-        <VisibilityTreeNodeRenderer
+        <TreeNodeRenderer
           {...nodeProps}
           expandNode={expandNode}
           onNodeClick={onNodeClick}
           onNodeKeyDown={onNodeKeyDown}
           getIcon={getIcon}
           getSublabel={getSublabel}
-          getCheckboxStatus={getCheckboxStatus}
-          onCheckboxClicked={onCheckboxClicked}
           onFilterClick={onFilterClick}
           getHierarchyLevelDetails={getHierarchyLevelDetails}
+          checkboxProps={checkboxProps}
         />
       );
     },
-    [expandNode, onNodeClick, onNodeKeyDown, getHierarchyLevelDetails, getIcon, getSublabel, getCheckboxStatus, onCheckboxClicked, onFilterClick],
+    [expandNode, onNodeClick, onNodeKeyDown, getHierarchyLevelDetails, getIcon, getSublabel, onFilterClick, checkboxProps],
   );
 
   const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
 
   return (
-    <Tree<RenderedTreeNode>
-      {...props}
-      className="tw-visibility-tree-renderer"
-      data={rootNodes}
-      nodeRenderer={nodeRenderer}
-      getNode={getNode}
-      enableVirtualization={true}
-    />
+    <LocalizationContextProvider localizedStrings={localizedStrings}>
+      <Tree<RenderedTreeNode>
+        {...props}
+        className="tw-tree-renderer"
+        data={rootNodes}
+        nodeRenderer={nodeRenderer}
+        getNode={getNode}
+        enableVirtualization={true}
+      />
+    </LocalizationContextProvider>
   );
 }
 
 type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
-type VisibilityTreeNodeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeNodeRenderer>;
+type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;
+type LocalizationContextProviderProps = ComponentPropsWithoutRef<typeof LocalizationContextProvider>;
