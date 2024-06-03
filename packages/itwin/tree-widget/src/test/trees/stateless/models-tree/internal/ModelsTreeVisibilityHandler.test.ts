@@ -51,7 +51,7 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-describe.only("HierarchyBasedVisibilityHandler", () => {
+describe("HierarchyBasedVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();

@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, last, reduce, scan, takeWhile } from "rxjs";
+import { defaultIfEmpty, last, scan, takeWhile } from "rxjs";
 
 import type { Observable, OperatorFunction } from "rxjs";
 
@@ -18,11 +18,6 @@ export function reduceWhile<TValue, TAccumulator>(
   return (obs) => {
     return obs.pipe(scan(reduceFunc, initial), takeWhile(predicate, true), defaultIfEmpty(undefined), last());
   };
-}
-
-/** Collects elements to a set. */
-export function toSet<T>(): OperatorFunction<T, Set<T>> {
-  return (obs) => obs.pipe(reduce((set, x) => set.add(x), new Set()));
 }
 
 /** Same as `firstValueFrom` except it won't throw if the observable emits no values. */
