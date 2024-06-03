@@ -920,7 +920,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           expect(result.isDisabled).to.be.true;
         });
 
-        describe("is hidden when model is hidden", async () => {
+        it("is hidden when model is hidden", async () => {
           const node = createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId });
           const viewport = createFakeSinonViewport({
             view: {
@@ -1940,7 +1940,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         categoryId = getFirstValue(models.get(modelId)!.values());
       });
 
-      it("showing category makes its model visible in the viewport and per model override for that category hast to be set", async () => {
+      it("showing category makes its model visible in the viewport and per model override for that category has to be set", async () => {
         await handler.changeVisibility(createCategoryHierarchyNode(modelId, categoryId), true);
         const categoryIdFilter = (id: string) => id === categoryId;
         await Promise.all([

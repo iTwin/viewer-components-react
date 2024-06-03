@@ -10,6 +10,7 @@ import { createVisibilityChangeEventListener } from "../../../../../components/t
 import { createFakeSinonViewport } from "../../../Common";
 
 import type { Viewport } from "@itwin/core-frontend";
+
 describe("VisibilityChangeEventListener", () => {
   it("raises event on `onAlwaysDrawnChanged` event", async () => {
     const evt = new BeEvent();
