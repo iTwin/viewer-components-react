@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
@@ -17,7 +18,6 @@ import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
 
@@ -53,13 +53,13 @@ export function StatelessModelsTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const { getModelsTreeIdsCache, visibilityHandler } = useCachedVisibility(activeView);
+  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView);
 
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(imodelAccess) }),
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache() }),
     [getModelsTreeIdsCache],
   );
 
@@ -68,7 +68,7 @@ export function StatelessModelsTree({
       return undefined;
     }
     return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, idsCache: getModelsTreeIdsCache(imodelAccess) });
+      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, idsCache: getModelsTreeIdsCache() });
   }, [focusedInstancesKeys, getModelsTreeIdsCache]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
@@ -77,7 +77,7 @@ export function StatelessModelsTree({
     }
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
-      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, idsCache: getModelsTreeIdsCache(imodelAccess) });
+      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, idsCache: getModelsTreeIdsCache() });
     };
   }, [filter, getModelsTreeIdsCache, reportUsage]);
 
@@ -90,7 +90,7 @@ export function StatelessModelsTree({
       imodel={imodel}
       treeName="StatelessModelsTree"
       getSchemaContext={getSchemaContext}
-      visibilityHandler={visibilityHandler}
+      visibilityHandlerFactory={visibilityHandlerFactory}
       getHierarchyDefinition={getHierarchyDefinition}
       getFilteredPaths={getFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
@@ -136,38 +136,39 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
+function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: () => ModelsTreeIdsCache) {
+  return () => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter() });
+}
+
 function useCachedVisibility(activeView: Viewport) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
-  const prevImodelAccessRef = useRef<LimitingECSqlQueryExecutor>();
+  const currentIModelRef = useRef(activeView.iModel);
 
-  const [visibilityHandler, setVisibilityHandler] = useState(createModelsTreeVisibilityHandler({ viewport: activeView }));
+  const getModelsTreeIdsCache = useCallback(() => {
+    if (!cacheRef.current) {
+      cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current));
+    }
+    return cacheRef.current;
+  }, []);
+
+  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
 
   useIModelChangeListener({
     imodel: activeView.iModel,
     action: useCallback(() => {
       cacheRef.current = undefined;
-      setVisibilityHandler(createModelsTreeVisibilityHandler({ viewport: activeView }));
-    }, [activeView]),
+      setVisibilityHandlerFactory(createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+    }, [activeView, getModelsTreeIdsCache]),
   });
 
-  const getModelsTreeIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
-    if (prevImodelAccessRef.current !== imodelAccess) {
-      cacheRef.current = undefined;
-      prevImodelAccessRef.current = imodelAccess;
-    }
-
-    if (!cacheRef.current) {
-      const cache = new ModelsTreeIdsCache(imodelAccess);
-      cacheRef.current = cache;
-      setVisibilityHandler((handler) => {
-        return { ...handler, idsCache: cache };
-      });
-    }
-    return cacheRef.current;
-  }, []);
+  useEffect(() => {
+    currentIModelRef.current = activeView.iModel;
+    cacheRef.current = undefined;
+    setVisibilityHandlerFactory(createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+  }, [activeView, getModelsTreeIdsCache]);
 
   return {
     getModelsTreeIdsCache,
-    visibilityHandler,
+    visibilityHandlerFactory,
   };
 }

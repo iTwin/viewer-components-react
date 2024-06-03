@@ -19,7 +19,7 @@ export interface HierarchyVisibilityHandler extends IDisposable {
 }
 
 interface UseHierarchyVisibilityProps {
-  visibilityHandler: HierarchyVisibilityHandler;
+  visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
 
 interface UseHierarchyVisibilityResult {
@@ -28,7 +28,7 @@ interface UseHierarchyVisibilityResult {
 }
 
 /** @internal */
-export function useHierarchyVisibility({ visibilityHandler }: UseHierarchyVisibilityProps): UseHierarchyVisibilityResult {
+export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): UseHierarchyVisibilityResult {
   const statusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>());
   const [state, setState] = useState({
     getCheckboxStatus: (_node: PresentationHierarchyNode): VisibilityStatus => ({ state: "hidden", isDisabled: true }),
@@ -37,6 +37,7 @@ export function useHierarchyVisibility({ visibilityHandler }: UseHierarchyVisibi
 
   useEffect(() => {
     statusMap.current.clear();
+    const handler = visibilityHandlerFactory();
 
     const visibilityChanged = new Subject<void>();
     const calculate = new Subject<PresentationHierarchyNode>();
@@ -47,9 +48,7 @@ export function useHierarchyVisibility({ visibilityHandler }: UseHierarchyVisibi
     const subscription = calculate
       .pipe(
         distinct(undefined, visibilityChanged),
-        mergeMap((node) =>
-          defer(async () => ({ node, status: await visibilityHandler.getVisibilityStatus(node.nodeData) })).pipe(takeUntil(visibilityChanged)),
-        ),
+        mergeMap((node) => defer(async () => ({ node, status: await handler.getVisibilityStatus(node.nodeData) })).pipe(takeUntil(visibilityChanged))),
       )
       .subscribe({
         next: ({ node, status }) => {
@@ -62,7 +61,7 @@ export function useHierarchyVisibility({ visibilityHandler }: UseHierarchyVisibi
       });
 
     const changeVisibility = (node: PresentationHierarchyNode, checked: boolean) => {
-      void visibilityHandler.changeVisibility(node.nodeData, checked);
+      void handler.changeVisibility(node.nodeData, checked);
       const status = statusMap.current.get(node.id);
       if (!status) {
         return;
@@ -77,7 +76,7 @@ export function useHierarchyVisibility({ visibilityHandler }: UseHierarchyVisibi
       getCheckboxStatus: createStatusGetter(statusMap, calculateNodeStatus),
     });
 
-    const removeListener = visibilityHandler.onVisibilityChange.addListener(() => {
+    const removeListener = handler.onVisibilityChange.addListener(() => {
       statusMap.current.forEach((value) => {
         value.needsRefresh = true;
       });
@@ -92,9 +91,9 @@ export function useHierarchyVisibility({ visibilityHandler }: UseHierarchyVisibi
     return () => {
       subscription.unsubscribe();
       removeListener();
-      visibilityHandler.dispose();
+      handler.dispose();
     };
-  }, [visibilityHandler]);
+  }, [visibilityHandlerFactory]);
 
   return state;
 }

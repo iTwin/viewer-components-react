@@ -78,7 +78,7 @@ function VisibilityTreeImpl({
   imodelAccess,
   getHierarchyDefinition,
   getFilteredPaths,
-  visibilityHandler,
+  visibilityHandlerFactory,
   defaultHierarchyLevelSizeLimit,
   noDataMessage,
   treeName,
@@ -112,7 +112,7 @@ function VisibilityTreeImpl({
   useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
   const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
-  const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandler });
+  const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
