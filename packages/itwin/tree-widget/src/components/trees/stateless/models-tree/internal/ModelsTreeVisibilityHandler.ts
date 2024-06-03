@@ -444,21 +444,21 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       }
 
       const { ids, on } = props;
+      if (!on) {
+        viewport.changeModelDisplay(ids, false);
+        return EMPTY;
+      }
+
       return concat(
         defer(() => {
           viewport.perModelCategoryVisibility.clearOverrides(ids);
-          if (on) {
-            return from(viewport.addViewedModels(ids));
-          }
-
-          viewport.changeModelDisplay(ids, false);
-          return EMPTY;
+          return from(viewport.addViewedModels(ids));
         }),
         (typeof ids === "string" ? of(ids) : from(ids)).pipe(
           mergeMap((modelId) => {
             return from(this._idsCache.getModelCategories(modelId)).pipe(
               concatAll(),
-              mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on })),
+              mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on: true })),
             );
           }),
         ),
