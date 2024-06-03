@@ -15,9 +15,9 @@ import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHand
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
 import type { ViewManager, Viewport } from "@itwin/core-frontend";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
+import type { HierarchyVisibilityHandler } from "../common/UseHierarchyVisibility";
 
 interface StatelessCategoriesTreeOwnProps {
   filter: string;
@@ -57,20 +57,14 @@ export function StatelessCategoriesTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const visibilityHandlerFactory = useCallback(() => {
-    const visibilityHandler = new StatelessCategoriesVisibilityHandler({
+  const visibilityHandler = useMemo<HierarchyVisibilityHandler>(() => {
+    return new StatelessCategoriesVisibilityHandler({
       imodel,
       viewport: activeView,
       viewManager: viewManager ?? IModelApp.viewManager,
       categories,
       allViewports,
     });
-    return {
-      getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
-      changeVisibility: async (node: HierarchyNode, on: boolean) => visibilityHandler.changeVisibility(node, on),
-      onVisibilityChange: visibilityHandler.onVisibilityChange,
-      dispose: () => visibilityHandler.dispose(),
-    };
   }, [activeView, allViewports, categories, imodel, viewManager]);
 
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessCategoriesTreeId });
@@ -99,7 +93,7 @@ export function StatelessCategoriesTree({
       imodel={imodel}
       treeName="StatelessCategoriesTree"
       getSchemaContext={getSchemaContext}
-      visibilityHandlerFactory={visibilityHandlerFactory}
+      visibilityHandler={visibilityHandler}
       getHierarchyDefinition={getDefinitionsProvider}
       getFilteredPaths={getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}

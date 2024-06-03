@@ -102,7 +102,9 @@ export interface ModelsTreeVisibilityHandlerProps {
  * When determining visibility for nodes, it should take into account the visibility of their children.
  * @internal
  */
-export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
+export interface ModelsTreeVisibilityHandler extends HierarchyVisibilityHandler {
+  idsCache: ModelsTreeIdsCache;
+}
 
 /**
  * Creates an instance if [[ModelsTreeVisibilityHandler]].
@@ -115,11 +117,11 @@ export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHan
 class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
-  private readonly _idsCache: ModelsTreeIdsCache;
+  public idsCache: ModelsTreeIdsCache;
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
-    this._idsCache =
+    this.idsCache =
       this._props.idsCache ?? new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(this._props.viewport.iModel), "unbounded"));
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
   }
@@ -190,7 +192,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         return of(createVisibilityStatus("disabled", "subject.nonSpatialView"));
       }
 
-      return from(this._idsCache.getSubjectModelIds(subjectIds)).pipe(
+      return from(this.idsCache.getSubjectModelIds(subjectIds)).pipe(
         concatAll(),
         distinct(),
         mergeMap((modelId) => this.getModelVisibilityStatus(modelId)),
@@ -218,7 +220,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         return of(createVisibilityStatus("hidden", "model.hiddenThroughModelSelector"));
       }
 
-      return from(this._idsCache.getModelCategories(modelId)).pipe(
+      return from(this.idsCache.getModelCategories(modelId)).pipe(
         concatAll(),
         map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
         map((x) => x.state),
@@ -428,7 +430,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         return EMPTY;
       }
 
-      return from(this._idsCache.getSubjectModelIds(ids)).pipe(mergeMap((modelIds) => this.changeModelState({ ids: modelIds, on })));
+      return from(this.idsCache.getSubjectModelIds(ids)).pipe(mergeMap((modelIds) => this.changeModelState({ ids: modelIds, on })));
     });
 
     const ovr = this._props.overrides?.changeSubjectNodeState;
@@ -456,7 +458,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }),
         (typeof ids === "string" ? of(ids) : from(ids)).pipe(
           mergeMap((modelId) => {
-            return from(this._idsCache.getModelCategories(modelId)).pipe(
+            return from(this.idsCache.getModelCategories(modelId)).pipe(
               concatAll(),
               mergeMap((categoryId) => this.changeCategoryState({ categoryId, modelId, on })),
             );
@@ -471,7 +473,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private showModelWithoutAnyCategoriesOrElements(modelId: Id64String) {
     const viewport = this._props.viewport;
     return forkJoin({
-      categories: this._idsCache.getModelCategories(modelId),
+      categories: this.idsCache.getModelCategories(modelId),
       alwaysDrawnElements: this.getAlwaysDrawnElements({ modelId }),
     }).pipe(
       mergeMap(async ({ categories, alwaysDrawnElements }) => {
@@ -663,7 +665,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     }
 
     const { modelId, categoryId } = props.queryProps;
-    const totalCount = categoryId ? this._idsCache.getCategoryElementsCount(modelId, categoryId) : this._idsCache.getModelElementCount(modelId);
+    const totalCount = categoryId ? this.idsCache.getCategoryElementsCount(modelId, categoryId) : this.idsCache.getModelElementCount(modelId);
     return forkJoin({
       totalCount,
       alwaysDrawn: this.getAlwaysDrawnElements(props.queryProps),

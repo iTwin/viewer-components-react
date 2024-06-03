@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
@@ -15,9 +15,8 @@ import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
-import type { ModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
@@ -54,11 +53,7 @@ export function StatelessModelsTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const { getModelsTreeIdsCache } = useModelsTreeIdsCache(imodel);
-
-  const visibilityHandlerFactory = useCallback((): ModelsTreeVisibilityHandler => {
-    return createModelsTreeVisibilityHandler({ viewport: activeView });
-  }, [activeView]);
+  const { getModelsTreeIdsCache, visibilityHandler } = useCachedVisibility(activeView);
 
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
@@ -95,7 +90,7 @@ export function StatelessModelsTree({
       imodel={imodel}
       treeName="StatelessModelsTree"
       getSchemaContext={getSchemaContext}
-      visibilityHandlerFactory={visibilityHandlerFactory}
+      visibilityHandler={visibilityHandler}
       getHierarchyDefinition={getHierarchyDefinition}
       getFilteredPaths={getFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
@@ -141,15 +136,18 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
-function useModelsTreeIdsCache(imodel: IModelConnection) {
+function useCachedVisibility(activeView: Viewport) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const prevImodelAccessRef = useRef<LimitingECSqlQueryExecutor>();
 
+  const [visibilityHandler, setVisibilityHandler] = useState(createModelsTreeVisibilityHandler({ viewport: activeView }));
+
   useIModelChangeListener({
-    imodel,
+    imodel: activeView.iModel,
     action: useCallback(() => {
       cacheRef.current = undefined;
-    }, []),
+      setVisibilityHandler(createModelsTreeVisibilityHandler({ viewport: activeView }));
+    }, [activeView]),
   });
 
   const getModelsTreeIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
@@ -157,13 +155,19 @@ function useModelsTreeIdsCache(imodel: IModelConnection) {
       cacheRef.current = undefined;
       prevImodelAccessRef.current = imodelAccess;
     }
+
     if (!cacheRef.current) {
-      cacheRef.current = new ModelsTreeIdsCache(imodelAccess);
+      const cache = new ModelsTreeIdsCache(imodelAccess);
+      cacheRef.current = cache;
+      setVisibilityHandler((handler) => {
+        return { ...handler, idsCache: cache };
+      });
     }
     return cacheRef.current;
   }, []);
 
   return {
     getModelsTreeIdsCache,
+    visibilityHandler,
   };
 }
