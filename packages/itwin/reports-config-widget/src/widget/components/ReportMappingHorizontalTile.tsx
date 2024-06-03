@@ -41,7 +41,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
     };
   }, [props.jobStartEvent, props.mapping.imodelId]);
 
-  const getExtractionState = useCallback(async () => {
+  const updateExtractionState = useCallback(async () => {
     try {
       const state = await props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
       if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded) {
@@ -59,17 +59,17 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
   }, [props.bulkExtractor, props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl, extractionState]);
 
   useEffect(() => {
-    void getExtractionState();
-  }, [extractionState, getExtractionState]);
+    void updateExtractionState();
+  }, [extractionState, updateExtractionState]);
 
   useEffect(() => {
     window.clearInterval(interval.current);
     if (extractionState === ExtractionStates.None) return;
     interval.current = window.setInterval(async () => {
-      await getExtractionState();
+      await updateExtractionState();
     }, STATUS_CHECK_INTERVAL);
     return () => window.clearInterval(interval.current);
-  }, [extractionState, getExtractionState]);
+  }, [extractionState, updateExtractionState]);
 
   const handleUpdateDataset = useCallback(async () => {
     setExtractionState(ExtractionStates.Starting);
