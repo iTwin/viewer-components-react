@@ -1,6 +1,6 @@
 sep=;
 Release Tag;API Item
-public;CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel, }: CalculatedPropertyActionProps) => JSX.Element
+public;CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel }: CalculatedPropertyActionProps) => JSX.Element
 public;CalculatedPropertyActionProps
 public;CalculatedPropertyActionWithVisuals: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel, }: CalculatedPropertyActionWithVisualsProps) => JSX.Element
 public;CalculatedPropertyActionWithVisualsProps
@@ -13,7 +13,7 @@ internal;createDefaultPropertiesClient: (prefix?: ClientPrefix) => IPropertiesCl
 internal;createGroupsClient: (clientProp: IGroupsClient | ClientPrefix) => IGroupsClient
 internal;createMappingClient: (clientProp: IMappingsClient | ClientPrefix) => IMappingsClient
 internal;createPropertiesClient: (clientProp: IPropertiesClient | ClientPrefix) => IPropertiesClient
-public;CustomCalculationAction: ({ mappingId, groupId, customCalculation, onSaveSuccess, onClickCancel, }: CustomCalculationActionProps) => JSX.Element
+public;CustomCalculationAction: ({ mappingId, groupId, customCalculation, onSaveSuccess, onClickCancel }: CustomCalculationActionProps) => JSX.Element
 public;CustomCalculationActionProps
 public;DataType = "Double" | "String" | "Boolean" | "Integer"
 public;GetAccessTokenFn = () => Promise
@@ -28,9 +28,9 @@ public;GroupingMappingContextProps
 public;GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI
 public;GroupingMappingCustomUIType
 public;GroupingMappingProvider
-public;GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel, }: GroupPropertyActionProps) => JSX.Element
+public;GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => JSX.Element
 public;GroupPropertyActionProps
-public;GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView, }: GroupingCustomUIProps) => JSX.Element
+public;GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
 public;Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, }: GroupsProps) => JSX.Element
 internal;GroupsClientContext: Context
 internal;GroupsOperationsProps
@@ -40,7 +40,7 @@ internal;GroupsViewProps
 public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, ...rest }: GroupsVisualizationProps) => JSX.Element
 public;GroupsVisualizationProps
 public;IResult
-public;ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery, }: GroupingCustomUIProps) => JSX.Element
+public;ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery }: GroupingCustomUIProps) => JSX.Element
 public;MappingAction: ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => JSX.Element
 public;MappingActionProps
 internal;MappingClientContext: Context
@@ -56,10 +56,10 @@ public;PropertyMenuProps
 public;PropertyMenuWithVisualization: ({ group, color, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
 public;PropertyMenuWithVisualizationProps
 public;resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap): IResult
-public;SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView, }: GroupingCustomUIProps) => JSX.Element
+public;SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
 public;useGroupingMappingApiConfig: () => GroupingMappingApiConfig
 internal;useGroupsClient: () => IGroupsClient
-internal;useGroupsOperations: ({ mappingId, }: GroupsOperationsProps) =>
+internal;useGroupsOperations: ({ mappingId }: GroupsOperationsProps) =>
 internal;useMappingClient: () => IMappingsClient
 internal;useMappingsOperations: ({ iModelId, getAccessToken, mappingClient }: MappingsOperationsProps) =>
 internal;usePropertiesClient: () => IPropertiesClient
