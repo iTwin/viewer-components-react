@@ -14,18 +14,21 @@ import type {
   DefineRootHierarchyLevelProps,
   HierarchyDefinition,
   HierarchyLevelDefinition,
+  LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 
 interface ExternalSourcesTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
+  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
 }
 
 export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+  private _queryExecutor: LimitingECSqlQueryExecutor;
+  private _isSupported?: boolean;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
     this._impl = createClassBasedHierarchyDefinition({
@@ -48,6 +51,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
+    this._queryExecutor = props.imodelAccess;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
@@ -61,6 +65,14 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
+    if (this._isSupported === undefined) {
+      this._isSupported = await this.isSupported();
+    }
+
+    if (!this._isSupported) {
+      return [];
+    }
+
     return this._impl.defineHierarchyLevel(props);
   }
 
@@ -270,5 +282,18 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         }),
       },
     ]);
+  }
+
+  private async isSupported() {
+    const query = `
+      SELECT 1
+      FROM ECDbMeta.ECSchemaDef
+      WHERE Name = 'BisCore' AND VersionMinor > 12
+    `;
+
+    for await (const _row of this._queryExecutor.createQueryReader({ ecsql: query })) {
+      return true;
+    }
+    return false;
   }
 }
