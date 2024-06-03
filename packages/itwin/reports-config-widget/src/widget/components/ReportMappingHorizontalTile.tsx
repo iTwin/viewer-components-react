@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { BulkExtractor } from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
@@ -9,10 +9,7 @@ import type { BeEvent } from "@itwin/core-bentley";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { IconButton } from "@itwin/itwinui-react";
-import {
-  SvgDelete,
-  SvgPlay,
-} from "@itwin/itwinui-icons-react";
+import { SvgDelete, SvgPlay } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
 import type { ReportMappingAndMapping } from "./ReportMappings";
 import type { ExtractionRequestDetails } from "@itwin/insights-client";
@@ -87,44 +84,37 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
       title={props.mapping.mappingName}
       subText={props.mapping.iModelName}
       titleTooltip={props.mapping.mappingDescription}
-      actionGroup={(
-        <div
-          className="rcw-action-button"
-          data-testid="tile-action-button">
-          {extractionState === ExtractionStates.None ?
-            (
-              <>
-                <IconButton
-                  styleType="borderless"
-                  title={ReportsConfigWidget.localization.getLocalizedString(
-                    "ReportsConfigWidget:UpdateDataset"
-                  )}
-                  onClick={handleUpdateDataset}
-                >
-                  <SvgPlay />
-                </IconButton>
-                <IconButton
-                  styleType="borderless"
-                  title={ReportsConfigWidget.localization.getLocalizedString(
-                    "ReportsConfigWidget:Remove"
-                  )}
-                  onClick={() => {
-                    props.onClickDelete();
-                  }}
-                >
-                  <SvgDelete />
-                </IconButton>
-              </>
-            ) : (
-              <ExtractionStatus
-                state={extractionState}
-                clearExtractionState={() => {
-                  setExtractionState(ExtractionStates.None);
+      actionGroup={
+        <div className="rcw-action-button" data-testid="tile-action-button">
+          {extractionState === ExtractionStates.None ? (
+            <>
+              <IconButton
+                styleType="borderless"
+                title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:UpdateDataset")}
+                onClick={handleUpdateDataset}
+              >
+                <SvgPlay />
+              </IconButton>
+              <IconButton
+                styleType="borderless"
+                title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Remove")}
+                onClick={() => {
+                  props.onClickDelete();
                 }}
-              ></ExtractionStatus>
-            )}
-        </div >
-      )}
+              >
+                <SvgDelete />
+              </IconButton>
+            </>
+          ) : (
+            <ExtractionStatus
+              state={extractionState}
+              clearExtractionState={() => {
+                setExtractionState(ExtractionStates.None);
+              }}
+            ></ExtractionStatus>
+          )}
+        </div>
+      }
     />
   );
 };

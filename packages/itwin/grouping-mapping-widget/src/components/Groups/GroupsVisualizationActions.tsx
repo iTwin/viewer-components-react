@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { ButtonGroup, IconButton, ToggleSwitch } from "@itwin/itwinui-react";
 import React from "react";
 import { ToggleGroupVisibility } from "./ToggleGroupVisibility";
@@ -24,44 +24,20 @@ export const GroupVisualizationActions = ({
   showAll,
   hideAll,
 }: GroupVisualizationActionsProps) => {
-  const {
-    showGroupColor,
-    setShowGroupColor,
-  } = useGroupHilitedElementsContext();
+  const { showGroupColor, setShowGroupColor } = useGroupHilitedElementsContext();
 
   return (
     <ButtonGroup className="gmw-visual-buttons">
-      <ToggleSwitch
-        label="Visualization"
-        labelPosition="left"
-        checked={isVisualizationEnabled}
-        onChange={onClickVisualizationButton}
-      />
+      <ToggleSwitch label="Visualization" labelPosition="left" checked={isVisualizationEnabled} onChange={onClickVisualizationButton} />
       <ButtonGroup>
-        <ToggleGroupVisibility
-          isLoadingQuery={disabled}
-          showGroupColor={showGroupColor}
-          setShowGroupColor={setShowGroupColor}
-        />
-        <IconButton
-          title="Show All"
-          onClick={showAll}
-          disabled={disabled}
-          styleType="borderless"
-        >
+        <ToggleGroupVisibility isLoadingQuery={disabled} showGroupColor={showGroupColor} setShowGroupColor={setShowGroupColor} />
+        <IconButton title="Show All" onClick={showAll} disabled={disabled} styleType="borderless">
           <SvgVisibilityShow />
         </IconButton>
-        <IconButton
-          title="Hide All"
-          onClick={hideAll}
-          disabled={disabled}
-          styleType="borderless"
-        >
+        <IconButton title="Hide All" onClick={hideAll} disabled={disabled} styleType="borderless">
           <SvgVisibilityHide />
         </IconButton>
       </ButtonGroup>
-    </ButtonGroup >
+    </ButtonGroup>
   );
-
 };
-

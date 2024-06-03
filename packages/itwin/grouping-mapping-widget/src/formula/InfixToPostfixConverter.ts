@@ -1,9 +1,17 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { isFunction } from "./FormulaFunctionProvider";
-import { getBinaryOperator, getOperatorAssociativity, getOperatorPrecedence, getUnaryOperator, isOperator, isSupportedOperator, OperatorAssociativity } from "./FormulaOperatorsProvider";
+import {
+  getBinaryOperator,
+  getOperatorAssociativity,
+  getOperatorPrecedence,
+  getUnaryOperator,
+  isOperator,
+  isSupportedOperator,
+  OperatorAssociativity,
+} from "./FormulaOperatorsProvider";
 import type { IResult } from "./IResult";
 import { Queue } from "./Queue";
 import { Stack } from "./Stack";
@@ -186,7 +194,7 @@ const addOperator: TokenInterpreter = (ctx: IConverterContext) => {
       break;
     }
 
-    const o2Unary = (o2.argCount === 0) || (o2.argCount === 1 && o2.argCountIncremented === true);
+    const o2Unary = o2.argCount === 0 || (o2.argCount === 1 && o2.argCountIncremented === true);
     const op2 = o2Unary ? getUnaryOperator(o2.value) : getBinaryOperator(o2.value);
     const o2Precedence = getOperatorPrecedence(op2);
     if (!(o2Precedence > o1Precedence || (o2Precedence === o1Precedence && o1Associativity === OperatorAssociativity.Left))) {

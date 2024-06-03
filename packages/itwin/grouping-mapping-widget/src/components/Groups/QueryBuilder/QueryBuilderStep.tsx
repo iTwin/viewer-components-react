@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { ComboBox, Fieldset, Label, Text } from "@itwin/itwinui-react";
@@ -24,15 +24,12 @@ export interface QueryBuilderStepProps extends QueryBuilderCustomUIProps {
 export const QueryBuilderStep = ({ queryRowCount, isHidden, onChange, getOptions, displayStrings: userDisplayStrings, ...rest }: QueryBuilderStepProps) => {
   const containerClassName = isHidden ? "gmw-hide" : "gmw-query-builder-container";
 
-  const displayStrings = React.useMemo(
-    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
-    [userDisplayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
 
   return (
     <Fieldset legend={displayStrings.groupBy} className={containerClassName}>
       <span>
-        <Label htmlFor='query-combo-input'>Query Generation Tool</Label>
+        <Label htmlFor="query-combo-input">Query Generation Tool</Label>
         <ComboBox
           value={rest.queryGenerationType}
           inputProps={{
@@ -43,9 +40,7 @@ export const QueryBuilderStep = ({ queryRowCount, isHidden, onChange, getOptions
         />
       </span>
       <Text>{`Row Count: ${queryRowCount}`}</Text>
-      <QueryBuilderCustomUI
-        {...rest}
-      />
+      <QueryBuilderCustomUI {...rest} />
     </Fieldset>
   );
 };

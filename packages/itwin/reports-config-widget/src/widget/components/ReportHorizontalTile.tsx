@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useRef, useState } from "react";
 import type { BulkExtractor } from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
@@ -9,16 +9,8 @@ import type { BeEvent } from "@itwin/core-bentley";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
 import type { Report } from "@itwin/insights-client";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
-import {
-  DropdownMenu,
-  IconButton,
-  MenuItem,
-} from "@itwin/itwinui-react";
-import {
-  SvgDelete,
-  SvgEdit,
-  SvgMore,
-} from "@itwin/itwinui-icons-react";
+import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
+import { SvgDelete, SvgEdit, SvgMore } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
 
 export interface ReportHorizontalTileProps {
@@ -82,48 +74,46 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
       onClick={onClickTile}
       onClickTitle={() => props.onClickTitle?.(props.report)}
       selected={props.selected}
-      actionGroup={extractionState === ExtractionStates.None ? (
-        <div
-          className="rcw-action-button"
-          data-testid="tile-action-button">
-          <DropdownMenu
-            menuItems={(close: () => void) => [
-              props.onClickModify ? <MenuItem
-                key={0}
-                onClick={() => props.onClickModify?.(props.report)}
-                icon={<SvgEdit />}
-              >
-                {ReportsConfigWidget.localization.getLocalizedString(
-                  "ReportsConfigWidget:Modify"
-                )}
-              </MenuItem> : [],
-              <MenuItem
-                key={1}
-                onClick={() => {
-                  props.onClickDelete();
-                  close();
-                }}
-                icon={<SvgDelete />}
-              >
-                {ReportsConfigWidget.localization.getLocalizedString(
-                  "ReportsConfigWidget:Remove"
-                )}
-              </MenuItem>,
-            ].flat()}
-          >
-            <IconButton styleType="borderless" title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportOptions")}>
-              <SvgMore />
-            </IconButton>
-          </DropdownMenu>
-        </div>
-      ) : (
-        <ExtractionStatus
-          state={extractionState}
-          clearExtractionState={() => {
-            setExtractionState(ExtractionStates.None);
-          }}
-        ></ExtractionStatus>
-      )}
+      actionGroup={
+        extractionState === ExtractionStates.None ? (
+          <div className="rcw-action-button" data-testid="tile-action-button">
+            <DropdownMenu
+              menuItems={(close: () => void) =>
+                [
+                  props.onClickModify ? (
+                    <MenuItem key={0} onClick={() => props.onClickModify?.(props.report)} icon={<SvgEdit />}>
+                      {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Modify")}
+                    </MenuItem>
+                  ) : (
+                    []
+                  ),
+                  <MenuItem
+                    key={1}
+                    onClick={() => {
+                      props.onClickDelete();
+                      close();
+                    }}
+                    icon={<SvgDelete />}
+                  >
+                    {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Remove")}
+                  </MenuItem>,
+                ].flat()
+              }
+            >
+              <IconButton styleType="borderless" title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportOptions")}>
+                <SvgMore />
+              </IconButton>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <ExtractionStatus
+            state={extractionState}
+            clearExtractionState={() => {
+              setExtractionState(ExtractionStates.None);
+            }}
+          ></ExtractionStatus>
+        )
+      }
     ></HorizontalTile>
   );
 };

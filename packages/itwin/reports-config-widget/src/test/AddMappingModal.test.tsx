@@ -1,29 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import {
-  mockIModelId1,
-  mockIModelId2,
-  mockIModelsResponse,
-  mockITwinId,
-  mockReportId,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "./test-utils";
+import { mockIModelId1, mockIModelId2, mockIModelsResponse, mockITwinId, mockReportId, render, screen, waitFor, within } from "./test-utils";
 import * as moq from "typemoq";
-import type {
-  MappingContainer,
-  MappingsClient,
-  ReportMappingCollection,
-  ReportsClient,
-} from "@itwin/insights-client";
+import type { MappingContainer, MappingsClient, ReportMappingCollection, ReportsClient } from "@itwin/insights-client";
 import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
 import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
 import { AddMappingsModal } from "../widget/components/AddMappingsModal";
@@ -89,29 +74,25 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
   };
 };
 
-const mockMappingsFactory = (
-  mockReportMappings: ReportMappingCollection
-): MappingContainer[] => {
-  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map(
-    (mapping, index) => ({
-      mapping: {
-        id: mapping.mappingId,
-        mappingName: `mOcKMaPpIngNaMe${index}`,
-        description: `mOcKmApPInGDeScRiPtIoN${index}`,
-        extractionEnabled: false,
-        createdOn: "",
-        createdBy: "",
-        modifiedOn: "",
-        modifiedBy: "",
-        _links: {
-          iModel: {
-            // Tie the mapping to to the iModel Id
-            href: mapping.imodelId,
-          },
+const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): MappingContainer[] => {
+  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map((mapping, index) => ({
+    mapping: {
+      id: mapping.mappingId,
+      mappingName: `mOcKMaPpIngNaMe${index}`,
+      description: `mOcKmApPInGDeScRiPtIoN${index}`,
+      extractionEnabled: false,
+      createdOn: "",
+      createdBy: "",
+      modifiedOn: "",
+      modifiedBy: "",
+      _links: {
+        iModel: {
+          // Tie the mapping to to the iModel Id
+          href: mapping.imodelId,
         },
       },
-    })
-  );
+    },
+  }));
 
   const extraMappingId = faker.datatype.uuid();
   const extraMappingName = "mOcKNaMeExTrA";
@@ -139,18 +120,17 @@ const mockMappingsFactory = (
 };
 
 const mockReportMappingsAndMappingsFactory = (mockMappings: MappingContainer[], reportMappings: ReportMappingCollection): ReportMappingAndMapping[] => {
-  const reportMappingsAndMapping =
-    reportMappings.mappings.map((reportMapping) => {
-      const mapping = mockMappings.find((x) => x.mapping.id === reportMapping.mappingId)!.mapping;
-      const iModelName = mockProjectIModels.iModels.find((x) => x.id === reportMapping.imodelId)!.displayName;
-      const reportMappingAndMapping: ReportMappingAndMapping = {
-        ...reportMapping,
-        iModelName,
-        mappingName: mapping.mappingName,
-        mappingDescription: mapping.description ?? "",
-      };
-      return reportMappingAndMapping;
-    });
+  const reportMappingsAndMapping = reportMappings.mappings.map((reportMapping) => {
+    const mapping = mockMappings.find((x) => x.mapping.id === reportMapping.mappingId)!.mapping;
+    const iModelName = mockProjectIModels.iModels.find((x) => x.id === reportMapping.imodelId)!.displayName;
+    const reportMappingAndMapping: ReportMappingAndMapping = {
+      ...reportMapping,
+      iModelName,
+      mappingName: mapping.mappingName,
+      mappingDescription: mapping.description ?? "",
+    };
+    return reportMappingAndMapping;
+  });
   return reportMappingsAndMapping;
 };
 
@@ -194,7 +174,7 @@ describe("Add Mapping Modal", () => {
     const mockMappings = mockMappingsFactory(mockReportMappings);
     const mockReportMappingsAndMappings = mockReportMappingsAndMappingsFactory(mockMappings, mockReportMappings);
 
-    mockGetMappings.mockReturnValueOnce({mappings: mockMappings.map((m: MappingContainer) => m.mapping)});
+    mockGetMappings.mockReturnValueOnce({ mappings: mockMappings.map((m: MappingContainer) => m.mapping) });
 
     const { user } = render(
       <AddMappingsModal
@@ -203,7 +183,8 @@ describe("Add Mapping Modal", () => {
         existingMappings={mockReportMappingsAndMappings}
         onClose={jest.fn()}
         defaultIModelId={mockIModelId1}
-      />, { iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object }
+      />,
+      { iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object },
     );
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -220,10 +201,7 @@ describe("Add Mapping Modal", () => {
     // Already mapped mappings are disabled
     for (let i = 0; i < mockMappings.length - 1; i++) {
       const row = screen.getByRole("row", {
-        name: new RegExp(
-          `${mockMappings[i].mapping.mappingName} ${mockMappings[i].mapping.description}`,
-          "i"
-        ),
+        name: new RegExp(`${mockMappings[i].mapping.mappingName} ${mockMappings[i].mapping.description}`, "i"),
       });
 
       const checkbox = within(row).getByRole("checkbox");
@@ -232,11 +210,7 @@ describe("Add Mapping Modal", () => {
 
     // Click on checkbox on new mapping
     const unmappedRow = screen.getByRole("row", {
-      name: new RegExp(
-        `${mockMappings[mockMappings.length - 1].mapping.mappingName
-        } ${mockMappings[mockMappings.length - 1].mapping.description}`,
-        "i"
-      ),
+      name: new RegExp(`${mockMappings[mockMappings.length - 1].mapping.mappingName} ${mockMappings[mockMappings.length - 1].mapping.description}`, "i"),
     });
 
     const enabledCheckbox = within(unmappedRow).getByRole("checkbox");

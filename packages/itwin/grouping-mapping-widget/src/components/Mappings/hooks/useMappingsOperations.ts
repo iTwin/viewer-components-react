@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useState } from "react";
 import { ExtractionState } from "@itwin/insights-client";
 import type { IMappingsClient, Mapping } from "@itwin/insights-client";
@@ -33,11 +33,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   const [initialStateExtractionFlag, setInitialExtractionStateFlag] = useState<boolean>(true);
   const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
 
-  const {
-    data: mappings,
-    isFetched: isMappingsFetched,
-    isFetching: isLoadingMappings,
-  } = useFetchMappings(iModelId, getAccessToken, mappingClient);
+  const { data: mappings, isFetched: isMappingsFetched, isFetching: isLoadingMappings } = useFetchMappings(iModelId, getAccessToken, mappingClient);
 
   const {
     data: extractionStatus,
@@ -46,28 +42,29 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   } = useFetchExtractionStatus({ iModelId, getAccessToken, extractionClient });
 
   const refreshExtractionStatus = useCallback(async () => {
-    await queryClient.invalidateQueries({queryKey: ["iModelExtractionStatus"]});
+    await queryClient.invalidateQueries({ queryKey: ["iModelExtractionStatus"] });
     setInitialExtractionStateFlag(false);
   }, [queryClient]);
 
   useEffect(() => {
-    if(initialStateExtractionFlag && isMappingsFetched && isExtractionStatusFetched && mappings && extractionStatus && !mappingIdJobInfo.size){
+    if (initialStateExtractionFlag && isMappingsFetched && isExtractionStatusFetched && mappings && extractionStatus && !mappingIdJobInfo.size) {
       const newMappingIdJobInfo = new Map<string, string>();
       const latestExtractionResultId = extractionStatus.latestExtractionResult.value?.id;
       const state = extractionStatus.latestExtractionResult.value?.state;
-      if((state === ExtractionState.Failed || state === ExtractionState.Succeeded || state === ExtractionState.PartiallySucceeded)) return;
-      !!latestExtractionResultId && mappings.forEach((mapping) => {
-        const mappingId = mapping.id;
-        const latestExtractionResultId = extractionStatus.latestExtractionResult.value.id;
-        newMappingIdJobInfo.set(mappingId, latestExtractionResultId);
-      });
+      if (state === ExtractionState.Failed || state === ExtractionState.Succeeded || state === ExtractionState.PartiallySucceeded) return;
+      !!latestExtractionResultId &&
+        mappings.forEach((mapping) => {
+          const mappingId = mapping.id;
+          const latestExtractionResultId = extractionStatus.latestExtractionResult.value.id;
+          newMappingIdJobInfo.set(mappingId, latestExtractionResultId);
+        });
       setMappingIdJobInfo(newMappingIdJobInfo);
       setInitialExtractionStateFlag(false);
     }
   }, [extractionStatus, initialStateExtractionFlag, isExtractionStatusFetched, isMappingsFetched, mappingIdJobInfo.size, mappings, setMappingIdJobInfo]);
 
   const refreshMappings = useCallback(async () => {
-    await queryClient.invalidateQueries({queryKey: ["mappings"]});
+    await queryClient.invalidateQueries({ queryKey: ["mappings"] });
   }, [queryClient]);
 
   const { mutateAsync: toggleExtraction, isLoading: isTogglingExtraction } = useMutation({
@@ -81,7 +78,7 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
     },
   });
 
-  const { mutateAsync: onDelete, isLoading: isDeletingMapping} = useMutation({
+  const { mutateAsync: onDelete, isLoading: isDeletingMapping } = useMutation({
     mutationFn: async (mapping: Mapping) => {
       const accessToken = await getAccessToken();
       await mappingClient.deleteMapping(accessToken, mapping.id);
@@ -92,13 +89,31 @@ export const useMappingsOperations = ({ iModelId, getAccessToken, mappingClient 
   });
 
   const isLoading = isLoadingMappings || isTogglingExtraction || isDeletingMapping;
-  const extractionStatusGated = (!extractionStatus || isLoadingExtractionStatus) ? {
-    extractionStatusIcon: {
-      iconStatus: undefined,
-      iconMessage: "Loading...",
-    },
-    extractionMessageData: [],
-  } : extractionStatus;
+  const extractionStatusGated =
+    !extractionStatus || isLoadingExtractionStatus
+      ? {
+          extractionStatusIcon: {
+            iconStatus: undefined,
+            iconMessage: "Loading...",
+          },
+          extractionMessageData: [],
+        }
+      : extractionStatus;
 
-  return { mappings, isLoading, showExtractionMessageModal, extractionStatus: extractionStatusGated, setShowExtractionMessageModal, refreshMappings, refreshExtractionStatus, toggleExtraction, onDelete, setShowImportModal, showImportModal, setShowDeleteModal, showDeleteModal, isTogglingExtraction};
+  return {
+    mappings,
+    isLoading,
+    showExtractionMessageModal,
+    extractionStatus: extractionStatusGated,
+    setShowExtractionMessageModal,
+    refreshMappings,
+    refreshExtractionStatus,
+    toggleExtraction,
+    onDelete,
+    setShowImportModal,
+    showImportModal,
+    setShowDeleteModal,
+    showDeleteModal,
+    isTogglingExtraction,
+  };
 };
