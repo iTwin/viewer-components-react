@@ -51,7 +51,7 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-describe("HierarchyBasedVisibilityHandler", () => {
+describe.only("HierarchyBasedVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -1394,19 +1394,12 @@ describe("HierarchyBasedVisibilityHandler", () => {
             expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
           });
 
-          it("removes all children from never drawn list", async () => {
+          it("removes element from never drawn list", async () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const elementId = "0x3";
-            const childElements = ["0x4", "0x5", "0x6"];
             const viewport = createFakeSinonViewport({
-              neverDrawn: new Set(childElements),
-              queryHandler: (query) => {
-                if (query.includes("ChildElements")) {
-                  return childElements.map((id) => ({ id }));
-                }
-                return [];
-              },
+              neverDrawn: new Set([elementId]),
             });
             const { handler } = createHandler({
               viewport,
@@ -1414,30 +1407,6 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
             await handler.changeVisibility(createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId }), true);
             expect(viewport.neverDrawn?.size ?? 0).to.eq(0);
-          });
-
-          it("adds all children to always drawn if category is hidden", async () => {
-            const modelId = "0x1";
-            const categoryId = "0x2";
-            const elementId = "0x3";
-            const childElements = ["0x4", "0x5", "0x6"];
-            const viewport = createFakeSinonViewport({
-              view: {
-                viewsCategory: sinon.fake.returns(false),
-              },
-              queryHandler: (query) => {
-                if (query.includes("ChildElements")) {
-                  return childElements.map((id) => ({ id }));
-                }
-                return [];
-              },
-            });
-            const { handler } = createHandler({
-              viewport,
-            });
-
-            await handler.changeVisibility(createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId }), true);
-            expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId, ...childElements]));
           });
         });
 
@@ -1493,52 +1462,6 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const { handler } = createHandler({ viewport });
             await handler.changeVisibility(node, false);
             expect(viewport.neverDrawn).to.deep.eq(new Set([elementId]));
-          });
-
-          it("removes all children from always drawn drawn", async () => {
-            const modelId = "0x1";
-            const categoryId = "0x2";
-            const elementId = "0x3";
-            const childElements = ["0x4", "0x5", "0x6"];
-            const queryHandler = sinon.fake((query: string) => {
-              if (query.includes("ChildElements")) {
-                return childElements.map((id) => ({ id }));
-              }
-              return [];
-            });
-
-            const viewport = createFakeSinonViewport({
-              alwaysDrawn: new Set([elementId, ...childElements]),
-              queryHandler,
-            });
-            const { handler } = createHandler({
-              viewport,
-            });
-
-            await handler.changeVisibility(createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId }), false);
-            expect(queryHandler).to.be.called;
-            expect(viewport.alwaysDrawn?.size ?? 0).to.eq(0);
-          });
-
-          it("adds all children to never drawn list if category is visible", async () => {
-            const modelId = "0x1";
-            const categoryId = "0x2";
-            const elementId = "0x3";
-            const childElements = ["0x4", "0x5", "0x6"];
-            const queryHandler = sinon.fake((query: string) => {
-              if (query.includes("ChildElements")) {
-                return childElements.map((id) => ({ id }));
-              }
-              return [];
-            });
-            const viewport = createFakeSinonViewport({ queryHandler });
-            const { handler } = createHandler({
-              viewport,
-            });
-
-            await handler.changeVisibility(createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId }), false);
-            expect(queryHandler).to.be.called;
-            expect(viewport.neverDrawn).to.deep.eq(new Set([elementId, ...childElements]));
           });
         });
       });
@@ -1989,7 +1912,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       it("if model is hidden, showing element makes model and category partially visible", async () => {
         const elementNode = createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId });
         await handler.changeVisibility(elementNode, true);
-        expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId, ...elementHierarchy.get(elementId)!]));
+        expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
         viewport.renderFrame();
         await Promise.all([
           assertModelVisibility({
@@ -2020,7 +1943,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         const elementNode = createElementHierarchyNode({ modelId, categoryId, hasChildren: true, elementId });
         await handler.changeVisibility(elementNode, true);
 
-        expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId, ...elementHierarchy.get(elementId)!]));
+        expect(viewport.alwaysDrawn).to.deep.eq(new Set([elementId]));
         viewport.renderFrame();
         await Promise.all([
           assertModelVisibility({

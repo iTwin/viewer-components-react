@@ -4,14 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Observable, OperatorFunction } from "rxjs";
-import {
-  concat, concatAll, concatWith, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, mergeWith, of, reduce, shareReplay,
-} from "rxjs";
+import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
-import { reduceWhile, toSet, toVoidPromise } from "../../common/Rxjs";
+import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
 import { AlwaysAndNeverDrawnElementInfo } from "./internal/AlwaysAndNeverDrawnElementInfo";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { ModelsTreeNode } from "./internal/ModelsTreeNode";
@@ -40,7 +38,6 @@ interface GetElementStateProps {
   elementId: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
-  hasChildren: boolean;
 }
 
 interface ChangeElementStateProps extends GetElementStateProps {
@@ -118,7 +115,6 @@ export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHan
 class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
-  private readonly _groupingNodeElementsCache = new Map<string, { modelId: string; categoryId: string; elementIds: Observable<Id64String> }>();
   private readonly _idsCache: ModelsTreeIdsCache;
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
@@ -186,7 +182,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       elementId: node.key.instanceKeys[0].id,
       modelId,
       categoryId,
-      hasChildren: node.children,
     });
   }
 
@@ -317,24 +312,19 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         return of(createVisibilityStatus("hidden"));
       }
 
-      return elementIds.pipe(
-        toSet(),
-        mergeMap((ids) => {
-          return this.getVisibilityFromAlwaysAndNeverDrawnElements({
-            elements: ids,
-            defaultStatus: () => {
-              const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
-              return createVisibilityStatus(status.state, `groupingNode.${status.state}ThroughCategory`);
-            },
-            tooltips: {
-              allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
-              allElementsInNeverDrawnList: "groupingNode.allElementsHidden",
-              elementsInBothAlwaysAndNeverDrawn: "groupingNode.someElementsAreHidden",
-              noElementsInExclusiveAlwaysDrawnList: "groupingNode.allElementsHidden",
-            },
-          });
-        }),
-      );
+      return this.getVisibilityFromAlwaysAndNeverDrawnElements({
+        elements: elementIds,
+        defaultStatus: () => {
+          const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+          return createVisibilityStatus(status.state, `groupingNode.${status.state}ThroughCategory`);
+        },
+        tooltips: {
+          allElementsInAlwaysDrawnList: "groupingNode.allElementsVisible",
+          allElementsInNeverDrawnList: "groupingNode.allElementsHidden",
+          elementsInBothAlwaysAndNeverDrawn: "groupingNode.someElementsAreHidden",
+          noElementsInExclusiveAlwaysDrawnList: "groupingNode.allElementsHidden",
+        },
+      });
     });
 
     const ovr = this._props.overrides?.getElementGroupingNodeDisplayStatus;
@@ -428,7 +418,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       elementId: node.key.instanceKeys[0].id,
       modelId,
       categoryId,
-      hasChildren: node.children,
       on,
     });
   }
@@ -563,17 +552,14 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
    */
   private changeElementState(props: ChangeElementStateProps): Observable<void> {
     const result = defer(() => {
-      const { elementId, on, hasChildren, modelId, categoryId } = props;
+      const { elementId, on, modelId, categoryId } = props;
       const viewport = this._props.viewport;
       return concat(
         props.on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
         defer(() => {
           const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
           const isDisplayedByDefault = categoryVisibility.state === "visible";
-          return of(elementId).pipe(
-            concatWith(hasChildren ? from(this.getElementRecursiveChildren([props.elementId])) : EMPTY),
-            this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }),
-          );
+          return of(elementId).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
         }),
       );
     });
@@ -742,46 +728,12 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   }
 
   private getGroupingNodeInfo(node: GroupingHierarchyNode) {
-    const cacheKey = JSON.stringify(node.key);
-    let res = this._groupingNodeElementsCache.get(cacheKey);
-    if (res) {
-      return res;
-    }
-
     const modelId = ModelsTreeNode.getModelId(node);
     const categoryId = ModelsTreeNode.getCategoryId(node);
     assert(!!modelId && !!categoryId);
 
-    const ids = node.groupedInstanceKeys.map((key) => key.id);
-    const elementIds = from(ids).pipe(mergeWith(this.getElementRecursiveChildren(ids)), shareReplay());
-    res = { modelId, categoryId, elementIds };
-
-    this._groupingNodeElementsCache.set(cacheKey, res);
-    return res;
-  }
-
-  private getElementRecursiveChildren(parentIds: Id64String | Id64Array): Observable<Id64String> {
-    const executor = createECSqlQueryExecutor(this._props.viewport.iModel);
-    const reader = executor.createQueryReader({
-      ctes: [
-        `
-        ChildElements(id) AS (
-          SELECT ECInstanceId id
-          FROM bis.GeometricElement3d
-          WHERE ${typeof parentIds === "string" ? "Parent.Id = ?" : "InVirtualSet(?, Parent.Id)"}
-
-          UNION ALL
-
-          SELECT c.ECInstanceId id
-          FROM bis.GeometricElement3d c
-          JOIN ChildElements p ON c.Parent.Id = p.id
-        )
-        `,
-      ],
-      ecsql: "SELECT * FROM ChildElements",
-      bindings: [typeof parentIds === "string" ? { type: "id", value: parentIds } : { type: "idset", value: parentIds }],
-    });
-    return from(reader).pipe(map((row) => row.id));
+    const elementIds = new Set(node.groupedInstanceKeys.map((key) => key.id));
+    return { modelId, categoryId, elementIds };
   }
 }
 
