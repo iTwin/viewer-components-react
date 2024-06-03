@@ -3,8 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 import { useCallback, useEffect, useState } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -20,6 +18,8 @@ import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 import { TreeRenderer } from "./TreeRenderer";
 
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { UsageTrackedFeatures } from "../../../common/UseFeatureReporting";

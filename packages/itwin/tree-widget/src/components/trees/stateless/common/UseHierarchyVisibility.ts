@@ -33,8 +33,8 @@ interface UseHierarchyVisibilityResult {
 export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): UseHierarchyVisibilityResult {
   const nodesStateMap = useRef(new Map<string, { node: PresentationHierarchyNode; state: TreeNodeCheckboxState; needsRefresh: boolean }>());
   const [state, setState] = useState<UseHierarchyVisibilityResult>({
-    getCheckboxState: (_node: PresentationHierarchyNode): TreeNodeCheckboxState => ({ state: "off", isDisabled: true }),
-    onCheckboxClicked: (_node: PresentationHierarchyNode, _checked: boolean): void => {},
+    getCheckboxState: () => ({ state: "off", isDisabled: true }),
+    onCheckboxClicked: () => {},
   });
 
   useEffect(() => {
