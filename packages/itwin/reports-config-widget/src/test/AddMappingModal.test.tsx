@@ -19,8 +19,8 @@ import {
 } from "./test-utils";
 import * as moq from "typemoq";
 import type {
+  MappingContainer,
   MappingsClient,
-  MappingSingle,
   ReportMappingCollection,
   ReportsClient,
 } from "@itwin/insights-client";
@@ -91,8 +91,8 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
 
 const mockMappingsFactory = (
   mockReportMappings: ReportMappingCollection
-): MappingSingle[] => {
-  const mockMappings: MappingSingle[] = mockReportMappings.mappings.map(
+): MappingContainer[] => {
+  const mockMappings: MappingContainer[] = mockReportMappings.mappings.map(
     (mapping, index) => ({
       mapping: {
         id: mapping.mappingId,
@@ -104,7 +104,7 @@ const mockMappingsFactory = (
         modifiedOn: "",
         modifiedBy: "",
         _links: {
-          imodel: {
+          iModel: {
             // Tie the mapping to to the iModel Id
             href: mapping.imodelId,
           },
@@ -128,7 +128,7 @@ const mockMappingsFactory = (
       modifiedOn: "",
       modifiedBy: "",
       _links: {
-        imodel: {
+        iModel: {
           href: "",
         },
       },
@@ -138,7 +138,7 @@ const mockMappingsFactory = (
   return mockMappings;
 };
 
-const mockReportMappingsAndMappingsFactory = (mockMappings: MappingSingle[], reportMappings: ReportMappingCollection): ReportMappingAndMapping[] => {
+const mockReportMappingsAndMappingsFactory = (mockMappings: MappingContainer[], reportMappings: ReportMappingCollection): ReportMappingAndMapping[] => {
   const reportMappingsAndMapping =
     reportMappings.mappings.map((reportMapping) => {
       const mapping = mockMappings.find((x) => x.mapping.id === reportMapping.mappingId)!.mapping;
@@ -172,12 +172,13 @@ const mockMappingsClient = moq.Mock.ofType<MappingsClient>();
 beforeAll(async () => {
   const localization = new EmptyLocalization();
   await ReportsConfigWidget.initialize(localization);
-  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+  mockIModelsClientOperations
+    .setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
     .returns(async () => mockIModelsResponse[0].iModel);
-  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+  mockIModelsClientOperations
+    .setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
     .returns(async () => mockIModelsResponse[1].iModel);
-  mockIModelsClient.setup((x) => x.iModels)
-    .returns(() => mockIModelsClientOperations.object);
+  mockIModelsClient.setup((x) => x.iModels).returns(() => mockIModelsClientOperations.object);
   mockReportsClient.setup(async (x) => x.createReportMapping(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(mockCreateReportMapping);
   mockMappingsClient.setup(async (x) => x.getMappings(moq.It.isAny(), moq.It.isAny())).returns(mockGetMappings);
 });
@@ -193,7 +194,7 @@ describe("Add Mapping Modal", () => {
     const mockMappings = mockMappingsFactory(mockReportMappings);
     const mockReportMappingsAndMappings = mockReportMappingsAndMappingsFactory(mockMappings, mockReportMappings);
 
-    mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingSingle) => m.mapping));
+    mockGetMappings.mockReturnValueOnce({mappings: mockMappings.map((m: MappingContainer) => m.mapping)});
 
     const { user } = render(
       <AddMappingsModal

@@ -33,7 +33,7 @@ const fetchMappings = async (
       accessToken,
       iModelId
     );
-    setMappings(mappings);
+    setMappings(mappings.mappings);
   } catch (error: any) {
     handleError(error.status);
   } finally {
