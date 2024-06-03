@@ -18,8 +18,8 @@ importers:
         specifier: ^4.2.3
         version: 4.2.3
       '@itwin/insights-client':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.10.1
+        version: 0.10.1
       '@itwin/itwinui-icons-color-react':
         specifier: ^2.1.0
         version: 2.1.0(react-dom@17.0.2)(react@17.0.2)
@@ -596,8 +596,8 @@ packages:
   '@itwin/imodels-client-management@4.2.3':
     resolution: {integrity: sha512-1ijl+/OTKQ7qbtKdGXgqmDs+lg30Grp+YQx4RAJxWsg03L9K1vAqp/fBh3DnVFz9kOsBv0ZI1KRGsWcjfEkUPg==}
 
-  '@itwin/insights-client@0.4.0':
-    resolution: {integrity: sha512-vOdk5AbcqfnEW0S2VmZzPoBFQPEHIhhUybJqKLajB1/rBSwcK40EIo+JienBrqCgV3KU9N31H4UISEOfRDgqOg==}
+  '@itwin/insights-client@0.10.1':
+    resolution: {integrity: sha512-20vqnr0AijYyO5zHmjakOyG6nzL8FFQZ9Wu4pnW4F7ulzlKiayKOW4183UdOX0oTQt3BHMvnkphhEWJF8a/MDw==}
 
   '@itwin/itwinui-css@1.12.6':
     resolution: {integrity: sha512-Y32ksKaIFfym5ZcoBMfH89eCUh3VgcHpKtUDgQgCT3g6j9tzaUycsHkui63s0bLreSGChPoEuCKB5CUP+DSPOg==}
@@ -4166,7 +4166,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@itwin/insights-client@0.4.0':
+  '@itwin/insights-client@0.10.1':
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.2

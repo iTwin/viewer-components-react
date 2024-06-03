@@ -8,6 +8,7 @@
 
 import type { AccessToken } from '@itwin/core-bentley';
 import { ExtractionClient } from '@itwin/insights-client';
+import type { ExtractionRequestDetails } from '@itwin/insights-client';
 import { IModelsClient } from '@itwin/imodels-client-management';
 import type { Localization } from '@itwin/core-common';
 import { MappingsClient } from '@itwin/insights-client';
@@ -27,9 +28,9 @@ export class BulkExtractor {
     // (undocumented)
     getReportState(reportId: string): Promise<ExtractionStates>;
     // (undocumented)
-    runIModelExtraction(iModelId: string): Promise<void>;
+    runIModelExtraction(extractionRequestDetails: ExtractionRequestDetails): Promise<void>;
     // (undocumented)
-    runIModelExtractions(iModels: string[]): Promise<void>;
+    runIModelExtractions(extractionRequestsDetails: ExtractionRequestDetails[]): Promise<void>;
     // (undocumented)
     runReportExtractions(reportIds: string[]): Promise<void>;
     // (undocumented)

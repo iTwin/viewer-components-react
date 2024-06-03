@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Upgraded insights-client version to 0.10.1, fixed functions using old dependencies",
+  "packageName": "@itwin/reports-config-widget-react",
+  "email": "hansraj.koravenciah@bentley.com",
+  "dependentChangeType": "patch"
+}
