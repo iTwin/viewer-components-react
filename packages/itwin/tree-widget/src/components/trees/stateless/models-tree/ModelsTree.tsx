@@ -12,10 +12,10 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
+import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
-import { createModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
 
-import type { ModelsTreeVisibilityHandler } from "./ModelsTreeVisibilityHandler";
+import type { ModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";

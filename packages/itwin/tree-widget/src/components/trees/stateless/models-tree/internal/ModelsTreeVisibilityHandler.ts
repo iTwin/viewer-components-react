@@ -9,21 +9,21 @@ import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
-import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
-import { AlwaysAndNeverDrawnElementInfo } from "./internal/AlwaysAndNeverDrawnElementInfo";
-import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
-import { ModelsTreeNode } from "./internal/ModelsTreeNode";
-import { createVisibilityStatus } from "./internal/Tooltip";
-import { createVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
+import { reduceWhile, toVoidPromise } from "../../../common/Rxjs";
+import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
+import { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
+import { ModelsTreeNode } from "./ModelsTreeNode";
+import { createVisibilityStatus } from "./Tooltip";
+import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { AlwaysOrNeverDrawnElementsQueryProps } from "./internal/AlwaysAndNeverDrawnElementInfo";
-import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
-import type { IVisibilityChangeEventListener } from "./internal/VisibilityChangeEventListener";
+import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
+import type { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
+import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
-import type { NonPartialVisibilityStatus, Visibility } from "./internal/Tooltip";
-import type { HierarchyVisibilityHandler } from "../common/UseHierarchyVisibility";
+import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
+import type { HierarchyVisibilityHandler } from "../../common/UseHierarchyVisibility";
 
 interface GetCategoryStatusProps {
   categoryId: Id64String;
@@ -137,7 +137,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     return toVoidPromise(this.changeVisibilityObs(node, shouldDisplay));
   }
 
-  // istanbul ignore next
   public dispose(): void {
     this._eventListener.dispose();
     this._alwaysAndNeverDrawnElements.dispose();
@@ -225,7 +224,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         map((x) => x.state),
         getVisibilityFromTreeNodeChildren,
         mergeMap((visibilityByCategories) => {
-          // istanbul ignore if
           if (visibilityByCategories === "empty") {
             return of(createVisibilityStatus("visible"));
           }
@@ -395,6 +393,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     }
 
     const modelId = ModelsTreeNode.getModelId(node);
+    // istanbul ignore if
     if (!modelId) {
       return EMPTY;
     }

@@ -21,18 +21,18 @@ import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shar
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { toVoidPromise } from "../../../../components/trees/common/Rxjs";
-import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
-import { createVisibilityStatus } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
-import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
-import { createModelsTreeVisibilityHandler } from "../../../../components/trees/stateless/models-tree/ModelsTreeVisibilityHandler";
-import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../../IModelUtils";
-import { TestUtils } from "../../../TestUtils";
-import { createFakeSinonViewport } from "../../Common";
+import { toVoidPromise } from "../../../../../components/trees/common/Rxjs";
+import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
+import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
+import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
+import { ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
+import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../../../IModelUtils";
+import { TestUtils } from "../../../../TestUtils";
+import { createFakeSinonViewport } from "../../../Common";
 import {
   createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
   createSubjectHierarchyNode,
-} from "../Common";
+} from "../../Common";
 
 import type { Observable } from "rxjs";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -41,8 +41,8 @@ import type { GeometricElement3dProps } from "@itwin/core-common";
 import type {
   ModelsTreeVisibilityHandler,
   ModelsTreeVisibilityHandlerProps,
-} from "../../../../components/trees/stateless/models-tree/ModelsTreeVisibilityHandler";
-import type { Visibility } from "../../../../components/trees/stateless/models-tree/internal/Tooltip";
+} from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
+import type { Visibility } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 import type { IModelDb } from "@itwin/core-backend";
 interface VisibilityOverrides {
@@ -108,6 +108,26 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
         overrides,
       };
     }
+
+    describe("overridden methods", () => {
+      it("can call original implementation", async () => {
+        let useOriginalImplFlag = false;
+        const handler = createModelsTreeVisibilityHandler({
+          viewport: createFakeSinonViewport(),
+          overrides: {
+            getElementDisplayStatus: async ({ originalImplementation }) => {
+              return useOriginalImplFlag ? originalImplementation() : createVisibilityStatus("hidden");
+            },
+          },
+        });
+
+        const node = createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" });
+        await expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "hidden" });
+
+        useOriginalImplFlag = true;
+        await expect(handler.getVisibilityStatus(node)).to.eventually.include({ state: "visible" });
+      });
+    });
 
     describe("getVisibilityStatus", () => {
       it("returns disabled when node is not an instance node", async () => {
@@ -271,7 +291,15 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
         });
 
         describe("visible", () => {
-          it("when all categories are displayed", async () => {
+          it("when enabled and has no categories", async () => {
+            const modelId = "0x1";
+            const node = createModelHierarchyNode(modelId);
+            const { handler } = createHandler();
+            const result = await handler.getVisibilityStatus(node);
+            expect(result).to.include({ state: "visible" });
+          });
+
+          it("when enabled and all categories are displayed", async () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode(modelId);
@@ -334,7 +362,7 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
             expect(result).to.include({ state: "visible" });
           });
 
-          it("when all categories are displayed and always/never drawn lists contain no children", async () => {
+          it("when all categories are displayed and always/never drawn lists contain no elements", async () => {
             const modelId = "0x1";
             const categories = ["0x10", "0x20"];
             const node = createModelHierarchyNode(modelId);
@@ -870,6 +898,20 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
         const categoryId = "0x2";
         const elementId = "0x3";
 
+        it("can be overridden", async () => {
+          const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
+            getElementDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
+          };
+          const handler = createModelsTreeVisibilityHandler({
+            viewport: createFakeSinonViewport(),
+            overrides,
+          });
+
+          const status = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: "0x1", categoryId: "0x2", elementId: "0x3" }));
+          expect(overrides.getElementDisplayStatus).to.be.called;
+          expect(status.state).to.eq("visible");
+        });
+
         it("is disabled when has no category or model", async () => {
           const { handler } = createHandler();
           let result = await handler.getVisibilityStatus(createElementHierarchyNode({ modelId: undefined, categoryId: undefined }));
@@ -953,6 +995,18 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
 
         it("is visible when always/never drawn sets are undefined", async () => {
           const { handler } = createHandler();
+          const node = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "visible" });
+        });
+
+        it("is visible when always/never drawn sets doesn't contain it", async () => {
+          const { handler } = createHandler({
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0xff"]),
+              neverDrawn: new Set(["0xffff"]),
+            }),
+          });
           const node = createElementHierarchyNode({ modelId, categoryId, elementId });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "visible" });
@@ -1049,11 +1103,69 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
               categoryElements: new Map([[categoryId, elementIds]]),
             }),
             viewport: createFakeSinonViewport({
-              neverDrawn: new Set([elementIds[0]]),
+              alwaysDrawn: new Set([elementIds[0]]),
+              neverDrawn: new Set([elementIds[1]]),
             }),
           });
           const result = await handler.getVisibilityStatus(node);
           expect(result).to.include({ state: "partial" });
+        });
+
+        it("is visible if always/never drawn sets are empty", async () => {
+          const elementIds = ["0x10", "0x20"];
+          const node = createClassGroupingHierarchyNode({
+            modelId,
+            categoryId,
+            elements: elementIds,
+          });
+          const { handler } = createHandler({
+            idsCache: createFakeIdsCache({
+              modelCategories: new Map([[modelId, [categoryId]]]),
+              categoryElements: new Map([[categoryId, elementIds]]),
+            }),
+          });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "visible" });
+        });
+
+        it("is visible if always drawn set contains no elements of the grouping node", async () => {
+          const elementIds = ["0x10", "0x20"];
+          const node = createClassGroupingHierarchyNode({
+            modelId,
+            categoryId,
+            elements: elementIds,
+          });
+          const { handler } = createHandler({
+            idsCache: createFakeIdsCache({
+              modelCategories: new Map([[modelId, [categoryId]]]),
+              categoryElements: new Map([[categoryId, elementIds]]),
+            }),
+            viewport: createFakeSinonViewport({
+              alwaysDrawn: new Set(["0xfff"]),
+            }),
+          });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "visible" });
+        });
+
+        it("is visible if never drawn set contains no elements of the grouping node", async () => {
+          const elementIds = ["0x10", "0x20"];
+          const node = createClassGroupingHierarchyNode({
+            modelId,
+            categoryId,
+            elements: elementIds,
+          });
+          const { handler } = createHandler({
+            idsCache: createFakeIdsCache({
+              modelCategories: new Map([[modelId, [categoryId]]]),
+              categoryElements: new Map([[categoryId, elementIds]]),
+            }),
+            viewport: createFakeSinonViewport({
+              neverDrawn: new Set(["0xfff"]),
+            }),
+          });
+          const result = await handler.getVisibilityStatus(node);
+          expect(result).to.include({ state: "visible" });
         });
 
         it("uses category visibility when always/never drawn lists are empty", async () => {
