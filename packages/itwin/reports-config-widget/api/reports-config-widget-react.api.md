@@ -64,7 +64,7 @@ export interface ReportMappingsProps {
 }
 
 // @public
-export const Reports: ({ onClickAddReport, onClickReportModify, onClickReportTitle, }: ReportsProps) => JSX.Element | null;
+export const Reports: ({ onClickAddReport, onClickReportModify, onClickReportTitle }: ReportsProps) => JSX.Element | null;
 
 // @internal (undocumented)
 export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
