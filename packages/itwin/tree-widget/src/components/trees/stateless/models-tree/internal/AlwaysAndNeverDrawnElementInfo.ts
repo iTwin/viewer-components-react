@@ -11,8 +11,7 @@ import { pushToMap } from "../../common/Utils";
 
 import type { Observable, Subscription } from "rxjs";
 import type { Viewport } from "@itwin/core-frontend";
-import type { BeEvent, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { CacheLike } from "../../../common/Utils";
+import type { BeEvent, Id64Array, Id64Set, Id64String, IDisposable } from "@itwin/core-bentley";
 
 interface ElementInfo {
   elementId: Id64String;
@@ -29,14 +28,22 @@ export interface AlwaysOrNeverDrawnElementsQueryProps {
 
 export const SET_CHANGE_DEBOUNCE_TIME = 20;
 
-export class AlwaysAndNeverDrawnElementInfo implements CacheLike {
-  private _subscriptions?: Subscription[];
-  private _alwaysDrawn?: Observable<CacheEntry>;
-  private _neverDrawn?: Observable<CacheEntry>;
+export class AlwaysAndNeverDrawnElementInfo implements IDisposable {
+  private _subscriptions: Subscription[];
+  private _alwaysDrawn: Observable<CacheEntry>;
+  private _neverDrawn: Observable<CacheEntry>;
   private _disposeSubject = new Subject<void>();
 
   constructor(private readonly _viewport: Viewport) {
-    this.invalidate();
+    this._alwaysDrawn = this.createCacheEntryObservable({
+      event: this._viewport.onAlwaysDrawnChanged,
+      getSet: () => this._viewport.alwaysDrawn,
+    });
+    this._neverDrawn = this.createCacheEntryObservable({
+      event: this._viewport.onNeverDrawnChanged,
+      getSet: () => this._viewport.neverDrawn,
+    });
+    this._subscriptions = [this._alwaysDrawn.subscribe(), this._neverDrawn.subscribe()];
   }
 
   public getElements({ setType, modelId, categoryId }: { setType: "always" | "never" } & AlwaysOrNeverDrawnElementsQueryProps): Observable<Id64Set> {
@@ -52,9 +59,9 @@ export class AlwaysAndNeverDrawnElementInfo implements CacheLike {
             set.forEach((id) => elements.add(id));
           }
           return elements;
-        };;
+        };
 
-    return cache!.pipe(map(getElements));
+    return cache.pipe(map(getElements));
   }
 
   private createCacheEntryObservable(props: { event: BeEvent<() => void>; getSet(): Id64Set | undefined }) {
@@ -88,21 +95,8 @@ export class AlwaysAndNeverDrawnElementInfo implements CacheLike {
     return obs;
   }
 
-  public invalidate() {
-    this.dispose();
-    this._alwaysDrawn = this.createCacheEntryObservable({
-      event: this._viewport.onAlwaysDrawnChanged,
-      getSet: () => this._viewport.alwaysDrawn,
-    });
-    this._neverDrawn = this.createCacheEntryObservable({
-      event: this._viewport.onNeverDrawnChanged,
-      getSet: () => this._viewport.neverDrawn,
-    });
-    this._subscriptions = [this._alwaysDrawn.subscribe(), this._neverDrawn.subscribe()];
-  }
-
   public dispose(): void {
-    this._subscriptions?.forEach((x) => x.unsubscribe());
+    this._subscriptions.forEach((x) => x.unsubscribe());
     this._subscriptions = [];
     this._disposeSubject.next();
   }

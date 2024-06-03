@@ -145,7 +145,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   public dispose(): void {
     this._eventListener.dispose();
     this._alwaysAndNeverDrawnElements.dispose();
-    this._idsCache.dispose();
   }
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {

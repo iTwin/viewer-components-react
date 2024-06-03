@@ -154,7 +154,6 @@ function useSubjectModelIdsCache(imodel: IModelConnection) {
 
   const getSubjectModelIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
     if (prevImodelAccessRef.current !== imodelAccess) {
-      cacheRef.current?.dispose();
       cacheRef.current = undefined;
       prevImodelAccessRef.current = imodelAccess;
     }

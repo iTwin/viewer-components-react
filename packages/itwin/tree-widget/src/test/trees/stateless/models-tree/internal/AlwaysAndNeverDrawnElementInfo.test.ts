@@ -141,41 +141,6 @@ describe("AlwaysAndNeverDrawnElementInfo", () => {
       });
     });
 
-    it(`can reset cache of ${setType} drawn elements`, async () => {
-      const modelId = "0x1";
-      const categoryId = "0x2";
-      const elements = ["0x10", "0x20"];
-      const queryHandler = sinon.fake(() => {
-        return elements.map((elementId) => ({ elementId, modelId, categoryId }));
-      });
-      const viewport = createFakeSinonViewport({
-        [`${setType}Drawn`]: new Set(elements),
-        queryHandler,
-      });
-      await using(new AlwaysAndNeverDrawnElementInfo(viewport), async (info) => {
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-
-        let obs = info.getElements({ setType, categoryId, modelId });
-        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
-        expect(queryHandler).to.be.calledOnce;
-
-        obs = info.getElements({ setType, modelId });
-        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
-        expect(queryHandler).to.be.calledOnce;
-
-        info.invalidate();
-        await sinon.clock.tickAsync(SET_CHANGE_DEBOUNCE_TIME);
-
-        obs = info.getElements({ setType, categoryId, modelId });
-        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
-        expect(queryHandler).to.be.calledTwice;
-
-        obs = info.getElements({ setType, modelId });
-        await expect(firstValueFrom(obs)).to.eventually.deep.eq(new Set(elements));
-        expect(queryHandler).to.be.calledTwice;
-      });
-    });
-
     it(`updates cache when ${setType} drawn set is changed`, async () => {
       const modelId = "0x1";
       const categoryId = "0x2";

@@ -7,7 +7,6 @@ import { pushToMap } from "../../common/Utils";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import type { CacheLike } from "../../../common/Utils";
 
 interface SubjectInfo {
   subjectsHierarchy: Map<Id64String, Id64Set>;
@@ -16,24 +15,13 @@ interface SubjectInfo {
 }
 
 /** @internal */
-export class ModelsTreeIdsCache implements CacheLike {
+export class ModelsTreeIdsCache {
   private readonly _categoryElementCounts = new Map<Id64String, number>();
   private _subjectInfo: Promise<SubjectInfo> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, { categories: Id64Array; elementCount: number }>> | undefined;
 
   constructor(private _queryExecutor: LimitingECSqlQueryExecutor) {}
-
-  public invalidate(): void {
-    this._subjectInfo = undefined;
-    this._parentSubjectIds = undefined;
-    this._modelInfos = undefined;
-    this._categoryElementCounts.clear();
-  }
-
-  public dispose(): void {
-    this.invalidate();
-  }
 
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
     const subjectsQuery = `
