@@ -100,7 +100,7 @@ export const GroupPropertyAction = ({
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
 
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, group.id, getAccessToken, propertiesClient);
-  const { isFormulaValid, forceValidation, inferredDataType } = useFormulaValidation(propertyName.toLowerCase(), formula, groupProperties?.properties ?? [], setFormulaErrorMessage);
+  const { forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, groupProperties?.properties ?? [], setFormulaErrorMessage, dataType);
 
   const reset = useCallback(() => {
     setPropertyName("");
@@ -269,6 +269,7 @@ export const GroupPropertyAction = ({
             onChange={(value) => {
               validator.showMessageFor("dataType");
               setDataType(value);
+              // forceValidation();
             }}
             message={validator.message("dataType", propertyName, "required")}
             status={
@@ -348,7 +349,7 @@ export const GroupPropertyAction = ({
         onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
-          !propertyName || dataType === undefined || formula ? !(isFormulaValid &&  dataType === inferredDataType): isFormulaValid
+          !propertyName || dataType === undefined || formulaErrorMessage !== undefined
         }
       />
       <GroupsPropertiesSelectionModal
