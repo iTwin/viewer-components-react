@@ -28,7 +28,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   private _queryExecutor: LimitingECSqlQueryExecutor;
-  private _isSupported?: boolean;
+  private _isSupported?: Promise<boolean>;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
     this._impl = createClassBasedHierarchyDefinition({
@@ -66,10 +66,10 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
     if (this._isSupported === undefined) {
-      this._isSupported = await this.isSupported();
+      this._isSupported = this.isSupported();
     }
 
-    if (!this._isSupported) {
+    if ((await this._isSupported) === false) {
       return [];
     }
 
