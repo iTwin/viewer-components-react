@@ -26,7 +26,7 @@ import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: ModelsTreeIdsCache;
+  idsCache: ModelsTreeIdsCache;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
@@ -85,7 +85,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
-    this._idsCache = props.subjectModelIdsCache;
+    this._idsCache = props.idsCache;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }

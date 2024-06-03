@@ -54,7 +54,7 @@ export function StatelessModelsTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const { getSubjectModelIdsCache } = useSubjectModelIdsCache(imodel);
+  const { getModelsTreeIdsCache } = useModelsTreeIdsCache(imodel);
 
   const visibilityHandlerFactory = useCallback((): ModelsTreeVisibilityHandler => {
     return createModelsTreeVisibilityHandler({ viewport: activeView });
@@ -64,8 +64,8 @@ export function StatelessModelsTree({
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) }),
-    [getSubjectModelIdsCache],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(imodelAccess) }),
+    [getModelsTreeIdsCache],
   );
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
@@ -73,8 +73,8 @@ export function StatelessModelsTree({
       return undefined;
     }
     return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, idsCache: getSubjectModelIdsCache(imodelAccess) });
-  }, [focusedInstancesKeys, getSubjectModelIdsCache]);
+      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, idsCache: getModelsTreeIdsCache(imodelAccess) });
+  }, [focusedInstancesKeys, getModelsTreeIdsCache]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
@@ -82,9 +82,9 @@ export function StatelessModelsTree({
     }
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
-      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, idsCache: getSubjectModelIdsCache(imodelAccess) });
+      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, idsCache: getModelsTreeIdsCache(imodelAccess) });
     };
-  }, [filter, getSubjectModelIdsCache, reportUsage]);
+  }, [filter, getModelsTreeIdsCache, reportUsage]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -141,7 +141,7 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
-function useSubjectModelIdsCache(imodel: IModelConnection) {
+function useModelsTreeIdsCache(imodel: IModelConnection) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const prevImodelAccessRef = useRef<LimitingECSqlQueryExecutor>();
 
@@ -152,7 +152,7 @@ function useSubjectModelIdsCache(imodel: IModelConnection) {
     }, []),
   });
 
-  const getSubjectModelIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
+  const getModelsTreeIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
     if (prevImodelAccessRef.current !== imodelAccess) {
       cacheRef.current = undefined;
       prevImodelAccessRef.current = imodelAccess;
@@ -164,6 +164,6 @@ function useSubjectModelIdsCache(imodel: IModelConnection) {
   }, []);
 
   return {
-    getSubjectModelIdsCache,
+    getModelsTreeIdsCache,
   };
 }

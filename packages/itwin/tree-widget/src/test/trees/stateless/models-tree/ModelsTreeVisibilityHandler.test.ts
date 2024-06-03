@@ -2111,10 +2111,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModelConnection), 1000),
         };
 
-        const subjectModelIdsCache = new ModelsTreeIdsCache(imodelAccess);
+        const idsCache = new ModelsTreeIdsCache(imodelAccess);
         const provider = createHierarchyProvider({
           imodelAccess,
-          hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, subjectModelIdsCache }),
+          hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
         });
 
         from(provider.getNodes({ parentNode: undefined }))
