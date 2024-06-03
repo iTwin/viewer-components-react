@@ -288,7 +288,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     const query = `
       SELECT 1
       FROM ECDbMeta.ECSchemaDef
-      WHERE Name = 'BisCore' AND VersionMinor > 12
+      WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
     `;
 
     for await (const _row of this._queryExecutor.createQueryReader({ ecsql: query })) {
