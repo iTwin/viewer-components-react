@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import chai from "chai";
+import chaiAsPromised from "chai-as-promised";
 import chaiJestSnapshot from "chai-jest-snapshot";
 import chaiSubset from "chai-subset";
 import globalJsdom from "global-jsdom";
@@ -21,6 +22,7 @@ chai.should();
 chai.use(chaiJestSnapshot);
 chai.use(chaiSubset);
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 before(async function () {
   chaiJestSnapshot.resetSnapshotRegistry();
