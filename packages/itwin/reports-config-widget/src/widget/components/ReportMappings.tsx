@@ -25,7 +25,7 @@ import {
 } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import type { MappingsClient, Report, ReportMapping, ReportsClient } from "@itwin/insights-client";
+import type { ExtractionRequestDetails, MappingsClient, Report, ReportMapping, ReportsClient } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { AddMappingsModal } from "./AddMappingsModal";
 import type {
@@ -40,7 +40,6 @@ import { ReportMappingHorizontalTile } from "./ReportMappingHorizontalTile";
 import type { AccessToken } from "@itwin/core-bentley";
 import { BeEvent } from "@itwin/core-bentley";
 import { useBulkExtractor } from "../context/BulkExtractorContext";
-
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
 export type ReportMappingAndMapping = ReportMappingType & {
@@ -75,7 +74,6 @@ const fetchReportMappings = async (
       let iModelName = "";
       const mapping = await mappingsClient.getMapping(
         accessToken,
-        iModelId,
         reportMapping.mappingId
       );
       if (iModelNames.has(iModelId)) {
@@ -148,7 +146,10 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
 
   useEffect(() => {
     if (!bulkExtractor) return;
-    bulkExtractor.setHook(setJobRunning, reportMappings.map((x) => x.imodelId));
+    bulkExtractor.setHook(
+      setJobRunning,
+      reportMappings.map((x) => x.imodelId),
+    );
   }, [bulkExtractor, reportMappings]);
 
   const refresh = useCallback(async () => {
@@ -183,7 +184,10 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
     [reportMappings, searchValue]
   );
 
-  const onAddMappingsModalClose = useCallback(async () => { await refresh(); setShowAddMapping(false); }, [refresh]);
+  const onAddMappingsModalClose = useCallback(async () => {
+    await refresh();
+    setShowAddMapping(false);
+  }, [refresh]);
 
   if (!bulkExtractor) return null;
 
@@ -233,7 +237,7 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
               )}
               onClick={refresh}
               disabled={isLoading}
-              styleType='borderless'
+              styleType="borderless"
             >
               <SvgRefresh />
             </IconButton>
@@ -308,7 +312,17 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
           onClick={async () => {
             setJobRunning(true);
             const uniqueIModels = Array.from(new Set(reportMappings.map((x) => x.imodelId)));
-            await bulkExtractor.runIModelExtractions(uniqueIModels);
+            const iModelsAndMappings: ExtractionRequestDetails[] = uniqueIModels.map((iModelId) => {
+              return {
+                iModelId,
+                mappings: reportMappings
+                  .filter((reportMapping) => reportMapping.imodelId === iModelId)
+                  .map((reportMappingForIModel) => ({
+                    id: reportMappingForIModel.mappingId,
+                  })),
+              };
+            });
+            await bulkExtractor.runIModelExtractions(iModelsAndMappings);
             reportMappings.forEach((reportMapping) => {
               jobStartEvent.raiseEvent(reportMapping.imodelId);
             });

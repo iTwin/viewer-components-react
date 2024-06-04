@@ -38,7 +38,7 @@
     "cover": "nyc npm test"
   },
   "dependencies": {
-    "@itwin/insights-client": "^0.4.0",
+    "@itwin/insights-client": "^0.10.1",
     "@itwin/itwinui-icons-react": "^2.2.0",
     "@itwin/itwinui-react": "^2.11.2"
   },

@@ -54,7 +54,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
           displayName: x.displayName,
           description: x.description ?? "",
           id: x.id,
-          labels: x.labels,
+          labels: [],
           reportId: x._links.report.href.split("/reports/")[1],
         };
       });
@@ -102,7 +102,6 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
     const newToken = await getEC3AccessToken();
     setToken(newToken);
     openModal(true);
-
   }, [getEC3AccessToken]);
 
   useEffect(() => {
