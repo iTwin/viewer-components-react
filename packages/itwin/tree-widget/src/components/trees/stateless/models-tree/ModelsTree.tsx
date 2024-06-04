@@ -16,8 +16,8 @@ import { StatelessModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 import { SubjectModelIdsCache } from "./SubjectModelIdsCache";
 
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { HierarchyNode, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { IModelApp, type IModelConnection, type Viewport } from "@itwin/core-frontend";
+import { HierarchyNode, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
 
@@ -72,6 +72,18 @@ export function StatelessModelsTree({
     [getSubjectModelIdsCache],
   );
 
+  const onNodeDoubleClick = useCallback(
+    async ({ nodeData, extendedData }: PresentationHierarchyNode) => {
+      if (!HierarchyNode.isInstancesNode(nodeData) || (extendedData && (extendedData.isSubject || extendedData.isModel || extendedData.isCategory))) {
+        return;
+      }
+      const instanceIds = nodeData.key.instanceKeys.map((instanceKey) => instanceKey.id);
+      await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
+      reportUsage({ featureId: "zoom-to-node", reportInteraction: false });
+    },
+    [reportUsage],
+  );
+
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!focusedInstancesKeys) {
       return undefined;
@@ -87,7 +99,7 @@ export function StatelessModelsTree({
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
       return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
-    }
+    };
   }, [filter, getSubjectModelIdsCache, reportUsage]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
@@ -111,6 +123,7 @@ export function StatelessModelsTree({
         onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
       }}
       reportUsage={reportUsage}
+      onNodeDoubleClick={onNodeDoubleClick}
     />
   );
 }

@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useCallback, useEffect, useRef } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
@@ -19,27 +20,39 @@ interface UseMultiCheckboxHandlerResult {
 
 /** @internal */
 export function useMultiCheckboxHandler({ rootNodes, isNodeSelected, onClick }: UseMultiCheckboxHandlerProps): UseMultiCheckboxHandlerResult {
-  const clickSelectedNodes = (nodes: Array<PresentationTreeNode>, checked: boolean) => {
-    nodes.forEach((node) => {
-      if (!isPresentationHierarchyNode(node)) {
+  const rootNodesRef = useRef(rootNodes);
+
+  useEffect(() => {
+    rootNodesRef.current = rootNodes;
+  }, [rootNodes]);
+
+  const clickSelectedNodes = useCallback(
+    (nodes: Array<PresentationTreeNode>, checked: boolean) => {
+      nodes.forEach((node) => {
+        if (!isPresentationHierarchyNode(node)) {
+          return;
+        }
+        if (isNodeSelected(node.id)) {
+          onClick(node, checked);
+        }
+        if (node.isExpanded && typeof node.children !== "boolean") {
+          clickSelectedNodes(node.children, checked);
+        }
+      });
+    },
+    [isNodeSelected, onClick],
+  );
+
+  const onCheckboxClicked = useCallback(
+    (node: PresentationHierarchyNode, checked: boolean) => {
+      if (!isNodeSelected(node.id)) {
+        onClick(node, checked);
         return;
       }
-      if (isNodeSelected(node.id)) {
-        onClick(node, checked);
-      }
-      if (node.isExpanded && typeof node.children !== "boolean") {
-        clickSelectedNodes(node.children, checked);
-      }
-    });
-  };
-
-  const onCheckboxClicked = (node: PresentationHierarchyNode, checked: boolean) => {
-    if (!isNodeSelected(node.id)) {
-      onClick(node, checked);
-      return;
-    }
-    rootNodes && clickSelectedNodes(rootNodes, checked);
-  };
+      rootNodesRef.current && clickSelectedNodes(rootNodesRef.current, checked);
+    },
+    [rootNodesRef, clickSelectedNodes, isNodeSelected, onClick],
+  );
 
   return { onCheckboxClicked };
 }

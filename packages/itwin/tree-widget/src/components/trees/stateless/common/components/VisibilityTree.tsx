@@ -19,6 +19,7 @@ import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 import { VisibilityTreeRenderer } from "./VisibilityTreeRenderer";
+import { useDoubleClickHandler } from "../UseDoubleClickHandler";
 
 import type { UsageTrackedFeatures } from "../../../common/UseFeatureReporting";
 import type { ReactElement, ReactNode } from "react";
@@ -38,6 +39,7 @@ interface VisibilityTreeOwnProps {
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
   reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  onNodeDoubleClick?: (node: PresentationHierarchyNode) => void;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
@@ -88,6 +90,7 @@ function VisibilityTreeImpl({
   selectionMode,
   onPerformanceMeasured,
   reportUsage,
+  onNodeDoubleClick,
 }: Omit<VisibilityTreeProps, "getSchemaContext" | "hierarchyLevelSizeLimit"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const {
@@ -112,6 +115,7 @@ function VisibilityTreeImpl({
   useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
   const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
+  const { onNodeClick: onNodeClicked } = useDoubleClickHandler({ onNodeClick, onNodeDoubleClick });
   const { getCheckboxStatus, onCheckboxClicked: onClick } = useHierarchyVisibility({ visibilityHandlerFactory });
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes, isNodeSelected: treeProps.isNodeSelected, onClick });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
@@ -150,7 +154,7 @@ function VisibilityTreeImpl({
             rootNodes={rootNodes}
             {...treeProps}
             expandNode={reportingExpandNode}
-            onNodeClick={onNodeClick}
+            onNodeClick={onNodeClicked}
             onNodeKeyDown={onNodeKeyDown}
             getCheckboxStatus={getCheckboxStatus}
             onCheckboxClicked={reportingOnCheckboxClicked}
