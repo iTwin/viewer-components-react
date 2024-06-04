@@ -53,7 +53,7 @@ describe("useHierarchyVisibility", () => {
     });
 
     await waitFor(() => {
-      // wait for visibility status to calculated
+      // wait for visibility status to be calculated
       expect(visibilityHandler.getVisibilityStatus).to.be.called;
       const state = result.current.getCheckboxState(node);
       expect(state.state).to.be.eq("on");
@@ -107,6 +107,7 @@ describe("useHierarchyVisibility", () => {
       expect(state.state).to.be.eq("partial");
     });
 
+    expect(result.current.getCheckboxState(node).state).to.be.eq("partial");
     expect(visibilityHandler.getVisibilityStatus).to.be.calledTwice;
   });
 
