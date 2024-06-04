@@ -1388,7 +1388,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             expect(viewport.perModelCategoryVisibility.setOverride).to.be.calledWith(modelId, categoryId, PerModelCategoryVisibility.Override.None);
           });
 
-          it("shows sets SHOW override if model is shown but category is hidden in selector", async () => {
+          it("sets SHOW override if model is shown but category is hidden in selector", async () => {
             const modelId = "0x1";
             const categoryId = "0x2";
             const node = createCategoryHierarchyNode(modelId, categoryId);
