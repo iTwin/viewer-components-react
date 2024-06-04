@@ -63,7 +63,7 @@ function CategoriesTreeComponentImpl({
   };
 
   return (
-    <div className="tree-widget-tree-with-header">
+    <div className="tw-tree-with-header">
       <UnifiedSelectionProvider storage={selectionStorage}>
         <TreeHeader onFilterClear={() => setFilter("")} onFilterStart={(newFilter) => setFilter(newFilter)} onSelectedChanged={() => {}} density={density}>
           {headerButtons
@@ -80,7 +80,7 @@ function CategoriesTreeComponentImpl({
                 />,
               ]}
         </TreeHeader>
-        <div className={classNames("tree-widget-tree-content", density === "enlarged" && "enlarge")}>
+        <div className={classNames("tw-tree-content", density === "enlarged" && "enlarge")}>
           <AutoSizer>
             {({ width, height }) => (
               <StatelessCategoriesTree

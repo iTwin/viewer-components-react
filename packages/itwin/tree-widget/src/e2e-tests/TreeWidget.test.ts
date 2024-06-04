@@ -189,7 +189,7 @@ test.describe("tree widget", () => {
 
       test("initial tree", async ({ page }) => {
         // wait for element to be visible in the tree
-        await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible", exact: true }).waitFor();
+        await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: At least one model is visible", exact: true }).waitFor();
         await takeScreenshot(page, treeWidget);
       });
 

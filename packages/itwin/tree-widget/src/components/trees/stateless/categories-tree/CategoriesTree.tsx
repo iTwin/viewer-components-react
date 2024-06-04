@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "../Tree.scss";
 import { useCallback, useMemo } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { Text } from "@itwin/itwinui-react";
@@ -103,7 +104,6 @@ export function StatelessCategoriesTree({
       getHierarchyDefinition={getDefinitionsProvider}
       getFilteredPaths={getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
-      getIcon={getIcon}
       getSublabel={getSublabel}
       density={density}
       noDataMessage={getNoDataMessage(filter)}
@@ -125,9 +125,4 @@ function getNoDataMessage(filter: string) {
 
 function getSublabel(node: PresentationHierarchyNode): ReactElement | undefined {
   return <div style={{ marginBottom: "10px" }}>{node.extendedData?.description}</div>;
-}
-
-function getIcon(): ReactElement | undefined {
-  // empty icon aligns nodes with and without an expander
-  return <></>;
 }
