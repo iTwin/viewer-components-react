@@ -5,7 +5,7 @@
 
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
-import { FilterableTree } from "../common/components/FilterableTree";
+import { BaseTree } from "../common/components/BaseTree";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 
 import type { ReactElement } from "react";
@@ -18,10 +18,10 @@ interface StatelessExternalSourcesTreeOwnProps {
   onFeatureUsed?: (feature: string) => void;
 }
 
-type FilterableTreeProps = Parameters<typeof FilterableTree>[0];
-type GetHierarchyDefinitionsProviderCallback = FilterableTreeProps["getHierarchyDefinition"];
+type BaseTreeProps = Parameters<typeof BaseTree>[0];
+type GetHierarchyDefinitionsProviderCallback = BaseTreeProps["getHierarchyDefinition"];
 type StatelessExternalSourcesTreeProps = StatelessExternalSourcesTreeOwnProps &
-  Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+  Pick<BaseTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 const StatelessExternalSourcesTreeId = "external-sources-tree-v2";
 
@@ -29,7 +29,7 @@ const StatelessExternalSourcesTreeId = "external-sources-tree-v2";
 export function StatelessExternalSourcesTree({ onPerformanceMeasured, onFeatureUsed, ...props }: StatelessExternalSourcesTreeProps) {
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessExternalSourcesTreeId });
   return (
-    <FilterableTree
+    <BaseTree
       {...props}
       treeName="StatelessExternalSourcesTree"
       getHierarchyDefinition={getDefinitionsProvider}
