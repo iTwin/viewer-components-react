@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HierarchyNode, HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import { hasChildren } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/internal/Common";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
+
+import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 export interface HierarchyDef<TNode> {
   node: TNode;
@@ -331,4 +332,11 @@ export async function collect<T>(items: AsyncIterableIterator<T>) {
     result.push(item);
   }
   return result;
+}
+
+function hasChildren(node: { children?: boolean | Array<unknown> }): boolean {
+  if (Array.isArray(node.children)) {
+    return node.children.length > 0;
+  }
+  return !!node.children;
 }

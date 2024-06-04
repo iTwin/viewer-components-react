@@ -6,21 +6,11 @@
 import { expect } from "chai";
 import { join } from "node:path";
 import { ElementOwnsMultiAspects, ExternalSourceAspect, PhysicalModel, SpatialCategory, Subject } from "@itwin/core-backend";
-import { GenericInstanceFilter, GenericInstanceFilterRule, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelConnection } from "@itwin/core-frontend";
+import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import {
-  DefaultContentDisplayTypes,
-  Descriptor,
-  KeySet,
-  NestedContentField,
-  PresentationRpcInterface,
-  PropertiesField,
-  PropertyValueFormat,
-} from "@itwin/presentation-common";
+import { DefaultContentDisplayTypes, KeySet, PresentationRpcInterface, PropertyValueFormat } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import { DefineHierarchyLevelProps, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import {
   buildTestIModel,
   HierarchyCacheMode,
@@ -40,6 +30,11 @@ import {
 import { collect, NodeValidators, validateHierarchyLevel } from "../../HierarchyValidation";
 import { createModelsTreeProvider } from "./Utils";
 
+import type { GenericInstanceFilter, GenericInstanceFilterRule } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { Descriptor, NestedContentField, PropertiesField } from "@itwin/presentation-common";
+import type { DefineHierarchyLevelProps, HierarchyProvider } from "@itwin/presentation-hierarchies";
+
 describe("Models tree", () => {
   describe("Hierarchy level filtering", () => {
     before(async function () {
@@ -57,6 +52,7 @@ describe("Models tree", () => {
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });
+      // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
     });
 

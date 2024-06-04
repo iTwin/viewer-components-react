@@ -5,19 +5,13 @@
 
 import { expect } from "chai";
 import { join } from "node:path";
-import { Id64, Id64String } from "@itwin/core-bentley";
+import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelConnection } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { InstanceKey, PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyNodeIdentifier, HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
-import {
-  HierarchyCacheMode,
-  initialize as initializePresentationTesting,
-  terminate as terminatePresentationTesting,
-  TestIModelBuilder,
-} from "@itwin/presentation-testing";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { SubjectModelIdsCache } from "../../../../components/trees/stateless/models-tree/SubjectModelIdsCache";
 import {
@@ -29,8 +23,15 @@ import {
   insertSpatialCategory,
   insertSubject,
 } from "../../../IModelUtils";
-import { ExpectedHierarchyDef, NodeValidators, validateHierarchy } from "../../HierarchyValidation";
+import { NodeValidators, validateHierarchy } from "../../HierarchyValidation";
 import { createIModelAccess, createModelsTreeProvider } from "./Utils";
+
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { TestIModelBuilder } from "@itwin/presentation-testing";
+import type { ExpectedHierarchyDef } from "../../HierarchyValidation";
 
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
@@ -79,6 +80,7 @@ describe("Models Tree", () => {
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });
+      // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
     });
 

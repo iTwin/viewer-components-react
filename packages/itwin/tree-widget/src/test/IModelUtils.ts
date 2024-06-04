@@ -4,11 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { XMLParser } from "fast-xml-parser";
-import { Id64, Id64String } from "@itwin/core-bentley";
+import { Id64 } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
-import { IModelConnection } from "@itwin/core-frontend";
-import { buildTestIModel, TestIModelBuilder } from "@itwin/presentation-testing";
+import { buildTestIModel } from "@itwin/presentation-testing";
 
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type {
   CategoryProps,
   ElementProps,
@@ -25,6 +27,7 @@ import type {
   SubCategoryProps,
   SubjectProps,
 } from "@itwin/core-common";
+
 export async function buildIModel(
   mochaContext: Mocha.Context,
   setup?: (builder: TestIModelBuilder, testSchema: TestSchemaDefinition, mochaContext: Mocha.Context) => Promise<void>,
@@ -40,7 +43,7 @@ export async function buildIModel<TResult extends {} | undefined>(
   let res!: TResult;
   // eslint-disable-next-line deprecation/deprecation
   const imodel = await buildTestIModel(mochaContext, async (builder) => {
-    const testSchema = (await importSchema(
+    const testSchema = importSchema(
       mochaContext,
       builder,
       `
@@ -50,7 +53,7 @@ export async function buildIModel<TResult extends {} | undefined>(
           <BaseClass>bis:ISubModeledElement</BaseClass>
         </ECEntityClass>
       `,
-    )) as TestSchemaDefinition;
+    ) as TestSchemaDefinition;
     if (setup) {
       res = await setup(builder, testSchema, mochaContext);
     }

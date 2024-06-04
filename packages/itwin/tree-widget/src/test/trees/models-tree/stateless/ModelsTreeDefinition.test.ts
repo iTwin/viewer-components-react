@@ -8,7 +8,6 @@ import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itw
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { InstanceKey } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import {
   buildIModel,
@@ -21,6 +20,8 @@ import {
 } from "../../../IModelUtils";
 import { NodeValidators, validateHierarchy } from "../../HierarchyValidation";
 import { createModelsTreeProvider } from "./Utils";
+
+import type { InstanceKey } from "@itwin/presentation-shared";
 
 describe("Models tree", () => {
   describe("Hierarchy definition", () => {
@@ -39,6 +40,7 @@ describe("Models tree", () => {
         },
         rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
       });
+      // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
     });
 
