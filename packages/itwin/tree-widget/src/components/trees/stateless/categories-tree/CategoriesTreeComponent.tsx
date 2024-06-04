@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import classNames from "classnames";
 import { Fragment, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -79,19 +80,21 @@ function CategoriesTreeComponentImpl({
                 />,
               ]}
         </TreeHeader>
-        <AutoSizer>
-          {({ width, height }) => (
-            <StatelessCategoriesTree
-              {...treeProps}
-              imodel={iModel}
-              categories={categories}
-              activeView={viewport}
-              width={width}
-              height={height}
-              filter={filter}
-            />
-          )}
-        </AutoSizer>
+        <div className={classNames("tree-widget-tree-content", density === "enlarged" && "enlarge")}>
+          <AutoSizer>
+            {({ width, height }) => (
+              <StatelessCategoriesTree
+                {...treeProps}
+                imodel={iModel}
+                categories={categories}
+                activeView={viewport}
+                width={width}
+                height={height}
+                filter={filter}
+              />
+            )}
+          </AutoSizer>
+        </div>
       </UnifiedSelectionProvider>
     </div>
   );

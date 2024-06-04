@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import classNames from "classnames";
 import { Fragment, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgCursorClick } from "@itwin/itwinui-icons-react";
@@ -83,9 +84,13 @@ function ModelsTreeComponentImpl({
                   <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
                 ]}
           </TreeHeader>
-          <AutoSizer>
-            {({ width, height }) => <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
-          </AutoSizer>
+          <div className={classNames("tree-widget-tree-content", density === "enlarged" && "enlarge")}>
+            <AutoSizer>
+              {({ width, height }) => (
+                <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />
+              )}
+            </AutoSizer>
+          </div>
         </FocusedInstancesContextProvider>
       </UnifiedSelectionProvider>
     </div>
