@@ -27,7 +27,15 @@ import { ClassGroupingOption } from "../../../components/trees/common/Types";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
-import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement, addSubject } from "../../IModelUtils";
+import {
+  insertDefinitionModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  insertSubject,
+} from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, render, stubDOMMatrix, TestUtils, waitFor } from "../../TestUtils";
 import {
   createCategoryNode,
@@ -1000,16 +1008,14 @@ describe("ModelsTree", () => {
     it("does not load private categories", async () => {
       // eslint-disable-next-line deprecation/deprecation
       const iModel: IModelConnection = await buildTestIModel("ModelsTree", async (builder) => {
-        const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
-        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
-        const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const definitionModel = insertDefinitionModelWithPartition({ builder, codeValue: "TestDefinitionModel" });
 
-        const categoryId = addSpatialCategory(builder, definitionModelId, "Test Spatial Category");
-        addPhysicalObject(builder, modelId, categoryId);
+        const nonPrivateCategory = insertSpatialCategory({ builder, modelId: definitionModel.id, codeValue: "Test Spatial Category" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: nonPrivateCategory.id });
 
-        const privateCategoryId = addSpatialCategory(builder, definitionModelId, "Private Test Spatial Category", true);
-        addPhysicalObject(builder, modelId, privateCategoryId);
+        const privateCategory = insertSpatialCategory({ builder, modelId: definitionModel.id, codeValue: "Private Test Spatial Category", isPrivate: true });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: privateCategory.id });
       });
 
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
@@ -1021,10 +1027,9 @@ describe("ModelsTree", () => {
     it("groups elements by class", async () => {
       // eslint-disable-next-line deprecation/deprecation
       const iModel: IModelConnection = await buildTestIModel("ModelsTree", async (builder) => {
-        const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
-        const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-        const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-        addPhysicalObject(builder, modelId, categoryId);
+        const model = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+        insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
       });
 
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
@@ -1036,11 +1041,10 @@ describe("ModelsTree", () => {
     it("loads specified type of elements", async () => {
       // eslint-disable-next-line deprecation/deprecation
       const iModel: IModelConnection = await buildTestIModel("ModelsTree", async (builder) => {
-        const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
-        const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-        const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-        addPhysicalObject(builder, modelId, categoryId);
-        addSpatialLocationElement(builder, modelId, categoryId);
+        const model = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+        const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+        insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+        insertPhysicalElement({ builder, classFullName: "Generic:SpatialLocation", modelId: model.id, categoryId: category.id });
       });
 
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
@@ -1065,10 +1069,15 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Job: { Bridge: "Test" } } } });
-          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
-          addPhysicalObject(builder, modelX, category);
+          const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+          const subjectX = insertSubject({
+            builder,
+            codeValue: "Subject X",
+            parentId: IModel.rootSubjectId,
+            jsonProperties: { Subject: { Job: { Bridge: "Test" } } },
+          });
+          const modelX = insertPhysicalModelWithPartition({ builder, codeValue: "Model X", partitionParentId: subjectX.id });
+          insertPhysicalElement({ builder, modelId: modelX.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
@@ -1084,10 +1093,15 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } } });
-          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
-          addPhysicalObject(builder, modelX, category);
+          const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+          const subjectX = insertSubject({
+            builder,
+            codeValue: "Subject X",
+            parentId: IModel.rootSubjectId,
+            jsonProperties: { Subject: { Model: { Type: "Hierarchy" } } },
+          });
+          const modelX = insertPhysicalModelWithPartition({ builder, codeValue: "Model X", partitionParentId: subjectX.id });
+          insertPhysicalElement({ builder, modelId: modelX.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
@@ -1103,8 +1117,8 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
+          const subjectX = insertSubject({ builder, codeValue: "Subject X", parentId: IModel.rootSubjectId });
+          insertPhysicalModelWithPartition({ builder, codeValue: "Model X", partitionParentId: subjectX.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
@@ -1120,10 +1134,10 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX));
-          addPhysicalObject(builder, modelX, category);
+          const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+          const subjectX = insertSubject({ builder, codeValue: "Subject X", parentId: IModel.rootSubjectId });
+          const modelX = insertPhysicalModelWithPartition({ builder, codeValue: "Model X", partitionParentId: subjectX.id });
+          insertPhysicalElement({ builder, modelId: modelX.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
@@ -1140,11 +1154,16 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-          const partitionX = addPartition(builder, "BisCore:PhysicalPartition", "Model X", IModel.rootSubjectId);
-          const modelX = addModel(builder, "BisCore:PhysicalModel", partitionX);
-          addPhysicalObject(builder, modelX, category);
-          addSubject(builder, "Subject X", IModel.rootSubjectId, { jsonProperties: { Subject: { Model: { TargetPartition: partitionX } } } });
+          const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+          const partitionX = insertPhysicalPartition({ builder, codeValue: "Model X", parentId: IModel.rootSubjectId });
+          const modelX = insertPhysicalSubModel({ builder, modeledElementId: partitionX.id });
+          insertPhysicalElement({ builder, modelId: modelX.id, categoryId: category.id });
+          insertSubject({
+            builder,
+            codeValue: "Subject X",
+            parentId: IModel.rootSubjectId,
+            jsonProperties: { Subject: { Model: { TargetPartition: partitionX.id } } },
+          });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
@@ -1160,14 +1179,18 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          const modelX = addModel(
+          const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+          const subjectX = insertSubject({ builder, codeValue: "Subject X", parentId: IModel.rootSubjectId });
+          const modelX = insertPhysicalSubModel({
             builder,
-            "BisCore:PhysicalModel",
-            addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }),
-          );
-          addPhysicalObject(builder, modelX, category);
+            modeledElementId: insertPhysicalPartition({
+              builder,
+              codeValue: "Model X",
+              parentId: subjectX.id,
+              jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
+            }).id,
+          });
+          insertPhysicalElement({ builder, modelId: modelX.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
@@ -1183,14 +1206,18 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          const modelX = addModel(
+          const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+          const subjectX = insertSubject({ builder, codeValue: "Subject X", parentId: IModel.rootSubjectId });
+          const modelX = insertPhysicalSubModel({
             builder,
-            "BisCore:PhysicalModel",
-            addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX, { jsonProperties: { PhysicalPartition: { Model: { Content: true } } } }),
-          );
-          addPhysicalObject(builder, modelX, category);
+            modeledElementId: insertPhysicalPartition({
+              builder,
+              codeValue: "Model X",
+              parentId: subjectX.id,
+              jsonProperties: { PhysicalPartition: { Model: { Content: true } } },
+            }).id,
+          });
+          insertPhysicalElement({ builder, modelId: modelX.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));
@@ -1205,12 +1232,14 @@ describe("ModelsTree", () => {
         */
         // eslint-disable-next-line deprecation/deprecation
         const iModel: IModelConnection = await buildTestIModel(createIModelName(this), async (builder) => {
-          const category = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
-          const subjectX = addSubject(builder, "Subject X", IModel.rootSubjectId);
-          const modelX = addModel(builder, "BisCore:PhysicalModel", addPartition(builder, "BisCore:PhysicalPartition", "Model X", subjectX), {
+          const category = insertSpatialCategory({ builder, modelId: IModel.dictionaryId, codeValue: "Test Spatial Category" });
+          const subjectX = insertSubject({ builder, codeValue: "Subject X", parentId: IModel.rootSubjectId });
+          const modelX = insertPhysicalSubModel({
+            builder,
+            modeledElementId: insertPhysicalPartition({ builder, codeValue: "Model X", parentId: subjectX.id }).id,
             isPrivate: true,
           });
-          addPhysicalObject(builder, modelX, category);
+          insertPhysicalElement({ builder, modelId: modelX.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
         const hierarchy = await hierarchyBuilder.createHierarchy(createSearchRuleset({}));

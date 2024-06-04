@@ -22,22 +22,22 @@ import type {
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
-import type { SubjectModelIdsCache } from "./SubjectModelIdsCache";
+import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: SubjectModelIdsCache;
+  idsCache: ModelsTreeIdsCache;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: SubjectModelIdsCache;
+  idsCache: ModelsTreeIdsCache;
   keys: InstanceKey[];
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
-  subjectModelIdsCache: SubjectModelIdsCache;
+  idsCache: ModelsTreeIdsCache;
   label: string;
 }
 
@@ -52,7 +52,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
-  private _subjectModelIdsCache: SubjectModelIdsCache;
+  private _idsCache: ModelsTreeIdsCache;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
 
@@ -85,7 +85,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
-    this._subjectModelIdsCache = props.subjectModelIdsCache;
+    this._idsCache = props.idsCache;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
@@ -158,8 +158,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       }),
     ]);
     const [childSubjectIds, childModelIds] = await Promise.all([
-      this._subjectModelIdsCache.getChildSubjectIds(subjectIds),
-      this._subjectModelIdsCache.getSubjectModelIds(subjectIds),
+      this._idsCache.getChildSubjectIds(subjectIds),
+      this._idsCache.getChildSubjectModelIds(subjectIds),
     ]);
     const defs = new Array<HierarchyNodesDefinition>();
     childSubjectIds.length &&
@@ -193,7 +193,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
           `,
           bindings: [
-            { type: "idset", value: await this._subjectModelIdsCache.getParentSubjectIds() },
+            { type: "idset", value: await this._idsCache.getParentSubjectIds() },
             ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
           ],
         },
