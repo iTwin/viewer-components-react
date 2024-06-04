@@ -22,7 +22,7 @@ import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/mo
 import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
-import { addModel, addPartition, addSpatialCategory, createLocalIModel } from "../../../../IModelUtils";
+import { createLocalIModel, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory } from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport } from "../../../Common";
 import {
@@ -1694,16 +1694,16 @@ describe("HierarchyBasedVisibilityHandler", () => {
         await builder.importSchema(schema);
 
         const partitions = [
-          addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel 1"),
-          addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel 2"),
+          insertPhysicalPartition({ builder, codeValue: "TestPhysicalModel 1", parentId: IModel.rootSubjectId }),
+          insertPhysicalPartition({ builder, codeValue: "TestPhysicalModel 2", parentId: IModel.rootSubjectId }),
         ];
         for (let modelIdx = 0; modelIdx < 2; ++modelIdx) {
-          const partitionId = partitions[modelIdx];
-          const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
+          const partitionId = partitions[modelIdx].id;
+          const modelId = insertPhysicalSubModel({ builder, modeledElementId: partitionId }).id;
           const modelCategories = new Array<string>();
 
           for (let categoryIdx = 0; categoryIdx < 2; ++categoryIdx) {
-            const categoryId = addSpatialCategory(builder, IModel.dictionaryId, `Test SpatialCategory ${modelIdx}_${categoryIdx}`);
+            const categoryId = insertSpatialCategory({ builder, codeValue: `Test SpatialCategory ${modelIdx}_${categoryIdx}` }).id;
             modelCategories.push(categoryId);
 
             const parents = new Array<string>();
