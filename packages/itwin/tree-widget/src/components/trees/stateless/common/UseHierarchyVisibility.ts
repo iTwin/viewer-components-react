@@ -12,6 +12,7 @@ import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { TreeNodeCheckboxState } from "./components/TreeNodeCheckbox";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 
+/** @internal */
 export interface HierarchyVisibilityHandler extends IDisposable {
   readonly onVisibilityChange: BeEvent<() => void>;
 
