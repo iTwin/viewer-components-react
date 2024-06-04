@@ -15,6 +15,7 @@ import {
 } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
 import type { ReportMappingAndMapping } from "./ReportMappings";
+import type { ExtractionRequestDetails } from "@itwin/insights-client";
 
 export interface ReportMappingHorizontalTileProps {
   jobStartEvent: BeEvent<(iModelId: string) => void>;
@@ -73,9 +74,13 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
 
   const handleUpdateDataset = useCallback(async () => {
     setExtractionState(ExtractionStates.Starting);
-    await props.bulkExtractor.runIModelExtraction(props.mapping.imodelId);
+    const extractionRequestDetails: ExtractionRequestDetails = {
+      iModelId: props.mapping.imodelId,
+      mappings: [{ id: props.mapping.mappingId }],
+    };
+    await props.bulkExtractor.runIModelExtraction(extractionRequestDetails);
     props.jobStartEvent.raiseEvent(props.mapping.imodelId);
-  }, [props.bulkExtractor, props.jobStartEvent, props.mapping.imodelId]);
+  }, [props.bulkExtractor, props.jobStartEvent, props.mapping.imodelId, props.mapping.mappingId]);
 
   return (
     <HorizontalTile
