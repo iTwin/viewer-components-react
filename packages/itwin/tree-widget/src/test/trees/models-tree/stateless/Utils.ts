@@ -8,12 +8,11 @@ import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createHierarchyProvider, createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
-import { SubjectModelIdsCache } from "../../../../components/trees/stateless/models-tree/SubjectModelIdsCache";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
-
 export function createIModelAccess(imodel: IModelConnection) {
   const schemas = new SchemaContext();
   // eslint-disable-next-line @itwin/no-internal
@@ -28,10 +27,10 @@ export function createIModelAccess(imodel: IModelConnection) {
 
 export function createModelsTreeProvider(imodel: IModelConnection, filteredNodePaths?: HierarchyNodeIdentifiersPath[]) {
   const imodelAccess = createIModelAccess(imodel);
-  const subjectModelIdsCache = new SubjectModelIdsCache(imodelAccess);
+  const idsCache = new ModelsTreeIdsCache(imodelAccess);
   return createHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, subjectModelIdsCache }),
+    hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
     ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths } } : undefined),
   });
 }

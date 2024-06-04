@@ -12,8 +12,8 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
-import { SubjectModelIdsCache } from "../../../../components/trees/stateless/models-tree/SubjectModelIdsCache";
 import {
   buildIModel,
   insertPhysicalElement,
@@ -32,7 +32,6 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../../HierarchyValidation";
-
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
@@ -807,7 +806,7 @@ describe("Models Tree", () => {
         let targetInstanceLabel: string | undefined;
         let expectedHierarchy!: ExpectedHierarchyDef[];
 
-        let modelsTreeIdsCache: SubjectModelIdsCache;
+        let modelsTreeIdsCache: ModelsTreeIdsCache;
         let hierarchyProvider: HierarchyProvider;
 
         before(async function () {
@@ -824,7 +823,7 @@ describe("Models Tree", () => {
         });
 
         beforeEach(() => {
-          modelsTreeIdsCache = new SubjectModelIdsCache(createIModelAccess(imodel));
+          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel));
           hierarchyProvider = createModelsTreeProvider(imodel, instanceKeyPaths);
         });
 
@@ -843,7 +842,7 @@ describe("Models Tree", () => {
           const actualInstanceKeyPaths = (
             await ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
-              subjectModelIdsCache: modelsTreeIdsCache,
+              idsCache: modelsTreeIdsCache,
               keys: targetInstanceKeys,
             })
           ).sort(instanceKeyPathSorter);
@@ -857,7 +856,7 @@ describe("Models Tree", () => {
           const actualInstanceKeyPaths = (
             await ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
-              subjectModelIdsCache: modelsTreeIdsCache,
+              idsCache: modelsTreeIdsCache,
               label: targetInstanceLabel,
             })
           ).sort(instanceKeyPathSorter);
@@ -883,7 +882,7 @@ describe("Models Tree", () => {
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess: createIModelAccess(imodel),
-          subjectModelIdsCache: new SubjectModelIdsCache(createIModelAccess(imodel)),
+          idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
           label: formattedECInstanceId,
         })
       ).sort(instanceKeyPathSorter);
