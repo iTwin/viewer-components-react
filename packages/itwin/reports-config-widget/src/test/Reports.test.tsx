@@ -1,15 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import {
-  render,
-  screen,
-  waitForElementToBeRemoved,
-  within,
-} from "../test/test-utils";
+import { render, screen, waitForElementToBeRemoved, within } from "../test/test-utils";
 import { Reports } from "../widget/components/Reports";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import faker from "@faker-js/faker";
@@ -19,20 +14,17 @@ import { EmptyLocalization } from "@itwin/core-common";
 import * as moq from "typemoq";
 
 const reportsFactory = (): ReportCollection => ({
-  reports: Array.from(
-    { length: faker.datatype.number({ min: 3, max: 5 }) },
-    (_, index) => ({
-      id: `${faker.datatype.uuid()}`,
-      displayName: `mOcKRePoRT${index}`,
-      description: `mOcKRePoRTDeScRiPtIoN${index}`,
-      deleted: false,
-      _links: {
-        project: {
-          href: "",
-        },
+  reports: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, (_, index) => ({
+    id: `${faker.datatype.uuid()}`,
+    displayName: `mOcKRePoRT${index}`,
+    description: `mOcKRePoRTDeScRiPtIoN${index}`,
+    deleted: false,
+    _links: {
+      project: {
+        href: "",
       },
-    })
-  ),
+    },
+  })),
   _links: {
     next: undefined,
     self: {
@@ -78,7 +70,7 @@ describe("Reports View", () => {
     mockGetReports.mockReturnValueOnce([]);
 
     const onClickAddMock = jest.fn();
-    const { user } = render(<Reports onClickAddReport={onClickAddMock} />,  { reportsClient: mockReportsClient.object });
+    const { user } = render(<Reports onClickAddReport={onClickAddMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
     const newButton = screen.getByRole("button", {
@@ -92,7 +84,7 @@ describe("Reports View", () => {
     const mockedReports: ReportCollection = reportsFactory();
     mockGetReports.mockReturnValueOnce(mockedReports.reports);
 
-    render(<Reports />,  { reportsClient: mockReportsClient.object });
+    render(<Reports />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
     const horizontalTiles = screen.getAllByTestId("horizontal-tile");
@@ -101,16 +93,8 @@ describe("Reports View", () => {
 
     for (const [index, horizontalTile] of horizontalTiles.entries()) {
       const reportMappingTile = within(horizontalTile);
-      expect(
-        reportMappingTile.getByText(
-          mockedReports?.reports[index].displayName ?? ""
-        )
-      ).toBeInTheDocument();
-      expect(
-        reportMappingTile.getByTitle(
-          mockedReports?.reports[index].description ?? ""
-        )
-      ).toBeInTheDocument();
+      expect(reportMappingTile.getByText(mockedReports?.reports[index].displayName ?? "")).toBeInTheDocument();
+      expect(reportMappingTile.getByTitle(mockedReports?.reports[index].description ?? "")).toBeInTheDocument();
     }
   });
 
@@ -118,13 +102,11 @@ describe("Reports View", () => {
     const mockedReports: ReportCollection = reportsFactory();
     mockGetReports.mockReturnValueOnce(mockedReports.reports);
     const onClickModifyMock = jest.fn();
-    const { user } = render(<Reports onClickReportModify={onClickModifyMock} />,  { reportsClient: mockReportsClient.object });
+    const { user } = render(<Reports onClickReportModify={onClickModifyMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const firstMenuDropdown = within(
-      screen.getAllByTestId(/tile-action-button/i)[0]
-    ).getByRole("button");
+    const firstMenuDropdown = within(screen.getAllByTestId(/tile-action-button/i)[0]).getByRole("button");
     await user.click(firstMenuDropdown);
     const modifyButton = screen.getByRole("menuitem", { name: /modify/i });
     await user.click(modifyButton);
@@ -137,13 +119,11 @@ describe("Reports View", () => {
 
     mockGetReports.mockReturnValue(mockedReports.reports);
 
-    const { user } = render(<Reports />,  { reportsClient: mockReportsClient.object });
+    const { user } = render(<Reports />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const firstMenuDropdown = within(
-      screen.getAllByTestId(/tile-action-button/i)[0]
-    ).getByRole("button");
+    const firstMenuDropdown = within(screen.getAllByTestId(/tile-action-button/i)[0]).getByRole("button");
     await user.click(firstMenuDropdown);
     const removeButton = screen.getByRole("menuitem", { name: /remove/i });
     await user.click(removeButton);
@@ -178,38 +158,26 @@ describe("Reports View", () => {
     });
 
     // Be an exact match on display name.
-    await userEvent.type(
-      searchInput,
-      mockedReports.reports[0].displayName
-    );
+    await userEvent.type(searchInput, mockedReports.reports[0].displayName);
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(
-      screen.getByText(mockedReports.reports[0].displayName)
-    ).toBeInTheDocument();
+    expect(screen.getByText(mockedReports.reports[0].displayName)).toBeInTheDocument();
 
     // Be an exact match on description.
     await userEvent.clear(searchInput);
-    await userEvent.type(
-      searchInput,
-      mockedReports.reports[0].description ?? ""
-    );
+    await userEvent.type(searchInput, mockedReports.reports[0].description ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(
-      screen.getByText(mockedReports.reports[0].displayName)
-    ).toBeInTheDocument();
+    expect(screen.getByText(mockedReports.reports[0].displayName)).toBeInTheDocument();
   });
 
   it("modify a report", async () => {
     const mockedReports: ReportCollection = reportsFactory();
     mockGetReports.mockReturnValueOnce(mockedReports.reports);
     const onClickModifyMock = jest.fn();
-    const { user } = render(<Reports onClickReportModify={onClickModifyMock} />,  { reportsClient: mockReportsClient.object });
+    const { user } = render(<Reports onClickReportModify={onClickModifyMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const firstMenuDropdown = within(
-      screen.getAllByTestId(/tile-action-button/i)[0]
-    ).getByRole("button");
+    const firstMenuDropdown = within(screen.getAllByTestId(/tile-action-button/i)[0]).getByRole("button");
     await user.click(firstMenuDropdown);
     const modifyButton = screen.getByRole("menuitem", { name: /modify/i });
     await user.click(modifyButton);
@@ -220,13 +188,11 @@ describe("Reports View", () => {
     const mockedReports: ReportCollection = reportsFactory();
     mockGetReports.mockReturnValueOnce(mockedReports.reports);
     const onClickTitleMock = jest.fn();
-    const { user } = render(<Reports onClickReportTitle={onClickTitleMock} />,  { reportsClient: mockReportsClient.object });
+    const { user } = render(<Reports onClickReportTitle={onClickTitleMock} />, { reportsClient: mockReportsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const reportName = screen.getByText(
-      mockedReports.reports[0].displayName
-    );
+    const reportName = screen.getByText(mockedReports.reports[0].displayName);
     await user.click(reportName);
     expect(onClickTitleMock).toBeCalled();
   });

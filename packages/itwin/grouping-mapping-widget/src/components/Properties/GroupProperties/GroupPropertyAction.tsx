@@ -1,35 +1,19 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/presentation-common";
 import type { SelectOption } from "@itwin/itwinui-react";
-import {
-  Alert,
-  Button,
-  Fieldset,
-  LabeledInput,
-  LabeledSelect,
-  Text,
-} from "@itwin/itwinui-react";
+import { Alert, Button, Fieldset, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { DataType, QuantityType } from "@itwin/insights-client";
-import type {
-  GroupMinimal,
-  Property,
-  PropertyModify,
-} from "@itwin/insights-client";
+import type { GroupMinimal, Property, PropertyModify } from "@itwin/insights-client";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
-import {
-  convertPresentationFields,
-  convertToECProperties,
-  fetchPresentationDescriptor,
-  findProperties,
-} from "./GroupPropertyUtils";
+import { convertPresentationFields, convertToECProperties, fetchPresentationDescriptor, findProperties } from "./GroupPropertyUtils";
 import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
@@ -64,13 +48,7 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefine
  * Component to create or update a group.
  * @public
  */
-export const GroupPropertyAction = ({
-  mappingId,
-  group,
-  groupProperty,
-  onSaveSuccess,
-  onClickCancel,
-}: GroupPropertyActionProps) => {
+export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => {
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const propertiesClient = usePropertiesClient();
   const [propertyName, setPropertyName] = useState<string>("");
@@ -98,29 +76,26 @@ export const GroupPropertyAction = ({
     const descriptor = await fetchPresentationDescriptor(iModelConnection, result);
 
     // Only allow primitives and structs
-    const propertyFields = descriptor?.fields.filter(
-      (field) =>
-        field.type.valueFormat === PropertyValueFormat.Primitive ||
-        field.type.valueFormat === PropertyValueFormat.Struct
-    ) ?? [];
+    const propertyFields =
+      descriptor?.fields.filter((field) => field.type.valueFormat === PropertyValueFormat.Primitive || field.type.valueFormat === PropertyValueFormat.Struct) ??
+      [];
 
     const propertiesMetaData = convertPresentationFields(propertyFields);
 
     let groupPropertyDetails = null;
     if (groupProperty) {
       const accessToken = await getAccessToken();
-      groupPropertyDetails = await propertiesClient.getProperty(
-        accessToken,
-        mappingId,
-        group.id,
-        groupProperty.id
-      );
+      groupPropertyDetails = await propertiesClient.getProperty(accessToken, mappingId, group.id, groupProperty.id);
     }
 
     return { propertiesMetaData, groupPropertyDetails };
   }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, mappingId, propertiesClient]);
 
-  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["properties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
+  const {
+    data,
+    isFetching: isLoadingProperties,
+    isSuccess: isLoadingPropertiesSuccessful,
+  } = useQuery(["properties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
 
   useEffect(() => {
     if (isLoadingPropertiesSuccessful && data?.propertiesMetaData) {
@@ -130,8 +105,7 @@ export const GroupPropertyAction = ({
         setPropertyName(data.groupPropertyDetails.propertyName);
         setOldPropertyName(data.groupPropertyDetails.propertyName);
         setDataType(data.groupPropertyDetails.dataType);
-        if(data.groupPropertyDetails.quantityType)
-          setQuantityType(data.groupPropertyDetails.quantityType);
+        if (data.groupPropertyDetails.quantityType) setQuantityType(data.groupPropertyDetails.quantityType);
 
         const properties = findProperties(data.groupPropertyDetails.ecProperties ?? [], data.propertiesMetaData);
         if (properties.length === 0) {
@@ -154,19 +128,8 @@ export const GroupPropertyAction = ({
       };
 
       return groupProperty
-        ? propertiesClient.updateProperty(
-          accessToken,
-          mappingId,
-          group.id,
-          groupProperty.id,
-          newGroupProperty
-        )
-        : propertiesClient.createProperty(
-          accessToken,
-          mappingId,
-          group.id,
-          newGroupProperty
-        );
+        ? propertiesClient.updateProperty(accessToken, mappingId, group.id, groupProperty.id, newGroupProperty)
+        : propertiesClient.createProperty(accessToken, mappingId, group.id, newGroupProperty);
     },
     onSuccess: async () => {
       onSaveSuccess();
@@ -195,37 +158,29 @@ export const GroupPropertyAction = ({
 
   return (
     <>
-      <div className='gmw-group-property-action-container'>
-        <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
-          <Text variant='small' as='small' className='gmw-field-legend'>
+      <div className="gmw-group-property-action-container">
+        <Fieldset disabled={isLoading} className="gmw-property-options" legend="Property Details">
+          <Text variant="small" as="small" className="gmw-field-legend">
             Asterisk * indicates mandatory fields.
           </Text>
           <LabeledInput
-            id='propertyName'
-            label='Property Name'
+            id="propertyName"
+            label="Property Name"
             value={propertyName}
             required
             onChange={(event) => {
               setPropertyName(event.target.value);
               validator.showMessageFor("propertyName");
             }}
-            message={validator.message(
-              "propertyName",
-              propertyName,
-              NAME_REQUIREMENTS
-            )}
-            status={
-              validator.message("propertyName", propertyName, NAME_REQUIREMENTS)
-                ? "negative"
-                : undefined
-            }
+            message={validator.message("propertyName", propertyName, NAME_REQUIREMENTS)}
+            status={validator.message("propertyName", propertyName, NAME_REQUIREMENTS) ? "negative" : undefined}
             onBlur={() => {
               validator.showMessageFor("propertyName");
             }}
           />
           <LabeledSelect<DataType>
             label={"Data Type"}
-            id='dataType'
+            id="dataType"
             options={[
               { value: DataType.Boolean, label: "Boolean" },
               { value: DataType.Integer, label: "Integer" },
@@ -239,47 +194,42 @@ export const GroupPropertyAction = ({
               setDataType(value);
             }}
             message={validator.message("dataType", propertyName, "required")}
-            status={
-              validator.message("dataType", propertyName, "required")
-                ? "negative"
-                : undefined
-            }
+            status={validator.message("dataType", propertyName, "required") ? "negative" : undefined}
             onBlur={() => {
               validator.showMessageFor("dataType");
             }}
-            onShow={() => { }}
-            onHide={() => { }}
+            onShow={() => {}}
+            onHide={() => {}}
           />
           <LabeledSelect<QuantityType | undefined>
-            label='Quantity Type'
+            label="Quantity Type"
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
-            onShow={() => { }}
-            onHide={() => { }}
-            placeholder = 'No Quantity Type'
+            onShow={() => {}}
+            onHide={() => {}}
+            placeholder="No Quantity Type"
           />
         </Fieldset>
-        {propertiesNotFoundAlert &&
+        {propertiesNotFoundAlert && (
           <Alert type="warning">
-            Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new selection is made and saved.
+            Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new
+            selection is made and saved.
           </Alert>
-        }
-        <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
+        )}
+        <Fieldset className="gmw-property-view-container" legend="Mapped Properties">
           <div className="gmw-property-view-button">
-            <Button
-              onClick={async () => setShowPropertiesSelectionModal(true)}
-              disabled={isLoading}
-            >
+            <Button onClick={async () => setShowPropertiesSelectionModal(true)} disabled={isLoading}>
               Select Properties
             </Button>
           </div>
           <div className="gmw-properties-list">
-            {selectedProperties.length === 0 && !isLoading ?
+            {selectedProperties.length === 0 && !isLoading ? (
               <div className="gmw-empty-selection">
                 <Text>No properties selected.</Text>
                 <Text>Press the &quot;Select Properties&quot; button for options.</Text>
-              </div> :
+              </div>
+            ) : (
               selectedProperties.map((property) => (
                 <GroupPropertyListItem
                   key={property.key}
@@ -287,7 +237,8 @@ export const GroupPropertyAction = ({
                   title={`${property.actualECClassName}`}
                   description={property.categoryLabel}
                 />
-              ))}
+              ))
+            )}
           </div>
         </Fieldset>
       </div>
@@ -295,9 +246,7 @@ export const GroupPropertyAction = ({
         onSave={handleSaveClick}
         onCancel={onClickCancel}
         isLoading={isLoading}
-        isSavingDisabled={
-          selectedProperties.length === 0 || !propertyName || dataType === undefined
-        }
+        isSavingDisabled={selectedProperties.length === 0 || !propertyName || dataType === undefined}
       />
       <GroupsPropertiesSelectionModal
         showModal={showPropertiesSelectionModal}
@@ -306,11 +255,7 @@ export const GroupPropertyAction = ({
         setSelectedProperties={setSelectedProperties}
         propertiesMetaData={propertiesMetaData}
       />
-      <SaveModal
-        onSave={onSave}
-        onClose={handleCloseSaveModal}
-        showSaveModal={showSaveConfirmationModal}
-      />
+      <SaveModal onSave={onSave} onClose={handleCloseSaveModal} showSaveModal={showSaveConfirmationModal} />
     </>
   );
 };

@@ -1,12 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import type {
-  InstanceKey,
-  PropertiesField,
-} from "@itwin/presentation-common";
+import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
 import type { Primitives, PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { toaster } from "@itwin/itwinui-react";
@@ -52,10 +49,8 @@ export interface AddedProperty {
 
 /* This class is to build adaptive and dynamic query for find similar property selections */
 export class QueryBuilder {
-  private static readonly MULTI_ASPECT_PRIMARY_CLASS =
-    "BisCore:ElementOwnsMultiAspects";
-  private static readonly UNIQUE_ASPECT_PRIMARY_CLASS =
-    "BisCore:ElementOwnsUniqueAspect";
+  private static readonly MULTI_ASPECT_PRIMARY_CLASS = "BisCore:ElementOwnsMultiAspects";
+  private static readonly UNIQUE_ASPECT_PRIMARY_CLASS = "BisCore:ElementOwnsUniqueAspect";
   private static readonly DEFAULT_DOUBLE_PRECISION = 4;
 
   private dataProvider: PresentationPropertyDataProvider;
@@ -66,8 +61,7 @@ export class QueryBuilder {
   }
 
   private isCategory(propertyField: PropertiesField): boolean {
-    const classInfo =
-      propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
+    const classInfo = propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
     return classInfo?.name === "BisCore:GeometricElement3dIsInCategory";
   }
 
@@ -95,14 +89,10 @@ export class QueryBuilder {
       return false;
     }
 
-    const propertyField = (await this.dataProvider.getFieldByPropertyRecord(
-      prop,
-    )) as PropertiesField;
+    const propertyField = (await this.dataProvider.getFieldByPropertyRecord(prop)) as PropertiesField;
 
     if (!propertyField) {
-      toaster.negative(
-        "Error. Failed to fetch field for this property record.",
-      );
+      toaster.negative("Error. Failed to fetch field for this property record.");
       return false;
     }
 
@@ -111,18 +101,14 @@ export class QueryBuilder {
   }
 
   public async removeProperty(prop: PropertyRecord) {
-    const propertyField = (await this.dataProvider.getFieldByPropertyRecord(
-      prop,
-    )) as PropertiesField;
+    const propertyField = (await this.dataProvider.getFieldByPropertyRecord(prop)) as PropertiesField;
 
     this._propertyMap.delete(JSON.stringify(propertyField.getFieldDescriptor()));
   }
 
   private buildProperty(prop: PropertyRecord, propertiesField: PropertiesField) {
     if (prop.value?.valueFormat !== PropertyValueFormat.Primitive || prop.value.value === undefined) {
-      toaster.negative(
-        "Error. An unexpected error has occured while building a query.",
-      );
+      toaster.negative("Error. An unexpected error has occured while building a query.");
       return;
     }
 
@@ -130,65 +116,32 @@ export class QueryBuilder {
       return str.split(match).join(replacement);
     }
     // if property value has single quote, escape
-    if (
-      (typeof prop.value.value === "string" ||
-        prop.value.value instanceof String) &&
-      String(prop.value.value).indexOf("'") >= 0
-    ) {
+    if ((typeof prop.value.value === "string" || prop.value.value instanceof String) && String(prop.value.value).indexOf("'") >= 0) {
       prop.value.value = replaceAll(prop.value.value.toString(), "'", "''");
     }
 
     const pathToPrimaryClass = propertiesField.parent?.pathToPrimaryClass;
 
     // get the special cases
-    const isNavigation: boolean =
-      prop.property.typename.toLowerCase() === "navigation";
+    const isNavigation: boolean = prop.property.typename.toLowerCase() === "navigation";
     const isCategory: boolean = isNavigation && this.isCategory(propertiesField);
 
     const isAspect: boolean =
       pathToPrimaryClass?.find(
-        (a) =>
-          a.relationshipInfo?.name ===
-          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
-          a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
+        (a) => a.relationshipInfo?.name === QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS || a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
     for (let i = 0; i < propertiesField.properties.length; i++) {
       const property = propertiesField.properties[i].property;
 
       const className = property.classInfo.name.replace(":", ".");
-      const propertyName = isNavigation
-        ? isCategory
-          ? `${property.name}.CodeValue`
-          : `${property.name}.id`
-        : property.name;
-      const propertyValue = isNavigation
-        ? isCategory
-          ? prop.value.displayValue ?? ""
-          : (prop.value.value as InstanceKey).id
-        : prop.value.value;
+      const propertyName = isNavigation ? (isCategory ? `${property.name}.CodeValue` : `${property.name}.id`) : property.name;
+      const propertyValue = isNavigation ? (isCategory ? prop.value.displayValue ?? "" : (prop.value.value as InstanceKey).id) : prop.value.value;
 
-      if (
-        !isAspect &&
-        pathToPrimaryClass &&
-        pathToPrimaryClass.length > 0
-      ) {
-        this.addRelatedToQuery(
-          i,
-          propertiesField,
-          propertyName,
-          propertyValue,
-        );
+      if (!isAspect && pathToPrimaryClass && pathToPrimaryClass.length > 0) {
+        this.addRelatedToQuery(i, propertiesField, propertyName, propertyValue);
       } else {
-        this.addPropertyToQuery(
-          i,
-          className,
-          propertyName,
-          propertyValue,
-          this.needsQuote(propertiesField),
-          isCategory,
-          isAspect,
-        );
+        this.addPropertyToQuery(i, className, propertyName, propertyValue, this.needsQuote(propertiesField), isCategory, isAspect);
       }
     }
     return true;
@@ -200,64 +153,28 @@ export class QueryBuilder {
     return "string" === typeName || "uri" === typeName;
   }
 
-  private addRelatedToQuery(
-    unionIndex: number,
-    propertyField: PropertiesField,
-    propertyName: string,
-    propertyValue: Primitives.Value,
-  ) {
+  private addRelatedToQuery(unionIndex: number, propertyField: PropertiesField, propertyName: string, propertyValue: Primitives.Value) {
     const paths = [...(propertyField.parent?.pathToPrimaryClass ?? [])];
     paths.reverse().forEach((path) => {
       const sourceClassName = path.sourceClassInfo?.name.replace(":", ".");
       const targetClassName = path.targetClassInfo?.name.replace(":", ".");
       const relClassName = path.relationshipInfo?.name.replace(":", ".");
 
-      const relClassProperty = path.isForwardRelationship
-        ? `SourceECInstanceId`
-        : `TargetECInstanceId`;
+      const relClassProperty = path.isForwardRelationship ? `SourceECInstanceId` : `TargetECInstanceId`;
 
-      const relPropertyValue = path.isForwardRelationship
-        ? `TargetECInstanceId`
-        : `SourceECInstanceId`;
+      const relPropertyValue = path.isForwardRelationship ? `TargetECInstanceId` : `SourceECInstanceId`;
 
-      this.addClassToQuery(
-        unionIndex,
-        targetClassName,
-        `ECInstanceId`,
-        relClassName,
-        relPropertyValue
-      );
+      this.addClassToQuery(unionIndex, targetClassName, `ECInstanceId`, relClassName, relPropertyValue);
 
-      this.addClassToQuery(
-        unionIndex,
-        relClassName,
-        relClassProperty,
-        sourceClassName,
-        `ECInstanceId`
-      );
+      this.addClassToQuery(unionIndex, relClassName, relClassProperty, sourceClassName, `ECInstanceId`);
 
-      if (path.sourceClassInfo?.name
-        === propertyField.parent?.contentClassInfo.name) {
-        this.addPropertyToQuery(
-          unionIndex,
-          sourceClassName,
-          propertyName,
-          propertyValue,
-          this.needsQuote(propertyField),
-          false,
-          false,
-        );
+      if (path.sourceClassInfo?.name === propertyField.parent?.contentClassInfo.name) {
+        this.addPropertyToQuery(unionIndex, sourceClassName, propertyName, propertyValue, this.needsQuote(propertyField), false, false);
       }
     });
   }
 
-  private addClassToQuery(
-    unionIndex: number,
-    className: string,
-    classProperty: string,
-    joinClassName: string,
-    joinClassProperty: string,
-  ) {
+  private addClassToQuery(unionIndex: number, className: string, classProperty: string, joinClassName: string, joinClassProperty: string) {
     if (this.query === undefined) {
       this.query = { unions: [] };
     }
@@ -281,17 +198,14 @@ export class QueryBuilder {
       return;
     }
 
-    const foundClass = this.query.unions[unionIndex].classes.find((c) =>
-      c.className === className
-    );
+    const foundClass = this.query.unions[unionIndex].classes.find((c) => c.className === className);
 
     if (foundClass) {
-      const foundJoin = foundClass.classJoins.find((join) =>
-        join.classProperty === classProperty && join.joinClassName === joinClassName && join.joinClassProperty === joinClassProperty
+      const foundJoin = foundClass.classJoins.find(
+        (join) => join.classProperty === classProperty && join.joinClassName === joinClassName && join.joinClassProperty === joinClassProperty,
       );
 
-      if (!foundJoin)
-        foundClass.classJoins.push(classJoin);
+      if (!foundJoin) foundClass.classJoins.push(classJoin);
       return;
     }
 
@@ -332,14 +246,10 @@ export class QueryBuilder {
       return;
     }
 
-    const foundPropertyClass = this.query.unions[unionIndex].properties.find((p) =>
-      p.className === className
-    );
+    const foundPropertyClass = this.query.unions[unionIndex].properties.find((p) => p.className === className);
 
     if (foundPropertyClass) {
-      const foundJoin = foundPropertyClass?.classProperties.find((join) =>
-        join.name === propertyName
-      );
+      const foundJoin = foundPropertyClass?.classProperties.find((join) => join.name === propertyName);
 
       if (foundJoin) {
         foundJoin.value = propertyValue;
@@ -355,16 +265,12 @@ export class QueryBuilder {
 
   public buildQueryString() {
     this.regenerateQuery();
-    if (
-      this.query === undefined ||
-      (this.query.unions.find((u) => u.classes.length === 0 && u.properties.length === 0))
-    ) {
+    if (this.query === undefined || this.query.unions.find((u) => u.classes.length === 0 && u.properties.length === 0)) {
       return "";
     }
 
     const unionSegments: string[] = [];
     for (const union of this.query.unions) {
-
       const baseClass = union.classes[0];
       const baseProperty = union.properties[0];
       const baseClassName = baseClass ? baseClass.className : baseProperty?.className;
@@ -386,9 +292,7 @@ export class QueryBuilder {
           continue;
         }
 
-        const joinIdName = property.isAspect
-          ? `${property.className}.Element.id`
-          : `${property.className}.ECInstanceId`;
+        const joinIdName = property.isAspect ? `${property.className}.Element.id` : `${property.className}.ECInstanceId`;
 
         if (!querySegments.has(property.className) && property.className !== baseClassName)
           querySegments.set(property.className, [`${joinIdName} = ${baseIdName}`]);
@@ -431,7 +335,7 @@ export class QueryBuilder {
     for (const queryClass of classes) {
       for (const classJoin of queryClass.classJoins) {
         const querySegment = [
-          ...querySegments.get(classJoin.joinClassName) ?? [],
+          ...(querySegments.get(classJoin.joinClassName) ?? []),
           `${queryClass.className}.${classJoin.classProperty} = ${classJoin.joinClassName}.${classJoin.joinClassProperty}`,
         ];
         querySegments.set(classJoin.joinClassName, querySegment);
@@ -443,9 +347,11 @@ export class QueryBuilder {
 
   private propertyQuerySegment = (className: string, property: ClassProperty, needsQuote: boolean): string => {
     if (this.isFloat(property.value))
-      return `ROUND(${className}.${property.name}, ` +
+      return (
+        `ROUND(${className}.${property.name}, ` +
         `${QueryBuilder.DEFAULT_DOUBLE_PRECISION}) = ` +
-        `${Number(property.value).toFixed(QueryBuilder.DEFAULT_DOUBLE_PRECISION)}`;
+        `${Number(property.value).toFixed(QueryBuilder.DEFAULT_DOUBLE_PRECISION)}`
+      );
 
     const propertyValue = needsQuote ? `'${property.value}'` : property.value;
     return `${className}.${property.name} = ${propertyValue}`;

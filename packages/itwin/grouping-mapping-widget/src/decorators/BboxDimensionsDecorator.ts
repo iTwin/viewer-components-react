@@ -1,10 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type {
-  CurvePrimitive,
-  GeometryQuery} from "@itwin/core-geometry";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { CurvePrimitive, GeometryQuery } from "@itwin/core-geometry";
 import {
   Angle,
   Arc3d,
@@ -23,25 +21,9 @@ import {
   Transform,
   YawPitchRollAngles,
 } from "@itwin/core-geometry";
-import {
-  ColorByName,
-  ColorDef,
-  LinePixels,
-  Placement3d,
-  QueryBinder,
-  QueryRowFormat,
-} from "@itwin/core-common";
-import type {
-  DecorateContext,
-  Decorator,
-  GraphicBuilder,
-  RenderGraphic} from "@itwin/core-frontend";
-import {
-  GraphicBranch,
-  GraphicType,
-  IModelApp,
-  Marker,
-} from "@itwin/core-frontend";
+import { ColorByName, ColorDef, LinePixels, Placement3d, QueryBinder, QueryRowFormat } from "@itwin/core-common";
+import type { DecorateContext, Decorator, GraphicBuilder, RenderGraphic } from "@itwin/core-frontend";
+import { GraphicBranch, GraphicType, IModelApp, Marker } from "@itwin/core-frontend";
 
 export enum BboxDimension {
   BoundingBoxShortestEdgeLength = "Shortest Edge Length",
@@ -96,9 +78,7 @@ export class BboxDimensionsDecorator implements Decorator {
   private markers: Marker[] = [];
 
   private fill = false;
-  private shapeColor: ColorDef = ColorDef.fromTbgr(
-    ColorDef.withTransparency(ColorDef.create(ColorByName.cyan).tbgr, 200)
-  );
+  private shapeColor: ColorDef = ColorDef.fromTbgr(ColorDef.withTransparency(ColorDef.create(ColorByName.cyan).tbgr, 200));
   private pointColor: ColorDef = ColorDef.white;
   private lineColor: ColorDef = ColorDef.red;
   private fillColor: ColorDef = ColorDef.white;
@@ -122,19 +102,12 @@ export class BboxDimensionsDecorator implements Decorator {
     // get locating info on the requested instance
     const query = `SELECT bBoxHigh,bBoxLow,yaw,pitch,roll,origin FROM BisCore.SpatialElement WHERE ECInstanceId = ?`;
 
-    if (
-      !IModelApp.viewManager.selectedView ||
-      !IModelApp.viewManager.selectedView.iModel
-    ) {
+    if (!IModelApp.viewManager.selectedView || !IModelApp.viewManager.selectedView.iModel) {
       return false;
     }
 
     const params = new QueryBinder().bindId(1, instanceId);
-    const queryIterable = IModelApp.viewManager.selectedView?.iModel.query(
-      query,
-      params,
-      { rowFormat: QueryRowFormat.UseJsPropertyNames }
-    );
+    const queryIterable = IModelApp.viewManager.selectedView?.iModel.query(query, params, { rowFormat: QueryRowFormat.UseJsPropertyNames });
 
     const results: SpatialElementQueryResult[] = [];
     for await (const row of queryIterable) {
@@ -167,8 +140,7 @@ export class BboxDimensionsDecorator implements Decorator {
     const corners = this.instance.placement.getWorldCorners().points;
     const mappings = this.instance.pointMappings;
     for (const dimKey in BboxDimension) {
-      if (!Object.prototype.hasOwnProperty.call(BboxDimension, dimKey))
-        continue;
+      if (!Object.prototype.hasOwnProperty.call(BboxDimension, dimKey)) continue;
       const dim = BboxDimension[dimKey as keyof typeof BboxDimension];
       if (mappings.has(dim)) {
         const points = mappings.get(dim);
@@ -190,16 +162,9 @@ export class BboxDimensionsDecorator implements Decorator {
     this.clearContext();
 
     // add geometry to decorator
-    const polyface = this.buildPolyface(
-      this.instance.placement.bbox,
-      this.instance.placement.transform
-    );
+    const polyface = this.buildPolyface(this.instance.placement.bbox, this.instance.placement.transform);
     this.addGeometry(polyface);
-    const [line, points] = this.buildLine(
-      this.instance.placement.bbox,
-      dim,
-      this.instance.placement.transform
-    );
+    const [line, points] = this.buildLine(this.instance.placement.bbox, dim, this.instance.placement.transform);
     this.addLine(line);
     this.addPoints(points);
 
@@ -235,23 +200,13 @@ export class BboxDimensionsDecorator implements Decorator {
   // #region Helper Functions
 
   /** Calculate all BBox dimensions and properties and save. */
-  private inferSpatialData(
-    elem: SpatialElementQueryResult
-  ): InferredSpatialData {
+  private inferSpatialData(elem: SpatialElementQueryResult): InferredSpatialData {
     // build placement from result
     const origin = new Point3d(elem.origin.x, elem.origin.y, elem.origin.z);
     const bBoxLow = new Point3d(elem.bBoxLow.x, elem.bBoxLow.y, elem.bBoxLow.z);
-    const bBoxHigh = new Point3d(
-      elem.bBoxHigh.x,
-      elem.bBoxHigh.y,
-      elem.bBoxHigh.z
-    );
+    const bBoxHigh = new Point3d(elem.bBoxHigh.x, elem.bBoxHigh.y, elem.bBoxHigh.z);
     const range = Range3d.create(bBoxLow, bBoxHigh);
-    const ypra = new YawPitchRollAngles(
-      Angle.createDegrees(elem.yaw),
-      Angle.createDegrees(elem.pitch),
-      Angle.createDegrees(elem.roll)
-    );
+    const ypra = new YawPitchRollAngles(Angle.createDegrees(elem.yaw), Angle.createDegrees(elem.pitch), Angle.createDegrees(elem.roll));
     const placement = new Placement3d(origin, ypra, range);
 
     // determine dimension size ordering
@@ -263,118 +218,46 @@ export class BboxDimensionsDecorator implements Decorator {
     const d04 = corners.distance(0, 4);
     if (d01 >= d02 && d02 >= d04) {
       pointMappings.set(BboxDimension.BoundingBoxLongestEdgeLength, [0, 1]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateEdgeLength,
-        [0, 2]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateEdgeLength, [0, 2]);
       pointMappings.set(BboxDimension.BoundingBoxShortestEdgeLength, [0, 4]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxLongestFaceDiagonalLength,
-        [0, 3]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateFaceDiagonalLength,
-        [0, 5]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxShortestFaceDiagonalLength,
-        [0, 6]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxLongestFaceDiagonalLength, [0, 3]);
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateFaceDiagonalLength, [0, 5]);
+      pointMappings.set(BboxDimension.BoundingBoxShortestFaceDiagonalLength, [0, 6]);
     } else if (d01 >= d04 && d04 >= d02) {
       pointMappings.set(BboxDimension.BoundingBoxLongestEdgeLength, [0, 1]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateEdgeLength,
-        [0, 4]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateEdgeLength, [0, 4]);
       pointMappings.set(BboxDimension.BoundingBoxShortestEdgeLength, [0, 2]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxLongestFaceDiagonalLength,
-        [0, 5]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateFaceDiagonalLength,
-        [0, 3]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxShortestFaceDiagonalLength,
-        [0, 6]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxLongestFaceDiagonalLength, [0, 5]);
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateFaceDiagonalLength, [0, 3]);
+      pointMappings.set(BboxDimension.BoundingBoxShortestFaceDiagonalLength, [0, 6]);
     } else if (d04 >= d02 && d02 >= d01) {
       pointMappings.set(BboxDimension.BoundingBoxLongestEdgeLength, [0, 4]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateEdgeLength,
-        [0, 2]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateEdgeLength, [0, 2]);
       pointMappings.set(BboxDimension.BoundingBoxShortestEdgeLength, [0, 1]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxLongestFaceDiagonalLength,
-        [0, 6]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateFaceDiagonalLength,
-        [0, 5]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxShortestFaceDiagonalLength,
-        [0, 3]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxLongestFaceDiagonalLength, [0, 6]);
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateFaceDiagonalLength, [0, 5]);
+      pointMappings.set(BboxDimension.BoundingBoxShortestFaceDiagonalLength, [0, 3]);
     } else if (d04 >= d01 && d01 >= d02) {
       pointMappings.set(BboxDimension.BoundingBoxLongestEdgeLength, [0, 4]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateEdgeLength,
-        [0, 1]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateEdgeLength, [0, 1]);
       pointMappings.set(BboxDimension.BoundingBoxShortestEdgeLength, [0, 2]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxLongestFaceDiagonalLength,
-        [0, 5]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateFaceDiagonalLength,
-        [0, 6]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxShortestFaceDiagonalLength,
-        [0, 3]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxLongestFaceDiagonalLength, [0, 5]);
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateFaceDiagonalLength, [0, 6]);
+      pointMappings.set(BboxDimension.BoundingBoxShortestFaceDiagonalLength, [0, 3]);
     } else if (d02 >= d01 && d01 >= d04) {
       pointMappings.set(BboxDimension.BoundingBoxLongestEdgeLength, [0, 2]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateEdgeLength,
-        [0, 1]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateEdgeLength, [0, 1]);
       pointMappings.set(BboxDimension.BoundingBoxShortestEdgeLength, [0, 4]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxLongestFaceDiagonalLength,
-        [0, 3]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateFaceDiagonalLength,
-        [0, 6]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxShortestFaceDiagonalLength,
-        [0, 5]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxLongestFaceDiagonalLength, [0, 3]);
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateFaceDiagonalLength, [0, 6]);
+      pointMappings.set(BboxDimension.BoundingBoxShortestFaceDiagonalLength, [0, 5]);
     } else if (d02 >= d04 && d04 >= d01) {
       pointMappings.set(BboxDimension.BoundingBoxLongestEdgeLength, [0, 2]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateEdgeLength,
-        [0, 4]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateEdgeLength, [0, 4]);
       pointMappings.set(BboxDimension.BoundingBoxShortestEdgeLength, [0, 1]);
-      pointMappings.set(
-        BboxDimension.BoundingBoxLongestFaceDiagonalLength,
-        [0, 6]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxIntermediateFaceDiagonalLength,
-        [0, 3]
-      );
-      pointMappings.set(
-        BboxDimension.BoundingBoxShortestFaceDiagonalLength,
-        [0, 5]
-      );
+      pointMappings.set(BboxDimension.BoundingBoxLongestFaceDiagonalLength, [0, 6]);
+      pointMappings.set(BboxDimension.BoundingBoxIntermediateFaceDiagonalLength, [0, 3]);
+      pointMappings.set(BboxDimension.BoundingBoxShortestFaceDiagonalLength, [0, 5]);
     } else {
       // Unreachable case
     }
@@ -428,16 +311,9 @@ export class BboxDimensionsDecorator implements Decorator {
    * @param tf Transformation on the Bounding Box if applicable.
    * @returns The line geometry.
    */
-  private buildLine(
-    bbox: Range3d,
-    dim: BboxDimension,
-    tf: Transform
-  ): [CurvePrimitive, Point3d[]] {
+  private buildLine(bbox: Range3d, dim: BboxDimension, tf: Transform): [CurvePrimitive, Point3d[]] {
     // fallback scenario
-    const fallback: [CurvePrimitive, Point3d[]] = [
-      LineSegment3d.create(bbox.low, bbox.high).cloneTransformed(tf),
-      [bbox.low, bbox.high],
-    ];
+    const fallback: [CurvePrimitive, Point3d[]] = [LineSegment3d.create(bbox.low, bbox.high).cloneTransformed(tf), [bbox.low, bbox.high]];
     if (!this.instance) {
       // TODO: probably should have some warning here...
       return fallback;
@@ -447,10 +323,7 @@ export class BboxDimensionsDecorator implements Decorator {
     const corners = this.instance.placement.getWorldCorners().points;
     const targets = this.instance.pointMappings.get(dim);
     if (targets) {
-      return [
-        LineSegment3d.create(corners[targets[0]], corners[targets[1]]),
-        [corners[targets[0]], corners[targets[1]]],
-      ];
+      return [LineSegment3d.create(corners[targets[0]], corners[targets[1]]), [corners[targets[0]], corners[targets[1]]]];
     } else {
       // TODO: probably should have some warning here...
       return fallback;
@@ -527,19 +400,11 @@ export class BboxDimensionsDecorator implements Decorator {
    */
   private createGraphics(context: DecorateContext): RenderGraphic | undefined {
     // Specifying an Id for the graphics tells the display system that all of the geometry belongs to the same entity, so that it knows to make sure the edges draw on top of the surfaces.
-    const builder = context.createGraphicBuilder(
-      GraphicType.Scene,
-      undefined,
-      context.viewport.iModel.transientIds.next
-    );
+    const builder = context.createGraphicBuilder(GraphicType.Scene, undefined, context.viewport.iModel.transientIds.next);
     // Read-only now
     // builder.wantNormals = true;
     this.points.forEach((styledPoint) => {
-      builder.setSymbology(
-        styledPoint.color,
-        styledPoint.fill ? styledPoint.color : ColorDef.white,
-        styledPoint.lineThickness
-      );
+      builder.setSymbology(styledPoint.color, styledPoint.fill ? styledPoint.color : ColorDef.white, styledPoint.lineThickness);
       const point = styledPoint.point;
       builder.addPointString([point]);
     });
@@ -549,18 +414,14 @@ export class BboxDimensionsDecorator implements Decorator {
         styledGeometry.color,
         styledGeometry.fill ? styledGeometry.fillColor : styledGeometry.color,
         styledGeometry.lineThickness,
-        styledGeometry.linePixels
+        styledGeometry.linePixels,
       );
       this.createGraphicsForGeometry(geometry, styledGeometry.edges, builder);
     });
     const graphic = builder.finish();
     return graphic;
   }
-  private createGraphicsForGeometry(
-    geometry: GeometryQuery,
-    wantEdges: boolean,
-    builder: GraphicBuilder
-  ) {
+  private createGraphicsForGeometry(geometry: GeometryQuery, wantEdges: boolean, builder: GraphicBuilder) {
     if (geometry instanceof LineString3d) {
       builder.addLineString(geometry.points);
     } else if (geometry instanceof Loop) {

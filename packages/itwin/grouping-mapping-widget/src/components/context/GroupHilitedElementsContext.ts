@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 export interface OverlappedInfo {
   groupIds: string[];
@@ -44,20 +44,18 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   },
   isVisualizationsEnabled: false,
   isOverlappedColored: false,
-  setHiddenGroupsIds: () => { },
-  setShowGroupColor: () => { },
-  setNumberOfVisualizedGroups: () => { },
-  setOverlappedElementsMetadata: () => { },
-  setIsOverlappedColored: () => { },
-  setIsVisualizationsEnabled: () => { },
+  setHiddenGroupsIds: () => {},
+  setShowGroupColor: () => {},
+  setNumberOfVisualizedGroups: () => {},
+  setOverlappedElementsMetadata: () => {},
+  setIsOverlappedColored: () => {},
+  setIsVisualizationsEnabled: () => {},
 });
 
 export const useGroupHilitedElementsContext = (): GroupHilitedElements => {
   const context = React.useContext(GroupHilitedElementsContext);
   if (!context) {
-    throw new Error(
-      "useGroupHilitedElementsContext should be used within a GroupHilitedElementsContext provider"
-    );
+    throw new Error("useGroupHilitedElementsContext should be used within a GroupHilitedElementsContext provider");
   }
   return context;
 };

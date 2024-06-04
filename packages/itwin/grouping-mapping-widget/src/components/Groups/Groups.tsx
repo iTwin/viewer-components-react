@@ -1,12 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useCallback } from "react";
 import type { GroupMinimal, Mapping } from "@itwin/insights-client";
-import type {
-  ContextCustomUI,
-} from "../customUI/GroupingMappingCustomUI";
+import type { ContextCustomUI } from "../customUI/GroupingMappingCustomUI";
 import type { ActionButtonRenderer, ProgressConfig } from "./GroupsView";
 import { GroupsView } from "./GroupsView";
 import { useGroupsOperations } from "./hooks/useGroupsOperations";
@@ -22,11 +20,7 @@ export interface GroupsProps {
   onClickAddGroup?: (queryGenerationType: string) => void;
   onClickGroupTitle?: (group: GroupMinimal) => void;
   onClickGroupModify?: (group: GroupMinimal, queryGenerationType: string) => void;
-  onClickRenderContextCustomUI?: (
-    contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>,
-    group: GroupMinimal,
-    displayLabel: string,
-  ) => void;
+  onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: GroupMinimal, displayLabel: string) => void;
   disableActions?: boolean;
   isVisualizing?: boolean;
   progressConfig?: ProgressConfig;
@@ -64,10 +58,13 @@ export const Groups = ({
     overlappedElementsInfo,
   } = useGroupsOperations({ mappingId: mapping.id });
 
-  const addGroup = useCallback((type: string) => {
-    if (!onClickAddGroup) return;
-    onClickAddGroup(type);
-  }, [onClickAddGroup]);
+  const addGroup = useCallback(
+    (type: string) => {
+      if (!onClickAddGroup) return;
+      onClickAddGroup(type);
+    },
+    [onClickAddGroup],
+  );
 
   const renderAlert = useCallback(() => {
     if (!errorMessage) {

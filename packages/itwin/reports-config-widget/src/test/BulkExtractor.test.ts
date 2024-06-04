@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { BulkExtractor } from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { assert } from "chai";
@@ -21,7 +21,7 @@ jest.mock("../widget/components/ExtractionToast.tsx", () => ({
 
 const mockRunExtraction = moq.Mock.ofType<(accessToken: AccessToken, extractionRequest: ExtractionRequestDetails) => Promise<{ id: string }>>();
 const mockGetStatus = moq.Mock.ofType<(accessToken: AccessToken, jobId: string) => Promise<{ state: ExtractionState }>>();
-const mockGetReportMappings = moq.Mock.ofType<(accessToken: AccessToken, reportId: string) => Promise<{ imodelId: string, mappingId: string }[]>>();
+const mockGetReportMappings = moq.Mock.ofType<(accessToken: AccessToken, reportId: string) => Promise<{ imodelId: string; mappingId: string }[]>>();
 
 jest.mock("@itwin/insights-client", () => ({
   ...jest.requireActual("@itwin/insights-client"),
@@ -143,7 +143,7 @@ describe("BulkExtractor", () => {
 
     mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractionState.Running }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId, mappingId: mockMappingId}]);
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId, mappingId: mockMappingId }]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -162,7 +162,12 @@ describe("BulkExtractor", () => {
 
     mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(async () => ({ state: ExtractionState.Running }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId, mappingId: mockMappingId }, { imodelId: mockIModelId1, mappingId: mockMappingId1}]);
+    mockGetReportMappings
+      .setup(async (x) => x(moq.It.isAny(), mockReportId))
+      .returns(async () => [
+        { imodelId: mockIModelId, mappingId: mockMappingId },
+        { imodelId: mockIModelId1, mappingId: mockMappingId1 },
+      ]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -184,7 +189,12 @@ describe("BulkExtractor", () => {
 
     mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(async () => ({ state: ExtractionState.Queued }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId, mappingId: mockMappingId }, { imodelId: mockIModelId1, mappingId: mockMappingId1}]);
+    mockGetReportMappings
+      .setup(async (x) => x(moq.It.isAny(), mockReportId))
+      .returns(async () => [
+        { imodelId: mockIModelId, mappingId: mockMappingId },
+        { imodelId: mockIModelId1, mappingId: mockMappingId1 },
+      ]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -203,7 +213,12 @@ describe("BulkExtractor", () => {
 
     mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(async () => ({ state: ExtractionState.Failed }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId, mappingId: mockMappingId }, { imodelId: mockIModelId1, mappingId: mockMappingId1}]);
+    mockGetReportMappings
+      .setup(async (x) => x(moq.It.isAny(), mockReportId))
+      .returns(async () => [
+        { imodelId: mockIModelId, mappingId: mockMappingId },
+        { imodelId: mockIModelId1, mappingId: mockMappingId1 },
+      ]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
 
@@ -222,7 +237,7 @@ describe("BulkExtractor", () => {
 
     mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(async () => ({ state: ExtractionState.Succeeded }));
 
-    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId, mappingId: mockMappingId}]);
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(async () => [{ imodelId: mockIModelId, mappingId: mockMappingId }]);
 
     const sut = new BulkExtractor(new ReportsClient(), new ExtractionClient(), mockGetAccessToken, mockToastCallback, mockToastCallback);
     await sut.runReportExtractions([mockReportId]);

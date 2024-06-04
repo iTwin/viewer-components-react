@@ -1,18 +1,12 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { ExtractionState } from "@itwin/insights-client";
 import { handleError } from "./utils";
 import { ExtractionStates } from "./ExtractionStatus";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
-import type {
-  ExtractionClient,
-  ExtractionMapping,
-  ExtractionRequestDetails,
-  ReportMapping,
-  ReportsClient,
-} from "@itwin/insights-client";
+import type { ExtractionClient, ExtractionMapping, ExtractionRequestDetails, ReportMapping, ReportsClient } from "@itwin/insights-client";
 import type { AccessToken } from "@itwin/core-bentley";
 
 export type ReportMappingAndMapping = ReportMapping & {
@@ -64,7 +58,7 @@ export class BulkExtractor {
   }
 
   public async getReportState(reportId: string): Promise<ExtractionStates> {
-    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
+    if (new Date().getTime() - this._timeFetched.getTime() > STATUS_CHECK_INTERVAL) {
       this._timeFetched = new Date();
       await this.fetchStates();
     }
@@ -81,7 +75,7 @@ export class BulkExtractor {
   }
 
   public async getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates> {
-    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
+    if (new Date().getTime() - this._timeFetched.getTime() > STATUS_CHECK_INTERVAL) {
       this._timeFetched = new Date();
       await this.fetchStates();
     }
@@ -103,17 +97,13 @@ export class BulkExtractor {
   }
 
   private static getFinalState(states: ExtractionState[]): ExtractionStates {
-    if (states.includes(ExtractionState.Failed))
-      return ExtractionStates.Failed;
+    if (states.includes(ExtractionState.Failed)) return ExtractionStates.Failed;
 
-    if (states.includes(ExtractionState.Queued))
-      return ExtractionStates.Queued;
+    if (states.includes(ExtractionState.Queued)) return ExtractionStates.Queued;
 
-    if (states.includes(ExtractionState.Running))
-      return ExtractionStates.Running;
+    if (states.includes(ExtractionState.Running)) return ExtractionStates.Running;
 
-    if (states.includes(ExtractionState.Succeeded))
-      return ExtractionStates.Succeeded;
+    if (states.includes(ExtractionState.Succeeded)) return ExtractionStates.Succeeded;
 
     return ExtractionStates.Failed;
   }
@@ -155,9 +145,8 @@ export class BulkExtractor {
       });
     }
 
-    const extractionDetails: ExtractionRequestDetails[] = Array.from(
-      extractionDetailsIModelIdMap.entries()).map(([iModelId, mappings]) => {
-      const mappingSetArray: ExtractionMapping[] = Array.from(new Set(mappings.map((m) => m.id))).map((id) => ({id}));
+    const extractionDetails: ExtractionRequestDetails[] = Array.from(extractionDetailsIModelIdMap.entries()).map(([iModelId, mappings]) => {
+      const mappingSetArray: ExtractionMapping[] = Array.from(new Set(mappings.map((m) => m.id))).map((id) => ({ id }));
       return {
         iModelId,
         mappings: mappingSetArray,
@@ -188,25 +177,24 @@ export class BulkExtractor {
   }
 
   public async runIModelExtractions(extractionRequestsDetails: ExtractionRequestDetails[]): Promise<void> {
-    await Promise.all(extractionRequestsDetails.map(async (details) => {
-      const run = await this.runExtraction(details);
-      if (run) {
-        this._iModelStates.set(details.iModelId, ExtractionState.Queued);
-        this._iModelRun.set(details.iModelId, run);
-      }
-    }));
+    await Promise.all(
+      extractionRequestsDetails.map(async (details) => {
+        const run = await this.runExtraction(details);
+        if (run) {
+          this._iModelStates.set(details.iModelId, ExtractionState.Queued);
+          this._iModelRun.set(details.iModelId, run);
+        }
+      }),
+    );
     this.checkRunning();
   }
 
   private async fetchReportExtractionRequestDetails(reportId: string): Promise<ExtractionRequestDetails[]> {
-    const reportMappings = await this._reportsClientApi.getReportMappings(
-      await this._accessToken(),
-      reportId
-    );
+    const reportMappings = await this._reportsClientApi.getReportMappings(await this._accessToken(), reportId);
     const extractionRequestDetails: ExtractionRequestDetails[] = reportMappings.map((reportMapping) => {
       return {
         iModelId: reportMapping.imodelId,
-        mappings: [{id: reportMapping.mappingId}],
+        mappings: [{ id: reportMapping.mappingId }],
       };
     });
     return extractionRequestDetails;

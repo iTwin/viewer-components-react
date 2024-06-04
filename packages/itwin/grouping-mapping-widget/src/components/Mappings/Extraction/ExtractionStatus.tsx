@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { useEffect, useState } from "react";
 import * as React from "react";
 import { STATUS_CHECK_INTERVAL } from "../../Constants";
@@ -25,10 +25,7 @@ interface ExtractionStatusProps {
   clearExtractionState: () => void;
 }
 
-export const ExtractionStatus = ({
-  state,
-  clearExtractionState,
-}: ExtractionStatusProps) => {
+export const ExtractionStatus = ({ state, clearExtractionState }: ExtractionStatusProps) => {
   const [fadeOut, setFadeOut] = useState<boolean>(false);
 
   const onAnimationEnd = () => {
@@ -48,23 +45,15 @@ export const ExtractionStatus = ({
 
   switch (state) {
     case ExtractionStates.Starting:
-      return (<StartingExtractionState />);
+      return <StartingExtractionState />;
     case ExtractionStates.Queued:
-      return (<QueuedExtractionState />);
+      return <QueuedExtractionState />;
     case ExtractionStates.Running:
-      return (<RunningExtractionState />);
+      return <RunningExtractionState />;
     case ExtractionStates.Succeeded:
-      return (<TerminalExtractionState
-        status="Succeeded"
-        animation={fadeOut}
-        onAnimationEnd={onAnimationEnd}
-      />);
+      return <TerminalExtractionState status="Succeeded" animation={fadeOut} onAnimationEnd={onAnimationEnd} />;
     case ExtractionStates.Failed:
-      return (<TerminalExtractionState
-        status="Failed"
-        animation={fadeOut}
-        onAnimationEnd={onAnimationEnd}
-      />);
+      return <TerminalExtractionState status="Failed" animation={fadeOut} onAnimationEnd={onAnimationEnd} />;
     default:
       return null;
   }

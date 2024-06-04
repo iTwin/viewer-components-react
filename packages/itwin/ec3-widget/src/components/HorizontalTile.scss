@@ -35,10 +35,7 @@
 
   &-selected {
     border: 1px solid var(--iui-color-border-accent);
-    background: linear-gradient(
-      rgba(var(--iui-color-accent-hsl), var(iui-opacity-6)),
-      rgba(var(--iui-color-accent-hsl), var(iui-opacity-6))
-      ),
+    background: linear-gradient(rgba(var(--iui-color-accent-hsl), var(iui-opacity-6)), rgba(var(--iui-color-accent-hsl), var(iui-opacity-6))),
       linear-gradient(var(--iui-color-background), var(--iui-color-background));
   }
 }
