@@ -125,23 +125,23 @@ MeasureAreaToolModel
     if (!ev.viewport) return;
 
     if (this._enableSheetMeasurements) {
-      if (this.toolModel.drawingMetaData?.drawingId === undefined && ev.viewport.view.id !== undefined && isFirstPoint) {
+      if (this.toolModel.drawingMetadata?.drawingId === undefined && ev.viewport.view.id !== undefined && isFirstPoint) {
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
         this.toolModel.sheetViewId = ev.viewport.view.id;
 
         if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
           const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents};
-          this.toolModel.drawingMetaData = data;
+          this.toolModel.drawingMetadata = data;
         }
       }
     }
   }
 
   public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
-    if (!this._enableSheetMeasurements || this.toolModel.drawingMetaData?.drawingId === undefined || this.toolModel.drawingMetaData?.origin === undefined || this.toolModel.drawingMetaData?.extents === undefined)
+    if (!this._enableSheetMeasurements || this.toolModel.drawingMetadata?.drawingId === undefined || this.toolModel.drawingMetadata?.origin === undefined || this.toolModel.drawingMetadata?.extents === undefined)
       return true;
 
-    return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents);
+    return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingMetadata?.origin, this.toolModel.drawingMetadata?.extents);
   }
 
   private _sendHintsToAccuDraw(ev: BeButtonEvent): void {
@@ -209,8 +209,8 @@ MeasureAreaToolModel
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this._enableSheetMeasurements && this.toolModel.drawingMetaData?.origin !== undefined && this.toolModel.drawingMetaData?.extents !== undefined) {
-      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingMetaData?.origin, this.toolModel.drawingMetaData?.extents));
+    if (this._enableSheetMeasurements && this.toolModel.drawingMetadata?.origin !== undefined && this.toolModel.drawingMetadata?.extents !== undefined) {
+      context.addDecorationFromBuilder(SheetMeasurementsHelper.getDrawingContourGraphic(context, this.toolModel.drawingMetadata?.origin, this.toolModel.drawingMetadata?.extents));
     }
   }
 

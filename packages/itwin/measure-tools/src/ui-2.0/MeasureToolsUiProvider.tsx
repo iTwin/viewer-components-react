@@ -56,7 +56,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props?.enableSheetMeasurement ?? true));
       }
       if (!featureFlags?.hideLocationTool) {
-        tools.push(MeasureToolDefinitions.measureLocationToolCommand);
+        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props?.enableSheetMeasurement ?? true));
       }
       if (!featureFlags?.hideRadiusTool) {
         tools.push(MeasureToolDefinitions.measureRadiusToolCommand);

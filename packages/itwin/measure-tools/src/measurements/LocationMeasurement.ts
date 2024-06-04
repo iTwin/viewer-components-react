@@ -40,6 +40,7 @@ import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 import { MeasureTools } from "../MeasureTools";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 
 /**
  * Props for serializing a [[LocationMeasurement]].
@@ -144,7 +145,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   constructor(props?: LocationMeasurementProps) {
-    super();
+    super(props);
 
     this._location = Point3d.createZero();
     this._isDynamic = false;
@@ -233,24 +234,27 @@ export class LocationMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
+    let convertedSheetPoint;
+    if (this.drawingMetadata?.transform)
+      convertedSheetPoint = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.transform);
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_x"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.x),
+        value: await FormatterUtils.formatLength(convertedSheetPoint?.x ?? adjustedLocation.x),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_y"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.y),
+        value: await FormatterUtils.formatLength(convertedSheetPoint?.y ?? adjustedLocation.y),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
-        value: await FormatterUtils.formatLength(adjustedLocation.z),
+        value: await FormatterUtils.formatLength(convertedSheetPoint?.z ?? adjustedLocation.z),
       },
     ];
 
@@ -287,7 +291,9 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
+    let adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
+    if (this.drawingMetadata?.transform)
+      adjustedLocation = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.transform);
     const fCoordinates = await FormatterUtils.formatCoordinates(adjustedLocation);
 
     let title = MeasureTools.localization.getLocalizedString(
@@ -326,22 +332,23 @@ export class LocationMeasurement extends Measurement {
         value: await FormatterUtils.formatLength(adjustedLocation.z),
       });
     }
+    if (this.drawingMetadata?.transform === undefined) {
+      let slopeValue: string;
+      if (undefined !== this._slope)
+        slopeValue = FormatterUtils.formatSlope(100.0 * this._slope, true);
+      else
+        slopeValue = MeasureTools.localization.getLocalizedString(
+          "MeasureTools:tools.MeasureLocation.slopeUnavailable"
+        );
 
-    let slopeValue: string;
-    if (undefined !== this._slope)
-      slopeValue = FormatterUtils.formatSlope(100.0 * this._slope, true);
-    else
-      slopeValue = MeasureTools.localization.getLocalizedString(
-        "MeasureTools:tools.MeasureLocation.slopeUnavailable"
-      );
-
-    data.properties.push({
-      label: MeasureTools.localization.getLocalizedString(
-        "MeasureTools:tools.MeasureLocation.slope"
-      ),
-      name: "LocationMeasurement_Slope",
-      value: slopeValue,
-    });
+      data.properties.push({
+        label: MeasureTools.localization.getLocalizedString(
+          "MeasureTools:tools.MeasureLocation.slope"
+        ),
+        name: "LocationMeasurement_Slope",
+        value: slopeValue,
+      });
+    }
 
     if (undefined !== this._station) {
       data.properties.push({

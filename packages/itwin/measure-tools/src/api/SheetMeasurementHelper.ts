@@ -13,6 +13,12 @@ import type { DrawingMetadata } from "./Measurement";
 
 export namespace SheetMeasurementsHelper {
 
+  export interface SheetTransformProps {
+    masterOrigin: Point3d;
+    sheetTov8Drawing: Transform;
+    v8DrawingToDesign: Transform;
+  }
+
   /**
    * @param imodel
    * @param id SheetViewDefinition ID
@@ -33,7 +39,7 @@ export namespace SheetMeasurementsHelper {
           // Within y extents
           const jsonProp = JSON.parse(row[3]);
           const scale = jsonProp.scale;
-          const transform = createsheetTo3dTransform(Point3d.fromJSON(jsonProp.masterOrigin), Transform.fromJSON(jsonProp.sheetToV8DrawingTransform), Transform.fromJSON(jsonProp.v8DrawingToDesignTransform));
+          const transform: SheetTransformProps = { masterOrigin: Point3d.fromJSON(jsonProp.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.v8DrawingToDesignTransform)};
           const result: DrawingMetadata = {
             drawingId: row[0],
             origin: new Point2d(row[1].X, row[1].Y),
@@ -79,10 +85,10 @@ export namespace SheetMeasurementsHelper {
     return areaBuilder;
   }
 
-  function createsheetTo3dTransform(masterOrigin: Point3d, sheetTov8Drawing: Transform, v8DrawingToDesign: Transform): Transform {
-    const firstStep = Transform.createOriginAndMatrix(masterOrigin, sheetTov8Drawing.matrix);
-    const result = Transform.createIdentity();
-    firstStep.multiplyTransformTransform(v8DrawingToDesign, result);
-    return result;
+  export function measurementTransform(point: Point3d, transform: SheetTransformProps): Point3d {
+    const drawingPoint = transform.sheetTov8Drawing.multiplyPoint3d(point);
+    const adjustedDrawingPoint = new Point3d(drawingPoint.x, drawingPoint.y, transform.masterOrigin.z);
+    const final3dPoint = transform.v8DrawingToDesign.multiplyPoint3d(adjustedDrawingPoint);
+    return final3dPoint;
   }
 }

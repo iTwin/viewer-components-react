@@ -34,6 +34,8 @@ import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel
 import { MeasureTools } from "../MeasureTools";
 import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin/appui-abstract";
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
+import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
@@ -43,6 +45,7 @@ MeasureLocationToolModel
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
+  private _enableSheetMeasurements: boolean;
 
   private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
@@ -67,12 +70,13 @@ MeasureLocationToolModel
     return MeasureToolsFeatures.Tools_MeasureLocation;
   }
 
-  constructor() {
+  constructor(enableSheetMeasurements = false) {
     super();
+    this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureLocationTool();
+    const tool = new MeasureLocationTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
@@ -89,6 +93,23 @@ MeasureLocationToolModel
     return EventHandled.Yes;
   }
 
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent): Promise<DrawingMetadata | undefined> {
+    if (!ev.viewport) return undefined;
+
+    if (this._enableSheetMeasurements) {
+      if (ev.viewport.view.id !== undefined) {
+        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+        this.toolModel.sheetViewId = ev.viewport.view.id;
+
+        if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
+          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents, transform: drawingInfo.transform};
+          return data;
+        }
+      }
+    }
+    return undefined;
+  }
+
   public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
     if (undefined === ev.viewport || !this._useDynamicMeasurement)
       return;
@@ -102,6 +123,7 @@ MeasureLocationToolModel
     const props: AddLocationProps = {
       location: ev.point.clone(),
       viewType: MeasurementViewTarget.classifyViewport(ev.viewport!),
+      drawingMetadata: (await this.sheetMeasurementsDataButtonDown(ev)) as DrawingMetadataProps,
     };
 
     await this.queryGeoLocation(props);

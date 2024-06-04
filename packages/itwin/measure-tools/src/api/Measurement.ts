@@ -8,7 +8,8 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
-import type { Point3d, Transform, XYProps } from "@itwin/core-geometry";
+import type { TransformProps, XYProps, XYZProps } from "@itwin/core-geometry";
+import { Point3d, Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
@@ -16,6 +17,7 @@ import { MeasurementPreferences } from "./MeasurementPreferences";
 import type { MeasurementProps } from "./MeasurementProps";
 import { MeasurementViewTarget } from "./MeasurementViewTarget";
 import { ShimFunctions } from "./ShimFunctions";
+import type { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
 
 /** A property value on a measurement that can be aggregated with other similarly-named properties from other measurements so aggregate totals can be displayed in the UI. */
 export interface AggregatableValue {
@@ -57,14 +59,17 @@ export namespace DrawingMetadata {
       return undefined;
     const origin = obj.origin?.toJSONXY();
     const extents = obj.extents?.toJSONXY();
+    const masterOrigin = obj.transform?.masterOrigin.toJSONXYZ();
+    const sheetTov8Drawing = obj.transform?.sheetTov8Drawing.toJSON();
+    const v8DrawingToDesign = obj.transform?.v8DrawingToDesign.toJSON();
     if (origin !== undefined)
-      return { origin, extents, worldScale: obj.worldScale, drawingId: obj.drawingId };
+      return { origin, extents, worldScale: obj.worldScale, drawingId: obj.drawingId, transform: (masterOrigin !== undefined && sheetTov8Drawing !== undefined && v8DrawingToDesign !== undefined) ? {masterOrigin, sheetTov8Drawing, v8DrawingToDesign}: undefined };
     return undefined;
   }
 
   export function fromJSON(json: DrawingMetadataProps): DrawingMetadata {
 
-    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents)};
+    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents), transform: { masterOrigin: Point3d.fromJSON(json.transform?.masterOrigin), sheetTov8Drawing: Transform.fromJSON(json.transform?.sheetTov8Drawing), v8DrawingToDesign: Transform.fromJSON(json.transform?.v8DrawingToDesign)}};
 
   }
 
@@ -257,9 +262,14 @@ export interface MeasurementEqualityOptions {
   angleTolerance?: number;
 }
 
-export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents"> {
+export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents" | "transform"> {
   origin: XYProps;
   extents?: XYProps;
+  transform?: {
+    masterOrigin: XYZProps;
+    sheetTov8Drawing: TransformProps;
+    v8DrawingToDesign: TransformProps;
+  };
 }
 
 export interface DrawingMetadata {
@@ -276,7 +286,7 @@ export interface DrawingMetadata {
   extents?: Point2d;
 
   /** Represents the transform from sheet points to 3d points */
-  transform?: Transform;
+  transform?: SheetMeasurementsHelper.SheetTransformProps;
 
 }
 
@@ -306,7 +316,7 @@ export abstract class Measurement {
   private _isVisible: boolean; // Not serialized
 
   // Used for sheet measurements
-  private _drawingMetaData?: DrawingMetadata;
+  private _drawingMetadata?: DrawingMetadata;
 
   /** Default drawing style name. */
   public static readonly defaultStyle: string = WellKnownMeasurementStyle.Default;
@@ -336,17 +346,17 @@ export abstract class Measurement {
     this.onTransientIdChanged(prevId);
   }
 
-  public get drawingMetaData(): Readonly<DrawingMetadata | undefined> {
-    return this._drawingMetaData;
+  public get drawingMetadata(): Readonly<DrawingMetadata | undefined> {
+    return this._drawingMetadata;
   }
 
-  public set drawingMetaData(data: DrawingMetadata | undefined) {
-    this._drawingMetaData = data;
+  public set drawingMetadata(data: DrawingMetadata | undefined) {
+    this._drawingMetadata = data;
     this.onDrawingMetadataChanged();
   }
 
   public get worldScale(): Readonly<number> {
-    return this.drawingMetaData?.worldScale ?? 1.0;
+    return this.drawingMetadata?.worldScale ?? 1.0;
   }
 
   public set sheetViewId(id: string | undefined) {
@@ -477,7 +487,7 @@ export abstract class Measurement {
     this._displayLabels = MeasurementPreferences.current.displayMeasurementLabels;
     this._viewTarget = new MeasurementViewTarget();
     if (props?.drawingMetadata)
-      this.drawingMetaData = DrawingMetadata.fromJSON(props.drawingMetadata);
+      this.drawingMetadata = DrawingMetadata.fromJSON(props.drawingMetadata);
   }
 
   /** Copies the measurement data into a new instance.
@@ -691,8 +701,8 @@ export abstract class Measurement {
     this.lockStyle = other.lockStyle;
     this.viewTarget.copyFrom(other.viewTarget);
     this.displayLabels = other.displayLabels;
-    if (other.drawingMetaData)
-      this._drawingMetaData = { origin: other.drawingMetaData.origin.clone(), worldScale: other.drawingMetaData.worldScale, drawingId: other.drawingMetaData.drawingId, extents: other.drawingMetaData.extents};
+    if (other.drawingMetadata)
+      this._drawingMetadata = { origin: other.drawingMetadata.origin.clone(), worldScale: other.drawingMetadata.worldScale, drawingId: other.drawingMetadata.drawingId, extents: other.drawingMetadata.extents, transform: other.drawingMetadata.transform};
   }
 
   /**
@@ -710,7 +720,7 @@ export abstract class Measurement {
     this._displayLabels = (json.displayLabels !== undefined) ? json.displayLabels : MeasurementPreferences.current.displayMeasurementLabels;
 
     if (json.drawingMetadata !== undefined)
-      this.drawingMetaData = DrawingMetadata.fromJSON(json.drawingMetadata);
+      this.drawingMetadata = DrawingMetadata.fromJSON(json.drawingMetadata);
 
     if (json.viewTarget !== undefined) {
       this._viewTarget.loadFromJSON(json.viewTarget);
@@ -753,9 +763,9 @@ export abstract class Measurement {
     json.lockStyle = this._lockStyle;
     json.viewTarget = this._viewTarget.toJSON();
     json.displayLabels = this._displayLabels;
-    const drawingMetaDataJson = DrawingMetadata.toJSON(this.drawingMetaData);
-    if (drawingMetaDataJson)
-      json.drawingMetadata = drawingMetaDataJson;
+    const drawingMetadataJson = DrawingMetadata.toJSON(this.drawingMetadata);
+    if (drawingMetadataJson)
+      json.drawingMetadata = drawingMetadataJson;
   }
 
   /** Notify subclasses that style options have changed. This is to allow implementations to regenerate any cached graphics.
