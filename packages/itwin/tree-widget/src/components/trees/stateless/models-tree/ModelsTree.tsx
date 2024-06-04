@@ -157,14 +157,14 @@ function useCachedVisibility(activeView: Viewport) {
     imodel: activeView.iModel,
     action: useCallback(() => {
       cacheRef.current = undefined;
-      setVisibilityHandlerFactory(createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
     }, [activeView, getModelsTreeIdsCache]),
   });
 
   useEffect(() => {
     currentIModelRef.current = activeView.iModel;
     cacheRef.current = undefined;
-    setVisibilityHandlerFactory(createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
   }, [activeView, getModelsTreeIdsCache]);
 
   return {
