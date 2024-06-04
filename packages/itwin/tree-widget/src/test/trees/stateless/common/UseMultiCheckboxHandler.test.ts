@@ -6,10 +6,11 @@
 import { expect } from "chai";
 import { act } from "react-dom/test-utils";
 import sinon from "sinon";
-import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { useMultiCheckboxHandler } from "../../../../components/trees/stateless/common/UseMultiCheckboxHandler";
 import { renderHook, waitFor } from "../../../TestUtils";
 import { createPresentationHierarchyNode } from "../TreeUtils";
+
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 type UseMultiCheckboxHandlerProps = Parameters<typeof useMultiCheckboxHandler>[0];
 

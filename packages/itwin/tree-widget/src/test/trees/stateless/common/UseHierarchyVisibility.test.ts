@@ -7,9 +7,11 @@ import { expect } from "chai";
 import { act } from "react-dom/test-utils";
 import sinon from "sinon";
 import { BeEvent } from "@itwin/core-bentley";
-import { HierarchyVisibilityHandler, useHierarchyVisibility } from "../../../../components/trees/stateless/common/UseHierarchyVisibility";
+import { useHierarchyVisibility } from "../../../../components/trees/stateless/common/UseHierarchyVisibility";
 import { renderHook, waitFor } from "../../../TestUtils";
 import { createPresentationHierarchyNode } from "../TreeUtils";
+
+import type { HierarchyVisibilityHandler } from "../../../../components/trees/stateless/common/UseHierarchyVisibility";
 
 type UseHierarchyVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
 

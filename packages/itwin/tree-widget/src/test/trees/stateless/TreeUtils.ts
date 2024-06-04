@@ -3,8 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 export function createPresentationHierarchyNode(partial?: Partial<PresentationHierarchyNode>): PresentationHierarchyNode {
   return {

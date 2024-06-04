@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { PropsWithChildren } from "react";
 import { act } from "react-dom/test-utils";
 import { createStorage } from "@itwin/unified-selection";
 import { useFocusedInstancesContext } from "../../../../components/trees/stateless/common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../../../../components/trees/stateless/common/FocusedInstancesContextProvider";
 import { renderHook, waitFor } from "../../../TestUtils";
+
+import type { PropsWithChildren } from "react";
 
 describe("FocusedInstancesContext", () => {
   const selectionStorage = createStorage();

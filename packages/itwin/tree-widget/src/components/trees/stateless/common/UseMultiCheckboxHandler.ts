@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
+
 interface UseMultiCheckboxHandlerProps {
   rootNodes: PresentationTreeNode[] | undefined;
   isNodeSelected: (nodeId: string) => boolean;
@@ -20,14 +21,14 @@ interface UseMultiCheckboxHandlerResult {
 /** @internal */
 export function useMultiCheckboxHandler({ rootNodes, isNodeSelected, onClick }: UseMultiCheckboxHandlerProps): UseMultiCheckboxHandlerResult {
   const onCheckboxClicked = useCallback(
-    (node: PresentationHierarchyNode, checked: boolean) => {
-      if (!isNodeSelected(node.id)) {
-        onClick(node, checked);
+    (clickedNode: PresentationHierarchyNode, checked: boolean) => {
+      if (!isNodeSelected(clickedNode.id)) {
+        onClick(clickedNode, checked);
         return;
       }
       rootNodes && forEachSelectedNode(rootNodes, isNodeSelected, (node) => onClick(node, checked));
     },
-    [rootNodes, isNodeSelected],
+    [rootNodes, isNodeSelected, onClick],
   );
 
   return { onCheckboxClicked };
