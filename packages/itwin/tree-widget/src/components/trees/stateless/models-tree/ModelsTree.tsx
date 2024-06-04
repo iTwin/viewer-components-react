@@ -7,14 +7,16 @@ import { useCallback, useMemo, useRef } from "react";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
+import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
+import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 import { StatelessModelsVisibilityHandler } from "./ModelsVisibilityHandler";
 import { SubjectModelIdsCache } from "./SubjectModelIdsCache";
 
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import type { Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { HierarchyNode, LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
@@ -24,6 +26,7 @@ interface StatelessModelsTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   filter?: string;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -33,7 +36,8 @@ type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinitio
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-const StatelessModelsTreeId = "models-tree-v2";
+/** @internal */
+export const StatelessModelsTreeId = "models-tree-v2";
 
 /** @internal */
 export function StatelessModelsTree({
@@ -47,8 +51,9 @@ export function StatelessModelsTree({
   hierarchyLevelConfig,
   selectionMode,
   onPerformanceMeasured,
+  onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const { getSubjectModelIdsCache } = useSubjectModelIdsCache();
+  const { getSubjectModelIdsCache } = useSubjectModelIdsCache(imodel);
 
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessModelsVisibilityHandler({ viewport: activeView });
@@ -60,6 +65,7 @@ export function StatelessModelsTree({
     };
   }, [activeView]);
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) }),
@@ -78,9 +84,11 @@ export function StatelessModelsTree({
     if (!filter) {
       return undefined;
     }
-    return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
-  }, [filter, getSubjectModelIdsCache]);
+    return async ({ imodelAccess }) => {
+      reportUsage?.({ featureId: "filtering", reportInteraction: true });
+      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, subjectModelIdsCache: getSubjectModelIdsCache(imodelAccess) });
+    }
+  }, [filter, getSubjectModelIdsCache, reportUsage]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -102,6 +110,7 @@ export function StatelessModelsTree({
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
       }}
+      reportUsage={reportUsage}
     />
   );
 }
@@ -136,9 +145,16 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
-function useSubjectModelIdsCache() {
+function useSubjectModelIdsCache(imodel: IModelConnection) {
   const cacheRef = useRef<SubjectModelIdsCache>();
   const prevImodelAccessRef = useRef<LimitingECSqlQueryExecutor>();
+
+  useIModelChangeListener({
+    imodel,
+    action: useCallback(() => {
+      cacheRef.current = undefined;
+    }, []),
+  });
 
   const getSubjectModelIdsCache = useCallback((imodelAccess: LimitingECSqlQueryExecutor) => {
     if (prevImodelAccessRef.current !== imodelAccess) {

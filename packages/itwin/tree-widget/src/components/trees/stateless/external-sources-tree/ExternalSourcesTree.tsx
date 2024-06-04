@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
-import { FilterableTree } from "../common/components/FilterableTree";
+import { useFeatureReporting } from "../../common/UseFeatureReporting";
+import { BaseTree } from "../common/components/BaseTree";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 
 import type { ReactElement } from "react";
@@ -14,19 +15,21 @@ import type { HierarchyLevelConfig } from "../../common/Types";
 interface StatelessExternalSourcesTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
-type FilterableTreeProps = Parameters<typeof FilterableTree>[0];
-type GetHierarchyDefinitionsProviderCallback = FilterableTreeProps["getHierarchyDefinition"];
+type BaseTreeProps = Parameters<typeof BaseTree>[0];
+type GetHierarchyDefinitionsProviderCallback = BaseTreeProps["getHierarchyDefinition"];
 type StatelessExternalSourcesTreeProps = StatelessExternalSourcesTreeOwnProps &
-  Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+  Pick<BaseTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 const StatelessExternalSourcesTreeId = "external-sources-tree-v2";
 
 /** @internal */
-export function StatelessExternalSourcesTree({ onPerformanceMeasured, ...props }: StatelessExternalSourcesTreeProps) {
+export function StatelessExternalSourcesTree({ onPerformanceMeasured, onFeatureUsed, ...props }: StatelessExternalSourcesTreeProps) {
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessExternalSourcesTreeId });
   return (
-    <FilterableTree
+    <BaseTree
       {...props}
       treeName="StatelessExternalSourcesTree"
       getHierarchyDefinition={getDefinitionsProvider}
@@ -35,6 +38,7 @@ export function StatelessExternalSourcesTree({ onPerformanceMeasured, ...props }
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessExternalSourcesTreeId}-${action}`, duration);
       }}
+      reportUsage={reportUsage}
     />
   );
 };

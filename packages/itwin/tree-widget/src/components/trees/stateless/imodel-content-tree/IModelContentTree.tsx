@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { FilterableTree } from "../common/components/FilterableTree";
+import { useFeatureReporting } from "../../common/UseFeatureReporting";
+import { BaseTree } from "../common/components/BaseTree";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
 
 import type { ReactElement } from "react";
@@ -14,19 +15,21 @@ import type { HierarchyLevelConfig } from "../../common/Types";
 interface StatelessIModelContentTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
-type FilterableTreeProps = Parameters<typeof FilterableTree>[0];
-type GetHierarchyDefinitionsProviderCallback = FilterableTreeProps["getHierarchyDefinition"];
+type BaseTreeTreeProps = Parameters<typeof BaseTree>[0];
+type GetHierarchyDefinitionsProviderCallback = BaseTreeTreeProps["getHierarchyDefinition"];
 type StatelessIModelContentTreeProps = StatelessIModelContentTreeOwnProps &
-  Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+  Pick<BaseTreeTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 const StatelessIModelContentTreeId = "imodel-content-tree-v2";
 
 /** @internal */
-export function StatelessIModelContentTree({ onPerformanceMeasured, ...props }: StatelessIModelContentTreeProps) {
+export function StatelessIModelContentTree({ onPerformanceMeasured, onFeatureUsed, ...props }: StatelessIModelContentTreeProps) {
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessIModelContentTreeId });
   return (
-    <FilterableTree
+    <BaseTree
       {...props}
       treeName="StatelessIModelContentTree"
       getHierarchyDefinition={getDefinitionsProvider}
@@ -35,6 +38,7 @@ export function StatelessIModelContentTree({ onPerformanceMeasured, ...props }: 
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessIModelContentTreeId}-${action}`, duration);
       }}
+      reportUsage={reportUsage}
     />
   );
 };

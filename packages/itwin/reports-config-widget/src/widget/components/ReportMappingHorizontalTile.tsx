@@ -15,6 +15,7 @@ import {
 } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
 import type { ReportMappingAndMapping } from "./ReportMappings";
+import type { ExtractionRequestDetails } from "@itwin/insights-client";
 
 export interface ReportMappingHorizontalTileProps {
   jobStartEvent: BeEvent<(iModelId: string) => void>;
@@ -26,15 +27,12 @@ export interface ReportMappingHorizontalTileProps {
 
 export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTileProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
-  const [jobStarted, setJobStarted] = useState<boolean>(true);
   const interval = useRef<number>();
-  const initialLoad = useRef<boolean>(true);
 
   useEffect(() => {
     const listener = (startedIModelId: string) => {
       if (startedIModelId === props.mapping.imodelId) {
         setExtractionState(ExtractionStates.Starting);
-        setJobStarted(true);
       }
     };
     props.jobStartEvent.addListener(listener);
@@ -42,38 +40,47 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
     return () => {
       props.jobStartEvent.removeListener(listener);
     };
-  }, [props.jobStartEvent, props.mapping]);
+  }, [props.jobStartEvent, props.mapping.imodelId]);
 
-  const getExtractionState = useCallback(async () => {
-    const state = await props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
-    if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded || state === ExtractionStates.None) {
-      setJobStarted(false);
-      if (initialLoad.current) {
-        initialLoad.current = false;
-        setExtractionState(ExtractionStates.None);
-        return;
+  const updateExtractionState = useCallback(async () => {
+    try {
+      const state = await props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
+      if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded) {
+        if (extractionState === ExtractionStates.Running) {
+          setExtractionState(state);
+        }
+      } else {
+        setExtractionState(state);
       }
-    } else {
-      initialLoad.current = false;
+    } catch (error) {
+      setExtractionState(ExtractionStates.Failed);
+      /* eslint-disable no-console */
+      console.error(error);
     }
-    setExtractionState(state);
-  }, [props.mapping, props.bulkExtractor, props.odataFeedUrl]);
+  }, [props.bulkExtractor, props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl, extractionState]);
 
   useEffect(() => {
-    if (jobStarted) {
-      getExtractionState().catch((error) => {
-        setExtractionState(ExtractionStates.Failed);
-        setJobStarted(false);
-        /* eslint-disable no-console */
-        console.error(error);
-      });
-      window.clearInterval(interval.current);
-      interval.current = window.setInterval(async () => {
-        await getExtractionState();
-      }, STATUS_CHECK_INTERVAL);
-    }
+    void updateExtractionState();
+  }, [extractionState, updateExtractionState]);
+
+  useEffect(() => {
+    window.clearInterval(interval.current);
+    if (extractionState === ExtractionStates.None) return;
+    interval.current = window.setInterval(async () => {
+      await updateExtractionState();
+    }, STATUS_CHECK_INTERVAL);
     return () => window.clearInterval(interval.current);
-  }, [jobStarted, getExtractionState]);
+  }, [extractionState, updateExtractionState]);
+
+  const handleUpdateDataset = useCallback(async () => {
+    setExtractionState(ExtractionStates.Starting);
+    const extractionRequestDetails: ExtractionRequestDetails = {
+      iModelId: props.mapping.imodelId,
+      mappings: [{ id: props.mapping.mappingId }],
+    };
+    await props.bulkExtractor.runIModelExtraction(extractionRequestDetails);
+    props.jobStartEvent.raiseEvent(props.mapping.imodelId);
+  }, [props.bulkExtractor, props.jobStartEvent, props.mapping.imodelId, props.mapping.mappingId]);
 
   return (
     <HorizontalTile
@@ -92,12 +99,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
                   title={ReportsConfigWidget.localization.getLocalizedString(
                     "ReportsConfigWidget:UpdateDataset"
                   )}
-                  onClick={async () => {
-                    setExtractionState(ExtractionStates.Starting);
-                    await props.bulkExtractor.runIModelExtraction(props.mapping.imodelId);
-                    props.jobStartEvent.raiseEvent(props.mapping.imodelId);
-                  }}
-                  disabled={jobStarted}
+                  onClick={handleUpdateDataset}
                 >
                   <SvgPlay />
                 </IconButton>

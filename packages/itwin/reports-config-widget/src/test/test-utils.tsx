@@ -14,6 +14,9 @@ export const mockAccessToken = async () => "Bearer eyJhbGci";
 export const mockIModelId1 = "mockIModelId1";
 export const mockIModelId2 = "mockIModelId2";
 
+export const mockMappingId1 = "mockMappingId1";
+export const mockMappingId2 = "mockMappingId2";
+
 export const mockReportId = "mockReportId";
 export const mockITwinId: string = "mockiTwinId";
 
@@ -69,6 +72,17 @@ export const mockIModelsResponse = [
         complete: undefined,
       },
     },
+  },
+];
+
+export const mockExtractionRequestDetails = [
+  {
+    iModelId: mockIModelId1,
+    mappings: [{id: mockMappingId1}],
+  },
+  {
+    iModelId: mockIModelId2,
+    mappings: [{id: mockMappingId2}],
   },
 ];
 

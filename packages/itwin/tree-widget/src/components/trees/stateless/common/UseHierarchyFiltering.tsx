@@ -11,6 +11,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
 
+import type { UsageTrackedFeatures } from "../../common/UseFeatureReporting";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
 import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
@@ -22,12 +23,13 @@ type UseTreeResult = ReturnType<typeof useTree>;
 interface UseHierarchyLevelFilteringOwnProps {
   imodel: IModelConnection;
   defaultHierarchyLevelSizeLimit: number;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
 }
 
 type UseHierarchyLevelFilteringProps = UseHierarchyLevelFilteringOwnProps & Pick<UseTreeResult, "getHierarchyLevelDetails">;
 
 /** @internal */
-export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit, getHierarchyLevelDetails }: UseHierarchyLevelFilteringProps) {
+export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit, getHierarchyLevelDetails, reportUsage }: UseHierarchyLevelFilteringProps) {
   const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string | undefined; hierarchyDetails: HierarchyLevelDetails }>();
   const onFilterClick = useCallback(
     (nodeId: string | undefined) => {
@@ -91,6 +93,7 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
         if (!filteringOptions) {
           return;
         }
+        reportUsage?.({ featureId: info ? "hierarchy-level-filtering" : undefined, reportInteraction: true });
         filteringOptions.hierarchyDetails.setInstanceFilter(toGenericFilter(info));
         setFilteringOptions(undefined);
       }}
