@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import "./utils.scss";
@@ -13,11 +13,7 @@ export interface WidgetHeaderProps {
   returnFn?: () => Promise<void>;
 }
 
-export const WidgetHeader = ({
-  title,
-  disabled = false,
-  returnFn,
-}: WidgetHeaderProps) => {
+export const WidgetHeader = ({ title, disabled = false, returnFn }: WidgetHeaderProps) => {
   return (
     <div className="oclca-widget-header-container">
       {returnFn && (

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { useState } from "react";
 import SimpleReactValidator from "simple-react-validator";
 
@@ -34,15 +34,11 @@ export const Validators = {
   },
 };
 
-export const NAME_REQUIREMENTS =
-  "required|NoDuplicateUnderscore|OnlyBeginsWithLetterOrUnderscore|FollowedByLettersUnderscoresAndDigits|CharLimit";
+export const NAME_REQUIREMENTS = "required|NoDuplicateUnderscore|OnlyBeginsWithLetterOrUnderscore|FollowedByLettersUnderscoresAndDigits|CharLimit";
 
 export const Messages = { required: "This field is required." };
 
-const useValidator = (
-  customMessage = Messages,
-  customValidator = Validators,
-): [SimpleReactValidator, React.Dispatch<React.SetStateAction<boolean>>] => {
+const useValidator = (customMessage = Messages, customValidator = Validators): [SimpleReactValidator, React.Dispatch<React.SetStateAction<boolean>>] => {
   const [show, setShow] = useState(false);
   const validator = new SimpleReactValidator({
     messages: customMessage,

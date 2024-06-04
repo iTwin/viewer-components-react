@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 export class Queue<TData> {
-  constructor(private _dataStore: TData[] = []) { }
+  constructor(private _dataStore: TData[] = []) {}
 
   public enqueue(element: TData): Queue<TData> {
     this._dataStore.push(element);

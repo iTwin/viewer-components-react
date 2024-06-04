@@ -8,7 +8,10 @@
 
 import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
 import { BeEvent } from '@itwin/core-bentley';
+import { Checkbox } from '@itwin/itwinui-react';
+import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
+import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
@@ -17,25 +20,33 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IPropertyValueRenderer } from '@itwin/components-react';
 import type { Localization } from '@itwin/core-common';
-import type { LocalizationOptions } from '@itwin/core-i18n';
+import { LocalizationContextProvider } from '@itwin/presentation-hierarchies-react';
 import type { MouseEvent as MouseEvent_2 } from 'react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
+import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
+import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyValueRendererContext } from '@itwin/components-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
 import { Ref } from 'react';
+import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { Ruleset } from '@itwin/presentation-common';
+import type { SchemaContext } from '@itwin/ecschema-metadata';
 import type { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
+import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import type { SingleSchemaClassSpecification } from '@itwin/presentation-common';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import { Subscription } from '@itwin/components-react';
+import type { TranslationOptions } from '@itwin/core-common';
+import { Tree } from '@itwin/itwinui-react';
 import type { TreeCheckboxStateChangeEventArgs } from '@itwin/components-react';
 import type { TreeModelNode } from '@itwin/components-react';
 import type { TreeNodeItem } from '@itwin/components-react';
+import { TreeNodeRenderer as TreeNodeRenderer_2 } from '@itwin/presentation-hierarchies-react';
 import type { TreeNodeRendererProps as TreeNodeRendererProps_2 } from '@itwin/components-react';
 import type { TreeRendererProps as TreeRendererProps_2 } from '@itwin/components-react';
 import type { TreeSelectionModificationEventArgs } from '@itwin/components-react';
@@ -43,6 +54,8 @@ import type { TreeSelectionReplacementEventArgs } from '@itwin/components-react'
 import type { UiItemsProvider } from '@itwin/appui-react';
 import { UnifiedSelectionTreeEventHandler } from '@itwin/presentation-components';
 import type { UnifiedSelectionTreeEventHandlerParams } from '@itwin/presentation-components';
+import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
+import type { useTree } from '@itwin/presentation-hierarchies-react';
 import type { ViewManager } from '@itwin/core-frontend';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
@@ -454,9 +467,23 @@ export function showAllCategories(categories: string[], viewport: Viewport): Pro
 // @public
 export function showAllModels(models: string[], viewport: Viewport): Promise<void>;
 
+// @beta
+export const StatelessCategoriesTreeComponent: (props: StatelessCategoriesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessExternalSourcesTreeComponent: (props: StatelessExternalSourcesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessIModelContentTreeComponent: (props: StatelessIModelContentTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessModelsTreeComponent: (props: StatelessModelsTreeComponentProps) => JSX.Element | null;
+
 // @internal (undocumented)
 export class SubjectModelIdsCache {
     constructor(imodel: IModelConnection);
+    // (undocumented)
+    clear(): void;
     // (undocumented)
     getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]>;
 }
@@ -549,7 +576,7 @@ export class TreeWidget {
     static get i18nNamespace(): string;
     static initialize(i18n?: Localization): Promise<void>;
     static terminate(): void;
-    static translate(key: string | string[], options?: LocalizationOptions): string;
+    static translate(key: string | string[], options?: TranslationOptions): string;
 }
 
 // @public

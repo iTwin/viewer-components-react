@@ -1,12 +1,12 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { BrowserStorage } from "./BrowserStorage";
-import { CustomParamItem } from "./ui/Interfaces";
+import type { CustomParamItem } from "./ui/Interfaces";
 
-export class CustomParamsStorage extends BrowserStorage<CustomParamItem>  {
+export class CustomParamsStorage extends BrowserStorage<CustomParamItem> {
   constructor() {
-    super({itemKeyName: "itwinjs.mapLayers.customParams"});
+    super({ itemKeyName: "itwinjs.mapLayers.customParams" });
   }
 }

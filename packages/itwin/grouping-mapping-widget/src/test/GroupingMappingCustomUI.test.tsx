@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
 import { faker } from "@faker-js/faker";
@@ -33,23 +33,20 @@ const mockMapping: Mapping = {
 };
 
 const groupsFactory = (): GroupMinimalList => ({
-  groups: Array.from(
-    { length: faker.datatype.number({ min: 3, max: 5 }) },
-    (_, index) => ({
-      id: `${faker.datatype.uuid()}`,
-      groupName: `mOcKgRoUp${index}`,
-      description: `mOcKgRoUpDeScRiPtIoN${index}`,
-      query: `mOcKgRoUpQuErY${index}`,
-      _links: {
-        iModel: {
-          href: "",
-        },
-        mapping: {
-          href: "",
-        },
+  groups: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, (_, index) => ({
+    id: `${faker.datatype.uuid()}`,
+    groupName: `mOcKgRoUp${index}`,
+    description: `mOcKgRoUpDeScRiPtIoN${index}`,
+    query: `mOcKgRoUpQuErY${index}`,
+    _links: {
+      iModel: {
+        href: "",
       },
-    })
-  ),
+      mapping: {
+        href: "",
+      },
+    },
+  })),
   _links: {
     next: undefined,
     self: {
@@ -103,9 +100,7 @@ describe("Groups View", () => {
     connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
     connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
 
-    groupsClientMock
-      .setup(async (x) => x.getGroups(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => Promise.resolve(mockGroups));
+    groupsClientMock.setup(async (x) => x.getGroups(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(async () => Promise.resolve(mockGroups));
   });
 
   afterEach(() => {
@@ -126,7 +121,7 @@ describe("Groups View", () => {
         onClickGroupModify={jest.fn()}
         onClickGroupTitle={jest.fn}
         onClickRenderContextCustomUI={jest.fn()}
-      />
+      />,
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -139,16 +134,8 @@ describe("Groups View", () => {
 
     horizontalTiles.forEach((horizontalTile, index) => {
       const groupTile = within(horizontalTile);
-      expect(
-        groupTile.getByText(
-          mockGroups.groups[index].groupName
-        )
-      ).toBeInTheDocument();
-      expect(
-        groupTile.getByText(
-          mockGroups.groups[index].description ?? ""
-        )
-      ).toBeInTheDocument();
+      expect(groupTile.getByText(mockGroups.groups[index].groupName)).toBeInTheDocument();
+      expect(groupTile.getByText(mockGroups.groups[index].description ?? "")).toBeInTheDocument();
     });
 
     // Click on first group more icon
@@ -184,7 +171,7 @@ describe("Groups View", () => {
         onClickGroupTitle={jest.fn}
         onClickRenderContextCustomUI={jest.fn()}
       />,
-      groupingMappingCustomUIMock
+      groupingMappingCustomUIMock,
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -251,7 +238,7 @@ describe("Groups View", () => {
         onClickGroupTitle={jest.fn}
         onClickRenderContextCustomUI={onClickRenderContextCustomUIMock}
       />,
-      groupingMappingCustomUIMock
+      groupingMappingCustomUIMock,
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -311,7 +298,7 @@ describe("Groups View", () => {
         onClickGroupTitle={jest.fn}
         onClickRenderContextCustomUI={onClickRenderContextCustomUIMock}
       />,
-      groupingMappingCustomUIMock
+      groupingMappingCustomUIMock,
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));

@@ -6,11 +6,7 @@ import { SvgAdd, SvgPlay, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
-import {
-  EmptyMessage,
-  handleError,
-  LoadingOverlay,
-} from "./utils";
+import { EmptyMessage, handleError, LoadingOverlay } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
 import type { Report, ReportsClient } from "@itwin/insights-client";
@@ -29,7 +25,7 @@ const fetchReports = async (
   iTwinId: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
   reportsClient: ReportsClient,
-  getAccessToken: () => Promise<AccessToken>
+  getAccessToken: () => Promise<AccessToken>,
 ) => {
   try {
     if (!iTwinId) return;
@@ -58,64 +54,33 @@ export interface ReportsProps {
  * Component to manage and list reports for an iTwin.
  * @public
  */
-export const Reports = ({
-  onClickAddReport,
-  onClickReportModify,
-  onClickReportTitle,
-}: ReportsProps) => {
+export const Reports = ({ onClickAddReport, onClickReportModify, onClickReportTitle }: ReportsProps) => {
   const { iTwinId, getAccessToken, reportsClient } = useReportsConfigApi();
   const { bulkExtractor } = useBulkExtractor();
-  const [showDeleteModal, setShowDeleteModal] = useState<Report | undefined>(
-    undefined
-  );
+  const [showDeleteModal, setShowDeleteModal] = useState<Report | undefined>(undefined);
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
-  const jobStartEvent = useMemo(
-    () => new BeEvent<(reportId: string) => void>(),
-    []
-  );
+  const jobStartEvent = useMemo(() => new BeEvent<(reportId: string) => void>(), []);
 
   useEffect(() => {
-    void fetchReports(
-      setReports,
-      iTwinId,
-      setIsLoading,
-      reportsClient,
-      getAccessToken
-    );
+    void fetchReports(setReports, iTwinId, setIsLoading, reportsClient, getAccessToken);
   }, [getAccessToken, iTwinId, reportsClient, setIsLoading]);
 
   const refresh = useCallback(async () => {
-    await fetchReports(
-      setReports,
-      iTwinId,
-      setIsLoading,
-      reportsClient,
-      getAccessToken
-    );
+    await fetchReports(setReports, iTwinId, setIsLoading, reportsClient, getAccessToken);
   }, [getAccessToken, iTwinId, reportsClient]);
 
   const filteredReports = useMemo(
-    () =>
-      reports.filter((x) =>
-        [x.displayName, x.description]
-          .join(" ")
-          .toLowerCase()
-          .includes(searchValue.toLowerCase())
-      ),
-    [reports, searchValue]
+    () => reports.filter((x) => [x.displayName, x.description].join(" ").toLowerCase().includes(searchValue.toLowerCase())),
+    [reports, searchValue],
   );
 
   const onSelectionChange = (reportId: string, control: boolean) => {
     if (!control) setSelectedReportIds([]);
 
-    setSelectedReportIds((sr) =>
-      sr.some((r) => reportId === r)
-        ? sr.filter((r) => reportId !== r)
-        : [...sr, reportId]
-    );
+    setSelectedReportIds((sr) => (sr.some((r) => reportId === r) ? sr.filter((r) => reportId !== r) : [...sr, reportId]));
   };
 
   const updateDatasets = useCallback(async () => {
@@ -133,46 +98,28 @@ export const Reports = ({
         <div className="rcw-toolbar">
           <div className="rcw-button-spacing">
             {onClickAddReport && (
-              <Button
-                startIcon={<SvgAdd />}
-                onClick={onClickAddReport}
-                styleType="high-visibility"
-                title="New Report"
-              >
-                {ReportsConfigWidget.localization.getLocalizedString(
-                  "ReportsConfigWidget:New"
-                )}
+              <Button startIcon={<SvgAdd />} onClick={onClickAddReport} styleType="high-visibility" title="New Report">
+                {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:New")}
               </Button>
             )}
             <IconButton
-              title={ReportsConfigWidget.localization.getLocalizedString(
-                "ReportsConfigWidget:UpdateDatasets"
-              )}
+              title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:UpdateDatasets")}
               onClick={updateDatasets}
               disabled={selectedReportIds.length === 0}
             >
               <SvgPlay />
             </IconButton>
           </div>
-          <div
-            className="rcw-search-bar-container"
-            data-testid="rcw-search-bar"
-          >
+          <div className="rcw-search-bar-container" data-testid="rcw-search-bar">
             <IconButton
-              title={ReportsConfigWidget.localization.getLocalizedString(
-                "ReportsConfigWidget:Refresh"
-              )}
+              title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Refresh")}
               onClick={refresh}
               disabled={isLoading}
               styleType="borderless"
             >
               <SvgRefresh />
             </IconButton>
-            <SearchBar
-              searchValue={searchValue}
-              setSearchValue={setSearchValue}
-              disabled={isLoading}
-            />
+            <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
           </div>
         </div>
         {isLoading ? (
@@ -180,14 +127,10 @@ export const Reports = ({
         ) : reports.length === 0 && onClickAddReport ? (
           <EmptyMessage>
             <>
-              {ReportsConfigWidget.localization.getLocalizedString(
-                "ReportsConfigWidget:NoReports"
-              )}
+              {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:NoReports")}
               <div>
                 <Button onClick={onClickAddReport} styleType="cta">
-                  {ReportsConfigWidget.localization.getLocalizedString(
-                    "ReportsConfigWidget:CreateOneReportCTA"
-                  )}
+                  {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}
                 </Button>
               </div>
             </>
@@ -206,9 +149,7 @@ export const Reports = ({
                 }}
                 onClickModify={onClickReportModify}
                 onSelectionChange={onSelectionChange}
-                selected={selectedReportIds.some(
-                  (reportId) => report.id === reportId
-                )}
+                selected={selectedReportIds.some((reportId) => report.id === reportId)}
               />
             ))}
           </div>
@@ -219,10 +160,7 @@ export const Reports = ({
         onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
-          await reportsClient.deleteReport(
-            accessToken,
-            showDeleteModal?.id ?? ""
-          );
+          await reportsClient.deleteReport(accessToken, showDeleteModal?.id ?? "");
         }}
         refresh={refresh}
       />

@@ -1,16 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type {
-  TablePaginatorRendererProps,
-} from "@itwin/itwinui-react";
-import {
-  Button,
-  Table,
-  tableFilters,
-  TablePaginator,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
+import { Button, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo, useState } from "react";
 import { useMappingClient } from "../../context/MappingClientContext";
 import type { IMappingTyped } from "../Mappings";
@@ -31,26 +24,14 @@ interface SelectMappingsProps {
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
-const SelectMappings = ({
-  iModelId,
-  onSelect,
-  onCancel,
-  backFn,
-  displayStrings: userDisplayStrings,
-}: SelectMappingsProps) => {
+const SelectMappings = ({ iModelId, onSelect, onCancel, backFn, displayStrings: userDisplayStrings }: SelectMappingsProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
 
-  const {
-    data: mappings,
-    isFetching: isLoading,
-  } = useFetchMappings(iModelId, getAccessToken, mappingClient);
+  const { data: mappings, isFetching: isLoading } = useFetchMappings(iModelId, getAccessToken, mappingClient);
 
-  const displayStrings = React.useMemo(
-    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
-    [userDisplayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
 
   const mappingsColumns = useMemo<Column<IMappingTyped>[]>(
     () => [
@@ -67,23 +48,18 @@ const SelectMappings = ({
         Filter: tableFilters.TextFilter(),
       },
     ],
-    [displayStrings.mappings]
+    [displayStrings.mappings],
   );
 
   const pageSizeList = useMemo(() => [10, 25, 50], []);
-  const paginator = useCallback(
-    (props: TablePaginatorRendererProps) => (
-      <TablePaginator {...props} pageSizeList={pageSizeList} />
-    ),
-    [pageSizeList]
-  );
+  const paginator = useCallback((props: TablePaginatorRendererProps) => <TablePaginator {...props} pageSizeList={pageSizeList} />, [pageSizeList]);
 
   return (
-    <div className='gmw-select-mapping-container'>
+    <div className="gmw-select-mapping-container">
       <Table<IMappingTyped>
         data={mappings ?? []}
         columns={mappingsColumns}
-        className='gmw-select-mapping-table'
+        className="gmw-select-mapping-table"
         emptyTableContent={`No ${displayStrings.mappings} available.`}
         isSortable
         isSelectable
@@ -93,10 +69,10 @@ const SelectMappings = ({
         }}
         paginatorRenderer={paginator}
       />
-      <div className='gmw-import-action-panel'>
+      <div className="gmw-import-action-panel">
         <Button onClick={backFn}>Back</Button>
         <Button
-          styleType='high-visibility'
+          styleType="high-visibility"
           onClick={() => {
             onSelect(selectedMappings);
           }}

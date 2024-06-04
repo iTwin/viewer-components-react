@@ -1,15 +1,24 @@
 steps:
   # 1. Configure node
-  - task: NodeTool@0
+  - task: UseNode@1
     displayName: "Use Node $(NodeVersion)"
     inputs:
-      versionSpec: "$(NodeVersion)"
+      version: "$(NodeVersion)"
 
-  - task: Npm@1
-    displayName: install pnpm ^8.11.0
+  - task: Cache@2
+    displayName: Cache pnpm
     inputs:
-      command: "custom"
-      customCommand: "install -g pnpm@^8.11.0"
+      key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+      path: $(pnpm_config_cache)
+
+  - script: |
+      corepack enable
+      corepack prepare pnpm@9.1.2 --activate
+    displayName: "Setup pnpm"
+
+  - script: |
+      pnpm config set store-dir $(pnpm_config_cache)
+    displayName: "Setup pnpm config"
 
   - script: pnpm install --frozen-lockfile
     displayName: pnpm install

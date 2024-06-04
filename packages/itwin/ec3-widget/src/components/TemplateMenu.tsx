@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { useEffect, useMemo, useState } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Select } from "@itwin/itwinui-react";
@@ -11,16 +11,9 @@ import { handleSelectChange } from "./utils";
 import type { Configuration } from "./EC3/Template";
 import { LabelTile } from "./LabelTile";
 import { handleInputChange } from "./utils";
-import {
-  ComboBox,
-  Label,
-} from "@itwin/itwinui-react";
+import { ComboBox, Label } from "@itwin/itwinui-react";
 
-import {
-  Button,
-  Text,
-  toaster,
-} from "@itwin/itwinui-react";
+import { Button, Text, toaster } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
@@ -46,7 +39,9 @@ export interface TemplateMenuProps {
  * @beta
  */
 export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: TemplateMenuProps) => {
-  const { config: { getAccessToken, iTwinId: projectId } } = useApiContext();
+  const {
+    config: { getAccessToken, iTwinId: projectId },
+  } = useApiContext();
   const reportsClient = useApiContext().reportsClient;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -135,26 +130,25 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
 
   return (
     <>
-      <div className='ec3w-template-details-container' data-testid="ec3-template-details">
-        <Fieldset legend='Template Details' className='ec3w-template-details'>
+      <div className="ec3w-template-details-container" data-testid="ec3-template-details">
+        <Fieldset legend="Template Details" className="ec3w-template-details">
           <RequiredFieldsNotice />
           <LabeledInput
-            id='templateName'
+            id="templateName"
             data-testid="ec3-template-name-input"
-            name='displayName'
-            label='EC3 Project Template Name'
+            name="displayName"
+            label="EC3 Project Template Name"
             value={childTemplate.displayName}
             required
             onChange={(event) => {
               handleInputChange(event, childTemplate, setChildTemplate);
             }}
-
           />
           <LabeledInput
-            id='templateDescription'
+            id="templateDescription"
             data-testid="ec3-template-description-input"
-            name='description'
-            label='Template description'
+            name="description"
+            label="Template description"
             value={childTemplate.description}
             onChange={(event) => {
               handleInputChange(event, childTemplate, setChildTemplate);
@@ -166,8 +160,7 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
               <Label htmlFor="combo-input" required={true}>
                 Report
               </Label>
-              {!template
-                ?
+              {!template ? (
                 <ComboBox
                   data-testid="ec3-enabled-selection"
                   options={ReportOptions}
@@ -184,48 +177,48 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
                     placeholder: "Select report",
                   }}
                 />
-                :
-                <Select
-                  data-testid="ec3-disabled-selection"
-                  options={ReportOptions}
-                  value={childTemplate.reportId}
-                  disabled={true}
-                />}
+              ) : (
+                <Select data-testid="ec3-disabled-selection" options={ReportOptions} value={childTemplate.reportId} disabled={true} />
+              )}
             </div>
           </div>
         </Fieldset>
-        <Fieldset legend='Assemblies' className='ec3w-template-details'>
+        <Fieldset legend="Assemblies" className="ec3w-template-details">
           <div className="ec3w-labels-container">
             <Button
               data-testid="ec3-add-assembly-button"
               styleType="high-visibility"
               startIcon={<SvgAdd />}
-              onClick={() => { setSelectedLabel(undefined); setShowLabelActionModal(true); }}
+              onClick={() => {
+                setSelectedLabel(undefined);
+                setShowLabelActionModal(true);
+              }}
               disabled={!childTemplate.reportId}
             >
               Add Assembly
             </Button>
             <div className="ec3w-labels-list">
-              {childTemplate.labels.length === 0 && !isLoading ?
+              {childTemplate.labels.length === 0 && !isLoading ? (
                 <div className="gmw-empty-selection">
                   <Text>No Assemblies selected.</Text>
                   <Text>Press the &quot;Add Assembly&quot; button to create an Assembly.</Text>
-                </div> :
-                childTemplate.labels
-                  .map((g) => (
-                    <LabelTile
-                      key={g.reportTable}
-                      title={g.name === "" ? g.reportTable : g.name}
-                      onDelete={() => {
-                        setSelectedLabel(g);
-                        setShowDeleteModal(true);
-                      }}
-                      onClickTitle={() => {
-                        setSelectedLabel(g);
-                        setShowLabelActionModal(true);
-                      }}
-                    />
-                  ))}
+                </div>
+              ) : (
+                childTemplate.labels.map((g) => (
+                  <LabelTile
+                    key={g.reportTable}
+                    title={g.name === "" ? g.reportTable : g.name}
+                    onDelete={() => {
+                      setSelectedLabel(g);
+                      setShowDeleteModal(true);
+                    }}
+                    onClickTitle={() => {
+                      setSelectedLabel(g);
+                      setShowLabelActionModal(true);
+                    }}
+                  />
+                ))
+              )}
             </div>
           </div>
         </Fieldset>
@@ -243,7 +236,7 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
         onDelete={async () => {
           childTemplate.labels = childTemplate.labels.filter((x) => x.reportTable !== selectedLabel?.reportTable);
         }}
-        refresh={async () => { }}
+        refresh={async () => {}}
       />
 
       <ReportConfirmModal
@@ -255,7 +248,7 @@ export const TemplateMenu = ({ template, onSaveSuccess, onClickCancel }: Templat
         onCancel={() => {
           handleSelectChange(previouslySelectedReport ?? "", "reportId", childTemplate, setChildTemplate);
         }}
-        refresh={async () => { }}
+        refresh={async () => {}}
       />
       <LabelActionModal
         show={showLabelActionModal}

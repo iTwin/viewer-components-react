@@ -5,10 +5,10 @@ public;ReportAction: ({ report, onSaveSuccess, onClickCancel }: ReportActionProp
 public;ReportActionProps
 public;ReportMappings: ({ report, onClickClose, defaultIModelId }: ReportMappingsProps) => JSX.Element | null
 public;ReportMappingsProps
-public;Reports: ({ onClickAddReport, onClickReportModify, onClickReportTitle, }: ReportsProps) => JSX.Element | null
+public;Reports: ({ onClickAddReport, onClickReportModify, onClickReportTitle }: ReportsProps) => JSX.Element | null
 internal;REPORTS_CONFIG_BASE_URL = "https://api.bentley.com"
 public;ReportsConfigContext: (props: ReportsConfigContextProps) => JSX.Element
 public;ReportsConfigContextProps
-public;ReportsConfigProvider 
+public;ReportsConfigProvider
 public;ReportsConfigWidget
 public;ReportsProps

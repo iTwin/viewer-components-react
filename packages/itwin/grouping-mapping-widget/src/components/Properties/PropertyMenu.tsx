@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useCallback } from "react";
 import "./PropertyMenu.scss";
 import { GroupPropertyTable } from "./GroupProperties/GroupPropertyTable";
@@ -56,10 +56,13 @@ export const PropertyMenu = ({
 
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, groupId, getAccessToken, propertiesClient);
 
-  const refreshGroupProperties = useCallback(async () => queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, group.id] }), [group.id, iModelId, mappingId, queryClient]);
+  const refreshGroupProperties = useCallback(
+    async () => queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, group.id] }),
+    [group.id, iModelId, mappingId, queryClient],
+  );
 
   return (
-    <div className='gmw-property-menu-wrapper'>
+    <div className="gmw-property-menu-wrapper">
       {!hideGroupProps && (
         <GroupPropertyTable
           iModelId={iModelId}

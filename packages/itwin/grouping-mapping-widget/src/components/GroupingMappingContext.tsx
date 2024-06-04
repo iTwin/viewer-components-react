@@ -1,20 +1,13 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useMemo, useState } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import type {
-  ClientPrefix,
-  GetAccessTokenFn,
-  GroupingMappingApiConfig,
-} from "./context/GroupingApiConfigContext";
+import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
-import {
-  createMappingClient,
-  MappingClientContext,
-} from "./context/MappingClientContext";
+import { createMappingClient, MappingClientContext } from "./context/MappingClientContext";
 import type { Group, IExtractionClient, IGroupsClient, IMappingsClient, IPropertiesClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
@@ -81,8 +74,7 @@ export interface GroupingMappingContextProps {
   children?: React.ReactNode;
 }
 
-const authorizationClientGetAccessToken = async () =>
-  (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+const authorizationClientGetAccessToken = async () => (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
 const defaultQueryClient = new QueryClient({
   defaultOptions: {
@@ -98,20 +90,16 @@ const defaultQueryClient = new QueryClient({
           toaster.negative(query.meta?.message as string);
           break;
         default: {
-          if (error.status)
-            toaster.negative(getErrorMessage(error.status));
-          else
-            toaster.negative("An error occurred while fetching data.");
+          if (error.status) toaster.negative(getErrorMessage(error.status));
+          else toaster.negative("An error occurred while fetching data.");
         }
       }
     },
   }),
   mutationCache: new MutationCache({
     onError: (error: any) => {
-      if (error.status)
-        toaster.negative(getErrorMessage(error.status));
-      else
-        toaster.negative("A network error occured while processing this action.");
+      if (error.status) toaster.negative(getErrorMessage(error.status));
+      else toaster.negative("A network error occured while processing this action.");
     },
   }),
 });
@@ -130,9 +118,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [groupsClient, setGroupsClient] = useState<IGroupsClient>(createGroupsClient(groupsClientProp));
   const [propertiesClient, setPropertiesClient] = useState<IPropertiesClient>(createPropertiesClient(propertiesClientProp));
   const [extractionClient, setExtractionClient] = useState<IExtractionClient>(createExtractionClient(extractionClientProp));
-  const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
-    createGroupingMappingCustomUI(props.customUIs),
-  );
+  const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(createGroupingMappingCustomUI(props.customUIs));
   const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
     getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
     iModelId: props.iModelId,
@@ -167,11 +153,11 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     setMappingClient(createMappingClient(mappingsClientProp));
   }, [mappingsClientProp]);
 
-  useEffect(()=>{
+  useEffect(() => {
     setGroupsClient(createGroupsClient(groupsClientProp));
   }, [groupsClientProp]);
 
-  useEffect(()=>{
+  useEffect(() => {
     setPropertiesClient(createPropertiesClient(propertiesClientProp));
   }, [propertiesClientProp]);
 
@@ -202,7 +188,16 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       overlappedElementsMetadata,
       setOverlappedElementsMetadata,
     }),
-    [showGroupColor, hiddenGroupsIds, groups, numberOfVisualizedGroups, isOverlappedColored, currentHilitedGroups, isVisualizationsEnabled, overlappedElementsMetadata]
+    [
+      showGroupColor,
+      hiddenGroupsIds,
+      groups,
+      numberOfVisualizedGroups,
+      isOverlappedColored,
+      currentHilitedGroups,
+      isVisualizationsEnabled,
+      overlappedElementsMetadata,
+    ],
   );
 
   const propertiesContextValue = useMemo(
@@ -210,18 +205,24 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       showGroupColor: propertiesShowGroup,
       setShowGroupColor: setPropertiesShowGroup,
     }),
-    [propertiesShowGroup]
+    [propertiesShowGroup],
   );
 
-  const customUIContextValue = useMemo(() => ({
-    customUIs,
-    setCustomUIs,
-  }), [customUIs]);
+  const customUIContextValue = useMemo(
+    () => ({
+      customUIs,
+      setCustomUIs,
+    }),
+    [customUIs],
+  );
 
-  const extractionStateJobContextValue = useMemo(() => ({
-    mappingIdJobInfo,
-    setMappingIdJobInfo,
-  }), [mappingIdJobInfo]);
+  const extractionStateJobContextValue = useMemo(
+    () => ({
+      mappingIdJobInfo,
+      setMappingIdJobInfo,
+    }),
+    [mappingIdJobInfo],
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -233,9 +234,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
                 <ExtractionStatusJobContext.Provider value={extractionStateJobContextValue}>
                   <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
                     <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-                      <PropertiesGroupColorContext.Provider value={propertiesContextValue}>
-                        {props.children}
-                      </PropertiesGroupColorContext.Provider>
+                      <PropertiesGroupColorContext.Provider value={propertiesContextValue}>{props.children}</PropertiesGroupColorContext.Provider>
                     </GroupHilitedElementsContext.Provider>
                   </GroupingMappingCustomUIContext.Provider>
                 </ExtractionStatusJobContext.Provider>

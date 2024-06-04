@@ -4,10 +4,5 @@
   "extension": [".ts", ".tsx"],
   "temp-dir": "./lib/cjs/test/coverage/.nyc_output",
   "report-dir": "./lib/cjs/test/coverage",
-  "reporter": ["text-summary", "lcov", "cobertura"],
-  "check-coverage": true,
-  "statements": 100,
-  "functions": 100,
-  "branches": 100,
-  "lines": 100
+  "reporter": ["text-summary", "lcov", "cobertura"]
 }

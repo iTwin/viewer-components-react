@@ -4,24 +4,43 @@
  *--------------------------------------------------------------------------------------------*/
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { SelectionMode } from "@itwin/components-react";
+import { IModelConnection } from "@itwin/core-frontend";
 import { EC3Provider } from "@itwin/ec3-widget-react";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
-import { SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
+import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
-  AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
-  RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
+  AddFavoritePropertyContextMenuItem,
+  AncestorsNavigationControls,
+  CopyPropertyTextContextMenuItem,
+  PropertyGridManager,
+  PropertyGridUiItemsProvider,
+  RemoveFavoritePropertyContextMenuItem,
+  ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps,
-  TreeWidget, TreeWidgetComponent,
+  CategoriesTreeComponent,
+  ExternalSourcesTreeComponent,
+  IModelContentTreeComponent,
+  ModelsTreeComponent,
+  SelectableTreeProps,
+  StatelessCategoriesTreeComponent,
+  StatelessExternalSourcesTreeComponent,
+  StatelessIModelContentTreeComponent,
+  StatelessModelsTreeComponent,
+  TreeRenderProps,
+  TreeWidget,
+  TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
+import { unifiedSelectionStorage } from "./SelectionStorage";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -67,6 +86,13 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 interface UiItem {
   initialize: () => Promise<void>;
   createUiItemsProviders: () => UiItemsProvider[];
+}
+
+function getSchemaContext(imodel: IModelConnection) {
+  const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
+  const schemaContext = new SchemaContext();
+  schemaContext.addLocater(schemaLocater);
+  return schemaContext;
 }
 
 const configuredUiItems = new Map<string, UiItem>([
@@ -132,10 +158,65 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
                 startIcon: <SvgTechnicalPreviewMiniBw />,
               },
+              {
+                id: `stateless-${ModelsTreeComponent.id}`,
+                getLabel: () => `${ModelsTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessModelsTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    selectionMode={"extended"}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+              },
+              {
+                id: `stateless-${CategoriesTreeComponent.id}`,
+                getLabel: () => `${CategoriesTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessCategoriesTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+              },
+              {
+                id: `stateless-${IModelContentTreeComponent.id}`,
+                getLabel: () => `${IModelContentTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessIModelContentTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+              },
+              {
+                id: `stateless-${ExternalSourcesTreeComponent.id}`,
+                getLabel: () => `${ExternalSourcesTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessExternalSourcesTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+                startIcon: <SvgTechnicalPreviewMiniBw />,
+              },
             ];
             return [
               {
                 id: "tree-widget",
+                icon: <SvgHierarchyTree />,
                 content: <TreeWidgetWithOptions trees={trees} />,
                 layouts: {
                   standard: {
