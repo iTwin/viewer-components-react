@@ -5,7 +5,7 @@
 
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
-import { FilterableTree } from "../common/components/FilterableTree";
+import { BaseTree } from "../common/components/BaseTree";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
 
 import type { ReactElement } from "react";
@@ -18,10 +18,10 @@ interface StatelessIModelContentTreeOwnProps {
   onFeatureUsed?: (feature: string) => void;
 }
 
-type FilterableTreeProps = Parameters<typeof FilterableTree>[0];
-type GetHierarchyDefinitionsProviderCallback = FilterableTreeProps["getHierarchyDefinition"];
+type BaseTreeTreeProps = Parameters<typeof BaseTree>[0];
+type GetHierarchyDefinitionsProviderCallback = BaseTreeTreeProps["getHierarchyDefinition"];
 type StatelessIModelContentTreeProps = StatelessIModelContentTreeOwnProps &
-  Pick<FilterableTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+  Pick<BaseTreeTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 const StatelessIModelContentTreeId = "imodel-content-tree-v2";
 
@@ -29,7 +29,7 @@ const StatelessIModelContentTreeId = "imodel-content-tree-v2";
 export function StatelessIModelContentTree({ onPerformanceMeasured, onFeatureUsed, ...props }: StatelessIModelContentTreeProps) {
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessIModelContentTreeId });
   return (
-    <FilterableTree
+    <BaseTree
       {...props}
       treeName="StatelessIModelContentTree"
       getHierarchyDefinition={getDefinitionsProvider}
