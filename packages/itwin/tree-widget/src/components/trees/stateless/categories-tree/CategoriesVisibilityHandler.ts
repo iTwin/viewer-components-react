@@ -10,6 +10,7 @@ import { enableCategory, enableSubCategory } from "../../CategoriesVisibilityUti
 import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
 import type { VisibilityChangeListener, VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { HierarchyVisibilityHandler } from "../common/UseHierarchyVisibility";
 
 interface StatelessCategoriesVisibilityHandlerProps {
   viewManager: ViewManager;
@@ -20,7 +21,7 @@ interface StatelessCategoriesVisibilityHandlerProps {
 }
 
 /** @internal */
-export class StatelessCategoriesVisibilityHandler {
+export class StatelessCategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   private _viewManager: ViewManager;
   private _imodel: IModelConnection;
   private _pendingVisibilityChange: any | undefined;

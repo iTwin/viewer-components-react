@@ -19,3 +19,14 @@ export function createIdsSelector(ids: string[]): string {
   }
   return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
 }
+
+
+/** @internal */
+export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
+  let set = targetMap.get(key);
+  if (!set) {
+    set = new Set();
+    targetMap.set(key, set);
+  }
+  set.add(value);
+}

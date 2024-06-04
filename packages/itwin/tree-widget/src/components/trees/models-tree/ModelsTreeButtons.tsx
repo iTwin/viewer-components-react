@@ -41,7 +41,7 @@ export function useAvailableModels(imodel: IModelConnection) {
       .then((modelInfos: ModelInfo[]) => {
         setAvailableModels(modelInfos);
       })
-      .catch((_e) => {
+      .catch(() => {
         setAvailableModels([]);
       });
   }, [imodel]);
