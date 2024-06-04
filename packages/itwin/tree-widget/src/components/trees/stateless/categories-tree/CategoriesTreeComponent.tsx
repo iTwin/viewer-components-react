@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "../Tree.scss";
 import classNames from "classnames";
 import { Fragment, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
