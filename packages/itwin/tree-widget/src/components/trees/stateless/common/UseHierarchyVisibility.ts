@@ -6,18 +6,18 @@
 import { useEffect, useRef, useState } from "react";
 import { defer, distinct, mergeMap, Subject, takeUntil } from "rxjs";
 
+import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { MutableRefObject } from "react";
-import type { BeEvent } from "@itwin/core-bentley";
-import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { TreeNodeCheckboxState } from "./components/TreeNodeCheckbox";
+import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 
-interface HierarchyVisibilityHandler {
-  getVisibilityStatus: (node: HierarchyNode) => Promise<VisibilityStatus>;
-  changeVisibility: (node: HierarchyNode, on: boolean) => Promise<void>;
-  onVisibilityChange: BeEvent<() => void>;
-  dispose: () => void;
+/** @internal */
+export interface HierarchyVisibilityHandler extends IDisposable {
+  readonly onVisibilityChange: BeEvent<() => void>;
+
+  getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
+  changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
 }
 
 interface UseHierarchyVisibilityProps {

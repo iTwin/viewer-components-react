@@ -14,7 +14,7 @@ import { KeySet } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { waitFor } from "@testing-library/react";
 import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
-import { flushAsyncOperations, TestUtils } from "../TestUtils";
+import { createResolvablePromise, flushAsyncOperations, TestUtils } from "../TestUtils";
 import { createSimpleTreeModelNode } from "./Common";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -22,6 +22,7 @@ import type { SelectionChangesListener, SelectionHandler } from "@itwin/presenta
 import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange } from "@itwin/components-react";
 import type { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../../components/trees/VisibilityTreeEventHandler";
+
 describe("VisibilityTreeEventHandler", () => {
   const selectionHandlerStub = {
     getSelection: () => {},
@@ -37,8 +38,8 @@ describe("VisibilityTreeEventHandler", () => {
     isDisabled: false,
   };
 
-  const getVisibilityStatus = sinon.stub().returns(testVisibilityStatus);
-  const changeVisibility = sinon.stub();
+  const getVisibilityStatus = sinon.stub<any[], VisibilityStatus>().returns(testVisibilityStatus);
+  const changeVisibility = sinon.stub<any[], Promise<void>>();
   const onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
   const visibilityHandler: IVisibilityHandler = {
@@ -148,9 +149,9 @@ describe("VisibilityTreeEventHandler", () => {
       const changes: CheckboxStateChange[] = [{ nodeItem: node!.item, newState: CheckBoxState.On }];
       const changesSubject = new Subject<CheckboxStateChange[]>();
 
-      changeVisibility.returns(EMPTY);
+      changeVisibility.resolves(undefined);
       await using(eventHandler, async (_) => {
-        await waitFor(() => expect(getVisibilityStatus).to.be.calledOnce);
+        await waitFor(() => expect(getVisibilityStatus).to.be.called);
         getVisibilityStatus.resetHistory();
         eventHandler.onCheckboxStateChanged({
           stateChanges: changesSubject,
@@ -173,22 +174,24 @@ describe("VisibilityTreeEventHandler", () => {
 
       const eventHandler = createHandler(nodeLoader);
       const changes: CheckboxStateChange[] = [{ nodeItem: node!.item, newState: CheckBoxState.Off }];
-      const errorSubject = new Subject();
+      const { promise: changeVisibilityPromise, reject: rejectChangeVisibilityPromise } = createResolvablePromise<void>();
 
-      changeVisibility.returns(errorSubject);
+      changeVisibility.returns(changeVisibilityPromise);
       await using(eventHandler, async (_) => {
-        await waitFor(() => expect(getVisibilityStatus).to.be.calledOnce);
+        await waitFor(() => expect(getVisibilityStatus).to.be.called);
         getVisibilityStatus.resetHistory();
         eventHandler.onCheckboxStateChanged({
           // eslint-disable-next-line deprecation/deprecation
           stateChanges: from([changes]),
         });
         onVisibilityChange.raiseEvent(["testId1"]);
-        errorSubject.error(new Error());
+        await waitFor(() => expect(changeVisibility).to.be.calledOnce);
+        rejectChangeVisibilityPromise(new Error());
         onVisibilityChange.raiseEvent(["testId1"]);
         await flushAsyncOperations();
       });
-      expect(getVisibilityStatus).to.be.calledTwice;
+      // If `changeVisibility` throws an error, checkbox update isn't called in subscribe next callback
+      expect(getVisibilityStatus).to.be.calledOnce;
     });
   });
 });

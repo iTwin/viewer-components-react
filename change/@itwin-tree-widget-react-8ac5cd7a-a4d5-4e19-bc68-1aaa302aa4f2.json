@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Models Tree: Added hierarchy-based visibility handler which determines node visibility from its children. ",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "yato333@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
