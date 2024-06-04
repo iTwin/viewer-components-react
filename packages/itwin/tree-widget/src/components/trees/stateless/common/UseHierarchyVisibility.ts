@@ -13,7 +13,8 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { VisibilityStatus } from "../../VisibilityTreeEventHandler";
 import type { TreeNodeCheckboxState } from "./components/TreeNodeCheckbox";
 
-interface HierarchyVisibilityHandler {
+/** @internal */
+export interface HierarchyVisibilityHandler {
   getVisibilityStatus: (node: HierarchyNode) => Promise<VisibilityStatus>;
   changeVisibility: (node: HierarchyNode, on: boolean) => Promise<void>;
   onVisibilityChange: BeEvent<() => void>;
