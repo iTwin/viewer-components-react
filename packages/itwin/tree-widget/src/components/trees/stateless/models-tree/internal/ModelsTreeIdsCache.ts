@@ -3,23 +3,30 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { assert } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils";
 
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 
 interface SubjectInfo {
-  subjectsHierarchy: Map<Id64String, Id64Set>;
-  subjectModels: Map<Id64String, Id64Set>;
-  hideInHierarchy: Map<Id64String, boolean>;
+  parentSubject: Id64String | undefined;
+  hideInHierarchy: boolean;
+  childSubjects: Id64Set;
+  childModels: Id64Set;
+}
+
+interface ModelInfo {
+  categories: Id64Set;
+  elementCount: number;
 }
 
 /** @internal */
 export class ModelsTreeIdsCache {
   private readonly _categoryElementCounts = new Map<Id64String, number>();
-  private _subjectInfo: Promise<SubjectInfo> | undefined;
+  private _subjectInfos: Promise<Map<Id64String, SubjectInfo>> | undefined;
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
-  private _modelInfos: Promise<Map<Id64String, { categories: Id64Array; elementCount: number }>> | undefined;
+  private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
 
   constructor(private _queryExecutor: LimitingECSqlQueryExecutor) {}
 
@@ -55,80 +62,85 @@ export class ModelsTreeIdsCache {
     }
   }
 
-  private async getSubjectInfo() {
-    this._subjectInfo ??= (async () => {
-      const targetPartitionSubjects = new Map<Id64String, Set<Id64String>>();
-      const subjectsHierarchy = new Map<Id64String, Set<Id64String>>();
-      const hideInHierarchy = new Map<Id64String, boolean>();
-
-      await Promise.all([
+  private async getSubjectInfos() {
+    this._subjectInfos ??= (async () => {
+      const [subjectInfos, targetPartitionSubjects] = await Promise.all([
         (async () => {
+          const result = new Map<Id64String, SubjectInfo>();
           for await (const subject of this.querySubjects()) {
-            hideInHierarchy.set(subject.id, subject.hideInHierarchy);
-            if (subject.parentId) {
-              pushToMap(subjectsHierarchy, subject.parentId, subject.id);
-            }
+            const subjectInfo: SubjectInfo = {
+              parentSubject: subject.parentId,
+              hideInHierarchy: subject.hideInHierarchy,
+              childSubjects: new Set(),
+              childModels: new Set(),
+            };
             if (subject.targetPartitionId) {
-              pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
+              subjectInfo.childModels.add(subject.targetPartitionId);
             }
+            result.set(subject.id, subjectInfo);
           }
+          return result;
         })(),
         (async () => {
+          const result = new Map<Id64String, Set<Id64String>>();
           for await (const model of this.queryModels()) {
-            pushToMap(targetPartitionSubjects, model.id, model.parentId);
+            pushToMap(result, model.id, model.parentId);
           }
+          return result;
         })(),
       ]);
 
-      const subjectModels = new Map<Id64String, Set<Id64String>>();
+      for (const [subjectId, { parentSubject: parentSubjectId }] of subjectInfos.entries()) {
+        if (parentSubjectId) {
+          const parentSubjectInfo = subjectInfos.get(parentSubjectId);
+          assert(!!parentSubjectInfo);
+          parentSubjectInfo.childSubjects.add(subjectId);
+        }
+      }
+
       for (const [partitionId, subjectIds] of targetPartitionSubjects) {
         subjectIds.forEach((subjectId) => {
-          pushToMap(subjectModels, subjectId, partitionId);
+          const subjectInfo = subjectInfos.get(subjectId);
+          assert(!!subjectInfo);
+          subjectInfo.childModels.add(partitionId);
         });
       }
 
-      return {
-        subjectsHierarchy,
-        hideInHierarchy,
-        subjectModels,
-      };
+      return subjectInfos;
     })();
-    return this._subjectInfo;
+    return this._subjectInfos;
   }
 
+  /** Returns ECInstanceIDs of Subjects that either have direct Model or at least one child Subject with a Model. */
   public async getParentSubjectIds(): Promise<Id64String[]> {
     this._parentSubjectIds ??= (async () => {
-      const { subjectsHierarchy, subjectModels } = await this.getSubjectInfo();
-      const hasChildModels = (subjectId: Id64String) => {
-        if ((subjectModels.get(subjectId)?.size ?? 0) > 0) {
-          return true;
-        }
-        const childSubjectIds = subjectsHierarchy.get(subjectId);
-        return childSubjectIds && [...childSubjectIds].some(hasChildModels);
-      };
+      const subjectInfos = await this.getSubjectInfos();
       const parentSubjectIds = new Set<Id64String>();
-      const addIfHasChildren = (subjectId: Id64String) => {
-        if (hasChildModels(subjectId)) {
+      subjectInfos.forEach((subjectInfo, subjectId) => {
+        if (subjectInfo.childModels.size > 0) {
           parentSubjectIds.add(subjectId);
         }
-      };
-      subjectsHierarchy.forEach((childSubjectIds, parentSubjectId) => {
-        addIfHasChildren(parentSubjectId);
-        childSubjectIds.forEach(addIfHasChildren);
+        let currParentId = subjectInfo.parentSubject;
+        while (currParentId) {
+          parentSubjectIds.add(currParentId);
+          currParentId = subjectInfos.get(currParentId)?.parentSubject;
+        }
       });
       return [...parentSubjectIds];
     })();
     return this._parentSubjectIds;
   }
 
+  /**
+   * Returns child subjects of the specified parent subjects as they're displayed in the hierarchy - taking into
+   * account `hideInHierarchy` flag.
+   */
   public async getChildSubjectIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
     const childSubjectIds = new Array<Id64String>();
-    const { subjectsHierarchy, hideInHierarchy } = await this.getSubjectInfo();
-
+    const subjectInfos = await this.getSubjectInfos();
     parentSubjectIds.forEach((subjectId) => {
-      forEachChildSubject(subjectsHierarchy, subjectId, (childSubjectId) => {
-        const isHidden = hideInHierarchy.get(childSubjectId)!;
-        if (!isHidden) {
+      forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
+        if (!childSubjectInfo.hideInHierarchy) {
           childSubjectIds.push(childSubjectId);
           return "break";
         }
@@ -138,32 +150,34 @@ export class ModelsTreeIdsCache {
     return childSubjectIds;
   }
 
+  /** Returns ECInstanceIDs of all Models under specific parent Subjects, including their child Subjects, etc. */
   public async getSubjectModelIds(subjectIds: Id64Array): Promise<Id64Array> {
-    const { subjectsHierarchy, subjectModels } = await this.getSubjectInfo();
+    const subjectInfos = await this.getSubjectInfos();
     const subjectStack = [...subjectIds];
     const result = new Array<Id64String>();
     while (true) {
-      const subject = subjectStack.pop();
-      if (subject === undefined) {
+      const subjectId = subjectStack.pop();
+      if (subjectId === undefined) {
         break;
       }
-      const modelIds = subjectModels.get(subject);
-      modelIds && result.push(...modelIds);
-
-      const childSubjects = subjectsHierarchy.get(subject);
-      childSubjects && subjectStack.push(...childSubjects);
+      const subjectInfo = subjectInfos.get(subjectId);
+      if (!subjectInfo) {
+        continue;
+      }
+      result.push(...subjectInfo.childModels);
+      subjectStack.push(...subjectInfo.childSubjects);
     }
     return result;
   }
 
+  /** Returns ECInstanceIDs of Models under specific parent Subjects as they are displayed in the hierarchy. */
   public async getChildSubjectModelIds(parentSubjectIds: Id64String[]): Promise<Id64String[]> {
-    const { subjectsHierarchy, subjectModels, hideInHierarchy } = await this.getSubjectInfo();
+    const subjectInfos = await this.getSubjectInfos();
 
     const hiddenSubjectIds = new Array<Id64String>();
     parentSubjectIds.forEach((subjectId) => {
-      forEachChildSubject(subjectsHierarchy, subjectId, (childSubjectId) => {
-        const isHidden = hideInHierarchy.get(childSubjectId)!;
-        if (isHidden) {
+      forEachChildSubject(subjectInfos, subjectId, (childSubjectId, childSubjectInfo) => {
+        if (childSubjectInfo.hideInHierarchy) {
           hiddenSubjectIds.push(childSubjectId);
           return "continue";
         }
@@ -173,10 +187,28 @@ export class ModelsTreeIdsCache {
 
     const modelIds = new Array<Id64String>();
     [...parentSubjectIds, ...hiddenSubjectIds].forEach((subjectId) => {
-      const subjectModelIds = subjectModels.get(subjectId);
-      subjectModelIds && modelIds.push(...subjectModelIds);
+      const subjectInfo = subjectInfos.get(subjectId);
+      subjectInfo && modelIds.push(...subjectInfo.childModels);
     });
     return modelIds;
+  }
+
+  /**
+   * Returns a list of Subject ancestor ECInstanceIds from root to target Subject as displayed in the
+   * hierarchy  - taking into account `hideInHierarchy` flag.
+   */
+  public async getSubjectAncestorsPath(targetSubjectId: Id64String): Promise<Id64Array> {
+    const subjectInfos = await this.getSubjectInfos();
+    const result = new Array<Id64String>();
+    let currParentId: Id64String | undefined = targetSubjectId;
+    while (currParentId) {
+      const parentInfo = subjectInfos.get(currParentId);
+      if (!parentInfo?.hideInHierarchy) {
+        result.push(currParentId);
+      }
+      currParentId = parentInfo?.parentSubject;
+    }
+    return result.reverse();
   }
 
   private async *queryModelElementCounts() {
@@ -203,16 +235,15 @@ export class ModelsTreeIdsCache {
 
   private async getModelInfos() {
     this._modelInfos ??= (async () => {
-      const modelInfos = new Map<Id64String, { categories: Id64Array; elementCount: number }>();
-
+      const modelInfos = new Map<Id64String, { categories: Id64Set; elementCount: number }>();
       await Promise.all([
         (async () => {
           for await (const { modelId, categoryId } of this.queryModelCategories()) {
             const entry = modelInfos.get(modelId);
             if (entry) {
-              entry.categories.push(categoryId);
+              entry.categories.add(categoryId);
             } else {
-              modelInfos.set(modelId, { categories: [categoryId], elementCount: 0 });
+              modelInfos.set(modelId, { categories: new Set([categoryId]), elementCount: 0 });
             }
           }
         })(),
@@ -222,26 +253,36 @@ export class ModelsTreeIdsCache {
             if (entry) {
               entry.elementCount = elementCount;
             } else {
-              modelInfos.set(modelId, { categories: [], elementCount });
+              modelInfos.set(modelId, { categories: new Set(), elementCount });
             }
           }
         })(),
       ]);
-
       return modelInfos;
     })();
-
     return this._modelInfos;
   }
 
   public async getModelCategories(modelId: Id64String): Promise<Id64Array> {
     const modelInfos = await this.getModelInfos();
-    return modelInfos.get(modelId)?.categories ?? [];
+    const categories = modelInfos.get(modelId)?.categories;
+    return categories ? [...categories] : [];
   }
 
   public async getModelElementCount(modelId: Id64String): Promise<number> {
     const modelInfos = await this.getModelInfos();
     return modelInfos.get(modelId)?.elementCount ?? 0;
+  }
+
+  public async getModelSubjects(modelId: Id64String): Promise<Id64Array> {
+    const result = new Array<Id64String>();
+    const subjectInfos = await this.getSubjectInfos();
+    subjectInfos.forEach((subjectInfo, subjectId) => {
+      if (subjectInfo.childModels.has(modelId)) {
+        result.push(subjectId);
+      }
+    });
+    return result;
   }
 
   private async queryCategoryElementsCount(modelId: Id64String, categoryId: Id64String): Promise<number> {
@@ -285,19 +326,31 @@ export class ModelsTreeIdsCache {
     this._categoryElementCounts.set(cacheKey, result);
     return result;
   }
+
+  public async getCategoryModels(categoryId: Id64String): Promise<Id64Array> {
+    const result = new Set<Id64String>();
+    const modelInfos = await this.getModelInfos();
+    modelInfos?.forEach((modelInfo, modelId) => {
+      if (modelInfo.categories.has(categoryId)) {
+        result.add(modelId);
+      }
+    });
+    return [...result];
+  }
 }
 
 function forEachChildSubject(
-  subjectsHierarchy: Map<Id64String, Id64Set>,
-  parentSubjectId: Id64String,
-  cb: (childSubjectId: Id64String) => "break" | "continue",
+  subjectInfos: Map<Id64String, SubjectInfo>,
+  parentSubject: Id64String | SubjectInfo,
+  cb: (childSubjectId: Id64String, childSubjectInfo: SubjectInfo) => "break" | "continue",
 ) {
-  const childSubjectIds = subjectsHierarchy.get(parentSubjectId);
-  childSubjectIds &&
-    childSubjectIds.forEach((childSubjectId) => {
-      if (cb(childSubjectId) === "break") {
+  const parentSubjectInfo = typeof parentSubject === "string" ? subjectInfos.get(parentSubject) : parentSubject;
+  parentSubjectInfo &&
+    parentSubjectInfo.childSubjects.forEach((childSubjectId) => {
+      const childSubjectInfo = subjectInfos.get(childSubjectId)!;
+      if (cb(childSubjectId, childSubjectInfo) === "break") {
         return;
       }
-      forEachChildSubject(subjectsHierarchy, childSubjectId, cb);
+      forEachChildSubject(subjectInfos, childSubjectInfo, cb);
     });
 }

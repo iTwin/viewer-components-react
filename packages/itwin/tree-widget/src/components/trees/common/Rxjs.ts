@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { defaultIfEmpty, last, scan, takeWhile } from "rxjs";
+import { defaultIfEmpty, from, last, scan, takeWhile } from "rxjs";
 
-import type { Observable, OperatorFunction } from "rxjs";
+import type { Observable, ObservableInput, OperatorFunction } from "rxjs";
 
 /**
  * Applies reduce function and "returns" early if the predicate returns `false` for the accumulator.
@@ -26,6 +26,24 @@ export async function toVoidPromise(obs: Observable<any>): Promise<void> {
     obs.subscribe({
       complete: () => resolve(),
       error: reject,
+    });
+  });
+}
+
+/** Returns observable results in an array */
+export async function collect<T>(obs: ObservableInput<T>): Promise<T[]> {
+  return new Promise((resolve, reject) => {
+    const arr = new Array<T>();
+    from(obs).subscribe({
+      next(item: T) {
+        arr.push(item);
+      },
+      complete() {
+        resolve(arr);
+      },
+      error(reason) {
+        reject(reason);
+      },
     });
   });
 }
