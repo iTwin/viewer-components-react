@@ -4,13 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 export * from "./PropertyGridManager";
-export * from "./PropertyGridUiItemsProvider";
 export * from "./PropertyGridComponent";
+export * from "./api/PreferencesStorage";
+export * from "./PropertyGridUiItemsProvider";
+
+export * from "./components/PropertyGrid";
+export * from "./components/MultiElementPropertyGrid";
+export * from "./components/SingleElementPropertyGrid";
 export { FilteringPropertyGridProps } from "./components/FilteringPropertyGrid";
 export { PropertyGridPropertyUpdatedArgs, PropertyGridContentBaseProps, PropertyGridContentProps } from "./components/PropertyGridContent";
-export * from "./components/PropertyGrid";
-export * from "./components/SingleElementPropertyGrid";
-export * from "./components/MultiElementPropertyGrid";
 export {
   SettingsMenuItemProps,
   SettingsMenuProps,
@@ -19,6 +21,11 @@ export {
   ShowHideNullValuesSettingsMenuItemProps,
   ShowHideNullValuesSettingsMenuItem,
 } from "./components/SettingsDropdownMenu";
+
+export { DataProviderProps } from "./hooks/UseDataProvider";
+export { NullValueSettingContext } from "./hooks/UseNullValuesSetting";
+export { TelemetryContextProvider, PerformanceTrackedFeatures } from "./hooks/UseTelemetryContext";
+export * from "./hooks/UsePropertyGridTransientState";
 export {
   ContextMenuItemProps,
   ContextMenuProps,
@@ -30,9 +37,3 @@ export {
   RemoveFavoritePropertyContextMenuItem,
   CopyPropertyTextContextMenuItem,
 } from "./hooks/UseContextMenu";
-export { DataProviderProps } from "./hooks/UseDataProvider";
-// export * from "./hooks/UseInstanceSelection";
-export { NullValueSettingContext } from "./hooks/UseNullValuesSetting";
-export * from "./hooks/UsePropertyGridTransientState";
-export { TelemetryContextProvider, PerformanceTrackedFeatures } from "./hooks/UseTelemetryContext";
-export * from "./api/PreferencesStorage";
