@@ -486,102 +486,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }
 }
 
-function createECInstanceKeySelectClause(
-  props: (({ classIdSelector: string } | { classIdAlias: string }) & ({ instanceHexIdSelector: string } | { instanceIdAlias: string })) | { alias: string },
-) {
-  const classIdSelector = (props as any).classIdSelector ?? `[${(props as any).classIdAlias ?? (props as any).alias}].[ECClassId]`;
-  const instanceHexIdSelector =
-    (props as any).instanceHexIdSelector ?? `printf('0x%x', [${(props as any).instanceIdAlias ?? (props as any).alias}].[ECInstanceId])`;
-  return `json_object('className', ec_classname(${classIdSelector}, 's.c'), 'id', ${instanceHexIdSelector})`;
-}
-
-function createInstanceKeyPathsCTEs() {
-  return [
-    `GeometricElementsHierarchy(TargetId, ECClassId, ECInstanceId, ParentId, ModelId, CategoryId, Path) AS (
-      SELECT
-        e.ECInstanceId,
-        e.ECClassId,
-        e.ECInstanceId,
-        e.Parent.Id,
-        e.Model.Id,
-        e.Category.Id,
-        json_array(${createECInstanceKeySelectClause({ alias: "e" })})
-      FROM bis.GeometricElement3d e
-      UNION ALL
-      SELECT
-        c.TargetId,
-        p.ECClassId,
-        p.ECInstanceId,
-        p.Parent.Id,
-        p.Model.Id,
-        p.Category.Id,
-        json_insert(c.Path, '$[#]', ${createECInstanceKeySelectClause({ alias: "p" })})
-      FROM GeometricElementsHierarchy c
-      JOIN bis.GeometricElement3d p on p.ECInstanceId = c.ParentId
-    )`,
-    `GeometricElements(TargetId, ECClassId, ECInstanceId, ModelId, CategoryId, Path) AS (
-      SELECT e.TargetId, e.ECClassId, e.ECInstanceId, e.ModelId, e.CategoryId, e.Path
-      FROM GeometricElementsHierarchy e
-      WHERE e.ParentId IS NULL
-    )`,
-    `Models(ECClassId, ECInstanceId, HexId) AS (
-      SELECT
-        m.ECClassId,
-        m.ECInstanceId,
-        printf('0x%x', m.ECInstanceId) HexId
-      FROM bis.GeometricModel3d m
-    )`,
-    `Categories(ECClassId, ECInstanceId, HexId) AS (
-      SELECT
-        c.ECClassId,
-        c.ECInstanceId,
-        printf('0x%x', c.ECInstanceId) HexId
-      FROM bis.SpatialCategory c
-    )`,
-    `ModelsCategoriesElementsHierarchy(TargetElementId, ModelId, ModelHexId, Path) AS (
-      SELECT
-        e.TargetId,
-        m.ECInstanceId,
-        m.HexId,
-        json_insert(
-          e.Path,
-          '$[#]', ${createECInstanceKeySelectClause({
-            classIdAlias: "c",
-            instanceHexIdSelector: "c.HexId",
-          })},
-          '$[#]', ${createECInstanceKeySelectClause({
-            classIdAlias: "m",
-            instanceHexIdSelector: "m.HexId",
-          })}
-        )
-      FROM GeometricElements e
-      JOIN Categories c ON c.ECInstanceId = e.CategoryId
-      JOIN Models m ON m.ECInstanceId = e.ModelId
-      UNION ALL
-      SELECT
-        mce.TargetElementId,
-        m.ECInstanceId,
-        m.HexId,
-        json_insert(
-          mce.Path,
-          '$[#]', json(e.Path),
-          '$[#]', ${createECInstanceKeySelectClause({
-            classIdAlias: "c",
-            instanceHexIdSelector: "c.HexId",
-          })},
-          '$[#]', ${createECInstanceKeySelectClause({
-            classIdAlias: "m",
-            instanceHexIdSelector: "m.HexId",
-          })}
-        )
-      FROM ModelsCategoriesElementsHierarchy mce
-      JOIN GeometricElements e on e.TargetId = mce.ModelId
-      JOIN Categories c ON c.ECInstanceId = e.CategoryId
-      JOIN Models m ON m.ECInstanceId = e.ModelId
-    )`,
-  ];
-}
-
 function createSubjectInstanceKeysPath(subjectId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
   return from(idsCache.getSubjectAncestorsPath(subjectId)).pipe(map((idsPath) => idsPath.map((id) => ({ className: "BisCore.Subject", id }))));
 }
@@ -612,25 +516,56 @@ function createGeometricElementInstanceKeyPaths(
   elementIds: Id64String[],
 ): Observable<HierarchyNodeIdentifiersPath> {
   return defer(() => {
+    const ctes = [
+      `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, Path) AS (
+        SELECT
+          e.ECInstanceId,
+          e.Parent.Id,
+          e.Model.Id,
+          json_array(
+            ${createECInstanceKeySelectClause({ alias: "e" })},
+            IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "c" })}, NULL),
+            IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
+          )
+        FROM bis.GeometricElement3d e
+        JOIN bis.GeometricModel3d m ON m.ECInstanceId = e.Model.Id
+        JOIN bis.SpatialCategory c ON c.ECInstanceId = e.Category.Id
+        WHERE e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
+
+        UNION ALL
+
+        SELECT
+          pe.ECInstanceId,
+          pe.Parent.Id,
+          pe.Model.Id,
+          json_insert(
+            ce.Path,
+            '$[#]', ${createECInstanceKeySelectClause({ alias: "pe" })},
+            '$[#]', IIF(pe.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "c" })}, NULL),
+            '$[#]', IIF(pe.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
+          )
+        FROM ModelsCategoriesElementsHierarchy ce
+        JOIN bis.GeometricElement3d pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
+        JOIN bis.GeometricModel3d m ON m.ECInstanceId = pe.Model.Id
+        JOIN bis.SpatialCategory c ON c.ECInstanceId = pe.Category.Id
+      )`,
+    ];
     const ecsql = `
       SELECT mce.ModelId, mce.Path
       FROM ModelsCategoriesElementsHierarchy mce
-      WHERE mce.TargetElementId IN (${elementIds.map(() => "?").join(",")})
+      WHERE mce.ParentId IS NULL
     `;
-    return imodelAccess.createQueryReader(
-      { ctes: createInstanceKeyPathsCTEs(), ecsql, bindings: elementIds.map((id) => ({ type: "id", value: id })) },
-      { rowFormat: "Indexes" },
-    );
+    return imodelAccess.createQueryReader({ ctes, ecsql, bindings: elementIds.map((id) => ({ type: "id", value: id })) }, { rowFormat: "Indexes" });
   }).pipe(
     map((row) => ({
       modelId: row[0],
-      elementHierarchyPath: flatten<InstanceKey>(JSON.parse(row[1])).reverse(),
+      elementHierarchyPath: flatten<InstanceKey | undefined>(JSON.parse(row[1])).reverse(),
     })),
     mergeMap(({ modelId, elementHierarchyPath }) =>
       createModelInstanceKeyPaths(modelId, idsCache).pipe(
         map((modelPath) => {
           modelPath.pop(); // model is already included in the element hierarchy path
-          return [...modelPath, ...elementHierarchyPath];
+          return [...modelPath, ...elementHierarchyPath.filter((x): x is InstanceKey => !!x)];
         }),
       ),
     ),
@@ -713,6 +648,12 @@ async function createInstanceKeyPathsFromInstanceLabel(
   }
 
   return createInstanceKeyPathsFromInstanceKeys({ ...props, keys: targetKeys });
+}
+
+function createECInstanceKeySelectClause(props: { alias: string }) {
+  const classIdSelector = `[${props.alias}].[ECClassId]`;
+  const instanceHexIdSelector = `printf('0x%x', [${props.alias}].[ECInstanceId])`;
+  return `json_object('className', ec_classname(${classIdSelector}, 's.c'), 'id', ${instanceHexIdSelector})`;
 }
 
 type ArrayOrValue<T> = T | Array<ArrayOrValue<T>>;
