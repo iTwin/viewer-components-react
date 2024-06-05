@@ -4,9 +4,7 @@ name: Extract API
 
 on:
   pull_request:
-    branches:
-      - master
-      - stable
+    branches: [master]
     paths:
       - packages/itwin/property-grid/**
       - packages/itwin/tree-widget/**
