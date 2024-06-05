@@ -12,7 +12,7 @@ on:
 
 jobs:
   extract-api:
-    # if: '! github.event.pull_request.draft'
+    if: '! github.event.pull_request.draft'
     runs-on: ubuntu-latest
     name: Extract API
     steps:
