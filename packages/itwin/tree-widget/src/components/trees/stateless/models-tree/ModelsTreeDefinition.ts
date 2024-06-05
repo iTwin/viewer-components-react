@@ -605,35 +605,32 @@ async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceK
 async function createInstanceKeyPathsFromInstanceLabel(
   props: ModelsTreeInstanceKeyPathsFromInstanceLabelProps & { labelsFactory: IInstanceLabelSelectClauseFactory },
 ) {
+  const elementLabelSelectClause = await props.labelsFactory.createSelectClause({
+    classAlias: "e",
+    className: "BisCore.Element",
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
+  });
   const targetsReader = props.imodelAccess.createQueryReader(
     {
       ecsql: `
         SELECT *
         FROM (
           SELECT
-            ec_classname(s.ECClassId, 's.c'),
-            s.ECInstanceId,
-            ${await props.labelsFactory.createSelectClause({
-              classAlias: "s",
-              className: "BisCore.Subject",
-              // eslint-disable-next-line @typescript-eslint/unbound-method
-              selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
-            })} Label
-          FROM BisCore.Subject s
+            ec_classname(e.ECClassId, 's.c'),
+            e.ECInstanceId,
+            ${elementLabelSelectClause} Label
+          FROM BisCore.Element e
+          WHERE e.ECClassId IS (BisCore.Subject, BisCore.SpatialCategory, BisCore.GeometricElement3d)
 
           UNION ALL
 
           SELECT
             ec_classname(m.ECClassId, 's.c'),
             m.ECInstanceId,
-            ${await props.labelsFactory.createSelectClause({
-              classAlias: "p",
-              className: "BisCore.Element",
-              // eslint-disable-next-line @typescript-eslint/unbound-method
-              selectorsConcatenator: ECSql.createConcatenatedValueStringSelector,
-            })} Label
+            ${elementLabelSelectClause} Label
           FROM BisCore.GeometricModel3d m
-          JOIN BisCore.Element p on p.ECInstanceId = m.ModeledElement.Id
+          JOIN BisCore.Element e on e.ECInstanceId = m.ModeledElement.Id
         )
         WHERE Label LIKE '%' || ? || '%'
       `,

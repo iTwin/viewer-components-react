@@ -37,7 +37,7 @@ interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
   getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyNodeIdentifiersPath[];
   getTargetInstanceKeys: (setupResult: TIModelSetupResult) => InstanceKey[];
-  getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
+  getTargetInstanceLabel: (setupResult: TIModelSetupResult) => string;
   getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
 }
 
@@ -48,7 +48,7 @@ namespace TreeFilteringTestCaseDefinition {
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
     getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyNodeIdentifiersPath[],
     getTargetInstanceKeys: (setupResult: TIModelSetupResult) => InstanceKey[],
-    getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
+    getTargetInstanceLabel: (setupResult: TIModelSetupResult) => string,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
   ): TreeFilteringTestCaseDefinition<TIModelSetupResult> {
     return {
@@ -460,7 +460,7 @@ describe("Models tree", () => {
           [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model2.id }, x.category3],
         ],
         (x) => [x.category1, x.category3],
-        undefined,
+        (_x) => "matching",
         (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.rootSubject],
@@ -529,7 +529,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model2, x.category2, x.element22],
         ],
         (x) => [x.element11, x.element22],
-        undefined,
+        (_x) => "matching",
         (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.rootSubject],
@@ -608,7 +608,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.rootElement, x.childElement3],
         ],
         (x) => [x.childElement1, x.childElement3],
-        undefined,
+        (_x) => "matching",
         (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.rootSubject],
@@ -687,7 +687,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.rootElement, x.subModel, x.category, x.subModeledElement3],
         ],
         (x) => [x.subModeledElement1, x.subModeledElement3],
-        undefined,
+        (_x) => "matching",
         (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.rootSubject],
@@ -775,7 +775,7 @@ describe("Models tree", () => {
         },
         (x) => [[x.rootSubject, x.model, x.category, x.element1]],
         (x) => [x.element1],
-        undefined,
+        (_x) => "matching",
         (x) => [
           NodeValidators.createForInstanceNode({
             instanceKeys: [x.rootSubject],
@@ -803,7 +803,7 @@ describe("Models tree", () => {
         let imodel: IModelConnection;
         let instanceKeyPaths!: HierarchyNodeIdentifiersPath[];
         let targetInstanceKeys!: InstanceKey[];
-        let targetInstanceLabel: string | undefined;
+        let targetInstanceLabel: string;
         let expectedHierarchy!: ExpectedHierarchyDef[];
 
         let modelsTreeIdsCache: ModelsTreeIdsCache;
@@ -816,7 +816,7 @@ describe("Models tree", () => {
               const imodelSetupResult = await testCase.setupIModel(...args);
               instanceKeyPaths = testCase.getTargetInstancePaths(imodelSetupResult).sort(instanceKeyPathSorter);
               targetInstanceKeys = testCase.getTargetInstanceKeys(imodelSetupResult);
-              targetInstanceLabel = testCase.getTargetInstanceLabel?.(imodelSetupResult);
+              targetInstanceLabel = testCase.getTargetInstanceLabel(imodelSetupResult);
               expectedHierarchy = testCase.getExpectedHierarchy(imodelSetupResult);
             })
           ).imodel;
@@ -850,9 +850,6 @@ describe("Models tree", () => {
         });
 
         it("finds instance key paths by target instance label", async function () {
-          if (!targetInstanceLabel) {
-            this.skip();
-          }
           const actualInstanceKeyPaths = (
             await ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
@@ -865,7 +862,7 @@ describe("Models tree", () => {
       });
     });
 
-    it.skip("finds elements by base36 ECInstanceId suffix", async function () {
+    it("finds elements by base36 ECInstanceId suffix", async function () {
       const { imodel, expectedPaths, formattedECInstanceId } = await buildIModel(this, async (builder) => {
         const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
