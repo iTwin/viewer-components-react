@@ -62,6 +62,10 @@ async function selectTree(page: Page, tree: string) {
 
 test.describe("tree widget", () => {
   const testCases = (lastNodeLabel: string) => {
+    test.beforeEach(async () => {
+      await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: At least one model is visible", exact: true }).waitFor();
+    });
+
     test("initial tree", async ({ page }) => {
       // wait for element to be visible in the tree
       await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible", exact: true }).waitFor();
@@ -151,7 +155,6 @@ test.describe("tree widget", () => {
     });
 
     test("search", async ({ page }) => {
-      await treeWidget.getByText("BayTown").waitFor();
       await treeWidget.getByTitle("Search for something").click();
       await treeWidget.getByPlaceholder("Search...").fill("Model");
       await treeWidget.locator(".components-activehighlight").waitFor();
@@ -159,7 +162,6 @@ test.describe("tree widget", () => {
     });
 
     test("button dropdown", async ({ page }) => {
-      await treeWidget.getByText("BayTown").waitFor();
       await treeWidget.getByTitle("Search for something").click();
       await treeWidget.getByTitle("More").click();
       await page.locator(".tree-header-button-dropdown-container").waitFor();
@@ -167,7 +169,6 @@ test.describe("tree widget", () => {
     });
 
     test("tree selector", async ({ page }) => {
-      await treeWidget.getByText("BayTown").waitFor();
       await treeWidget.getByRole("combobox").click();
       await page.getByRole("listbox").waitFor();
       await takeScreenshot(page, treeWidget);
@@ -185,11 +186,12 @@ test.describe("tree widget", () => {
     test.describe("stateless models tree", () => {
       test.beforeEach(async ({ page }) => {
         await selectTree(page, "Models (Beta)");
+        await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: All models are visible", exact: true }).waitFor();
       });
 
       test("initial tree", async ({ page }) => {
         // wait for element to be visible in the tree
-        await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: At least one model is visible", exact: true }).waitFor();
+        await locateNode(treeWidget, "ProcessPhysicalModel").getByRole("checkbox", { name: "Visible: All categories visible", exact: true }).waitFor();
         await takeScreenshot(page, treeWidget);
       });
 
@@ -225,9 +227,12 @@ test.describe("tree widget", () => {
 
         await page.getByRole("button", { name: "Apply" }).click();
 
-        // expand node to see children being filtered
+        // expand node to see filtered children
         await physicalModelNode.getByLabel("Expand").click();
         await locateNode(treeWidget, "PipeSupport").waitFor();
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await page.mouse.wheel(-10000, -10000);
 
         // hover the node for the button to appear
         await physicalModelNode.hover();
@@ -247,10 +252,13 @@ test.describe("tree widget", () => {
         await selectPropertyInDialog(page, "Is Private");
 
         await page.getByRole("button", { name: "Apply" }).click();
-        await physicalModelNode.getByLabel("Expand").click();
 
-        // wait until filter is applied
+        // expand node to see filtered children
+        await physicalModelNode.getByLabel("Expand").click();
         await treeWidget.getByText("No child nodes match current filter").waitFor();
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await page.mouse.wheel(-10000, -10000);
 
         // hover the node for the button to appear
         await physicalModelNode.hover();
@@ -307,7 +315,6 @@ test.describe("tree widget", () => {
       });
 
       test("button dropdown", async ({ page }) => {
-        await treeWidget.getByText("BayTown").waitFor();
         await treeWidget.getByTitle("Search for something").click();
         await treeWidget.getByTitle("More").click();
         await page.locator(".tree-header-button-dropdown-container").waitFor();
@@ -350,10 +357,13 @@ test.describe("tree widget", () => {
         await selectValueInDialog(page, "Equipment - Insulation");
 
         await page.getByRole("button", { name: "Apply" }).click();
-        await node.getByLabel("Expand").click();
 
-        // wait until filter is applied
+        // expand node to see filtered children
+        await node.getByLabel("Expand").click();
         await locateNode(treeWidget, "Equipment - Insulation").waitFor();
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await page.mouse.wheel(-10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
@@ -373,10 +383,13 @@ test.describe("tree widget", () => {
         await selectPropertyInDialog(page, "Is Private");
 
         await page.getByRole("button", { name: "Apply" }).click();
-        await node.getByLabel("Expand").click();
 
-        // wait until filter is applied
+        // expand node to see filtered children
+        await node.getByLabel("Expand").click();
         await treeWidget.getByText("No child nodes match current filter").waitFor();
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await page.mouse.wheel(-10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
@@ -460,9 +473,12 @@ test.describe("tree widget", () => {
 
         await page.getByRole("button", { name: "Apply" }).click();
 
-        // expand node to see children being filtered
+        // expand node to see filtered children
         await node.getByLabel("Expand").click();
         await locateNode(treeWidget, "PipeSupport").waitFor();
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await page.mouse.wheel(-10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
@@ -482,10 +498,13 @@ test.describe("tree widget", () => {
         await selectPropertyInDialog(page, "Is Private");
 
         await page.getByRole("button", { name: "Apply" }).click();
-        await node.getByLabel("Expand").click();
 
-        // wait until filter is applied
+        // expand node to see filtered children
+        await node.getByLabel("Expand").click();
         await treeWidget.getByText("No child nodes match current filter").waitFor();
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await page.mouse.wheel(-10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
