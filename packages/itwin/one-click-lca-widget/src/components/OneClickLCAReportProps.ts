@@ -21,12 +21,12 @@ export interface OneClickLCAReportProps {
   carbonCalculationBasePath?: string;
 
   /**
-   * A custom implementation of ReportsClient.
+   * A custom implementation of ReportsClient. If provided, reportingBasePath is ignored.
    */
   reportsClient?: IReportsClient;
 
   /**
-   * A custom implementation of ReportsClient.
+   * A custom implementation of ReportsClient. If provided, carbonCalculationBasePath is ignored.
    */
   oclcaJobsClient?: OCLCAJobsClient;
 }
