@@ -886,6 +886,57 @@ describe("Models tree", () => {
       expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths);
     });
 
+    it("finds elements by label containing special SQLite characters", async function () {
+      const { imodel, keys } = await buildIModel(this, async (builder) => {
+        const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+        const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+        const category = insertSpatialCategory({ builder, codeValue: "category" });
+        const element1 = insertPhysicalElement({ builder, userLabel: `elem_ent 1`, modelId: model.id, categoryId: category.id });
+        const element2 = insertPhysicalElement({ builder, userLabel: `elem%ent 2`, modelId: model.id, categoryId: category.id });
+        const element3 = insertPhysicalElement({ builder, userLabel: `elem\\ent 3`, modelId: model.id, categoryId: category.id });
+        return {
+          keys: {
+            rootSubject,
+            model,
+            category,
+            element1,
+            element2,
+            element3,
+          },
+        };
+      });
+
+      expect(
+        (
+          await ModelsTreeDefinition.createInstanceKeyPaths({
+            imodelAccess: createIModelAccess(imodel),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
+            label: "_",
+          })
+        ).sort(instanceKeyPathSorter),
+      ).to.deep.eq([[keys.rootSubject, keys.model, keys.category, keys.element1]]);
+
+      expect(
+        (
+          await ModelsTreeDefinition.createInstanceKeyPaths({
+            imodelAccess: createIModelAccess(imodel),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
+            label: "%",
+          })
+        ).sort(instanceKeyPathSorter),
+      ).to.deep.eq([[keys.rootSubject, keys.model, keys.category, keys.element2]]);
+
+      expect(
+        (
+          await ModelsTreeDefinition.createInstanceKeyPaths({
+            imodelAccess: createIModelAccess(imodel),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
+            label: "\\",
+          })
+        ).sort(instanceKeyPathSorter),
+      ).to.deep.eq([[keys.rootSubject, keys.model, keys.category, keys.element3]]);
+    });
+
     function insertModelWithElements(builder: TestIModelBuilder, modelNo: number, elementsCategoryId: Id64String, parentId?: Id64String) {
       const modelKey = insertPhysicalModelWithPartition({ builder, codeValue: `model-${modelNo}`, partitionParentId: parentId });
       insertPhysicalElement({ builder, userLabel: `element-${modelNo}`, modelId: modelKey.id, categoryId: elementsCategoryId });

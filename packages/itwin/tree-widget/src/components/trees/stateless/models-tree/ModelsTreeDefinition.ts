@@ -632,9 +632,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
           FROM BisCore.GeometricModel3d m
           JOIN BisCore.Element e on e.ECInstanceId = m.ModeledElement.Id
         )
-        WHERE Label LIKE '%' || ? || '%'
+        WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
       `,
-      bindings: [{ type: "string", value: props.label }],
+      bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
     },
     { rowFormat: "Indexes", restartToken: "tree-widget/models-tree/filter-by-label-query" },
   );
