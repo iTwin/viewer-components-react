@@ -4,3 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
 export * from "./widgets/OneClickLCAWidget";
+
+export * from "@itwin/insights-client";
+
+export { OneClickLCAReportProps } from "./components/OneClickLCAReportProps";

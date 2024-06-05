@@ -8,10 +8,10 @@ import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Table, toaster } from "@itwin/itwinui-react";
 import type { Report } from "@itwin/insights-client";
-import { ReportsClient } from "@itwin/insights-client";
 import { WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
 import "./Reports.scss";
+import { useReportsClient } from "./context/ReportsClientContext";
 
 type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
@@ -19,15 +19,12 @@ type CreateTypeFromInterface<Interface> = {
 
 type Reporting = CreateTypeFromInterface<Report>;
 
-export interface ReportProps {
-  reportingBasePath?: string;
-  carbonCalculationBasePath?: string;
-}
-
-export const Reports = (props: ReportProps) => {
+/**
+ * @internal
+ */
+export const Reports = () => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportsClientApi = useMemo(() => new ReportsClient(props.reportingBasePath), [props.reportingBasePath]);
-
+  const reportsClient = useReportsClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useState<Report[]>([]);
   const [buttonIsDisabled, disableButton] = useState<boolean>(true);
@@ -54,16 +51,12 @@ export const Reports = (props: ReportProps) => {
         ],
       },
     ],
-    []
+    [],
   );
 
   const onSearchBoxValueChanged = async (value: string) => {
     disableButton(true);
-    const filterReports = reports.filter(
-      (x) =>
-        x.displayName &&
-        x.displayName.toLowerCase().indexOf(value.toLowerCase()) > -1
-    );
+    const filterReports = reports.filter((x) => x.displayName && x.displayName.toLowerCase().indexOf(value.toLowerCase()) > -1);
     setFilteredReports(filterReports);
   };
 
@@ -89,18 +82,15 @@ export const Reports = (props: ReportProps) => {
       }
       setSelectedReport(row.original);
     },
-    [buttonIsDisabled, selectedReport]
+    [buttonIsDisabled, selectedReport],
   );
 
   useEffect(() => {
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
+    if (!IModelApp.authorizationClient) throw new Error("AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet.");
     IModelApp.authorizationClient
       .getAccessToken()
       .then((token: string) => {
-        reportsClientApi
+        reportsClient
           .getReports(token, projectId)
           .then((data) => {
             if (data) {
@@ -122,17 +112,14 @@ export const Reports = (props: ReportProps) => {
         /* eslint-disable no-console */
         console.error(err);
       });
-  }, [projectId, reportsClientApi]);
+  }, [projectId, reportsClient]);
 
   return (
     <>
       <WidgetHeader title="Reports" />
       <div className="oclca-reports-container">
         <div className="oclca-searchbox-container">
-          <SearchBox
-            onValueChanged={onSearchBoxValueChanged}
-            placeholder={"Search reports"}
-          />
+          <SearchBox onValueChanged={onSearchBoxValueChanged} placeholder={"Search reports"} />
         </div>
         <div className="oclca-scrollable-table">
           <Table<Reporting>
@@ -150,20 +137,10 @@ export const Reports = (props: ReportProps) => {
           />
         </div>
       </div>
-      <Button
-        onClick={() => openModal(true)}
-        styleType="cta"
-        disabled={buttonIsDisabled}
-        className="oclca-button-center"
-      >
+      <Button onClick={() => openModal(true)} styleType="cta" disabled={buttonIsDisabled} className="oclca-button-center">
         One Click LCA Export
       </Button>
-      <ExportModal
-        isOpen={modalIsOpen}
-        close={() => openModal(false)}
-        reportId={selectedReport?.id}
-        carbonCalculationBasePath={props.carbonCalculationBasePath}
-      />
+      <ExportModal isOpen={modalIsOpen} close={() => openModal(false)} reportId={selectedReport?.id} />
     </>
   );
 };

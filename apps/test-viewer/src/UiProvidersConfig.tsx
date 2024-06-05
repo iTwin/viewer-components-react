@@ -9,12 +9,12 @@ import { EC3Provider } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { CARBON_CALCULATION_BASE_PATH, ClientPrefix, GroupingMappingProvider, REPORTING_BASE_PATH } from "@itwin/grouping-mapping-widget";
+import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
-import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
+import { CARBON_CALCULATION_BASE_PATH, OneClickLCAProvider, REPORTING_BASE_PATH } from "@itwin/one-click-lca-react";
 import {
   AddFavoritePropertyContextMenuItem,
   AncestorsNavigationControls,
