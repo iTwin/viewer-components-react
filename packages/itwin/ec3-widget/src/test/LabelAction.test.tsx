@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
 import { screen } from "@testing-library/react";
@@ -43,25 +43,27 @@ describe("LabelAction", () => {
     labels: [label],
   };
 
-  const mockedOData: ODataTable[] = Array.from(
-    { length: 5 },
-    (_, index) => ({
-      name: `table_${index}`,
-      columns: [{
+  const mockedOData: ODataTable[] = Array.from({ length: 5 }, (_, index) => ({
+    name: `table_${index}`,
+    columns: [
+      {
         name: `string_column_${index}`,
         type: `Edm.String`,
-      }, {
+      },
+      {
         name: `number_column_${index}`,
         type: `Edm.Double`,
-      }, {
+      },
+      {
         name: `material_${index}`,
         type: `Edm.String`,
-      }, {
+      },
+      {
         name: `extra_material_${index}`,
         type: `Edm.String`,
-      }],
-    })
-  );
+      },
+    ],
+  }));
 
   const accessToken = faker.datatype.uuid();
   const getAccessTokenFn = async () => accessToken;
@@ -76,12 +78,7 @@ describe("LabelAction", () => {
 
   it("Label Action menu should render successfully", async () => {
     await renderWithContext({
-      component: <LabelAction
-        template={emptyTemplate}
-        label={undefined}
-        onClose={async () => { }}
-        setTemplate={() => { }}
-      />,
+      component: <LabelAction template={emptyTemplate} label={undefined} onClose={async () => {}} setTemplate={() => {}} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
@@ -90,12 +87,7 @@ describe("LabelAction", () => {
 
   it("Mocked report tables should appear in comboBox", async () => {
     await renderWithContext({
-      component: <LabelAction
-        template={emptyTemplate}
-        label={undefined}
-        onClose={async () => { }}
-        setTemplate={() => { }}
-      />,
+      component: <LabelAction template={emptyTemplate} label={undefined} onClose={async () => {}} setTemplate={() => {}} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
@@ -109,12 +101,7 @@ describe("LabelAction", () => {
 
   it("Selecting report table should enable other inputs", async () => {
     await renderWithContext({
-      component: <LabelAction
-        template={emptyTemplate}
-        label={undefined}
-        onClose={async () => { }}
-        setTemplate={() => { }}
-      />,
+      component: <LabelAction template={emptyTemplate} label={undefined} onClose={async () => {}} setTemplate={() => {}} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
@@ -137,12 +124,7 @@ describe("LabelAction", () => {
 
   it("String colunms appear in the element select, number collumns in the quantity select", async () => {
     await renderWithContext({
-      component: <LabelAction
-        template={template}
-        label={label}
-        onClose={async () => { }}
-        setTemplate={() => { }}
-      />,
+      component: <LabelAction template={template} label={label} onClose={async () => {}} setTemplate={() => {}} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
@@ -160,25 +142,16 @@ describe("LabelAction", () => {
 
   it("Selected label properties should be displayed in the inputs", async () => {
     await renderWithContext({
-      component: <LabelAction
-        template={template}
-        label={label}
-        onClose={async () => { }}
-        setTemplate={() => { }}
-      />,
+      component: <LabelAction template={template} label={label} onClose={async () => {}} setTemplate={() => {}} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
 
-    const reportTableInput = screen.getByTestId("ec3-report-table-select")
-      .querySelector(".iui-input") as HTMLInputElement;
-    const elementInput = screen.getByTestId("ec3-element-select")
-      .querySelector(".iui-content") as HTMLInputElement;
-    const elementQuantityInput = screen.getByTestId("ec3-element-quantity-select")
-      .querySelector(".iui-content") as HTMLInputElement;
-    const dropdownTileInput = screen.getByTestId("ec3-dropdown-tile-select")
-      .querySelector(".iui-content") as HTMLInputElement;
+    const reportTableInput = screen.getByTestId("ec3-report-table-select").querySelector(".iui-input") as HTMLInputElement;
+    const elementInput = screen.getByTestId("ec3-element-select").querySelector(".iui-content") as HTMLInputElement;
+    const elementQuantityInput = screen.getByTestId("ec3-element-quantity-select").querySelector(".iui-content") as HTMLInputElement;
+    const dropdownTileInput = screen.getByTestId("ec3-dropdown-tile-select").querySelector(".iui-content") as HTMLInputElement;
 
     expect(reportTableInput.value).toEqual(label.reportTable);
     expect(elementInput).toHaveTextContent(label.elementNameColumn);
@@ -188,12 +161,7 @@ describe("LabelAction", () => {
 
   it("Filling out required fields enables add material and save buttons", async () => {
     await renderWithContext({
-      component: <LabelAction
-        template={emptyTemplate}
-        label={undefined}
-        onClose={async () => { }}
-        setTemplate={() => { }}
-      />,
+      component: <LabelAction template={emptyTemplate} label={undefined} onClose={async () => {}} setTemplate={() => {}} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
@@ -215,12 +183,7 @@ describe("LabelAction", () => {
 
   it("Adding material allows deletion, deletion brings up delete modal", async () => {
     await renderWithContext({
-      component: <LabelAction
-        template={template}
-        label={label}
-        onClose={async () => { }}
-        setTemplate={() => { }}
-      />,
+      component: <LabelAction template={template} label={label} onClose={async () => {}} setTemplate={() => {}} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
@@ -245,12 +208,7 @@ describe("LabelAction", () => {
   it("Saving updates the template state", async () => {
     const setter = jest.fn();
     await renderWithContext({
-      component: <LabelAction
-        template={template}
-        label={label}
-        onClose={async () => { }}
-        setTemplate={setter}
-      />,
+      component: <LabelAction template={template} label={label} onClose={async () => {}} setTemplate={setter} />,
       oDataClient: oDataClient.object,
       getAccessTokenFn,
     });
@@ -265,15 +223,19 @@ describe("LabelAction", () => {
     await simulateClick(button);
 
     const expectedArg = template;
-    template.labels = [{
-      name: label.name,
-      reportTable: "table_1",
-      elementNameColumn: "string_column_1",
-      elementQuantityColumn: "number_column_1",
-      materials: [{
-        nameColumn: "material_1",
-      }],
-    }];
+    template.labels = [
+      {
+        name: label.name,
+        reportTable: "table_1",
+        elementNameColumn: "string_column_1",
+        elementQuantityColumn: "number_column_1",
+        materials: [
+          {
+            nameColumn: "material_1",
+          },
+        ],
+      },
+    ];
     expect(setter).toHaveBeenCalledWith(expectedArg);
   });
 });

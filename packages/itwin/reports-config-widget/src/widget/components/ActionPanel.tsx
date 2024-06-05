@@ -28,23 +28,12 @@ const ActionPanel = ({
   return (
     <div className="rcw-action-panel">
       {isLoading && <LoadingSpinner />}
-      <Button
-        disabled={isSavingDisabled || isLoading}
-        styleType="high-visibility"
-        onClick={onAction}
-      >
+      <Button disabled={isSavingDisabled || isLoading} styleType="high-visibility" onClick={onAction}>
         {actionLabel}
       </Button>
       {onCancel && (
-        <Button
-          styleType="default"
-          type="button"
-          onClick={onCancel}
-          disabled={isCancelDisabled || isLoading}
-        >
-          {ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Cancel"
-          )}
+        <Button styleType="default" type="button" onClick={onCancel} disabled={isCancelDisabled || isLoading}>
+          {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
         </Button>
       )}
     </div>

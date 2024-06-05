@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { ITwinsAccessClient } from "@itwin/itwins-client";
 import { createContext, useContext } from "react";
 import type { ClientPrefix } from "./GroupingApiConfigContext";
@@ -25,9 +25,7 @@ export const ITwinsClientContext = createContext<ITwinsAccessClient>(createITwin
 export const useITwinsClient = () => {
   const context = useContext(ITwinsClientContext);
   if (!context) {
-    throw new Error(
-      "useITwinsClient should be used within an ITwinsClientContext provider"
-    );
+    throw new Error("useITwinsClient should be used within an ITwinsClientContext provider");
   }
   return context;
 };

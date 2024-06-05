@@ -1,13 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type {
-  SelectOption,
-} from "@itwin/itwinui-react";
-import {
-  Button,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { SelectOption } from "@itwin/itwinui-react";
+import { Button } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { LoadingSpinner } from "../../SharedComponents/LoadingSpinner";
 import "./GroupAction.scss";
@@ -59,8 +55,9 @@ export const GroupAction = (props: GroupActionProps) => {
     throw new Error("This component requires an active iModelConnection.");
   }
   const groupsClient = useGroupsClient();
-  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs
-    .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
+  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs.filter(
+    (p) => p.type === GroupingMappingCustomUIType.Grouping,
+  ) as GroupingCustomUI[];
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
     description: props.group?.description ?? "",
@@ -71,28 +68,17 @@ export const GroupAction = (props: GroupActionProps) => {
   const [validator, setShowValidationMessage] = useValidator();
   const queryClient = useQueryClient();
 
-  const [queryGenerationType, setQueryGenerationType] = useState(
-    props.queryGenerationType,
-  );
-  const {
-    isRendering,
-    simpleSelectionQuery,
-    setSimpleSelectionQuery,
-    clearPresentationSelection,
-    resetView,
-  } = useVisualization(
+  const [queryGenerationType, setQueryGenerationType] = useState(props.queryGenerationType);
+  const { isRendering, simpleSelectionQuery, setSimpleSelectionQuery, clearPresentationSelection, resetView } = useVisualization(
     props.shouldVisualize,
     iModelConnection,
     query,
-    queryGenerationType
+    queryGenerationType,
   );
 
   const [currentStep, setCurrentStep] = React.useState(GroupActionStep.QueryBuilder);
 
-  const displayStrings = React.useMemo(
-    () => ({ ...defaultDisplayStrings, ...props.displayStrings }),
-    [props.displayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...props.displayStrings }), [props.displayStrings]);
 
   useEffect(() => setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
 
@@ -122,7 +108,7 @@ export const GroupAction = (props: GroupActionProps) => {
         value: ui.name,
         icon: ui.icon,
       })),
-    [groupUIs]
+    [groupUIs],
   );
 
   const onChange = useCallback(
@@ -133,7 +119,7 @@ export const GroupAction = (props: GroupActionProps) => {
       setSimpleSelectionQuery("");
       await resetView();
     },
-    [clearPresentationSelection, resetView, setSimpleSelectionQuery]
+    [clearPresentationSelection, resetView, setSimpleSelectionQuery],
   );
 
   const saveGroup = async () => {
@@ -141,17 +127,8 @@ export const GroupAction = (props: GroupActionProps) => {
     const currentQuery = query || simpleSelectionQuery;
 
     return props.group
-      ? groupsClient.updateGroup(
-        accessToken,
-        props.mappingId,
-        props.group.id,
-        { ...details, query: currentQuery }
-      )
-      : groupsClient.createGroup(
-        accessToken,
-        props.mappingId,
-        { ...details, query: currentQuery }
-      );
+      ? groupsClient.updateGroup(accessToken, props.mappingId, props.group.id, { ...details, query: currentQuery })
+      : groupsClient.createGroup(accessToken, props.mappingId, { ...details, query: currentQuery });
   };
 
   const { mutate: onSaveMutate, isLoading: isSaveLoading } = useMutation(saveGroup, {
@@ -165,7 +142,6 @@ export const GroupAction = (props: GroupActionProps) => {
       setCurrentStep(GroupActionStep.QueryBuilder);
       setShowValidationMessage(false);
       props.onSaveSuccess();
-
     },
   });
 
@@ -217,34 +193,17 @@ export const GroupAction = (props: GroupActionProps) => {
           displayStrings={{ ...displayStrings }}
           group={props.group}
         />
-        {isGroupDetailsStep && <GroupDetailsStep
-          details={details}
-          setDetails={setDetails}
-          validator={validator}
-          displayStrings={{ ...displayStrings }}
-        />}
+        {isGroupDetailsStep && <GroupDetailsStep details={details} setDetails={setDetails} validator={validator} displayStrings={{ ...displayStrings }} />}
       </div>
-      <div className='gmw-action-panel'>
-        {isLoading &&
-          <LoadingSpinner />
-        }
-        {isQueryBuilderStep && (
-          <QueryBuilderActionPanel onClickNext={onClickNext} />
+      <div className="gmw-action-panel">
+        {isLoading && <LoadingSpinner />}
+        {isQueryBuilderStep && <QueryBuilderActionPanel onClickNext={onClickNext} />}
+        {isGroupDetailsStep && <GroupDetailsActionPanel isSaveDisabled={isBlockingActions} onClickSave={onClickSave} onClickBack={onClickBack} />}
+        {props.onClickCancel && (
+          <Button type="button" id="cancel" onClick={onClickCancel}>
+            Cancel
+          </Button>
         )}
-        {isGroupDetailsStep && (
-          <GroupDetailsActionPanel
-            isSaveDisabled={isBlockingActions}
-            onClickSave={onClickSave}
-            onClickBack={onClickBack}
-          />
-        )}
-        {props.onClickCancel && <Button
-          type='button'
-          id='cancel'
-          onClick={onClickCancel}
-        >
-          Cancel
-        </Button>}
       </div>
     </>
   );

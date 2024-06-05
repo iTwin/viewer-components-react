@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { ProgressRadial, toaster } from "@itwin/itwinui-react";
 import { Text } from "@itwin/itwinui-react";
@@ -14,11 +14,7 @@ export interface WidgetHeaderProps {
   returnFn?: () => Promise<void>;
 }
 
-export const WidgetHeader = ({
-  title,
-  disabled = false,
-  returnFn,
-}: WidgetHeaderProps) => {
+export const WidgetHeader = ({ title, disabled = false, returnFn }: WidgetHeaderProps) => {
   return (
     <div className="ec3w-widget-header-container">
       {returnFn && (
@@ -38,7 +34,7 @@ export const WidgetHeader = ({
 };
 
 export const LoadingOverlay = () => (
-  <div className='ec3w-center-overlay'>
+  <div className="ec3w-center-overlay">
     <Text>Loading</Text>
     <ProgressRadial indeterminate />
     <Text>Please wait...</Text>
@@ -50,16 +46,12 @@ interface EmptyMessageProps {
 }
 
 export const EmptyMessage = ({ message }: EmptyMessageProps) => (
-  <div className='ec3w-center-overlay'>
+  <div className="ec3w-center-overlay">
     <Text>{message}</Text>
   </div>
 );
 
-export const handleInputChange = <T,>(
-  e: React.ChangeEvent<HTMLInputElement>,
-  values: T,
-  setValues: React.Dispatch<React.SetStateAction<T>>,
-) => {
+export const handleInputChange = <T,>(e: React.ChangeEvent<HTMLInputElement>, values: T, setValues: React.Dispatch<React.SetStateAction<T>>) => {
   const { name, value } = e.target;
 
   setValues({
@@ -68,12 +60,7 @@ export const handleInputChange = <T,>(
   });
 };
 
-export const handleSelectChange = <T,>(
-  value: string,
-  name: string,
-  values: T,
-  setValues: React.Dispatch<React.SetStateAction<T>>,
-) => {
+export const handleSelectChange = <T,>(value: string, name: string, values: T, setValues: React.Dispatch<React.SetStateAction<T>>) => {
   setValues({
     ...values,
     [name]: value,
@@ -122,5 +109,4 @@ export const handleError = (errorStatus: number) => {
       errorMessage += `Something went wrong!`;
   }
   toaster.negative(errorMessage);
-
 };

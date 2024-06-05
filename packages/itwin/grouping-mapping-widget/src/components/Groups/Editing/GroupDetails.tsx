@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { LabeledInput, Text } from "@itwin/itwinui-react";
 import React from "react";
 import type SimpleReactValidator from "simple-react-validator";
@@ -19,11 +19,7 @@ export interface GroupDetailsProps {
   validator: SimpleReactValidator;
 }
 
-export const GroupDetails = ({
-  details,
-  setDetails,
-  validator,
-}: GroupDetailsProps) => {
+export const GroupDetails = ({ details, setDetails, validator }: GroupDetailsProps) => {
   return (
     <>
       <Text variant="small" as="small" className="gmw-field-legend">
@@ -39,20 +35,8 @@ export const GroupDetails = ({
           handleInputChange(event, details, setDetails);
           validator.showMessageFor("groupName");
         }}
-        message={validator.message(
-          "groupName",
-          details.groupName,
-          NAME_REQUIREMENTS,
-        )}
-        status={
-          validator.message(
-            "groupName",
-            details.groupName,
-            NAME_REQUIREMENTS,
-          )
-            ? "negative"
-            : undefined
-        }
+        message={validator.message("groupName", details.groupName, NAME_REQUIREMENTS)}
+        status={validator.message("groupName", details.groupName, NAME_REQUIREMENTS) ? "negative" : undefined}
         onBlur={() => {
           validator.showMessageFor("groupName");
         }}

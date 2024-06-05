@@ -1,13 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { GroupMinimal } from "@itwin/insights-client";
 import React, { useCallback } from "react";
-import type {
-  ContextCustomUI,
-  GroupingCustomUI,
-} from "../customUI/GroupingMappingCustomUI";
+import type { ContextCustomUI, GroupingCustomUI } from "../customUI/GroupingMappingCustomUI";
 import type { GroupsProps } from "./Groups";
 import { GroupMenuActions } from "./GroupMenuActions";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
@@ -20,18 +17,14 @@ export interface GroupListItemProps extends Omit<GroupsProps, "onClickAddGroup">
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
   setShowDeleteModal: (showDeleteModal: GroupMinimal) => void;
-  setActiveOverlapInfoPanelGroup?: (
-    activeOverlapInfoPanelGroup: GroupMinimal
-  ) => void;
+  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: GroupMinimal) => void;
 }
 
-export const GroupListItem = ({
-  onClickGroupTitle,
-  disableActions,
-  group,
-  ...rest
-}: GroupListItemProps) => {
-  const { overlappedElementsMetadata: { groupElementsInfo, overlappedElementsInfo }, showGroupColor } = useGroupHilitedElementsContext();
+export const GroupListItem = ({ onClickGroupTitle, disableActions, group, ...rest }: GroupListItemProps) => {
+  const {
+    overlappedElementsMetadata: { groupElementsInfo, overlappedElementsInfo },
+    showGroupColor,
+  } = useGroupHilitedElementsContext();
 
   const onTitleClick = useCallback(() => {
     if (onClickGroupTitle) {
@@ -40,35 +33,20 @@ export const GroupListItem = ({
   }, [group, onClickGroupTitle]);
 
   return (
-    <ListItem
-      title={group.groupName}
-      key={group.id}
-      className="gmw-group-list-item"
-      data-testid="group-list-item"
-    >
+    <ListItem title={group.groupName} key={group.id} className="gmw-group-list-item" data-testid="group-list-item">
       <ListItem.Content>
         {onClickGroupTitle ? <Anchor onClick={onTitleClick}>{group.groupName}</Anchor> : group.groupName}
-        <ListItem.Description>
-          {group.description}
-        </ListItem.Description>
+        <ListItem.Description>{group.description}</ListItem.Description>
       </ListItem.Content>
       <div className="gmw-group-list-end">
         <div className="gmw-group-menu-actions">
-          <GroupMenuActions
-            group={group}
-            disableActions={disableActions}
-            {...rest}
-          />
+          <GroupMenuActions group={group} disableActions={disableActions} {...rest} />
         </div>
-        {showGroupColor && overlappedElementsInfo.size > 0 &&
+        {showGroupColor && overlappedElementsInfo.size > 0 && (
           <div className="gmw-overlap-progress">
-            <OverlapProgress
-              group={group}
-              overlappedElementsInfo={overlappedElementsInfo}
-              groupElementsInfo={groupElementsInfo}
-            />
+            <OverlapProgress group={group} overlappedElementsInfo={overlappedElementsInfo} groupElementsInfo={groupElementsInfo} />
           </div>
-        }
+        )}
       </div>
     </ListItem>
   );

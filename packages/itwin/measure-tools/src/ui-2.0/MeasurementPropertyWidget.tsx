@@ -17,6 +17,10 @@ import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
 import { useCallback, useState } from "react";
+import type { ActionButtonRendererProps } from "@itwin/components-react";
+import { SvgCopy } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
+import type { PrimitiveValue } from "@itwin/appui-abstract";
 
 export function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
@@ -188,10 +192,34 @@ export const MeasurementPropertyWidget = () => {
     setSize({ width: w, height: h });
   }, []);
 
+  const copyButton = React.useCallback(
+    (props: ActionButtonRendererProps) =>
+      props.isPropertyHovered && (
+        <IconButton
+          styleType="borderless"
+          onClick={() => {
+            const value = props.property.value;
+            if (value !== undefined && value.hasOwnProperty("displayValue"))
+              navigator.clipboard.writeText((value as PrimitiveValue).displayValue ?? "").catch((_) => {});
+          }}
+        >
+          <SvgCopy />
+        </IconButton>
+      ),
+    [],
+  );
+
   return (
     <div className={"measure-tools-property-widget-container"}>
       <ResizableContainerObserver onResize={handleResize}>
-        <VirtualizedPropertyGridWithDataProvider dataProvider={dataProvider} orientation={Orientation.Vertical} height={height} width={width} />
+        <VirtualizedPropertyGridWithDataProvider
+          dataProvider={dataProvider}
+          orientation={Orientation.Vertical}
+          height={height}
+          width={width}
+          isPropertyHoverEnabled
+          actionButtonRenderers={[copyButton]}
+        />
       </ResizableContainerObserver>
     </div>
   );

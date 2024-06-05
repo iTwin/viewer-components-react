@@ -1,14 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  Button,
-  MiddleTextTruncation,
-  Modal,
-  ModalButtonBar,
-  Text,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { Button, MiddleTextTruncation, Modal, ModalButtonBar, Text } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./DeleteModal.scss";
 import { handleError, LoadingSpinner } from "./utils";
@@ -21,13 +15,7 @@ export interface DeleteModalProps {
   refresh: () => Promise<void>;
 }
 
-export const DeleteModal = ({
-  entityName,
-  show,
-  setShow,
-  onDelete,
-  refresh,
-}: DeleteModalProps) => {
+export const DeleteModal = ({ entityName, show, setShow, onDelete, refresh }: DeleteModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const deleteCallback = async () => {
@@ -45,9 +33,9 @@ export const DeleteModal = ({
 
   return (
     <Modal
-      title='Confirm'
+      title="Confirm"
       data-testid="ec3-delete-modal"
-      modalRootId='ec3-widget-react'
+      modalRootId="ec3-widget-react"
       isOpen={show}
       isDismissible={!isLoading}
       onClose={() => {
@@ -55,29 +43,23 @@ export const DeleteModal = ({
       }}
     >
       <div className="ec3w-delete-modal-body-text">
-        <Text variant="leading">
-          Are you sure you want to delete
-        </Text>
+        <Text variant="leading">Are you sure you want to delete</Text>
         <strong>
           <MiddleTextTruncation text={`${entityName}?`} />
         </strong>
       </div>
       <ModalButtonBar>
-        {isLoading &&
+        {isLoading && (
           <div className="ec3w-loading-delete">
             <LoadingSpinner />
-          </div>}
-        <Button
-          styleType='high-visibility'
-          onClick={deleteCallback}
-          disabled={isLoading}
-          data-testid="ec3-delete-modal-button"
-        >
+          </div>
+        )}
+        <Button styleType="high-visibility" onClick={deleteCallback} disabled={isLoading} data-testid="ec3-delete-modal-button">
           Delete
         </Button>
         <Button
           data-testid="ec3-delete-modal-cancel-button"
-          styleType='default'
+          styleType="default"
           onClick={() => {
             setShow(false);
           }}
