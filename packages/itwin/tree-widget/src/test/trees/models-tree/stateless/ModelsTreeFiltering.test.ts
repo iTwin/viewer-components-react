@@ -62,7 +62,7 @@ namespace TreeFilteringTestCaseDefinition {
   }
 }
 
-describe("Models Tree", () => {
+describe("Models tree", () => {
   describe("Hierarchy filtering", () => {
     before(async function () {
       await initializePresentationTesting({
@@ -326,8 +326,8 @@ describe("Models Tree", () => {
           return { rootSubject, model1, model2, model3 };
         },
         (x) => [
-          [x.rootSubject, x.model1],
-          [x.rootSubject, x.model3],
+          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }],
+          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model3.id }],
         ],
         (x) => [x.model1, x.model3],
         (_x) => "matching",
@@ -393,7 +393,7 @@ describe("Models Tree", () => {
         },
         (x) => [
           [x.rootSubject, x.childSubject],
-          [x.rootSubject, x.childSubject, x.model1],
+          [x.rootSubject, x.childSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }],
         ],
         (x) => [x.childSubject, x.model1],
         (_x) => "matching",
@@ -456,8 +456,8 @@ describe("Models Tree", () => {
           return { rootSubject, model1, model2, category1, category2, category3 };
         },
         (x) => [
-          [x.rootSubject, x.model1, x.category1],
-          [x.rootSubject, x.model2, x.category3],
+          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }, x.category1],
+          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model2.id }, x.category3],
         ],
         (x) => [x.category1, x.category3],
         undefined,
@@ -907,10 +907,18 @@ describe("Models Tree", () => {
           if (0 !== classNameCmp) {
             return classNameCmp;
           }
-          return lhsId.id.localeCompare(rhsId.id);
+          const idCmp = lhsId.id.localeCompare(rhsId.id);
+          if (0 !== idCmp) {
+            return idCmp;
+          }
+          continue;
         }
         if (HierarchyNodeIdentifier.isCustomNodeIdentifier(lhsId) && HierarchyNodeIdentifier.isCustomNodeIdentifier(rhsId)) {
-          return lhsId.key.localeCompare(rhsId.key);
+          const keyCmp = lhsId.key.localeCompare(rhsId.key);
+          if (0 !== keyCmp) {
+            return keyCmp;
+          }
+          continue;
         }
         return HierarchyNodeIdentifier.isCustomNodeIdentifier(lhsId) ? -1 : 1;
       }
