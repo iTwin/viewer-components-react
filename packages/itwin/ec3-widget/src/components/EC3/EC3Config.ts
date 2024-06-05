@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../api/APIContext";
@@ -91,19 +91,13 @@ export class EC3Config {
     this.ec3Uri = getDefaultEC3Uri(props.ec3Uri);
     this.iTwinId = props.iTwinId;
 
-    this.reportingBasePath = (props.reportingBasePath)
-      ? REPORTING_BASE_PATH.replace("https://api.bentley.com", props.reportingBasePath)
-      : REPORTING_BASE_PATH;
+    this.reportingBasePath = props.reportingBasePath ? REPORTING_BASE_PATH.replace("https://api.bentley.com", props.reportingBasePath) : REPORTING_BASE_PATH;
 
-    this.carbonCalculationBasePath = (props.carbonCalculationBasePath)
+    this.carbonCalculationBasePath = props.carbonCalculationBasePath
       ? CARBON_CALCULATION_BASE_PATH.replace("https://api.bentley.com", props.carbonCalculationBasePath)
       : CARBON_CALCULATION_BASE_PATH;
 
-    this.getAccessToken = props.getAccessToken ?? (async () =>
-      (IModelApp.authorizationClient)
-        ? IModelApp.authorizationClient.getAccessToken()
-        : ""
-    );
+    this.getAccessToken = props.getAccessToken ?? (async () => (IModelApp.authorizationClient ? IModelApp.authorizationClient.getAccessToken() : ""));
 
     this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
     this.getEC3AccessToken = "getEC3AccessToken" in props ? props.getEC3AccessToken : this.getAuthWindowToken.bind(this);
@@ -120,8 +114,7 @@ export class EC3Config {
         let authWindow: Window | null = null;
 
         const receiveMessage = (event: MessageEvent<EC3Token>) => {
-          if (event.data.source !== "ec3-auth")
-            return;
+          if (event.data.source !== "ec3-auth") return;
           authWindow?.close();
           window.removeEventListener("message", receiveMessage, false);
 
@@ -136,16 +129,13 @@ export class EC3Config {
 
         const url = this.getAuthorizationUrl();
         authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
-
       } else {
         resolve(this.token!.token);
       }
-
     });
   }
 
   private getAuthorizationUrl(): string {
     return `${this.ec3Uri}oauth2/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&response_type=code&scope=${this.scope}`;
   }
-
 }

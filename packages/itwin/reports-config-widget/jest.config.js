@@ -1,27 +1,24 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 module.exports = {
-  preset: 'ts-jest',
+  preset: "ts-jest",
   testTimeout: 10000,
-  testEnvironment: 'jsdom',
+  testEnvironment: "jsdom",
   globals: {
-    'ts-jest': {
-      isolatedModules: true
-    }
+    "ts-jest": {
+      isolatedModules: true,
+    },
   },
-  moduleFileExtensions: ['tsx', 'ts', 'js', 'json'],
+  moduleFileExtensions: ["tsx", "ts", "js", "json"],
   transform: {
-    "\\.(ts)$": ['ts-jest'],
+    "\\.(ts)$": ["ts-jest"],
   },
   moduleNameMapper: {
-    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|svg?.+)$":
-      "<rootDir>/__mocks__/fileMock.js",
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|svg?.+)$": "<rootDir>/__mocks__/fileMock.js",
     "\\.(scss|sass|css)$": "jest-transform-stub",
-    '^axios$': require.resolve('axios'),
+    "^axios$": require.resolve("axios"),
   },
-  roots: [
-    "./src/",
-  ],
-}
+  roots: ["./src/"],
+};

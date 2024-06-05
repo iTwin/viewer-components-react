@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
 import { screen } from "@testing-library/react";
@@ -15,13 +15,7 @@ describe("ReportConfirmModal", () => {
 
   it("Report Confirm modal with the show prop should render successfully and be visible", async () => {
     await renderWithContext({
-      component: <ReportConfirmModal
-        show={true}
-        setShow={() => { }}
-        onConfirm={() => { }}
-        refresh={async () => { }}
-        onCancel={() => { }}
-      />,
+      component: <ReportConfirmModal show={true} setShow={() => {}} onConfirm={() => {}} refresh={async () => {}} onCancel={() => {}} />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
@@ -29,13 +23,7 @@ describe("ReportConfirmModal", () => {
 
   it("Report Confirm modal without the show prop should not be visible", async () => {
     await renderWithContext({
-      component: <ReportConfirmModal
-        show={false}
-        setShow={() => { }}
-        onConfirm={() => { }}
-        refresh={async () => { }}
-        onCancel={() => { }}
-      />,
+      component: <ReportConfirmModal show={false} setShow={() => {}} onConfirm={() => {}} refresh={async () => {}} onCancel={() => {}} />,
     });
     expect(document.querySelector("ec3-report-confirm-modal")).toBeDefined();
     expect(document.querySelector(".iui-dialog-visible")).toBeNull();
@@ -45,13 +33,7 @@ describe("ReportConfirmModal", () => {
     const show = jest.fn();
     const cancel = jest.fn();
     await renderWithContext({
-      component: <ReportConfirmModal
-        show={true}
-        setShow={show}
-        onConfirm={() => { }}
-        refresh={async () => { }}
-        onCancel={cancel}
-      />,
+      component: <ReportConfirmModal show={true} setShow={show} onConfirm={() => {}} refresh={async () => {}} onCancel={cancel} />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
@@ -67,13 +49,7 @@ describe("ReportConfirmModal", () => {
     const show = jest.fn();
     const cancel = jest.fn();
     await renderWithContext({
-      component: <ReportConfirmModal
-        show={true}
-        setShow={show}
-        onConfirm={() => { }}
-        refresh={async () => { }}
-        onCancel={cancel}
-      />,
+      component: <ReportConfirmModal show={true} setShow={show} onConfirm={() => {}} refresh={async () => {}} onCancel={cancel} />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
@@ -91,13 +67,7 @@ describe("ReportConfirmModal", () => {
     const show = jest.fn();
 
     await renderWithContext({
-      component: <ReportConfirmModal
-        show={true}
-        setShow={show}
-        onConfirm={confirm}
-        refresh={refresh}
-        onCancel={() => { }}
-      />,
+      component: <ReportConfirmModal show={true} setShow={show} onConfirm={confirm} refresh={refresh} onCancel={() => {}} />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();

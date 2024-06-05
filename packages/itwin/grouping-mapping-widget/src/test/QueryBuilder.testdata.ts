@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { FieldDescriptorType } from "@itwin/presentation-common";
 import type { QueryBuilderTestData } from "./QueryBuilderTestData";
 
@@ -49,7 +49,8 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property added, return query string with property value and relation chain to it",
-      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString'",
+      expectedResult:
+        "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString'",
       operations: [
         {
           expectedResult: true,
@@ -133,7 +134,8 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when multiple relational properties added, return query string with property values and relation chains to them",
-      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN G.H ON Rel.BC.TargetECInstanceId = G.H.ECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE G.H.someOtherPropName = 'someOtherString' AND A.B.somePropName = 'someString'",
+      expectedResult:
+        "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN G.H ON Rel.BC.TargetECInstanceId = G.H.ECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE G.H.someOtherPropName = 'someOtherString' AND A.B.somePropName = 'someString'",
       operations: [
         {
           expectedResult: true,
@@ -295,7 +297,8 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property and non-relational property from one of relational chain classes added, return query string with property values and relation chain",
-      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.C.SomeOtherPropName = 1",
+      expectedResult:
+        "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.C.SomeOtherPropName = 1",
       operations: [
         {
           expectedResult: true,
@@ -413,7 +416,8 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational and non-relational property from the same class added, return query string with property values and relation chain",
-      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.B.SomeOtherPropName = 1",
+      expectedResult:
+        "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.B.SomeOtherPropName = 1",
       operations: [
         {
           expectedResult: true,
@@ -887,7 +891,8 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property re-added after removing, return query string with property value and relation chain to it",
-      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someOtherString'",
+      expectedResult:
+        "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someOtherString'",
       operations: [
         {
           expectedResult: true,
@@ -1211,7 +1216,8 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property is category, return a category query string",
-      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN BisCore.Category ON BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id WHERE ((BisCore.Category.CodeValue = 'displayValueString') OR (BisCore.Category.UserLabel = 'displayValueString'))",
+      expectedResult:
+        "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN BisCore.Category ON BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id WHERE ((BisCore.Category.CodeValue = 'displayValueString') OR (BisCore.Category.UserLabel = 'displayValueString'))",
       operations: [
         {
           expectedResult: true,
@@ -1257,7 +1263,8 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when category property and relational property added, return query string with property value, relational chain and with category joined",
-      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN BisCore.Category ON BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id WHERE ((BisCore.Category.CodeValue = 'displayValueString') OR (BisCore.Category.UserLabel = 'displayValueString'))",
+      expectedResult:
+        "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN BisCore.Category ON BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id WHERE ((BisCore.Category.CodeValue = 'displayValueString') OR (BisCore.Category.UserLabel = 'displayValueString'))",
       operations: [
         {
           expectedResult: true,

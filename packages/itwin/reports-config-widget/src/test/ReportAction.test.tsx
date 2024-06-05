@@ -1,16 +1,12 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import {
-  render,
-  screen,
-  waitForElementToBeRemoved,
-} from "./test-utils";
+import { render, screen, waitForElementToBeRemoved } from "./test-utils";
 import { ReportAction } from "../widget/components/ReportAction";
 import userEvent from "@testing-library/user-event";
 import { EmptyLocalization } from "@itwin/core-common";
@@ -55,12 +51,16 @@ describe("Reports Action", () => {
 
     const reportsClient = new ReportsClient();
 
-    jest.spyOn(reportsClient, "createReport").mockImplementation(async () =>
-      new Promise((resolve) => setTimeout(() => { resolve(mockReport); }, 100))
+    jest.spyOn(reportsClient, "createReport").mockImplementation(
+      async () =>
+        new Promise((resolve) =>
+          setTimeout(() => {
+            resolve(mockReport);
+          }, 100),
+        ),
     );
 
-    const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { reportsClient });
+    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { reportsClient });
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -86,9 +86,7 @@ describe("Reports Action", () => {
     expect(cancelButton).toBeDisabled();
     expect(nameInput).toBeDisabled();
 
-    await waitForElementToBeRemoved(() =>
-      screen.getByTestId(/loading\-spinner/i)
-    );
+    await waitForElementToBeRemoved(() => screen.getByTestId(/loading\-spinner/i));
 
     expect(mockReturnFn).toHaveBeenCalledTimes(1);
   });
@@ -96,9 +94,7 @@ describe("Reports Action", () => {
   it("No duplicate underscores in the beginning of name", async () => {
     const mockReturnFn = jest.fn();
 
-    const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
-    );
+    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -110,17 +106,13 @@ describe("Reports Action", () => {
 
     await userEvent.type(nameInput, "__testName");
     await user.click(addButton);
-    expect(
-      screen.getByText(/validators\.noduplicateunderscore/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/validators\.noduplicateunderscore/i)).toBeInTheDocument();
   });
 
   it("Only begin with letters or underscores of name", async () => {
     const mockReturnFn = jest.fn();
 
-    const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
-    );
+    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -132,17 +124,13 @@ describe("Reports Action", () => {
 
     await userEvent.type(nameInput, "$testName");
     await user.click(addButton);
-    expect(
-      screen.getByText(/validators\.onlybeginswithletterorunderscore/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/validators\.onlybeginswithletterorunderscore/i)).toBeInTheDocument();
   });
 
   it("Only letters underscores and digits of name", async () => {
     const mockReturnFn = jest.fn();
 
-    const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
-    );
+    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -154,19 +142,13 @@ describe("Reports Action", () => {
 
     await userEvent.type(nameInput, "_# ");
     await user.click(addButton);
-    expect(
-      screen.getByText(
-        /validators\.FollowedByLettersUnderscoresSpacesAndDigits/i
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/validators\.FollowedByLettersUnderscoresSpacesAndDigits/i)).toBeInTheDocument();
   });
 
   it("check for character limits of name", async () => {
     const mockReturnFn = jest.fn();
 
-    const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
-    );
+    const { user } = render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { FieldDescriptorType, PropertiesField } from "@itwin/presentation-common";
 import type { FieldDescriptor, RelationshipPath, StrippedRelatedClassInfo } from "@itwin/presentation-common";
@@ -30,18 +30,14 @@ describe("QueryBuilder", () => {
 
   const testData: QueryBuilderTestData = testCases;
   testData.testCases.forEach((testCase) => {
-    it(testCase.name, async () => executeTest(
-      sut,
-      testCase.expectedResult,
-      testCase.operations,
-    ));
+    it(testCase.name, async () => executeTest(sut, testCase.expectedResult, testCase.operations));
   });
 
   const createFieldDescriptor = (
     pathToClass: RelationshipPath | undefined,
     fieldProperties: PropertiesTestData[],
     type: FieldDescriptorType,
-    fieldName: string | undefined
+    fieldName: string | undefined,
   ): FieldDescriptor => {
     switch (type) {
       case FieldDescriptorType.Properties:
@@ -89,7 +85,7 @@ describe("QueryBuilder", () => {
         op.propertiesField.parent?.pathToPrimaryClass,
         op.propertiesField.properties,
         op.fieldDescriptorType,
-        op.fieldDescriptorName
+        op.fieldDescriptorName,
       );
 
       const prop = createPropertyRecord(op.propertyRecord, op.propertiesField as PropertiesField, fieldDescriptor);

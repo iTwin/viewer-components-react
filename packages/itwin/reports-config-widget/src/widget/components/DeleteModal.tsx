@@ -1,15 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  Button,
-  MiddleTextTruncation,
-  Modal,
-  ModalButtonBar,
-  ModalContent,
-  Text,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { Button, MiddleTextTruncation, Modal, ModalButtonBar, ModalContent, Text } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import "./DeleteModal.scss";
@@ -22,12 +15,7 @@ export interface DeleteModalProps {
   refresh: () => Promise<void>;
 }
 
-export const DeleteModal = ({
-  entityName,
-  onClose,
-  onDelete,
-  refresh,
-}: DeleteModalProps) => {
+export const DeleteModal = ({ entityName, onClose, onDelete, refresh }: DeleteModalProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const deleteCallback = async () => {
@@ -45,20 +33,14 @@ export const DeleteModal = ({
 
   return (
     <Modal
-      title={ReportsConfigWidget.localization.getLocalizedString(
-        "ReportsConfigWidget:Confirm"
-      )}
+      title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
       isOpen={!!entityName}
       isDismissible={!isDeleting}
       onClose={onClose}
     >
       <ModalContent>
         <div className="rcw-delete-modal-body-text">
-          <Text variant='leading'>
-            {ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:AreYouSureYouWantToDelete"
-            )}
-          </Text>
+          <Text variant="leading">{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}</Text>
           <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
         </div>
       </ModalContent>
@@ -68,23 +50,11 @@ export const DeleteModal = ({
             <LoadingSpinner />
           </div>
         )}
-        <Button
-          styleType="high-visibility"
-          onClick={deleteCallback}
-          disabled={isDeleting}
-        >
-          {ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Delete"
-          )}
+        <Button styleType="high-visibility" onClick={deleteCallback} disabled={isDeleting}>
+          {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Delete")}
         </Button>
-        <Button
-          styleType="default"
-          onClick={onClose}
-          disabled={isDeleting}
-        >
-          {ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Cancel"
-          )}
+        <Button styleType="default" onClick={onClose} disabled={isDeleting}>
+          {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
         </Button>
       </ModalButtonBar>
     </Modal>

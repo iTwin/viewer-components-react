@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { ExtractionStatus, IExtractionClient } from "@itwin/insights-client";
 import { ExtractionState } from "@itwin/insights-client";
 import { useQuery } from "@tanstack/react-query";
@@ -31,7 +31,7 @@ export const useFetchExtractionStatus = ({
       let extractionMessageData: ExtractionMessageData[] = [];
 
       const latestExtractionResultId = latestExtractionResult.value?.id;
-      let latestJobStatus: ExtractionStatus|undefined;
+      let latestJobStatus: ExtractionStatus | undefined;
       if (latestExtractionResultId) {
         latestJobStatus = latestExtractionResult.value;
       }
@@ -44,12 +44,14 @@ export const useFetchExtractionStatus = ({
       } else {
         if (latestJobStatus?.state === ExtractionState.PartiallySucceeded || latestJobStatus?.state === ExtractionState.Failed) {
           const logs = await extractionClient.getExtractionLogs(accessToken, latestExtractionResultId);
-          extractionMessageData = logs.logs.filter((log) => log.message !== null).map((log) => ({
-            date: log.dateTime,
-            category: log.category,
-            level: log.level,
-            message: log.message ?? "",
-          }));
+          extractionMessageData = logs.logs
+            .filter((log) => log.message !== null)
+            .map((log) => ({
+              date: log.dateTime,
+              category: log.category,
+              level: log.level,
+              message: log.message ?? "",
+            }));
           extractionStatusIcon = {
             iconStatus: "negative",
             iconMessage: "Extraction contains issues. Click to view extraction logs.",
@@ -62,7 +64,7 @@ export const useFetchExtractionStatus = ({
         }
       }
 
-      return { extractionStatusIcon, extractionMessageData, latestExtractionResult};
+      return { extractionStatusIcon, extractionMessageData, latestExtractionResult };
     },
   });
 };

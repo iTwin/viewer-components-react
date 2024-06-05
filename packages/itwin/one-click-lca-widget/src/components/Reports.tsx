@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useMemo, useState } from "react";
 import { SearchBox } from "@itwin/core-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -49,16 +49,12 @@ const Reports = () => {
         ],
       },
     ],
-    []
+    [],
   );
 
   const onSearchBoxValueChanged = async (value: string) => {
     disableButton(true);
-    const filterReports = reports.filter(
-      (x) =>
-        x.displayName &&
-        x.displayName.toLowerCase().indexOf(value.toLowerCase()) > -1
-    );
+    const filterReports = reports.filter((x) => x.displayName && x.displayName.toLowerCase().indexOf(value.toLowerCase()) > -1);
     setFilteredReports(filterReports);
   };
 
@@ -84,14 +80,11 @@ const Reports = () => {
       }
       setSelectedReport(row.original);
     },
-    [buttonIsDisabled, selectedReport]
+    [buttonIsDisabled, selectedReport],
   );
 
   useEffect(() => {
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
+    if (!IModelApp.authorizationClient) throw new Error("AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet.");
     IModelApp.authorizationClient
       .getAccessToken()
       .then((token: string) => {
@@ -124,10 +117,7 @@ const Reports = () => {
       <WidgetHeader title="Reports" />
       <div className="oclca-reports-container">
         <div className="oclca-searchbox-container">
-          <SearchBox
-            onValueChanged={onSearchBoxValueChanged}
-            placeholder={"Search reports"}
-          />
+          <SearchBox onValueChanged={onSearchBoxValueChanged} placeholder={"Search reports"} />
         </div>
         <div className="oclca-scrollable-table">
           <Table<Reporting>
@@ -145,19 +135,10 @@ const Reports = () => {
           />
         </div>
       </div>
-      <Button
-        onClick={() => openModal(true)}
-        styleType="cta"
-        disabled={buttonIsDisabled}
-        className="oclca-button-center"
-      >
+      <Button onClick={() => openModal(true)} styleType="cta" disabled={buttonIsDisabled} className="oclca-button-center">
         One Click LCA Export
       </Button>
-      <ExportModal
-        isOpen={modalIsOpen}
-        close={() => openModal(false)}
-        reportId={selectedReport?.id}
-      />
+      <ExportModal isOpen={modalIsOpen} close={() => openModal(false)} reportId={selectedReport?.id} />
     </>
   );
 };

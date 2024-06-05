@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import * as React from "react";
@@ -30,13 +30,12 @@ export interface GroupingMappingApiConfig {
 /**
  * @public
  */
-export const GroupingMappingApiConfigContext =
-  createContext<GroupingMappingApiConfig>({
-    getAccessToken: async () => "",
-    iModelId: "",
-    prefix: undefined,
-    iModelConnection: undefined,
-  });
+export const GroupingMappingApiConfigContext = createContext<GroupingMappingApiConfig>({
+  getAccessToken: async () => "",
+  iModelId: "",
+  prefix: undefined,
+  iModelConnection: undefined,
+});
 
 /**
  * Hook to access the GroupingMappingApiConfig from the context.
@@ -45,9 +44,7 @@ export const GroupingMappingApiConfigContext =
 export const useGroupingMappingApiConfig = () => {
   const context = React.useContext(GroupingMappingApiConfigContext);
   if (!context) {
-    throw new Error(
-      "useGroupingMappingApiConfig should be used within a GroupingMappingApiConfigContext provider"
-    );
+    throw new Error("useGroupingMappingApiConfig should be used within a GroupingMappingApiConfigContext provider");
   }
   return context;
 };

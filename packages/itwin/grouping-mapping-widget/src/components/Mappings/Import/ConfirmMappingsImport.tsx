@@ -1,14 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  Button,
-  LabeledInput,
-  MiddleTextTruncation,
-  ProgressLinear,
-  Text,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { Button, LabeledInput, MiddleTextTruncation, ProgressLinear, Text } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
 import type { IMappingTyped } from "../Mappings";
 import "./ConfirmMappingsImport.scss";
@@ -50,10 +44,7 @@ const ConfirmMappingImport = ({
   const [validator, showValidationMessage] = useValidator();
   const [errored, setErrored] = useState<boolean>(false);
 
-  const displayStrings = React.useMemo(
-    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
-    [userDisplayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
 
   useEffect(() => {
     setSelectedMappings((selectedMappings) =>
@@ -64,10 +55,7 @@ const ConfirmMappingImport = ({
     );
   }, [setSelectedMappings]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const newState = [...selectedMappings];
     newState[index] = {
       ...newState[index],
@@ -79,14 +67,11 @@ const ConfirmMappingImport = ({
   const importMutation = useMutation({
     mutationFn: async (selectedMapping: IMappingTyped) => {
       const accessToken = await getAccessToken();
-      await mappingClient.createMapping(
-        accessToken,
-        {
-          iModelId,
-          mappingName: selectedMapping.mappingName,
-          sourceMappingId: selectedMapping.id,
-        }
-      );
+      await mappingClient.createMapping(accessToken, {
+        iModelId,
+        mappingName: selectedMapping.mappingName,
+        sourceMappingId: selectedMapping.id,
+      });
     },
     onMutate: async (selectedMapping: IMappingTyped) => {
       setCurrentlyImporting(selectedMapping.mappingName);
@@ -114,46 +99,45 @@ const ConfirmMappingImport = ({
   return (
     <>
       {importing ? (
-        <div className='gmw-import-progress-container'>
-          <div className='gmw-import-progress-bar'>
-            <div className='gmw-import-progress-bar-description'>
-              {
-                !errored ? importCount !== selectedMappings.length ? (
+        <div className="gmw-import-progress-container">
+          <div className="gmw-import-progress-bar">
+            <div className="gmw-import-progress-bar-description">
+              {!errored ? (
+                importCount !== selectedMappings.length ? (
                   <>
-                    <Text variant='title'>Importing</Text>
+                    <Text variant="title">Importing</Text>
                     <Text>{`We are currently importing the ${displayStrings.mappings.toLocaleLowerCase()}.`}</Text>
                   </>
                 ) : (
                   <>
-                    <Text variant='title'>Done!</Text>
+                    <Text variant="title">Done!</Text>
                     <Text>{`Your imported ${displayStrings.mappings.toLocaleLowerCase()} are ready.`}</Text>
                   </>
-                ) :
-                  <>
-                    <Text variant='title'>Error!</Text>
-                    <Text>{`Sorry, there was an error importing some or all ${displayStrings.mappings}.`}</Text>
-                  </>}
+                )
+              ) : (
+                <>
+                  <Text variant="title">Error!</Text>
+                  <Text>{`Sorry, there was an error importing some or all ${displayStrings.mappings}.`}</Text>
+                </>
+              )}
             </div>
             <ProgressLinear
               value={(importCount / selectedMappings.length) * 100}
               labels={
                 importCount === selectedMappings.length
-                  ? ["Import done!", <SvgStatusSuccessHollow key='0' />]
+                  ? ["Import done!", <SvgStatusSuccessHollow key="0" />]
                   : [
-                    <>
-                      <Text>Copying</Text>
-                      <MiddleTextTruncation text={currentlyImporting} />
-                    </>,
-                    `${importCount}/${selectedMappings.length}`,
-                  ]
+                      <>
+                        <Text>Copying</Text>
+                        <MiddleTextTruncation text={currentlyImporting} />
+                      </>,
+                      `${importCount}/${selectedMappings.length}`,
+                    ]
               }
-              status={
-                !errored ?
-                  importCount === selectedMappings.length ? "positive" : undefined : "negative"
-              }
+              status={!errored ? (importCount === selectedMappings.length ? "positive" : undefined) : "negative"}
             />
           </div>
-          <div className='gmw-import-action-panel'>
+          <div className="gmw-import-action-panel">
             <Button
               disabled={!errored && importCount === selectedMappings.length}
               onClick={() => {
@@ -165,28 +149,24 @@ const ConfirmMappingImport = ({
             >
               Back
             </Button>
-            <Button
-              styleType='high-visibility'
-              disabled={!errored && importCount !== selectedMappings.length}
-              onClick={onFinish}
-            >
+            <Button styleType="high-visibility" disabled={!errored && importCount !== selectedMappings.length} onClick={onFinish}>
               Close
             </Button>
           </div>
         </div>
       ) : (
-        <div className='gmw-rename-confirm-container '>
-          <div className='gmw-mapping-rename-container'>
-            <div className='gmw-mapping-row-header-container'>
-              <div className='gmw-mapping-row'>
-                <Text variant='leading'>{displayStrings.mappings}</Text>
-                <Text variant='leading'>Description</Text>
+        <div className="gmw-rename-confirm-container ">
+          <div className="gmw-mapping-rename-container">
+            <div className="gmw-mapping-row-header-container">
+              <div className="gmw-mapping-row">
+                <Text variant="leading">{displayStrings.mappings}</Text>
+                <Text variant="leading">Description</Text>
               </div>
             </div>
-            <div className='gmw-mapping-row-body'>
+            <div className="gmw-mapping-row-body">
               {selectedMappings.map((mapping, index) => (
-                <div className='gmw-mapping-row-container' key={mapping.id}>
-                  <div className='gmw-mapping-row'>
+                <div className="gmw-mapping-row-container" key={mapping.id}>
+                  <div className="gmw-mapping-row">
                     <LabeledInput
                       value={mapping.mappingName}
                       name={`mapping_${mapping.id}`}
@@ -195,20 +175,8 @@ const ConfirmMappingImport = ({
                         handleChange(event, index);
                         validator.showMessageFor(`mapping_${mapping.id}`);
                       }}
-                      message={validator.message(
-                        `mapping_${mapping.id}`,
-                        mapping.mappingName,
-                        NAME_REQUIREMENTS,
-                      )}
-                      status={
-                        validator.message(
-                          `mapping_${mapping.id}`,
-                          mapping.mappingName,
-                          NAME_REQUIREMENTS,
-                        )
-                          ? "negative"
-                          : undefined
-                      }
+                      message={validator.message(`mapping_${mapping.id}`, mapping.mappingName, NAME_REQUIREMENTS)}
+                      status={validator.message(`mapping_${mapping.id}`, mapping.mappingName, NAME_REQUIREMENTS) ? "negative" : undefined}
                       onBlur={() => {
                         validator.showMessageFor(`mapping_${mapping.id}`);
                       }}
@@ -219,14 +187,14 @@ const ConfirmMappingImport = ({
                     />
                     <div>{mapping.description}</div>
                   </div>
-                  <div className='gmw-border-div' />
+                  <div className="gmw-border-div" />
                 </div>
               ))}
             </div>
           </div>
-          <div className='gmw-import-action-panel'>
+          <div className="gmw-import-action-panel">
             <Button onClick={backFn}>Back</Button>
-            <Button styleType='high-visibility' onClick={async () => onImport()}>
+            <Button styleType="high-visibility" onClick={async () => onImport()}>
               Import
             </Button>
             <Button onClick={onCancel}>Cancel</Button>
