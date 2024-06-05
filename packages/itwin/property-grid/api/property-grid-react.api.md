@@ -15,10 +15,7 @@ import type { IPropertyDataFilterer } from '@itwin/components-react';
 import { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
 import type { PropertyCategory } from '@itwin/components-react';
-import type { PropertyDataFilterResult } from '@itwin/components-react';
-import type { PropertyGridContextMenuArgs } from '@itwin/components-react';
 import type { PropertyRecord } from '@itwin/appui-abstract';
-import { PropertyRecordDataFiltererBase } from '@itwin/components-react';
 import type { PropertyUpdatedArgs } from '@itwin/components-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
@@ -74,9 +71,6 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
     scope?: FavoritePropertiesScope;
 }
 
-// @internal
-export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element | null;
-
 // @public
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
     autoExpandChildCategories?: boolean;
@@ -93,12 +87,6 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
     set(key: string, value: string): Promise<void>;
 }
 
-// @internal
-export interface InstanceSelectionProps {
-    // (undocumented)
-    imodel: IModelConnection;
-}
-
 // @public
 export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps): JSX.Element;
 
@@ -107,34 +95,8 @@ export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "
     ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
 }
 
-// @internal
-export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
-    // (undocumented)
-    get isActive(): boolean;
-    // (undocumented)
-    recordMatchesFilter(node: PropertyRecord): Promise<PropertyDataFilterResult>;
-}
-
-// @internal
-export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
-    // (undocumented)
-    get isActive(): boolean;
-    // (undocumented)
-    recordMatchesFilter(): Promise<PropertyDataFilterResult>;
-}
-
 // @public
 export function NullValueSettingContext({ children }: PropsWithChildren<{}>): JSX.Element;
-
-// @internal (undocumented)
-export interface NullValueSettingContextValue {
-    // (undocumented)
-    setShowNullValues: (value: boolean, options?: {
-        persist?: boolean;
-    }) => Promise<void>;
-    // (undocumented)
-    showNullValues: boolean;
-}
 
 // @public
 export type PerformanceTrackedFeatures = "properties-load" | "elements-list-load";
@@ -159,9 +121,6 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
     onPerformanceMeasured?: (feature: PerformanceTrackedFeatures, elapsedTime: number) => void;
     preferencesStorage?: PreferencesStorage;
 }
-
-// @internal
-export function PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, dataRenderer, onPropertyUpdated, ...props }: PropertyGridContentProps): JSX.Element;
 
 // @public
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"> {
@@ -244,15 +203,6 @@ export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 // @public
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
 
-// @internal
-export function SettingsDropdownMenu({ settingsMenuItems, dataProvider }: SettingsDropdownMenuProps): JSX.Element | null;
-
-// @internal
-export interface SettingsDropdownMenuProps extends SettingsMenuProps {
-    // (undocumented)
-    dataProvider: IPresentationPropertyDataProvider;
-}
-
 // @public
 export interface SettingsMenuItemProps {
     close: () => void;
@@ -272,9 +222,6 @@ export interface ShowHideNullValuesSettingsMenuItemProps extends SettingsMenuIte
     persist?: boolean;
 }
 
-// @internal (undocumented)
-export const SHOWNULL_KEY = "showNullValues";
-
 // @public
 export interface SingleElementDataProviderProps extends DataProviderProps {
     instanceKey: InstanceKey;
@@ -288,49 +235,6 @@ export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dat
 
 // @public
 export function TelemetryContextProvider({ onPerformanceMeasured, onFeatureUsed, children }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
-
-// @internal
-export interface UseContentMenuProps extends ContextMenuProps {
-    // (undocumented)
-    dataProvider: IPresentationPropertyDataProvider;
-    // (undocumented)
-    imodel: IModelConnection;
-}
-
-// @internal
-export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps): {
-    onPropertyContextMenu: (args: PropertyGridContextMenuArgs) => Promise<void>;
-    renderContextMenu: () => JSX.Element | undefined;
-};
-
-// @internal
-export function useDataProvider({ imodel, createDataProvider }: DataProviderProps & {
-    imodel: IModelConnection;
-}): IPresentationPropertyDataProvider | undefined;
-
-// @internal
-export function useInstanceSelection({ imodel }: InstanceSelectionProps): {
-    selectedKeys: InstanceKey[];
-    focusedInstanceKey: InstanceKey | undefined;
-    focusInstance: (key: InstanceKey) => void;
-    ancestorsNavigationProps: {
-        navigateDown: () => void;
-        navigateUp: () => Promise<void>;
-        canNavigateUp: boolean;
-        canNavigateDown: boolean;
-    };
-};
-
-// @internal
-export function useNullValueSetting(): {
-    showNullValues: boolean;
-    setShowNullValues: (value: boolean, options?: {
-        persist?: boolean;
-    }) => Promise<void>;
-};
-
-// @internal (undocumented)
-export function useNullValueSettingContext(): NullValueSettingContextValue;
 
 // @public
 export function usePropertyGridTransientState<T extends Element>(): Ref<T>;

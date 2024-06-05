@@ -7,19 +7,16 @@ import "./PropertyGridContent.scss";
 import classnames from "classnames";
 import { useCallback, useMemo, useState } from "react";
 import {
-  CompositeFilterType,
-  CompositePropertyDataFilterer,
-  DisplayValuePropertyDataFilterer,
-  FilteredType,
-  LabelPropertyDataFilterer,
-  PropertyCategoryLabelFilterer,
-  PropertyValueRendererManager,
+  CompositeFilterType, CompositePropertyDataFilterer, DisplayValuePropertyDataFilterer, FilteredType, LabelPropertyDataFilterer,
+  PropertyCategoryLabelFilterer, PropertyValueRendererManager,
 } from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
 import { Text } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
+import { useLatest } from "../hooks/UseLatest";
 import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer } from "./FilteringPropertyGrid";
 import { Header } from "./Header";
 import { SettingsDropdownMenu } from "./SettingsDropdownMenu";
@@ -32,8 +29,6 @@ import type { PropertyCategory, PropertyUpdatedArgs } from "@itwin/components-re
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
-import { useTelemetryContext } from "../hooks/UseTelemetryContext";
-import { useLatest } from "../hooks/UseLatest";
 
 /**
  * Arguments for the `onPropertyUpdated` callback.

@@ -16,6 +16,7 @@ import type { TreeRendererBaseProps, TreeRendererProps } from "./common/TreeRend
 import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps } from "@itwin/components-react";
 import type { IPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
 import type { VisibilityTreeFilterInfo } from "./common/Types";
+
 /**
  * These constants are taken from `@itwin/core-react`.
  * Defines the size in pixels of the expansion toggle.
