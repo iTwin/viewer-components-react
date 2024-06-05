@@ -45,31 +45,31 @@ export const CustomCalculationAction = ({
         </Icon>
       }
       isExpanded={formula ? true : false}>
-      <div className='gmw-custom-calculation-action-container'>
-        <InputGroup className='gmw-details-form'>
-          <Alert
-            type='informational'
-            clickableText='Click here.'
-            clickableTextProps={{ href: "https://developer.bentley.com/apis/grouping-and-mapping/operations/create-property/#customcalculations", target: "_blank", rel: "noreferrer" }}
-          >
+      <InputGroup
+        className='gmw-custom-calculation-action-container'>
+        <Alert
+          type='informational'
+          clickableText='Click here.'
+          clickableTextProps={{ href: "https://developer.bentley.com/apis/grouping-and-mapping/operations/create-property/#customcalculations", target: "_blank", rel: "noreferrer" }}
+        >
             To learn more about creating custom calculation formulas, view the documentation.
-          </Alert>
-          <LabeledTextarea
-            value={formula}
-            name='formula'
-            label='Formula'
-            disabled={disabled}
-            onChange={(event) => {
-              setFormula(event.target.value);
-            }}
-            message={formulaErrorMessage}
-            status={formulaErrorMessage ? "negative" : undefined}
-            onBlurCapture={() => {
-              forceValidation();
-            }}
-          />
-        </InputGroup>
-      </div>
+        </Alert>
+        <LabeledTextarea
+          className='gmw-details-form'
+          value={formula}
+          name='formula'
+          label='Formula'
+          disabled={disabled}
+          onChange={(event) => {
+            setFormula(event.target.value);
+          }}
+          message={formulaErrorMessage}
+          status={formulaErrorMessage ? "negative" : undefined}
+          onBlurCapture={() => {
+            forceValidation();
+          }}
+        />
+      </InputGroup>
     </ExpandableBlock>
   );
 };

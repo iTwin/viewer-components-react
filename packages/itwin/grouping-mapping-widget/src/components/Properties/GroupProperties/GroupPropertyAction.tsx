@@ -269,7 +269,6 @@ export const GroupPropertyAction = ({
             onChange={(value) => {
               validator.showMessageFor("dataType");
               setDataType(value);
-              // forceValidation();
             }}
             message={validator.message("dataType", propertyName, "required")}
             status={
@@ -318,7 +317,7 @@ export const GroupPropertyAction = ({
             </div>
             <div className="gmw-properties-list">
               {selectedProperties.length === 0 && !isLoading ?
-                <div className="gmw-empty-selection">
+                <div className='gmw-empty-selection'>
                   <Text>No properties selected.</Text>
                   <Text>Press the &quot;Select Properties&quot; button for options.</Text>
                 </div> :

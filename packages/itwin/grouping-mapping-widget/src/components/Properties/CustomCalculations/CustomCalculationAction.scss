@@ -4,12 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 .gmw-custom-calculation-action-container {
+  display: flex;
+  flex-direction: column;
   overflow-x: auto;
   height: 100%;
+  gap: var(--iui-size-s);
 
   .gmw-details-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--iui-size-s);
+    padding-top: var(--iui-size-s);
   }
 }

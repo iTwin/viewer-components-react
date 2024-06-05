@@ -80,7 +80,6 @@ export const GroupPropertyTable = ({
       },
       {
         id: "dropdown",
-        Header: "",
         width: 80,
         Cell: (value: CellProps<Property>) => {
           return (
