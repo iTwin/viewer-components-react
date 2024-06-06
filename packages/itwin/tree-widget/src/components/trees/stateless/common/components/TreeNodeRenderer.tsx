@@ -19,11 +19,11 @@ type CoreTreeNodeRendererProps = ComponentPropsWithoutRef<typeof CoreTreeNodeRen
 type TreeNodeRendererProps = CoreTreeNodeRendererProps & TreeNodeRendererOwnProps;
 
 /** @internal */
-export function TreeNodeRenderer({ checkboxProps, ...props }: TreeNodeRendererProps) {
+export function TreeNodeRenderer({ checkboxProps, nodeProps, ...props }: TreeNodeRendererProps) {
   return (
     <CoreTreeNodeRenderer
       {...props}
-      nodeProps={{ className: cx("tw-tree-node", props.isSelected && "selected", props.className) }}
+      nodeProps={{ ...nodeProps, className: cx("tw-tree-node", props.isSelected && "selected", props.className) }}
       actionButtonsClassName="tw-tree-node-action-buttons"
       checkbox={checkboxProps ? <TreeNodeCheckbox {...checkboxProps} node={props.node} /> : null}
       contentProps={{ className: "tw-tree-node-content" }}
