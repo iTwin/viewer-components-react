@@ -398,8 +398,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
-                  modelId: { selector: "printf('0x%x', this.Model.Id)" },
-                  categoryId: { selector: "printf('0x%x', this.Category.Id)" },
+                  modelId: { selector: "IdToHex(this.Model.Id)" },
+                  categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                 },
                 supportsFiltering: true,
@@ -459,8 +459,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
-                  modelId: { selector: "printf('0x%x', this.Model.Id)" },
-                  categoryId: { selector: "printf('0x%x', this.Category.Id)" },
+                  modelId: { selector: "IdToHex(this.Model.Id)" },
+                  categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                 },
                 supportsFiltering: true,
@@ -649,7 +649,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
 
 function createECInstanceKeySelectClause(props: { alias: string }) {
   const classIdSelector = `[${props.alias}].[ECClassId]`;
-  const instanceHexIdSelector = `printf('0x%x', [${props.alias}].[ECInstanceId])`;
+  const instanceHexIdSelector = `IdToHex([${props.alias}].[ECInstanceId])`;
   return `json_object('className', ec_classname(${classIdSelector}, 's.c'), 'id', ${instanceHexIdSelector})`;
 }
 
