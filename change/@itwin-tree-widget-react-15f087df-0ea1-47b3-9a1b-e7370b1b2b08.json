@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed scrollbar not being shown when content size decreases and added e2e tests for stateless components.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "33428304+jasdom@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
