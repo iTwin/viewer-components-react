@@ -16,19 +16,33 @@ import { KeySet, LabelDefinition, PropertyValueFormat, StandardNodeTypes } from 
 import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
-  buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  buildTestIModel,
+  HierarchyBuilder,
+  HierarchyCacheMode,
+  initialize as initializePresentationTesting,
+  terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { _categoryVisibilityHandler, _viewManager } from "../../../internal/Internal";
 import {
-  insertDrawingCategory, insertDrawingGraphic, insertDrawingModelWithPartition, insertPhysicalElement, insertPhysicalModelWithPartition,
-  insertSpatialCategory, insertSubCategory,
+  insertDrawingCategory,
+  insertDrawingGraphic,
+  insertDrawingModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertSpatialCategory,
+  insertSubCategory,
 } from "../../IModelUtils";
 import { mockPresentationManager, mockViewport, render, stubDOMMatrix, TestUtils, waitFor } from "../../TestUtils";
 import {
-  createElementNode, createInfoNode, createModelNode, createPresentationTreeNodeItem, createSimpleTreeModelNode, createTestContentDescriptor,
-  createTestPropertiesContentField, createTestPropertyInfo,
+  createElementNode,
+  createInfoNode,
+  createModelNode,
+  createPresentationTreeNodeItem,
+  createSimpleTreeModelNode,
+  createTestContentDescriptor,
+  createTestPropertiesContentField,
+  createTestPropertyInfo,
 } from "../Common";
 
 import type { CategoryInfo } from "../../../components/trees/category-tree/CategoriesTreeButtons";
@@ -131,10 +145,10 @@ describe("CategoryTree", () => {
           <CategoryTree
             {...sizeProps}
             categories={categories}
+            viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
-            {...{ [_viewManager]: viewManagerMock.object }}
-            {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+            categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
         const node = await waitFor(() => result.getByText("test-node"));
@@ -152,10 +166,10 @@ describe("CategoryTree", () => {
           <CategoryTree
             {...sizeProps}
             categories={categories}
+            viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
+            categoryVisibilityHandler={visibilityHandler.object}
             activeView={viewportMock.object}
-            {...{ [_viewManager]: viewManagerMock.object }}
-            {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
           />,
         );
         await waitFor(() => result.getByText("test-node"));
@@ -167,11 +181,11 @@ describe("CategoryTree", () => {
           <CategoryTree
             {...sizeProps}
             categories={categories}
+            viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
+            categoryVisibilityHandler={visibilityHandler.object}
             activeView={viewportMock.object}
             contextMenuItems={[() => <div>Test Menu Item</div>]}
-            {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
-            {...{ [_viewManager]: viewManagerMock.object }}
           />,
         );
         const node = await waitFor(() => getByText("test-node"));
@@ -187,10 +201,10 @@ describe("CategoryTree", () => {
           <CategoryTree
             {...sizeProps}
             categories={categories}
+            viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={mockViewport({ viewState: viewStateMock.object }).object}
-            {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
-            {...{ [_viewManager]: viewManagerMock.object }}
+            categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
 
@@ -206,10 +220,10 @@ describe("CategoryTree", () => {
           <CategoryTree
             {...sizeProps}
             categories={categories}
+            viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
-            {...{ [_viewManager]: viewManagerMock.object }}
-            {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+            categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
 
@@ -226,10 +240,10 @@ describe("CategoryTree", () => {
           <CategoryTree
             {...sizeProps}
             categories={categories}
+            viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
-            {...{ [_viewManager]: viewManagerMock.object }}
-            {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+            categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
         const node = await waitFor(() => result.getByTestId("tree-node"));
@@ -244,9 +258,9 @@ describe("CategoryTree", () => {
           <CategoryTree
             {...sizeProps}
             categories={categories}
+            viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
-            {...{ [_viewManager]: viewManagerMock.object }}
           />,
         );
         await waitFor(() => expect(result.queryByTestId("tree-node")).to.not.be.null);
@@ -266,7 +280,7 @@ describe("CategoryTree", () => {
             iModel={imodelMock.object}
             activeView={mockViewport().object}
             onFeatureUsed={onFeatureUsedSpy}
-            {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+            categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
         const node = await waitFor(() => getByTestId("tree-node"));
@@ -287,10 +301,10 @@ describe("CategoryTree", () => {
             <CategoryTree
               {...sizeProps}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
-              {...{ [_viewManager]: viewManagerMock.object }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+              categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
           const node = await waitFor(() => getByTestId("tree-node"));
@@ -307,10 +321,10 @@ describe("CategoryTree", () => {
             <CategoryTree
               {...sizeProps}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
-              {...{ [_viewManager]: viewManagerMock.object }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+              categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
           const node = await waitFor(() => getByTestId("tree-node"));
@@ -440,8 +454,8 @@ describe("CategoryTree", () => {
               iModel={imodelMock.object}
               activeView={mockViewport().object}
               onFeatureUsed={onFeatureUsedSpy}
+              categoryVisibilityHandler={visibilityHandler.object}
               hierarchyLevelConfig={{ isFilteringEnabled: true }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
             />,
           );
           const node = await waitFor(() => getByTestId("tree-node"));
@@ -479,9 +493,9 @@ describe("CategoryTree", () => {
               categories={categories}
               iModel={imodelMock.object}
               activeView={mockViewport().object}
+              categoryVisibilityHandler={visibilityHandler.object}
               onFeatureUsed={onFeatureUsedSpy}
               hierarchyLevelConfig={{ isFilteringEnabled: true }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
             />,
           );
 
@@ -538,9 +552,9 @@ describe("CategoryTree", () => {
               categories={categories}
               iModel={imodelMock.object}
               activeView={mockViewport().object}
+              categoryVisibilityHandler={visibilityHandler.object}
               onFeatureUsed={onFeatureUsedSpy}
               hierarchyLevelConfig={{ isFilteringEnabled: true }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
             />,
           );
 
@@ -590,10 +604,10 @@ describe("CategoryTree", () => {
             <CategoryTree
               {...sizeProps}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
-              {...{ [_viewManager]: viewManagerMock.object }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+              categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
           const node = await waitFor(() => getSubCategoryNode(result.getAllByTestId("tree-node")));
@@ -608,10 +622,10 @@ describe("CategoryTree", () => {
             <CategoryTree
               {...sizeProps}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
-              {...{ [_viewManager]: viewManagerMock.object }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+              categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
           const node = await waitFor(() => getSubCategoryNode(getAllByTestId("tree-node")));
@@ -627,10 +641,10 @@ describe("CategoryTree", () => {
             <CategoryTree
               {...sizeProps}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
-              {...{ [_viewManager]: viewManagerMock.object }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+              categoryVisibilityHandler={visibilityHandler.object}
             />,
           );
           const node = await waitFor(() => getSubCategoryNode(getAllByTestId("tree-node")));
@@ -659,11 +673,11 @@ describe("CategoryTree", () => {
             <CategoryTree
               {...sizeProps}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
-              activeView={mockViewport().object}
+              categoryVisibilityHandler={visibilityHandler.object}
               filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
-              {...{ [_viewManager]: viewManagerMock.object }}
+              activeView={mockViewport().object}
             />,
           );
           await result.findByText("filtered-node");
@@ -682,13 +696,13 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
-              onFilterApplied={spy}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
-              activeView={mockViewport().object}
+              categoryVisibilityHandler={visibilityHandler.object}
               filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }}
-              {...{ [_viewManager]: viewManagerMock.object }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+              onFilterApplied={spy}
+              activeView={mockViewport().object}
             />,
           );
           await result.findByText("filtered-node");
@@ -701,11 +715,11 @@ describe("CategoryTree", () => {
             <CategoryTree
               {...sizeProps}
               categories={categories}
+              viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
-              activeView={mockViewport().object}
+              categoryVisibilityHandler={visibilityHandler.object}
               filterInfo={{ filter: "filtered-node1", activeMatchIndex: 0 }}
-              {...{ [_viewManager]: viewManagerMock.object }}
-              {...{ [_categoryVisibilityHandler]: visibilityHandler.object }}
+              activeView={mockViewport().object}
             />,
           );
 

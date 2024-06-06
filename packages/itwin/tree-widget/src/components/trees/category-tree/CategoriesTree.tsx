@@ -10,7 +10,6 @@ import { SelectionMode } from "@itwin/components-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { PresentationTree } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
-import { _categoryVisibilityHandler, _viewManager } from "../../../internal/Internal";
 import { TreeWidget } from "../../../TreeWidget";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
@@ -45,12 +44,20 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
   allViewports?: boolean;
   /** Active viewport */
   activeView: Viewport;
-  /** Available iModel categories */
+  /**
+   * Available iModel categories
+   */
   categories: CategoryInfo[];
-  /** Custom category visibility handler to use for testing */
-  [_categoryVisibilityHandler]?: CategoryVisibilityHandler;
-  /** Custom view manager to use for testing */
-  [_viewManager]?: ViewManager;
+  /**
+   * Custom category visibility handler to use for testing
+   * @internal
+   */
+  categoryVisibilityHandler?: CategoryVisibilityHandler;
+  /**
+   * Custom view manager to use for testing
+   * @internal
+   */
+  viewManager?: ViewManager;
   /**
    * Props for configuring hierarchy level.
    * @beta
@@ -77,17 +84,8 @@ export interface CategoryTreeProps extends BaseFilterableTreeProps {
  */
 export function CategoryTree(props: CategoryTreeProps) {
   // istanbul ignore next
-  const viewManager = props[_viewManager] ?? IModelApp.viewManager;
-  const {
-    activeView,
-    allViewports,
-    [_categoryVisibilityHandler]: categoryVisibilityHandler,
-    onFilterApplied,
-    density,
-    hierarchyLevelConfig,
-    onPerformanceMeasured,
-    onFeatureUsed,
-  } = props;
+  const viewManager = props.viewManager ?? IModelApp.viewManager;
+  const { activeView, allViewports, categoryVisibilityHandler, onFilterApplied, density, hierarchyLevelConfig, onPerformanceMeasured, onFeatureUsed } = props;
 
   const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, activeView, allViewports, categoryVisibilityHandler);
   const onFilterChange = useCallback(

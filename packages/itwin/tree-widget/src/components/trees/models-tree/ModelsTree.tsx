@@ -8,7 +8,6 @@ import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SelectionMode } from "@itwin/components-react";
 import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
-import { _subjectModelIdsCache } from "../../../internal/Internal";
 import { TreeWidget } from "../../../TreeWidget";
 import { FilterableTreeRenderer } from "../common/TreeRenderer";
 import { ClassGroupingOption } from "../common/Types";
@@ -311,7 +310,7 @@ function useVisibilityHandler(
     const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
       rulesetId,
       viewport: activeView,
-      [_subjectModelIdsCache]: subjectModelIdsCache,
+      subjectModelIdsCache,
     };
 
     const handler = visibilityHandler ? visibilityHandler(visibilityHandlerProps) : new ModelsVisibilityHandler(visibilityHandlerProps);

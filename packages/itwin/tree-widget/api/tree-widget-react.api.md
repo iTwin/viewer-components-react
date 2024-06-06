@@ -112,17 +112,19 @@ export function CategoryTree(props: CategoryTreeProps): JSX.Element | null;
 
 // @public
 export interface CategoryTreeProps extends BaseFilterableTreeProps {
-    [_categoryVisibilityHandler]?: CategoryVisibilityHandler;
-    [_viewManager]?: ViewManager;
     activeView: Viewport;
     allViewports?: boolean;
     categories: CategoryInfo[];
+    // @internal
+    categoryVisibilityHandler?: CategoryVisibilityHandler;
     // @beta
     hierarchyLevelConfig?: HierarchyLevelConfig;
     // @beta
     onFeatureUsed?: (feature: string) => void;
     // @beta
     onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
+    // @internal
+    viewManager?: ViewManager;
 }
 
 // @public
@@ -422,11 +424,11 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
 // @public
 export interface ModelsVisibilityHandlerProps {
     // (undocumented)
-    [_subjectModelIdsCache]?: SubjectModelIdsCache;
-    // (undocumented)
     hierarchyAutoUpdateEnabled?: boolean;
     // (undocumented)
     rulesetId: string;
+    // @internal (undocumented)
+    subjectModelIdsCache?: SubjectModelIdsCache;
     // (undocumented)
     viewport: Viewport;
 }

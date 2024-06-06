@@ -9,7 +9,6 @@ import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { KeySet, NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
-import { _subjectModelIdsCache } from "../../../internal/Internal";
 import { TreeWidget } from "../../../TreeWidget";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { CachingElementIdsContainer } from "./Utils";
@@ -48,7 +47,8 @@ export interface ModelsVisibilityHandlerProps {
   rulesetId: string;
   viewport: Viewport;
   hierarchyAutoUpdateEnabled?: boolean;
-  [_subjectModelIdsCache]?: SubjectModelIdsCache;
+  /** @internal */
+  subjectModelIdsCache?: SubjectModelIdsCache;
 }
 
 /**
@@ -65,7 +65,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
 
   constructor(props: ModelsVisibilityHandlerProps) {
     this._props = props;
-    this._subjectModelIdsCache = props[_subjectModelIdsCache] ?? new SubjectModelIdsCache(this._props.viewport.iModel);
+    this._subjectModelIdsCache = props.subjectModelIdsCache ?? new SubjectModelIdsCache(this._props.viewport.iModel);
     this._elementIdsCache = new ElementIdsCache(this._props.viewport.iModel);
     this._listeners.push(this._props.viewport.onViewedCategoriesPerModelChanged.addListener(this.onViewChanged));
     this._listeners.push(this._props.viewport.onViewedCategoriesChanged.addListener(this.onViewChanged));
