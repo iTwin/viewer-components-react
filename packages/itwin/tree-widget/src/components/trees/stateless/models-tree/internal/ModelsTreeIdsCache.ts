@@ -33,17 +33,23 @@ export class ModelsTreeIdsCache {
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
     const subjectsQuery = `
       SELECT
-        ECInstanceId id,
-        Parent.Id parentId,
-        json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId,
+        s.ECInstanceId id,
+        s.Parent.Id parentId,
+        (
+          SELECT m.ECInstanceId
+          FROM bis.GeometricModel3d m
+          WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
+            AND NOT m.IsPrivate
+            AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
+        ) targetPartitionId,
         CASE
           WHEN (
-            json_extract(JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
-            OR json_extract(JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
+            json_extract(s.JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
+            OR json_extract(s.JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
           ) THEN 1
           ELSE 0
         END hideInHierarchy
-      FROM bis.Subject
+      FROM bis.Subject s
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: subjectsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId, targetPartitionId: row.targetPartitionId, hideInHierarchy: !!row.hideInHierarchy };

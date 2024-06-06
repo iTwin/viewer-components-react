@@ -62,7 +62,7 @@
     "@bentley/icons-generic": "^1.0.34",
     "@itwin/itwinui-icons-react": "^2.8.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/itwinui-react": "^3.5.0",
+    "@itwin/itwinui-react": "^3.11.1",
     "@itwin/presentation-core-interop": "^0.2.0",
     "@itwin/presentation-hierarchies": "^0.1.2",
     "@itwin/presentation-hierarchies-react": "^0.3.0",
