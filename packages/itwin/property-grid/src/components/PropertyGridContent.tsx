@@ -53,9 +53,7 @@ export interface PropertyGridContentBaseProps
   onBackButton?: () => void;
   headerControls?: ReactNode;
   onPropertyUpdated?: (args: PropertyGridPropertyUpdatedArgs, category: PropertyCategory) => Promise<boolean>;
-  /** @internal */
   dataProvider: IPresentationPropertyDataProvider;
-  /** @internal */
   dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
 }
 

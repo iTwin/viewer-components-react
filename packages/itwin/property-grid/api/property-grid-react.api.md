@@ -74,7 +74,6 @@ export interface FavoritePropertiesContextMenuItemProps extends DefaultContextMe
 // @public
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
     autoExpandChildCategories?: boolean;
-    // @internal (undocumented)
     filterer: IPropertyDataFilterer;
 }
 
@@ -126,9 +125,9 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height" | "onPropertyUpdated"> {
     // (undocumented)
     className?: string;
-    // @internal (undocumented)
+    // (undocumented)
     dataProvider: IPresentationPropertyDataProvider;
-    // @internal (undocumented)
+    // (undocumented)
     dataRenderer?: (props: FilteringPropertyGridProps) => ReactNode;
     // (undocumented)
     headerControls?: ReactNode;
