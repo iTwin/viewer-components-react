@@ -27,6 +27,7 @@ import {
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
   CategoriesTreeComponent,
+  ClassGroupingOption,
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
@@ -118,6 +119,11 @@ const configuredUiItems = new Map<string, UiItem>([
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
                     density={props.density}
+                    hierarchyConfig={{
+                      enableElementsClassGrouping: ClassGroupingOption.YesWithCounts,
+                      // elementClassSpecification: { schemaName: "BisCore", className: "GraphicalElement3d" },
+                      // elementClassSpecification: { schemaName: "BisCore", className: "GeometricElement3d" },
+                    }}
                   />
                 ),
               },
@@ -169,6 +175,12 @@ const configuredUiItems = new Map<string, UiItem>([
                     selectionMode={"extended"}
                     onPerformanceMeasured={props.onPerformanceMeasured}
                     onFeatureUsed={props.onFeatureUsed}
+                    hierarchyConfig={{
+                      elementClassGrouping: "enableWithCounts",
+                      elementClassSpecification: "BisCore.GraphicalElement3d",
+                      // elementClassSpecification: "BisCore.GeometricElement3d",
+                      showEmptyModels: false,
+                    }}
                   />
                 ),
               },

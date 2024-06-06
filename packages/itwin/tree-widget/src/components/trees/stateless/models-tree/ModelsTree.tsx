@@ -32,9 +32,11 @@ interface StatelessModelsTreeOwnProps {
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
+type StatelessModelsHierarchyConfiguration = Pick<ConstructorParameters<typeof ModelsTreeDefinition>[0], "hierarchyConfig">;
 
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
-  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> &
+  StatelessModelsHierarchyConfiguration;
 
 /** @internal */
 export const StatelessModelsTreeId = "models-tree-v2";
@@ -49,6 +51,7 @@ export function StatelessModelsTree({
   filter,
   density,
   hierarchyLevelConfig,
+  hierarchyConfig,
   selectionMode,
   onPerformanceMeasured,
   onFeatureUsed,
@@ -59,8 +62,8 @@ export function StatelessModelsTree({
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache() }),
-    [getModelsTreeIdsCache],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig }),
+    [getModelsTreeIdsCache, hierarchyConfig],
   );
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
