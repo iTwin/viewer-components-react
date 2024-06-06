@@ -4,21 +4,21 @@
 *--------------------------------------------------------------------------------------------*/
 
 .tree-widget-tree-with-header {
+  --tree-header-height: var(--iui-size-xl);
+  --tree-header-contracted-width: var(--iui-size-xl);
+
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
 
-  .tree-widget-tree-header {
-    height: var(--iui-size-xl);
+  &.enlarge {
+    --tree-header-height: calc(var(--iui-size-xl) + var(--iui-size-m));
+    --tree-header-contracted-width: calc(var(--iui-size-xl) + var(--iui-size-m));
   }
 
   .tree-widget-tree-content {
-    height: calc(100% - var(--iui-size-xl));
-
-    &.enlarge {
-      height: calc(100% - var(--iui-size-xl) - var(--iui-size-m));
-    }
+    height: calc(100% - var(--tree-header-height));
   }
 }
 
