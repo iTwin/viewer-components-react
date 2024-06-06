@@ -295,7 +295,7 @@ test.describe("tree widget", () => {
         await node.click();
 
         // wait for node to become selected
-        await expect(node).toHaveClass(/selected/);
+        await expect(node).toHaveAttribute("aria-selected", "true");
         await takeScreenshot(page, treeWidget);
       });
 
