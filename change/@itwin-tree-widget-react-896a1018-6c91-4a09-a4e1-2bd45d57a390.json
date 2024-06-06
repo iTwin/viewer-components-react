@@ -1,6 +1,6 @@
 {
   "type": "patch",
-  "comment": "Fixed stateless tree sticky checkbox to cover node label behind when try is horizontally scrolled.",
+  "comment": "Fixed stateless tree sticky checkbox not covering node label behind it when tree is horizontally scrolled.",
   "packageName": "@itwin/tree-widget-react",
   "email": "24278440+saskliutas@users.noreply.github.com",
   "dependentChangeType": "patch"
