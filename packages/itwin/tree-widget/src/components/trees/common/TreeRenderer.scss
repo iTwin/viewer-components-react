@@ -13,8 +13,8 @@
   flex-direction: column;
 
   &.enlarge {
-    --tree-header-height: calc(var(--iui-size-xl) + var(--iui-size-m));
-    --tree-header-contracted-width: calc(var(--iui-size-xl) + var(--iui-size-m));
+    --tree-header-height: calc(var(--iui-size-xl) + var(--iui-size-l));
+    --tree-header-contracted-width: calc(var(--iui-size-xl) + var(--iui-size-l));
   }
 
   .tree-widget-tree-content {
