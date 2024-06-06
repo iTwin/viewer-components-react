@@ -34,19 +34,19 @@
     overflow: visible;
   }
 
-  .tw-tree-node:not(.selected):hover {
-    .tw-tree-node-checkbox-container,
-    .tw-tree-node-checkbox::before,
-    .tw-tree-node-action-buttons {
-      background-color: var(--iui-color-background-hover);
-    }
-  }
-
   .tw-tree-node.selected {
     .tw-tree-node-checkbox-container,
     .tw-tree-node-checkbox::before,
     .tw-tree-node-action-buttons {
       background-color: var(--iui-color-background-accent-muted);
+    }
+  }
+
+  .tw-tree-node:not(.selected):hover {
+    .tw-tree-node-checkbox-container,
+    .tw-tree-node-checkbox::before,
+    .tw-tree-node-action-buttons {
+      background-color: var(--iui-color-background-hover);
     }
   }
 }
