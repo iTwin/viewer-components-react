@@ -15,29 +15,18 @@ import type { UsageTrackedFeatures } from "../../common/UseFeatureReporting";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
 import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
-import type { HierarchyLevelDetails, useTree } from "@itwin/presentation-hierarchies-react";
+import type { HierarchyLevelDetails } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
 
-type UseTreeResult = ReturnType<typeof useTree>;
-
-interface UseHierarchyLevelFilteringOwnProps {
+interface UseHierarchyLevelFilteringProps {
   imodel: IModelConnection;
   defaultHierarchyLevelSizeLimit: number;
   reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
 }
 
-type UseHierarchyLevelFilteringProps = UseHierarchyLevelFilteringOwnProps & Pick<UseTreeResult, "getHierarchyLevelDetails">;
-
 /** @internal */
-export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit, getHierarchyLevelDetails, reportUsage }: UseHierarchyLevelFilteringProps) {
-  const [filteringOptions, setFilteringOptions] = useState<{ nodeId: string | undefined; hierarchyDetails: HierarchyLevelDetails }>();
-  const onFilterClick = useCallback(
-    (nodeId: string | undefined) => {
-      const hierarchyDetails = getHierarchyLevelDetails(nodeId);
-      setFilteringOptions(hierarchyDetails ? { nodeId, hierarchyDetails } : undefined);
-    },
-    [getHierarchyLevelDetails],
-  );
+export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit, reportUsage }: UseHierarchyLevelFilteringProps) {
+  const [filteringOptions, setFilteringOptions] = useState<HierarchyLevelDetails>();
 
   const propertiesSource = useMemo<(() => Promise<PresentationInstanceFilterPropertiesSource>) | undefined>(() => {
     if (!filteringOptions) {
@@ -45,7 +34,7 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
     }
 
     return async () => {
-      const inputKeys = await collectInstanceKeys(filteringOptions.hierarchyDetails.getInstanceKeysIterator());
+      const inputKeys = await collectInstanceKeys(filteringOptions.getInstanceKeysIterator());
       if (inputKeys.length === 0) {
         throw new Error("Hierarchy level is empty - unable to create content descriptor.");
       }
@@ -77,7 +66,7 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
   }, [filteringOptions, imodel]);
 
   const getInitialFilter = useMemo(() => {
-    const currentFilter = filteringOptions?.hierarchyDetails.instanceFilter;
+    const currentFilter = filteringOptions?.instanceFilter;
     if (!currentFilter) {
       return undefined;
     }
@@ -94,7 +83,7 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
           return;
         }
         reportUsage?.({ featureId: info ? "hierarchy-level-filtering" : undefined, reportInteraction: true });
-        filteringOptions.hierarchyDetails.setInstanceFilter(toGenericFilter(info));
+        filteringOptions.setInstanceFilter(toGenericFilter(info));
         setFilteringOptions(undefined);
       }}
       onClose={() => {
@@ -108,18 +97,14 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
         }
 
         return (
-          <MatchingInstancesCount
-            filter={filter}
-            hierarchyLevelDetails={filteringOptions.hierarchyDetails}
-            defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit}
-          />
+          <MatchingInstancesCount filter={filter} hierarchyLevelDetails={filteringOptions} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
         );
       }}
     />
   );
 
   return {
-    onFilterClick,
+    onFilterClick: setFilteringOptions,
     filteringDialog,
   };
 }
