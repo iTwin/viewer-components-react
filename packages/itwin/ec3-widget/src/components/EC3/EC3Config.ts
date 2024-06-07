@@ -41,9 +41,25 @@ export interface EC3ConfigCommonProps {
    * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to CARBON_CALCULATION_BASE_PATH from @itwin/insights-client.
    */
   carbonCalculationBasePath?: string;
+
+  /**
+   * A custom implementation of ReportsClient.
+   */
   reportsClient?: IReportsClient;
+
+  /**
+   * A custom implementation of OdataClient.
+   */
   oDataClient?: IOdataClient;
+
+  /**
+   * A custom implementation of EC3JobsClient.
+   */
   ec3JobsClient?: IEC3JobsClient;
+
+  /**
+   * A custom implementation of EC3ConfigurationClient.
+   */
   ec3ConfigurationsClient?: IEC3ConfigurationsClient;
 }
 
