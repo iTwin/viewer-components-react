@@ -3,12 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable, OperatorFunction } from "rxjs";
-import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
+import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { createLimitingECSqlQueryExecutor, HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { reduceWhile, toVoidPromise } from "../../../common/Rxjs";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
 import { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
@@ -16,14 +15,16 @@ import { ModelsTreeNode } from "./ModelsTreeNode";
 import { createVisibilityStatus } from "./Tooltip";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
+import type { Observable, ObservableInput, OperatorFunction } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
 import type { VisibilityStatus } from "../../../VisibilityTreeEventHandler";
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
 import type { HierarchyVisibilityHandler } from "../../common/UseHierarchyVisibility";
+import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 
 interface GetCategoryStatusProps {
   categoryId: Id64String;
@@ -93,6 +94,7 @@ interface VisibilityHandlerOverrides {
  */
 export interface ModelsTreeVisibilityHandlerProps {
   viewport: Viewport;
+  imodelAccess: ECClassHierarchyInspector;
   overrides?: VisibilityHandlerOverrides;
   idsCache?: ModelsTreeIdsCache;
 }
@@ -372,6 +374,21 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
+    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+      const parentKeys = new Array<InstanceKey>();
+      for (const parentKey of node.parentKeys) {
+        if (!HierarchyNodeKey.isInstances(parentKey)) {
+          continue;
+        }
+        parentKeys.push(...parentKey.instanceKeys);
+      }
+      return this.changeFilteredNodeVisibility({
+        parentKeys,
+        childPaths: node.filtering.filteredChildrenIdentifierPaths,
+        on
+      });
+    }
+
     if (HierarchyNode.isClassGroupingNode(node)) {
       return this.changeElementGroupingNodeState(node, on);
     }
@@ -419,6 +436,55 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       categoryId,
       on,
     });
+  }
+
+  private changeFilteredNodeVisibility({ parentKeys, childPaths, on }: {
+    parentKeys: InstanceKey[],
+    childPaths: HierarchyNodeIdentifiersPath[],
+    on: boolean;
+  }) {
+    return from(childPaths).pipe(
+      mergeMap(async (path) => {
+        if (path.length === 0) {
+          return EMPTY;
+        }
+
+        const lastNodeKey = path[path.length - 1];
+        if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeKey)) {
+          return EMPTY;
+        }
+
+        const { id: lastNodeId, className: lastNodeClassName } = lastNodeKey;
+        if (await this._props.imodelAccess.classDerivesFrom(lastNodeClassName, "BisCore.GeometricModel3d")) {
+          return this.changeModelState({ ids: lastNodeId, on });
+        }
+
+        if (await this._props.imodelAccess.classDerivesFrom(lastNodeClassName, "BisCore.Subject")) {
+          return this.changeSubjectNodeState([lastNodeId], on);
+        }
+
+        const findClassIdInPreviousPath = async (className: string) => {
+          for (let i = parentKeys.length - 1; i >= 0; --i) {
+            const parentKey = parentKeys[i];
+            if (await this._props.imodelAccess.classDerivesFrom(parentKey.className, className)) {
+              return parentKey.id;
+            }
+          }
+          return undefined;
+        };
+
+        const modelId = await findClassIdInPreviousPath("BisCore.GeometricModel3d");
+        assert(!!modelId, () => `Invalid identifier path for a category node: ${JSON.stringify(path, undefined, 2)}`);
+        if (await this._props.imodelAccess.classDerivesFrom(lastNodeClassName, "BisCore.SpatialCategory")) {
+          return this.changeCategoryState({ modelId, categoryId: lastNodeId, on });
+        }
+
+        const categoryId = await findClassIdInPreviousPath("BisCore.SpatialCategory");
+        assert(!!categoryId, () => `Invalid identifier path for an element node ${JSON.stringify(path, undefined, 2)}`);
+        return this.changeElementState({ modelId, categoryId, elementId: lastNodeId, on });
+      }),
+      mergeAll(),
+    );
   }
 
   private changeSubjectNodeState(ids: Id64Array, on: boolean): Observable<void> {
@@ -791,4 +857,11 @@ function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   lhs.forEach((x) => rhs.has(x) && result.add(x));
   return result;
+}
+
+function asObs<T>(x: T | Promise<T>): ObservableInput<T> {
+  if (x instanceof Promise) {
+    return x;
+  }
+  return of(x);
 }

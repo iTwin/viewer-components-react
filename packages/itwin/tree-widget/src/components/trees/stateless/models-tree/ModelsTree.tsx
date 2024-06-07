@@ -20,6 +20,7 @@ import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
+import { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 
 interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
@@ -137,7 +138,7 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
 }
 
 function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: () => ModelsTreeIdsCache) {
-  return () => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter() });
+  return (imodelAccess: ECClassHierarchyInspector) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
 }
 
 function useCachedVisibility(activeView: Viewport) {

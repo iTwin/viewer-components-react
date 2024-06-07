@@ -3,26 +3,38 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
-import { useHierarchyVisibility } from "../UseHierarchyVisibility";
+import { HierarchyVisibilityHandler, useHierarchyVisibility } from "../UseHierarchyVisibility";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
 import { BaseTree } from "./BaseTree";
 import { TreeRenderer } from "./TreeRenderer";
+import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 
 import type { ComponentPropsWithoutRef } from "react";
+import { ECClassHierarchyInspector, createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { createIModelAccess } from "../Utils";
 
 type BaseTreeProps = ComponentPropsWithoutRef<typeof BaseTree>;
 type UseHierarchyVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
-type VisibilityTreeProps = Omit<BaseTreeProps, "treeRenderer"> & UseHierarchyVisibilityProps;
+type VisibilityTreeProps = Omit<BaseTreeProps, "treeRenderer" | "imodelAccess"> &
+  Omit<UseHierarchyVisibilityProps, "visibilityHandlerFactory"> & {
+    visibilityHandlerFactory: (imodelAccess: ECClassHierarchyInspector) => HierarchyVisibilityHandler;
+  };
+type IModelAccess = BaseTreeProps["imodelAccess"];
 
 /** @internal */
 export function VisibilityTree({ visibilityHandlerFactory, ...props }: VisibilityTreeProps) {
-  const { getCheckboxState, onCheckboxClicked } = useHierarchyVisibility({ visibilityHandlerFactory });
-
+  const { imodel, getSchemaContext } = props;
+  const imodelAccess = useMemo(() => createIModelAccess({ imodel, getSchemaContext }), [imodel, getSchemaContext]);
+  const { getCheckboxState, onCheckboxClicked } = useHierarchyVisibility({
+    visibilityHandlerFactory: useCallback(() => visibilityHandlerFactory(imodelAccess), [visibilityHandlerFactory, imodelAccess]),
+  });
   return (
     <BaseTree
       {...props}
+      imodelAccess={imodelAccess}
       treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getCheckboxState={getCheckboxState} onCheckboxClicked={onCheckboxClicked} />}
     />
   );
