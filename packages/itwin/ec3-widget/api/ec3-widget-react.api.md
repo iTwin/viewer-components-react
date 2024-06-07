@@ -8,6 +8,10 @@
 
 import type { AccessToken } from '@itwin/core-bentley';
 import type { EC3ConfigurationLabel } from '@itwin/insights-client';
+import type { IEC3ConfigurationsClient } from '@itwin/insights-client';
+import type { IEC3JobsClient } from '@itwin/insights-client';
+import type { IOdataClient } from '@itwin/insights-client';
+import type { IReportsClient } from '@itwin/insights-client';
 import { default as React_2 } from 'react';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
@@ -32,11 +36,19 @@ export interface Configuration {
 export interface EC3ConfigCommonProps {
     carbonCalculationBasePath?: string;
     clientId: string;
+    // (undocumented)
+    ec3ConfigurationsClient?: IEC3ConfigurationsClient;
+    // (undocumented)
+    ec3JobsClient?: IEC3JobsClient;
     ec3Uri?: string;
     getAccessToken?: GetAccessTokenFn;
     // (undocumented)
     iTwinId: string;
+    // (undocumented)
+    oDataClient?: IOdataClient;
     reportingBasePath?: string;
+    // (undocumented)
+    reportsClient?: IReportsClient;
 }
 
 // @beta
