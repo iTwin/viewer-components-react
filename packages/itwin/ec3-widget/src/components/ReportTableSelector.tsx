@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { Configuration } from "./EC3/Template";
 import "./ReportTableSelector.scss";
 import SimpleReactValidator from "simple-react-validator";
-import { useApiContext } from "./api/APIContext";
+import { useApiContext } from "./context/APIContext";
 
 export interface ReportTableSelectorProps {
   selectedReportTable: string;

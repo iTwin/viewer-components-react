@@ -2,19 +2,16 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import type { AccessToken } from "@itwin/core-bentley";
 import React, { useCallback, useState } from "react";
 import "./ReportsContainer.scss";
 import type { Report } from "@itwin/insights-client";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { ReportsHeader } from "./ReportsHeader";
 import { ReportsRouter } from "./ReportsRouter";
-import { ReportsConfigContext } from "./ReportsConfigContext";
+import type { ReportsConfigContextProps } from "./ReportsConfigContext";
+import { ReportsConfigContext } from "./ReportsConfigContext"
 
-interface ReportsContainerProps {
-  getAccessToken?: () => Promise<AccessToken>;
-  baseUrl: string;
-}
+export type ReportsContainerProps = Omit<ReportsConfigContextProps, "iTwinId">;
 
 export enum RouteStep {
   ReportsList,
@@ -32,7 +29,7 @@ export interface Route {
   reportsRoutingFields: ReportsRouteFields;
 }
 
-const ReportsContainer = ({ getAccessToken, baseUrl }: ReportsContainerProps) => {
+const ReportsContainer = (props: ReportsContainerProps) => {
   const [routingHistory, setRoutingHistory] = useState<Route[]>([{ step: RouteStep.ReportsList, title: "iTwin Reports", reportsRoutingFields: {} }]);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
@@ -47,7 +44,7 @@ const ReportsContainer = ({ getAccessToken, baseUrl }: ReportsContainerProps) =>
   }, [routingHistory]);
 
   return (
-    <ReportsConfigContext getAccessToken={getAccessToken} baseUrl={baseUrl} iTwinId={iTwinId}>
+    <ReportsConfigContext {...props} iTwinId={iTwinId}>
       <div className="rcw-reports-container">
         <ReportsHeader goBack={goBack} currentRoute={currentRoute} />
         <ReportsRouter currentRoute={currentRoute} navigateTo={navigateTo} goBack={goBack} />

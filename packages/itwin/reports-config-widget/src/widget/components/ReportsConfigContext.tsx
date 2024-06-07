@@ -5,6 +5,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 import type { IModelsClientOptions } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
+import type { IExtractionClient, IMappingsClient, IReportsClient } from "@itwin/insights-client";
 import { ExtractionClient, GROUPING_AND_MAPPING_BASE_PATH, MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,9 +27,9 @@ export interface ReportsConfigContextProps {
   baseUrl?: string;
   iTwinId: string;
   bulkExtractor?: BulkExtractor;
-  reportsClient?: ReportsClient;
-  mappingsClient?: MappingsClient;
-  extractionClient?: ExtractionClient;
+  reportsClient?: IReportsClient;
+  mappingsClient?: IMappingsClient;
+  extractionClient?: IExtractionClient;
   iModelsClient?: IModelsClient;
   children?: React.ReactNode;
 }
@@ -48,22 +49,22 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     }),
     [props.baseUrl],
   );
-  const [extractionClient, setExtractionClient] = useState<ExtractionClient>(props.extractionClient ?? new ExtractionClient(reportsBaseUrl()));
+  const [extractionClient, setExtractionClient] = useState<IExtractionClient>(props.extractionClient ?? new ExtractionClient(reportsBaseUrl()));
 
   const [apiConfig, setApiConfig] = useState<ReportsConfigApiProps>({
     getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
     baseUrl: reportsBaseUrl(),
     iTwinId: props.iTwinId,
     reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
-    mappingsClient: props.mappingsClient ?? new MappingsClient(groupingMappingBaseUrl()),
+    mappingsClient: props.mappingsClient ?? new MappingsClient(undefined, groupingMappingBaseUrl()),
     iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
   });
 
   useEffect(() => {
     if (!props.extractionClient) {
-      setExtractionClient(props.extractionClient ?? new ExtractionClient(reportsBaseUrl()));
+      setExtractionClient(props.extractionClient ?? new ExtractionClient(undefined, groupingMappingBaseUrl()));
     }
-  }, [props.extractionClient, reportsBaseUrl]);
+  }, [groupingMappingBaseUrl, props.extractionClient]);
 
   const successfulExtractionToast = (iModelName: string, odataFeedUrl: string) => {
     toaster.positive(<SuccessfulExtractionToast iModelName={iModelName} odataFeedUrl={odataFeedUrl} />);
@@ -88,10 +89,20 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
       baseUrl: props.baseUrl || REPORTS_CONFIG_BASE_URL,
       iTwinId: props.iTwinId,
       reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
-      mappingsClient: props.mappingsClient ?? new MappingsClient(reportsBaseUrl()),
+      mappingsClient: props.mappingsClient ?? new MappingsClient(undefined, groupingMappingBaseUrl()),
       iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
     }));
-  }, [props.getAccessToken, props.baseUrl, props.iTwinId, props.reportsClient, props.mappingsClient, props.iModelsClient, reportsBaseUrl, iModelClientOptions]);
+  }, [
+    props.getAccessToken,
+    props.baseUrl,
+    props.iTwinId,
+    props.reportsClient,
+    props.mappingsClient,
+    props.iModelsClient,
+    reportsBaseUrl,
+    iModelClientOptions,
+    groupingMappingBaseUrl,
+  ]);
 
   return (
     <ReportsConfigApiContext.Provider value={apiConfig}>
