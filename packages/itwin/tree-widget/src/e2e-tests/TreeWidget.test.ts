@@ -540,7 +540,6 @@ test.describe("tree widget", () => {
     test.beforeEach(async ({ page }) => {
       const expandedLayoutToggleButton = page.getByTitle("Toggle expanded layout");
       await expandedLayoutToggleButton.click();
-      await treeWidget.locator(".tree-widget-tree-header.enlarge").waitFor();
     });
 
     testCases("SG-1-SG-0317-EX-OPM");
