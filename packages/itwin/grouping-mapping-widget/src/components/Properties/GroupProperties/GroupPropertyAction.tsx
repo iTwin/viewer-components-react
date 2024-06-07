@@ -15,7 +15,7 @@ import {
   LabeledSelect,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
@@ -81,7 +81,7 @@ export const GroupPropertyAction = ({
   onSaveSuccess,
   onClickCancel,
 }: GroupPropertyActionProps) => {
-  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
+  const actionContainerRef = useRef<HTMLDivElement>(null);
   const propertiesClient = usePropertiesClient();
   const queryClient = useQueryClient();
 
@@ -99,6 +99,7 @@ export const GroupPropertyAction = ({
   const [formula, setFormula] = useState<string | undefined>(groupProperty?.formula ?? undefined);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
 
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, group.id, getAccessToken, propertiesClient);
   const { forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, groupProperties?.properties ?? [], setFormulaErrorMessage, dataType);
 
@@ -224,7 +225,7 @@ export const GroupPropertyAction = ({
 
   return (
     <>
-      <div className='gmw-group-property-action-container'>
+      <div className='gmw-group-property-action-container' ref={actionContainerRef}>
         <Fieldset
           disabled={isLoading}
           className='gmw-property-options'
@@ -335,13 +336,15 @@ export const GroupPropertyAction = ({
         <CalculatedPropertyActionWithVisuals
           group={group}
           calculatedPropertyType={calculatedPropertyType}
-          setCalculatedPropertyType={setCalculatedPropertyType}/>
+          setCalculatedPropertyType={setCalculatedPropertyType}
+          parentRef={actionContainerRef}/>
         <CustomCalculationAction
           formula={formula}
           setFormula={setFormula}
           formulaErrorMessage={formulaErrorMessage}
           forceValidation={forceValidation}
-          disabled={isLoading}/>
+          disabled={isLoading}
+          parentRef={actionContainerRef}/>
       </div>
       <ActionPanel
         onSave={handleSaveClick}

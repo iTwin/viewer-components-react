@@ -13,7 +13,7 @@ import {
   MenuItem,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BboxDimension,
   BboxDimensionsDecorator,
@@ -35,6 +35,7 @@ export interface CalculatedPropertyActionWithVisualsProps {
   calculatedPropertyType?: CalculatedPropertyType;
   isLoading?: boolean;
   setCalculatedPropertyType: (calculatedPropertyType: CalculatedPropertyType | undefined) => void;
+  parentRef?: React.RefObject<HTMLDivElement>;
 }
 
 /**
@@ -46,7 +47,9 @@ export const CalculatedPropertyActionWithVisuals = ({
   calculatedPropertyType,
   isLoading,
   setCalculatedPropertyType,
+  parentRef,
 }: CalculatedPropertyActionWithVisualsProps) => {
+  const ref = useRef<HTMLDivElement>(null);
   const { iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
@@ -115,45 +118,62 @@ export const CalculatedPropertyActionWithVisuals = ({
       </div>
     );
 
-  return (
-    <ExpandableBlock title={"Calculated Property"}
-      endIcon={
-        <Icon fill={calculatedPropertyType ? "informational" : "default"}>
-          <SvgMeasure />
-        </Icon>
+  const scrollToBlock = useCallback(() => {
+    setTimeout(() => {
+      if(ref.current && parentRef?.current){
+        parentRef.current.scrollTo({
+          top: ref.current.offsetTop,
+          behavior: "smooth",
+        });
       }
-      isExpanded={calculatedPropertyType ? true : false}>
-      <div className='gmw-calculated-properties-action-container'>
-        <InputGroup className='gmw-details-form'>
-          <div className='gmw-field-legend-container'>
+    }, 500);
+  }, [parentRef]);
+
+  return (
+    <div ref={ref}>
+      <ExpandableBlock title={"Calculated Property"}
+        endIcon={
+          <Icon fill={calculatedPropertyType ? "informational" : "default"}>
+            <SvgMeasure />
+          </Icon>
+        }
+        isExpanded={calculatedPropertyType ? true : false}
+        onToggle={(isExpanding)=> {
+          if(isExpanding === true)
+            scrollToBlock();
+        }}>
+        <div className='gmw-calculated-properties-action-container'>
+          <InputGroup className='gmw-details-form'>
             <ToggleSwitch
+              className="gmw-field-legend-container"
               label='Visualize Dimensions'
               labelPosition='left'
               disabled={isLoading}
               checked={colorProperty}
               onChange={() => setColorProperty((b) => !b)}
-            ></ToggleSwitch>
-          </div>
-          <SharedCalculatedPropertyForms
-            calculatedPropertyType={calculatedPropertyType}
-            setCalculatedPropertyType={setCalculatedPropertyType}
-            itemRenderer={(option: SelectOption<string | undefined>) => (
-              <MenuItem>
-                <div className='gmw-gr-cp-menu-item'>
+            >
+            </ToggleSwitch>
+            <SharedCalculatedPropertyForms
+              calculatedPropertyType={calculatedPropertyType}
+              setCalculatedPropertyType={setCalculatedPropertyType}
+              itemRenderer={(option: SelectOption<string | undefined>) => (
+                <MenuItem>
+                  <div className='gmw-gr-cp-menu-item'>
+                    <div>{option.label}</div>
+                    {getSpatialData(option.value)}
+                  </div>
+                </MenuItem>
+              )}
+              selectedItemRenderer={(option: SelectOption<string | undefined>) => (
+                <div className='gmw-select-item'>
                   <div>{option.label}</div>
                   {getSpatialData(option.value)}
                 </div>
-              </MenuItem>
-            )}
-            selectedItemRenderer={(option: SelectOption<string | undefined>) => (
-              <div className='gmw-select-item'>
-                <div>{option.label}</div>
-                {getSpatialData(option.value)}
-              </div>
-            )}
-          />
-        </InputGroup>
-      </div>
-    </ExpandableBlock>
+              )}
+            />
+          </InputGroup>
+        </div>
+      </ExpandableBlock>
+    </div>
   );
 };
