@@ -21,14 +21,14 @@ importers:
         specifier: ^3.11.1
         version: 3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-core-interop':
-        specifier: ^0.2.0
-        version: 0.2.0(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-geometry@4.5.1))(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1))(@itwin/ecschema-metadata@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1)))
+        specifier: ^0.2.1
+        version: 0.2.1(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-geometry@4.5.1))(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1))(@itwin/ecschema-metadata@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1)))
       '@itwin/presentation-hierarchies':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: ^0.1.3
+        version: 0.1.3
       '@itwin/presentation-hierarchies-react':
-        specifier: ^0.3.0
-        version: 0.3.0(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
+        specifier: ^0.4.0
+        version: 0.4.0(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-shared':
         specifier: ^0.2.0
         version: 0.2.0
@@ -808,8 +808,8 @@ packages:
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
 
-  '@itwin/presentation-core-interop@0.2.0':
-    resolution: {integrity: sha512-N5llS44zwJ9Bh8ihGfYF5cVZ6Y6VxXfrzVPwTrPC7urqh+bN13zOl4u18FhjHeMJgC3AFtiCpt9Ub/CmIR4KuA==}
+  '@itwin/presentation-core-interop@0.2.1':
+    resolution: {integrity: sha512-5ExYb3L/SooqKC+iowfXWLhSqY7+89+Z6/M0kUlUyWLt9PFuTvoF8mKFDWptJ6mHoz/7S1DSO6pFzelRbysuXg==}
     peerDependencies:
       '@itwin/core-bentley': ^4.1.0
       '@itwin/core-common': ^4.1.0
@@ -827,8 +827,8 @@ packages:
       '@itwin/ecschema-metadata': ^4.5.1
       '@itwin/presentation-common': ^4.5.1
 
-  '@itwin/presentation-hierarchies-react@0.3.0':
-    resolution: {integrity: sha512-+KMIBPoNGXmGPIsGHeDwrDOEL3TrzLP593dX5xF5wFMmsRWqKnq7KHVbpP6gempei48bIAI0Qp8uXkP1TyghaQ==}
+  '@itwin/presentation-hierarchies-react@0.4.0':
+    resolution: {integrity: sha512-6Xmhc3vcAcbiVhP32na7lSlfkHlgXYT+ks0bZvCwFCVpXItcUCVgrckdfzlKf5RY5KLkpf7Tie9F493FhgalBg==}
     peerDependencies:
       '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
@@ -837,8 +837,8 @@ packages:
       '@itwin/itwinui-react':
         optional: true
 
-  '@itwin/presentation-hierarchies@0.1.2':
-    resolution: {integrity: sha512-xagZD0w8176LpYqK32+K4TzWaiZiqXCgUHT5s+pRzrYYN4R32NDE7NjrQNZnXqbfHZW4ZBrAW5WDRI06xvptqQ==}
+  '@itwin/presentation-hierarchies@0.1.3':
+    resolution: {integrity: sha512-ynW2VYCOkL1OlDTOuZawkXqp3ZQVB5QYe3VGfCxmx3hcGXdLJ5M1j5UsdTyZtX8farvOHE+AiGsL7q/zqPa7zA==}
 
   '@itwin/presentation-shared@0.1.1':
     resolution: {integrity: sha512-XivaSbqZ6Zqx1O4VnuTCNXyEYnAHd1Btm21KEWzb9pXf7zZ++rtiehfFvW21kNS/HSI6yzjHh3rAZj92WGDQSA==}
@@ -4467,7 +4467,7 @@ snapshots:
       mocha-junit-reporter: 2.2.1(mocha@10.2.0)
       rimraf: 3.0.2
       tree-kill: 1.2.2
-      typedoc: 0.23.28(typescript@5.0.4)
+      typedoc: 0.23.28(typescript@5.0.2)
       typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@5.0.4))
       typescript: 5.0.4
       wtfnode: 0.9.1
@@ -4804,7 +4804,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@itwin/presentation-core-interop@0.2.0(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-geometry@4.5.1))(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1))(@itwin/ecschema-metadata@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1)))':
+  '@itwin/presentation-core-interop@0.2.1(@itwin/core-bentley@4.5.1)(@itwin/core-common@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-geometry@4.5.1))(@itwin/core-geometry@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1))(@itwin/ecschema-metadata@4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-quantity@4.5.1(@itwin/core-bentley@4.5.1)))':
     dependencies:
       '@itwin/core-bentley': 4.5.1
       '@itwin/core-common': 4.5.1(@itwin/core-bentley@4.5.1)(@itwin/core-geometry@4.5.1)
@@ -4826,11 +4826,11 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@0.3.0(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
+  '@itwin/presentation-hierarchies-react@0.4.0(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
     dependencies:
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      '@itwin/presentation-hierarchies': 0.1.2
+      '@itwin/presentation-hierarchies': 0.1.3
       '@itwin/presentation-shared': 0.2.0
       '@itwin/unified-selection': 0.4.2
       classnames: 2.5.1
@@ -4842,7 +4842,7 @@ snapshots:
     optionalDependencies:
       '@itwin/itwinui-react': 3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
 
-  '@itwin/presentation-hierarchies@0.1.2':
+  '@itwin/presentation-hierarchies@0.1.3':
     dependencies:
       '@itwin/core-bentley': 4.6.0
       '@itwin/core-common': 4.6.0(@itwin/core-bentley@4.6.0)(@itwin/core-geometry@4.6.0)
@@ -8197,15 +8197,15 @@ snapshots:
 
   typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@5.0.4)):
     dependencies:
-      typedoc: 0.23.28(typescript@5.0.4)
+      typedoc: 0.23.28(typescript@5.0.2)
 
-  typedoc@0.23.28(typescript@5.0.4):
+  typedoc@0.23.28(typescript@5.0.2):
     dependencies:
       lunr: 2.3.9
       marked: 4.3.0
       minimatch: 7.4.6
       shiki: 0.14.7
-      typescript: 5.0.4
+      typescript: 5.0.2
 
   typemoq@2.1.0:
     dependencies:
