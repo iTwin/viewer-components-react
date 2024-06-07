@@ -6,7 +6,7 @@
 import "./TreeRenderer.scss";
 import { useCallback } from "react";
 import { Tree } from "@itwin/itwinui-react";
-import { createRenderedTreeNodeData, isPresentationHierarchyNode, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
+import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeNodeRenderer } from "./TreeNodeRenderer";
 
 import type { ComponentPropsWithoutRef } from "react";
@@ -47,19 +47,13 @@ export function TreeRenderer({
       return (
         <TreeNodeRenderer
           {...nodeProps}
-          onNodeClick={(nodeId, isSelected, event) => {
-            // Ignore double clicks
-            onNodeDoubleClick && event.detail !== 2 && onNodeClick?.(nodeId, isSelected, event);
-          }}
-          nodeProps={{
-            onDoubleClick: (event) => {
-              if (nodeProps.isDisabled || "type" in nodeProps.node || !isPresentationHierarchyNode(nodeProps.node)) {
-                return;
-              }
-              onNodeDoubleClick?.(nodeProps.node, !!nodeProps.isSelected);
-              // Select node to not lose highlight
-              !nodeProps.isSelected && onNodeClick?.(nodeProps.node, true, event);
-            },
+          onNodeClick={(node, isSelected, event) => {
+            if (onNodeDoubleClick && event.detail === 2) {
+              onNodeDoubleClick?.(node, !!nodeProps.isSelected);
+              // Click node to not lose selection
+              return onNodeClick?.(node, true, event);
+            }
+            onNodeClick?.(node, isSelected, event);
           }}
           expandNode={expandNode}
           onNodeKeyDown={onNodeKeyDown}
