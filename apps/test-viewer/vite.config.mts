@@ -40,6 +40,9 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       strictPort: true,
     },
+    optimizeDeps: {
+      force: true,
+    },
     resolve: {
       alias: [
         {
@@ -51,7 +54,7 @@ export default defineConfig(({ mode }) => {
     },
     envPrefix: ENV_PREFIX,
     define: {
-      "process.env.IMJS_URL_PREFIX": `"${env.IMJS_URL_PREFIX}"`,
+      "process.env.IMJS_URL_PREFIX": env.IMJS_URL_PREFIX ? `"${env.IMJS_URL_PREFIX}"` : `""`,
     },
   };
 });
