@@ -6,15 +6,15 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IModelApp } from "@itwin/core-frontend";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { ArcGisAccessClient } from "@itwin/map-layers-auth";
 import { Viewer as WebViewer } from "@itwin/web-viewer-react";
+import { unifiedSelectionStorage } from "../SelectionStorage";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { ApiKeys } from "./ApiKeys";
 import { useAuthorizationContext } from "./Authorization";
 import { statusBarActionsProvider, ViewerOptionsProvider } from "./ViewerOptions";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { unifiedSelectionStorage } from "../SelectionStorage";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -26,7 +26,7 @@ async function onIModelAppInit() {
   accessClient.initialize({
     redirectUri: "http://localhost:3000/esri-oauth2-callback",
     clientIds: {
-      arcgisOnlineClientId: process.env.IMJS_AUTH_ARCGIS_CLIENT_ID,
+      arcgisOnlineClientId: import.meta.env.IMJS_AUTH_ARCGIS_CLIENT_ID,
       enterpriseClientIds: [{ serviceBaseUrl: "", clientId: "Bentley_TestApp" }],
     },
   });
@@ -90,13 +90,13 @@ function useIModelInfo() {
       return;
     }
 
-    if (!process.env.IMJS_ITWIN_ID || !process.env.IMJS_IMODEL_ID) {
+    if (!import.meta.env.IMJS_ITWIN_ID || !import.meta.env.IMJS_IMODEL_ID) {
       throw new Error(
         "Please add a valid iTwin ID and iModel ID in the .env file and restart the application or add it to the `iTwinId`/`iModelId` query parameter in the url and refresh the page. See the README for more information.",
       );
     }
 
-    navigate(`/?iTwinId=${process.env.IMJS_ITWIN_ID}&iModelId=${process.env.IMJS_IMODEL_ID}`);
+    navigate(`/?iTwinId=${import.meta.env.IMJS_ITWIN_ID}&iModelId=${import.meta.env.IMJS_IMODEL_ID}`);
   }, [searchParams, navigate]);
 
   return {
