@@ -8,8 +8,13 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { Descriptor, PropertiesField, StandardNodeTypes } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType } from "@itwin/presentation-components";
+import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNodeRenderer";
 
 import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
@@ -33,7 +38,6 @@ import type {
 } from "@itwin/presentation-common";
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
-
 export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: labelValue ?? "Node Label" });
   label.property.renderer = { name: TREE_NODE_LABEL_RENDERER };
@@ -347,4 +351,16 @@ export function createFakeSinonViewport(
   };
 
   return result as Viewport;
+}
+
+export function createIModelAccess(imodel: IModelConnection) {
+  const schemas = new SchemaContext();
+  // eslint-disable-next-line @itwin/no-internal
+  schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
+  const schemaProvider = createECSchemaProvider(schemas);
+  return {
+    ...schemaProvider,
+    ...createCachingECClassHierarchyInspector({ schemaProvider }),
+    ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
+  };
 }
