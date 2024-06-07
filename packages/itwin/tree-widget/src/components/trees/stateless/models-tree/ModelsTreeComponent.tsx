@@ -68,7 +68,7 @@ function ModelsTreeComponentImpl({
   };
 
   return (
-    <div className="tw-tree-with-header">
+    <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
           <TreeHeader onFilterClear={() => setFilter("")} onFilterStart={(newFilter) => setFilter(newFilter)} onSelectedChanged={() => {}} density={density}>
@@ -85,7 +85,7 @@ function ModelsTreeComponentImpl({
                   <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
                 ]}
           </TreeHeader>
-          <div className={classNames("tw-tree-content", density === "enlarged" && "enlarge")}>
+          <div className="tw-tree-content">
             <AutoSizer>
               {({ width, height }) => (
                 <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />

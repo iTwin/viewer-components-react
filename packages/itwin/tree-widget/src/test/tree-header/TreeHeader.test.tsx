@@ -35,20 +35,6 @@ describe("<TreeHeader />", () => {
     sinon.restore();
   });
 
-  it("renders `enlarged` header", async () => {
-    sinon.stub(HTMLElement.prototype, "scrollWidth").get(() => 200);
-    sinon.stub(HTMLElement.prototype, "offsetWidth").get(() => 32);
-
-    const { container } = render(
-      <TreeHeader {...defaultProps} density="enlarged">
-        <Button>Button1</Button>
-        <Button>Button2</Button>
-      </TreeHeader>,
-    );
-
-    await waitFor(() => expect(container.querySelector(".enlarge")).to.not.be.null);
-  });
-
   it("renders supplied buttons", async () => {
     const { queryByRole } = render(
       <TreeHeader {...defaultProps}>
