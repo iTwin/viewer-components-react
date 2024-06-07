@@ -121,6 +121,9 @@ export interface TemplateProps {
 // @beta
 export const Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element;
 
+
+export * from "@itwin/insights-client";
+
 // (No @packageDocumentation comment for this package)
 
 ```
