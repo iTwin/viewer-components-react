@@ -10,9 +10,9 @@ import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
 
 // Set custom global variables
-if (process.env.IMJS_GLOBAL_PROPS) {
+if (import.meta.env.IMJS_GLOBAL_PROPS) {
   try {
-    const json = JSON.parse(process.env.IMJS_GLOBAL_PROPS);
+    const json = JSON.parse(import.meta.env.IMJS_GLOBAL_PROPS);
     Object.entries(json).forEach(([key, value]) => {
       Object.defineProperty(globalThis, key, { value });
     });
@@ -20,18 +20,9 @@ if (process.env.IMJS_GLOBAL_PROPS) {
     console.log(`Could not read 'IMJS_GLOBAL_PROPS'`);
   }
 }
-if (process.env.IMJS_URL_PREFIX) {
-  globalThis.IMJS_URL_PREFIX = process.env.IMJS_URL_PREFIX;
-}
 
-if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID) {
-  throw new Error("Please add a valid OIDC client id to the .env file and restart the application. See the README for more information.");
-}
-if (!process.env.IMJS_AUTH_CLIENT_SCOPES) {
-  throw new Error("Please add valid scopes for your OIDC client to the .env file and restart the application. See the README for more information.");
-}
-if (!process.env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
-  throw new Error("Please add a valid redirect URI to the .env file and restart the application. See the README for more information.");
+if (import.meta.env.IMJS_URL_PREFIX) {
+  globalThis.IMJS_URL_PREFIX = import.meta.env.IMJS_URL_PREFIX;
 }
 
 const root = createRoot(document.getElementById("root")!);
