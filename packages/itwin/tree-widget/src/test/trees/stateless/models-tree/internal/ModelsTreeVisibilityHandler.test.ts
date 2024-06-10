@@ -7,34 +7,40 @@ import { expect } from "chai";
 import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
-import { concat, EMPTY, expand, filter, first, from, mergeMap, shareReplay, takeWhile } from "rxjs";
+import { concat, defer, EMPTY, expand, filter, first, from, map, mergeMap, of, shareReplay, takeWhile } from "rxjs";
 import sinon from "sinon";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
-import {
-  IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SnapshotConnection, SpatialViewState, ViewRect,
-} from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SnapshotConnection, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { SchemaContext, SchemaJsonLocater } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { toVoidPromise } from "../../../../../components/trees/common/Rxjs";
 import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
-import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
+import {
+  CATEGORY_CLASS_NAME,
+  createModelsTreeVisibilityHandler,
+  ELEMENT_CLASS_NAME,
+  MODEL_CLASS_NAME,
+  SUBJECT_CLASS_NAME,
+} from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { createLocalIModel, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory } from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport } from "../../../Common";
 import {
-  createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
+  createCategoryHierarchyNode,
+  createClassGroupingHierarchyNode,
+  createElementHierarchyNode,
+  createFakeIdsCache,
+  createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../../Common";
 
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { Observable } from "rxjs";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -2217,36 +2223,53 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
     });
 
-    describe("filtered nodes", () => {
-      let filteredProvider: HierarchyProvider;
+    describe.only("filtered nodes", () => {
+      let idsCache: ModelsTreeIdsCache;
       let defaultProvider: HierarchyProvider;
       let visibilityHandler: ModelsTreeVisibilityHandler;
+      let paths: {
+        elementPath: HierarchyNodeIdentifiersPath[];
+        categoryPath: HierarchyNodeIdentifiersPath[];
+        modelPath: HierarchyNodeIdentifiersPath[];
+      };
 
-      beforeEach(async () => {
-        const idsCache = new ModelsTreeIdsCache(imodelAccess);
+      before(async () => {
         const modelId = [...modelCategories.keys()][0];
         const categoryId = modelCategories.get(modelId)![0];
         const parentElementId = categoryParentElements.get(categoryId)![0];
         const elementId = [...elementHierarchy.get(parentElementId)!][0];
-        const filterPaths = await ModelsTreeDefinition.createInstanceKeyPaths({
+        idsCache = new ModelsTreeIdsCache(imodelAccess);
+        const props = {
           idsCache,
           imodelAccess,
           label: "",
-          keys: [{ id: elementId, className: "BisCore.GeometricElement3d" }],
-        });
-        filteredProvider = createHierarchyProvider({
-          imodelAccess,
-          hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
-          filtering: {
-            paths: filterPaths,
-          },
-        });
+        };
+        const [elementPath, categoryPath, modelPath] = await Promise.all([
+          ModelsTreeDefinition.createInstanceKeyPaths({
+            ...props,
+            keys: [{ id: elementId, className: ELEMENT_CLASS_NAME }],
+          }),
+          ModelsTreeDefinition.createInstanceKeyPaths({
+            ...props,
+            keys: [{ id: categoryId, className: CATEGORY_CLASS_NAME }],
+          }),
+          ModelsTreeDefinition.createInstanceKeyPaths({
+            ...props,
+            keys: [{ id: modelId, className: "BisCore.PhysicalModel" }],
+          }),
+        ]);
+        paths = {
+          elementPath,
+          categoryPath,
+          modelPath,
+        };
+      });
 
+      beforeEach(async () => {
         defaultProvider = createHierarchyProvider({
           imodelAccess,
           hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
         });
-
         visibilityHandler = createModelsTreeVisibilityHandler({ imodelAccess, viewport, idsCache });
       });
 
@@ -2254,17 +2277,28 @@ describe("HierarchyBasedVisibilityHandler", () => {
         visibilityHandler.dispose();
       });
 
-      function createNodeSerializableKey(node: HierarchyNode) {
-        return JSON.stringify([...node.parentKeys, node.key]);
+      interface FilteredNodeTestProps {
+        on: boolean;
+        filteredProvider: HierarchyProvider;
+        getExpectedVisibility: (filteredNode: HierarchyNode) => Observable<Visibility>;
+        changeVisibility: (filteredNodes: Observable<HierarchyNode>) => Observable<any>;
       }
 
-      function runFilteredNodeTest({ on, changeVisibility }: { on: boolean; changeVisibility: (filteredNodes: Observable<HierarchyNode>) => Observable<any> }) {
+      function runFilteredNodeTest({ on, filteredProvider, changeVisibility, getExpectedVisibility }: FilteredNodeTestProps) {
         const filteredNodes = from(filteredProvider.getNodes({ parentNode: undefined })).pipe(
           expand((node) => filteredProvider.getNodes({ parentNode: node })),
           shareReplay(),
         );
         const filteredNodeSet = new Set<string>();
+        const createNodeSerializableKey = (node: HierarchyNode) => JSON.stringify([...node.parentKeys, node.key]);
         return concat(
+          on
+            ? EMPTY
+            : defer(async () => {
+                const rootSubjectId = iModel.elements.getRootSubject().id;
+                await visibilityHandler.changeVisibility(createSubjectHierarchyNode({ subjectIds: [rootSubjectId] }), true);
+                viewport.renderFrame();
+              }),
           changeVisibility(filteredNodes),
           filteredNodes.pipe(
             mergeMap(async (node) => {
@@ -2277,21 +2311,12 @@ describe("HierarchyBasedVisibilityHandler", () => {
           ),
           from(defaultProvider.getNodes({ parentNode: undefined })).pipe(
             expand((node) => defaultProvider.getNodes({ parentNode: node })),
-            mergeMap(async (node) => {
-              if (!filteredNodeSet.has(createNodeSerializableKey(node))) {
-                return { node, expectedVisibility: on ? "hidden" : "visible" };
+            mergeMap((node) => {
+              if (filteredNodeSet.has(createNodeSerializableKey(node))) {
+                return getExpectedVisibility(node).pipe(map((expectedVisibility) => ({ node, expectedVisibility })));
               }
 
-              // Element visibility should match `on` value, passed to `visibilityHandler.changeVisibility`
-              if (
-                HierarchyNode.isInstancesNode(node) &&
-                (await imodelAccess.classDerivesFrom(node.key.instanceKeys[0].className, "BisCore.GeometricElement3d"))
-              ) {
-                return { node, expectedVisibility: on ? "visible" : "hidden" };
-              }
-
-              // All other filtered nodes should be partial
-              return { node, expectedVisibility: "partial" };
+              return of({ node, expectedVisibility: on ? "hidden" : "visible" });
             }),
             mergeMap(async ({ node, expectedVisibility }) => {
               await expect(visibilityHandler.getVisibilityStatus(node)).to.eventually.include(
@@ -2303,61 +2328,181 @@ describe("HierarchyBasedVisibilityHandler", () => {
         );
       }
 
-      function runRootNodeTest(on: boolean) {
-        return runFilteredNodeTest({
-          on,
-          changeVisibility: (obs) =>
-            obs.pipe(
-              first(),
-              mergeMap(async (node) => {
-                await visibilityHandler.changeVisibility(node, on);
-                viewport.renderFrame();
-              }),
-            ),
-        });
-      }
-
-      it("switches ON only filtered hierarchy when root node is clicked", async () => {
-        await toVoidPromise(runRootNodeTest(true));
-      });
-
-      it("switches OFF only filtered hierarchy when root node is clicked", async () => {
-        const rootSubjectId = iModel.elements.getRootSubject().id;
-        await visibilityHandler.changeVisibility(createSubjectHierarchyNode({ subjectIds: [rootSubjectId] }), true);
-        viewport.renderFrame();
-        await toVoidPromise(runRootNodeTest(false));
-      });
-
-      function runCategoryNodeTest(on: boolean) {
-        return runFilteredNodeTest({
-          on,
-          changeVisibility: (obs) =>
-            obs.pipe(
-              mergeMap(async (node) => {
-                if (
-                  HierarchyNode.isInstancesNode(node) &&
-                  (await imodelAccess.classDerivesFrom(node.key.instanceKeys[0].className, "BisCore.SpatialCategory"))
-                ) {
-                  await visibilityHandler.changeVisibility(node, on);
-                  viewport.renderFrame();
-                  return true;
+      function runFirstFoundClassNameNodeTest({
+        clickedClassName,
+        filterTargetClassName,
+        ...props
+      }: Pick<FilteredNodeTestProps, "on" | "filteredProvider"> & {
+        clickedClassName: string;
+        filterTargetClassName: string;
+      }) {
+        const hierarchyClasses = [SUBJECT_CLASS_NAME, MODEL_CLASS_NAME, CATEGORY_CLASS_NAME, ELEMENT_CLASS_NAME];
+        const getClassIndex = async (className: string) => {
+          // eslint-disable-next-line @typescript-eslint/no-for-in-array
+          for (const idx in hierarchyClasses) {
+            if (await imodelAccess.classDerivesFrom(className, hierarchyClasses[idx])) {
+              return idx;
+            }
+          }
+          expect.fail(`Unexpected class name: ${className}`);
+        };
+        return from(getClassIndex(filterTargetClassName)).pipe(
+          mergeMap((testedClassIndex) => {
+            return runFilteredNodeTest({
+              ...props,
+              getExpectedVisibility: (node) => {
+                // Case for a grouping node
+                if (!HierarchyNode.isInstancesNode(node)) {
+                  if (filterTargetClassName === ELEMENT_CLASS_NAME) {
+                    return of("partial");
+                  }
+                  return of(props.on ? "visible" : "hidden");
                 }
-                return false;
-              }),
-              takeWhile((found) => !found),
-            ),
+
+                const nodeClassName = node.key.instanceKeys[0].className;
+                return from(getClassIndex(nodeClassName)).pipe(
+                  map((classIndex) => {
+                    if (classIndex < testedClassIndex) {
+                      return "partial";
+                    }
+                    return props.on ? "visible" : "hidden";
+                  }),
+                );
+              },
+              changeVisibility: (obs) =>
+                obs.pipe(
+                  mergeMap(async (node) => {
+                    if (HierarchyNode.isInstancesNode(node) && (await imodelAccess.classDerivesFrom(node.key.instanceKeys[0].className, clickedClassName))) {
+                      await visibilityHandler.changeVisibility(node, props.on);
+                      viewport.renderFrame();
+                      return true;
+                    }
+                    return false;
+                  }),
+                  takeWhile((found) => !found),
+                ),
+            });
+          }),
+        );
+      }
+
+      function runRootNodeTest(props: Pick<FilteredNodeTestProps, "on" | "filteredProvider"> & { filterTargetClassName: string }) {
+        return runFirstFoundClassNameNodeTest({
+          ...props,
+          clickedClassName: SUBJECT_CLASS_NAME,
         });
       }
 
-      it("switches ON filtered elements when category node is clicked", async () => {
-        await toVoidPromise(runCategoryNodeTest(true));
+      function runModelNodeTest(props: Pick<FilteredNodeTestProps, "on" | "filteredProvider"> & { filterTargetClassName: string }) {
+        return runFirstFoundClassNameNodeTest({
+          ...props,
+          clickedClassName: "BisCore.PhysicalModel",
+        });
+      }
+
+      function runCategoryNodeTest(props: Pick<FilteredNodeTestProps, "on" | "filteredProvider"> & { filterTargetClassName: string }) {
+        return runFirstFoundClassNameNodeTest({
+          ...props,
+          clickedClassName: CATEGORY_CLASS_NAME,
+        });
+      }
+
+      describe("element path", () => {
+        const filterTargetClassName = ELEMENT_CLASS_NAME;
+        let filteredProvider: HierarchyProvider;
+
+        beforeEach(async () => {
+          filteredProvider = createHierarchyProvider({
+            imodelAccess,
+            hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
+            filtering: {
+              paths: paths.elementPath,
+            },
+          });
+        });
+
+        it("switches ON only filtered hierarchy when root node is clicked", async () => {
+          await toVoidPromise(runRootNodeTest({ on: true, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches OFF only filtered hierarchy when root node is clicked", async () => {
+          await toVoidPromise(runRootNodeTest({ on: false, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches ON only filtered hierarchy when model node is clicked", async () => {
+          await toVoidPromise(runModelNodeTest({ on: true, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches OFF only filtered hierarchy when model node is clicked", async () => {
+          await toVoidPromise(runModelNodeTest({ on: false, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches ON only filtered hierarchy when category node is clicked", async () => {
+          await toVoidPromise(runCategoryNodeTest({ on: true, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches OFF only filtered hierarchy when category node is clicked", async () => {
+          await toVoidPromise(runCategoryNodeTest({ on: false, filteredProvider, filterTargetClassName }));
+        });
       });
 
-      it("switches OFF filtered elements when category node is clicked", async () => {
-        const rootSubjectId = iModel.elements.getRootSubject().id;
-        await visibilityHandler.changeVisibility(createSubjectHierarchyNode({ subjectIds: [rootSubjectId] }), true);
-        await toVoidPromise(runCategoryNodeTest(false));
+      describe("category path", () => {
+        const filterTargetClassName = CATEGORY_CLASS_NAME;
+        let filteredProvider: HierarchyProvider;
+
+        beforeEach(async () => {
+          filteredProvider = createHierarchyProvider({
+            imodelAccess,
+            hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
+            filtering: {
+              paths: paths.categoryPath,
+            },
+          });
+        });
+
+        it("switches ON only filtered hierarchy when root node is clicked", async () => {
+          await toVoidPromise(runRootNodeTest({ on: true, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches OFF only filtered hierarchy when root node is clicked", async () => {
+          await toVoidPromise(runRootNodeTest({ on: false, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches ON only filtered hierarchy when model node is clicked", async () => {
+          await toVoidPromise(runModelNodeTest({ on: true, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches OFF only filtered hierarchy when model node is clicked", async () => {
+          await toVoidPromise(runModelNodeTest({ on: false, filteredProvider, filterTargetClassName }));
+        });
       });
+
+      describe("model path", () => {
+        const filterTargetClassName = MODEL_CLASS_NAME;
+        let filteredProvider: HierarchyProvider;
+
+        beforeEach(async () => {
+          filteredProvider = createHierarchyProvider({
+            imodelAccess,
+            hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
+            filtering: {
+              paths: paths.modelPath,
+            },
+          });
+        });
+
+        it("switches ON only filtered hierarchy when root node is clicked", async () => {
+          await toVoidPromise(runRootNodeTest({ on: true, filteredProvider, filterTargetClassName }));
+        });
+
+        it("switches OFF only filtered hierarchy when root node is clicked", async () => {
+          await toVoidPromise(runRootNodeTest({ on: false, filteredProvider, filterTargetClassName }));
+        });
+      });
+
+      // describe("multiple paths", () => {
+
+      // });
     });
   });
 });

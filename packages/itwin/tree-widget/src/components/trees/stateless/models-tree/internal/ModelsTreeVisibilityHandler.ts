@@ -123,10 +123,10 @@ export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHan
   return new ModelsTreeVisibilityHandlerImpl(props);
 }
 
-const SUBJECT_CLASS_NAME = "BisCore.Subject";
-const MODEL_CLASS_NAME = "BisCore.PhysicalModel";
-const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory";
-const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d";
+export const SUBJECT_CLASS_NAME = "BisCore.Subject";
+export const MODEL_CLASS_NAME = "BisCore.GeometricModel3d";
+export const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory";
+export const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d";
 
 class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
