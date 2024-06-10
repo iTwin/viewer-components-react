@@ -13,7 +13,12 @@ import { createIModelMock } from "../../../Common";
 describe("ModelsTreeIdsCache", () => {
   function createIdsCache(queryHandler: (query: string) => any[]) {
     const iModel = createIModelMock(queryHandler);
-    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"));
+    const hierarchyConfig = {
+      elementClassGrouping: "enable" as const,
+      elementClassSpecification: "BisCore.GeometricElement3d",
+      showEmptyModels: false,
+    };
+    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), hierarchyConfig);
   }
 
   // TODO: Merge with other tests if they will be added

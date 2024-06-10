@@ -32,11 +32,15 @@ interface StatelessModelsTreeOwnProps {
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
-type StatelessModelsHierarchyConfiguration = Pick<ConstructorParameters<typeof ModelsTreeDefinition>[0], "hierarchyConfig">;
+type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+
+interface HierarchyConfiguration {
+  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+}
 
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> &
-  StatelessModelsHierarchyConfiguration;
+  HierarchyConfiguration;
 
 /** @internal */
 export const StatelessModelsTreeId = "models-tree-v2";
@@ -56,14 +60,23 @@ export function StatelessModelsTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView);
+  const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
+    () => ({
+      elementClassGrouping: "enable",
+      elementClassSpecification: "BisCore.GeometricElement3d",
+      showEmptyModels: false,
+      ...hierarchyConfig,
+    }),
+    [hierarchyConfig],
+  );
 
+  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration);
   const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
-    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig }),
-    [getModelsTreeIdsCache, hierarchyConfig],
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
+    [getModelsTreeIdsCache, hierarchyConfiguration],
   );
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
@@ -143,16 +156,16 @@ function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: ()
   return () => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter() });
 }
 
-function useCachedVisibility(activeView: Viewport) {
+function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const currentIModelRef = useRef(activeView.iModel);
 
   const getModelsTreeIdsCache = useCallback(() => {
     if (!cacheRef.current) {
-      cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current));
+      cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), hierarchyConfig);
     }
     return cacheRef.current;
-  }, []);
+  }, [hierarchyConfig]);
 
   const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
 

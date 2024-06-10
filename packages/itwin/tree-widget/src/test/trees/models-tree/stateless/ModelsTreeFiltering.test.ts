@@ -11,16 +11,13 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import {
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
 import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import {
-  buildIModel,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
+  buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory,
   insertSubject,
 } from "../../../IModelUtils";
 import { NodeValidators, validateHierarchy } from "../../HierarchyValidation";
@@ -64,6 +61,12 @@ namespace TreeFilteringTestCaseDefinition {
 
 describe("Models tree", () => {
   describe("Hierarchy filtering", () => {
+    const hierarchyConfig = {
+      elementClassGrouping: "enable" as const,
+      elementClassSpecification: "BisCore.GeometricElement3d",
+      showEmptyModels: false,
+    };
+
     before(async function () {
       await initializePresentationTesting({
         backendProps: {
@@ -820,7 +823,7 @@ describe("Models tree", () => {
         });
 
         beforeEach(() => {
-          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel));
+          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig);
           hierarchyProvider = createModelsTreeProvider(imodel, instanceKeyPaths);
         });
 
@@ -876,7 +879,7 @@ describe("Models tree", () => {
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess: createIModelAccess(imodel),
-          idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
+          idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
           label: formattedECInstanceId,
         })
       ).sort(instanceKeyPathSorter);
@@ -907,7 +910,7 @@ describe("Models tree", () => {
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
             label: "_",
           })
         ).sort(instanceKeyPathSorter),
@@ -917,7 +920,7 @@ describe("Models tree", () => {
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
             label: "%",
           })
         ).sort(instanceKeyPathSorter),
@@ -927,7 +930,7 @@ describe("Models tree", () => {
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel)),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
             label: "\\",
           })
         ).sort(instanceKeyPathSorter),

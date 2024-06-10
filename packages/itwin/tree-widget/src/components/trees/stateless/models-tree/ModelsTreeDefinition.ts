@@ -49,7 +49,7 @@ interface HierarchyConfiguration {
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig?: Partial<HierarchyConfiguration>;
+  hierarchyConfig: HierarchyConfiguration;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
@@ -113,14 +113,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     });
     this._idsCache = props.idsCache;
     this._queryExecutor = props.imodelAccess;
+    this._hierarchyConfig = props.hierarchyConfig;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    this._hierarchyConfig = {
-      elementClassGrouping: "disable",
-      elementClassSpecification: "BisCore.GeometricElement3d",
-      showEmptyModels: false,
-      ...props.hierarchyConfig,
-    };
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
@@ -263,6 +258,15 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                         WHEN (
                           json_extract([partition].JsonProperties, '$.PhysicalPartition.Model.Content') IS NOT NULL
                           OR json_extract([partition].JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NOT NULL
+                          ${
+                            this._hierarchyConfig.showEmptyModels
+                              ? ""
+                              : `AND EXISTS (
+                                  SELECT 1
+                                  FROM ${this._hierarchyConfig.elementClassSpecification} element
+                                  WHERE element.Model.Id = m.ECInstanceId
+                                )`
+                          }
                         ) THEN 1
                         ELSE 0
                       END
@@ -288,15 +292,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               JOIN bis.InformationPartitionElement [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
               WHERE
               m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
-                ${
-                  this._hierarchyConfig.showEmptyModels
-                    ? ""
-                    : `AND EXISTS (
-                        SELECT 1
-                        FROM ${this._hierarchyConfig.elementClassSpecification} element
-                        WHERE element.Model.Id = m.ECInstanceId
-                      )`
-                }
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}

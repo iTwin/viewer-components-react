@@ -13,6 +13,7 @@ import { ModelsTreeDefinition } from "../../../../components/trees/stateless/mod
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+
 export function createIModelAccess(imodel: IModelConnection) {
   const schemas = new SchemaContext();
   // eslint-disable-next-line @itwin/no-internal
@@ -27,10 +28,19 @@ export function createIModelAccess(imodel: IModelConnection) {
 
 export function createModelsTreeProvider(imodel: IModelConnection, filteredNodePaths?: HierarchyNodeIdentifiersPath[]) {
   const imodelAccess = createIModelAccess(imodel);
-  const idsCache = new ModelsTreeIdsCache(imodelAccess);
+  const hierarchyConfig = {
+    elementClassGrouping: "enable" as const,
+    elementClassSpecification: "BisCore.GeometricElement3d",
+    showEmptyModels: false,
+  };
+  const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
   return createHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
+    hierarchyDefinition: new ModelsTreeDefinition({
+      imodelAccess,
+      idsCache,
+      hierarchyConfig,
+    }),
     ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths } } : undefined),
   });
 }

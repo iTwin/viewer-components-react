@@ -6,6 +6,7 @@
 import { assert } from "@itwin/core-bentley";
 import { pushToMap } from "../../common/Utils";
 
+import type { ModelsTreeDefinition } from "../ModelsTreeDefinition";
 import type { Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { LimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 
@@ -21,6 +22,8 @@ interface ModelInfo {
   elementCount: number;
 }
 
+type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+
 /** @internal */
 export class ModelsTreeIdsCache {
   private readonly _categoryElementCounts = new Map<Id64String, number>();
@@ -28,7 +31,10 @@ export class ModelsTreeIdsCache {
   private _parentSubjectIds: Promise<Id64Array> | undefined; // the list should contain a subject id if its node should be shown as having children
   private _modelInfos: Promise<Map<Id64String, ModelInfo>> | undefined;
 
-  constructor(private _queryExecutor: LimitingECSqlQueryExecutor) {}
+  constructor(
+    private _queryExecutor: LimitingECSqlQueryExecutor,
+    private _hierarchyConfig: ModelsTreeHierarchyConfiguration,
+  ) {}
 
   private async *querySubjects(): AsyncIterableIterator<{ id: Id64String; parentId?: Id64String; targetPartitionId?: Id64String; hideInHierarchy: boolean }> {
     const subjectsQuery = `
@@ -40,7 +46,7 @@ export class ModelsTreeIdsCache {
           FROM bis.GeometricModel3d m
           WHERE m.ECInstanceId = HexToId(json_extract(s.JsonProperties, '$.Subject.Model.TargetPartition'))
             AND NOT m.IsPrivate
-            AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
+            AND EXISTS (SELECT 1 FROM ${this._hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)
         ) targetPartitionId,
         CASE
           WHEN (
@@ -61,7 +67,9 @@ export class ModelsTreeIdsCache {
       SELECT p.ECInstanceId id, p.Parent.Id parentId
       FROM bis.InformationPartitionElement p
       INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
-      WHERE NOT m.IsPrivate AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
+      WHERE
+        NOT m.IsPrivate
+        ${this._hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${this._hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: modelsQuery }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
       yield { id: row.id, parentId: row.parentId };
@@ -125,11 +133,11 @@ export class ModelsTreeIdsCache {
       subjectInfos.forEach((subjectInfo, subjectId) => {
         if (subjectInfo.childModels.size > 0) {
           parentSubjectIds.add(subjectId);
-        }
-        let currParentId = subjectInfo.parentSubject;
-        while (currParentId) {
-          parentSubjectIds.add(currParentId);
-          currParentId = subjectInfos.get(currParentId)?.parentSubject;
+          let currParentId = subjectInfo.parentSubject;
+          while (currParentId) {
+            parentSubjectIds.add(currParentId);
+            currParentId = subjectInfos.get(currParentId)?.parentSubject;
+          }
         }
       });
       return [...parentSubjectIds];
@@ -220,7 +228,7 @@ export class ModelsTreeIdsCache {
   private async *queryModelElementCounts() {
     const query = /* sql */ `
       SELECT Model.Id modelId, COUNT(*) elementCount
-      FROM bis.GeometricElement3d
+      FROM ${this._hierarchyConfig.elementClassSpecification}
       GROUP BY Model.Id
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
@@ -231,7 +239,7 @@ export class ModelsTreeIdsCache {
   private async *queryModelCategories() {
     const query = /* sql */ `
       SELECT Model.Id modelId, Category.Id categoryId
-      FROM bis.GeometricElement3d
+      FROM ${this._hierarchyConfig.elementClassSpecification}
       GROUP BY modelId, categoryId
     `;
     for await (const row of this._queryExecutor.createQueryReader({ ecsql: query }, { rowFormat: "ECSqlPropertyNames", limit: "unbounded" })) {
@@ -298,13 +306,13 @@ export class ModelsTreeIdsCache {
           `
             CategoryElements(id) AS (
               SELECT ECInstanceId id
-              FROM bis.GeometricElement3d
+              FROM ${this._hierarchyConfig.elementClassSpecification}
               WHERE Model.Id = ? AND Category.Id = ?
 
               UNION ALL
 
               SELECT c.ECInstanceId id
-              FROM bis.GeometricElement3d c
+              FROM ${this._hierarchyConfig.elementClassSpecification} c
               JOIN CategoryElements p ON c.Parent.Id = p.id
             )
           `,
