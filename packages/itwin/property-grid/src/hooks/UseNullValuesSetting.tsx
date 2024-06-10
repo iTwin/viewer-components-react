@@ -3,11 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { PropsWithChildren } from "react";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-
 import { usePreferencesContext } from "../PropertyGridPreferencesContext";
 import { useTelemetryContext } from "./UseTelemetryContext";
+
+import type { PropsWithChildren } from "react";
 
 /**
  * Provides context for `Show\Hide Empty Values` setting.

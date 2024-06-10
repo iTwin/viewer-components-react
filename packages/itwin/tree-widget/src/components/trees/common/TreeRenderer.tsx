@@ -15,6 +15,7 @@ import type { AbstractTreeNodeLoaderWithProvider, TreeRendererProps as Component
 import type { TreeNodeRendererProps } from "./TreeNodeRenderer";
 import type { TreeContextMenuProps } from "./ContextMenu";
 import type { UsageTrackedFeatures } from "./UseFeatureReporting";
+
 /**
  * Base props for [[TreeRenderer]] component.
  * @public

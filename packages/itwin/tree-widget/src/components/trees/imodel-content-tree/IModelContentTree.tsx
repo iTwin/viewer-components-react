@@ -16,6 +16,7 @@ import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
+
 /**
  * Presentation rules used by IModelContentTree
  * @internal

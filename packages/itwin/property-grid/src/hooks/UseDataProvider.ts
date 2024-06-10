@@ -13,6 +13,7 @@ import type { PropertyDescription, PropertyRecord } from "@itwin/appui-abstract"
 import type { KeySet, PageOptions, SelectionInfo } from "@itwin/presentation-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+
 /**
  * Props for data provider used by `PropertyGrid`
  * @public
