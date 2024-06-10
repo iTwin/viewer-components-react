@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
+This log was last generated on Mon, 10 Jun 2024 17:40:38 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.9.0
+
+Mon, 10 Jun 2024 17:40:38 GMT
+
+### Minor changes
+
+- Do not export top level `@internal` API through barrel. ([#885](https://github.com/iTwin/viewer-components-react/pull/885))
 
 ## 1.8.0
 
