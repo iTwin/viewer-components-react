@@ -9,7 +9,7 @@ import type { CreateTypeFromInterface } from "./utils";
 import { EmptyMessage, generateUrl, handleError, LoadingOverlay, LoadingSpinner } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import type { ExtractionRequestDetails, MappingsClient, Report, ReportMapping, ReportsClient } from "@itwin/insights-client";
+import type { ExtractionRequestDetails, IMappingsClient, IReportsClient, Report, ReportMapping } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { AddMappingsModal } from "./AddMappingsModal";
 import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
@@ -33,8 +33,8 @@ const fetchReportMappings = async (
   setReportMappings: (mappings: ReportMappingAndMapping[]) => void,
   reportId: string,
   setIsLoading: (isLoading: boolean) => void,
-  reportsClient: ReportsClient,
-  mappingsClient: MappingsClient,
+  reportsClient: IReportsClient,
+  mappingsClient: IMappingsClient,
   iModelsClient: IModelsClient,
   getAccessToken: () => Promise<AccessToken>,
 ) => {

@@ -6,7 +6,7 @@ import { ExtractionState } from "@itwin/insights-client";
 import { handleError } from "./utils";
 import { ExtractionStates } from "./ExtractionStatus";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
-import type { ExtractionClient, ExtractionMapping, ExtractionRequestDetails, ReportMapping, ReportsClient } from "@itwin/insights-client";
+import type { ExtractionMapping, ExtractionRequestDetails, IExtractionClient, IReportsClient, ReportMapping } from "@itwin/insights-client";
 import type { AccessToken } from "@itwin/core-bentley";
 
 export type ReportMappingAndMapping = ReportMapping & {
@@ -19,10 +19,9 @@ export type ReportMappingAndMapping = ReportMapping & {
  * @public
  */
 export class BulkExtractor {
-  private _reportsClientApi: ReportsClient;
-  private _extractionClientApi: ExtractionClient;
+  private _reportsClientApi: IReportsClient;
+  private _extractionClientApi: IExtractionClient;
   private _accessToken: () => Promise<string>;
-
   private _reportIModels = new Map<string, string[]>(); // key: reportId, value: iModels
   private _iModelStates = new Map<string, ExtractionState>(); // key: iModelId, value: state
   private _timeFetched = new Date();
@@ -34,8 +33,8 @@ export class BulkExtractor {
   private _iModels: string[] = [];
 
   constructor(
-    reportsClient: ReportsClient,
-    extractionClient: ExtractionClient,
+    reportsClient: IReportsClient,
+    extractionClient: IExtractionClient,
     getAccessToken: () => Promise<AccessToken>,
     successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void,
     failedExtractionToast: (iModelName: string) => void,

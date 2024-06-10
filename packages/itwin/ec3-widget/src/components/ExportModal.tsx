@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Modal, ProgressLinear, ProgressRadial, Text } from "@itwin/itwinui-react";
 import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
-import { useApiContext } from "./api/APIContext";
+import { useApiContext } from "./context/APIContext";
 
 interface JobSuccess {
   status: CarbonUploadState.Succeeded;

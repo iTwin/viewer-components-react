@@ -8,8 +8,8 @@ import { act } from "@testing-library/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import type { GetAccessTokenFn } from "../components/api/APIContext";
-import { ApiContext } from "../components/api/APIContext";
+import type { GetAccessTokenFn } from "../components/context/APIContext";
+import { ApiContext } from "../components/context/APIContext";
 import * as moq from "typemoq";
 import { EC3Config } from "../components/EC3/EC3Config";
 
