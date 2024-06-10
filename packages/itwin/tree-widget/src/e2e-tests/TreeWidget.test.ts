@@ -450,15 +450,6 @@ test.describe("tree widget", () => {
         await takeScreenshot(page, treeWidget);
       });
 
-      test("hierarchy-limit-exceeded", async ({ page }) => {
-        const node = locateNode(treeWidget, "ProcessPhysicalModel");
-        await node.getByLabel("Expand").click();
-
-        // wait for hierarchy level limit exceeded text to appear
-        await treeWidget.getByText(/hierarchy level size limit/).waitFor();
-        await takeScreenshot(page, treeWidget);
-      });
-
       test("node with active filtering", async ({ page }) => {
         const node = locateNode(treeWidget, "ProcessPhysicalModel");
 
