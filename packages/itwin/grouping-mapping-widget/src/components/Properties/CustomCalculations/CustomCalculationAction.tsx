@@ -7,7 +7,7 @@ import {
   InputGroup,
   LabeledTextarea,
 } from "@itwin/itwinui-react";
-import React, {  } from "react";
+import React from "react";
 import "./CustomCalculationAction.scss";
 
 /**
