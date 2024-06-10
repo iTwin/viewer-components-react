@@ -17,6 +17,7 @@ import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import * as RULESET_CATEGORIES_IMPORT from "./Categories.json";
 import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
@@ -32,7 +33,7 @@ const PAGING_SIZE = 20;
  * Presentation rules used by ControlledCategoriesTree
  * @internal
  */
-export const RULESET_CATEGORIES: Ruleset = require("./Categories.json"); // eslint-disable-line @typescript-eslint/no-var-requires
+export const RULESET_CATEGORIES = RULESET_CATEGORIES_IMPORT as Ruleset;
 
 /**
  * Properties for the [[CategoryTree]] component
