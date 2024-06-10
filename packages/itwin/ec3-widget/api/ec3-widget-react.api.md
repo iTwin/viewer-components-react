@@ -36,18 +36,14 @@ export interface Configuration {
 export interface EC3ConfigCommonProps {
     carbonCalculationBasePath?: string;
     clientId: string;
-    // (undocumented)
     ec3ConfigurationsClient?: IEC3ConfigurationsClient;
-    // (undocumented)
     ec3JobsClient?: IEC3JobsClient;
     ec3Uri?: string;
     getAccessToken?: GetAccessTokenFn;
     // (undocumented)
     iTwinId: string;
-    // (undocumented)
     oDataClient?: IOdataClient;
     reportingBasePath?: string;
-    // (undocumented)
     reportsClient?: IReportsClient;
 }
 

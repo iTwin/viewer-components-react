@@ -74,29 +74,22 @@ export const ReportsConfigContext: (props: ReportsConfigContextProps) => JSX.Ele
 
 // @public
 export interface ReportsConfigContextProps {
-    // (undocumented)
     baseUrl?: string;
-    // (undocumented)
     bulkExtractor?: BulkExtractor;
     // (undocumented)
     children?: React_2.ReactNode;
-    // (undocumented)
     extractionClient?: IExtractionClient;
-    // (undocumented)
     getAccessToken?: GetAccessTokenFn;
-    // (undocumented)
     iModelsClient?: IModelsClient;
     // (undocumented)
     iTwinId: string;
-    // (undocumented)
     mappingsClient?: IMappingsClient;
-    // (undocumented)
     reportsClient?: IReportsClient;
 }
 
 // @public
 export class ReportsConfigProvider implements UiItemsProvider {
-    constructor(_props: ReportsContainerProps);
+    constructor(_props?: ReportsContainerProps | undefined);
     // (undocumented)
     readonly id = "ReportsConfigProvider";
     // (undocumented)

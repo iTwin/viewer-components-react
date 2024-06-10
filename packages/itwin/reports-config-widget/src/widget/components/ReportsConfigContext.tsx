@@ -23,13 +23,35 @@ import { generateUrl } from "./utils";
  * @public
  */
 export interface ReportsConfigContextProps {
+  /**
+   * A callback function that returns an access token for authenticating API requests.
+   * If not specified, it defaults to the authorizationClient of the IModelApp.
+   */
   getAccessToken?: GetAccessTokenFn;
+  /**
+   * The base URL for the API requests. Defaults to https://api.bentley.com.
+   */
   baseUrl?: string;
   iTwinId: string;
+  /**
+   * The bulk extractor instance to use for extracting data. Internal use only.
+   */
   bulkExtractor?: BulkExtractor;
+  /**
+   * A custom implementation of ReportsClient. If provided, baseUrl is ignored.
+   */
   reportsClient?: IReportsClient;
+  /**
+   * A custom implementation of MappingsClient. If provided, baseUrl is ignored.
+   */
   mappingsClient?: IMappingsClient;
+  /**
+   * A custom implementation of ExtractionClient. If provided, baseUrl is ignored.
+   */
   extractionClient?: IExtractionClient;
+  /**
+   * A custom implementation of IModelsClient. If provided, baseUrl is ignored.
+   */
   iModelsClient?: IModelsClient;
   children?: React.ReactNode;
 }

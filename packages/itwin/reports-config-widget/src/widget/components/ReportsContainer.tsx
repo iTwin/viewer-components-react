@@ -11,7 +11,7 @@ import { ReportsRouter } from "./ReportsRouter";
 import type { ReportsConfigContextProps } from "./ReportsConfigContext";
 import { ReportsConfigContext } from "./ReportsConfigContext"
 
-export type ReportsContainerProps = Omit<ReportsConfigContextProps, "iTwinId">;
+export type ReportsContainerProps = Omit<ReportsConfigContextProps, "iTwinId" | "children">;
 
 export enum RouteStep {
   ReportsList,

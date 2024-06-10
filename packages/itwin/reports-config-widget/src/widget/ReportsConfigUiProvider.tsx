@@ -22,7 +22,7 @@ export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";
 
-  constructor(private _props: ReportsContainerProps) {}
+  constructor(private _props?: ReportsContainerProps) { }
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];

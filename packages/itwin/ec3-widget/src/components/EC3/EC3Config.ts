@@ -43,22 +43,22 @@ export interface EC3ConfigCommonProps {
   carbonCalculationBasePath?: string;
 
   /**
-   * A custom implementation of ReportsClient.
+   * A custom implementation of ReportsClient. If provided, reportingBasePath is ignored.
    */
   reportsClient?: IReportsClient;
 
   /**
-   * A custom implementation of OdataClient.
+   * A custom implementation of OdataClient. If provided, reportingBasePath is ignored.
    */
   oDataClient?: IOdataClient;
 
   /**
-   * A custom implementation of EC3JobsClient.
+   * A custom implementation of EC3JobsClient. If provided, carbonCalculationBasePath is ignored.
    */
   ec3JobsClient?: IEC3JobsClient;
 
   /**
-   * A custom implementation of EC3ConfigurationClient.
+   * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
    */
   ec3ConfigurationsClient?: IEC3ConfigurationsClient;
 }
