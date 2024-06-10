@@ -38,11 +38,11 @@ import type {
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
 interface HierarchyConfiguration {
-  /** Should element nodes be grouped by class. By default grouping is disabled. */
+  /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";
   /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d` */
   elementClassSpecification: string;
-  /** Should models without elements be shown. */
+  /** Should models without elements be shown. Defaults to `false` */
   showEmptyModels: boolean;
 }
 
