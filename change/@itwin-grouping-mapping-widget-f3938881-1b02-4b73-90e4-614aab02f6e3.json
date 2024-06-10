@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "Ran prettier on ec3, lca, reportconfig and reportmapping widgets",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "hansraj.koravenciah@bentley.com",
-  "dependentChangeType": "none"
-}
