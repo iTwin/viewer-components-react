@@ -9,7 +9,7 @@ import type { IReportsClient, OCLCAJobsClient } from "@itwin/insights-client";
  * Props for the {@link OneClickLCA} component.
  * @public
  */
-export interface OneClickLCAReportProps {
+export interface OneClickLCAProps {
   /**
    * The base path for the Reporting API endpoints. If not specified, it defaults to REPORTING_BASE_PATH from @itwin/insights-client.
    */
@@ -26,7 +26,7 @@ export interface OneClickLCAReportProps {
   reportsClient?: IReportsClient;
 
   /**
-   * A custom implementation of ReportsClient. If provided, carbonCalculationBasePath is ignored.
+   * A custom implementation of OCLCAJobsClient. If provided, carbonCalculationBasePath is ignored.
    */
   oclcaJobsClient?: OCLCAJobsClient;
 }

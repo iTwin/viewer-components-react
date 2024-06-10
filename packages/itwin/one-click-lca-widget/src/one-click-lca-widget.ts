@@ -7,4 +7,4 @@ export * from "./widgets/OneClickLCAWidget";
 
 export * from "@itwin/insights-client";
 
-export { OneClickLCAReportProps } from "./components/OneClickLCAReportProps";
+export { OneClickLCAProps } from "./components/OneClickLCAProps";
