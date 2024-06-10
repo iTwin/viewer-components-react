@@ -5,16 +5,15 @@
 
 import { useCallback, useMemo } from "react";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
-import { HierarchyVisibilityHandler, useHierarchyVisibility } from "../UseHierarchyVisibility";
+import { useHierarchyVisibility } from "../UseHierarchyVisibility";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
+import { createIModelAccess } from "../Utils";
 import { BaseTree } from "./BaseTree";
 import { TreeRenderer } from "./TreeRenderer";
-import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
+import type { HierarchyVisibilityHandler } from "../UseHierarchyVisibility";
 import type { ComponentPropsWithoutRef } from "react";
-import { ECClassHierarchyInspector, createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createIModelAccess } from "../Utils";
 
 type BaseTreeProps = ComponentPropsWithoutRef<typeof BaseTree>;
 type UseHierarchyVisibilityProps = Parameters<typeof useHierarchyVisibility>[0];
@@ -22,7 +21,6 @@ type VisibilityTreeProps = Omit<BaseTreeProps, "treeRenderer" | "imodelAccess"> 
   Omit<UseHierarchyVisibilityProps, "visibilityHandlerFactory"> & {
     visibilityHandlerFactory: (imodelAccess: ECClassHierarchyInspector) => HierarchyVisibilityHandler;
   };
-type IModelAccess = BaseTreeProps["imodelAccess"];
 
 /** @internal */
 export function VisibilityTree({ visibilityHandlerFactory, ...props }: VisibilityTreeProps) {

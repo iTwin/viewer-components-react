@@ -15,7 +15,7 @@ import { ModelsTreeNode } from "./ModelsTreeNode";
 import { createVisibilityStatus } from "./Tooltip";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
-import type { Observable, ObservableInput, OperatorFunction } from "rxjs";
+import type { Observable, OperatorFunction } from "rxjs";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
@@ -39,6 +39,15 @@ interface GetElementStateProps {
   elementId: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
+}
+
+interface GetFilteredNodeVisibilityProps {
+  parentKeys: HierarchyNodeKey[];
+  childPaths: HierarchyNodeIdentifiersPath[];
+}
+
+interface ChangeFilteredNodeVisibilityProps extends GetFilteredNodeVisibilityProps {
+  on: boolean;
 }
 
 interface ChangeElementStateProps extends GetElementStateProps {
@@ -114,6 +123,11 @@ export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHan
   return new ModelsTreeVisibilityHandlerImpl(props);
 }
 
+const SUBJECT_CLASS_NAME = "BisCore.Subject";
+const MODEL_CLASS_NAME = "BisCore.PhysicalModel";
+const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory";
+const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d";
+
 class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
@@ -145,6 +159,13 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   }
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
+    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+      return this.getFilteredNodeVisibility({
+        parentKeys: [...node.parentKeys, node.key],
+        childPaths: node.filtering.filteredChildrenIdentifierPaths,
+      });
+    }
+
     if (HierarchyNode.isClassGroupingNode(node)) {
       return this.getClassGroupingNodeDisplayStatus(node);
     }
@@ -184,6 +205,63 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       modelId,
       categoryId,
     });
+  }
+
+  private getFilteredNodeVisibility({ parentKeys, childPaths }: GetFilteredNodeVisibilityProps) {
+    return from(childPaths).pipe(
+      mergeMap(async (path) => {
+        const imodelAccess = this._props.imodelAccess;
+        const elementIds = new Array<Id64String>();
+        for (let i = path.length - 1; i >= 0; --i) {
+          const id = path[i];
+          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
+            continue;
+          }
+
+          if (!(await imodelAccess.classDerivesFrom(id.className, ELEMENT_CLASS_NAME))) {
+            break;
+          }
+
+          elementIds.push(id.id);
+        }
+
+        if (elementIds.length) {
+          return from(elementIds).pipe(
+            mergeMap((elementId) => {
+              return forkJoin({
+                modelId: this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME),
+                categoryId: this.findClassIdInFilterPath(path, parentKeys, CATEGORY_CLASS_NAME),
+              }).pipe(
+                mergeMap((state) => {
+                  return this.getElementDisplayStatus({ ...state, elementId });
+                }),
+              );
+            }),
+            map((x) => x.state),
+            getVisibilityFromTreeNodeChildren,
+            map((x) => {
+              assert(x !== "empty");
+              return createVisibilityStatus(x);
+            }),
+          );
+        }
+
+        const lastId = path[path.length - 1];
+        assert(HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastId));
+
+        if (await this._props.imodelAccess.classDerivesFrom(lastId.className, MODEL_CLASS_NAME)) {
+          return this.getModelVisibilityStatus(lastId.id);
+        }
+
+        if (await this._props.imodelAccess.classDerivesFrom(lastId.className, SUBJECT_CLASS_NAME)) {
+          return this.getSubjectNodeVisibilityStatus([lastId.id]);
+        }
+
+        const modelId = await this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME);
+        return this.getCategoryDisplayStatus({ modelId, categoryId: lastId.id });
+      }),
+      mergeAll(),
+    );
   }
 
   private getSubjectNodeVisibilityStatus(subjectIds: Id64Array): Observable<VisibilityStatus> {
@@ -375,17 +453,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
-      const parentKeys = new Array<InstanceKey>();
-      for (const parentKey of node.parentKeys) {
-        if (!HierarchyNodeKey.isInstances(parentKey)) {
-          continue;
-        }
-        parentKeys.push(...parentKey.instanceKeys);
-      }
       return this.changeFilteredNodeVisibility({
-        parentKeys,
+        parentKeys: [...node.parentKeys, node.key],
         childPaths: node.filtering.filteredChildrenIdentifierPaths,
-        on
+        on,
       });
     }
 
@@ -438,50 +509,52 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
   }
 
-  private changeFilteredNodeVisibility({ parentKeys, childPaths, on }: {
-    parentKeys: InstanceKey[],
-    childPaths: HierarchyNodeIdentifiersPath[],
-    on: boolean;
-  }) {
+  private changeFilteredNodeVisibility({ parentKeys, childPaths, on }: ChangeFilteredNodeVisibilityProps) {
     return from(childPaths).pipe(
       mergeMap(async (path) => {
-        if (path.length === 0) {
-          return EMPTY;
-        }
-
-        const lastNodeKey = path[path.length - 1];
-        if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastNodeKey)) {
-          return EMPTY;
-        }
-
-        const { id: lastNodeId, className: lastNodeClassName } = lastNodeKey;
-        if (await this._props.imodelAccess.classDerivesFrom(lastNodeClassName, "BisCore.GeometricModel3d")) {
-          return this.changeModelState({ ids: lastNodeId, on });
-        }
-
-        if (await this._props.imodelAccess.classDerivesFrom(lastNodeClassName, "BisCore.Subject")) {
-          return this.changeSubjectNodeState([lastNodeId], on);
-        }
-
-        const findClassIdInPreviousPath = async (className: string) => {
-          for (let i = parentKeys.length - 1; i >= 0; --i) {
-            const parentKey = parentKeys[i];
-            if (await this._props.imodelAccess.classDerivesFrom(parentKey.className, className)) {
-              return parentKey.id;
-            }
+        const imodelAccess = this._props.imodelAccess;
+        const elementIds = new Array<Id64String>();
+        for (let i = path.length - 1; i >= 0; --i) {
+          const id = path[i];
+          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
+            continue;
           }
-          return undefined;
-        };
 
-        const modelId = await findClassIdInPreviousPath("BisCore.GeometricModel3d");
-        assert(!!modelId, () => `Invalid identifier path for a category node: ${JSON.stringify(path, undefined, 2)}`);
-        if (await this._props.imodelAccess.classDerivesFrom(lastNodeClassName, "BisCore.SpatialCategory")) {
-          return this.changeCategoryState({ modelId, categoryId: lastNodeId, on });
+          if (!(await imodelAccess.classDerivesFrom(id.className, ELEMENT_CLASS_NAME))) {
+            break;
+          }
+
+          elementIds.push(id.id);
         }
 
-        const categoryId = await findClassIdInPreviousPath("BisCore.SpatialCategory");
-        assert(!!categoryId, () => `Invalid identifier path for an element node ${JSON.stringify(path, undefined, 2)}`);
-        return this.changeElementState({ modelId, categoryId, elementId: lastNodeId, on });
+        if (elementIds.length) {
+          return from(elementIds).pipe(
+            mergeMap((elementId) => {
+              return forkJoin({
+                modelId: this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME),
+                categoryId: this.findClassIdInFilterPath(path, parentKeys, CATEGORY_CLASS_NAME),
+              }).pipe(
+                mergeMap((state) => {
+                  return this.changeElementState({ ...state, elementId, on });
+                }),
+              );
+            }),
+          );
+        }
+
+        const lastId = path[path.length - 1];
+        assert(HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastId));
+
+        if (await imodelAccess.classDerivesFrom(lastId.className, MODEL_CLASS_NAME)) {
+          return this.changeModelState({ ids: lastId.id, on });
+        }
+
+        if (await imodelAccess.classDerivesFrom(lastId.className, SUBJECT_CLASS_NAME)) {
+          return this.changeSubjectNodeState([lastId.id], on);
+        }
+
+        const modelId = await this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME);
+        return this.changeCategoryState({ modelId, categoryId: lastId.id, on });
       }),
       mergeAll(),
     );
@@ -800,6 +873,32 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     const elementIds = new Set(node.groupedInstanceKeys.map((key) => key.id));
     return { modelId, categoryId, elementIds };
   }
+
+  private async findClassIdInFilterPath(path: HierarchyNodeIdentifiersPath, parentKeys: HierarchyNodeKey[], className: string) {
+    function* keysToCheck(): Iterable<InstanceKey> {
+      for (let i = path.length - 1; i >= 0; --i) {
+        const id = path[i];
+        if (HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
+          yield id;
+        }
+      }
+
+      for (let i = parentKeys.length - 1; i >= 0; --i) {
+        const key = parentKeys[i];
+        if (HierarchyNodeKey.isInstances(key)) {
+          yield* key.instanceKeys;
+        }
+      }
+    }
+
+    for (const parentKey of keysToCheck()) {
+      if (await this._props.imodelAccess.classDerivesFrom(parentKey.className, className)) {
+        return parentKey.id;
+      }
+    }
+
+    assert(false, () => `Cannot find an instance of ${className} in instance keys: ${JSON.stringify([...keysToCheck()], undefined, 2)}`);
+  }
 }
 
 interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
@@ -857,11 +956,4 @@ function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   lhs.forEach((x) => rhs.has(x) && result.add(x));
   return result;
-}
-
-function asObs<T>(x: T | Promise<T>): ObservableInput<T> {
-  if (x instanceof Promise) {
-    return x;
-  }
-  return of(x);
 }

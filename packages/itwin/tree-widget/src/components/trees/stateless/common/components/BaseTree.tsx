@@ -3,28 +3,25 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useCallback, useMemo } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { TreeWidget } from "../../../../../TreeWidget";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useIModelChangeListener } from "../UseIModelChangeListener";
+import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 import { TreeRenderer } from "./TreeRenderer";
 
+import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { UsageTrackedFeatures } from "../../../common/UseFeatureReporting";
-import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
-import { createIModelAccess } from "../Utils";
-import { MarkRequired } from "@itwin/core-bentley";
 
 type TreeRendererProps = Pick<
   ComponentPropsWithoutRef<typeof TreeRenderer>,

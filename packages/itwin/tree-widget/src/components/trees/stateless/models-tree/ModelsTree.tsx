@@ -16,11 +16,11 @@ import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
+import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
-import { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 
 interface StatelessModelsTreeOwnProps {
   activeView: Viewport;

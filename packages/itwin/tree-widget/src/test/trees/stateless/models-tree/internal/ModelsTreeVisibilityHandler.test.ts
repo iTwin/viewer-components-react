@@ -7,18 +7,20 @@ import { expect } from "chai";
 import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
-import { concat, defer, EMPTY, expand, filter, first, from, mergeMap, shareReplay } from "rxjs";
+import { concat, EMPTY, expand, filter, first, from, mergeMap, shareReplay, takeWhile } from "rxjs";
 import sinon from "sinon";
 import { assert } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SnapshotConnection, SpatialViewState, ViewRect } from "@itwin/core-frontend";
+import {
+  IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SnapshotConnection, SpatialViewState, ViewRect,
+} from "@itwin/core-frontend";
 import { SchemaContext, SchemaJsonLocater } from "@itwin/ecschema-metadata";
 import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
 import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { InstanceKey } from "@itwin/presentation-shared";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import {
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
 import { toVoidPromise } from "../../../../../components/trees/common/Rxjs";
 import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
@@ -28,14 +30,12 @@ import { createLocalIModel, insertPhysicalPartition, insertPhysicalSubModel, ins
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport } from "../../../Common";
 import {
-  createCategoryHierarchyNode,
-  createClassGroupingHierarchyNode,
-  createElementHierarchyNode,
-  createFakeIdsCache,
-  createModelHierarchyNode,
+  createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../../Common";
 
+import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { Observable } from "rxjs";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
@@ -54,7 +54,7 @@ interface VisibilityOverrides {
   elements?: Map<Id64String, Visibility>;
 }
 
-describe.only("HierarchyBasedVisibilityHandler", () => {
+describe("HierarchyBasedVisibilityHandler", () => {
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -2217,33 +2217,28 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
       });
     });
 
-    describe.only("filtering", () => {
+    describe("filtered nodes", () => {
       let filteredProvider: HierarchyProvider;
       let defaultProvider: HierarchyProvider;
-      let handler: ModelsTreeVisibilityHandler;
-      let modelId: string;
-      let categoryId: string;
-      let elementId: string;
+      let visibilityHandler: ModelsTreeVisibilityHandler;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         const idsCache = new ModelsTreeIdsCache(imodelAccess);
-
-        const subjectKey = partitions[0];
-        modelId = [...modelCategories.keys()][0];
-        categoryId = modelCategories.get(modelId)![0];
-        elementId = categoryParentElements.get(categoryId)![0];
+        const modelId = [...modelCategories.keys()][0];
+        const categoryId = modelCategories.get(modelId)![0];
+        const parentElementId = categoryParentElements.get(categoryId)![0];
+        const elementId = [...elementHierarchy.get(parentElementId)!][0];
+        const filterPaths = await ModelsTreeDefinition.createInstanceKeyPaths({
+          idsCache,
+          imodelAccess,
+          label: "",
+          keys: [{ id: elementId, className: "BisCore.GeometricElement3d" }],
+        });
         filteredProvider = createHierarchyProvider({
           imodelAccess,
           hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
           filtering: {
-            paths: [
-              [
-                subjectKey,
-                { id: modelId, className: "BisCore.GeometricModel3d" },
-                { id: categoryId, className: "BisCore.SpatialCategory" },
-                { id: elementId, className: "BisCore.GeometricElement3d" },
-              ],
-            ],
+            paths: filterPaths,
           },
         });
 
@@ -2252,102 +2247,116 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
           hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
         });
 
-        handler = createModelsTreeVisibilityHandler({ imodelAccess, viewport, idsCache });
+        visibilityHandler = createModelsTreeVisibilityHandler({ imodelAccess, viewport, idsCache });
       });
 
       afterEach(() => {
-        handler.dispose();
+        visibilityHandler.dispose();
       });
 
-      async function runRootNodeTest(on: boolean) {
-        const filteredNodeKeys = new Set<string>();
-        await toVoidPromise(
-          from(filteredProvider.getNodes({ parentNode: undefined })).pipe(
-            expand((node) => filteredProvider.getNodes({ parentNode: node })),
-            mergeMap((node, idx) => {
-              filteredNodeKeys.add(JSON.stringify(node.key));
-              return concat(
-                idx === 0 ? handler.changeVisibility(node, on) : EMPTY,
-                defer(async () => {
-                  await expect(handler.getVisibilityStatus(node)).to.eventually.include(
-                    { state: on ? "visible" : "hidden" },
-                    JSON.stringify(node.key, undefined, 2),
-                  );
-                }),
+      function createNodeSerializableKey(node: HierarchyNode) {
+        return JSON.stringify([...node.parentKeys, node.key]);
+      }
+
+      function runFilteredNodeTest({ on, changeVisibility }: { on: boolean; changeVisibility: (filteredNodes: Observable<HierarchyNode>) => Observable<any> }) {
+        const filteredNodes = from(filteredProvider.getNodes({ parentNode: undefined })).pipe(
+          expand((node) => filteredProvider.getNodes({ parentNode: node })),
+          shareReplay(),
+        );
+        const filteredNodeSet = new Set<string>();
+        return concat(
+          changeVisibility(filteredNodes),
+          filteredNodes.pipe(
+            mergeMap(async (node) => {
+              filteredNodeSet.add(createNodeSerializableKey(node));
+              await expect(visibilityHandler.getVisibilityStatus(node)).to.eventually.include(
+                { state: on ? "visible" : "hidden" },
+                `Filtered mode. Node: ${JSON.stringify(node.key, undefined, 2)}`,
               );
             }),
           ),
-        );
-
-        await toVoidPromise(
           from(defaultProvider.getNodes({ parentNode: undefined })).pipe(
             expand((node) => defaultProvider.getNodes({ parentNode: node })),
-            filter((node) => !filteredNodeKeys.has(JSON.stringify(node.key))),
             mergeMap(async (node) => {
-              await expect(handler.getVisibilityStatus(node)).to.eventually.include(
-                { state: on ? "hidden" : "visible" },
-                JSON.stringify(node.key, undefined, 2),
+              if (!filteredNodeSet.has(createNodeSerializableKey(node))) {
+                return { node, expectedVisibility: on ? "hidden" : "visible" };
+              }
+
+              // Element visibility should match `on` value, passed to `visibilityHandler.changeVisibility`
+              if (
+                HierarchyNode.isInstancesNode(node) &&
+                (await imodelAccess.classDerivesFrom(node.key.instanceKeys[0].className, "BisCore.GeometricElement3d"))
+              ) {
+                return { node, expectedVisibility: on ? "visible" : "hidden" };
+              }
+
+              // All other filtered nodes should be partial
+              return { node, expectedVisibility: "partial" };
+            }),
+            mergeMap(async ({ node, expectedVisibility }) => {
+              await expect(visibilityHandler.getVisibilityStatus(node)).to.eventually.include(
+                { state: expectedVisibility },
+                `Unfiltered mode. Node: ${JSON.stringify(node.key, undefined, 2)}`,
               );
             }),
           ),
         );
       }
 
+      function runRootNodeTest(on: boolean) {
+        return runFilteredNodeTest({
+          on,
+          changeVisibility: (obs) =>
+            obs.pipe(
+              first(),
+              mergeMap(async (node) => {
+                await visibilityHandler.changeVisibility(node, on);
+                viewport.renderFrame();
+              }),
+            ),
+        });
+      }
+
       it("switches ON only filtered hierarchy when root node is clicked", async () => {
-        await runRootNodeTest(true);
+        await toVoidPromise(runRootNodeTest(true));
       });
 
       it("switches OFF only filtered hierarchy when root node is clicked", async () => {
         const rootSubjectId = iModel.elements.getRootSubject().id;
-        await handler.changeVisibility(createSubjectHierarchyNode({ subjectIds: [rootSubjectId] }), true);
-        await runRootNodeTest(false);
+        await visibilityHandler.changeVisibility(createSubjectHierarchyNode({ subjectIds: [rootSubjectId] }), true);
+        viewport.renderFrame();
+        await toVoidPromise(runRootNodeTest(false));
       });
 
-      async function runCategoryNodeTest(on: boolean) {
-        const filteredNodeKeys = new Set<string>();
-        await toVoidPromise(
-          from(filteredProvider.getNodes({ parentNode: undefined })).pipe(
-            expand((node) => filteredProvider.getNodes({ parentNode: node })),
-            mergeMap((node) => {
-              filteredNodeKeys.add(JSON.stringify(node.key));
-              return concat(
-                HierarchyNode.isInstancesNode(node) && node.key.instanceKeys[0].className === "BisCore.SpatialCategory"
-                  ? handler.changeVisibility(node, on)
-                  : EMPTY,
-                defer(async () => {
-                  await expect(handler.getVisibilityStatus(node)).to.eventually.include(
-                    { state: on ? "visible" : "hidden" },
-                    JSON.stringify(node.key, undefined, 2),
-                  );
-                }),
-              );
-            }),
-          ),
-        );
-
-        // Make sure unfiltered nodes are unaffected
-        await toVoidPromise(
-          from(defaultProvider.getNodes({ parentNode: undefined })).pipe(
-            expand((node) => defaultProvider.getNodes({ parentNode: node })),
-            filter((node) => !filteredNodeKeys.has(JSON.stringify(node.key))),
-            mergeMap(async (node) => {
-              await expect(handler.getVisibilityStatus(node)).to.eventually.include(
-                { state: on ? "hidden" : "visible" },
-                JSON.stringify(node.key, undefined, 2),
-              );
-            }),
-          ),
-        );
+      function runCategoryNodeTest(on: boolean) {
+        return runFilteredNodeTest({
+          on,
+          changeVisibility: (obs) =>
+            obs.pipe(
+              mergeMap(async (node) => {
+                if (
+                  HierarchyNode.isInstancesNode(node) &&
+                  (await imodelAccess.classDerivesFrom(node.key.instanceKeys[0].className, "BisCore.SpatialCategory"))
+                ) {
+                  await visibilityHandler.changeVisibility(node, on);
+                  viewport.renderFrame();
+                  return true;
+                }
+                return false;
+              }),
+              takeWhile((found) => !found),
+            ),
+        });
       }
 
       it("switches ON filtered elements when category node is clicked", async () => {
-        await runCategoryNodeTest(true);
+        await toVoidPromise(runCategoryNodeTest(true));
       });
 
       it("switches OFF filtered elements when category node is clicked", async () => {
         const rootSubjectId = iModel.elements.getRootSubject().id;
-        await handler.changeVisibility(createSubjectHierarchyNode({ subjectIds: [rootSubjectId] }), true);
-        await runCategoryNodeTest(false);
+        await visibilityHandler.changeVisibility(createSubjectHierarchyNode({ subjectIds: [rootSubjectId] }), true);
+        await toVoidPromise(runCategoryNodeTest(false));
       });
     });
   });

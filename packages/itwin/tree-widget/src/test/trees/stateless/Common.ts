@@ -1,8 +1,14 @@
-import type { Id64Array, Id64String } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, HierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
 import { concatMap, count, EMPTY, expand, firstValueFrom, from, toArray } from "rxjs";
 import sinon from "sinon";
 import { ModelsTreeIdsCache } from "../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
+
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 interface IdsCacheMockProps {
   subjectsHierarchy?: Map<Id64String, Id64String[]>;
@@ -127,8 +133,8 @@ export function createElementHierarchyNode({
     label: "",
     parentKeys: [],
     extendedData: {
-      modelId: modelId,
-      categoryId: categoryId,
+      modelId,
+      categoryId,
     },
   };
 }
