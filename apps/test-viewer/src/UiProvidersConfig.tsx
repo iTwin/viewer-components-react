@@ -89,10 +89,17 @@ interface UiItem {
   createUiItemsProviders: () => UiItemsProvider[];
 }
 
+const schemaContextCache = new Map<string, SchemaContext>();
 function getSchemaContext(imodel: IModelConnection) {
-  const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
-  const schemaContext = new SchemaContext();
-  schemaContext.addLocater(schemaLocater);
+  const key = imodel.getRpcProps().key;
+  let schemaContext = schemaContextCache.get(key);
+  if (!schemaContext) {
+    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
+    schemaContext = new SchemaContext();
+    schemaContext.addLocater(schemaLocater);
+    schemaContextCache.set(key, schemaContext);
+    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
+  }
   return schemaContext;
 }
 
