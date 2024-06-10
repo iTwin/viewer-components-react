@@ -30,7 +30,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 describe("ExternalSources Tree", () => {
-  describe.skip("Hierarchy definition", () => {
+  describe("Hierarchy definition", () => {
     before(async function () {
       await initializePresentationTesting({
         backendProps: {
