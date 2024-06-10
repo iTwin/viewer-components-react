@@ -22,6 +22,7 @@ import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigCont
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
   CalculatedPropertyType,
+
   GroupMinimal,
   Property,
   PropertyModify,
@@ -40,7 +41,7 @@ import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
-import { SvgLabel } from "@itwin/itwinui-icons-react";
+import { SvgFunction, SvgLabel,  SvgMeasure} from "@itwin/itwinui-icons-react";
 import { CalculatedPropertyActionWithVisuals } from "../CalculatedProperties/CalculatedPropertyActionWithVisuals";
 import { handleError } from "../../../common/utils";
 import { CustomCalculationAction } from "../CustomCalculations/CustomCalculationAction";
@@ -82,6 +83,8 @@ export const GroupPropertyAction = ({
   onClickCancel,
 }: GroupPropertyActionProps) => {
   const actionContainerRef = useRef<HTMLDivElement>(null);
+  const calculatedPropertyActionRef = useRef<HTMLDivElement>(null);
+  const customCalculationActionRef = useRef<HTMLDivElement>(null);
   const propertiesClient = usePropertiesClient();
   const queryClient = useQueryClient();
 
@@ -111,6 +114,17 @@ export const GroupPropertyAction = ({
     setCalculatedPropertyType(undefined);
     setFormula(undefined);
   }, []);
+
+  const scrollToBlock = useCallback((childRef: React.RefObject<HTMLDivElement>) => {
+    setTimeout(() => {
+      if(actionContainerRef.current && childRef.current){
+        actionContainerRef.current.scrollTo({
+          top: childRef.current.offsetTop,
+          behavior: "smooth",
+        });
+      }
+    }, 500);
+  }, [actionContainerRef]);
 
   const fetchPropertiesMetadata = useCallback(async () => {
     if (!iModelConnection) return;
@@ -153,12 +167,13 @@ export const GroupPropertyAction = ({
         if(data.groupPropertyDetails.quantityType)
           setQuantityType(data.groupPropertyDetails.quantityType);
 
-        const properties = findProperties(data.groupPropertyDetails.ecProperties ?? [], data.propertiesMetaData);
-        if (properties.length === 0) {
-          setPropertiesNotFoundAlert(true);
+        if(data.groupPropertyDetails.ecProperties){
+          const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
+          if (properties.length === 0) {
+            setPropertiesNotFoundAlert(true);
+          }
+          setSelectedProperties(properties);
         }
-
-        setSelectedProperties(properties);
       }
     }
   }, [data, isLoadingPropertiesSuccessful]);
@@ -167,6 +182,12 @@ export const GroupPropertyAction = ({
     if(calculatedPropertyType)
       setDataType(DataType.Double);
   }, [calculatedPropertyType]);
+
+  useEffect(()=> {
+    if(formulaErrorMessage){
+      scrollToBlock(customCalculationActionRef);
+    }
+  }, [formulaErrorMessage, scrollToBlock]);
 
   const { mutate: onSave, isLoading: isSaving } = useMutation({
     mutationFn: async () => {
@@ -225,7 +246,9 @@ export const GroupPropertyAction = ({
 
   return (
     <>
-      <div className='gmw-group-property-action-container' ref={actionContainerRef}>
+      <div
+        className='gmw-group-property-action-container'
+        ref={actionContainerRef}>
         <Fieldset
           disabled={isLoading}
           className='gmw-property-options'
@@ -333,18 +356,45 @@ export const GroupPropertyAction = ({
             </div>
           </InputGroup>
         </ExpandableBlock>
-        <CalculatedPropertyActionWithVisuals
-          group={group}
-          calculatedPropertyType={calculatedPropertyType}
-          setCalculatedPropertyType={setCalculatedPropertyType}
-          parentRef={actionContainerRef}/>
-        <CustomCalculationAction
-          formula={formula}
-          setFormula={setFormula}
-          formulaErrorMessage={formulaErrorMessage}
-          forceValidation={forceValidation}
-          disabled={isLoading}
-          parentRef={actionContainerRef}/>
+        <div ref={calculatedPropertyActionRef}>
+          <ExpandableBlock title={"Calculated Property"}
+            endIcon={
+              <Icon fill={calculatedPropertyType ? "informational" : "default"}>
+                <SvgMeasure />
+              </Icon>
+            }
+            isExpanded={calculatedPropertyType ? true : false}
+            onToggle={(isExpanding)=> {
+              if(isExpanding === true)
+                scrollToBlock(calculatedPropertyActionRef);
+            }}>
+            <CalculatedPropertyActionWithVisuals
+              group={group}
+              calculatedPropertyType={calculatedPropertyType}
+              setCalculatedPropertyType={setCalculatedPropertyType}/>
+          </ExpandableBlock>
+        </div>
+        <div ref={customCalculationActionRef}>
+          <ExpandableBlock
+            title={"Custom Calculation"}
+            endIcon={
+              <Icon fill={formula ? "informational" : "default"}>
+                <SvgFunction />
+              </Icon>
+            }
+            isExpanded={formula ? true : false}
+            onToggle={(isExpanding)=> {
+              if(isExpanding === true)
+                scrollToBlock(customCalculationActionRef);
+            }}>
+            <CustomCalculationAction
+              formula={formula}
+              setFormula={setFormula}
+              formulaErrorMessage={formulaErrorMessage}
+              forceValidation={forceValidation}
+              disabled={isLoading}/>
+          </ExpandableBlock>
+        </div>
       </div>
       <ActionPanel
         onSave={handleSaveClick}
