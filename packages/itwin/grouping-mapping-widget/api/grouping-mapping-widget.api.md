@@ -9,6 +9,7 @@
 import type { AccessToken } from '@itwin/core-bentley';
 import { Alert } from '@itwin/itwinui-react';
 import { Context } from 'react';
+import type { DataType as DataType_2 } from '@itwin/insights-client';
 import { Dispatch } from 'react';
 import { ExtractionStatus } from '@itwin/insights-client';
 import type { Group } from '@itwin/insights-client';
@@ -40,23 +41,6 @@ export interface CalculatedPropertyActionProps {
     calculatedProperty?: Property;
     // (undocumented)
     group: Group;
-    // (undocumented)
-    mappingId: string;
-    // (undocumented)
-    onClickCancel?: () => void;
-    // (undocumented)
-    onSaveSuccess: () => void;
-}
-
-// @public
-export const CalculatedPropertyActionWithVisuals: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel, }: CalculatedPropertyActionWithVisualsProps) => JSX.Element;
-
-// @public
-export interface CalculatedPropertyActionWithVisualsProps {
-    // (undocumented)
-    calculatedProperty?: Property;
-    // (undocumented)
-    group: GroupMinimal;
     // (undocumented)
     mappingId: string;
     // (undocumented)
@@ -99,23 +83,6 @@ export const createMappingClient: (clientProp: IMappingsClient | ClientPrefix) =
 
 // @internal (undocumented)
 export const createPropertiesClient: (clientProp: IPropertiesClient | ClientPrefix) => IPropertiesClient;
-
-// @public
-export const CustomCalculationAction: ({ mappingId, groupId, customCalculation, onSaveSuccess, onClickCancel }: CustomCalculationActionProps) => JSX.Element;
-
-// @public
-export interface CustomCalculationActionProps {
-    // (undocumented)
-    customCalculation?: Property;
-    // (undocumented)
-    groupId: string;
-    // (undocumented)
-    mappingId: string;
-    // (undocumented)
-    onClickCancel?: () => void;
-    // (undocumented)
-    onSaveSuccess: () => void;
-}
 
 // @public (undocumented)
 export type DataType = "Double" | "String" | "Boolean" | "Integer";
@@ -439,7 +406,7 @@ export interface PropertyMap {
 }
 
 // @public
-export const PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, onClickAddCalculatedProperty, onClickModifyCalculatedProperty, onClickAddCustomCalculationProperty, onClickModifyCustomCalculation, hideGroupProps, hideCalculatedProps, hideCustomCalculationProps, }: PropertyMenuProps) => JSX.Element;
+export const PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideGroupProps }: PropertyMenuProps) => JSX.Element;
 
 // @public
 export interface PropertyMenuProps {
@@ -477,7 +444,7 @@ export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
 }
 
 // @public
-export function resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap): IResult<DataType>;
+export function resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap, providedDataType?: DataType_2): IResult<DataType>;
 
 // @public
 export const SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element;

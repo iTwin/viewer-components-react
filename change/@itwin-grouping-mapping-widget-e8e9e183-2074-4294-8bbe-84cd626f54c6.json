@@ -1,0 +1,7 @@
+{
+  "type": "major",
+  "comment": "removed export for calculated and custom property",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "141143406+julioalvahash@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
