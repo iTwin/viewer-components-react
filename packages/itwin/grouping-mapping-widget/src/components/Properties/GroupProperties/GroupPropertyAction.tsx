@@ -75,7 +75,7 @@ export const GroupPropertyAction = ({
   group,
   groupProperty,
   onSaveSuccess,
-  onClickCancel,
+  onClickCancel
 }: GroupPropertyActionProps) => {
   const actionContainerRef = useRef<HTMLDivElement>(null);
   const calculatedPropertyActionRef = useRef<HTMLDivElement>(null);

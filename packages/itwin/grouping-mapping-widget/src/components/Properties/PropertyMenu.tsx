@@ -38,7 +38,7 @@ export const PropertyMenu = ({
   group,
   onClickAddGroupProperty,
   onClickModifyGroupProperty,
-  hideGroupProps = false,
+  hideGroupProps = false
 }: PropertyMenuProps) => {
   const groupId = group.id;
   const mappingId = mapping.id;
