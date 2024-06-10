@@ -11,6 +11,7 @@ import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { usePerformanceReporting } from "../common/UsePerformanceReporting";
 import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
+import * as RULESET_IMODEL_CONTENT_IMPORT from "./IModelContent.json";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 
 import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
@@ -21,7 +22,7 @@ import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
  * Presentation rules used by IModelContentTree
  * @internal
  */
-export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); // eslint-disable-line @typescript-eslint/no-var-requires
+export const RULESET_IMODEL_CONTENT = RULESET_IMODEL_CONTENT_IMPORT as Ruleset;
 
 /**
  * Props for [[IModelContentTree]].
