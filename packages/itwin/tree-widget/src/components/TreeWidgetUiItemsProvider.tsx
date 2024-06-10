@@ -18,6 +18,7 @@ import { useTreeTransientState } from "./utils/UseTreeTransientState";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { SelectableTreeProps, TreeDefinition } from "./SelectableTree";
 import type { FallbackProps } from "react-error-boundary";
+
 /**
  * Parameters for creating a [[TreeWidgetUiItemsProvider]].
  * @public

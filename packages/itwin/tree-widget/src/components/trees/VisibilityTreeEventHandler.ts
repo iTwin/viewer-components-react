@@ -23,6 +23,7 @@ import type {
   TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
 import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
+
 /**
  * Data structure that describes instance visibility status.
  * @public

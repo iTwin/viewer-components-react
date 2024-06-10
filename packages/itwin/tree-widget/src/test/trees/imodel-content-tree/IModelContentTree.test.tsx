@@ -8,7 +8,7 @@ import { join } from "path";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyFilterRuleOperator } from "@itwin/components-react";
-import { BisCodeSpec, EmptyLocalization, IModel } from "@itwin/core-common";
+import { EmptyLocalization, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { LabelDefinition } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType, PresentationTreeDataProvider } from "@itwin/presentation-components";
@@ -20,17 +20,20 @@ import {
   initialize as initializePresentationTesting,
   terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../tree-widget-react";
+import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../components/trees/imodel-content-tree/IModelContentTree";
 import {
-  addDocument,
-  addDrawingCategory,
-  addDrawingGraphic,
-  addGroup,
-  addModel,
-  addPartition,
-  addPhysicalObject,
-  addSpatialCategory,
-  addSubject,
+  insertDrawingCategory,
+  insertDrawingElement,
+  insertDrawingGraphic,
+  insertDrawingSubModel,
+  insertGroupInformationElement,
+  insertGroupInformationModelWithPartition,
+  insertModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertSpatialCategory,
+  insertSubject,
+  insertSubModel,
 } from "../../IModelUtils";
 import { createAsyncIterator, mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 import {
@@ -47,6 +50,7 @@ import type { PresentationInstanceFilterInfo } from "@itwin/presentation-compone
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Node, NodeKey } from "@itwin/presentation-common";
+
 describe("IModelContentTree", () => {
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };
@@ -328,9 +332,9 @@ describe("IModelContentTree", () => {
       it("creates subjects hierarchy", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          addSubject(builder, "A", IModel.rootSubjectId);
-          const b = addSubject(builder, "B", IModel.rootSubjectId);
-          addSubject(builder, "C", b);
+          insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
+          const b = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
+          insertSubject({ builder, codeValue: "C", parentId: b.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -340,8 +344,7 @@ describe("IModelContentTree", () => {
       it("creates 3d model nodes child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
-          addModel(builder, "BisCore:PhysicalModel", partitionId);
+          insertPhysicalModelWithPartition({ builder, codeValue: "test partition", partitionParentId: IModel.rootSubjectId });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -353,15 +356,20 @@ describe("IModelContentTree", () => {
       it("creates drawing category child nodes for 2d models", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const documentModelId = addModel(
+          const documentModel = insertModelWithPartition({
             builder,
-            "BisCore:DocumentListModel",
-            addPartition(builder, "BisCore:DocumentPartition", "test partition", IModel.rootSubjectId),
-          );
-          const modeledElementId = addDocument(builder, documentModelId, builder.createCode(documentModelId, BisCodeSpec.nullCodeSpec, "test document"));
-          const drawingModelId = addModel(builder, "BisCore:DrawingModel", modeledElementId);
-          const drawingCategoryId = addDrawingCategory(builder, IModel.dictionaryId, "drawing category");
-          addDrawingGraphic(builder, drawingModelId, drawingCategoryId);
+            modelClassFullName: "BisCore:DocumentListModel",
+            partitionClassFullName: "BisCore:DocumentPartition",
+            partitionParentId: IModel.rootSubjectId,
+            codeValue: "test partition",
+          });
+          const modeledElement = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "test document" });
+          const drawingModel = insertDrawingSubModel({
+            builder,
+            modeledElementId: modeledElement.id,
+          });
+          const drawingCategory = insertDrawingCategory({ builder, modelId: IModel.dictionaryId, codeValue: "drawing category" });
+          insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: drawingCategory.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -371,10 +379,9 @@ describe("IModelContentTree", () => {
       it("creates spatial category child nodes for 3d models", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
-          const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-          const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "test category");
-          addPhysicalObject(builder, modelId, categoryId);
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
+          const category = insertSpatialCategory({ builder, codeValue: "test category" });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -384,9 +391,13 @@ describe("IModelContentTree", () => {
       it("creates element child nodes for non-graphical models", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:DocumentPartition", "test partition", IModel.rootSubjectId);
-          const modelId = addModel(builder, "BisCore:DocumentListModel", partitionId);
-          addDocument(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "test document"));
+          const model = insertModelWithPartition({
+            builder,
+            partitionClassFullName: "BisCore:DocumentPartition",
+            modelClassFullName: "BisCore:DocumentListModel",
+            codeValue: "test partition",
+          });
+          insertDrawingElement({ builder, modelId: model.id, codeValue: "test document" });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -398,9 +409,8 @@ describe("IModelContentTree", () => {
       it("creates childless node when group has no child or grouped elements", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:GroupInformationPartition", "test partition", IModel.rootSubjectId);
-          const modelId = addModel(builder, "Generic:GroupModel", partitionId);
-          addGroup(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "test group"));
+          const model = insertGroupInformationModelWithPartition({ builder, codeValue: "test partition" });
+          insertGroupInformationElement({ builder, modelId: model.id, codeValue: "test group" });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -410,10 +420,9 @@ describe("IModelContentTree", () => {
       it("creates child elements as child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:GroupInformationPartition", "test partition", IModel.rootSubjectId);
-          const modelId = addModel(builder, "Generic:GroupModel", partitionId);
-          const parentGroupId = addGroup(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "parent group"));
-          addGroup(builder, modelId, builder.createCode(parentGroupId, BisCodeSpec.nullCodeSpec, "child group"), parentGroupId);
+          const model = insertGroupInformationModelWithPartition({ builder, codeValue: "test partition" });
+          const parentGroup = insertGroupInformationElement({ builder, modelId: model.id, codeValue: "parent group" });
+          insertGroupInformationElement({ builder, modelId: model.id, parentId: parentGroup.id, codeValue: "child group" });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -423,18 +432,19 @@ describe("IModelContentTree", () => {
       it("creates grouped elements as child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const groupPartitionId = addPartition(builder, "BisCore:GroupInformationPartition", "group partition", IModel.rootSubjectId);
-          const groupModelId = addModel(builder, "Generic:GroupModel", groupPartitionId);
-          const groupId = addGroup(builder, groupModelId, builder.createCode(groupPartitionId, BisCodeSpec.nullCodeSpec, "group"));
-
-          const documentPartitionId = addPartition(builder, "BisCore:DocumentPartition", "document partition", IModel.rootSubjectId);
-          const documentModelId = addModel(builder, "BisCore:DocumentListModel", documentPartitionId);
-          const documentId = addDocument(builder, documentModelId, builder.createCode(documentPartitionId, BisCodeSpec.nullCodeSpec, "test document"));
-
+          const groupModel = insertGroupInformationModelWithPartition({ builder, codeValue: "group partition" });
+          const group = insertGroupInformationElement({ builder, modelId: groupModel.id, codeValue: "group" });
+          const documentModel = insertModelWithPartition({
+            builder,
+            modelClassFullName: "BisCore:DocumentListModel",
+            partitionClassFullName: "BisCore:DocumentPartition",
+            codeValue: "document partition",
+          });
+          const document = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "test document" });
           builder.insertRelationship({
             classFullName: "BisCore:ElementGroupsMembers",
-            sourceId: groupId,
-            targetId: documentId,
+            sourceId: group.id,
+            targetId: document.id,
           });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
@@ -447,10 +457,9 @@ describe("IModelContentTree", () => {
       it("creates childless node when element has no child or modeling elements", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
-          const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-          const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "test category");
-          addPhysicalObject(builder, modelId, categoryId);
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
+          const category = insertSpatialCategory({ builder, codeValue: "test category" });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -460,11 +469,10 @@ describe("IModelContentTree", () => {
       it("creates child elements as child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "test partition", IModel.rootSubjectId);
-          const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-          const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "test category");
-          const parentElementId = addPhysicalObject(builder, modelId, categoryId);
-          addPhysicalObject(builder, modelId, categoryId, undefined, parentElementId);
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
+          const category = insertSpatialCategory({ builder, codeValue: "test category" });
+          const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: parentElement.id });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);
@@ -474,11 +482,15 @@ describe("IModelContentTree", () => {
       it("creates modeling elements as child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const imodel = await buildTestIModel(this, async (builder) => {
-          const partitionId = addPartition(builder, "BisCore:DocumentPartition", "test partition", IModel.rootSubjectId);
-          const modelId = addModel(builder, "BisCore:DocumentListModel", partitionId);
-          const parentElementId = addDocument(builder, modelId, builder.createCode(partitionId, BisCodeSpec.nullCodeSpec, "parent document"));
-          const childModelId = addModel(builder, "BisCore:DocumentListModel", parentElementId);
-          addDocument(builder, childModelId, builder.createCode(parentElementId, BisCodeSpec.nullCodeSpec, "child document"));
+          const documentModel = insertModelWithPartition({
+            builder,
+            modelClassFullName: "BisCore:DocumentListModel",
+            partitionClassFullName: "BisCore:DocumentPartition",
+            codeValue: "test partition",
+          });
+          const parentDocument = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "parent document" });
+          const childModel = insertSubModel({ builder, classFullName: "BisCore:DocumentListModel", modeledElementId: parentDocument.id });
+          insertDrawingElement({ builder, modelId: childModel.id, codeValue: "child document" });
         });
         const hierarchyBuilder = new HierarchyBuilder({ imodel });
         const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_IMODEL_CONTENT);

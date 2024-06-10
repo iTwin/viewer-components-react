@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import React, { useCallback, useState } from "react";
 import "./ReportsContainer.scss";
@@ -19,7 +19,7 @@ interface ReportsContainerProps {
 export enum RouteStep {
   ReportsList,
   ReportAction,
-  ReportMappings
+  ReportMappings,
 }
 
 export interface ReportsRouteFields {
@@ -32,14 +32,8 @@ export interface Route {
   reportsRoutingFields: ReportsRouteFields;
 }
 
-const ReportsContainer = ({
-  getAccessToken,
-  baseUrl,
-}: ReportsContainerProps) => {
-
-  const [routingHistory, setRoutingHistory] = useState<Route[]>([
-    { step: RouteStep.ReportsList, title: "iTwin Reports", reportsRoutingFields: {} },
-  ]);
+const ReportsContainer = ({ getAccessToken, baseUrl }: ReportsContainerProps) => {
+  const [routingHistory, setRoutingHistory] = useState<Route[]>([{ step: RouteStep.ReportsList, title: "iTwin Reports", reportsRoutingFields: {} }]);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
@@ -55,15 +49,8 @@ const ReportsContainer = ({
   return (
     <ReportsConfigContext getAccessToken={getAccessToken} baseUrl={baseUrl} iTwinId={iTwinId}>
       <div className="rcw-reports-container">
-        <ReportsHeader
-          goBack={goBack}
-          currentRoute={currentRoute}
-        />
-        <ReportsRouter
-          currentRoute={currentRoute}
-          navigateTo={navigateTo}
-          goBack={goBack}
-        />
+        <ReportsHeader goBack={goBack} currentRoute={currentRoute} />
+        <ReportsRouter currentRoute={currentRoute} navigateTo={navigateTo} goBack={goBack} />
       </div>
     </ReportsConfigContext>
   );

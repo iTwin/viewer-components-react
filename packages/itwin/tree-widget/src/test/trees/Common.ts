@@ -3,15 +3,22 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import { Id64 } from "@itwin/core-bentley";
+import { BeEvent, Id64 } from "@itwin/core-bentley";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { CheckBoxState } from "@itwin/core-react";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { Descriptor, PropertiesField, StandardNodeTypes } from "@itwin/presentation-common";
 import { InfoTreeNodeItemType } from "@itwin/presentation-components";
+import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { TREE_NODE_LABEL_RENDERER } from "../../components/trees/common/TreeNodeRenderer";
 
-import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { Id64String } from "@itwin/core-bentley";
 import type {
   CategoryDescription,
@@ -30,7 +37,7 @@ import type {
   TypeDescription,
 } from "@itwin/presentation-common";
 import type { PresentationInfoTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
-
+import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
 export const createSimpleTreeModelNode = (id?: string, labelValue?: string, node?: Partial<TreeModelNode>): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: labelValue ?? "Node Label" });
   label.property.renderer = { name: TREE_NODE_LABEL_RENDERER };
@@ -126,8 +133,8 @@ export const createSubjectNode = (ids?: Id64String | Id64String[]): Presentation
   },
 });
 
-export const createModelNode = (): PresentationTreeNodeItem => ({
-  key: createKey("model", "model_id"),
+export const createModelNode = (id?: Id64String): PresentationTreeNodeItem => ({
+  key: createKey("model", id ?? "model_id"),
   id: "model",
   label: PropertyRecord.fromString("model"),
   extendedData: {
@@ -135,14 +142,14 @@ export const createModelNode = (): PresentationTreeNodeItem => ({
   },
 });
 
-export const createCategoryNode = (parentModelKey?: InstanceKey): PresentationTreeNodeItem => ({
-  key: createKey("category", "category_id"),
+export const createCategoryNode = (parentModelKey?: InstanceKey | Id64String, id?: Id64String): PresentationTreeNodeItem => ({
+  key: createKey("category", id ?? "category_id"),
   id: "category",
   parentId: "model",
   label: PropertyRecord.fromString("category"),
   extendedData: {
     isCategory: true,
-    modelId: parentModelKey ? parentModelKey.id : undefined,
+    modelId: parentModelKey ? (typeof parentModelKey === "string" ? parentModelKey : parentModelKey.id) : undefined,
   },
 });
 
@@ -152,8 +159,8 @@ export const createElementClassGroupingNode = (elementIds: Id64String[]): Presen
   label: PropertyRecord.fromString("grouping"),
 });
 
-export const createElementNode = (modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): PresentationTreeNodeItem => ({
-  key: createKey("element", "element_id"),
+export const createElementNode = (modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean, elementId?: string): PresentationTreeNodeItem => ({
+  key: createKey("element", elementId ?? "element_id"),
   id: "element",
   label: PropertyRecord.fromString("element"),
   extendedData: {
@@ -260,4 +267,100 @@ function createPropertyRecord(value?: PropertyValue, description?: Partial<Prope
     typename: description?.typename ?? "string",
   };
   return new PropertyRecord(propertyValue, propertyDescription);
+}
+
+export function createIModelMock(queryHandler?: (query: string) => any[] | Promise<any[]>) {
+  return {
+    createQueryReader: sinon.fake(async function* (query: string): AsyncIterableIterator<any> {
+      const result = (await queryHandler?.(query)) ?? [];
+      for (const item of result) {
+        yield { ...item, toRow: () => item, toArray: () => Object.values(item) };
+      }
+    }),
+  } as unknown as IModelConnection;
+}
+
+export function createFakeSinonViewport(
+  props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
+    view?: Partial<ViewState>;
+    perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
+    queryHandler?: (query: string) => any[] | Promise<any[]>;
+  },
+): Viewport {
+  let alwaysDrawn = props?.alwaysDrawn;
+  let neverDrawn = props?.neverDrawn;
+
+  // Stubs are defined as partial to ensure that the overridden implementation is compatible with original interfaces
+  const perModelCategoryVisibility: Partial<PerModelCategoryVisibility.Overrides> = {
+    getOverride: sinon.fake.returns(PerModelCategoryVisibility.Override.None),
+    setOverride: sinon.fake(),
+    clearOverrides: sinon.fake(),
+    ...props?.perModelCategoryVisibility,
+  };
+
+  const view: Partial<ViewState> = {
+    isSpatialView: sinon.fake.returns(true),
+    viewsCategory: sinon.fake.returns(true),
+    viewsModel: sinon.fake.returns(true),
+    ...props?.view,
+  };
+
+  const onAlwaysDrawnChanged = new BeEvent();
+  const onNeverDrawnChanged = new BeEvent();
+
+  const result: Partial<Viewport> = {
+    addViewedModels: sinon.fake.resolves(undefined),
+    changeCategoryDisplay: sinon.fake(),
+    changeModelDisplay: sinon.fake.returns(true),
+    isAlwaysDrawnExclusive: false,
+    onViewedCategoriesPerModelChanged: new BeEvent(),
+    onViewedCategoriesChanged: new BeEvent(),
+    onViewedModelsChanged: new BeEvent(),
+    onAlwaysDrawnChanged,
+    onNeverDrawnChanged,
+    ...props,
+    get alwaysDrawn() {
+      return alwaysDrawn;
+    },
+    get neverDrawn() {
+      return neverDrawn;
+    },
+    setAlwaysDrawn: sinon.fake((x) => {
+      alwaysDrawn = x;
+      onAlwaysDrawnChanged.raiseEvent(result);
+    }),
+    setNeverDrawn: sinon.fake((x) => {
+      neverDrawn = x;
+      onNeverDrawnChanged.raiseEvent(result);
+    }),
+    clearAlwaysDrawn: sinon.fake(() => {
+      if (alwaysDrawn?.size) {
+        alwaysDrawn.clear();
+        onAlwaysDrawnChanged.raiseEvent(result);
+      }
+    }),
+    clearNeverDrawn: sinon.fake(() => {
+      if (neverDrawn?.size) {
+        neverDrawn.clear();
+        onNeverDrawnChanged.raiseEvent(result);
+      }
+    }),
+    perModelCategoryVisibility: perModelCategoryVisibility as PerModelCategoryVisibility.Overrides,
+    view: view as ViewState,
+    iModel: createIModelMock(props?.queryHandler),
+  };
+
+  return result as Viewport;
+}
+
+export function createIModelAccess(imodel: IModelConnection) {
+  const schemas = new SchemaContext();
+  // eslint-disable-next-line @itwin/no-internal
+  schemas.addLocater(new ECSchemaRpcLocater(imodel.getRpcProps()));
+  const schemaProvider = createECSchemaProvider(schemas);
+  return {
+    ...schemaProvider,
+    ...createCachingECClassHierarchyInspector({ schemaProvider }),
+    ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
+  };
 }

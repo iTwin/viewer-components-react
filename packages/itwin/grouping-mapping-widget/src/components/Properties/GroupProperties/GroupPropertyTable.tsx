@@ -36,15 +36,7 @@ export interface GroupPropertyTableProps {
   refresh: () => Promise<void>;
 }
 
-export const GroupPropertyTable = ({
-  mappingId,
-  groupId,
-  onClickAdd,
-  onClickModify,
-  isLoading,
-  groupProperties,
-  refresh,
-}: GroupPropertyTableProps) => {
+export const GroupPropertyTable = ({ mappingId, groupId, onClickAdd, onClickModify, isLoading, groupProperties, refresh }: GroupPropertyTableProps) => {
   const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const queryClient = useQueryClient();
@@ -84,32 +76,36 @@ export const GroupPropertyTable = ({
         Cell: (value: CellProps<Property>) => {
           return (
             <DropdownMenu
-              menuItems={(close: () => void) => [
-                onClickModify ? [
+              menuItems={(close: () => void) =>
+                [
+                  onClickModify
+                    ? [
+                        <MenuItem
+                          key={0}
+                          onClick={() => {
+                            onClickModify(value.row.original);
+                            close();
+                          }}
+                          icon={<SvgEdit />}
+                        >
+                          Modify
+                        </MenuItem>,
+                      ]
+                    : [],
                   <MenuItem
-                    key={0}
+                    key={1}
                     onClick={() => {
-                      onClickModify(value.row.original);
+                      handleShowDeleteModal(value.row.original);
                       close();
                     }}
-                    icon={<SvgEdit />}
+                    icon={<SvgDelete />}
                   >
-                    Modify
+                    Remove
                   </MenuItem>,
-                ] : [],
-                <MenuItem
-                  key={1}
-                  onClick={() => {
-                    handleShowDeleteModal(value.row.original);
-                    close();
-                  }}
-                  icon={<SvgDelete />}
-                >
-                  Remove
-                </MenuItem>,
-              ].flatMap((p) => p)}
+                ].flatMap((p) => p)
+              }
             >
-              <IconButton styleType='borderless' title='Property Options'>
+              <IconButton styleType="borderless" title="Property Options">
                 <SvgMore />
               </IconButton>
             </DropdownMenu>
@@ -117,18 +113,13 @@ export const GroupPropertyTable = ({
         },
       },
     ],
-    [onClickModify]
+    [onClickModify],
   );
 
   const { mutateAsync: deleteProperty } = useMutation({
     mutationFn: async (propertyId: string) => {
       const accessToken = await getAccessToken();
-      await propertiesClient.deleteProperty(
-        accessToken,
-        mappingId,
-        groupId,
-        propertyId,
-      );
+      await propertiesClient.deleteProperty(accessToken, mappingId, groupId, propertyId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, groupId] });

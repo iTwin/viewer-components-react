@@ -14,6 +14,7 @@ import type { IFilteredPresentationTreeDataProvider, PresentationTreeEventHandle
 import type { IVisibilityHandler, VisibilityTreeEventHandlerParams, VisibilityTreeSelectionPredicate } from "../VisibilityTreeEventHandler";
 import type { VisibilityTreeFilterInfo } from "./Types";
 import type { UsageTrackedFeatures } from "./UseFeatureReporting";
+
 /**
  * Props for [[useVisibilityTreeState]] hook.
  * @beta

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IExtractionClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 import { ExtractionClient, GROUPING_AND_MAPPING_BASE_PATH } from "@itwin/insights-client";
@@ -31,9 +31,7 @@ export const ExtractionClientContext = createContext<IExtractionClient>(createDe
 export const useExtractionClient = () => {
   const context = useContext(ExtractionClientContext);
   if (!context) {
-    throw new Error(
-      "useExtractionClient should be used within a ExtractionClientContext provider"
-    );
+    throw new Error("useExtractionClient should be used within a ExtractionClientContext provider");
   }
   return context;
 };

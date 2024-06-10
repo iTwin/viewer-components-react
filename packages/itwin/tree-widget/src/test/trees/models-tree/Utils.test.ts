@@ -15,11 +15,12 @@ import {
 } from "@itwin/presentation-testing";
 import { waitFor } from "@testing-library/react";
 import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset, queryModelsForHeaderActions } from "../../../components/trees/models-tree/Utils";
-import { addModel, addPartition } from "../../IModelUtils";
+import { insertPhysicalModelWithPartition, insertPhysicalSubModel } from "../../IModelUtils";
 
 import type { RepositoryLinkProps } from "@itwin/core-common";
 import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
 import type { Node } from "@itwin/presentation-common";
+
 describe("createRuleset", () => {
   it("creates default ruleset", () => {
     expect(createRuleset({})).to.matchSnapshot();
@@ -115,7 +116,7 @@ describe("queryModelsForHeaderActions", () => {
         userLabel: "furl",
       } as RepositoryLinkProps);
 
-      addModel(builder, "BisCore:PhysicalModel", repoLinkId);
+      insertPhysicalSubModel({ builder, modeledElementId: repoLinkId });
     });
 
     const availableModels = await queryModelsForHeaderActions(iModel);
@@ -125,8 +126,7 @@ describe("queryModelsForHeaderActions", () => {
   it("returns available model when modeled element is GeometricElement3d or InformationPartitionElement", async () => {
     // eslint-disable-next-line deprecation/deprecation
     const iModel = await buildTestIModel("test", async (builder) => {
-      const partition = addPartition(builder, "BisCore:PhysicalPartition", "partition");
-      addModel(builder, "BisCore:PhysicalModel", partition);
+      insertPhysicalModelWithPartition({ builder, codeValue: "partition" });
     });
     const availableModels = await queryModelsForHeaderActions(iModel);
     await waitFor(() => expect(availableModels.length).to.be.equal(1));

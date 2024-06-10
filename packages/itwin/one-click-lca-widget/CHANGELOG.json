@@ -2,6 +2,29 @@
   "name": "@itwin/one-click-lca-react",
   "entries": [
     {
+      "date": "Mon, 10 Jun 2024 17:40:38 GMT",
+      "version": "0.5.0",
+      "tag": "@itwin/one-click-lca-react_v0.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "hansraj.koravenciah@bentley.com",
+            "package": "@itwin/one-click-lca-react",
+            "commit": "fb68ffda26c43a99920e14d53d4d0a70c9a79c38",
+            "comment": "Upgraded insights-client version to 0.10.1, fixed functions using old dependencies"
+          }
+        ],
+        "none": [
+          {
+            "author": "hansraj.koravenciah@bentley.com",
+            "package": "@itwin/one-click-lca-react",
+            "commit": "36c49a556b4c99a4203d243fcb44581ec80ee9fb",
+            "comment": "Ran prettier on ec3, lca, reportconfig and reportmapping widgets"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@itwin/one-click-lca-react_v0.4.0",
       "date": "Mon, 25 Sep 2023 18:53:12 GMT",

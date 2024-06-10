@@ -14,18 +14,21 @@ import type {
   DefineRootHierarchyLevelProps,
   HierarchyDefinition,
   HierarchyLevelDefinition,
+  LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
 
 interface ExternalSourcesTreeDefinitionProps {
-  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
+  imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
 }
 
 export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+  private _queryExecutor: LimitingECSqlQueryExecutor;
+  private _isSupported?: Promise<boolean>;
 
   public constructor(props: ExternalSourcesTreeDefinitionProps) {
     this._impl = createClassBasedHierarchyDefinition({
@@ -48,6 +51,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
+    this._queryExecutor = props.imodelAccess;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
@@ -61,6 +65,14 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
+    if (this._isSupported === undefined) {
+      this._isSupported = this.isSupported();
+    }
+
+    if ((await this._isSupported) === false) {
+      return [];
+    }
+
     return this._impl.defineHierarchyLevel(props);
   }
 
@@ -90,7 +102,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             JOIN BisCore.SynchronizationConfigSpecifiesRootSources scsrs ON scsrs.TargetECInstanceId = this.ECInstanceId
-            JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
+            LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
           `,
         },
@@ -118,16 +130,6 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this.createCompositeLabelSelectClause({ externalSourceAlias: "this", repositoryLinkAlias: "rl" }),
                 },
-                hasChildren: {
-                  selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM BisCore.ExternalSourceAttachment esa
-                      WHERE esa.Attaches.Id = this.ECInstanceId
-                      LIMIT 1
-                    ), 0)
-                  `,
-                },
                 extendedData: {
                   imageId: "icon-document",
                 },
@@ -135,7 +137,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceGroupGroupsSources esggs ON esggs.TargetECInstanceId = this.ECInstanceId
-            JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
+            LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             WHERE
               esggs.SourceECInstanceId IN (${groupIds.map(() => "?").join(",")})
@@ -167,16 +169,6 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this.createCompositeLabelSelectClause({ externalSourceAlias: "this", repositoryLinkAlias: "rl" }),
                 },
-                hasChildren: {
-                  selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM BisCore.ExternalSourceAttachment esa
-                      WHERE esa.Attaches.Id = this.ECInstanceId
-                      LIMIT 1
-                    ), 0)
-                  `,
-                },
                 extendedData: {
                   imageId: "icon-document",
                 },
@@ -184,7 +176,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAttachment esa ON esa.Attaches.Id = this.ECInstanceId
-            JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
+            LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             WHERE
               esa.Parent.Id IN (${sourceIds.map(() => "?").join(",")})
@@ -242,7 +234,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
             JOIN BisCore.ExternalSourceAspect esa ON esa.Element.Id = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
-              esa.Source.Id = (${sourceIds.map(() => "?").join(",")})
+              esa.Source.Id IN (${sourceIds.map(() => "?").join(",")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: sourceIds.map((id) => ({ type: "id", value: id })),
@@ -252,16 +244,24 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   }
 
   private async createCompositeLabelSelectClause({ externalSourceAlias, repositoryLinkAlias }: { externalSourceAlias: string; repositoryLinkAlias: string }) {
-    return ECSql.createConcatenatedValueStringSelector([
+    return ECSql.createConcatenatedValueJsonSelector([
       {
-        selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
-          classAlias: repositoryLinkAlias,
-          className: "BisCore.RepositoryLink",
-        }),
-      },
-      {
-        type: "String",
-        value: " - ",
+        selector: `IIF(
+          ${repositoryLinkAlias}.ECInstanceId IS NOT NULL,
+          ${ECSql.createConcatenatedValueJsonSelector([
+            {
+              selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                classAlias: repositoryLinkAlias,
+                className: "BisCore.RepositoryLink",
+              }),
+            },
+            {
+              type: "String",
+              value: " - ",
+            },
+          ])},
+          ''
+        )`,
       },
       {
         selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
@@ -270,5 +270,18 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         }),
       },
     ]);
+  }
+
+  private async isSupported() {
+    const query = `
+      SELECT 1
+      FROM ECDbMeta.ECSchemaDef
+      WHERE Name = 'BisCore' AND (VersionMajor > 1 OR (VersionMajor = 1 AND VersionMinor > 12))
+    `;
+
+    for await (const _row of this._queryExecutor.createQueryReader({ ecsql: query })) {
+      return true;
+    }
+    return false;
   }
 }

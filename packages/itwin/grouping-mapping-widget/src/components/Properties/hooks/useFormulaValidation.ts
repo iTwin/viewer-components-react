@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { useEffect, useState } from "react";
 import { resolveFormulaDataType } from "../../../formula/FormulaDataTypeResolver";
 import type { DataType as FormulaDataType, PossibleDataType, PropertyMap } from "../../../formula/Types";

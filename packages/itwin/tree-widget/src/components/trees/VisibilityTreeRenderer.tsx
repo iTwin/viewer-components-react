@@ -6,6 +6,7 @@
 import classNames from "classnames";
 import { useEffect } from "react";
 import { TreeImageLoader, TreeNodeRenderer } from "@itwin/components-react";
+import { CheckBoxState } from "@itwin/core-react";
 import { Checkbox } from "@itwin/itwinui-react";
 import { PresentationTreeNodeRenderer, useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
 import { TreeRenderer } from "./common/TreeRenderer";
@@ -15,6 +16,7 @@ import type { TreeRendererBaseProps, TreeRendererProps } from "./common/TreeRend
 import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps } from "@itwin/components-react";
 import type { IPresentationTreeDataProvider, PresentationTreeNodeRendererProps } from "@itwin/presentation-components";
 import type { VisibilityTreeFilterInfo } from "./common/Types";
+
 /**
  * These constants are taken from `@itwin/core-react`.
  * Defines the size in pixels of the expansion toggle.
@@ -98,7 +100,11 @@ export function createVisibilityTreeNodeRenderer({
         node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }} // if we want to disable TreeNodeRenderer style calculations for tree nodes, we need to override these values.
         checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
           <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
-            <VisibilityTreeNodeCheckbox {...checkboxProps} onVisibilityToggled={onVisibilityToggled} />
+            <VisibilityTreeNodeCheckbox
+              {...checkboxProps}
+              indeterminate={treeNodeProps.node.checkbox.state === CheckBoxState.Partial}
+              onVisibilityToggled={onVisibilityToggled}
+            />
           </div>
         )}
         descriptionEnabled={descriptionEnabled}
@@ -115,6 +121,7 @@ export function createVisibilityTreeNodeRenderer({
 
 interface VisibilityTreeNodeCheckboxProps extends NodeCheckboxRenderProps {
   onVisibilityToggled?: (enabled: boolean) => void;
+  indeterminate?: boolean;
 }
 
 /**
@@ -127,9 +134,10 @@ export function VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProp
       className="visibility-tree-checkbox"
       variant="eyeball"
       checked={props.checked}
+      indeterminate={props.indeterminate}
       onChange={(e) => {
-        props.onVisibilityToggled?.(e.currentTarget.checked);
-        props.onChange(e.currentTarget.checked);
+        props.onVisibilityToggled?.(props.indeterminate || e.currentTarget.checked);
+        props.onChange(props.indeterminate || e.currentTarget.checked);
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={props.onClick}

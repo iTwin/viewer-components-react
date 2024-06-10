@@ -14,6 +14,7 @@ import { TreeSelector } from "./TreeSelector";
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
+
 /**
  * Props for rendering trees
  * @public

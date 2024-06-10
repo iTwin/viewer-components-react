@@ -51,7 +51,7 @@ async function getAccessToken() {
 async function main() {
   const accessToken = await getAccessToken();
   const options = process.platform === "win32" ? undefined : { shell: "/bin/sh" };
-  crossEnv([...(accessToken ? [`IMJS_USER_ACCESS_TOKEN=${accessToken}`] : []), `react-scripts`, `--max_old_space_size=4096`, `start`], options);
+  crossEnv([...(accessToken ? [`IMJS_USER_ACCESS_TOKEN=${accessToken}`] : []), `vite`], options);
 }
 
 main();

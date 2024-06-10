@@ -8,8 +8,9 @@ import * as sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import * as imodelContentTreeModule from "../../../components/trees/imodel-content-tree/IModelContentTree";
+import { IModelContentTreeComponent } from "../../../components/trees/imodel-content-tree/IModelContentTreeComponent";
 import * as autoSizerModule from "../../../components/utils/AutoSizer";
-import { IModelContentTreeComponent, TreeWidget } from "../../../tree-widget-react";
+import { TreeWidget } from "../../../TreeWidget";
 import { render, TestUtils } from "../../TestUtils";
 
 describe("<IModelContentTreeComponent />", () => {

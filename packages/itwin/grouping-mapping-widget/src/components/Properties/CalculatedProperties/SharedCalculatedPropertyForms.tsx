@@ -1,10 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  CalculatedPropertyType,
-} from "@itwin/insights-client";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { CalculatedPropertyType } from "@itwin/insights-client";
 import React, { useCallback } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { LabeledSelect } from "@itwin/itwinui-react";
@@ -22,7 +20,6 @@ export const SharedCalculatedPropertyForms = ({
   itemRenderer,
   selectedItemRenderer,
 }: SharedCalculatedPropertyFormsProps) => {
-
   const generateOptionsFromCalculatedPropertyType = useCallback(() => {
     const options: SelectOption<CalculatedPropertyType | undefined>[] = [];
 

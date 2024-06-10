@@ -1,12 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
-import {
-  SvgAdd,
-  SvgDelete,
-} from "@itwin/itwinui-icons-react";
+import { SvgAdd, SvgDelete } from "@itwin/itwinui-icons-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import "./LabelAction.scss";
@@ -64,21 +61,17 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
       value: col,
     }));
 
-    if (availableStringColumns.indexOf(itemName) === -1 && options.length !== 0)
-      setItemName("");
+    if (availableStringColumns.indexOf(itemName) === -1 && options.length !== 0) setItemName("");
 
     return options;
   }, [availableStringColumns, itemName]);
 
-  const getStringColumnOptions = ((material: string | undefined) => {
-    const options = stringColumnOptions
-      .filter((x) => !materials.some((m) => m?.nameColumn === x.label))
-      .filter((x) => x.label !== itemName);
+  const getStringColumnOptions = (material: string | undefined) => {
+    const options = stringColumnOptions.filter((x) => !materials.some((m) => m?.nameColumn === x.label)).filter((x) => x.label !== itemName);
 
-    if (material)
-      options.push({ label: material, value: material });
+    if (material) options.push({ label: material, value: material });
     return options;
-  });
+  };
 
   const numericalColumnOptions = useMemo(() => {
     const options = availableNumericalColumns.map((col) => ({
@@ -86,15 +79,14 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
       value: col,
     }));
 
-    if (availableNumericalColumns.indexOf(itemQuantity) === -1 && options.length !== 0)
-      setItemQuantity("");
+    if (availableNumericalColumns.indexOf(itemQuantity) === -1 && options.length !== 0) setItemQuantity("");
 
     return options;
   }, [availableNumericalColumns, itemQuantity]);
 
-  const addPair = (() => {
+  const addPair = () => {
     setMaterials((oldMaterials) => [...oldMaterials, undefined]);
-  });
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -108,21 +100,24 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
     }
   }, [label]);
 
-  const onChangeCallback = useCallback(async (table: string, numCols: string[], strCols: string[]) => {
-    if (table !== reportTable) {
-      setMaterials([undefined]);
-      setName(table);
-    }
-    setReportTable(table);
-    setNumericalColumns(numCols);
-    setStringColumns(strCols);
-  }, [reportTable]);
+  const onChangeCallback = useCallback(
+    async (table: string, numCols: string[], strCols: string[]) => {
+      if (table !== reportTable) {
+        setMaterials([undefined]);
+        setName(table);
+      }
+      setReportTable(table);
+      setNumericalColumns(numCols);
+      setStringColumns(strCols);
+    },
+    [reportTable],
+  );
 
   return (
     <>
-      <div className='ec3w-label-details-container' data-testid="ec3-label-action">
-        <Fieldset legend='Assembly' className='ec3w-label-details'>
-          <Text variant="small" className='ec3w-label-field-legend'>
+      <div className="ec3w-label-details-container" data-testid="ec3-label-action">
+        <Fieldset legend="Assembly" className="ec3w-label-details">
+          <Text variant="small" className="ec3w-label-field-legend">
             Asterisk * indicates mandatory fields.
           </Text>
 
@@ -135,9 +130,9 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
           />
 
           <LabeledInput
-            id='name'
-            name='name'
-            label='Assembly Name'
+            id="name"
+            name="name"
+            label="Assembly Name"
             value={name}
             onChange={(event) => {
               setName(event.target.value);
@@ -154,7 +149,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
               setItemName(value);
             }}
             disabled={isLoading || reportTable === ""}
-            placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
+            placeholder={isLoading ? "Loading elements" : reportTable === "" ? "Select report table first" : "Select element"}
           />
 
           <LabeledSelect
@@ -167,11 +162,11 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
               setItemQuantity(value);
             }}
             disabled={isLoading || reportTable === ""}
-            placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
+            placeholder={isLoading ? "Loading elements" : reportTable === "" ? "Select report table first" : "Select element quantity"}
           />
         </Fieldset>
 
-        <Fieldset legend='Materials' className='ec3w-label-details'>
+        <Fieldset legend="Materials" className="ec3w-label-details">
           <div className="ec3w-pair-list">
             <Button
               className="ec3w-label-button"
@@ -193,7 +188,7 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
                 onMaterialChange={async (value) => {
                   setMaterials((oldMaterials) => {
                     const newPairs = oldMaterials.map((oldMaterial) =>
-                      oldMaterial?.nameColumn === material?.nameColumn ? { nameColumn: value } : oldMaterial
+                      oldMaterial?.nameColumn === material?.nameColumn ? { nameColumn: value } : oldMaterial,
                     );
                     return newPairs;
                   });
@@ -227,21 +222,15 @@ export const LabelAction = ({ template, onClose, label, setTemplate }: LabelActi
         onDelete={async () => {
           setMaterials(materials.filter((x) => x?.nameColumn !== selectedMaterial?.nameColumn));
         }}
-        refresh={async () => { }}
+        refresh={async () => {}}
       />
 
       <LabelActionPanel
-        isSavingDisabled={
-          !validator.allValid() ||
-          materials.filter((x) => x?.nameColumn === undefined).length > 0 ||
-          itemQuantity === "" ||
-          itemName === ""
-        }
+        isSavingDisabled={!validator.allValid() || materials.filter((x) => x?.nameColumn === undefined).length > 0 || itemQuantity === "" || itemName === ""}
         onSave={async () => {
           void onSave();
           await onClose();
-        }
-        }
+        }}
         onCancel={onClose}
         isLoading={isLoading}
       />

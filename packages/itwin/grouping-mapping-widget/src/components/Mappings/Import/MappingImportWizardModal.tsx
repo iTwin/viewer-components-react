@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IModelsClient } from "@itwin/imodels-client-management";
 import type { ITwinsAccessClient } from "@itwin/itwins-client";
 import type { StepProperties } from "@itwin/itwinui-react";
@@ -35,12 +35,7 @@ interface MappingImportWizardModalProps {
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
-export const MappingImportWizardModal = ({
-  show,
-  setShow,
-  onFinish,
-  displayStrings: userDisplayStrings,
-}: MappingImportWizardModalProps) => {
+export const MappingImportWizardModal = ({ show, setShow, onFinish, displayStrings: userDisplayStrings }: MappingImportWizardModalProps) => {
   const { prefix } = useGroupingMappingApiConfig();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [iTwinType, setITwinType] = useState<ITwinType>(ITwinType.Favorite);
@@ -56,10 +51,7 @@ export const MappingImportWizardModal = ({
     setIModelsClient(createIModelsClient(prefix));
   }, [prefix]);
 
-  const displayStrings = React.useMemo(
-    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
-    [userDisplayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
 
   const steps = useRef<StepProperties[]>([
     {
@@ -76,8 +68,7 @@ export const MappingImportWizardModal = ({
     },
     {
       name: "Rename & Confirm",
-      description:
-        "Rename and confirm your selections. Click import when finished.",
+      description: "Rename and confirm your selections. Click import when finished.",
     },
   ]);
 
@@ -90,24 +81,18 @@ export const MappingImportWizardModal = ({
   return (
     <Modal
       title={`Import ${displayStrings.mappings}`}
-      modalRootId='grouping-mapping-widget'
+      modalRootId="grouping-mapping-widget"
       isOpen={show}
       closeOnEsc={false}
       closeOnExternalClick={false}
       isDismissible={!importing}
-      styleType='fullPage'
+      styleType="fullPage"
       onClose={async () => {
         await onClose();
       }}
     >
-      <div className='gmw-import-wizard-body-container'>
-        <Stepper
-          currentStep={currentStep}
-          steps={steps.current}
-          onStepClick={
-            importing ? undefined : (index: number) => setCurrentStep(index)
-          }
-        />
+      <div className="gmw-import-wizard-body-container">
+        <Stepper currentStep={currentStep} steps={steps.current} onStepClick={importing ? undefined : (index: number) => setCurrentStep(index)} />
 
         {(() => {
           switch (currentStep) {
@@ -149,10 +134,7 @@ export const MappingImportWizardModal = ({
               // Preserve table state within Select Mappings
               return (
                 <>
-                  <div
-                    style={{ display: currentStep === 2 ? "flex" : "none" }}
-                    className="gmw-mapping-container"
-                  >
+                  <div style={{ display: currentStep === 2 ? "flex" : "none" }} className="gmw-mapping-container">
                     <SelectMappings
                       iModelId={selectedIModelId}
                       onSelect={(selectedMappings) => {

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IPropertiesClient } from "@itwin/insights-client";
 import { GROUPING_AND_MAPPING_BASE_PATH, PropertiesClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
@@ -43,9 +43,7 @@ export const PropertiesClientContext = createContext<IPropertiesClient>(createDe
 export const usePropertiesClient = () => {
   const context = useContext(PropertiesClientContext);
   if (!context) {
-    throw new Error(
-      "useGroupsClient should be used within a GroupsClientContext provider"
-    );
+    throw new Error("useGroupsClient should be used within a GroupsClientContext provider");
   }
   return context;
 };

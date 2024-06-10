@@ -35,6 +35,11 @@ module.exports = {
       outputs: ["./api/**"],
       inputs: ["src/**"],
     },
+    "check-internal": {
+      dependsOn: ["extract-api"],
+      outputs: [],
+      inputs: ["api/**"],
+    },
     clean: {
       cache: false,
     },

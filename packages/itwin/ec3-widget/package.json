@@ -1,6 +1,6 @@
 {
   "name": "@itwin/ec3-widget-react",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the EC3 Carbon Calculation.",
   "keywords": [
     "Bentley",
@@ -45,7 +45,10 @@
     "plugins": [
       "@itwin"
     ],
-    "extends": "plugin:@itwin/ui",
+    "extends": [
+      "plugin:@itwin/ui",
+      "prettier"
+    ],
     "rules": {
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error",
@@ -55,7 +58,7 @@
     }
   },
   "dependencies": {
-    "@itwin/insights-client": "^0.4.0",
+    "@itwin/insights-client": "^0.10.1",
     "@itwin/itwinui-icons-react": "^2.4.0",
     "@itwin/itwinui-react": "^2.12.0",
     "classnames": "^2.3.1",
@@ -95,6 +98,7 @@
     "@typescript-eslint/parser": "^5.10.1",
     "cpx2": "^3.0.0",
     "eslint": "^7.32.0",
+    "eslint-config-prettier": "^9.1.0",
     "jest": "^27.5.1",
     "jest-cli": "^27.5.1",
     "jest-transform-stub": "^2.0.0",

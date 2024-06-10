@@ -94,7 +94,6 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
   const categories = useCategories(IModelApp.viewManager, props.iModel, props.viewport);
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[]>();
   const { searchOptions, filterString, onFilterApplied, filteredProvider } = useTreeFilteringState();
-  const contentClassName = classNames("tree-widget-tree-content", props.density === "enlarged" && "enlarge");
 
   useEffect(() => {
     void (async () => {
@@ -107,7 +106,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
   }, [filteredProvider]);
 
   return (
-    <div className="tree-widget-tree-with-header">
+    <div className={classNames("tree-widget-tree-with-header", props.density === "enlarged" && "enlarge")}>
       <TreeHeader
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
@@ -149,7 +148,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
               />,
             ]}
       </TreeHeader>
-      <div className={contentClassName}>
+      <div className="tree-widget-tree-content">
         <AutoSizer>
           {({ width, height }) => (
             <CategoryTree

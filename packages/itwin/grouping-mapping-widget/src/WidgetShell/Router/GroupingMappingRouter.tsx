@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { useGroupingMappingApiConfig } from "../../components/context/GroupingApiConfigContext";
 import { GroupAction } from "../../components/Groups/Editing/GroupAction";
@@ -29,9 +29,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.Mappings:
       return (
         <Mappings
-          onClickAddMapping={() =>
-            navigateTo(() => ({ step: RouteStep.MappingsAction, title: "Add Mapping", groupingRouteFields: {} }))
-          }
+          onClickAddMapping={() => navigateTo(() => ({ step: RouteStep.MappingsAction, title: "Add Mapping", groupingRouteFields: {} }))}
           onClickMappingTitle={(mapping) => {
             navigateTo(() => ({
               step: RouteStep.Groups,
@@ -46,9 +44,10 @@ export const GroupingMappingRouter = ({
               title: mapping.mappingName,
             }));
           }}
-        />);
+        />
+      );
     case RouteStep.MappingsAction:
-      return (<MappingAction mapping={mapping} onClickCancel={goBack} onSaveSuccess={goBack} />);
+      return <MappingAction mapping={mapping} onClickCancel={goBack} onSaveSuccess={goBack} />;
     case RouteStep.Groups:
       if (mapping) {
         return (
@@ -104,13 +103,11 @@ export const GroupingMappingRouter = ({
       return null;
     case RouteStep.GroupContextCustomUI:
       if (mapping && group && groupContextCustomUI) {
-        return (
-          React.createElement(groupContextCustomUI, {
-            iModelId,
-            mappingId: mapping.id,
-            groupId: group.id,
-          })
-        );
+        return React.createElement(groupContextCustomUI, {
+          iModelId,
+          mappingId: mapping.id,
+          groupId: group.id,
+        });
       }
       return null;
     case RouteStep.Properties:
@@ -124,19 +121,39 @@ export const GroupingMappingRouter = ({
               navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: "Add Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
             }
             onClickModifyGroupProperty={(gp) =>
-              navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: gp.propertyName, groupingRouteFields: { ...prev?.groupingRouteFields, property: gp } }))
+              navigateTo((prev) => ({
+                step: RouteStep.PropertyAction,
+                title: gp.propertyName,
+                groupingRouteFields: { ...prev?.groupingRouteFields, property: gp },
+              }))
             }
             onClickAddCalculatedProperty={() =>
-              navigateTo((prev) => ({ step: RouteStep.CalculatedPropertyAction, title: "Create Calculated Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
+              navigateTo((prev) => ({
+                step: RouteStep.CalculatedPropertyAction,
+                title: "Create Calculated Property",
+                groupingRouteFields: { ...prev?.groupingRouteFields },
+              }))
             }
             onClickModifyCalculatedProperty={(cp) =>
-              navigateTo((prev) => ({ step: RouteStep.CalculatedPropertyAction, title: cp.propertyName, groupingRouteFields: { ...prev?.groupingRouteFields, calculatedProperty: cp } }))
+              navigateTo((prev) => ({
+                step: RouteStep.CalculatedPropertyAction,
+                title: cp.propertyName,
+                groupingRouteFields: { ...prev?.groupingRouteFields, calculatedProperty: cp },
+              }))
             }
             onClickAddCustomCalculationProperty={() =>
-              navigateTo((prev) => ({ step: RouteStep.CustomCalculationPropertyAction, title: "Create Custom Calculation", groupingRouteFields: { ...prev?.groupingRouteFields } }))
+              navigateTo((prev) => ({
+                step: RouteStep.CustomCalculationPropertyAction,
+                title: "Create Custom Calculation",
+                groupingRouteFields: { ...prev?.groupingRouteFields },
+              }))
             }
             onClickModifyCustomCalculation={(cc) =>
-              navigateTo((prev) => ({ step: RouteStep.CustomCalculationPropertyAction, title: cc.propertyName, groupingRouteFields: { ...prev?.groupingRouteFields, customCalculation: cc } }))
+              navigateTo((prev) => ({
+                step: RouteStep.CustomCalculationPropertyAction,
+                title: cc.propertyName,
+                groupingRouteFields: { ...prev?.groupingRouteFields, customCalculation: cc },
+              }))
             }
           />
         );
@@ -144,15 +161,7 @@ export const GroupingMappingRouter = ({
       return null;
     case RouteStep.PropertyAction: {
       if (mapping && group) {
-        return (
-          <GroupPropertyAction
-            mappingId={mapping.id}
-            group={group}
-            groupProperty={property}
-            onSaveSuccess={goBack}
-            onClickCancel={goBack}
-          />
-        );
+        return <GroupPropertyAction mappingId={mapping.id} group={group} groupProperty={property} onSaveSuccess={goBack} onClickCancel={goBack} />;
       }
       return null;
     }

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/presentation-common";
 import type { SelectOption } from "@itwin/itwinui-react";
 import {
@@ -29,12 +29,7 @@ import type {
 } from "@itwin/insights-client";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
-import {
-  convertPresentationFields,
-  convertToECProperties,
-  fetchPresentationDescriptor,
-  findProperties,
-} from "./GroupPropertyUtils";
+import { convertPresentationFields, convertToECProperties, fetchPresentationDescriptor, findProperties } from "./GroupPropertyUtils";
 import { manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
@@ -133,28 +128,26 @@ export const GroupPropertyAction = ({
     const descriptor = await fetchPresentationDescriptor(iModelConnection, result);
 
     // Only allow primitives and structs
-    const propertyFields = descriptor?.fields.filter(
-      (field) =>
-        field.type.valueFormat === PropertyValueFormat.Primitive ||
-        field.type.valueFormat === PropertyValueFormat.Struct
-    ) ?? [];
+    const propertyFields =
+      descriptor?.fields.filter((field) => field.type.valueFormat === PropertyValueFormat.Primitive || field.type.valueFormat === PropertyValueFormat.Struct) ??
+      [];
 
     const propertiesMetaData = convertPresentationFields(propertyFields);
 
     let groupPropertyDetails = null;
     if (groupProperty) {
       const accessToken = await getAccessToken();
-      groupPropertyDetails = await propertiesClient.getProperty(
-        accessToken,
-        mappingId,
-        group.id,
-        groupProperty.id
-      );
+      groupPropertyDetails = await propertiesClient.getProperty(accessToken, mappingId, group.id, groupProperty.id);
     }
 
     return { propertiesMetaData, groupPropertyDetails };
   }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, mappingId, propertiesClient]);
-  const { data, isFetching: isLoadingProperties, isSuccess: isLoadingPropertiesSuccessful } = useQuery(["properties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
+
+  const {
+    data,
+    isFetching: isLoadingProperties,
+    isSuccess: isLoadingPropertiesSuccessful,
+  } = useQuery(["properties", iModelId, mappingId, group.id, groupProperty?.id, "metadata"], fetchPropertiesMetadata);
 
   useEffect(() => {
     if (isLoadingPropertiesSuccessful && data?.propertiesMetaData) {
@@ -164,8 +157,7 @@ export const GroupPropertyAction = ({
         setPropertyName(data.groupPropertyDetails.propertyName);
         setOldPropertyName(data.groupPropertyDetails.propertyName);
         setDataType(data.groupPropertyDetails.dataType);
-        if(data.groupPropertyDetails.quantityType)
-          setQuantityType(data.groupPropertyDetails.quantityType);
+        if (data.groupPropertyDetails.quantityType) setQuantityType(data.groupPropertyDetails.quantityType);
 
         if(data.groupPropertyDetails.ecProperties){
           const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
@@ -202,19 +194,8 @@ export const GroupPropertyAction = ({
       };
 
       return groupProperty
-        ? propertiesClient.updateProperty(
-          accessToken,
-          mappingId,
-          group.id,
-          groupProperty.id,
-          newGroupProperty
-        )
-        : propertiesClient.createProperty(
-          accessToken,
-          mappingId,
-          group.id,
-          newGroupProperty
-        );
+        ? propertiesClient.updateProperty(accessToken, mappingId, group.id, groupProperty.id, newGroupProperty)
+        : propertiesClient.createProperty(accessToken, mappingId, group.id, newGroupProperty);
     },
     onSuccess: async () => {
       onSaveSuccess();
@@ -257,31 +238,23 @@ export const GroupPropertyAction = ({
             Asterisk * indicates mandatory fields.
           </Text>
           <LabeledInput
-            id='propertyName'
-            label='Property Name'
+            id="propertyName"
+            label="Property Name"
             value={propertyName}
             required
             onChange={(event) => {
               setPropertyName(event.target.value);
               validator.showMessageFor("propertyName");
             }}
-            message={validator.message(
-              "propertyName",
-              propertyName,
-              NAME_REQUIREMENTS
-            )}
-            status={
-              validator.message("propertyName", propertyName, NAME_REQUIREMENTS)
-                ? "negative"
-                : undefined
-            }
+            message={validator.message("propertyName", propertyName, NAME_REQUIREMENTS)}
+            status={validator.message("propertyName", propertyName, NAME_REQUIREMENTS) ? "negative" : undefined}
             onBlur={() => {
               validator.showMessageFor("propertyName");
             }}
           />
           <LabeledSelect<DataType>
             label={"Data Type"}
-            id='dataType'
+            id="dataType"
             options={[
               { value: DataType.Boolean, label: "Boolean" },
               { value: DataType.Integer, label: "Integer" },
@@ -295,11 +268,7 @@ export const GroupPropertyAction = ({
               setDataType(value);
             }}
             message={validator.message("dataType", propertyName, "required")}
-            status={
-              validator.message("dataType", propertyName, "required")
-                ? "negative"
-                : undefined
-            }
+            status={validator.message("dataType", propertyName, "required") ? "negative" : undefined}
             onBlur={() => {
               validator.showMessageFor("dataType");
             }}
@@ -308,20 +277,21 @@ export const GroupPropertyAction = ({
             onHide={() => { }}
           />
           <LabeledSelect<QuantityType | undefined>
-            label='Quantity Type'
+            label="Quantity Type"
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
-            onShow={() => { }}
-            onHide={() => { }}
-            placeholder = 'No Quantity Type'
+            onShow={() => {}}
+            onHide={() => {}}
+            placeholder="No Quantity Type"
           />
         </Fieldset>
-        {propertiesNotFoundAlert &&
+        {propertiesNotFoundAlert && (
           <Alert type="warning">
-            Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new selection is made and saved.
+            Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new
+            selection is made and saved.
           </Alert>
-        }
+        )}
         <ExpandableBlock
           title={"Mapped Properties"}
           endIcon={
@@ -411,11 +381,7 @@ export const GroupPropertyAction = ({
         setSelectedProperties={setSelectedProperties}
         propertiesMetaData={propertiesMetaData}
       />
-      <SaveModal
-        onSave={onSave}
-        onClose={handleCloseSaveModal}
-        showSaveModal={showSaveConfirmationModal}
-      />
+      <SaveModal onSave={onSave} onClose={handleCloseSaveModal} showSaveModal={showSaveConfirmationModal} />
     </>
   );
 };
