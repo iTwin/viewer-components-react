@@ -44,7 +44,7 @@ export function TreeHeader(props: TreeHeaderProps) {
   const { onFilterStart, onFilterClear, resultCount, selectedIndex, onSelectedChanged, children, density, className } = props;
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const { enabled: instanceFocusEnabled } = useFocusedInstancesContext();
-  const isEnlarged = density === "enlarged";
+  const size = density === "enlarged" ? "large" : "small";
 
   useEffect(() => {
     // istanbul ignore if
@@ -54,8 +54,8 @@ export function TreeHeader(props: TreeHeaderProps) {
   }, [instanceFocusEnabled]);
 
   return (
-    <div className={classnames("tree-widget-tree-header", className, isEnlarged && "enlarge")}>
-      <HeaderButtons contracted={isSearchOpen} isEnlarged={isEnlarged}>
+    <div className={classnames("tree-widget-tree-header", className)}>
+      <HeaderButtons contracted={isSearchOpen} size={size}>
         {children}
       </HeaderButtons>
       <DebouncedSearchBox
@@ -67,7 +67,7 @@ export function TreeHeader(props: TreeHeaderProps) {
         selectedResultIndex={selectedIndex}
         resultCount={resultCount}
         onSelectedResultChanged={onSelectedChanged}
-        size={isEnlarged ? "large" : "small"}
+        size={size}
         isDisabled={instanceFocusEnabled}
       />
     </div>
@@ -83,7 +83,7 @@ interface DebouncedSearchBoxProps {
   selectedResultIndex?: number;
   resultCount?: number;
   onSelectedResultChanged: (index: number) => void;
-  size?: "large" | "small";
+  size: "large" | "small";
   isDisabled?: boolean;
 }
 
@@ -156,12 +156,11 @@ function DebouncedSearchBox({
 interface HeaderButtonsProps {
   contracted: boolean;
   children?: React.ReactNode;
-  isEnlarged?: boolean;
+  size: "large" | "small";
 }
 
 function HeaderButtons(props: HeaderButtonsProps) {
   const className = classnames("button-container", props.contracted && "contracted");
-  const dropdownClassName = classnames("dropdown-item", props.isEnlarged && "enlarge");
 
   return (
     <ButtonGroup
@@ -172,14 +171,14 @@ function HeaderButtons(props: HeaderButtonsProps) {
             Children.toArray(props.children)
               .slice(overflowStart)
               .map((btn, index) => (
-                <li key={index} className={dropdownClassName} role="menuitem">
+                <li key={index} className="dropdown-item" role="menuitem">
                   {btn}
                 </li>
               ))
           }
           className="tree-header-button-dropdown-container"
         >
-          <IconButton title={TreeWidget.translate("dropdownMore")} styleType="borderless" size={props.isEnlarged ? undefined : "small"}>
+          <IconButton title={TreeWidget.translate("dropdownMore")} styleType="borderless" size={props.size}>
             <SvgMore />
           </IconButton>
         </DropdownMenu>
@@ -194,7 +193,7 @@ interface SearchResultStepperProps {
   total?: number;
   onStep: (newIndex: number) => void;
   selectedIndex?: number;
-  size?: "large" | "small";
+  size: "large" | "small";
 }
 
 function SearchResultStepper(props: SearchResultStepperProps) {
