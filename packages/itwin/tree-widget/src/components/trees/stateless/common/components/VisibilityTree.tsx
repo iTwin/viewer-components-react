@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
@@ -26,12 +26,20 @@ type VisibilityTreeProps = Omit<BaseTreeProps, "treeRenderer" | "imodelAccess"> 
 export function VisibilityTree({ visibilityHandlerFactory, ...props }: VisibilityTreeProps) {
   const { imodel, getSchemaContext } = props;
   const imodelAccess = useMemo(() => createIModelAccess({ imodel, getSchemaContext }), [imodel, getSchemaContext]);
-  const { getCheckboxState, onCheckboxClicked } = useHierarchyVisibility({
+  const { getCheckboxState, onCheckboxClicked, triggerRefresh } = useHierarchyVisibility({
     visibilityHandlerFactory: useCallback(() => visibilityHandlerFactory(imodelAccess), [visibilityHandlerFactory, imodelAccess]),
   });
+  const [onRootNodesLoaded, setOnRootNodesLoaded] = useState<() => void>();
+
+  useEffect(() => {
+    // When filtered paths change, refresh checkboxes just after the filtered hierarchy is loaded.
+    setOnRootNodesLoaded(() => () => triggerRefresh());
+  }, [triggerRefresh, props.getFilteredPaths]);
+
   return (
     <BaseTree
       {...props}
+      onRootNodesLoaded={onRootNodesLoaded}
       imodelAccess={imodelAccess}
       treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getCheckboxState={getCheckboxState} onCheckboxClicked={onCheckboxClicked} />}
     />
@@ -45,7 +53,7 @@ function VisibilityTreeRenderer({
   onCheckboxClicked: onClick,
   reportUsage,
   ...props
-}: TreeRendererProps & ReturnType<typeof useHierarchyVisibility> & Pick<BaseTreeProps, "reportUsage">) {
+}: TreeRendererProps & Pick<ReturnType<typeof useHierarchyVisibility>, "getCheckboxState" | "onCheckboxClicked"> & Pick<BaseTreeProps, "reportUsage">) {
   const { onCheckboxClicked } = useMultiCheckboxHandler({ rootNodes: props.rootNodes, isNodeSelected: props.isNodeSelected, onClick });
   const reportingOnCheckboxClicked = useReportingAction({ featureId: "visibility-change", action: onCheckboxClicked, reportUsage });
 
