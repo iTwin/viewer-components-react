@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../../TreeWidget";
@@ -92,7 +92,6 @@ function BaseTreeRenderer({
   getIcon,
   getSublabel,
   onNodeDoubleClick,
-  onRootNodesLoaded,
 }: MarkRequired<Omit<BaseTreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const {
@@ -124,12 +123,6 @@ function BaseTreeRenderer({
   });
   const reportingExpandNode = useReportingAction({ action: expandNode, reportUsage });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
-
-  useEffect(() => {
-    if (rootNodes?.length && !isLoading) {
-      onRootNodesLoaded?.();
-    }
-  }, [onRootNodesLoaded, isLoading, rootNodes]);
 
   if (rootNodes === undefined) {
     return (

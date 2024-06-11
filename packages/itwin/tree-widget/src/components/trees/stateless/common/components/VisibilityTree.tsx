@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchyVisibility } from "../UseHierarchyVisibility";
 import { useMultiCheckboxHandler } from "../UseMultiCheckboxHandler";
@@ -23,23 +23,22 @@ type VisibilityTreeProps = Omit<BaseTreeProps, "treeRenderer" | "imodelAccess"> 
   };
 
 /** @internal */
-export function VisibilityTree({ visibilityHandlerFactory, ...props }: VisibilityTreeProps) {
+export function VisibilityTree({ visibilityHandlerFactory, onPerformanceMeasured, ...props }: VisibilityTreeProps) {
   const { imodel, getSchemaContext } = props;
   const imodelAccess = useMemo(() => createIModelAccess({ imodel, getSchemaContext }), [imodel, getSchemaContext]);
   const { getCheckboxState, onCheckboxClicked, triggerRefresh } = useHierarchyVisibility({
     visibilityHandlerFactory: useCallback(() => visibilityHandlerFactory(imodelAccess), [visibilityHandlerFactory, imodelAccess]),
   });
-  const [onRootNodesLoaded, setOnRootNodesLoaded] = useState<() => void>();
-
-  useEffect(() => {
-    // When filtered paths change, refresh checkboxes just after the filtered hierarchy is loaded.
-    setOnRootNodesLoaded(() => () => triggerRefresh());
-  }, [triggerRefresh, props.getFilteredPaths]);
 
   return (
     <BaseTree
       {...props}
-      onRootNodesLoaded={onRootNodesLoaded}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(action, duration);
+        if (action === "reload") {
+          triggerRefresh();
+        }
+      }}
       imodelAccess={imodelAccess}
       treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getCheckboxState={getCheckboxState} onCheckboxClicked={onCheckboxClicked} />}
     />
