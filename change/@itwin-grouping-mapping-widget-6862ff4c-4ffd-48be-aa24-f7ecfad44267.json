@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Refactor of grouping and mapping properties UI, removed calculated property and custom calculation exports in favor of a single group property that contains all group property related logic, refactor includes a flat-list with icons representing the property type instead of three separate ones for properties list.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "141143406+julioalvahash@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
