@@ -11,7 +11,7 @@ import type { Link, OCLCAJob } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
 import { useOCLCAJobsClient } from "./context/OCLCAJobsClientContext";
-import { OCLCAApiHelper } from "../components/api/OCLCALoginHelper";
+import { OCLCAApiHelper } from "./api/OCLCAApiHelper";
 
 interface ExportProps {
   isOpen: boolean;
