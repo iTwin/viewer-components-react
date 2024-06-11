@@ -11,7 +11,7 @@ import type { Configuration } from "./EC3/Template";
 import { SearchBar } from "./SearchBar";
 import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
-import { useApiContext } from "./api/APIContext";
+import { useApiContext } from "./context/APIContext";
 import { ExportModal } from "./ExportModal";
 import { DeleteModal } from "./DeleteModal";
 

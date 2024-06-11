@@ -11,6 +11,7 @@ import { PreferencesContextProvider } from "./PropertyGridPreferencesContext";
 import type { PerformanceTrackedFeatures, UsageTrackedFeatures } from "./hooks/UseTelemetryContext";
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid";
 import type { PreferencesStorage } from "./api/PreferencesStorage";
+
 /**
  * Props for `PropertyGridComponent`.
  * @public

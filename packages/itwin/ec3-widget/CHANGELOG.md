@@ -1,8 +1,16 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Mon, 29 Apr 2024 14:59:26 GMT and should not be manually modified.
+This log was last generated on Mon, 10 Jun 2024 17:40:38 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.6.0
+
+Mon, 10 Jun 2024 17:40:38 GMT
+
+### Minor changes
+
+- Upgraded insights-client version to 0.10.1, fixed functions using old dependencies ([#841](https://github.com/iTwin/viewer-components-react/pull/841))
 
 ## 0.5.0
 

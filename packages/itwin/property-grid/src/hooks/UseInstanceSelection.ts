@@ -7,10 +7,10 @@ import { useEffect, useRef, useState } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { Guid, Id64 } from "@itwin/core-bentley";
 import { Presentation } from "@itwin/presentation-frontend";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey, KeySet } from "@itwin/presentation-common";
-import { useTelemetryContext } from "./UseTelemetryContext";
 
 const PropertyGridSelectionScope = "Property Grid";
 

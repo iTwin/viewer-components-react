@@ -9,7 +9,7 @@ import type { CreateTypeFromInterface } from "./utils";
 import { EmptyMessage, handleError, LoadingOverlay } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report, ReportsClient } from "@itwin/insights-client";
+import type { IReportsClient, Report } from "@itwin/insights-client";
 import { ReportHorizontalTile } from "./ReportHorizontalTile";
 import { SearchBar } from "./SearchBar";
 import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
@@ -24,7 +24,7 @@ const fetchReports = async (
   setReports: (reports: Report[]) => void,
   iTwinId: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
-  reportsClient: ReportsClient,
+  reportsClient: IReportsClient,
   getAccessToken: () => Promise<AccessToken>,
 ) => {
   try {
