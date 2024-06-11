@@ -14,7 +14,7 @@ import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icon
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
-import { CARBON_CALCULATION_BASE_PATH, OneClickLCAProvider, REPORTING_BASE_PATH } from "@itwin/one-click-lca-react";
+import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
   AddFavoritePropertyContextMenuItem,
   AncestorsNavigationControls,
@@ -327,12 +327,7 @@ const configuredUiItems = new Map<string, UiItem>([
     "one-click-lca-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [
-        new OneClickLCAProvider({
-          reportingBasePath: prefixUrl(REPORTING_BASE_PATH, process.env.IMJS_URL_PREFIX),
-          carbonCalculationBasePath: prefixUrl(CARBON_CALCULATION_BASE_PATH, process.env.IMJS_URL_PREFIX),
-        }),
-      ],
+      createUiItemsProviders: () => [new OneClickLCAProvider()],
     },
   ],
 ]);
