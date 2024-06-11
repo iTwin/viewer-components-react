@@ -41,7 +41,7 @@ import { handleError } from "../../../common/utils";
 import { CustomCalculationAction } from "../CustomCalculations/CustomCalculationAction";
 import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
-import { PropertyExpandableBlock, PropertyExpandableBlockWithRef } from "../PropertyExpandableBlock";
+import { PropertyExpandableBlock } from "../PropertyExpandableBlock";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -326,7 +326,7 @@ export const GroupPropertyAction = ({
             </div>
           </InputGroup>
         </PropertyExpandableBlock>
-        <PropertyExpandableBlockWithRef
+        <PropertyExpandableBlock
           ref={calculatedPropertyActionRef}
           title={"Calculated Property"}
           endIcon={
@@ -343,8 +343,8 @@ export const GroupPropertyAction = ({
               group={group}
               calculatedPropertyType={calculatedPropertyType}
               setCalculatedPropertyType={setCalculatedPropertyType}/>
-        </PropertyExpandableBlockWithRef>
-        <PropertyExpandableBlockWithRef
+        </PropertyExpandableBlock>
+        <PropertyExpandableBlock
           ref={customCalculationActionRef}
           title={"Custom Calculation"}
           endIcon={
@@ -363,7 +363,7 @@ export const GroupPropertyAction = ({
               formulaErrorMessage={formulaErrorMessage}
               forceValidation={forceValidation}
               disabled={isLoading}/>
-        </PropertyExpandableBlockWithRef>
+        </PropertyExpandableBlock>
       </div>
       <ActionPanel
         onSave={handleSaveClick}

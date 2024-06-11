@@ -6,23 +6,12 @@ interface PropertyExpandableBlockProps extends ExpandableBlockProps {
     children: React.ReactNode;
 }
 
-export const PropertyExpandableBlock = ({
-    children, 
-    ...ExpandableBlockProps
-}: PropertyExpandableBlockProps) => {
-    return(
-    <ExpandableBlock {...ExpandableBlockProps}>
-        {children}
-    </ExpandableBlock>
-    )
-}
-
-export const PropertyExpandableBlockWithRef = forwardRef<HTMLDivElement, PropertyExpandableBlockProps>(function PropertyExpandableBlockWithRef(props, ref) { 
+export const PropertyExpandableBlock = forwardRef<HTMLDivElement, PropertyExpandableBlockProps>(function PropertyExpandableBlockWithRef(props, ref) {
     return (
         <div ref={ref}>
-            <PropertyExpandableBlock {...props}>
+            <ExpandableBlock {...props}>
                 {props.children}
-            </PropertyExpandableBlock>
+            </ExpandableBlock>
         </div>
     );
 });
