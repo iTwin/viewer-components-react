@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeAll, mergeMap, of, reduce } from "rxjs";
+import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
@@ -43,7 +43,7 @@ interface GetElementStateProps {
 
 interface GetFilteredNodeVisibilityProps {
   parentKeys: HierarchyNodeKey[];
-  childPaths: HierarchyNodeIdentifiersPath[];
+  filterPaths: HierarchyNodeIdentifiersPath[];
 }
 
 interface ChangeFilteredNodeVisibilityProps extends GetFilteredNodeVisibilityProps {
@@ -57,6 +57,39 @@ interface ChangeElementStateProps extends GetElementStateProps {
 interface ChangeModelStateProps {
   ids: Id64Arg;
   on: boolean;
+}
+
+export const SUBJECT_CLASS_NAME = "BisCore.Subject" as const;
+export const MODEL_CLASS_NAME = "BisCore.GeometricModel3d" as const;
+export const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory" as const;
+export const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d" as const;
+
+type CategoryKey = `${Id64String}-${Id64String}`;
+type ElementKey = `${CategoryKey}-${Id64String}`;
+
+function createCategoryKey(modelId: string, categoryId: string): CategoryKey {
+  return `${modelId}-${categoryId}`;
+}
+
+function parseCategoryKey(key: CategoryKey) {
+  const [modelId, categoryId] = key.split("-");
+  return { modelId, categoryId };
+}
+
+function createElementKey(modelId: string, categoryId: string, elementId: string): ElementKey {
+  return `${modelId}-${categoryId}-${elementId}`;
+}
+
+function parseElementKey(key: ElementKey) {
+  const [modelId, categoryId, elementId] = key.split("-");
+  return { modelId, categoryId, elementId };
+}
+
+interface FilterTargets {
+  subjects?: Set<Id64String>;
+  models?: Set<Id64String>;
+  categories?: Set<CategoryKey>;
+  elements?: Set<ElementKey>;
 }
 
 /**
@@ -123,11 +156,6 @@ export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHan
   return new ModelsTreeVisibilityHandlerImpl(props);
 }
 
-export const SUBJECT_CLASS_NAME = "BisCore.Subject";
-export const MODEL_CLASS_NAME = "BisCore.GeometricModel3d";
-export const CATEGORY_CLASS_NAME = "BisCore.SpatialCategory";
-export const ELEMENT_CLASS_NAME = "BisCore.GeometricElement3d";
-
 class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
@@ -162,11 +190,16 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
       return this.getFilteredNodeVisibility({
         parentKeys: [...node.parentKeys, node.key],
-        childPaths: node.filtering.filteredChildrenIdentifierPaths,
+        filterPaths: node.filtering.filteredChildrenIdentifierPaths,
       });
     }
 
     if (HierarchyNode.isClassGroupingNode(node)) {
+      const ancestor = node.nonGroupingAncestor;
+      if (ancestor && HierarchyNode.isInstancesNode(ancestor) && ancestor.filtering?.filteredChildrenIdentifierPaths) {
+        return this.getVisibilityStatusObs(ancestor);
+      }
+
       return this.getClassGroupingNodeDisplayStatus(node);
     }
 
@@ -207,60 +240,48 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
   }
 
-  private getFilteredNodeVisibility({ parentKeys, childPaths }: GetFilteredNodeVisibilityProps) {
-    return from(childPaths).pipe(
-      mergeMap(async (path) => {
-        const imodelAccess = this._props.imodelAccess;
-        const elementIds = new Array<Id64String>();
-        for (let i = path.length - 1; i >= 0; --i) {
-          const id = path[i];
-          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
-            continue;
-          }
-
-          if (!(await imodelAccess.classDerivesFrom(id.className, ELEMENT_CLASS_NAME))) {
-            break;
-          }
-
-          elementIds.push(id.id);
+  private getFilteredNodeVisibility({ parentKeys, filterPaths }: GetFilteredNodeVisibilityProps) {
+    return from(this.getFilterTargets({ parentKeys, filterPaths })).pipe(
+      mergeMap(({ subjects, models, categories, elements }) => {
+        const observables = new Array<Observable<VisibilityStatus>>();
+        if (subjects?.size) {
+          observables.push(this.getSubjectNodeVisibilityStatus([...subjects]));
         }
 
-        if (elementIds.length) {
-          return from(elementIds).pipe(
-            mergeMap((elementId) => {
-              return forkJoin({
-                modelId: this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME),
-                categoryId: this.findClassIdInFilterPath(path, parentKeys, CATEGORY_CLASS_NAME),
-              }).pipe(
-                mergeMap((state) => {
-                  return this.getElementDisplayStatus({ ...state, elementId });
-                }),
-              );
-            }),
-            map((x) => x.state),
-            getVisibilityFromTreeNodeChildren,
-            map((x) => {
-              assert(x !== "empty");
-              return createVisibilityStatus(x);
-            }),
+        if (models?.size) {
+          observables.push(from(models).pipe(mergeMap((modelId) => this.getModelVisibilityStatus(modelId))));
+        }
+
+        if (categories?.size) {
+          observables.push(
+            from(categories).pipe(
+              mergeMap((key) => {
+                const { modelId, categoryId } = parseCategoryKey(key);
+                return this.getCategoryDisplayStatus({ modelId, categoryId });
+              }),
+            ),
           );
         }
 
-        const lastId = path[path.length - 1];
-        assert(HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastId));
-
-        if (await this._props.imodelAccess.classDerivesFrom(lastId.className, MODEL_CLASS_NAME)) {
-          return this.getModelVisibilityStatus(lastId.id);
+        if (elements?.size) {
+          observables.push(
+            from(elements).pipe(
+              mergeMap((key) => {
+                const { modelId, categoryId, elementId } = parseElementKey(key);
+                return this.getElementDisplayStatus({ modelId, categoryId, elementId });
+              }),
+            ),
+          );
         }
 
-        if (await this._props.imodelAccess.classDerivesFrom(lastId.className, SUBJECT_CLASS_NAME)) {
-          return this.getSubjectNodeVisibilityStatus([lastId.id]);
-        }
-
-        const modelId = await this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME);
-        return this.getCategoryDisplayStatus({ modelId, categoryId: lastId.id });
+        return merge(...observables);
       }),
-      mergeAll(),
+      map((x) => x.state),
+      getVisibilityFromTreeNodeChildren,
+      map((x) => {
+        assert(x !== "empty");
+        return createVisibilityStatus(x);
+      }),
     );
   }
 
@@ -455,7 +476,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
       return this.changeFilteredNodeVisibility({
         parentKeys: [...node.parentKeys, node.key],
-        childPaths: node.filtering.filteredChildrenIdentifierPaths,
+        filterPaths: node.filtering.filteredChildrenIdentifierPaths,
         on,
       });
     }
@@ -509,54 +530,125 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     });
   }
 
-  private changeFilteredNodeVisibility({ parentKeys, childPaths, on }: ChangeFilteredNodeVisibilityProps) {
-    return from(childPaths).pipe(
-      mergeMap(async (path) => {
-        const imodelAccess = this._props.imodelAccess;
-        const elementIds = new Array<Id64String>();
-        for (let i = path.length - 1; i >= 0; --i) {
-          const id = path[i];
-          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
+  private async getFilterTargets({ parentKeys, filterPaths }: GetFilteredNodeVisibilityProps) {
+    const filterTargets: FilterTargets = {};
+
+    function addFilterTarget(targetType: "subjects" | "models", value: Id64String): void;
+    function addFilterTarget(targetType: "categories", value: CategoryKey): void;
+    function addFilterTarget(targetType: "elements", value: ElementKey): void;
+    function addFilterTarget(targetType: keyof FilterTargets, value: string) {
+      ((filterTargets as Record<keyof FilterTargets, Set<string>>)[targetType] ??= new Set()).add(value);
+    }
+
+    const imodelAccess = this._props.imodelAccess;
+
+    // Sort paths by length such that the shortest paths are at the top.
+    // If there are paths to both parent and child node, if we handle parent paths before child paths,
+    // we can avoid doing extra actions.
+    filterPaths = [...filterPaths].sort((a, b) => b.length - a.length);
+
+    await Promise.all(
+      filterPaths.map(async (path) => {
+        const target = path[path.length - 1];
+        if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(target)) {
+          return;
+        }
+
+        const previousPath = path.slice(0, path.length - 1);
+
+        if (await imodelAccess.classDerivesFrom(target.className, SUBJECT_CLASS_NAME)) {
+          const parentSubjectId = await this.findClassIdInFilterPath(previousPath, parentKeys, SUBJECT_CLASS_NAME);
+          if (!filterTargets?.subjects?.has(parentSubjectId)) {
+            addFilterTarget("subjects", target.id);
+          }
+          return;
+        }
+
+        if (await imodelAccess.classDerivesFrom(target.className, MODEL_CLASS_NAME)) {
+          const subjectId = await this.findClassIdInFilterPath(previousPath, parentKeys, SUBJECT_CLASS_NAME);
+          if (!filterTargets?.subjects?.has(subjectId)) {
+            addFilterTarget("models", target.id);
+          }
+          return;
+        }
+
+        if (await imodelAccess.classDerivesFrom(target.className, CATEGORY_CLASS_NAME)) {
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          const modelId = await this.findClassIdInFilterPath(previousPath, parentKeys, MODEL_CLASS_NAME);
+          if (!filterTargets?.models?.has(modelId)) {
+            addFilterTarget("categories", createCategoryKey(modelId, target.id));
+          }
+          return;
+        }
+
+        const [modelId, categoryId] = await Promise.all([
+          this.findClassIdInFilterPath(previousPath, parentKeys, MODEL_CLASS_NAME),
+          this.findClassIdInFilterPath(previousPath, parentKeys, CATEGORY_CLASS_NAME),
+        ]);
+        if (filterTargets?.models?.has(modelId)) {
+          return;
+        }
+
+        if (filterTargets?.categories?.has(createCategoryKey(modelId, categoryId))) {
+          return;
+        }
+
+        addFilterTarget("elements", createElementKey(modelId, categoryId, target.id));
+
+        // Add parent elements to the filter targets as well
+        for (let idx = path.length - 1; idx >= 0; --idx) {
+          const pathIdentifier = path[idx];
+          if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(pathIdentifier)) {
             continue;
           }
 
-          if (!(await imodelAccess.classDerivesFrom(id.className, ELEMENT_CLASS_NAME))) {
+          if (!(await imodelAccess.classDerivesFrom(pathIdentifier.className, ELEMENT_CLASS_NAME))) {
             break;
           }
+          addFilterTarget("elements", createElementKey(modelId, categoryId, pathIdentifier.id));
+        }
+      }),
+    );
 
-          elementIds.push(id.id);
+    return filterTargets;
+  }
+
+  private changeFilteredNodeVisibility({ on, ...props }: ChangeFilteredNodeVisibilityProps) {
+    return from(this.getFilterTargets(props)).pipe(
+      mergeMap(({ subjects, models, categories, elements }) => {
+        const observables = new Array<Observable<void>>();
+        if (subjects?.size) {
+          observables.push(this.changeSubjectNodeState([...subjects], on));
         }
 
-        if (elementIds.length) {
-          return from(elementIds).pipe(
-            mergeMap((elementId) => {
-              return forkJoin({
-                modelId: this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME),
-                categoryId: this.findClassIdInFilterPath(path, parentKeys, CATEGORY_CLASS_NAME),
-              }).pipe(
-                mergeMap((state) => {
-                  return this.changeElementState({ ...state, elementId, on });
-                }),
-              );
-            }),
+        if (models?.size) {
+          observables.push(this.changeModelState({ ids: models, on }));
+        }
+
+        if (categories?.size) {
+          observables.push(
+            from(categories).pipe(
+              mergeMap((key) => {
+                const { modelId, categoryId } = parseCategoryKey(key);
+                return this.changeCategoryState({ modelId, categoryId, on });
+              }),
+            ),
           );
         }
 
-        const lastId = path[path.length - 1];
-        assert(HierarchyNodeIdentifier.isInstanceNodeIdentifier(lastId));
-
-        if (await imodelAccess.classDerivesFrom(lastId.className, MODEL_CLASS_NAME)) {
-          return this.changeModelState({ ids: lastId.id, on });
+        if (elements?.size) {
+          observables.push(
+            from(elements).pipe(
+              mergeMap((key) => {
+                const { modelId, categoryId, elementId } = parseElementKey(key);
+                return this.changeElementState({ modelId, categoryId, elementId, on });
+              }),
+            ),
+          );
         }
 
-        if (await imodelAccess.classDerivesFrom(lastId.className, SUBJECT_CLASS_NAME)) {
-          return this.changeSubjectNodeState([lastId.id], on);
-        }
-
-        const modelId = await this.findClassIdInFilterPath(path, parentKeys, MODEL_CLASS_NAME);
-        return this.changeCategoryState({ modelId, categoryId: lastId.id, on });
+        return merge(...observables);
       }),
-      mergeAll(),
     );
   }
 
@@ -878,6 +970,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     function* keysToCheck(): Iterable<InstanceKey> {
       for (let i = path.length - 1; i >= 0; --i) {
         const id = path[i];
+        // istanbul ignore else
         if (HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
           yield id;
         }
@@ -897,6 +990,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       }
     }
 
+    // istanbul ignore next
     assert(false, () => `Cannot find an instance of ${className} in instance keys: ${JSON.stringify([...keysToCheck()], undefined, 2)}`);
   }
 }
@@ -911,6 +1005,8 @@ interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   /** Status when always/never lists are empty and exclusive mode is off */
   defaultStatus: () => NonPartialVisibilityStatus;
 }
+
+
 
 function getVisibilityFromTreeNodeChildren(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
   return obs.pipe(
