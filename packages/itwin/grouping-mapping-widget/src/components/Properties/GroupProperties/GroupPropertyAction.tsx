@@ -7,7 +7,6 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
   Button,
-  ExpandableBlock,
   Fieldset,
   Icon,
   InputGroup,
@@ -42,6 +41,7 @@ import { handleError } from "../../../common/utils";
 import { CustomCalculationAction } from "../CustomCalculations/CustomCalculationAction";
 import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
+import { PropertyExpandableBlock, PropertyExpandableBlockWithRef } from "../PropertyExpandableBlock";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -292,7 +292,7 @@ export const GroupPropertyAction = ({
             selection is made and saved.
           </Alert>
         )}
-        <ExpandableBlock
+        <PropertyExpandableBlock
           title={"Mapped Properties"}
           endIcon={
             <Icon fill={selectedProperties.length > 0 ? "informational" : "default"}>
@@ -325,46 +325,45 @@ export const GroupPropertyAction = ({
                 ))}
             </div>
           </InputGroup>
-        </ExpandableBlock>
-        <div ref={calculatedPropertyActionRef}>
-          <ExpandableBlock title={"Calculated Property"}
-            endIcon={
-              <Icon fill={calculatedPropertyType ? "informational" : "default"}>
-                <SvgMeasure />
-              </Icon>
-            }
-            isExpanded={calculatedPropertyType ? true : false}
-            onToggle={(isExpanding)=> {
-              if(isExpanding === true)
-                scrollToBlock(calculatedPropertyActionRef);
+        </PropertyExpandableBlock>
+        <PropertyExpandableBlockWithRef
+          ref={calculatedPropertyActionRef}
+          title={"Calculated Property"}
+          endIcon={
+          <Icon fill={calculatedPropertyType ? "informational" : "default"}>
+              <SvgMeasure />
+          </Icon>
+          }
+          isExpanded={calculatedPropertyType ? true : false}
+          onToggle={(isExpanding)=> {
+            if(isExpanding === true)
+              scrollToBlock(calculatedPropertyActionRef);
             }}>
             <CalculatedPropertyActionWithVisuals
               group={group}
               calculatedPropertyType={calculatedPropertyType}
               setCalculatedPropertyType={setCalculatedPropertyType}/>
-          </ExpandableBlock>
-        </div>
-        <div ref={customCalculationActionRef}>
-          <ExpandableBlock
-            title={"Custom Calculation"}
-            endIcon={
-              <Icon fill={formula ? "informational" : "default"}>
-                <SvgFunction />
-              </Icon>
-            }
-            isExpanded={formula ? true : false}
-            onToggle={(isExpanding)=> {
-              if(isExpanding === true)
-                scrollToBlock(customCalculationActionRef);
-            }}>
+        </PropertyExpandableBlockWithRef>
+        <PropertyExpandableBlockWithRef
+          ref={customCalculationActionRef}
+          title={"Custom Calculation"}
+          endIcon={
+            <Icon fill={formula ? "informational" : "default"}>
+              <SvgFunction />
+            </Icon>
+          }
+          isExpanded={formula !== undefined}
+          onToggle={(isExpanding)=> {
+            if(isExpanding === true)
+              scrollToBlock(customCalculationActionRef);
+          }}>
             <CustomCalculationAction
               formula={formula}
               setFormula={setFormula}
               formulaErrorMessage={formulaErrorMessage}
               forceValidation={forceValidation}
               disabled={isLoading}/>
-          </ExpandableBlock>
-        </div>
+        </PropertyExpandableBlockWithRef>
       </div>
       <ActionPanel
         onSave={handleSaveClick}

@@ -22,9 +22,9 @@ export const SharedCalculatedPropertyForms = ({
 }: SharedCalculatedPropertyFormsProps) => {
   const generateOptionsFromCalculatedPropertyType = useCallback(() => {
     const options: SelectOption<CalculatedPropertyType | undefined>[] = [];
-
     const indexableEnum = CalculatedPropertyType as unknown as { [key: string]: string };
-
+    
+    options.push({value: undefined, label: "No Calculated Property Type"});
     for (const key in indexableEnum) {
       if (typeof indexableEnum[key] === "string" && key !== "Undefined") {
         // Generate labels by adding space between capitals
@@ -35,7 +35,6 @@ export const SharedCalculatedPropertyForms = ({
         options.push({ value: indexableEnum[key] as CalculatedPropertyType, label });
       }
     }
-    options.push({value: undefined, label: "No Calculated Property Type"});
     return options;
   }, []);
 

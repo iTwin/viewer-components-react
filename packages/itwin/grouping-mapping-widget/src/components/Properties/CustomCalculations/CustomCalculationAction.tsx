@@ -54,6 +54,10 @@ export const CustomCalculationAction = ({
         }}
         message={formulaErrorMessage}
         status={formulaErrorMessage ? "negative" : undefined}
+        onBlur={(event)=> {
+          if(event.target.textLength === 0)
+            setFormula(undefined);
+        }}
         onBlurCapture={() => {
           forceValidation();
         }}
