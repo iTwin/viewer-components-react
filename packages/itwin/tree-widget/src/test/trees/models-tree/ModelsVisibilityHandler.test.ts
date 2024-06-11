@@ -27,6 +27,7 @@ import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
+import type { ModelInfo } from "../../../components/trees/models-tree/ModelsTreeButtons";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
@@ -35,7 +36,6 @@ import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } 
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import type { ModelInfo } from "../../../tree-widget-react";
 
 describe("ModelsVisibilityHandler", () => {
   before(async () => {

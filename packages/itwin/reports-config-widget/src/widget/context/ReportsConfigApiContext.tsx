@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelsClient } from "@itwin/imodels-client-management";
+import type { IMappingsClient, IReportsClient } from "@itwin/insights-client";
 import { MappingsClient, ReportsClient } from "@itwin/insights-client";
 import * as React from "react";
 import { createContext } from "react";
@@ -14,8 +15,8 @@ export interface ReportsConfigApiProps {
   getAccessToken: GetAccessTokenFn;
   iTwinId: string;
   baseUrl: string;
-  reportsClient: ReportsClient;
-  mappingsClient: MappingsClient;
+  reportsClient: IReportsClient;
+  mappingsClient: IMappingsClient;
   iModelsClient: IModelsClient;
 }
 

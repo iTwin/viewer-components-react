@@ -9,6 +9,6 @@ public;Reports: ({ onClickAddReport, onClickReportModify, onClickReportTitle }: 
 internal;REPORTS_CONFIG_BASE_URL = "https://api.bentley.com"
 public;ReportsConfigContext: (props: ReportsConfigContextProps) => JSX.Element
 public;ReportsConfigContextProps
-public;ReportsConfigProvider
+public;ReportsConfigProvider 
 public;ReportsConfigWidget
 public;ReportsProps

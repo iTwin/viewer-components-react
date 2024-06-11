@@ -30,6 +30,7 @@ import type { TreeNodeItem } from "@itwin/components-react";
 import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
 import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
+
 const PAGING_SIZE = 20;
 
 /**
