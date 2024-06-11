@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Changes in One Click LCA widget to provide custom client implementation ( ReportsClient and OCLCAJobsClient ).",
+  "packageName": "@itwin/one-click-lca-react",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}
