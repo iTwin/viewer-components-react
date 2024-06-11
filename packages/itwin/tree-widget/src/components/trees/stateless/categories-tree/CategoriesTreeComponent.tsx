@@ -3,6 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import "../Tree.scss";
+import classNames from "classnames";
 import { Fragment, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -62,7 +64,7 @@ function CategoriesTreeComponentImpl({
   };
 
   return (
-    <div className="tree-widget-tree-with-header">
+    <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
         <TreeHeader onFilterClear={() => setFilter("")} onFilterStart={(newFilter) => setFilter(newFilter)} onSelectedChanged={() => {}} density={density}>
           {headerButtons
@@ -79,19 +81,21 @@ function CategoriesTreeComponentImpl({
                 />,
               ]}
         </TreeHeader>
-        <AutoSizer>
-          {({ width, height }) => (
-            <StatelessCategoriesTree
-              {...treeProps}
-              imodel={iModel}
-              categories={categories}
-              activeView={viewport}
-              width={width}
-              height={height}
-              filter={filter}
-            />
-          )}
-        </AutoSizer>
+        <div className="tw-tree-content">
+          <AutoSizer>
+            {({ width, height }) => (
+              <StatelessCategoriesTree
+                {...treeProps}
+                imodel={iModel}
+                categories={categories}
+                activeView={viewport}
+                width={width}
+                height={height}
+                filter={filter}
+              />
+            )}
+          </AutoSizer>
+        </div>
       </UnifiedSelectionProvider>
     </div>
   );

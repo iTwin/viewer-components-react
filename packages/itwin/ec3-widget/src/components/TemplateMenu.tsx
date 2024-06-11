@@ -17,7 +17,7 @@ import { Button, Text, toaster } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import { useApiContext } from "./api/APIContext";
+import { useApiContext } from "./context/APIContext";
 import { TemplateActionPanel } from "./TemplateActionPanel";
 import { DeleteModal } from "./DeleteModal";
 import { ReportConfirmModal } from "./ReportConfirmModal";

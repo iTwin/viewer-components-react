@@ -6,11 +6,7 @@
 import { useEffect, useState } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
-  FilteredType,
-  FilteringPropertyDataProvider,
-  PropertyDataChangeEvent,
-  PropertyRecordDataFiltererBase,
-  VirtualizedPropertyGridWithDataProvider,
+  FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
@@ -31,7 +27,7 @@ import type { IDisposable } from "@itwin/core-bentley";
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
   /** Specifies whether child categories should be auto expanded or not. */
   autoExpandChildCategories?: boolean;
-  /** @internal */
+  /** Filterer used to filter data. */
   filterer: IPropertyDataFilterer;
 }
 

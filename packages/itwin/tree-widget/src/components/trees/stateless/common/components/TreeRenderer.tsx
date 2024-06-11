@@ -10,11 +10,12 @@ import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/
 import { TreeNodeRenderer } from "./TreeNodeRenderer";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode, PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
 
 interface TreeRendererOwnProps {
   rootNodes: PresentationTreeNode[];
   isNodeSelected: (nodeId: string) => boolean;
+  onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
 }
 
 type TreeRendererProps = Pick<
@@ -31,6 +32,7 @@ export function TreeRenderer({
   expandNode,
   onNodeClick,
   onNodeKeyDown,
+  onNodeDoubleClick,
   isNodeSelected,
   onFilterClick,
   getIcon,
@@ -45,8 +47,15 @@ export function TreeRenderer({
       return (
         <TreeNodeRenderer
           {...nodeProps}
+          onNodeClick={(node, isSelected, event) => {
+            if (onNodeDoubleClick && event.detail === 2) {
+              onNodeDoubleClick?.(node, !!nodeProps.isSelected);
+              // Click node to not lose selection
+              return onNodeClick?.(node, true, event);
+            }
+            onNodeClick?.(node, isSelected, event);
+          }}
           expandNode={expandNode}
-          onNodeClick={onNodeClick}
           onNodeKeyDown={onNodeKeyDown}
           getIcon={getIcon}
           getSublabel={getSublabel}
@@ -56,7 +65,7 @@ export function TreeRenderer({
         />
       );
     },
-    [expandNode, onNodeClick, onNodeKeyDown, getHierarchyLevelDetails, getIcon, getSublabel, onFilterClick, checkboxProps],
+    [expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, getHierarchyLevelDetails, getIcon, getSublabel, onFilterClick, checkboxProps],
   );
 
   const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);

@@ -1,0 +1,7 @@
+{
+  "type": "prerelease",
+  "comment": "`ExternalSources` tree: Fixed nodes sometimes being missing and invalid label in cases when an `ExternalSource` doesn't have a related `RepositoryLink` or the link doesn't have `CodeValue` and `UserLabel`.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

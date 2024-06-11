@@ -398,8 +398,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
-                  modelId: { selector: "printf('0x%x', this.Model.Id)" },
-                  categoryId: { selector: "printf('0x%x', this.Category.Id)" },
+                  modelId: { selector: "IdToHex(this.Model.Id)" },
+                  categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                 },
                 supportsFiltering: true,
@@ -459,8 +459,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                   `,
                 },
                 extendedData: {
-                  modelId: { selector: "printf('0x%x', this.Model.Id)" },
-                  categoryId: { selector: "printf('0x%x', this.Category.Id)" },
+                  modelId: { selector: "IdToHex(this.Model.Id)" },
+                  categoryId: { selector: "IdToHex(this.Category.Id)" },
                   imageId: "icon-item",
                 },
                 supportsFiltering: true,
@@ -630,7 +630,11 @@ async function createInstanceKeyPathsFromInstanceLabel(
             m.ECInstanceId,
             ${elementLabelSelectClause} Label
           FROM BisCore.GeometricModel3d m
-          JOIN BisCore.Element e on e.ECInstanceId = m.ModeledElement.Id
+          JOIN BisCore.Element e ON e.ECInstanceId = m.ModeledElement.Id
+          WHERE NOT m.IsPrivate
+            AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
+            AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
+            AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
         )
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
       `,
@@ -649,7 +653,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
 
 function createECInstanceKeySelectClause(props: { alias: string }) {
   const classIdSelector = `[${props.alias}].[ECClassId]`;
-  const instanceHexIdSelector = `printf('0x%x', [${props.alias}].[ECInstanceId])`;
+  const instanceHexIdSelector = `IdToHex([${props.alias}].[ECInstanceId])`;
   return `json_object('className', ec_classname(${classIdSelector}, 's.c'), 'id', ${instanceHexIdSelector})`;
 }
 

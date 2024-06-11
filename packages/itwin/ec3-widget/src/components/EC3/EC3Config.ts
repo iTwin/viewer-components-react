@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
-import type { GetAccessTokenFn } from "../api/APIContext";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
+import { CARBON_CALCULATION_BASE_PATH, EC3ConfigurationsClient, EC3JobsClient, ODataClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import type { GetAccessTokenFn } from "../context/APIContext";
 import type { EC3Token } from "./EC3Token";
 
 export const EC3URI = "https://buildingtransparency.org/";
@@ -40,6 +41,26 @@ export interface EC3ConfigCommonProps {
    * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to CARBON_CALCULATION_BASE_PATH from @itwin/insights-client.
    */
   carbonCalculationBasePath?: string;
+
+  /**
+   * A custom implementation of ReportsClient. If provided, reportingBasePath is ignored.
+   */
+  reportsClient?: IReportsClient;
+
+  /**
+   * A custom implementation of OdataClient. If provided, reportingBasePath is ignored.
+   */
+  oDataClient?: IOdataClient;
+
+  /**
+   * A custom implementation of EC3JobsClient. If provided, carbonCalculationBasePath is ignored.
+   */
+  ec3JobsClient?: IEC3JobsClient;
+
+  /**
+   * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
+   */
+  ec3ConfigurationsClient?: IEC3ConfigurationsClient;
 }
 
 /**
@@ -85,6 +106,10 @@ export class EC3Config {
   public readonly getEC3AccessToken: GetAccessTokenFn;
   private token?: EC3Token;
   private readonly redirectUri?: string;
+  public readonly reportsClient: IReportsClient;
+  public readonly oDataClient: IOdataClient;
+  public readonly ec3JobsClient: IEC3JobsClient;
+  public readonly ec3ConfigurationsClient: IEC3ConfigurationsClient;
 
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
@@ -101,6 +126,10 @@ export class EC3Config {
 
     this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
     this.getEC3AccessToken = "getEC3AccessToken" in props ? props.getEC3AccessToken : this.getAuthWindowToken.bind(this);
+    this.reportsClient = props.reportsClient ?? new ReportsClient(this.reportingBasePath);
+    this.oDataClient = props.oDataClient ?? new ODataClient(this.reportingBasePath);
+    this.ec3JobsClient = props.ec3JobsClient ?? new EC3JobsClient(this.carbonCalculationBasePath);
+    this.ec3ConfigurationsClient = props.ec3ConfigurationsClient ?? new EC3ConfigurationsClient(this.carbonCalculationBasePath);
   }
 
   private tokenExpired(): boolean {

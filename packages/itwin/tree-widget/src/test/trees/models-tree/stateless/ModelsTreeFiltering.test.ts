@@ -23,8 +23,9 @@ import {
   insertSpatialCategory,
   insertSubject,
 } from "../../../IModelUtils";
+import { createIModelAccess } from "../../Common";
 import { NodeValidators, validateHierarchy } from "../../HierarchyValidation";
-import { createIModelAccess, createModelsTreeProvider } from "./Utils";
+import { createModelsTreeProvider } from "./Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -32,6 +33,7 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../../HierarchyValidation";
+
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
@@ -391,11 +393,8 @@ describe("Models tree", () => {
           insertPhysicalElement({ builder, userLabel: `element-2`, modelId: model2.id, categoryId: category.id });
           return { rootSubject, childSubject, model1, model2, category };
         },
-        (x) => [
-          [x.rootSubject, x.childSubject],
-          [x.rootSubject, x.childSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }],
-        ],
-        (x) => [x.childSubject, x.model1],
+        (x) => [[x.rootSubject, x.childSubject]],
+        (x) => [x.childSubject],
         (_x) => "matching",
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -405,7 +404,7 @@ describe("Models tree", () => {
               NodeValidators.createForInstanceNode({
                 instanceKeys: [x.childSubject],
                 label: "matching child subject",
-                autoExpand: true,
+                autoExpand: false,
                 children: [
                   NodeValidators.createForInstanceNode({
                     label: "category",

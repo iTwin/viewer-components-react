@@ -48,9 +48,6 @@ public;ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) =
 public;ModelsVisibilityHandler 
 public;ModelsVisibilityHandlerProps
 public;ModelTreeComponentProps 
-internal;RULESET_CATEGORIES: Ruleset
-internal;RULESET_EXTERNAL_SOURCES: Ruleset
-internal;RULESET_IMODEL_CONTENT: Ruleset
 public;SelectableTree(props: SelectableTreeProps): JSX.Element | null
 public;SelectableTreeProps
 public;showAllCategories(categories: string[], viewport: Viewport): Promise
@@ -59,17 +56,12 @@ beta;StatelessCategoriesTreeComponent: (props: StatelessCategoriesTreeComponentP
 beta;StatelessExternalSourcesTreeComponent: (props: StatelessExternalSourcesTreeComponentProps) => JSX.Element | null
 beta;StatelessIModelContentTreeComponent: (props: StatelessIModelContentTreeComponentProps) => JSX.Element | null
 beta;StatelessModelsTreeComponent: (props: StatelessModelsTreeComponentProps) => JSX.Element | null
-internal;SubjectModelIdsCache
 public;toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise
-internal;TREE_NODE_LABEL_RENDERER = "visibility-tree-node-label"
 public;TreeContextMenuItem({ id, children, title, onSelect }: PropsWithChildren
 public;TreeContextMenuItemProps
 public;TreeContextMenuProps
 public;TreeDefinition
-internal;TreeNodeLabelRenderer 
 public;TreeNodeLabelRendererProps
-internal;TreeNodeRendererContextProvider({ nodeLabelRenderer, node, children }: TreeNodeRendererContextProviderProps): JSX.Element
-internal;TreeNodeRendererContextProviderProps 
 public;TreeNodeRendererProps
 public;TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, density, ...restProps }: TreeRendererProps): JSX.Element
 public;TreeRendererBaseProps 
@@ -80,11 +72,11 @@ public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element
 public;TreeWidgetId = "tree-widget-react:trees"
 public;TreeWidgetOptions
 public;TreeWidgetUiItemsProvider 
-internal;useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[]
-internal;useContextMenu({ contextMenuItems }: TreeContextMenuProps):
 public;useTreeTransientState
 public;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
 deprecated;useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider
+beta;useVisibilityTreeState({ imodel, ruleset, filterInfo, onFilterChange, visibilityHandler, selectionPredicate, eventHandler, reportUsage, ...props }: UseVisibilityTreeStateProps): UsePresentationTreeStateResult
+beta;UseVisibilityTreeStateProps 
 public;VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map
 public;VisibilityStatus
 public;VisibilityTreeEventHandler 

@@ -12,13 +12,15 @@ import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
+import { ModelsTreeComponent } from "../../../components/trees/models-tree/ModelsTreeComponent";
 import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import { ModelsTreeComponent, TreeWidget } from "../../../tree-widget-react";
+import { TreeWidget } from "../../../TreeWidget";
 import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
-import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget-react";
+import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../components/trees/models-tree/ModelsTreeButtons";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
+
 describe("<ModelsTreeComponent />", () => {
   before(async () => {
     await NoRenderApp.startup();

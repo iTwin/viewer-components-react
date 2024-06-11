@@ -352,10 +352,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: true,
               })}
             FROM ${categoryFilterClauses.from} this
-            JOIN ${elementClass} e ON e.Category.Id = this.ECInstanceId
             ${categoryFilterClauses.joins}
             WHERE
-              e.Model.Id IN (${modelIds.map(() => "?").join(",")})
+              EXISTS (SELECT 1 FROM ${elementClass} e WHERE e.Category.Id = this.ECInstanceId AND e.Model.Id IN (${modelIds.map(() => "?").join(",")}))
               ${categoryFilterClauses.where ? `AND ${categoryFilterClauses.where}` : ""}
           `,
           bindings: modelIds.map((id) => ({ type: "id", value: id })),
@@ -376,7 +375,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   }),
                 },
                 extendedData: {
-                  isInformationElement: true,
+                  isInformationContentElement: true,
                 },
                 hasChildren: true,
                 grouping: {
@@ -476,13 +475,17 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: "BisCore.Element", alias: "this" },
-    });
-    return [
-      {
-        fullClassName: "BisCore.Element",
+    const createContainedElementsDefinition = async (
+      elementFullClassName: string,
+      whereClause?: string,
+      extendedData?: Parameters<NodesQueryClauseFactory["createSelectClause"]>[0]["extendedData"],
+    ) => {
+      const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: elementFullClassName, alias: "this" },
+      });
+      return {
+        fullClassName: elementFullClassName,
         query: {
           ecsql: `
             SELECT
@@ -492,7 +495,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: "BisCore.Element",
+                    className: elementFullClassName,
                   }),
                 },
                 hasChildren: {
@@ -503,6 +506,8 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                         SELECT Parent.Id ParentId FROM BisCore.Element
                         UNION ALL
                         SELECT ModeledElement.Id ParentId FROM BisCore.Model
+                        UNION ALL
+                        SELECT SourceECInstanceId ParentId FROM BisCore.ElementGroupsMembers
                       )
                       WHERE ParentId = this.ECInstanceId
                       LIMIT 1
@@ -514,6 +519,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 },
                 extendedData: {
                   imageId: "icon-item",
+                  ...extendedData,
                 },
                 supportsFiltering: true,
               })}
@@ -521,14 +527,23 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             JOIN BisCore.Model m ON m.ECInstanceId = this.Model.id
             ${instanceFilterClauses.joins}
             WHERE
-              m.ECClassId IS NOT (BisCore.GeometricModel) AND
-              this.Parent IS NULL AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
+              m.ECClassId IS NOT (BisCore.GeometricModel)
+              AND this.Parent IS NULL
+              AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
+              ${whereClause ? `AND ${whereClause}` : ""}
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
-          bindings: modelIds.map((id) => ({ type: "id", value: id })),
+          bindings: modelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
-      },
-    ];
+      };
+    };
+
+    return Promise.all([
+      createContainedElementsDefinition("BisCore.Element", "this.ECClassId IS NOT (BisCore.GroupInformationElement)"),
+      createContainedElementsDefinition("BisCore.GroupInformationElement", "this.ECClassId IS (BisCore.GroupInformationElement)", {
+        isGroupInformationElement: true,
+      }),
+    ]);
   }
 
   private async createGroupInformationElementChildElementsQuery({
@@ -656,7 +671,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     parentNode,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const data = parentNode.extendedData;
-    if (data?.isCategory || data?.isSubject || data?.isInformationElement) {
+    if (data?.isCategory || data?.isSubject || data?.isInformationContentElement || data?.isGroupInformationElement) {
       return [];
     }
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({

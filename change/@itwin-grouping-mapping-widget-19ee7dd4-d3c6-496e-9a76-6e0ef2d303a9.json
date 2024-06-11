@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed an issue with the form validator allowing invalid characters if followed by a valid one.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Guillar1@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

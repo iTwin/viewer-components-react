@@ -18,6 +18,7 @@ import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
 import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
+
 /**
  * Presentation rules used by ControlledCategoriesTree
  * @internal
