@@ -8,17 +8,13 @@ import sinon from "sinon";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
+import { defaultHierarchyConfiguration } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { createIModelMock } from "../../../Common";
 
 describe("ModelsTreeIdsCache", () => {
   function createIdsCache(queryHandler: (query: string) => any[]) {
     const iModel = createIModelMock(queryHandler);
-    const hierarchyConfig = {
-      elementClassGrouping: "enable" as const,
-      elementClassSpecification: "BisCore.GeometricElement3d",
-      showEmptyModels: false,
-    };
-    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), hierarchyConfig);
+    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), defaultHierarchyConfiguration);
   }
 
   // TODO: Merge with other tests if they will be added

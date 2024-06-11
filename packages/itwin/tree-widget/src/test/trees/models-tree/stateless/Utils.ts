@@ -5,7 +5,7 @@
 
 import { createHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
-import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { createIModelAccess } from "../../Common";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -13,18 +13,13 @@ import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchi
 
 export function createModelsTreeProvider(imodel: IModelConnection, filteredNodePaths?: HierarchyNodeIdentifiersPath[]) {
   const imodelAccess = createIModelAccess(imodel);
-  const hierarchyConfig = {
-    elementClassGrouping: "enable" as const,
-    elementClassSpecification: "BisCore.GeometricElement3d",
-    showEmptyModels: false,
-  };
-  const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+  const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
   return createHierarchyProvider({
     imodelAccess,
     hierarchyDefinition: new ModelsTreeDefinition({
       imodelAccess,
       idsCache,
-      hierarchyConfig,
+      hierarchyConfig: defaultHierarchyConfiguration,
     }),
     ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths } } : undefined),
   });

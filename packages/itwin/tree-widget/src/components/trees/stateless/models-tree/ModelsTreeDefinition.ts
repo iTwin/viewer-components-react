@@ -46,6 +46,12 @@ interface HierarchyConfiguration {
   showEmptyModels: boolean;
 }
 
+export const defaultHierarchyConfiguration: HierarchyConfiguration = {
+  elementClassGrouping: "enable",
+  elementClassSpecification: "BisCore.GeometricElement3d",
+  showEmptyModels: false,
+};
+
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
@@ -120,12 +126,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (HierarchyNode.isClassGroupingNode(node)) {
-      // `imageId` is assigned to instance nodes at query time, but grouping ones need to
-      // be handled during post-processing
-      // Add `modelId` and `categoryId` from the first grouped element.
-      const label = this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label;
-      const childExtendedData = node.children[0].extendedData;
-      return { ...node, label, extendedData: { ...node.extendedData, ...childExtendedData, imageId: "icon-ec-class" } };
+      return {
+        ...node,
+        label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
+        extendedData: {
+          ...node.extendedData,
+          // add `modelId` and `categoryId` from the first grouped element
+          ...node.children[0].extendedData,
+          // `imageId` is assigned to instance nodes at query time, but grouping ones need to
+          // be handled during post-processing
+          imageId: "icon-ec-class",
+        },
+      };
     }
     return node;
   }
@@ -258,30 +270,23 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                         WHEN (
                           json_extract([partition].JsonProperties, '$.PhysicalPartition.Model.Content') IS NOT NULL
                           OR json_extract([partition].JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NOT NULL
-                          ${
-                            this._hierarchyConfig.showEmptyModels
-                              ? ""
-                              : `AND EXISTS (
-                                  SELECT 1
-                                  FROM ${this._hierarchyConfig.elementClassSpecification} element
-                                  WHERE element.Model.Id = m.ECInstanceId
-                                )`
-                          }
                         ) THEN 1
                         ELSE 0
                       END
                     `,
                   },
-                  hasChildren: {
-                    selector: `
-                      IFNULL((
-                        SELECT 1
-                        FROM ${this._hierarchyConfig.elementClassSpecification} e
-                        WHERE e.Model.Id = m.ECInstanceId
-                        LIMIT 1
-                      ), 0)
-                    `,
-                  },
+                  hasChildren: this._hierarchyConfig.showEmptyModels
+                    ? {
+                        selector: `
+                          IFNULL((
+                            SELECT 1
+                            FROM ${this._hierarchyConfig.elementClassSpecification} e
+                            WHERE e.Model.Id = m.ECInstanceId
+                            LIMIT 1
+                          ), 0)
+                        `,
+                      }
+                    : true,
                   extendedData: {
                     imageId: "icon-model",
                     isModel: true,
@@ -291,7 +296,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
               FROM Bis.GeometricModel3d m
               JOIN bis.InformationPartitionElement [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
               WHERE
-              m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
+                m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
@@ -538,7 +543,9 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   private async isSupported() {
     const [schemaName, className] = this._hierarchyConfig.elementClassSpecification.split(/[\.:]/);
     if (!schemaName || !className) {
-      return false;
+      throw new Error(
+        `Provided class specification ${this._hierarchyConfig.elementClassSpecification} should be in format {SchemaName}:{ClassName} or {SchemaName}.{ClassName`,
+      );
     }
 
     const query: ECSqlQueryDef = {

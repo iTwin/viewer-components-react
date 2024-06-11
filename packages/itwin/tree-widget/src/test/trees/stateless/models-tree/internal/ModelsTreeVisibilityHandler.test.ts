@@ -21,7 +21,7 @@ import { toVoidPromise } from "../../../../../components/trees/common/Rxjs";
 import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
-import { ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { createLocalIModel, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory } from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport } from "../../../Common";
@@ -54,12 +54,7 @@ interface VisibilityOverrides {
 
 describe("HierarchyBasedVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection) {
-    const hierarchyConfig = {
-      elementClassGrouping: "disable" as const,
-      elementClassSpecification: "BisCore.GeometricElement3d",
-      showEmptyModels: false,
-    };
-    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), hierarchyConfig);
+    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), defaultHierarchyConfiguration);
   }
 
   before(async () => {
@@ -2142,19 +2137,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
           ...createCachingECClassHierarchyInspector({ schemaProvider, cacheSize: 1000 }),
           ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModelConnection), 1000),
         };
-
-        const hierarchyConfig = {
-          elementClassGrouping: "enable" as const,
-          elementClassSpecification: "BisCore.GeometricElement3d",
-          showEmptyModels: false,
-        };
-        const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
+        const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
         const provider = createHierarchyProvider({
           imodelAccess,
           hierarchyDefinition: new ModelsTreeDefinition({
             imodelAccess,
             idsCache,
-            hierarchyConfig,
+            hierarchyConfig: defaultHierarchyConfiguration,
           }),
         });
 

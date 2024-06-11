@@ -14,7 +14,7 @@ import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
-import { ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -34,13 +34,10 @@ type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-interface HierarchyConfiguration {
-  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
-}
-
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
-  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> &
-  HierarchyConfiguration;
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> & {
+    hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+  };
 
 /** @internal */
 export const StatelessModelsTreeId = "models-tree-v2";
@@ -62,12 +59,11 @@ export function StatelessModelsTree({
 }: StatelessModelsTreeProps) {
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
-      elementClassGrouping: "enable",
-      elementClassSpecification: "BisCore.GeometricElement3d",
-      showEmptyModels: false,
+      ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
     }),
-    [hierarchyConfig],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Object.values(hierarchyConfig ?? {}),
   );
 
   const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration);

@@ -15,9 +15,14 @@ import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
-import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import {
-  buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory,
+  buildIModel,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
   insertSubject,
 } from "../../../IModelUtils";
 import { createIModelAccess } from "../../Common";
@@ -63,12 +68,6 @@ namespace TreeFilteringTestCaseDefinition {
 
 describe("Models tree", () => {
   describe("Hierarchy filtering", () => {
-    const hierarchyConfig = {
-      elementClassGrouping: "enable" as const,
-      elementClassSpecification: "BisCore.GeometricElement3d",
-      showEmptyModels: false,
-    };
-
     before(async function () {
       await initializePresentationTesting({
         backendProps: {
@@ -825,7 +824,7 @@ describe("Models tree", () => {
         });
 
         beforeEach(() => {
-          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig);
+          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration);
           hierarchyProvider = createModelsTreeProvider(imodel, instanceKeyPaths);
         });
 
@@ -881,7 +880,7 @@ describe("Models tree", () => {
       const actualInstanceKeyPaths = (
         await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess: createIModelAccess(imodel),
-          idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
+          idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
           label: formattedECInstanceId,
         })
       ).sort(instanceKeyPathSorter);
@@ -912,7 +911,7 @@ describe("Models tree", () => {
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "_",
           })
         ).sort(instanceKeyPathSorter),
@@ -922,7 +921,7 @@ describe("Models tree", () => {
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "%",
           })
         ).sort(instanceKeyPathSorter),
@@ -932,7 +931,7 @@ describe("Models tree", () => {
         (
           await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
-            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig),
+            idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "\\",
           })
         ).sort(instanceKeyPathSorter),
