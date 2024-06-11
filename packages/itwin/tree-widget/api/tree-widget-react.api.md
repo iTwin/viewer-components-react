@@ -11,6 +11,7 @@ import { BeEvent } from '@itwin/core-bentley';
 import { Checkbox } from '@itwin/itwinui-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
+import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64String } from '@itwin/core-bentley';
