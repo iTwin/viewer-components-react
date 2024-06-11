@@ -52,16 +52,13 @@ export function createFakeIdsCache(props?: IdsCacheMockProps): ModelsTreeIdsCach
   });
 }
 
-type CreateHierarchyNodeProps = Partial<Pick<NonGroupingHierarchyNode, "children" | "filtering">>;
-
-export function createSubjectHierarchyNode({ subjectIds, ...props }: CreateHierarchyNodeProps & { subjectIds: Id64String[] }): NonGroupingHierarchyNode {
+export function createSubjectHierarchyNode(...ids: Id64String[]): NonGroupingHierarchyNode {
   return {
-    children: false,
-    ...props,
     key: {
       type: "instances",
-      instanceKeys: subjectIds.map((id) => ({ className: "Bis:Subject", id })),
+      instanceKeys: ids.map((id) => ({ className: "Bis:Subject", id })),
     },
+    children: false,
     label: "",
     parentKeys: [],
     extendedData: {
@@ -69,41 +66,28 @@ export function createSubjectHierarchyNode({ subjectIds, ...props }: CreateHiera
     },
   };
 }
-export function createModelHierarchyNode(
-  props?: CreateHierarchyNodeProps & {
-    modelId?: Id64String;
-  },
-): NonGroupingHierarchyNode {
+export function createModelHierarchyNode(modelId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
   return {
-    children: false,
-    ...props,
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:Model", id: props?.modelId ?? "" }],
+      instanceKeys: [{ className: "bis:Model", id: modelId ?? "" }],
     },
+    children: !!hasChildren,
     label: "",
     parentKeys: [],
     extendedData: {
       isModel: true,
-      modelId: props?.modelId ?? "0x1",
+      modelId: modelId ?? "0x1",
     },
   };
 }
-export function createCategoryHierarchyNode({
-  modelId,
-  categoryId,
-  ...props
-}: CreateHierarchyNodeProps & {
-  modelId?: Id64String;
-  categoryId?: Id64String;
-}): NonGroupingHierarchyNode {
+export function createCategoryHierarchyNode(modelId?: Id64String, categoryId?: Id64String, hasChildren?: boolean): NonGroupingHierarchyNode {
   return {
-    children: false,
-    ...props,
     key: {
       type: "instances",
       instanceKeys: [{ className: "bis:SpatialCategory", id: categoryId ?? "" }],
     },
+    children: !!hasChildren,
     label: "",
     parentKeys: [],
     extendedData: {
@@ -113,28 +97,23 @@ export function createCategoryHierarchyNode({
     },
   };
 }
-export function createElementHierarchyNode({
-  modelId,
-  categoryId,
-  elementId,
-  ...props
-}: CreateHierarchyNodeProps & {
+export function createElementHierarchyNode(props: {
   modelId: Id64String | undefined;
   categoryId: Id64String | undefined;
+  hasChildren?: boolean;
   elementId?: Id64String;
 }): NonGroupingHierarchyNode {
   return {
-    children: false,
-    ...props,
     key: {
       type: "instances",
-      instanceKeys: [{ className: "bis:GeometricalElement3d", id: elementId ?? "" }],
+      instanceKeys: [{ className: "bis:GeometricalElement3d", id: props.elementId ?? "" }],
     },
+    children: !!props.hasChildren,
     label: "",
     parentKeys: [],
     extendedData: {
-      modelId,
-      categoryId,
+      modelId: props.modelId,
+      categoryId: props.categoryId,
     },
   };
 }

@@ -970,7 +970,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     function* keysToCheck(): Iterable<InstanceKey> {
       for (let i = path.length - 1; i >= 0; --i) {
         const id = path[i];
-        // istanbul ignore else
         if (HierarchyNodeIdentifier.isInstanceNodeIdentifier(id)) {
           yield id;
         }
@@ -990,7 +989,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       }
     }
 
-    // istanbul ignore next
     assert(false, () => `Cannot find an instance of ${className} in instance keys: ${JSON.stringify([...keysToCheck()], undefined, 2)}`);
   }
 }
