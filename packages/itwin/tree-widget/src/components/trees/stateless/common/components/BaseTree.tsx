@@ -50,7 +50,6 @@ interface BaseTreeOwnProps {
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
   reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
-  onRootNodesLoaded?: () => void;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
