@@ -35,6 +35,7 @@ type TreeRendererProps = Pick<
   | "size"
   | "getIcon"
   | "getSublabel"
+  | "onNodeDoubleClick"
 >;
 
 interface BaseTreeOwnProps {
@@ -58,7 +59,7 @@ type IModelAccess = UseTreeProps["imodelAccess"];
 type BaseTreeProps = BaseTreeOwnProps &
   Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
   Pick<Partial<UseSelectionHandlerProps>, "selectionMode"> &
-  Pick<TreeRendererProps, "getIcon" | "getSublabel">;
+  Pick<TreeRendererProps, "getIcon" | "getSublabel" | "onNodeDoubleClick">;
 
 /** @internal */
 export function BaseTree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAccess: providedIModelAccess, ...props }: BaseTreeProps) {
@@ -89,6 +90,7 @@ function BaseTreeRenderer({
   density,
   getIcon,
   getSublabel,
+  onNodeDoubleClick,
 }: MarkRequired<Omit<BaseTreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const {
@@ -148,6 +150,7 @@ function BaseTreeRenderer({
     onFilterClick: reportingOnFilterClicked,
     getIcon,
     getSublabel,
+    onNodeDoubleClick,
     size: density === "enlarged" ? "default" : "small",
   };
 
