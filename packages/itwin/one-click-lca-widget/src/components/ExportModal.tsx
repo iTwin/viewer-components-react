@@ -11,6 +11,7 @@ import type { Link, OCLCAJob } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
 import { useOCLCAJobsClient } from "./context/OCLCAJobsClientContext";
+import { OCLCAApiHelper } from "../components/api/OCLCALoginHelper";
 
 interface ExportProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
   const PIN_INTERVAL = 1000;
   const oneClickLCAClient = useOCLCAJobsClient();
+  const oclcaApiHelper = useMemo(() => new OCLCAApiHelper(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -125,7 +127,7 @@ const ExportModal = (props: ExportProps) => {
       e.preventDefault();
       startSigningIn(true);
       try {
-        const result = await oneClickLCAClient.getOCLCAAccessToken(email, password);
+        const result = await oclcaApiHelper.getOCLCAAccessToken(email, password);
         if (result && result.access_token && result.expires_in) {
           cacheToken({
             token: result.access_token,
@@ -143,7 +145,7 @@ const ExportModal = (props: ExportProps) => {
       }
       startSigningIn(false);
     },
-    [email, password, resetSignin, cacheToken, showSigninError, oneClickLCAClient],
+    [email, password, resetSignin, cacheToken, showSigninError, oclcaApiHelper],
   );
 
   const onClose = useCallback(() => {

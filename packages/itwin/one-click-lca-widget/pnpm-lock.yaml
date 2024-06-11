@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@itwin/insights-client':
-        specifier: ^0.10.1
-        version: 0.10.1
+        specifier: ^0.10.2
+        version: 0.10.2
       '@itwin/itwinui-icons-react':
         specifier: ^2.2.0
         version: 2.2.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -555,8 +555,8 @@ packages:
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
 
-  '@itwin/insights-client@0.10.1':
-    resolution: {integrity: sha512-20vqnr0AijYyO5zHmjakOyG6nzL8FFQZ9Wu4pnW4F7ulzlKiayKOW4183UdOX0oTQt3BHMvnkphhEWJF8a/MDw==}
+  '@itwin/insights-client@0.10.2':
+    resolution: {integrity: sha512-h4z5Is7b9kKOeG8RzRUowmqqjA0/+04Yq5GHz2NYDu56GRuDTJSzhgzBaf9zM1tZTwgVa2GJpom2EnIHaLapTA==}
 
   '@itwin/itwinui-css@1.12.6':
     resolution: {integrity: sha512-Y32ksKaIFfym5ZcoBMfH89eCUh3VgcHpKtUDgQgCT3g6j9tzaUycsHkui63s0bLreSGChPoEuCKB5CUP+DSPOg==}
@@ -4255,7 +4255,7 @@ snapshots:
       mocha-junit-reporter: 2.2.1(mocha@10.2.0)
       rimraf: 3.0.2
       tree-kill: 1.2.2
-      typedoc: 0.23.28(typescript@5.0.4)
+      typedoc: 0.23.28(typescript@4.6.2)
       typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@5.0.4))
       typescript: 5.0.4
       wtfnode: 0.9.1
@@ -4438,7 +4438,7 @@ snapshots:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
 
-  '@itwin/insights-client@0.10.1':
+  '@itwin/insights-client@0.10.2':
     dependencies:
       cross-fetch: 3.1.8
       fast-xml-parser: 4.3.2
@@ -8198,15 +8198,15 @@ snapshots:
 
   typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@5.0.4)):
     dependencies:
-      typedoc: 0.23.28(typescript@5.0.4)
+      typedoc: 0.23.28(typescript@4.6.2)
 
-  typedoc@0.23.28(typescript@5.0.4):
+  typedoc@0.23.28(typescript@4.6.2):
     dependencies:
       lunr: 2.3.9
       marked: 4.3.0
       minimatch: 7.4.6
       shiki: 0.14.7
-      typescript: 5.0.4
+      typescript: 4.6.2
 
   typescript@4.6.2: {}
 

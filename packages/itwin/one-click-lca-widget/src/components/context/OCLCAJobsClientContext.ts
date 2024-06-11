@@ -2,19 +2,20 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+import type { IOCLCAJobsClient } from "@itwin/insights-client";
 import { CARBON_CALCULATION_BASE_PATH, OCLCAJobsClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 
 /**
  * @internal
  */
-export const createDefaultOCLCAJobsClient = (carbonCalculationBasePath?: string): OCLCAJobsClient =>
+export const createDefaultOCLCAJobsClient = (carbonCalculationBasePath?: string): IOCLCAJobsClient =>
   new OCLCAJobsClient(carbonCalculationBasePath ?? CARBON_CALCULATION_BASE_PATH);
 
 /**
  * @internal
  */
-export const OCLCAJobsClientContext = createContext<OCLCAJobsClient>(createDefaultOCLCAJobsClient());
+export const OCLCAJobsClientContext = createContext<IOCLCAJobsClient>(createDefaultOCLCAJobsClient());
 
 /**
  * @internal

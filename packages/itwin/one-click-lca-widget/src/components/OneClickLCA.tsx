@@ -8,12 +8,12 @@ import "./Reports.scss";
 
 import type { OneClickLCAProps } from "./OneClickLCAProps";
 import { createDefaultReportsClient, ReportsClientContext } from "./context/ReportsClientContext";
-import type { IReportsClient, OCLCAJobsClient } from "@itwin/insights-client";
+import type { IOCLCAJobsClient, IReportsClient } from "@itwin/insights-client";
 import { createDefaultOCLCAJobsClient, OCLCAJobsClientContext } from "./context/OCLCAJobsClientContext";
 
 const OneClickLCA = (props?: OneClickLCAProps) => {
   const [reportsClient, setReportsClient] = useState<IReportsClient>(props?.reportsClient ?? createDefaultReportsClient(props?.reportingBasePath));
-  const [oclcaJobsClient, setOclcaJobsClient] = useState<OCLCAJobsClient>(
+  const [oclcaJobsClient, setOclcaJobsClient] = useState<IOCLCAJobsClient>(
     props?.oclcaJobsClient ?? createDefaultOCLCAJobsClient(props?.carbonCalculationBasePath),
   );
 

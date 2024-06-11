@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { IReportsClient, OCLCAJobsClient } from "@itwin/insights-client";
+import type { IOCLCAJobsClient, IReportsClient } from "@itwin/insights-client";
 
 /**
  * Props for the {@link OneClickLCA} component.
@@ -21,12 +21,12 @@ export interface OneClickLCAProps {
   carbonCalculationBasePath?: string;
 
   /**
-   * A custom implementation of ReportsClient. If provided, reportingBasePath is ignored.
+   * A custom implementation of IReportsClient. If provided, reportingBasePath is ignored.
    */
   reportsClient?: IReportsClient;
 
   /**
-   * A custom implementation of OCLCAJobsClient. If provided, carbonCalculationBasePath is ignored.
+   * A custom implementation of IOCLCAJobsClient. If provided, carbonCalculationBasePath is ignored.
    */
-  oclcaJobsClient?: OCLCAJobsClient;
+  oclcaJobsClient?: IOCLCAJobsClient;
 }
