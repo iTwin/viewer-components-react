@@ -7,14 +7,14 @@
 /// <reference types="react" />
 
 import type { AccessToken } from '@itwin/core-bentley';
-import { ExtractionClient } from '@itwin/insights-client';
 import type { ExtractionRequestDetails } from '@itwin/insights-client';
+import type { IExtractionClient } from '@itwin/insights-client';
+import type { IMappingsClient } from '@itwin/insights-client';
 import { IModelsClient } from '@itwin/imodels-client-management';
+import type { IReportsClient } from '@itwin/insights-client';
 import type { Localization } from '@itwin/core-common';
-import { MappingsClient } from '@itwin/insights-client';
 import { default as React_2 } from 'react';
 import type { Report } from '@itwin/insights-client';
-import { ReportsClient } from '@itwin/insights-client';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
@@ -22,7 +22,7 @@ import type { Widget } from '@itwin/appui-react';
 
 // @public (undocumented)
 export class BulkExtractor {
-    constructor(reportsClient: ReportsClient, extractionClient: ExtractionClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
+    constructor(reportsClient: IReportsClient, extractionClient: IExtractionClient, getAccessToken: () => Promise<AccessToken>, successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void, failedExtractionToast: (iModelName: string) => void);
     // (undocumented)
     getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates>;
     // (undocumented)
@@ -74,29 +74,22 @@ export const ReportsConfigContext: (props: ReportsConfigContextProps) => JSX.Ele
 
 // @public
 export interface ReportsConfigContextProps {
-    // (undocumented)
     baseUrl?: string;
-    // (undocumented)
     bulkExtractor?: BulkExtractor;
     // (undocumented)
     children?: React_2.ReactNode;
-    // (undocumented)
-    extractionClient?: ExtractionClient;
-    // (undocumented)
+    extractionClient?: IExtractionClient;
     getAccessToken?: GetAccessTokenFn;
-    // (undocumented)
     iModelsClient?: IModelsClient;
     // (undocumented)
     iTwinId: string;
-    // (undocumented)
-    mappingsClient?: MappingsClient;
-    // (undocumented)
-    reportsClient?: ReportsClient;
+    mappingsClient?: IMappingsClient;
+    reportsClient?: IReportsClient;
 }
 
 // @public
 export class ReportsConfigProvider implements UiItemsProvider {
-    constructor(getAccessToken?: () => Promise<AccessToken>, baseUrl?: string);
+    constructor(_props?: ReportsContainerProps | undefined);
     // (undocumented)
     readonly id = "ReportsConfigProvider";
     // (undocumented)
@@ -124,6 +117,9 @@ export interface ReportsProps {
     // (undocumented)
     onClickReportTitle?: (report: Report) => void;
 }
+
+
+export * from "@itwin/insights-client";
 
 // (No @packageDocumentation comment for this package)
 

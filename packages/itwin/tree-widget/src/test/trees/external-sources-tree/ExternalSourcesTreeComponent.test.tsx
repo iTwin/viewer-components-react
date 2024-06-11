@@ -8,8 +8,9 @@ import * as sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import * as externalSourcesTreeModule from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
+import { ExternalSourcesTreeComponent } from "../../../components/trees/external-sources-tree/ExternalSourcesTreeComponent";
 import * as autoSizerModule from "../../../components/utils/AutoSizer";
-import { ExternalSourcesTreeComponent, TreeWidget } from "../../../tree-widget-react";
+import { TreeWidget } from "../../../TreeWidget";
 import { render, TestUtils } from "../../TestUtils";
 
 describe("<ExternalSourcesTreeComponent />", () => {

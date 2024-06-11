@@ -20,7 +20,7 @@ import {
   initialize as initializePresentationTesting,
   terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../tree-widget-react";
+import { IModelContentTree, RULESET_IMODEL_CONTENT } from "../../../components/trees/imodel-content-tree/IModelContentTree";
 import {
   insertDrawingCategory,
   insertDrawingElement,
@@ -50,6 +50,7 @@ import type { PresentationInstanceFilterInfo } from "@itwin/presentation-compone
 import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Node, NodeKey } from "@itwin/presentation-common";
+
 describe("IModelContentTree", () => {
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };

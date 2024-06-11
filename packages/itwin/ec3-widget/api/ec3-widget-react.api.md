@@ -8,6 +8,10 @@
 
 import type { AccessToken } from '@itwin/core-bentley';
 import type { EC3ConfigurationLabel } from '@itwin/insights-client';
+import type { IEC3ConfigurationsClient } from '@itwin/insights-client';
+import type { IEC3JobsClient } from '@itwin/insights-client';
+import type { IOdataClient } from '@itwin/insights-client';
+import type { IReportsClient } from '@itwin/insights-client';
 import { default as React_2 } from 'react';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
@@ -32,11 +36,15 @@ export interface Configuration {
 export interface EC3ConfigCommonProps {
     carbonCalculationBasePath?: string;
     clientId: string;
+    ec3ConfigurationsClient?: IEC3ConfigurationsClient;
+    ec3JobsClient?: IEC3JobsClient;
     ec3Uri?: string;
     getAccessToken?: GetAccessTokenFn;
     // (undocumented)
     iTwinId: string;
+    oDataClient?: IOdataClient;
     reportingBasePath?: string;
+    reportsClient?: IReportsClient;
 }
 
 // @beta
@@ -108,6 +116,9 @@ export interface TemplateProps {
 
 // @beta
 export const Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element;
+
+
+export * from "@itwin/insights-client";
 
 // (No @packageDocumentation comment for this package)
 
