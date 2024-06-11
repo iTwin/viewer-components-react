@@ -153,7 +153,7 @@ export const MappingsView = ({
         </div>
         {alert}
         <div className="gmw-mappings-border" />
-        {isLoading ? (
+        {isLoading && !isTogglingExtraction ? (
           <LoadingOverlay />
         ) : mappings.length === 0 ? (
           <EmptyMessage message={`No ${displayStrings.mappings} available.`} />
