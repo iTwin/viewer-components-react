@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Changed client prop types to use corresponding interfaces.",
-  "packageName": "@itwin/reports-config-widget-react",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

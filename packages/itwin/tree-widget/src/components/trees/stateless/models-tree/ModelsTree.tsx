@@ -4,9 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
@@ -75,6 +77,18 @@ export function StatelessModelsTree({
     [getModelsTreeIdsCache, hierarchyConfiguration],
   );
 
+  const onNodeDoubleClick = useCallback(
+    async ({ nodeData, extendedData }: PresentationHierarchyNode) => {
+      if (!HierarchyNode.isInstancesNode(nodeData) || (extendedData && (extendedData.isSubject || extendedData.isModel || extendedData.isCategory))) {
+        return;
+      }
+      const instanceIds = nodeData.key.instanceKeys.map((instanceKey) => instanceKey.id);
+      await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
+      reportUsage({ featureId: "zoom-to-node", reportInteraction: false });
+    },
+    [reportUsage],
+  );
+
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!focusedInstancesKeys) {
       return undefined;
@@ -124,6 +138,7 @@ export function StatelessModelsTree({
         onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
       }}
       reportUsage={reportUsage}
+      onNodeDoubleClick={onNodeDoubleClick}
     />
   );
 }

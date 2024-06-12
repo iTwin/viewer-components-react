@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 21 May 2024 13:26:35 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Jun 2024 15:52:38 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.26.1
+
+Tue, 11 Jun 2024 15:52:38 GMT
+
+### Patches
+
+- Fixed an issue with the form validator allowing invalid characters if followed by a valid one. ([#930](https://github.com/iTwin/viewer-components-react/pull/930))
 
 ## 0.26.0
 
