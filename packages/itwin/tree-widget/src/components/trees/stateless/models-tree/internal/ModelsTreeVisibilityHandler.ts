@@ -545,7 +545,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     // Sort paths by length such that the shortest paths are at the top.
     // If there are paths to both parent and child node, if we handle parent paths before child paths,
     // we can avoid doing extra actions.
-    filterPaths = [...filterPaths].sort((a, b) => b.length - a.length);
+    filterPaths = [...filterPaths].sort((a, b) => a.length - b.length);
 
     await Promise.all(
       filterPaths.map(async (path) => {
