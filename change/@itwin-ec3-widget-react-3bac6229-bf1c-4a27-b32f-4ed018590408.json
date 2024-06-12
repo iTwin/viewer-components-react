@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added props that allow custom implementations of ReportsClient, OdataClient, EC3JobsClient, EC3ConfigurationsClient.",
-  "packageName": "@itwin/ec3-widget-react",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
