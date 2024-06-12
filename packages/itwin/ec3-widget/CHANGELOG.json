@@ -2,6 +2,21 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Tue, 11 Jun 2024 15:52:38 GMT",
+      "version": "0.7.0",
+      "tag": "@itwin/ec3-widget-react_v0.7.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "3da5297647e428425165200c5596f7a760925961",
+            "comment": "Added props that allow custom implementations of ReportsClient, OdataClient, EC3JobsClient, EC3ConfigurationsClient."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 10 Jun 2024 17:40:38 GMT",
       "version": "0.6.0",
       "tag": "@itwin/ec3-widget-react_v0.6.0",

@@ -8,10 +8,10 @@ import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Table, toaster } from "@itwin/itwinui-react";
 import type { Report } from "@itwin/insights-client";
-import { ReportsClient } from "@itwin/insights-client";
 import { WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
 import "./Reports.scss";
+import { useReportsClient } from "./context/ReportsClientContext";
 
 type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
@@ -19,10 +19,12 @@ type CreateTypeFromInterface<Interface> = {
 
 type Reporting = CreateTypeFromInterface<Report>;
 
-const Reports = () => {
+/**
+ * @internal
+ */
+export const Reports = () => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportsClientApi = useMemo(() => new ReportsClient(), []);
-
+  const reportsClient = useReportsClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useState<Report[]>([]);
   const [buttonIsDisabled, disableButton] = useState<boolean>(true);
@@ -88,7 +90,7 @@ const Reports = () => {
     IModelApp.authorizationClient
       .getAccessToken()
       .then((token: string) => {
-        reportsClientApi
+        reportsClient
           .getReports(token, projectId)
           .then((data) => {
             if (data) {
@@ -110,7 +112,7 @@ const Reports = () => {
         /* eslint-disable no-console */
         console.error(err);
       });
-  }, [projectId, reportsClientApi]);
+  }, [projectId, reportsClient]);
 
   return (
     <>
@@ -142,5 +144,3 @@ const Reports = () => {
     </>
   );
 };
-
-export default Reports;
