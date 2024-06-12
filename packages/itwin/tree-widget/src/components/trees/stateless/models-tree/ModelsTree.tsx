@@ -36,7 +36,7 @@ type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
 type StatelessModelsTreeProps = StatelessModelsTreeOwnProps &
-  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode" | "activeMatchIndex" | "onHighlightChanged">;
 
 /** @internal */
 export const StatelessModelsTreeId = "models-tree-v2";
@@ -52,8 +52,10 @@ export function StatelessModelsTree({
   density,
   hierarchyLevelConfig,
   selectionMode,
+  activeMatchIndex,
   onPerformanceMeasured,
   onFeatureUsed,
+  onHighlightChanged,
 }: StatelessModelsTreeProps) {
   const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView);
 
@@ -117,6 +119,9 @@ export function StatelessModelsTree({
       }}
       reportUsage={reportUsage}
       onNodeDoubleClick={onNodeDoubleClick}
+      textToHighlight={filter}
+      activeMatchIndex={activeMatchIndex}
+      onHighlightChanged={onHighlightChanged}
     />
   );
 }

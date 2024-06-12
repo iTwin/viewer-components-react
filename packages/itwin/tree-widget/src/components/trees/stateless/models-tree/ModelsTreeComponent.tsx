@@ -5,7 +5,7 @@
 
 import "../Tree.scss";
 import classNames from "classnames";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgCursorClick } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
@@ -16,13 +16,13 @@ import { AutoSizer } from "../../../utils/AutoSizer";
 import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "../../models-tree/ModelsTreeButtons";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
+import { useFiltering } from "../common/UseFiltering";
 import { StatelessModelsTree, StatelessModelsTreeId } from "./ModelsTree";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { ModelsTreeHeaderButtonProps } from "../../models-tree/ModelsTreeButtons";
-
 type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsTree>;
 
 interface StatelessModelsTreeComponentProps
@@ -58,7 +58,7 @@ function ModelsTreeComponentImpl({
   ...treeProps
 }: StatelessModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const availableModels = useAvailableModels(iModel);
-  const [filter, setFilter] = useState("");
+  const { filter, activeMatchIndex, setFilter, onHighlightChanged } = useFiltering();
   const density = treeProps.density;
 
   const onModelsTreeFeatureUsed = (feature: string) => {
@@ -88,7 +88,16 @@ function ModelsTreeComponentImpl({
           <div className="tw-tree-content">
             <AutoSizer>
               {({ width, height }) => (
-                <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />
+                <StatelessModelsTree
+                  {...treeProps}
+                  imodel={iModel}
+                  activeView={viewport}
+                  width={width}
+                  height={height}
+                  filter={filter}
+                  activeMatchIndex={activeMatchIndex}
+                  onHighlightChanged={onHighlightChanged}
+                />
               )}
             </AutoSizer>
           </div>

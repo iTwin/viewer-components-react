@@ -14,6 +14,7 @@ import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useIModelChangeListener } from "../UseIModelChangeListener";
+import { useNodeHighlighting } from "../UseNodeHighlighting";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 import { TreeRenderer } from "./TreeRenderer";
@@ -23,7 +24,6 @@ import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { UsageTrackedFeatures } from "../../../common/UseFeatureReporting";
-
 type TreeRendererProps = Pick<
   ComponentPropsWithoutRef<typeof TreeRenderer>,
   | "rootNodes"
@@ -35,6 +35,7 @@ type TreeRendererProps = Pick<
   | "getHierarchyLevelDetails"
   | "size"
   | "getIcon"
+  | "getLabel"
   | "getSublabel"
   | "onNodeDoubleClick"
 >;
@@ -50,16 +51,21 @@ interface BaseTreeOwnProps {
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
   reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  textToHighlight?: string;
+  activeMatchIndex?: number;
+  setTotalMatches?: (matches: number) => void;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
+type UseNodeHighlightingProps = Parameters<typeof useNodeHighlighting>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
 
 type BaseTreeProps = BaseTreeOwnProps &
   Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
   Pick<Partial<UseSelectionHandlerProps>, "selectionMode"> &
-  Pick<TreeRendererProps, "getIcon" | "getSublabel" | "onNodeDoubleClick">;
+  Pick<UseNodeHighlightingProps, "textToHighlight" | "activeMatchIndex" | "onHighlightChanged"> &
+  Pick<TreeRendererProps, "getIcon" | "getLabel" | "getSublabel" | "onNodeDoubleClick">;
 
 /** @internal */
 export function BaseTree({ imodel, getSchemaContext, hierarchyLevelSizeLimit, ...props }: BaseTreeProps) {
@@ -102,6 +108,9 @@ function BaseTreeRenderer({
   getIcon,
   getSublabel,
   onNodeDoubleClick,
+  textToHighlight,
+  activeMatchIndex,
+  onHighlightChanged,
 }: Omit<BaseTreeProps, "getSchemaContext"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const {
@@ -133,6 +142,7 @@ function BaseTreeRenderer({
   });
   const reportingExpandNode = useReportingAction({ action: expandNode, reportUsage });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
+  const { getLabel } = useNodeHighlighting({ rootNodes, textToHighlight, caseSensitive: false, activeMatchIndex, onHighlightChanged });
 
   if (rootNodes === undefined) {
     return (
@@ -160,6 +170,7 @@ function BaseTreeRenderer({
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
     getIcon,
+    getLabel,
     getSublabel,
     onNodeDoubleClick,
     size: density === "enlarged" ? "default" : "small",

@@ -35,7 +35,7 @@ type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
 type StatelessModelsTreeProps = StatelessCategoriesTreeOwnProps &
-  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode" | "activeMatchIndex" | "onHighlightChanged">;
 
 /** @internal */
 export const StatelessCategoriesTreeId = "categories-tree-v2";
@@ -56,6 +56,8 @@ export function StatelessCategoriesTree({
   selectionMode,
   onPerformanceMeasured,
   onFeatureUsed,
+  activeMatchIndex,
+  onHighlightChanged,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessCategoriesVisibilityHandler({
@@ -111,6 +113,9 @@ export function StatelessCategoriesTree({
         onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
       }}
       reportUsage={reportUsage}
+      textToHighlight={filter}
+      activeMatchIndex={activeMatchIndex}
+      onHighlightChanged={onHighlightChanged}
     />
   );
 }
