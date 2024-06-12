@@ -80,8 +80,13 @@ export function StatelessModelsTree({
       return undefined;
     }
     return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, keys: focusedInstancesKeys, idsCache: getModelsTreeIdsCache() });
-  }, [focusedInstancesKeys, getModelsTreeIdsCache]);
+      ModelsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        keys: focusedInstancesKeys,
+        idsCache: getModelsTreeIdsCache(),
+        hierarchyConfig: hierarchyConfiguration,
+      });
+  }, [focusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
@@ -89,9 +94,14 @@ export function StatelessModelsTree({
     }
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
-      return ModelsTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, idsCache: getModelsTreeIdsCache() });
+      return ModelsTreeDefinition.createInstanceKeyPaths({
+        imodelAccess,
+        label: filter,
+        idsCache: getModelsTreeIdsCache(),
+        hierarchyConfig: hierarchyConfiguration,
+      });
     };
-  }, [filter, getModelsTreeIdsCache, reportUsage]);
+  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 

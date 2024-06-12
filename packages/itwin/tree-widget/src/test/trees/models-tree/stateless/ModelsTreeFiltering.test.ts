@@ -17,12 +17,7 @@ import {
 import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import {
-  buildIModel,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
+  buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory,
   insertSubject,
 } from "../../../IModelUtils";
 import { createIModelAccess } from "../../Common";
@@ -36,6 +31,8 @@ import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/pre
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../../HierarchyValidation";
 
+type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
@@ -43,6 +40,7 @@ interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   getTargetInstanceKeys: (setupResult: TIModelSetupResult) => InstanceKey[];
   getTargetInstanceLabel: (setupResult: TIModelSetupResult) => string;
   getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
+  getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>;
 }
 
 namespace TreeFilteringTestCaseDefinition {
@@ -54,6 +52,7 @@ namespace TreeFilteringTestCaseDefinition {
     getTargetInstanceKeys: (setupResult: TIModelSetupResult) => InstanceKey[],
     getTargetInstanceLabel: (setupResult: TIModelSetupResult) => string,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
+    getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>,
   ): TreeFilteringTestCaseDefinition<TIModelSetupResult> {
     return {
       name,
@@ -62,6 +61,7 @@ namespace TreeFilteringTestCaseDefinition {
       getTargetInstanceKeys,
       getTargetInstanceLabel,
       getExpectedHierarchy,
+      getHierarchyConfig,
     };
   }
 }
@@ -377,6 +377,43 @@ describe("Models tree", () => {
         ],
       ),
       TreeFilteringTestCaseDefinition.create(
+        "Empty model nodes",
+        async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 1`, partitionParentId: rootSubject.id });
+          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
+          const model3 = insertPhysicalModelWithPartition({ builder, codeValue: `matching model 3`, partitionParentId: rootSubject.id });
+          return { rootSubject, model1, model2, model3 };
+        },
+        (x) => [
+          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model1.id }],
+          [x.rootSubject, { className: "BisCore.GeometricModel3d", id: x.model3.id }],
+        ],
+        (x) => [x.model1, x.model3],
+        (_x) => "matching",
+        (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.rootSubject],
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.model1],
+                label: "matching model 1",
+                autoExpand: false,
+                children: false,
+              }),
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.model3],
+                label: "matching model 3",
+                autoExpand: false,
+                children: false,
+              }),
+            ],
+          }),
+        ],
+        () => ({ showEmptyModels: true }),
+      ),
+      TreeFilteringTestCaseDefinition.create(
         "Subject with hidden child Model node",
         async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
@@ -665,6 +702,82 @@ describe("Models tree", () => {
         ],
       ),
       TreeFilteringTestCaseDefinition.create(
+        "child Element nodes when custom element specification class is used",
+        async (builder, testSchema) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category-x" });
+          const rootElement1 = insertPhysicalElement({
+            builder,
+            userLabel: `matching element 1`,
+            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const rootElement2 = insertPhysicalElement({
+            builder,
+            userLabel: `element 2`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const rootElement3 = insertPhysicalElement({
+            builder,
+            userLabel: `matching element 3`,
+            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          return { rootSubject, model, category, rootElement1, rootElement2, rootElement3 };
+        },
+        (x) => [
+          [x.rootSubject, x.model, x.category, x.rootElement1],
+          [x.rootSubject, x.model, x.category, x.rootElement3],
+        ],
+        (x) => [x.rootElement1, x.rootElement3],
+        (_x) => "matching",
+        (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.rootSubject],
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.model],
+                label: "model-x",
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [x.category],
+                    label: "category-x",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        label: "Test Physical Object",
+                        autoExpand: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.rootElement1],
+                            label: /^matching element 1/,
+                            autoExpand: false,
+                            children: false,
+                          }),
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.rootElement3],
+                            label: /^matching element 3/,
+                            autoExpand: false,
+                            children: false,
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+        (x) => ({ elementClassSpecification: x.rootElement1.className }),
+      ),
+      TreeFilteringTestCaseDefinition.create(
         "sub-modeled Element nodes",
         async (builder, testSchema) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
@@ -809,6 +922,7 @@ describe("Models tree", () => {
 
         let modelsTreeIdsCache: ModelsTreeIdsCache;
         let hierarchyProvider: HierarchyProvider;
+        let hierarchyConfig: ModelsTreeHierarchyConfiguration;
 
         before(async function () {
           // eslint-disable-next-line deprecation/deprecation
@@ -819,13 +933,14 @@ describe("Models tree", () => {
               targetInstanceKeys = testCase.getTargetInstanceKeys(imodelSetupResult);
               targetInstanceLabel = testCase.getTargetInstanceLabel(imodelSetupResult);
               expectedHierarchy = testCase.getExpectedHierarchy(imodelSetupResult);
+              hierarchyConfig = { ...defaultHierarchyConfiguration, ...testCase.getHierarchyConfig?.(imodelSetupResult) };
             })
           ).imodel;
         });
 
         beforeEach(() => {
-          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration);
-          hierarchyProvider = createModelsTreeProvider(imodel, instanceKeyPaths);
+          modelsTreeIdsCache = new ModelsTreeIdsCache(createIModelAccess(imodel), hierarchyConfig);
+          hierarchyProvider = createModelsTreeProvider({ imodel, filteredNodePaths: instanceKeyPaths, hierarchyConfig });
         });
 
         after(async function () {
@@ -845,6 +960,7 @@ describe("Models tree", () => {
               imodelAccess: createIModelAccess(imodel),
               idsCache: modelsTreeIdsCache,
               keys: targetInstanceKeys,
+              hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
           expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths);
@@ -856,6 +972,7 @@ describe("Models tree", () => {
               imodelAccess: createIModelAccess(imodel),
               idsCache: modelsTreeIdsCache,
               label: targetInstanceLabel,
+              hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
           expect(actualInstanceKeyPaths).to.deep.eq(instanceKeyPaths);
@@ -882,6 +999,7 @@ describe("Models tree", () => {
           imodelAccess: createIModelAccess(imodel),
           idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
           label: formattedECInstanceId,
+          hierarchyConfig: defaultHierarchyConfiguration,
         })
       ).sort(instanceKeyPathSorter);
       expect(actualInstanceKeyPaths).to.deep.eq(expectedPaths);
@@ -913,6 +1031,7 @@ describe("Models tree", () => {
             imodelAccess: createIModelAccess(imodel),
             idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "_",
+            hierarchyConfig: defaultHierarchyConfiguration,
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[keys.rootSubject, keys.model, keys.category, keys.element1]]);
@@ -923,6 +1042,7 @@ describe("Models tree", () => {
             imodelAccess: createIModelAccess(imodel),
             idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "%",
+            hierarchyConfig: defaultHierarchyConfiguration,
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[keys.rootSubject, keys.model, keys.category, keys.element2]]);
@@ -933,6 +1053,7 @@ describe("Models tree", () => {
             imodelAccess: createIModelAccess(imodel),
             idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "\\",
+            hierarchyConfig: defaultHierarchyConfiguration,
           })
         ).sort(instanceKeyPathSorter),
       ).to.deep.eq([[keys.rootSubject, keys.model, keys.category, keys.element3]]);

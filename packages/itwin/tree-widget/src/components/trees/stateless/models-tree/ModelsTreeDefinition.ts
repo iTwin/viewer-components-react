@@ -62,12 +62,14 @@ interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   keys: InstanceKey[];
+  hierarchyConfig: HierarchyConfiguration;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   label: string;
+  hierarchyConfig: HierarchyConfiguration;
 }
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromInstanceKeysProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
@@ -595,6 +597,7 @@ function createCategoryInstanceKeyPaths(categoryId: Id64String, idsCache: Models
 function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
+  hierarchyConfig: HierarchyConfiguration,
   elementIds: Id64String[],
 ): Observable<HierarchyNodeIdentifiersPath> {
   return defer(() => {
@@ -609,7 +612,7 @@ function createGeometricElementInstanceKeyPaths(
             IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "c" })}, NULL),
             IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
           )
-        FROM bis.GeometricElement3d e
+        FROM ${hierarchyConfig.elementClassSpecification} e
         JOIN bis.GeometricModel3d m ON m.ECInstanceId = e.Model.Id
         JOIN bis.SpatialCategory c ON c.ECInstanceId = e.Category.Id
         WHERE e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
@@ -627,7 +630,7 @@ function createGeometricElementInstanceKeyPaths(
             '$[#]', IIF(pe.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
           )
         FROM ModelsCategoriesElementsHierarchy ce
-        JOIN bis.GeometricElement3d pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
+        JOIN ${hierarchyConfig.elementClassSpecification} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
         JOIN bis.GeometricModel3d m ON m.ECInstanceId = pe.Model.Id
         JOIN bis.SpatialCategory c ON c.ECInstanceId = pe.Category.Id
       )`,
@@ -679,7 +682,7 @@ async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceK
       from(ids.subjects).pipe(mergeMap((id) => createSubjectInstanceKeysPath(id, props.idsCache))),
       from(ids.models).pipe(mergeMap((id) => createModelInstanceKeyPaths(id, props.idsCache))),
       from(ids.categories).pipe(mergeMap((id) => createCategoryInstanceKeyPaths(id, props.idsCache))),
-      ids.elements.length ? createGeometricElementInstanceKeyPaths(props.imodelAccess, props.idsCache, ids.elements) : EMPTY,
+      ids.elements.length ? createGeometricElementInstanceKeyPaths(props.imodelAccess, props.idsCache, props.hierarchyConfig, ids.elements) : EMPTY,
     ),
   );
 }
@@ -703,7 +706,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
             e.ECInstanceId,
             ${elementLabelSelectClause} Label
           FROM BisCore.Element e
-          WHERE e.ECClassId IS (BisCore.Subject, BisCore.SpatialCategory, BisCore.GeometricElement3d)
+          WHERE e.ECClassId IS (BisCore.Subject, BisCore.SpatialCategory, ${props.hierarchyConfig.elementClassSpecification})
 
           UNION ALL
 
@@ -714,7 +717,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           FROM BisCore.GeometricModel3d m
           JOIN BisCore.Element e ON e.ECInstanceId = m.ModeledElement.Id
           WHERE NOT m.IsPrivate
-            AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
+            ${props.hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${props.hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
             AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
             AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
         )
