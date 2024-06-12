@@ -376,7 +376,7 @@ describe("IModelContent tree", () => {
                       children: [
                         NodeValidators.createForInstanceNode({
                           instanceKeys: [keys.groupElement],
-                          supportsFiltering: true,
+                          supportsFiltering: false,
                           children: false,
                         }),
                       ],
@@ -419,7 +419,7 @@ describe("IModelContent tree", () => {
                       children: [
                         NodeValidators.createForInstanceNode({
                           instanceKeys: [keys.parentGroup],
-                          supportsFiltering: true,
+                          supportsFiltering: false,
                           children: [
                             NodeValidators.createForCustomNode({
                               label: "Children",
@@ -430,7 +430,7 @@ describe("IModelContent tree", () => {
                                   children: [
                                     NodeValidators.createForInstanceNode({
                                       instanceKeys: [keys.childGroup],
-                                      supportsFiltering: true,
+                                      supportsFiltering: false,
                                       children: false,
                                     }),
                                   ],
@@ -506,7 +506,7 @@ describe("IModelContent tree", () => {
                       children: [
                         NodeValidators.createForInstanceNode({
                           instanceKeys: [keys.group],
-                          supportsFiltering: true,
+                          supportsFiltering: false,
                           children: [
                             NodeValidators.createForCustomNode({
                               label: "Members",
