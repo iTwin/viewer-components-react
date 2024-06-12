@@ -11,7 +11,7 @@ import {
   MenuItem,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BboxDimension,
   BboxDimensionsDecorator,
@@ -73,8 +73,8 @@ export const CalculatedPropertyActionWithVisuals = ({
       return;
     }
     visualizeElements(resolvedHiliteIds, "red");
-    void zoomToElements(resolvedHiliteIds);
-  }, [calculatedPropertyType, colorProperty, resolvedHiliteIds]);
+    void zoomToElements([resolvedHiliteIds[0]]);
+  }, [colorProperty, resolvedHiliteIds]);
 
   useEffect(() => {
     if (!colorProperty || resolvedHiliteIds.length === 0) {
@@ -87,7 +87,7 @@ export const CalculatedPropertyActionWithVisuals = ({
       }
     };
     void setContext();
-  }, [bboxDecorator, calculatedPropertyType, colorProperty, resolvedHiliteIds]);
+  }, [bboxDecorator, colorProperty, resolvedHiliteIds]);
 
   useEffect(() => {
     if (bboxDecorator && calculatedPropertyType && inferredSpatialData) {
@@ -100,6 +100,11 @@ export const CalculatedPropertyActionWithVisuals = ({
       bboxDecorator?.clearContext();
     }
   }, [bboxDecorator, colorProperty, inferredSpatialData, calculatedPropertyType]);
+
+  const resetZoomToElements = useCallback(() =>{
+    if(!calculatedPropertyType || !colorProperty)
+      void zoomToElements(resolvedHiliteIds);
+  }, [calculatedPropertyType, colorProperty, resolvedHiliteIds])
 
   const getSpatialData = (value: string | undefined) =>
     value && inferredSpatialData?.has(
@@ -141,6 +146,7 @@ export const CalculatedPropertyActionWithVisuals = ({
               {getSpatialData(option.value)}
             </div>
           )}
+          onChangeCapture={resetZoomToElements}
         />
       </InputGroup>
     </div>

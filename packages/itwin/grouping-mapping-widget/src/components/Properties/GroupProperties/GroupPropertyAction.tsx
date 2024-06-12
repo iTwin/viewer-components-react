@@ -29,7 +29,7 @@ import type {
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import { convertPresentationFields, convertToECProperties, fetchPresentationDescriptor, findProperties } from "./GroupPropertyUtils";
-import { manufactureKeys } from "../../../common/viewerUtils";
+import { clearAll, manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -368,6 +368,7 @@ export const GroupPropertyAction = ({
       <ActionPanel
         onSave={handleSaveClick}
         onCancel={onClickCancel}
+        onCancelCapture={clearAll}
         isLoading={isLoading}
         isSavingDisabled={
           !propertyName || dataType === undefined || formulaErrorMessage !== undefined

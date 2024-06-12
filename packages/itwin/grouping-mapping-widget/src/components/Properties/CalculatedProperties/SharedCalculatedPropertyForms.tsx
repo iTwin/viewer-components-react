@@ -12,6 +12,7 @@ interface SharedCalculatedPropertyFormsProps {
   setCalculatedPropertyType: (value: CalculatedPropertyType | undefined) => void;
   itemRenderer?: (option: SelectOption<string | undefined>) => JSX.Element;
   selectedItemRenderer?: (option: SelectOption<string | undefined>) => JSX.Element;
+  onChangeCapture?: () => void;
 }
 
 export const SharedCalculatedPropertyForms = ({
@@ -19,6 +20,7 @@ export const SharedCalculatedPropertyForms = ({
   setCalculatedPropertyType,
   itemRenderer,
   selectedItemRenderer,
+  onChangeCapture,
 }: SharedCalculatedPropertyFormsProps) => {
   const generateOptionsFromCalculatedPropertyType = useCallback(() => {
     const options: SelectOption<CalculatedPropertyType | undefined>[] = [];
@@ -45,6 +47,7 @@ export const SharedCalculatedPropertyForms = ({
         options={generateOptionsFromCalculatedPropertyType()}
         value={calculatedPropertyType}
         onChange={setCalculatedPropertyType}
+        onChangeCapture={onChangeCapture}
         itemRenderer={itemRenderer}
         selectedItemRenderer={selectedItemRenderer}
         placeholder = 'No Calculated Property Type'
