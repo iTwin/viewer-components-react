@@ -542,10 +542,8 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
     const imodelAccess = this._props.imodelAccess;
 
-    // Sort paths by length such that the shortest paths are at the top.
-    // If there are paths to both parent and child node, if we handle parent paths before child paths,
-    // we can avoid doing extra actions.
-    filterPaths = [...filterPaths].sort((a, b) => a.length - b.length);
+    // Remove all paths such that there are paths to any of the ancestors of the filter target.
+    filterPaths = reduceFilterPaths(filterPaths);
 
     await Promise.all(
       filterPaths.map(async (path) => {
@@ -557,27 +555,19 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         const previousPath = path.slice(0, path.length - 1);
 
         if (await imodelAccess.classDerivesFrom(target.className, SUBJECT_CLASS_NAME)) {
-          const parentSubjectId = await this.findClassIdInFilterPath(previousPath, parentKeys, SUBJECT_CLASS_NAME);
-          if (!filterTargets?.subjects?.has(parentSubjectId)) {
-            addFilterTarget("subjects", target.id);
-          }
+          addFilterTarget("subjects", target.id);
           return;
         }
 
         if (await imodelAccess.classDerivesFrom(target.className, MODEL_CLASS_NAME)) {
-          const subjectId = await this.findClassIdInFilterPath(previousPath, parentKeys, SUBJECT_CLASS_NAME);
-          if (!filterTargets?.subjects?.has(subjectId)) {
-            addFilterTarget("models", target.id);
-          }
+          addFilterTarget("models", target.id);
           return;
         }
 
         if (await imodelAccess.classDerivesFrom(target.className, CATEGORY_CLASS_NAME)) {
           // eslint-disable-next-line @typescript-eslint/no-shadow
           const modelId = await this.findClassIdInFilterPath(previousPath, parentKeys, MODEL_CLASS_NAME);
-          if (!filterTargets?.models?.has(modelId)) {
-            addFilterTarget("categories", createCategoryKey(modelId, target.id));
-          }
+          addFilterTarget("categories", createCategoryKey(modelId, target.id));
           return;
         }
 
@@ -585,14 +575,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
           this.findClassIdInFilterPath(previousPath, parentKeys, MODEL_CLASS_NAME),
           this.findClassIdInFilterPath(previousPath, parentKeys, CATEGORY_CLASS_NAME),
         ]);
-        if (filterTargets?.models?.has(modelId)) {
-          return;
-        }
-
-        if (filterTargets?.categories?.has(createCategoryKey(modelId, categoryId))) {
-          return;
-        }
-
         addFilterTarget("elements", createElementKey(modelId, categoryId, target.id));
 
         // Add parent elements to the filter targets as well
@@ -1004,8 +986,6 @@ interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
   defaultStatus: () => NonPartialVisibilityStatus;
 }
 
-
-
 function getVisibilityFromTreeNodeChildren(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
   return obs.pipe(
     reduceWhile(
@@ -1050,4 +1030,36 @@ function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   const result = new Set<T>();
   lhs.forEach((x) => rhs.has(x) && result.add(x));
   return result;
+}
+
+function reduceFilterPaths(paths: HierarchyNodeIdentifiersPath[]) {
+  const sorted = [...paths].sort((a, b) => a.length - b.length);
+  paths = [];
+  for (const path of sorted) {
+    if (!arraySortedByLengthContainsPrefix(paths, path)) {
+      paths.push(path);
+    }
+  }
+  return paths;
+}
+
+function arraySortedByLengthContainsPrefix<T>(targetArray: T[][], source: T[]) {
+  for (const targetVal of targetArray) {
+    if (targetVal.length >= source.length) {
+      break;
+    }
+
+    let isPrefix = true;
+    for (let i = 0; i < targetVal.length; ++i) {
+      if (targetVal[i] !== source[i]) {
+        isPrefix = false;
+        break;
+      }
+    }
+
+    if (isPrefix) {
+      return true;
+    }
+  }
+  return false;
 }
