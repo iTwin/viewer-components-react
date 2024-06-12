@@ -24,6 +24,7 @@ import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { UsageTrackedFeatures } from "../../../common/UseFeatureReporting";
+
 type TreeRendererProps = Pick<
   ComponentPropsWithoutRef<typeof TreeRenderer>,
   | "rootNodes"

@@ -23,6 +23,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { ModelsTreeHeaderButtonProps } from "../../models-tree/ModelsTreeButtons";
+
 type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsTree>;
 
 interface StatelessModelsTreeComponentProps
