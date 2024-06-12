@@ -1,8 +1,16 @@
 # Change Log - @itwin/one-click-lca-react
 
-This log was last generated on Mon, 10 Jun 2024 17:40:38 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Jun 2024 15:52:38 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.6.0
+
+Tue, 11 Jun 2024 15:52:38 GMT
+
+### Minor changes
+
+- Changes in One Click LCA widget to provide custom client implementation ( ReportsClient and OCLCAJobsClient ). ([#863](https://github.com/iTwin/viewer-components-react/pull/863))
 
 ## 0.5.0
 

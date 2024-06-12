@@ -1,8 +1,16 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Mon, 10 Jun 2024 17:40:38 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Jun 2024 15:52:38 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.7.0
+
+Tue, 11 Jun 2024 15:52:38 GMT
+
+### Minor changes
+
+- Added props that allow custom implementations of ReportsClient, OdataClient, EC3JobsClient, EC3ConfigurationsClient. ([#897](https://github.com/iTwin/viewer-components-react/pull/897))
 
 ## 0.6.0
 

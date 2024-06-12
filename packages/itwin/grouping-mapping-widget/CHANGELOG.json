@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Tue, 11 Jun 2024 15:52:38 GMT",
+      "version": "0.26.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.26.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a0883f108372b7c9fa9ff233da63027d9bb06f4d",
+            "comment": "Fixed an issue with the form validator allowing invalid characters if followed by a valid one."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 10 Jun 2024 17:40:38 GMT",
       "version": "0.26.0",
       "tag": "@itwin/grouping-mapping-widget_v0.26.0",
