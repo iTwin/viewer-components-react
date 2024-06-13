@@ -123,5 +123,5 @@ function getNoDataMessage(filter: string) {
 }
 
 function getSublabel(node: PresentationHierarchyNode): ReactElement | undefined {
-  return <div style={{ marginBottom: "10px" }}>{node.extendedData?.description}</div>;
+  return <Text>{node.extendedData?.description}</Text>;
 }
