@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 10 Jun 2024 17:40:38 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Jun 2024 15:17:40 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.16.1
+
+Thu, 13 Jun 2024 15:17:40 GMT
+
+### Patches
+
+- Export SheetMeasurementHelper in measure-tools-react package ([#939](https://github.com/iTwin/viewer-components-react/pull/939))
 
 ## 0.16.0
 
