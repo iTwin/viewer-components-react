@@ -13,7 +13,7 @@ interface ScrollableExpandableBlockProps extends ExpandableBlockProps {
   children: React.ReactNode;
 }
 
-export const ScrollableExpandableBlock = forwardRef<HTMLDivElement, ScrollableExpandableBlockProps>(function PropertyExpandableBlockWithRef(props, forwardRef) {
+export const ScrollableExpandableBlock = forwardRef<HTMLDivElement, ScrollableExpandableBlockProps>(function ExpandableBlockWithRef(props, forwardRef) {
   const { parentRef, children, ...rest } = props;
   const forwardedRef = useForwardRef<HTMLDivElement>(forwardRef);
 

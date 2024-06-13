@@ -89,20 +89,6 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
     setFormula(undefined);
   }, []);
 
-  const scrollToBlock = useCallback(
-    (childRef: React.RefObject<HTMLDivElement>) => {
-      setTimeout(() => {
-        if (actionContainerRef.current && childRef.current) {
-          actionContainerRef.current.scrollTo({
-            top: childRef.current.offsetTop,
-            behavior: "smooth",
-          });
-        }
-      }, 500);
-    },
-    [actionContainerRef],
-  );
-
   const fetchPropertiesMetadata = useCallback(async () => {
     if (!iModelConnection) return;
 
@@ -124,6 +110,17 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
 
     return { propertiesMetaData, groupPropertyDetails };
   }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, mappingId, propertiesClient]);
+
+  const scrollToFormulaErrorMessage = useCallback(() => {
+    setTimeout(() => {
+      if (actionContainerRef.current && customCalculationActionRef.current) {
+        actionContainerRef.current.scrollTo({
+          top: customCalculationActionRef.current.offsetTop,
+          behavior: "smooth",
+        });
+      }
+    }, 500);
+  }, [actionContainerRef]);
 
   const {
     data,
@@ -158,9 +155,9 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
 
   useEffect(() => {
     if (formulaErrorMessage) {
-      scrollToBlock(customCalculationActionRef);
+      scrollToFormulaErrorMessage();
     }
-  }, [formulaErrorMessage, scrollToBlock]);
+  }, [formulaErrorMessage, scrollToFormulaErrorMessage]);
 
   const { mutate: onSave, isLoading: isSaving } = useMutation({
     mutationFn: async () => {
@@ -275,7 +272,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
               <SvgLabel />
             </Icon>
           }
-          isExpanded={selectedProperties.length > 0 ? true : false}
+          isExpanded={selectedProperties.length > 0}
         >
           <div className="gmw-property-view-container">
             <div className="gmw-property-view-button">
