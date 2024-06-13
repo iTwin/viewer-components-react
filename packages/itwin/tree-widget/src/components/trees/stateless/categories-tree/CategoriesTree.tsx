@@ -5,6 +5,7 @@
 
 import { useCallback, useMemo } from "react";
 import { IModelApp } from "@itwin/core-frontend";
+import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
@@ -12,7 +13,7 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
-import type { ComponentPropsWithoutRef, ReactElement } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
 import type { ViewManager, Viewport } from "@itwin/core-frontend";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
@@ -104,6 +105,7 @@ export function StatelessCategoriesTree({
       getFilteredPaths={getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       getSublabel={getSublabel}
+      getIcon={getIcon}
       density={density}
       noDataMessage={getNoDataMessage(filter)}
       selectionMode={selectionMode ?? "none"}
@@ -123,6 +125,10 @@ function getNoDataMessage(filter: string) {
   return undefined;
 }
 
-function getSublabel(node: PresentationHierarchyNode): ReactElement | undefined {
-  return <div style={{ marginBottom: "10px" }}>{node.extendedData?.description}</div>;
+function getIcon() {
+  return <SvgLayers />;
+}
+
+function getSublabel(node: PresentationHierarchyNode) {
+  return node.extendedData?.description;
 }
