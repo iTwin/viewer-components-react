@@ -5,18 +5,31 @@
 
 import { createHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { ModelsTreeIdsCache } from "../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
-import { ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { createIModelAccess } from "../../Common";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 
-export function createModelsTreeProvider(imodel: IModelConnection, filteredNodePaths?: HierarchyNodeIdentifiersPath[]) {
+type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+
+interface CreateModelsTreeProviderProps {
+  imodel: IModelConnection;
+  filteredNodePaths?: HierarchyNodeIdentifiersPath[];
+  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
+}
+
+export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyConfig }: CreateModelsTreeProviderProps) {
+  const config = { ...defaultHierarchyConfiguration, ...hierarchyConfig };
   const imodelAccess = createIModelAccess(imodel);
-  const idsCache = new ModelsTreeIdsCache(imodelAccess);
+  const idsCache = new ModelsTreeIdsCache(imodelAccess, config);
   return createHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new ModelsTreeDefinition({ imodelAccess, idsCache }),
+    hierarchyDefinition: new ModelsTreeDefinition({
+      imodelAccess,
+      idsCache,
+      hierarchyConfig: config,
+    }),
     ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths } } : undefined),
   });
 }

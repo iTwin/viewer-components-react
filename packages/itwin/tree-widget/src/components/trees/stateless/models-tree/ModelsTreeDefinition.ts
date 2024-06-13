@@ -27,23 +27,49 @@ import type {
   NodesQueryClauseFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
-import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory, InstanceKey } from "@itwin/presentation-shared";
+import type {
+  ECClassHierarchyInspector,
+  ECSchemaProvider,
+  ECSqlBinding,
+  ECSqlQueryDef,
+  IInstanceLabelSelectClauseFactory,
+  InstanceKey,
+} from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
+
+interface HierarchyConfiguration {
+  /** Should element nodes be grouped by class. Defaults to `enable`. */
+  elementClassGrouping: "enable" | "enableWithCounts" | "disable";
+  /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d` */
+  elementClassSpecification: string;
+  /** Should models without elements be shown. Defaults to `false` */
+  showEmptyModels: boolean;
+}
+
+export const defaultHierarchyConfiguration: HierarchyConfiguration = {
+  elementClassGrouping: "enable",
+  elementClassSpecification: "BisCore.GeometricElement3d",
+  showEmptyModels: false,
+};
+
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
+  hierarchyConfig: HierarchyConfiguration;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   keys: InstanceKey[];
+  hierarchyConfig: HierarchyConfiguration;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   label: string;
+  hierarchyConfig: HierarchyConfiguration;
 }
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromInstanceKeysProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
@@ -58,8 +84,11 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _idsCache: ModelsTreeIdsCache;
+  private _hierarchyConfig: HierarchyConfiguration;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
+  private _queryExecutor: LimitingECSqlQueryExecutor;
+  private _isSupported?: Promise<boolean>;
 
   public constructor(props: ModelsTreeDefinitionProps) {
     this._impl = createClassBasedHierarchyDefinition({
@@ -91,22 +120,39 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       },
     });
     this._idsCache = props.idsCache;
+    this._queryExecutor = props.imodelAccess;
+    this._hierarchyConfig = props.hierarchyConfig;
     this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
   }
 
   public async postProcessNode(node: ProcessedHierarchyNode): Promise<ProcessedHierarchyNode> {
     if (HierarchyNode.isClassGroupingNode(node)) {
-      // `imageId` is assigned to instance nodes at query time, but grouping ones need to
-      // be handled during post-processing
-      // Add `modelId` and `categoryId` from the first grouped element.
-      const childExtendedData = node.children[0].extendedData;
-      return { ...node, extendedData: { ...node.extendedData, ...childExtendedData, imageId: "icon-ec-class" } };
+      return {
+        ...node,
+        label: this._hierarchyConfig.elementClassGrouping === "enableWithCounts" ? `${node.label} (${node.children.length})` : node.label,
+        extendedData: {
+          ...node.extendedData,
+          // add `modelId` and `categoryId` from the first grouped element
+          ...node.children[0].extendedData,
+          // `imageId` is assigned to instance nodes at query time, but grouping ones need to
+          // be handled during post-processing
+          imageId: "icon-ec-class",
+        },
+      };
     }
     return node;
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {
+    if (this._isSupported === undefined) {
+      this._isSupported = this.isSupported();
+    }
+
+    if ((await this._isSupported) === false) {
+      return [];
+    }
+
     return this._impl.defineHierarchyLevel(props);
   }
 
@@ -212,8 +258,8 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             FROM (
               SELECT
                 ${await this._selectQueryFactory.createSelectClause({
-                  ecClassId: { selector: "model.ECClassId" },
-                  ecInstanceId: { selector: "model.ECInstanceId" },
+                  ecClassId: { selector: "m.ECClassId" },
+                  ecInstanceId: { selector: "m.ECInstanceId" },
                   nodeLabel: {
                     selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                       classAlias: "partition",
@@ -231,17 +277,28 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                       END
                     `,
                   },
-                  hasChildren: true,
+                  hasChildren: this._hierarchyConfig.showEmptyModels
+                    ? {
+                        selector: `
+                          IFNULL((
+                            SELECT 1
+                            FROM ${this._hierarchyConfig.elementClassSpecification} e
+                            WHERE e.Model.Id = m.ECInstanceId
+                            LIMIT 1
+                          ), 0)
+                        `,
+                      }
+                    : true,
                   extendedData: {
                     imageId: "icon-model",
                     isModel: true,
                   },
                   supportsFiltering: true,
                 })}
-              FROM Bis.GeometricModel3d model
-              JOIN bis.InformationPartitionElement [partition] ON [partition].ECInstanceId = model.ModeledElement.Id
+              FROM Bis.GeometricModel3d m
+              JOIN bis.InformationPartitionElement [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
               WHERE
-                model.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
+                m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
@@ -274,7 +331,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             WHERE
               this.ModeledElement.Id IN (${elementIds.map(() => "?").join(",")})
               AND NOT this.IsPrivate
-              AND this.ECInstanceId IN (SELECT Model.Id FROM bis.GeometricElement3d)
+              AND this.ECInstanceId IN (SELECT Model.Id FROM ${this._hierarchyConfig.elementClassSpecification})
           `,
           bindings: [...elementIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
         },
@@ -332,7 +389,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
             WHERE
               EXISTS (
                 SELECT 1
-                FROM bis.GeometricElement3d element
+                FROM ${this._hierarchyConfig.elementClassSpecification} element
                 WHERE
                   element.Model.Id IN (${modelIds.map(() => "?").join(",")})
                   AND element.Category.Id = +this.ECInstanceId
@@ -363,11 +420,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     }
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: "BisCore.GeometricElement3d", alias: "this" },
+      contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
     return [
       {
-        fullClassName: "BisCore.GeometricElement3d",
+        fullClassName: this._hierarchyConfig.elementClassSpecification,
         query: {
           ecsql: `
             SELECT
@@ -377,18 +434,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: "BisCore.GeometricElement3d",
+                    className: this._hierarchyConfig.elementClassSpecification,
                   }),
                 },
                 grouping: {
-                  byClass: true,
+                  byClass: this._hierarchyConfig.elementClassGrouping !== "disable",
                 },
                 hasChildren: {
                   selector: `
                     IFNULL((
                       SELECT 1
                       FROM (
-                        SELECT Parent.Id ParentId FROM bis.GeometricElement3d
+                        SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
                         UNION ALL
                         SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
                       )
@@ -424,11 +481,11 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
-      contentClass: { fullName: "BisCore.GeometricElement3d", alias: "this" },
+      contentClass: { fullName: this._hierarchyConfig.elementClassSpecification, alias: "this" },
     });
     return [
       {
-        fullClassName: "BisCore.GeometricElement3d",
+        fullClassName: this._hierarchyConfig.elementClassSpecification,
         query: {
           ecsql: `
             SELECT
@@ -438,18 +495,18 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                     classAlias: "this",
-                    className: "BisCore.GeometricElement3d",
+                    className: this._hierarchyConfig.elementClassSpecification,
                   }),
                 },
                 grouping: {
-                  byClass: true,
+                  byClass: this._hierarchyConfig.elementClassGrouping !== "disable",
                 },
                 hasChildren: {
                   selector: `
                     IFNULL((
                       SELECT 1
                       FROM (
-                        SELECT Parent.Id ParentId FROM bis.GeometricElement3d
+                        SELECT Parent.Id ParentId FROM ${this._hierarchyConfig.elementClassSpecification}
                         UNION ALL
                         SELECT ModeledElement.Id ParentId FROM bis.GeometricModel3d
                       )
@@ -484,6 +541,33 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     }
     return createInstanceKeyPathsFromInstanceKeys(props);
   }
+
+  private async isSupported() {
+    const [schemaName, className] = this._hierarchyConfig.elementClassSpecification.split(/[\.:]/);
+    if (!schemaName || !className) {
+      throw new Error(
+        `Provided class specification ${this._hierarchyConfig.elementClassSpecification} should be in format {SchemaName}:{ClassName} or {SchemaName}.{ClassName}`,
+      );
+    }
+
+    const query: ECSqlQueryDef = {
+      ecsql: `
+        SELECT 1
+        FROM ECDbMeta.ECSchemaDef s
+        JOIN ECDbMeta.ECClassDef c ON c.Schema.Id = s.ECInstanceId
+        WHERE s.Name = ? AND c.Name = ? AND c.ECInstanceId IS (BisCore.GeometricElement3d)
+      `,
+      bindings: [
+        { type: "string", value: schemaName },
+        { type: "string", value: className },
+      ],
+    };
+
+    for await (const _row of this._queryExecutor.createQueryReader(query)) {
+      return true;
+    }
+    return false;
+  }
 }
 
 function createSubjectInstanceKeysPath(subjectId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
@@ -513,6 +597,7 @@ function createCategoryInstanceKeyPaths(categoryId: Id64String, idsCache: Models
 function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
+  hierarchyConfig: HierarchyConfiguration,
   elementIds: Id64String[],
 ): Observable<HierarchyNodeIdentifiersPath> {
   return defer(() => {
@@ -527,7 +612,7 @@ function createGeometricElementInstanceKeyPaths(
             IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "c" })}, NULL),
             IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
           )
-        FROM bis.GeometricElement3d e
+        FROM ${hierarchyConfig.elementClassSpecification} e
         JOIN bis.GeometricModel3d m ON m.ECInstanceId = e.Model.Id
         JOIN bis.SpatialCategory c ON c.ECInstanceId = e.Category.Id
         WHERE e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
@@ -545,7 +630,7 @@ function createGeometricElementInstanceKeyPaths(
             '$[#]', IIF(pe.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
           )
         FROM ModelsCategoriesElementsHierarchy ce
-        JOIN bis.GeometricElement3d pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
+        JOIN ${hierarchyConfig.elementClassSpecification} pe ON (pe.ECInstanceId = ce.ParentId OR pe.ECInstanceId = ce.ModelId AND ce.ParentId IS NULL)
         JOIN bis.GeometricModel3d m ON m.ECInstanceId = pe.Model.Id
         JOIN bis.SpatialCategory c ON c.ECInstanceId = pe.Category.Id
       )`,
@@ -597,7 +682,7 @@ async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceK
       from(ids.subjects).pipe(mergeMap((id) => createSubjectInstanceKeysPath(id, props.idsCache))),
       from(ids.models).pipe(mergeMap((id) => createModelInstanceKeyPaths(id, props.idsCache))),
       from(ids.categories).pipe(mergeMap((id) => createCategoryInstanceKeyPaths(id, props.idsCache))),
-      ids.elements.length ? createGeometricElementInstanceKeyPaths(props.imodelAccess, props.idsCache, ids.elements) : EMPTY,
+      ids.elements.length ? createGeometricElementInstanceKeyPaths(props.imodelAccess, props.idsCache, props.hierarchyConfig, ids.elements) : EMPTY,
     ),
   );
 }
@@ -621,7 +706,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
             e.ECInstanceId,
             ${elementLabelSelectClause} Label
           FROM BisCore.Element e
-          WHERE e.ECClassId IS (BisCore.Subject, BisCore.SpatialCategory, BisCore.GeometricElement3d)
+          WHERE e.ECClassId IS (BisCore.Subject, BisCore.SpatialCategory, ${props.hierarchyConfig.elementClassSpecification})
 
           UNION ALL
 
@@ -632,7 +717,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
           FROM BisCore.GeometricModel3d m
           JOIN BisCore.Element e ON e.ECInstanceId = m.ModeledElement.Id
           WHERE NOT m.IsPrivate
-            AND EXISTS (SELECT 1 FROM bis.GeometricElement3d WHERE Model.Id = m.ECInstanceId)
+            ${props.hierarchyConfig.showEmptyModels ? "" : `AND EXISTS (SELECT 1 FROM ${props.hierarchyConfig.elementClassSpecification} WHERE Model.Id = m.ECInstanceId)`}
             AND json_extract(e.JsonProperties, '$.PhysicalPartition.Model.Content') IS NULL
             AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
         )

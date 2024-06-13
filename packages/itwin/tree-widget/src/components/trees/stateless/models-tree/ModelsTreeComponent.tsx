@@ -29,7 +29,7 @@ type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsT
 interface StatelessModelsTreeComponentProps
   extends Pick<
     StatelessModelsTreeProps,
-    "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured" | "onFeatureUsed"
+    "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured" | "onFeatureUsed" | "hierarchyConfig"
   > {
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
