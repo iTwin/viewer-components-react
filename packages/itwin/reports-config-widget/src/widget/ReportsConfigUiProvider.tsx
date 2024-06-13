@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
-import type { AccessToken } from "@itwin/core-bentley";
 
 import * as React from "react";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
+import type { ReportsContainerProps } from "./components/ReportsContainer";
 import ReportsContainer from "./components/ReportsContainer";
 
 /**
@@ -21,13 +21,8 @@ export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
  */
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";
-  private readonly _getAccessToken?: () => Promise<AccessToken>;
-  private readonly _baseUrl: string;
 
-  constructor(getAccessToken?: () => Promise<AccessToken>, baseUrl: string = REPORTS_CONFIG_BASE_URL) {
-    this._getAccessToken = getAccessToken;
-    this._baseUrl = baseUrl;
-  }
+  constructor(private _props?: ReportsContainerProps) { }
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];
@@ -35,7 +30,7 @@ export class ReportsConfigProvider implements UiItemsProvider {
       const ReportsWidget: Widget = {
         id: "reports-config-widget",
         label: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
-        content: <ReportsContainer getAccessToken={this._getAccessToken} baseUrl={this._baseUrl} />,
+        content: <ReportsContainer {...this._props} />,
       };
 
       widgets.push(ReportsWidget);

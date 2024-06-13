@@ -7,10 +7,15 @@
   width: fit-content;
   min-width: 100%;
 
-  div:has(> .tw-tree-node-checkbox) {
+  .tw-tree-node-checkbox-container {
     position: sticky;
     left: 0;
     z-index: 1;
+    background-color: var(--iui-color-background);
+    padding-left: calc(var(--iui-size-2xs) + var(--iui-size-3xs));
+  }
+
+  .tw-tree-node-checkbox::before {
     background-color: var(--iui-color-background);
   }
 
@@ -21,21 +26,27 @@
     background-color: var(--iui-color-background);
   }
 
-  div:has(> .tw-tree-node-action-buttons) {
+  .tw-tree-node {
+    padding-inline: 1px;
+  }
+
+  .tw-tree-node-content {
     overflow: visible;
   }
 
-  .tw-tree-node:not(.selected) {
-    div:has(> .tw-tree-node-checkbox),
+  .tw-tree-node.selected {
+    .tw-tree-node-checkbox-container,
+    .tw-tree-node-checkbox::before,
     .tw-tree-node-action-buttons {
-      background-color: var(--iui-color-background-hover);
+      background-color: var(--iui-color-background-accent-muted);
     }
   }
 
-  .tw-tree-node.selected {
-    div:has(> .tw-tree-node-checkbox),
+  .tw-tree-node:not(.selected):hover {
+    .tw-tree-node-checkbox-container,
+    .tw-tree-node-checkbox::before,
     .tw-tree-node-action-buttons {
-      background-color: var(--iui-color-background-accent-muted);
+      background-color: var(--iui-color-background-hover);
     }
   }
 }

@@ -23,9 +23,11 @@ export function TreeNodeRenderer({ checkboxProps, ...props }: TreeNodeRendererPr
   return (
     <CoreTreeNodeRenderer
       {...props}
-      className={cx("tw-tree-node", props.isSelected && "selected", props.className)}
+      nodeProps={{ className: cx("tw-tree-node", props.isSelected && "selected", props.className) }}
       actionButtonsClassName="tw-tree-node-action-buttons"
       checkbox={checkboxProps ? <TreeNodeCheckbox {...checkboxProps} node={props.node} /> : null}
+      contentProps={{ className: "tw-tree-node-content" }}
+      checkboxProps={{ className: "tw-tree-node-checkbox-container" }}
     />
   );
 }

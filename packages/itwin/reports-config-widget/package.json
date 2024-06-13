@@ -1,6 +1,6 @@
 {
   "name": "@itwin/reports-config-widget-react",
-  "version": "0.5.0",
+  "version": "0.7.0",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",

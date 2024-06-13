@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed an issue that caused the extraction state for the mappings in the ReportMappings component to keep appearing after every rerender while in a final state.",
-  "packageName": "@itwin/reports-config-widget-react",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

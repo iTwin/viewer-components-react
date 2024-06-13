@@ -105,7 +105,6 @@ function ModelsTreeComponentImpl({
   const availableModels = useAvailableModels(iModel);
   const density = treeProps.density;
   const { searchOptions, filterString, onFilterApplied } = useTreeFilteringState();
-  const contentClassName = classNames("tree-widget-tree-content", density === "enlarged" && "enlarge");
 
   const filterInfo = useMemo(
     () => ({ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }),
@@ -120,7 +119,7 @@ function ModelsTreeComponentImpl({
   };
 
   return (
-    <div className="tree-widget-tree-with-header">
+    <div className={classNames("tree-widget-tree-with-header", density === "enlarged" && "enlarge")}>
       <TreeHeader
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
@@ -171,7 +170,7 @@ function ModelsTreeComponentImpl({
               />,
             ]}
       </TreeHeader>
-      <div className={contentClassName}>
+      <div className="tree-widget-tree-content">
         <AutoSizer>
           {({ width, height }) => (
             <ModelsTree

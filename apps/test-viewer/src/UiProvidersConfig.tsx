@@ -48,7 +48,7 @@ export interface UiProvidersConfig {
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
-  const enabledWidgets = process.env.IMJS_ENABLED_WIDGETS ?? "";
+  const enabledWidgets = import.meta.env.IMJS_ENABLED_WIDGETS ?? "";
   const matchingItems = collectSupportedItems(enabledWidgets.split(" "));
 
   const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
@@ -88,10 +88,17 @@ interface UiItem {
   createUiItemsProviders: () => UiItemsProvider[];
 }
 
+const schemaContextCache = new Map<string, SchemaContext>();
 function getSchemaContext(imodel: IModelConnection) {
-  const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
-  const schemaContext = new SchemaContext();
-  schemaContext.addLocater(schemaLocater);
+  const key = imodel.getRpcProps().key;
+  let schemaContext = schemaContextCache.get(key);
+  if (!schemaContext) {
+    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
+    schemaContext = new SchemaContext();
+    schemaContext.addLocater(schemaLocater);
+    schemaContextCache.set(key, schemaContext);
+    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
+  }
   return schemaContext;
 }
 
@@ -290,7 +297,7 @@ const configuredUiItems = new Map<string, UiItem>([
     "grouping-mapping-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: `${process.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix })],
+      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: import.meta.env.IMJS_URL_PREFIX ? `${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix : undefined })],
     },
   ],
   [
@@ -299,7 +306,7 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => {
         await ReportsConfigWidget.initialize();
       },
-      createUiItemsProviders: () => [new ReportsConfigProvider(undefined, prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX))],
+      createUiItemsProviders: () => [new ReportsConfigProvider({ baseUrl: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX) })],
     },
   ],
   [
@@ -308,10 +315,10 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => Promise.resolve(),
       createUiItemsProviders: () => [
         new EC3Provider({
-          clientId: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
-          redirectUri: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
-          reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
-          carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
+          clientId: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
+          redirectUri: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
+          reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
+          carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
         }),
       ],
     },

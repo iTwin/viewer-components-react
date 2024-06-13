@@ -13,6 +13,7 @@ import type {
   TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+
 export interface ReportingTreeEventHandlerProps {
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
   eventHandler: TreeEventHandler;

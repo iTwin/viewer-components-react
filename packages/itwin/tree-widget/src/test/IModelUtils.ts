@@ -19,6 +19,7 @@ import type {
   ElementAspectProps,
   ElementProps,
   ExternalSourceAspectProps,
+  ExternalSourceAttachmentProps,
   ExternalSourceProps,
   FunctionalElementProps,
   GeometricElement2dProps,
@@ -374,40 +375,25 @@ export function insertDrawingElement<TAdditionalProps extends {}>(
   return { className, id };
 }
 
-export function insertRepositoryLink(
-  props: BaseInstanceInsertProps & { repositoryUrl: string; repositoryLabel: string } & Partial<
-      Omit<RepositoryLinkProps, "id" | "model" | "url" | "userLabel">
-    >,
-) {
-  const { builder, classFullName, repositoryUrl, repositoryLabel, ...repoLinkProps } = props;
+export function insertRepositoryLink(props: BaseInstanceInsertProps & { codeValue?: string } & Partial<Omit<RepositoryLinkProps, "id" | "model" | "code">>) {
+  const { builder, classFullName, codeValue, ...repoLinkProps } = props;
   const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}RepositoryLink`;
   const className = classFullName ?? defaultClassName;
   const id = builder.insertElement({
     classFullName: className,
     model: IModel.repositoryModelId,
-    url: repositoryUrl,
-    userLabel: repositoryLabel,
+    code: codeValue ? builder.createCode(IModel.repositoryModelId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
     ...repoLinkProps,
   } as RepositoryLinkProps);
   return { className, id };
 }
 
 export function insertExternalSourceAspect(
-  props: BaseInstanceInsertProps & { elementId: Id64String; identifier: String; repositoryId?: Id64String } & Partial<
-      Omit<ExternalSourceAspectProps, "id" | "classFullName" | "element" | "source">
+  props: BaseInstanceInsertProps & { elementId: Id64String; identifier?: string; sourceId?: Id64String } & Partial<
+      Omit<ExternalSourceAspectProps, "id" | "classFullName" | "element" | "identifier" | "source">
     >,
 ) {
-  const { builder, repositoryId, elementId, identifier, ...externalSourceAspectProps } = props;
-  const externalSourceId = builder.insertElement({
-    classFullName: `BisCore${props.fullClassNameSeparator ?? "."}ExternalSource`,
-    model: IModel.repositoryModelId,
-    repository: repositoryId
-      ? {
-          id: repositoryId,
-        }
-      : undefined,
-  } as ExternalSourceProps);
-
+  const { builder, elementId, identifier, sourceId, ...externalSourceAspectProps } = props;
   const className = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSourceAspect`;
   const id = builder.insertAspect({
     classFullName: className,
@@ -415,13 +401,68 @@ export function insertExternalSourceAspect(
     element: {
       id: elementId,
     },
-    source: {
-      id: externalSourceId,
-    },
-    identifier,
+    source: sourceId
+      ? {
+          id: sourceId,
+        }
+      : undefined,
+    identifier: identifier ?? "",
     ...externalSourceAspectProps,
   } as ExternalSourceAspectProps);
 
+  return { className, id };
+}
+
+export function insertExternalSource(
+  props: BaseInstanceInsertProps & { codeValue?: string; parentId?: Id64String; repositoryLinkId?: Id64String } & Partial<
+      Omit<ExternalSourceProps, "id" | "repository" | "parent">
+    >,
+) {
+  const { builder, classFullName, codeValue, parentId, repositoryLinkId, ...externalSourceProps } = props;
+  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSource`;
+  const className = classFullName ?? defaultClassName;
+  const id = builder.insertElement({
+    classFullName: className,
+    model: IModel.repositoryModelId,
+    code: codeValue ? builder.createCode(IModel.repositoryModelId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
+    parent: parentId
+      ? {
+          relClassName: "BisCore:ElementOwnsChildElements",
+          id: parentId,
+        }
+      : undefined,
+    repository: repositoryLinkId
+      ? {
+          id: repositoryLinkId,
+        }
+      : undefined,
+    ...externalSourceProps,
+  } as RepositoryLinkProps);
+  return { className, id };
+}
+
+export function insertExternalSourceAttachment(
+  props: BaseInstanceInsertProps & { codeValue?: string; parentExternalSourceId: Id64String; attachedExternalSourceId: Id64String } & Partial<
+      Omit<ExternalSourceAttachmentProps, "id" | "parent" | "attaches">
+    >,
+) {
+  const { builder, classFullName, codeValue, parentExternalSourceId, attachedExternalSourceId, ...externalSourceAttachmentProps } = props;
+  const defaultClassName = `BisCore${props.fullClassNameSeparator ?? "."}ExternalSourceAttachment`;
+  const className = classFullName ?? defaultClassName;
+  const id = builder.insertElement({
+    classFullName: className,
+    model: IModel.repositoryModelId,
+    code: codeValue ? builder.createCode(IModel.repositoryModelId, BisCodeSpec.nullCodeSpec, codeValue) : Code.createEmpty(),
+    parent: {
+      relClassName: "BisCore:ExternalSourceOwnsAttachments",
+      id: parentExternalSourceId,
+    },
+    attaches: {
+      relClassName: "BisCore:ExternalSourceAttachmentAttachesSource",
+      id: attachedExternalSourceId,
+    },
+    ...externalSourceAttachmentProps,
+  } as RepositoryLinkProps);
   return { className, id };
 }
 

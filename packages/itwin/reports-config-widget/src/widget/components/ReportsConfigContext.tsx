@@ -5,6 +5,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 import type { IModelsClientOptions } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
+import type { IExtractionClient, IMappingsClient, IReportsClient } from "@itwin/insights-client";
 import { ExtractionClient, GROUPING_AND_MAPPING_BASE_PATH, MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -22,13 +23,35 @@ import { generateUrl } from "./utils";
  * @public
  */
 export interface ReportsConfigContextProps {
+  /**
+   * A callback function that returns an access token for authenticating API requests.
+   * If not specified, it defaults to the authorizationClient of the IModelApp.
+   */
   getAccessToken?: GetAccessTokenFn;
+  /**
+   * The base URL for the API requests. Defaults to https://api.bentley.com.
+   */
   baseUrl?: string;
   iTwinId: string;
+  /**
+   * The bulk extractor instance to use for extracting data. Internal use only.
+   */
   bulkExtractor?: BulkExtractor;
-  reportsClient?: ReportsClient;
-  mappingsClient?: MappingsClient;
-  extractionClient?: ExtractionClient;
+  /**
+   * A custom implementation of ReportsClient. If provided, baseUrl is ignored.
+   */
+  reportsClient?: IReportsClient;
+  /**
+   * A custom implementation of MappingsClient. If provided, baseUrl is ignored.
+   */
+  mappingsClient?: IMappingsClient;
+  /**
+   * A custom implementation of ExtractionClient. If provided, baseUrl is ignored.
+   */
+  extractionClient?: IExtractionClient;
+  /**
+   * A custom implementation of IModelsClient. If provided, baseUrl is ignored.
+   */
   iModelsClient?: IModelsClient;
   children?: React.ReactNode;
 }
@@ -48,22 +71,22 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     }),
     [props.baseUrl],
   );
-  const [extractionClient, setExtractionClient] = useState<ExtractionClient>(props.extractionClient ?? new ExtractionClient(reportsBaseUrl()));
+  const [extractionClient, setExtractionClient] = useState<IExtractionClient>(props.extractionClient ?? new ExtractionClient(reportsBaseUrl()));
 
   const [apiConfig, setApiConfig] = useState<ReportsConfigApiProps>({
     getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
     baseUrl: reportsBaseUrl(),
     iTwinId: props.iTwinId,
     reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
-    mappingsClient: props.mappingsClient ?? new MappingsClient(groupingMappingBaseUrl()),
+    mappingsClient: props.mappingsClient ?? new MappingsClient(undefined, groupingMappingBaseUrl()),
     iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
   });
 
   useEffect(() => {
     if (!props.extractionClient) {
-      setExtractionClient(props.extractionClient ?? new ExtractionClient(reportsBaseUrl()));
+      setExtractionClient(props.extractionClient ?? new ExtractionClient(undefined, groupingMappingBaseUrl()));
     }
-  }, [props.extractionClient, reportsBaseUrl]);
+  }, [groupingMappingBaseUrl, props.extractionClient]);
 
   const successfulExtractionToast = (iModelName: string, odataFeedUrl: string) => {
     toaster.positive(<SuccessfulExtractionToast iModelName={iModelName} odataFeedUrl={odataFeedUrl} />);
@@ -88,10 +111,20 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
       baseUrl: props.baseUrl || REPORTS_CONFIG_BASE_URL,
       iTwinId: props.iTwinId,
       reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
-      mappingsClient: props.mappingsClient ?? new MappingsClient(reportsBaseUrl()),
+      mappingsClient: props.mappingsClient ?? new MappingsClient(undefined, groupingMappingBaseUrl()),
       iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
     }));
-  }, [props.getAccessToken, props.baseUrl, props.iTwinId, props.reportsClient, props.mappingsClient, props.iModelsClient, reportsBaseUrl, iModelClientOptions]);
+  }, [
+    props.getAccessToken,
+    props.baseUrl,
+    props.iTwinId,
+    props.reportsClient,
+    props.mappingsClient,
+    props.iModelsClient,
+    reportsBaseUrl,
+    iModelClientOptions,
+    groupingMappingBaseUrl,
+  ]);
 
   return (
     <ReportsConfigApiContext.Provider value={apiConfig}>

@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
+import { Guid } from "@itwin/core-bentley";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { Guid } from "@itwin/core-bentley";
 
 /**
  * Props for `useLoadedInstanceInfo` hook.

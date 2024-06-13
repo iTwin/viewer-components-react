@@ -22,7 +22,7 @@ export const Validators = {
   FollowedByLettersUnderscoresAndDigits: {
     message: "Name can only contain letters, underscores, or digits",
     rule: (val: string) => {
-      const regexPattern = new RegExp(/[\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]+$/u);
+      const regexPattern = new RegExp(/^[\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]+$/u);
       return regexPattern.test(val);
     },
   },

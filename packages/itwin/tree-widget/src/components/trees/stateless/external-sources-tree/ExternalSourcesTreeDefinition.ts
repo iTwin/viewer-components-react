@@ -97,12 +97,12 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                   imageId: "icon-document",
                 },
                 autoExpand: true,
-                supportsFiltering: true,
+                supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
             JOIN BisCore.SynchronizationConfigSpecifiesRootSources scsrs ON scsrs.TargetECInstanceId = this.ECInstanceId
-            JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
+            LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.where ? `WHERE ${instanceFilterClauses.where}` : ""}
           `,
         },
@@ -130,24 +130,14 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this.createCompositeLabelSelectClause({ externalSourceAlias: "this", repositoryLinkAlias: "rl" }),
                 },
-                hasChildren: {
-                  selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM BisCore.ExternalSourceAttachment esa
-                      WHERE esa.Attaches.Id = this.ECInstanceId
-                      LIMIT 1
-                    ), 0)
-                  `,
-                },
                 extendedData: {
                   imageId: "icon-document",
                 },
-                supportsFiltering: true,
+                supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceGroupGroupsSources esggs ON esggs.TargetECInstanceId = this.ECInstanceId
-            JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
+            LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             WHERE
               esggs.SourceECInstanceId IN (${groupIds.map(() => "?").join(",")})
@@ -179,24 +169,14 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 nodeLabel: {
                   selector: await this.createCompositeLabelSelectClause({ externalSourceAlias: "this", repositoryLinkAlias: "rl" }),
                 },
-                hasChildren: {
-                  selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM BisCore.ExternalSourceAttachment esa
-                      WHERE esa.Attaches.Id = this.ECInstanceId
-                      LIMIT 1
-                    ), 0)
-                  `,
-                },
                 extendedData: {
                   imageId: "icon-document",
                 },
-                supportsFiltering: true,
+                supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAttachment esa ON esa.Attaches.Id = this.ECInstanceId
-            JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
+            LEFT JOIN BisCore.RepositoryLink rl ON rl.ECInstanceId = this.Repository.Id
             ${instanceFilterClauses.joins}
             WHERE
               esa.Parent.Id IN (${sourceIds.map(() => "?").join(",")})
@@ -220,6 +200,20 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
         },
       },
     ];
+  }
+
+  private createExternalSourceSupportsFilteringSelector(alias: string) {
+    return `
+      IFNULL((
+        SELECT 1
+        FROM (
+          SELECT 1 FROM BisCore.ExternalSourceGroupGroupsSources WHERE SourceECInstanceId = ${alias}.ECInstanceId
+          UNION ALL
+          SELECT 1 FROM BisCore.ExternalSourceAttachment WHERE Parent.Id = ${alias}.ECInstanceId
+        )
+        LIMIT 1
+      ), 0)
+    `;
   }
 
   private async createElementsNodeChildrenQuery({ parentNode, instanceFilter }: DefineCustomNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
@@ -247,14 +241,13 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                   imageId: "icon-item",
                 },
                 grouping: { byClass: true },
-                supportsFiltering: true,
                 hasChildren: false,
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAspect esa ON esa.Element.Id = this.ECInstanceId
             ${instanceFilterClauses.joins}
             WHERE
-              esa.Source.Id = (${sourceIds.map(() => "?").join(",")})
+              esa.Source.Id IN (${sourceIds.map(() => "?").join(",")})
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
           `,
           bindings: sourceIds.map((id) => ({ type: "id", value: id })),
@@ -264,16 +257,24 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
   }
 
   private async createCompositeLabelSelectClause({ externalSourceAlias, repositoryLinkAlias }: { externalSourceAlias: string; repositoryLinkAlias: string }) {
-    return ECSql.createConcatenatedValueStringSelector([
+    return ECSql.createConcatenatedValueJsonSelector([
       {
-        selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
-          classAlias: repositoryLinkAlias,
-          className: "BisCore.RepositoryLink",
-        }),
-      },
-      {
-        type: "String",
-        value: " - ",
+        selector: `IIF(
+          ${repositoryLinkAlias}.ECInstanceId IS NOT NULL,
+          ${ECSql.createConcatenatedValueJsonSelector([
+            {
+              selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                classAlias: repositoryLinkAlias,
+                className: "BisCore.RepositoryLink",
+              }),
+            },
+            {
+              type: "String",
+              value: " - ",
+            },
+          ])},
+          ''
+        )`,
       },
       {
         selector: await this._nodeLabelSelectClauseFactory.createSelectClause({

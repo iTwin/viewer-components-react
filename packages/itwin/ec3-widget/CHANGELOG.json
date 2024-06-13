@@ -2,6 +2,44 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Tue, 11 Jun 2024 15:52:38 GMT",
+      "version": "0.7.0",
+      "tag": "@itwin/ec3-widget-react_v0.7.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "3da5297647e428425165200c5596f7a760925961",
+            "comment": "Added props that allow custom implementations of ReportsClient, OdataClient, EC3JobsClient, EC3ConfigurationsClient."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Mon, 10 Jun 2024 17:40:38 GMT",
+      "version": "0.6.0",
+      "tag": "@itwin/ec3-widget-react_v0.6.0",
+      "comments": {
+        "none": [
+          {
+            "author": "hansraj.koravenciah@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "36c49a556b4c99a4203d243fcb44581ec80ee9fb",
+            "comment": "Ran prettier on ec3, lca, reportconfig and reportmapping widgets"
+          }
+        ],
+        "minor": [
+          {
+            "author": "hansraj.koravenciah@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "fb68ffda26c43a99920e14d53d4d0a70c9a79c38",
+            "comment": "Upgraded insights-client version to 0.10.1, fixed functions using old dependencies"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 21 May 2024 13:26:35 GMT",
       "version": "0.5.0",
       "tag": "@itwin/ec3-widget-react_v0.5.0",

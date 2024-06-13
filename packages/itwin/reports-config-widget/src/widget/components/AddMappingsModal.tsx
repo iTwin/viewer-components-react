@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { Modal, Table, tableFilters } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Mapping, MappingsClient } from "@itwin/insights-client";
+import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
@@ -23,7 +23,7 @@ const fetchMappings = async (
   setMappings: (mappings: Mapping[]) => void,
   iModelId: string,
   setIsLoading: (isLoading: boolean) => void,
-  mappingsClient: MappingsClient,
+  mappingsClient: IMappingsClient,
   getAccessToken: () => Promise<AccessToken>,
 ) => {
   try {

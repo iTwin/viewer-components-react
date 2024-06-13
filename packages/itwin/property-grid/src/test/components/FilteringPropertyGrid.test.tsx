@@ -6,7 +6,7 @@
 import { expect } from "chai";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
-import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "../../property-grid-react";
+import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "../../components/FilteringPropertyGrid";
 import { createPropertyRecord, render, waitFor } from "../TestUtils";
 
 import type { IPropertyDataProvider } from "@itwin/components-react";
