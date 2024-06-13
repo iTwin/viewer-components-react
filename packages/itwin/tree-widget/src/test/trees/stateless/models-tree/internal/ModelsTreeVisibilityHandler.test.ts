@@ -7,7 +7,7 @@ import { assert, expect } from "chai";
 import path from "path";
 import sinon from "sinon";
 import { using } from "@itwin/core-bentley";
-import { ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -22,7 +22,8 @@ import { createModelsTreeVisibilityHandler } from "../../../../../components/tre
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import {
-  buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject,
+  buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
+  insertSpatialCategory, insertSubject,
 } from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport, createIModelAccess } from "../../../Common";
@@ -32,6 +33,7 @@ import {
 } from "../../Common";
 import { ExpectedVisibility, validateHierarchyVisibility } from "./VisibilityValidation";
 
+import type { GeometricElement3dProps } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
@@ -51,7 +53,7 @@ interface VisibilityOverrides {
 
 type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
-describe("HierarchyBasedVisibilityHandler", () => {
+describe.only("HierarchyBasedVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
     return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
       ...defaultHierarchyConfiguration,
@@ -1697,33 +1699,39 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
-
-      // Logger.initializeToConsole();
-      // Logger.setLevelDefault(LogLevel.Trace);
     });
 
     after(async () => {
       await terminatePresentationTesting();
     });
 
-    function createHandler(imodel: IModelConnection) {
+    let createdHandlers = new Array<ModelsTreeVisibilityHandler>();
+
+    afterEach(() => {
+      createdHandlers.forEach((x) => x.dispose());
+      createdHandlers = [];
+    });
+
+    function createHandler(imodel: IModelConnection, hierarchyConfig = defaultHierarchyConfiguration) {
       const imodelAccess = createIModelAccess(imodel);
       const viewport = OffScreenViewport.create({
         view: createBlankViewState(imodel),
         viewRect: new ViewRect(),
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
+      const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
       const handler = createModelsTreeVisibilityHandler({ imodelAccess, viewport, idsCache });
+      createdHandlers.push(handler);
       return { handler, imodelAccess, viewport, idsCache };
     }
 
     function createProvider(props: {
       idsCache: ModelsTreeIdsCache;
       imodelAccess: ReturnType<typeof createIModelAccess>;
+      hierarchyConfig?: typeof defaultHierarchyConfiguration;
       filterPaths?: HierarchyNodeIdentifiersPath[];
     }) {
       return createHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ ...props, hierarchyConfig: defaultHierarchyConfiguration }),
+        hierarchyDefinition: new ModelsTreeDefinition({ ...props, hierarchyConfig: props.hierarchyConfig ?? defaultHierarchyConfiguration }),
         imodelAccess: props.imodelAccess,
         ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
       });
@@ -2164,6 +2172,210 @@ describe("HierarchyBasedVisibilityHandler", () => {
             groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
             element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
           },
+        });
+      });
+    });
+
+    describe("Custom Hierarchy configuration", () => {
+      /**
+       * Creates physical model that has one spatial category that contains contains 3 child elements
+       * out of which the first and second belong to the same custom class while the last element is of class `PhysicalObject`
+       */
+      async function createHierarchyConfigurationModel(context: Mocha.Context) {
+        return buildIModel(context, async (builder, schema) => {
+          const emptyPartitionId = insertPhysicalPartition({ builder, codeValue: "EmptyPhysicalModel", parentId: IModel.rootSubjectId }).id;
+          const emptyModelId = insertPhysicalSubModel({ builder, modeledElementId: emptyPartitionId }).id;
+
+          const customClassName = schema.items.SubModelabalePhysicalObject.fullName;
+
+          const partitionId = insertPhysicalPartition({ builder, codeValue: "ConfigurationPhysicalModel ", parentId: IModel.rootSubjectId }).id;
+          const configurationModelId = insertPhysicalSubModel({ builder, modeledElementId: partitionId }).id;
+          const modelCategories = new Array<string>();
+
+          const configurationCategoryId = insertSpatialCategory({ builder, codeValue: `ConfigurationSpatialCategory` }).id;
+          modelCategories.push(configurationCategoryId);
+          const elements = new Array<Id64String>();
+
+          for (let childIdx = 0; childIdx < 3; ++childIdx) {
+            const props: GeometricElement3dProps = {
+              model: configurationModelId,
+              category: configurationCategoryId,
+              code: new Code({ scope: partitionId, spec: "", value: `Configuration_${customClassName}_${childIdx}` }),
+              classFullName: childIdx !== 2 ? customClassName : "Generic:PhysicalObject",
+            };
+            elements.push(builder.insertElement(props));
+          }
+          const [customClassElement1, customClassElement2, nonCustomClassElement] = elements;
+
+          const hierarchyConfig: typeof defaultHierarchyConfiguration = {
+            ...defaultHierarchyConfiguration,
+            showEmptyModels: true,
+            elementClassSpecification: customClassName,
+          };
+
+          return {
+            configurationModelId,
+            configurationCategoryId,
+            elements,
+            customClassElement1,
+            customClassElement2,
+            nonCustomClassElement,
+            modelCategories,
+            emptyModelId,
+            customClassName,
+            hierarchyConfig,
+          };
+        });
+      }
+
+      describe("subject with empty model", () => {
+        const node = createSubjectHierarchyNode(IModel.rootSubjectId);
+
+        it("empty model hidden by default", async function () {
+          const { imodel, hierarchyConfig } = await createHierarchyConfigurationModel(this);
+          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
+          const provider = createProvider({ ...props, hierarchyConfig });
+
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectedVisibility: ExpectedVisibility.all("hidden"),
+          });
+        });
+
+        it("showing it makes empty model visible", async function () {
+          const { imodel, hierarchyConfig } = await createHierarchyConfigurationModel(this);
+          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
+          const provider = createProvider({ ...props, hierarchyConfig });
+
+          await handler.changeVisibility(node, true);
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectedVisibility: ExpectedVisibility.all("visible"),
+          });
+        });
+
+        it("gets partial when only empty model is visible", async function () {
+          const { imodel, hierarchyConfig, emptyModelId } = await createHierarchyConfigurationModel(this);
+          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
+          const provider = createProvider({ ...props, hierarchyConfig });
+
+          await handler.changeVisibility(createModelHierarchyNode(emptyModelId), true);
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectedVisibility: {
+              subject: () => "partial",
+              model: (id) => (id === emptyModelId ? { handler: "visible", selector: true } : { handler: "hidden", selector: false }),
+              category: () => ({ handler: "hidden", selector: false, override: "none" }),
+              groupingNode: () => "hidden",
+              element: () => "hidden",
+            },
+          });
+        });
+      });
+
+      describe("model with custom class specification elements", () => {
+        it("showing it makes it, all its categories and elements visible", async function () {
+          const { imodel, hierarchyConfig, configurationModelId } = await createHierarchyConfigurationModel(this);
+          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
+          const provider = createProvider({ ...props, hierarchyConfig });
+
+          await handler.changeVisibility(createModelHierarchyNode(configurationModelId), true);
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectedVisibility: {
+              ...ExpectedVisibility.all("visible"),
+              subject: () => "partial",
+              model: (id) => (id === configurationModelId ? { handler: "visible", selector: true } : { handler: "hidden", selector: false }),
+            },
+          });
+        });
+
+        it("gets partial when custom class element is visible", async function () {
+          const { imodel, hierarchyConfig, configurationModelId, configurationCategoryId, customClassElement1 } = await createHierarchyConfigurationModel(this);
+          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
+          const provider = createProvider({ ...props, hierarchyConfig });
+
+          await handler.changeVisibility(
+            createElementHierarchyNode({
+              modelId: configurationModelId,
+              categoryId: configurationCategoryId,
+              hasChildren: true,
+              elementId: customClassElement1,
+            }),
+            true,
+          );
+          expect(viewport.alwaysDrawn).to.deep.eq(new Set([customClassElement1]));
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectedVisibility: {
+              subject: () => "partial",
+              model: (id) => (id === configurationModelId ? { handler: "partial", selector: true } : { handler: "hidden", selector: false }),
+              category: ({ modelId }) => ({
+                handler: modelId === configurationModelId ? "partial" : "hidden",
+                selector: false,
+                override: "none",
+              }),
+              groupingNode: () => "partial",
+              element: ({ elementId }) => (elementId === customClassElement1 ? "visible" : "hidden"),
+            },
+          });
+        });
+
+        it("gets visible when all custom class elements are visible", async function () {
+          const { imodel, hierarchyConfig, configurationModelId, configurationCategoryId, customClassElement1, customClassElement2, nonCustomClassElement } =
+            await createHierarchyConfigurationModel(this);
+          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
+          const provider = createProvider({ ...props, hierarchyConfig });
+
+          await handler.changeVisibility(
+            createElementHierarchyNode({
+              modelId: configurationModelId,
+              categoryId: configurationCategoryId,
+              hasChildren: true,
+              elementId: customClassElement1,
+            }),
+            true,
+          );
+          await handler.changeVisibility(
+            createElementHierarchyNode({
+              modelId: configurationModelId,
+              categoryId: configurationCategoryId,
+              hasChildren: true,
+              elementId: customClassElement2,
+            }),
+            true,
+          );
+          expect(viewport.alwaysDrawn).to.deep.eq(new Set([customClassElement1, customClassElement2]));
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            provider,
+            handler,
+            viewport,
+            expectedVisibility: {
+              subject: () => "partial",
+              model: (id) => (id === configurationModelId ? { handler: "visible", selector: true } : { handler: "hidden", selector: false }),
+              category: ({ modelId }) => ({
+                handler: modelId === configurationModelId ? "visible" : "hidden",
+                selector: false,
+                override: "none",
+              }),
+              groupingNode: ({ elementIds }) => (elementIds.includes(nonCustomClassElement) ? "hidden" : "visible"),
+              element: ({ modelId }) => (modelId === nonCustomClassElement ? "hidden" : "visible"),
+            },
+          });
         });
       });
     });
