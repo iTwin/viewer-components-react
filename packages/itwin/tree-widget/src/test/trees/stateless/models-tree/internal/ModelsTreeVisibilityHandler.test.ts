@@ -12,14 +12,15 @@ import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, 
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createHierarchyProvider, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
-import { ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport, createIModelAccess } from "../../../Common";
@@ -37,16 +38,25 @@ import type {
   ModelsTreeVisibilityHandlerProps,
 } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import type { Visibility } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
+
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ValidateNodeProps } from "./VisibilityValidation";
-
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
   elements?: Map<Id64String, Visibility>;
 }
 
+type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
+
 describe("HierarchyBasedVisibilityHandler", () => {
+  function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
+    return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
+      ...defaultHierarchyConfiguration,
+      ...hierarchyConfig,
+    });
+  }
+
   before(async () => {
     await NoRenderApp.startup();
     await TestUtils.initialize();
@@ -114,8 +124,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
     describe("overridden methods", () => {
       it("can call original implementation", async () => {
         let useOriginalImplFlag = false;
+        const viewport = createFakeSinonViewport();
         const handler = createModelsTreeVisibilityHandler({
-          viewport: createFakeSinonViewport(),
+          viewport,
+          idsCache: createIdsCache(viewport.iModel),
           overrides: {
             getElementDisplayStatus: async ({ originalImplementation }) => {
               return useOriginalImplFlag ? originalImplementation() : createVisibilityStatus("hidden");
@@ -155,8 +167,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides = {
             getSubjectNodeVisibility: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -611,8 +625,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             getCategoryDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -907,8 +923,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             getElementDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1040,8 +1058,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             getElementGroupingNodeDisplayStatus: sinon.fake.resolves(createVisibilityStatus("visible")),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1206,8 +1226,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeSubjectNodeState: sinon.fake.resolves(undefined),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1368,8 +1390,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeCategoryState: sinon.fake.resolves(undefined),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1441,8 +1465,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeElementState: sinon.fake.resolves(undefined),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1592,8 +1618,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const overrides: ModelsTreeVisibilityHandlerProps["overrides"] = {
             changeElementGroupingNodeState: sinon.fake.resolves(undefined),
           };
+          const viewport = createFakeSinonViewport();
           const handler = createModelsTreeVisibilityHandler({
-            viewport: createFakeSinonViewport(),
+            viewport,
+            idsCache: createIdsCache(viewport.iModel),
             overrides,
             imodelAccess: createFakeIModelAccess(),
           });
@@ -1679,7 +1707,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         view: createBlankViewState(imodel),
         viewRect: new ViewRect(),
       });
-      const idsCache = new ModelsTreeIdsCache(imodelAccess);
+      const idsCache = new ModelsTreeIdsCache(imodelAccess, defaultHierarchyConfiguration);
       const handler = createModelsTreeVisibilityHandler({ imodelAccess, viewport, idsCache });
       return { handler, imodelAccess, viewport, idsCache };
     }
@@ -1690,7 +1718,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       filterPaths?: HierarchyNodeIdentifiersPath[];
     }) {
       return createHierarchyProvider({
-        hierarchyDefinition: new ModelsTreeDefinition({ ...props }),
+        hierarchyDefinition: new ModelsTreeDefinition({ ...props, hierarchyConfig: defaultHierarchyConfiguration }),
         imodelAccess: props.imodelAccess,
         ...(props.filterPaths ? { filtering: { paths: props.filterPaths } } : undefined),
       });

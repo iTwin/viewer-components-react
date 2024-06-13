@@ -74,7 +74,7 @@ describe("Models tree", () => {
         return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
       });
       await validateHierarchy({
-        provider: createModelsTreeProvider(imodel),
+        provider: createModelsTreeProvider({ imodel }),
         expect: [
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.rootSubject],
@@ -95,6 +95,7 @@ describe("Models tree", () => {
                         children: [
                           NodeValidators.createForClassGroupingNode({
                             className: keys.rootElement1.className,
+                            label: "Physical Object",
                             children: [
                               NodeValidators.createForInstanceNode({
                                 instanceKeys: [keys.rootElement1],
@@ -102,6 +103,7 @@ describe("Models tree", () => {
                                 children: [
                                   NodeValidators.createForClassGroupingNode({
                                     className: keys.childElement.className,
+                                    label: "Physical Object",
                                     children: [
                                       NodeValidators.createForInstanceNode({
                                         instanceKeys: [keys.childElement],
@@ -116,6 +118,7 @@ describe("Models tree", () => {
                           }),
                           NodeValidators.createForClassGroupingNode({
                             className: keys.rootElement2.className,
+                            label: "Test Physical Object",
                             children: [
                               NodeValidators.createForInstanceNode({
                                 instanceKeys: [keys.rootElement2],
@@ -127,6 +130,7 @@ describe("Models tree", () => {
                                     children: [
                                       NodeValidators.createForClassGroupingNode({
                                         className: keys.modelingElement.className,
+                                        label: "Physical Object",
                                         children: [
                                           NodeValidators.createForInstanceNode({
                                             instanceKeys: [keys.modelingElement],
@@ -170,7 +174,7 @@ describe("Models tree", () => {
           return { rootSubject, childSubject, model, category, element };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -206,7 +210,7 @@ describe("Models tree", () => {
           return { rootSubject, childSubject };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -233,7 +237,7 @@ describe("Models tree", () => {
           return { rootSubject, childSubject1, childSubject2, model };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -263,7 +267,7 @@ describe("Models tree", () => {
           return { rootSubject, childSubject1, childSubject2, model };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -292,7 +296,7 @@ describe("Models tree", () => {
           return { rootSubject, childSubject1, childSubject2, model, category, element };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -376,7 +380,7 @@ describe("Models tree", () => {
           return { rootSubject, mergedSubject1, mergedSubject2, model1, model2, category, element1, element2 };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -445,7 +449,7 @@ describe("Models tree", () => {
           return { rootSubject, model, category, element };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -484,7 +488,7 @@ describe("Models tree", () => {
           return { rootSubject, model, category, element };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -517,7 +521,7 @@ describe("Models tree", () => {
           return { rootSubject, model, category, element };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -537,7 +541,7 @@ describe("Models tree", () => {
           return { rootSubject, model };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -591,7 +595,7 @@ describe("Models tree", () => {
           return { rootSubject, model1, model2, category1, category2, element1, element2 };
         });
         await validateHierarchy({
-          provider: createModelsTreeProvider(imodel),
+          provider: createModelsTreeProvider({ imodel }),
           expect: [
             NodeValidators.createForInstanceNode({
               instanceKeys: [keys.rootSubject],
@@ -614,6 +618,328 @@ describe("Models tree", () => {
               ],
             }),
           ],
+        });
+      });
+    });
+
+    describe("Hierarchy customization", () => {
+      it("shows empty models when `showEmptyModels` is set to true", async function () {
+        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
+          return { rootSubject, model };
+        });
+        await validateHierarchy({
+          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } }),
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.model],
+                  autoExpand: false,
+                  supportsFiltering: true,
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("does not group elements when `elementClassGrouping` set to `disable`", async function () {
+        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const childSubject = insertSubject({ builder, codeValue: "child subject", parentId: rootSubject.id });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const rootElement1 = insertPhysicalElement({ builder, userLabel: `root element 1`, modelId: model.id, categoryId: category.id });
+          const childElement = insertPhysicalElement({
+            builder,
+            userLabel: `child element`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: rootElement1.id,
+          });
+          const rootElement2 = insertPhysicalElement({
+            builder,
+            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            userLabel: `root element 2`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const subModel = insertPhysicalSubModel({ builder, modeledElementId: rootElement2.id });
+          const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
+          return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement, modelingElement };
+        });
+        await validateHierarchy({
+          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "disable" } }),
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.childSubject],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.model],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.category],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.rootElement1],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.childElement],
+                                  supportsFiltering: true,
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.rootElement2],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.category],
+                                  supportsFiltering: true,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.modelingElement],
+                                      supportsFiltering: true,
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("displays element count for grouping nodes when `elementClassGrouping` set to `enableWithCounts`", async function () {
+        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const childSubject = insertSubject({ builder, codeValue: "child subject", parentId: rootSubject.id });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: childSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const rootElement1 = insertPhysicalElement({ builder, userLabel: `root element 1`, modelId: model.id, categoryId: category.id });
+          const childElement1 = insertPhysicalElement({
+            builder,
+            userLabel: `child element 1`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: rootElement1.id,
+          });
+          const childElement2 = insertPhysicalElement({
+            builder,
+            userLabel: `child element 2`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: rootElement1.id,
+          });
+          const rootElement2 = insertPhysicalElement({
+            builder,
+            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            userLabel: `root element 2`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const subModel = insertPhysicalSubModel({ builder, modeledElementId: rootElement2.id });
+          const modelingElement = insertPhysicalElement({ builder, userLabel: `modeling element`, modelId: subModel.id, categoryId: category.id });
+          return { rootSubject, childSubject, model, category, rootElement1, rootElement2, childElement1, childElement2, modelingElement };
+        });
+        await validateHierarchy({
+          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassGrouping: "enableWithCounts" } }),
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.childSubject],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.model],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.category],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.rootElement1.className,
+                              label: "Physical Object (1)",
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.rootElement1],
+                                  supportsFiltering: true,
+                                  children: [
+                                    NodeValidators.createForClassGroupingNode({
+                                      className: keys.childElement1.className,
+                                      label: "Physical Object (2)",
+                                      children: [
+                                        NodeValidators.createForInstanceNode({
+                                          instanceKeys: [keys.childElement1],
+                                          supportsFiltering: true,
+                                          children: false,
+                                        }),
+                                        NodeValidators.createForInstanceNode({
+                                          instanceKeys: [keys.childElement2],
+                                          supportsFiltering: true,
+                                          children: false,
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                            NodeValidators.createForClassGroupingNode({
+                              className: keys.rootElement2.className,
+                              label: "Test Physical Object (1)",
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  instanceKeys: [keys.rootElement2],
+                                  supportsFiltering: true,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.category],
+                                      supportsFiltering: true,
+                                      children: [
+                                        NodeValidators.createForClassGroupingNode({
+                                          className: keys.modelingElement.className,
+                                          label: "Physical Object (1)",
+                                          children: [
+                                            NodeValidators.createForInstanceNode({
+                                              instanceKeys: [keys.modelingElement],
+                                              supportsFiltering: true,
+                                              children: false,
+                                            }),
+                                          ],
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("uses custom element class specification", async function () {
+        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const parentElement1 = insertPhysicalElement({
+            builder,
+            userLabel: `parent element 1`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const parentElement2 = insertPhysicalElement({
+            builder,
+            userLabel: `parent element 2`,
+            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const childElement1 = insertPhysicalElement({
+            builder,
+            userLabel: `child element 1`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: parentElement1.id,
+          });
+          const childElement2 = insertPhysicalElement({
+            builder,
+            userLabel: `child element 2`,
+            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: parentElement2.id,
+          });
+          return { rootSubject, model, category, parentElement1, childElement1, parentElement2, childElement2 };
+        });
+        await validateHierarchy({
+          provider: createModelsTreeProvider({
+            imodel,
+            hierarchyConfig: { elementClassSpecification: keys.parentElement2.className, elementClassGrouping: "disable" },
+          }),
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.model],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.parentElement2],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.childElement2],
+                              supportsFiltering: true,
+                              children: false,
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+
+      it("returns empty hierarchy when the iModel doesn't have any elements of `elementClassSpecification` class", async function () {
+        const { imodel } = await buildIModel(this, async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
+          const model = insertPhysicalSubModel({ builder, modeledElementId: partition.id });
+          return { rootSubject, model };
+        });
+        await validateHierarchy({
+          provider: createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: "BisCore.GeometricElement2d" } }),
+          expect: [],
         });
       });
     });
