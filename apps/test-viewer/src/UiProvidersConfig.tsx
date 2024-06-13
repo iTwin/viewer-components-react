@@ -297,7 +297,7 @@ const configuredUiItems = new Map<string, UiItem>([
     "grouping-mapping-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: `${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix })],
+      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: import.meta.env.IMJS_URL_PREFIX ? `${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix : undefined })],
     },
   ],
   [
@@ -306,7 +306,7 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => {
         await ReportsConfigWidget.initialize();
       },
-      createUiItemsProviders: () => [new ReportsConfigProvider(undefined, prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX))],
+      createUiItemsProviders: () => [new ReportsConfigProvider({ baseUrl: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX) })],
     },
   ],
   [

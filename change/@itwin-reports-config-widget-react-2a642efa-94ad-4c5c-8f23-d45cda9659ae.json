@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "UIProvider props has been changed to extend from ReportsConfigContext.",
-  "packageName": "@itwin/reports-config-widget-react",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
