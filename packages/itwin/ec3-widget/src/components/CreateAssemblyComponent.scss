@@ -2,15 +2,35 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-  .report-creation-step-two {
+
+  .create-assembly-step {
     height: 100%;
-  }
-  .stepper-footer {
-    align-self: center;
-    .back-button {
-      margin-right: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    .assembly-list {
+      height: calc(100vh - 248px);
+      overflow: auto;
+      .assembly-expandable-block {
+        margin-top: 8px;
+        .iui-svg-icon {
+          display: flex;
+          flex-direction: row-reverse;
+        }
+      }
     }
-    .next-button {
-      margin-right: 8px;
+    .loading-indicator {
+      align-self: center;
+    }
+    .stepper-footer {
+      margin-top: 8px;
+      align-self: center;
+      .footer-button {
+        margin-right: 8px;
+      }
+    }
+    .button-row-above-stepper {
+      justify-content: flex-end;
+      display: flex;
     }
   }

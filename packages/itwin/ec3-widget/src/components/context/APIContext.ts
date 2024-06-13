@@ -42,6 +42,7 @@ export const ApiContext = createContext<EC3ApiContext>(
       iTwinId: "",
       clientId: "",
       redirectUri: "",
+      iModelId: "",
       reportsClient: new ReportsClient(),
       oDataClient: new ODataClient(),
       ec3JobsClient: new EC3JobsClient(),

@@ -2,204 +2,348 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { Button, Label, LabeledInput, LabeledSelect, Select } from "@itwin/itwinui-react";
+import { Button, ButtonGroup, ExpandableBlock, IconButton, Label, LabeledInput, LabeledSelect, ProgressRadial, Select } from "@itwin/itwinui-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Configuration } from "./EC3/Template";
 import React from "react";
-import type { EC3ConfigurationLabel, EC3ConfigurationMaterial } from "@itwin/insights-client";
-import { GroupSelector } from "./ReportTableSelectorV2";
+import type { EC3ConfigurationLabel, Group, ODataTable } from "@itwin/insights-client";
 import "./CreateAssemblyComponent.scss";
-export interface LabelActionProps {
+import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
+import { useApiContext } from "./api/APIContext";
+
+export interface CreateAssemblyProps {
   template: Configuration;
-  label?: EC3ConfigurationLabel[];
   onNextClick: () => void;
   onCancelClick?: () => void;
   onBackClick: () => void;
   setTemplate: (template: Configuration) => void;
-  selectedGroupDetails: string;
-  setSelectedGroupDetails: (table: string) => void;
+  label?: EC3ConfigurationLabel[];
 }
 
-export const CreateAssembly = (props: LabelActionProps) => {
-  const [assemblyName, setAssemblyName] = useState<string>(props.label?.[0]?.name ?? "");
-  const [elementName, setElementName] = useState<string>(props.label?.[0]?.elementNameColumn ?? "UserLabel");
-  const [elementQuantity, setItemQuantity] = useState<string>(props.label?.[0]?.elementQuantityColumn ?? "");
+export enum CreateAssemblyDropdownType {
+  material,
+  elementName,
+  elementQuantity,
+}
+
+export const CreateAssembly = (props: CreateAssemblyProps) => {
+  const [allAssemblies, setAllAssemblies] = useState<EC3ConfigurationLabel[] | undefined>(props.label);
+  const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [materials, setMaterials] = useState<(EC3ConfigurationMaterial | undefined)[]>(props.label?.[0]?.materials ?? []);
-  const [availableStringColumns, setStringColumns] = useState<string[]>([]);
-  const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
+  const [oDataTable, setoDataTable] = useState<ODataTable[]>([]);
+  const [editableAssemblyIndex, setEditableAssemblyIndex] = useState<number>();
 
-  const onNextClick = useCallback(async () => {
-    const selectedLabel: EC3ConfigurationLabel = {
-      reportTable: props.selectedGroupDetails,
-      name: assemblyName,
-      elementNameColumn: elementName,
-      elementQuantityColumn: elementQuantity,
-      materials: materials.filter((material): material is EC3ConfigurationMaterial => material !== undefined),
-    };
+  const oDataClient = useApiContext().oDataClient;
+  const {
+    config: { getAccessToken, iModelId, defaultMapping },
+  } = useApiContext();
+  const mappingsClient = useApiContext().mappingsClient;
 
-    if (props.label !== undefined) {
-      const i = props.template.labels.findIndex((l) => l.reportTable === props.label?.[0]?.reportTable);
-      props.template.labels[i] = selectedLabel;
-    } else {
-      props.template.labels.push(selectedLabel);
-    }
-
-    props.setTemplate(props.template);
-    props.onNextClick();
-    // eslint-disable-next-line
-  }, [assemblyName, elementName, elementQuantity, materials, props.template]);
-
-  const stringColumnOptions = useMemo(() => {
-    const options = availableStringColumns.map((col) => ({
-      label: col,
-      value: col,
-    }));
-
-    if (availableStringColumns.indexOf(elementName) === -1 && options.length !== 0) setElementName("");
-
-    return options;
-  }, [availableStringColumns, elementName]);
-
-  const getStringColumnOptions = (material: string | undefined) => {
-    const options = stringColumnOptions.filter((x) => !materials.some((m) => m?.nameColumn === x.label)).filter((x) => x.label !== elementName);
-    if (material) options.push({ label: material, value: material });
-
-    return options;
-  };
-
-  const getStringColumnOptionsForMaterial = (material: string | undefined) => {
-    // eslint-disable-next-line
-    console.log(stringColumnOptions);
-    const options = stringColumnOptions.filter((x) => x.label !== elementName);
-    if (material) options.push({ label: material, value: material });
-
-    return options;
-  };
-
-  const numericalColumnOptions = useMemo(() => {
-    const options = availableNumericalColumns.map((col) => ({
-      label: col,
-      value: col,
-    }));
-
-    if (availableNumericalColumns.indexOf(elementQuantity) === -1 && options.length !== 0) setItemQuantity("");
-
-    return options;
-  }, [availableNumericalColumns, elementQuantity]);
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (props.label) {
-      setAssemblyName(props.label?.[0]?.name);
-      setElementName(props.label?.[0]?.elementNameColumn);
-      setItemQuantity(props.label?.[0]?.elementQuantityColumn);
-      props.setSelectedGroupDetails(props.label?.[0]?.reportTable);
-      setMaterials([...props.label?.[0]?.materials]); // creating a copy of array, so original (in the parent) isn't modified
-    } else {
-      setElementName("UserLabel");
-    }
-    // eslint-disable-next-line
+  useMemo(() => {
+    setAllAssemblies(props.label);
   }, [props.label]);
 
-  useEffect(() => {
-    // eslint-disable-next-line
-    console.log("in create assembly component");
-  }, []);
-
-  const onChangeCallback = useCallback(
-    async (table: string, numCols: string[], strCols: string[]) => {
-      if (table !== props.selectedGroupDetails) {
-        setMaterials([]);
+  const getGroups = useCallback(async () => {
+    if (!defaultMapping) {
+      throw new Error("Default mapping missing.");
+    }
+    const accessToken = await getAccessToken();
+    const mappingsForiModel = await mappingsClient.getMappings(accessToken, iModelId);
+    // will replace this with hardcoded mapping once discussion is done
+    const carbonCalculationMapping = mappingsForiModel.find((mapping) => (mapping.mappingName = defaultMapping.mappingName));
+    if (carbonCalculationMapping) {
+      const carbonCalculationGroups = await mappingsClient.getGroups(accessToken, iModelId, carbonCalculationMapping.id);
+      if (carbonCalculationGroups.length > 0) {
+        setGroups(carbonCalculationGroups);
       }
-      props.setSelectedGroupDetails(table);
-      setNumericalColumns(numCols);
-      setStringColumns(strCols);
+    }
+  }, [getAccessToken, iModelId, mappingsClient, defaultMapping]);
+
+  const onAssemblyDataChange = useCallback(
+    (updatedAssembly: EC3ConfigurationLabel, index: number, action?: "add" | "delete") => {
+      if (allAssemblies) {
+        const newArray = [...allAssemblies];
+        if (action === "add") {
+          newArray.splice(0, 0, updatedAssembly);
+        } else if (action === "delete") {
+          newArray.splice(index, 1);
+        } else {
+          newArray.splice(index, 1, updatedAssembly);
+        }
+        setAllAssemblies(newArray);
+      } else {
+        setAllAssemblies([updatedAssembly]);
+      }
     },
-    // eslint-disable-next-line
-    [props.selectedGroupDetails],
+    [allAssemblies],
   );
 
+  const getMetadataColumns = (assembly: EC3ConfigurationLabel, optionType: CreateAssemblyDropdownType) => {
+    const oDataTableData = oDataTable.find((x) => x.name === assembly.reportTable);
+    if (!oDataTableData) {
+      return;
+    }
+    switch (optionType) {
+      case CreateAssemblyDropdownType.elementName: {
+        return oDataTableData.columns
+          .filter((x) => x.type === "Edm.String" && !assembly.materials.map((p) => p.nameColumn).includes(x.name))
+          .map((x) => x.name);
+      }
+      case CreateAssemblyDropdownType.elementQuantity: {
+        return oDataTableData.columns.filter((x) => x.type === "Edm.Double").map((x) => x.name);
+      }
+      case CreateAssemblyDropdownType.material: {
+        return oDataTableData.columns.filter((x) => x.type === "Edm.String" && assembly.elementNameColumn !== x.name).map((x) => x.name);
+      }
+    }
+  };
+
+  const initGroupSelection = useCallback(async () => {
+    if (!props.template.reportId) throw new Error("Invalid report.");
+    const token = await getAccessToken();
+    const reportMetadataResponse = await oDataClient.getODataReportMetadata(token, props.template.reportId);
+    setoDataTable(reportMetadataResponse);
+    setReportTables(reportMetadataResponse.map((d) => d.name ?? ""));
+  }, [getAccessToken, oDataClient, props.template.reportId]);
+
+  const addNewEmptyAssembly = () => {
+    setEditableAssemblyIndex(0);
+    onAssemblyDataChange(
+      {
+        name: "",
+        elementNameColumn: "UserLabel",
+        elementQuantityColumn: "",
+        materials: [],
+        reportTable: "",
+      },
+      0,
+      "add",
+    );
+  };
+
+  const init = useCallback(async () => {
+    setIsLoading(true);
+    await getGroups();
+    await initGroupSelection();
+    if (props.label === undefined || props.label.length === 0) {
+      addNewEmptyAssembly();
+    }
+    setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getGroups, initGroupSelection, props.label]);
+
+  useEffect(() => {
+    void init();
+    // eslint-disable-next-line
+  }, []);
+
+  // map reportTables and groups
+  const reportTableLabels = useMemo(() => {
+    return (
+      reportTables?.map((g) => ({
+        label: groups.find((group) => g.includes(group.groupName))?.groupName ?? g,
+        value: g,
+      })) ?? []
+    );
+  }, [groups, reportTables]);
+
+  // skip groups that have already been used in other assemblies
+  const getGroupOptions = (assembly: EC3ConfigurationLabel) => {
+    const existingAssembly = reportTableLabels.find((x) => x.value === assembly.reportTable);
+    if (existingAssembly) {
+      const allAssem = reportTableLabels.filter((x) => !allAssemblies?.map((p) => p.reportTable).includes(x.value));
+      allAssem.push(existingAssembly);
+      return allAssem;
+    }
+    return reportTableLabels.filter((x) => !allAssemblies?.map((p) => p.reportTable).includes(x.value));
+  };
+
   return (
-    <>
-      <div className="report-creation-step-two">
-        <LabeledInput
-          id="name"
-          name="name"
-          label="Assembly Name"
-          value={assemblyName}
-          onChange={(event) => {
-            setAssemblyName(event.target.value);
-          }}
-        />
-        <GroupSelector
-          selectedGroupDetails={props.selectedGroupDetails}
-          template={props.template}
-          placeHolder={isLoading ? "Loading report tables" : "Select group"}
-          onChange={onChangeCallback}
-          setIsLoading={setIsLoading}
-          isLoading={isLoading}
-        />
-        <LabeledSelect
-          data-testid="ec3-element-select"
-          required
-          label={"Element"}
-          options={getStringColumnOptions(elementName)}
-          value={elementName}
-          onChange={async (value) => {
-            setElementName(value);
-          }}
-          disabled={isLoading || props.selectedGroupDetails === ""}
-          placeholder={isLoading ? "Loading elements" : props.selectedGroupDetails === "" ? "Select group first" : "Select element"}
-        />
-        <LabeledSelect
-          data-testid="ec3-element-quantity-select"
-          required
-          label={"Element quantity"}
-          options={numericalColumnOptions}
-          value={elementQuantity}
-          onChange={async (value) => {
-            setItemQuantity(value);
-          }}
-          disabled={isLoading || props.selectedGroupDetails === ""}
-          placeholder={isLoading ? "Loading elements" : props.selectedGroupDetails === "" ? "Select group first" : "Select element quantity"}
-        />
-        <Label htmlFor="combo-input" required>
-          Materials
-        </Label>
-        <Select
-          disabled={isLoading || props.selectedGroupDetails === ""}
-          options={getStringColumnOptionsForMaterial(elementName)}
-          value={materials.map((x) => x?.nameColumn)}
-          onChange={(val, event) => {
-            if (val) {
-              setMaterials((prev) => (event === "removed" ? prev.filter((value) => val !== value?.nameColumn) : [...prev, { nameColumn: val }]));
-            }
-          }}
-          placeholder={isLoading ? "Loading elements" : props.selectedGroupDetails === "" ? "Select group first" : "Select property containing material names"}
-          multiple
-        />
-      </div>
-      <div className="stepper-footer">
-        <Button className="back-button" onClick={props.onBackClick}>
-          Back
-        </Button>
-        <Button
-          className="next-button"
-          styleType="high-visibility"
-          disabled={
-            assemblyName === undefined ||
-            props.selectedGroupDetails === undefined ||
-            elementName === undefined ||
-            elementQuantity === undefined ||
-            materials.length === 0
-          }
-          onClick={onNextClick}
-        >
-          Next
-        </Button>
-        <Button onClick={props.onCancelClick}>Cancel</Button>
-      </div>
-    </>
+    <div className="create-assembly-step">
+      {isLoading ? (
+        <ProgressRadial className="loading-indicator" indeterminate />
+      ) : (
+        <>
+          <div className="assembly-list">
+            {allAssemblies &&
+              allAssemblies.length > 0 &&
+              allAssemblies?.map((assembly, i) => {
+                return (
+                  <>
+                    <ExpandableBlock
+                      className="assembly-expandable-block"
+                      title={`${assembly.name}`}
+                      endIcon={
+                        <ButtonGroup>
+                          <IconButton
+                            key={`edit-assembly${i}`}
+                            styleType="borderless"
+                            onClick={(e) => {
+                              setEditableAssemblyIndex(i);
+                              e.stopPropagation();
+                            }}
+                          >
+                            <SvgEdit />
+                          </IconButton>
+                          <IconButton
+                            key={`delete-assembly${i}`}
+                            disabled={allAssemblies.length === 1}
+                            styleType="borderless"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAssemblyDataChange(assembly, i, "delete");
+                            }}
+                          >
+                            <SvgDelete />
+                          </IconButton>
+                        </ButtonGroup>
+                      }
+                      key={i}
+                      isExpanded={editableAssemblyIndex ? i === editableAssemblyIndex : i === 0}
+                    >
+                      <>
+                        <LabeledInput
+                          id="name"
+                          name="name"
+                          label="Assembly Name"
+                          value={assembly.name}
+                          onChange={(event) => {
+                            onAssemblyDataChange({ ...assembly, name: event.target.value }, i);
+                          }}
+                          disabled={i !== editableAssemblyIndex}
+                        />
+                        <LabeledSelect
+                          label="Select Group"
+                          data-testid="ec3-report-table-select"
+                          options={getGroupOptions(assembly)}
+                          value={assembly.reportTable}
+                          onChange={async (selectedReportTable) => {
+                            // reset all related fields
+                            onAssemblyDataChange(
+                              {
+                                elementNameColumn: "UserLabel",
+                                elementQuantityColumn: "",
+                                materials: [],
+                                name: assembly.name,
+                                reportTable: selectedReportTable,
+                              },
+                              i,
+                            );
+                          }}
+                          disabled={i !== editableAssemblyIndex}
+                        />
+                        <LabeledSelect
+                          data-testid="ec3-element-select"
+                          required
+                          label={"Element"}
+                          options={
+                            getMetadataColumns(assembly, CreateAssemblyDropdownType.elementName)?.map((x) => {
+                              return { label: x, value: x };
+                            }) ?? []
+                          }
+                          value={assembly.elementNameColumn}
+                          onChange={async (value) => {
+                            onAssemblyDataChange({ ...assembly, elementNameColumn: value }, i);
+                          }}
+                          disabled={isLoading || assembly.reportTable === "" || i !== editableAssemblyIndex}
+                          placeholder={isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select group first" : "Select element"}
+                        />
+                        <LabeledSelect
+                          data-testid="ec3-element-quantity-select"
+                          required
+                          label={"Element quantity"}
+                          options={
+                            getMetadataColumns(assembly, CreateAssemblyDropdownType.elementQuantity)?.map((x) => {
+                              return { label: x, value: x };
+                            }) ?? []
+                          }
+                          value={assembly.elementQuantityColumn}
+                          onChange={async (value) => {
+                            onAssemblyDataChange({ ...assembly, elementQuantityColumn: value }, i);
+                          }}
+                          disabled={isLoading || assembly.reportTable === "" || i !== editableAssemblyIndex}
+                          placeholder={isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select group first" : "Select element quantity"}
+                        />
+                        <Label htmlFor="combo-input" required>
+                          Materials
+                        </Label>
+                        <Select
+                          disabled={isLoading || assembly.reportTable === "" || i !== editableAssemblyIndex}
+                          options={
+                            getMetadataColumns(assembly, CreateAssemblyDropdownType.material)?.map((x) => {
+                              return { label: x, value: x };
+                            }) ?? []
+                          }
+                          value={assembly.materials.map((x) => x?.nameColumn)}
+                          onChange={(val, event) => {
+                            if (val) {
+                              onAssemblyDataChange(
+                                {
+                                  ...assembly,
+                                  materials:
+                                    event === "removed"
+                                      ? assembly.materials.filter((value) => val !== value?.nameColumn)
+                                      : [...(assembly.materials ?? []), { nameColumn: val }],
+                                },
+                                i,
+                              );
+                            }
+                          }}
+                          placeholder={
+                            isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select group first" : "Select property containing material names"
+                          }
+                          multiple
+                        />
+                      </>
+                    </ExpandableBlock>
+                  </>
+                );
+              })}
+            <div className="button-row-above-stepper">
+              <Button
+                className="add-new-button"
+                styleType="borderless"
+                title="Add new"
+                startIcon={<SvgAdd />}
+                onClick={() => {
+                  // add new empty item to the assemblies array
+                  addNewEmptyAssembly();
+                }}
+              >
+                Add new
+              </Button>
+            </div>
+          </div>
+          <div className="stepper-footer">
+            <Button onClick={props.onBackClick} className="footer-button">
+              Back
+            </Button>
+            <Button
+              styleType="high-visibility"
+              className="footer-button"
+              disabled={
+                allAssemblies === undefined ||
+                (allAssemblies && allAssemblies?.length === 0) ||
+                allAssemblies.some((assembly) => assembly.name === "") ||
+                allAssemblies.some((assembly) => assembly.name === undefined) ||
+                allAssemblies.some((assembly) => assembly.elementNameColumn === undefined) ||
+                allAssemblies.some((assembly) => assembly.elementQuantityColumn === undefined) ||
+                allAssemblies.some((assembly) => assembly.materials.length === 0) ||
+                allAssemblies.some((assembly) => assembly.reportTable === "")
+              }
+              onClick={() => {
+                // send back updated assemblies to the parent
+                props.setTemplate({ ...props.template, labels: allAssemblies ?? [] });
+                props.onNextClick();
+              }}
+            >
+              Next
+            </Button>
+            <Button onClick={props.onCancelClick}>Cancel</Button>
+          </div>
+        </>
+      )}
+    </div>
   );
 };

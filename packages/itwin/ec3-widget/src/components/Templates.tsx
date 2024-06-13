@@ -101,30 +101,35 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
   return (
     <>
       <div className="ec3w-templates-list-container">
-        <div className="ec3w-toolbar" data-testid="ec3-templates">
-          <div className="ec3w-toolbar-left">
-            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
-              New
-            </Button>
-            <Button data-testid="ec3-export-button" styleType="default" onClick={onExport} disabled={!selectedTemplate}>
-              Export
-            </Button>
-          </div>
-          <div className="ec3w-search-bar-container">
-            <IconButton title="Refresh" onClick={refresh} disabled={isLoading} styleType="borderless">
-              <SvgRefresh />
-            </IconButton>
-            <div className="ec3w-search-button" data-testid="ec3-search-bar">
-              <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
-            </div>
-          </div>
-        </div>
         {isLoading ? (
           <LoadingOverlay />
         ) : templates.length === 0 ? (
-          <EmptyMessage message="No templates available" />
+          <>
+            <EmptyMessage message="It looks like you haven't added any reports yet. Click the button below to create your first report." />
+            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
+              Add New Report
+            </Button>
+          </>
         ) : (
           <div className="ec3w-templates-list">
+            <div className="ec3w-toolbar" data-testid="ec3-templates">
+              <div className="ec3w-toolbar-left">
+                <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
+                  New
+                </Button>
+                <Button data-testid="ec3-export-button" styleType="default" onClick={onExport} disabled={!selectedTemplate}>
+                  Export
+                </Button>
+              </div>
+              <div className="ec3w-search-bar-container">
+                <IconButton title="Reload List" onClick={refresh} disabled={isLoading} styleType="borderless">
+                  <SvgRefresh />
+                </IconButton>
+                <div className="ec3w-search-button" data-testid="ec3-search-bar">
+                  <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+                </div>
+              </div>
+            </div>
             {filteredTemplates.map((template) => (
               <HorizontalTile
                 key={template.id}
