@@ -9,7 +9,7 @@ import { useNodeHighlighting } from "../../../../components/trees/stateless/comm
 import { render, renderHook } from "../../../TestUtils";
 import { createPresentationHierarchyNode } from "../TreeUtils";
 
-describe.only("useNodeHighlighting", () => {
+describe("useNodeHighlighting", () => {
   it("does not highlight text when no matches found", () => {
     const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "node" })];
     const onHighlightChangedStub = sinon.stub();
