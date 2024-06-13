@@ -11,6 +11,7 @@ import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useIModelChangeListener } from "../UseIModelChangeListener";
+import { useNodeHighlighting } from "../UseNodeHighlighting";
 import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
@@ -34,6 +35,7 @@ type TreeRendererProps = Pick<
   | "getHierarchyLevelDetails"
   | "size"
   | "getIcon"
+  | "getLabel"
   | "getSublabel"
   | "onNodeDoubleClick"
 >;
@@ -54,11 +56,13 @@ interface BaseTreeOwnProps {
 
 type UseTreeProps = Parameters<typeof useTree>[0];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
+type UseNodeHighlightingProps = Parameters<typeof useNodeHighlighting>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
 
 type BaseTreeProps = BaseTreeOwnProps &
   Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
   Pick<Partial<UseSelectionHandlerProps>, "selectionMode"> &
+  Pick<UseNodeHighlightingProps, "searchText"> &
   Pick<TreeRendererProps, "getIcon" | "getSublabel" | "onNodeDoubleClick">;
 
 /** @internal */
@@ -91,6 +95,7 @@ function BaseTreeRenderer({
   getIcon,
   getSublabel,
   onNodeDoubleClick,
+  searchText,
 }: MarkRequired<Omit<BaseTreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const {
@@ -122,6 +127,7 @@ function BaseTreeRenderer({
   });
   const reportingExpandNode = useReportingAction({ action: expandNode, reportUsage });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
+  const { getLabel } = useNodeHighlighting({ rootNodes, searchText });
 
   if (rootNodes === undefined) {
     return (
@@ -149,6 +155,7 @@ function BaseTreeRenderer({
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
     getIcon,
+    getLabel,
     getSublabel,
     onNodeDoubleClick,
     size: density === "enlarged" ? "default" : "small",

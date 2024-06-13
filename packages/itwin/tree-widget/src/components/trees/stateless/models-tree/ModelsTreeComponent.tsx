@@ -5,7 +5,7 @@
 
 import "../Tree.scss";
 import classNames from "classnames";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgCursorClick } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
@@ -16,6 +16,7 @@ import { AutoSizer } from "../../../utils/AutoSizer";
 import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "../../models-tree/ModelsTreeButtons";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
+import { useFiltering } from "../common/UseFiltering";
 import { StatelessModelsTree, StatelessModelsTreeId } from "./ModelsTree";
 
 import type { ComponentPropsWithoutRef } from "react";
@@ -58,7 +59,7 @@ function ModelsTreeComponentImpl({
   ...treeProps
 }: StatelessModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const availableModels = useAvailableModels(iModel);
-  const [filter, setFilter] = useState("");
+  const { filter, applyFilter } = useFiltering();
   const density = treeProps.density;
 
   const onModelsTreeFeatureUsed = (feature: string) => {
@@ -71,7 +72,7 @@ function ModelsTreeComponentImpl({
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
-          <TreeHeader onFilterClear={() => setFilter("")} onFilterStart={(newFilter) => setFilter(newFilter)} onSelectedChanged={() => {}} density={density}>
+          <TreeHeader onFilterClear={() => applyFilter("")} onFilterStart={applyFilter} onSelectedChanged={() => {}} density={density}>
             {headerButtons
               ? headerButtons.map((btn, index) => (
                   <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed: onModelsTreeFeatureUsed })}</Fragment>
