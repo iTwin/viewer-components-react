@@ -59,7 +59,7 @@ function ModelsTreeComponentImpl({
   ...treeProps
 }: StatelessModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const availableModels = useAvailableModels(iModel);
-  const { filter, activeMatchIndex, setFilter, onHighlightChanged } = useFiltering();
+  const { filter, setFilter } = useFiltering();
   const density = treeProps.density;
 
   const onModelsTreeFeatureUsed = (feature: string) => {
@@ -89,16 +89,7 @@ function ModelsTreeComponentImpl({
           <div className="tw-tree-content">
             <AutoSizer>
               {({ width, height }) => (
-                <StatelessModelsTree
-                  {...treeProps}
-                  imodel={iModel}
-                  activeView={viewport}
-                  width={width}
-                  height={height}
-                  filter={filter}
-                  activeMatchIndex={activeMatchIndex}
-                  onHighlightChanged={onHighlightChanged}
-                />
+                <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />
               )}
             </AutoSizer>
           </div>

@@ -3,15 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 
 interface UseNodeHighlightingProps {
   rootNodes: PresentationTreeNode[] | undefined;
-  textToHighlight?: string;
-  caseSensitive?: boolean;
+  searchText?: string;
   activeMatchIndex?: number;
   onHighlightChanged?: (activeMatchIndex: number, matches: number) => void;
 }
@@ -37,116 +36,117 @@ interface HighlightState {
 }
 
 interface UseNodeHighlightingResult {
+  activeNodeId?: string;
   getLabel: (node: PresentationHierarchyNode) => React.ReactElement;
 }
 
 /** @internal */
-export function useNodeHighlighting({
-  rootNodes,
-  textToHighlight,
-  caseSensitive,
-  activeMatchIndex,
-  onHighlightChanged,
-}: UseNodeHighlightingProps): UseNodeHighlightingResult {
+export function useNodeHighlighting({ rootNodes, searchText, activeMatchIndex, onHighlightChanged }: UseNodeHighlightingProps): UseNodeHighlightingResult {
   const state = useRef<HighlightState>({ nodeInfoMap: new Map(), totalMatches: 0 });
-  const activeMatchIndexRef = useRef(activeMatchIndex);
+  const [activeNodeId, setActiveNodeId] = useState<string | undefined>();
+  const activeMatchIndexRef = useLatest(activeMatchIndex);
+  const activeNodeIdRef = useLatest(activeNodeId);
+
+  const updateHighlightInfo = useCallback(
+    (index: number, matches: number) => {
+      if (matches === 0) {
+        setActiveNodeId(undefined);
+        index = 0;
+      }
+      onHighlightChanged?.(index, matches);
+    },
+    [onHighlightChanged],
+  );
 
   useEffect(() => {
-    activeMatchIndexRef.current = activeMatchIndex;
-  }, [activeMatchIndex]);
+    const { state: newState, activeIndex } =
+      rootNodes && searchText
+        ? computeHighlightState(rootNodes, searchText, state.current, activeNodeIdRef.current, activeMatchIndexRef.current)
+        : { state: { nodeInfoMap: new Map(), totalMatches: 0 }, activeIndex: 0 };
 
-  const getNodeChunkInfo = useCallback((nodeId: string, activeIndex?: number): NodeChunkInfo | undefined => {
-    const info = state.current.nodeInfoMap.get(nodeId);
-    if (!info) {
-      return undefined;
-    }
-    if (activeIndex === undefined) {
-      return { chunks: info.matches };
-    }
-    const isActive = info && activeIndex >= info.startIndex && activeIndex < info.startIndex + info.matches.length;
-    return isActive ? { activeChunkIndex: activeIndex - info.startIndex, chunks: info.matches } : { chunks: info.matches };
-  }, []);
-
-  const computeHighlightState = useCallback(() => {
-    const newState: HighlightState = { nodeInfoMap: new Map(), totalMatches: 0 };
-    let activeNodeInfo: { nodeId: string; info: NodeChunkInfo } | undefined;
-
-    const computeHighlightStateRecursively = (nodes: Array<PresentationTreeNode>) => {
-      nodes.forEach((node) => {
-        if (!isPresentationHierarchyNode(node)) {
-          return;
-        }
-
-        // keep track of previous active chunk
-        const nodeInfo = getNodeChunkInfo(node.id, activeMatchIndexRef.current);
-        if (nodeInfo?.activeChunkIndex !== undefined) {
-          activeNodeInfo = { nodeId: node.id, info: nodeInfo };
-        }
-
-        const matches = findChunks(node.label, textToHighlight!, caseSensitive ?? false);
-        newState.nodeInfoMap.set(node.id, { startIndex: newState.totalMatches, matches });
-        newState.totalMatches += matches.length;
-
-        if (typeof node.children !== "boolean") {
-          computeHighlightStateRecursively(node.children);
-        }
-      });
-    };
-
-    computeHighlightStateRecursively(rootNodes!);
-
-    let newActiveIndex = activeMatchIndexRef.current ?? 0;
-    if (activeNodeInfo && newActiveIndex !== 0) {
-      // update active index to not cause active chunk jumps when hierarchy changes
-      const updatedInfo = newState.nodeInfoMap.get(activeNodeInfo.nodeId);
-      updatedInfo && (newActiveIndex = updatedInfo?.startIndex + activeNodeInfo.info.activeChunkIndex!);
-    }
     state.current = newState;
-    onHighlightChanged?.(newActiveIndex, newState.totalMatches);
-  }, [rootNodes, textToHighlight, caseSensitive, getNodeChunkInfo, onHighlightChanged]);
-
-  useEffect(() => {
-    if (rootNodes && textToHighlight) {
-      computeHighlightState();
-      return;
-    }
-    state.current = { nodeInfoMap: new Map(), totalMatches: 0 };
-  }, [rootNodes, textToHighlight, caseSensitive, computeHighlightState]);
-
-  useEffect(() => {
-    onHighlightChanged?.(0, state.current.totalMatches);
-  }, [textToHighlight, caseSensitive, onHighlightChanged]);
+    updateHighlightInfo(activeIndex, newState.totalMatches);
+  }, [rootNodes, searchText, activeNodeIdRef, activeMatchIndexRef, updateHighlightInfo]);
 
   useEffect(() => {
     // focus on currently highlighted node to scroll it into view
     for (const nodeId of state.current.nodeInfoMap.keys()) {
-      if (getNodeChunkInfo(nodeId, activeMatchIndex)?.activeChunkIndex !== undefined) {
-        const nodeElement = document.querySelector(`[id="${nodeId}"]`) as HTMLElement;
-        nodeElement?.focus();
+      if (getNodeChunkInfo(state.current, nodeId, activeMatchIndex)?.activeChunkIndex !== undefined) {
+        setActiveNodeId(nodeId);
       }
     }
-  }, [activeMatchIndex, getNodeChunkInfo]);
+  }, [activeMatchIndex]);
+
+  useEffect(() => {
+    updateHighlightInfo(0, state.current.totalMatches);
+  }, [searchText, updateHighlightInfo]);
 
   const getLabel = useCallback(
     (node: PresentationHierarchyNode) => {
-      const chunkInfo = getNodeChunkInfo(node.id, activeMatchIndex);
-      if (textToHighlight && chunkInfo) {
+      const chunkInfo = getNodeChunkInfo(state.current, node.id, activeMatchIndex);
+      if (searchText && chunkInfo) {
         return <>{markChunks(node.label, chunkInfo.chunks, chunkInfo.activeChunkIndex)}</>;
       }
       return <span>{node.label}</span>;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [textToHighlight, activeMatchIndex, getNodeChunkInfo],
+    [searchText, activeMatchIndex],
   );
 
-  return { getLabel };
+  return { activeNodeId, getLabel };
 }
 
-function findChunks(text: string, textToHighlight: string, caseSensitive: boolean): HighlightedChunk[] {
+function getNodeChunkInfo(state: HighlightState, nodeId: string, activeIndex?: number): NodeChunkInfo | undefined {
+  const info = state.nodeInfoMap.get(nodeId);
+  if (!info) {
+    return undefined;
+  }
+  if (activeIndex === undefined) {
+    return { chunks: info.matches };
+  }
+  const isActive = info && activeIndex >= info.startIndex && activeIndex < info.startIndex + info.matches.length;
+  return isActive ? { activeChunkIndex: activeIndex - info.startIndex, chunks: info.matches } : { chunks: info.matches };
+}
+
+function computeHighlightState(rootNodes: PresentationTreeNode[], searchText: string, state: HighlightState, activeNodeId?: string, activeMatchIndex?: number) {
+  const newState: HighlightState = { nodeInfoMap: new Map(), totalMatches: 0 };
+  let newActiveIndex = activeMatchIndex ?? 0;
+
+  const computeHighlightStateRecursively = (nodes: Array<PresentationTreeNode>) => {
+    nodes.forEach((node) => {
+      if (!isPresentationHierarchyNode(node)) {
+        return;
+      }
+
+      const matches = findChunks(node.label, searchText);
+      newState.nodeInfoMap.set(node.id, { startIndex: newState.totalMatches, matches });
+      newState.totalMatches += matches.length;
+
+      if (typeof node.children !== "boolean") {
+        computeHighlightStateRecursively(node.children);
+      }
+    });
+  };
+
+  computeHighlightStateRecursively(rootNodes);
+
+  // update active index to not cause active chunk jumps when hierarchy changes
+  if (activeNodeId && newActiveIndex !== 0) {
+    const activeNodeInfo = getNodeChunkInfo(state, activeNodeId, activeMatchIndex);
+    const updatedInfo = newState.nodeInfoMap.get(activeNodeId);
+
+    if (updatedInfo && activeNodeInfo?.activeChunkIndex !== undefined) {
+      newActiveIndex = updatedInfo.startIndex + activeNodeInfo.activeChunkIndex;
+    }
+  }
+
+  return { state: newState, activeIndex: newActiveIndex };
+}
+
+function findChunks(text: string, searchText: string): HighlightedChunk[] {
   const chunks: HighlightedChunk[] = [];
 
-  const contentText = caseSensitive ? text : text.toLowerCase();
-  const inputText = caseSensitive ? textToHighlight : textToHighlight.toLowerCase();
+  const contentText = text.toLowerCase();
+  const inputText = searchText.toLowerCase();
   let index = contentText.indexOf(inputText);
 
   while (index !== -1) {
@@ -201,4 +201,13 @@ function mergeChunks(chunks: HighlightedChunk[]) {
     lastChunk = newChunk;
   }
   return mergedChunks;
+}
+
+function useLatest<T>(value: T) {
+  const ref = useRef(value);
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref;
 }

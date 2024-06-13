@@ -55,7 +55,7 @@ function CategoriesTreeComponentImpl({
   ...treeProps
 }: StatelessCategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const categories = useCategories(IModelApp.viewManager, iModel, viewport);
-  const { filter, activeMatchIndex, setFilter, onHighlightChanged } = useFiltering();
+  const { filter, setFilter } = useFiltering();
   const density = treeProps.density;
 
   const onCategoriesTreeFeatureUsed = (feature: string) => {
@@ -93,8 +93,6 @@ function CategoriesTreeComponentImpl({
                 width={width}
                 height={height}
                 filter={filter}
-                activeMatchIndex={activeMatchIndex}
-                onHighlightChanged={onHighlightChanged}
               />
             )}
           </AutoSizer>
