@@ -59,8 +59,16 @@ interface ModelsTreeDefinitionProps {
 }
 
 export interface ElementsGroupInfo {
-  parentType: "element" | "category";
-  parentKey: InstanceKey;
+  parent:
+    | {
+        ids: Id64String[];
+        type: "element";
+      }
+    | {
+        ids: Id64String[];
+        modelIds: Id64String[];
+        type: "category";
+      };
   classes: string[];
 }
 
@@ -611,10 +619,15 @@ function createGeometricElementInstanceKeyPaths(
     const groupInfos = elementInfos.filter((info): info is ElementsGroupInfo => typeof info !== "string");
 
     const elementsClause = elementIds.length > 0 ? `e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})` : undefined;
-    const classClause =
-      groupInfos.length > 0
-        ? groupInfos.map((info) => `(${info.parentType === "element" ? "e.Parent.Id" : "e.Category.Id"} = ? AND e.ECClassId IS (${info.classes.join(",")}))`)
-        : undefined;
+
+    const createParentElementClause = (parent: { ids: Id64String[] }) => `e.Parent.Id IN (${parent.ids.map(() => "?").join(",")})`;
+    const createParentCategoryClause = ({ ids, modelIds }: { ids: Id64String[]; modelIds: Id64String[] }) =>
+      `e.Category.Id IN (${ids.map(() => "?").join(",")}) AND e.Model.Id IN (${modelIds.map(() => "?").join(",")})`;
+
+    const classClause = groupInfos.map(
+      ({ parent, classes }) =>
+        `(${parent.type === "element" ? createParentElementClause(parent) : createParentCategoryClause(parent)} AND e.ECClassId IS (${classes.join(",")}))`,
+    );
 
     const whereClause = [...(elementsClause ? [elementsClause] : []), ...(classClause ?? [])].join(" OR ");
 
@@ -657,13 +670,20 @@ function createGeometricElementInstanceKeyPaths(
       FROM ModelsCategoriesElementsHierarchy mce
       WHERE mce.ParentId IS NULL
     `;
+    const createIdBinding = (id: Id64String) => ({ type: "id" as const, value: id });
+    const createCategoryElementsBindings = ({ ids, modelIds }: { ids: Id64String[]; modelIds: Id64String[] }) => [
+      ...ids.map(createIdBinding),
+      ...modelIds.map(createIdBinding),
+    ];
     return imodelAccess.createQueryReader(
       {
         ctes,
         ecsql,
         bindings: [
-          ...elementIds.map((id) => ({ type: "id" as const, value: id })),
-          ...groupInfos.map((info) => ({ type: "id" as const, value: info.parentKey.id })),
+          ...elementIds.map(createIdBinding),
+          ...groupInfos.flatMap((info) =>
+            info.parent.type === "element" ? info.parent.ids.map(createIdBinding) : createCategoryElementsBindings(info.parent),
+          ),
         ],
       },
       { rowFormat: "Indexes" },
@@ -693,7 +713,7 @@ async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceK
   };
   await Promise.all(
     props.keys.map(async (key) => {
-      if ("parentKey" in key) {
+      if ("parent" in key) {
         ids.elements.push(key);
       } else if (await props.imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
         ids.subjects.push(key.id);

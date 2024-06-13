@@ -18,7 +18,8 @@ import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
-import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { Id64String } from "@itwin/core-bentley";
+import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ElementsGroupInfo } from "./ModelsTreeDefinition";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -168,7 +169,7 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
     case "icon-item":
       return <SvgItem />;
     case "icon-ec-class":
-      return <ClassGroupingIcon />;
+      return <SvgClassGrouping />;
     case "icon-imodel-hollow-2":
       return <SvgImodelHollow />;
     case "icon-folder":
@@ -217,7 +218,7 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
   };
 }
 
-function ClassGroupingIcon() {
+function SvgClassGrouping() {
   return (
     <Icon>
       <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -229,6 +230,7 @@ function ClassGroupingIcon() {
 
 async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
   const targetKeys: Array<InstanceKey | ElementsGroupInfo> = [];
+  const groupingNodeInfos: Array<{ parentKey: InstancesNodeKey; parentType: "element" | "category"; classes: string[]; modelIds: Id64String[] }> = [];
   for await (const key of loadFocusedInstancesKeys()) {
     if ("id" in key) {
       targetKeys.push(key);
@@ -244,14 +246,24 @@ async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIt
       continue;
     }
 
-    const parentKey = key.nonGroupingAncestor.key.instanceKeys[0];
+    const parentKey = key.nonGroupingAncestor.key;
     const type = key.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
-    const targetInfo = targetKeys.find((target): target is ElementsGroupInfo => !("id" in target) && target.parentKey.id === parentKey.id);
-    if (targetInfo) {
-      targetInfo.classes.push(key.key.className);
+    const modelIds = ((key.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
+    const groupInfo = groupingNodeInfos.find((group) => HierarchyNodeKey.equals(group.parentKey, parentKey));
+    if (groupInfo) {
+      groupInfo.classes.push(key.key.className);
     } else {
-      targetKeys.push({ classes: [key.key.className], parentType: type, parentKey });
+      groupingNodeInfos.push({ classes: [key.key.className], parentType: type, parentKey, modelIds });
     }
   }
+  targetKeys.push(
+    ...groupingNodeInfos.map(({ parentKey, parentType, classes, modelIds }) => ({
+      parent:
+        parentType === "element"
+          ? { type: "element" as const, ids: parentKey.instanceKeys.map((key) => key.id) }
+          : { type: "category" as const, ids: parentKey.instanceKeys.map((key) => key.id), modelIds },
+      classes,
+    })),
+  );
   return targetKeys;
 }

@@ -1000,7 +1000,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.testElement1],
           [x.rootSubject, x.model, x.category, x.testElement2],
         ],
-        (x) => [{ parentKey: x.category, parentType: "category", classes: [x.testElement1.className] }],
+        (x) => [{ parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] }, classes: [x.testElement1.className] }],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1028,6 +1028,72 @@ describe("Models tree", () => {
                           NodeValidators.createForInstanceNode({
                             instanceKeys: [x.testElement2],
                             label: /^test element 2/,
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      ),
+      TreeFilteringTestCaseDefinition.create(
+        "grouping element node under category and correct model",
+        async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model1 = insertPhysicalModelWithPartition({ builder, codeValue: `model-1`, partitionParentId: rootSubject.id });
+          const model2 = insertPhysicalModelWithPartition({ builder, codeValue: `model-2`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category-x" });
+          const physicalElement11 = insertPhysicalElement({ builder, userLabel: `element 1-1`, modelId: model1.id, categoryId: category.id });
+          const physicalElement12 = insertPhysicalElement({
+            builder,
+            userLabel: `element 1-2`,
+            modelId: model1.id,
+            categoryId: category.id,
+          });
+          const physicalElement21 = insertPhysicalElement({ builder, userLabel: `element 2-1`, modelId: model2.id, categoryId: category.id });
+          const physicalElement22 = insertPhysicalElement({
+            builder,
+            userLabel: `element 2-2`,
+            modelId: model2.id,
+            categoryId: category.id,
+          });
+          return { rootSubject, model1, model2, category, physicalElement11, physicalElement12, physicalElement21, physicalElement22 };
+        },
+        (x) => [
+          [x.rootSubject, x.model2, x.category, x.physicalElement21],
+          [x.rootSubject, x.model2, x.category, x.physicalElement22],
+        ],
+        (x) => [{ parent: { type: "category", ids: [x.category.id], modelIds: [x.model2.id] }, classes: [x.physicalElement12.className] }],
+        undefined,
+        (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.rootSubject],
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.model2],
+                label: "model-2",
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [x.category],
+                    label: "category-x",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        label: "Physical Object",
+                        autoExpand: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.physicalElement21],
+                            label: /^element 2-1/,
+                          }),
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.physicalElement22],
+                            label: /^element 2-2/,
                           }),
                         ],
                       }),
@@ -1082,7 +1148,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement1],
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement2],
         ],
-        (x) => [{ parentKey: x.rootElement, parentType: "element", classes: [x.testElement1.className] }],
+        (x) => [{ parent: { type: "element", ids: [x.rootElement.id] }, classes: [x.testElement1.className] }],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1178,7 +1244,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement1],
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement2],
         ],
-        (x) => [{ parentKey: x.rootElement, parentType: "element", classes: [x.testElement1.className, x.physicalElement1.className] }],
+        (x) => [{ parent: { type: "element", ids: [x.rootElement.id] }, classes: [x.testElement1.className, x.physicalElement1.className] }],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
