@@ -69,7 +69,6 @@ export function useNodeHighlighting({ rootNodes, searchText, activeMatchIndex, o
   }, [rootNodes, searchText, activeNodeIdRef, activeMatchIndexRef, updateHighlightInfo]);
 
   useEffect(() => {
-    // focus on currently highlighted node to scroll it into view
     for (const nodeId of state.current.nodeInfoMap.keys()) {
       if (getNodeChunkInfo(state.current, nodeId, activeMatchIndex)?.activeChunkIndex !== undefined) {
         setActiveNodeId(nodeId);
