@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Export SheetMeasurementHelper in measure-tools-react package",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "125395992+Maxime-Brassard@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

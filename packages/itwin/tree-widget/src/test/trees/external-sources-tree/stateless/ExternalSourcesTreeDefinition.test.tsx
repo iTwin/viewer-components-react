@@ -71,7 +71,7 @@ describe("ExternalSources Tree", () => {
             instanceKeys: [keys.rootExternalSource],
             label: `Test repo link - Test external source`,
             autoExpand: true,
-            supportsFiltering: true,
+            supportsFiltering: false,
             children: false,
           }),
         ],
@@ -112,7 +112,7 @@ describe("ExternalSources Tree", () => {
                   NodeValidators.createForInstanceNode({
                     instanceKeys: [keys.childExternalSource],
                     label: `Child external source`,
-                    supportsFiltering: true,
+                    supportsFiltering: false,
                     children: false,
                   }),
                 ],
@@ -146,7 +146,7 @@ describe("ExternalSources Tree", () => {
               NodeValidators.createForInstanceNode({
                 instanceKeys: [keys.childExternalSource],
                 autoExpand: false,
-                supportsFiltering: true,
+                supportsFiltering: false,
                 children: false,
               }),
             ],
@@ -183,10 +183,11 @@ describe("ExternalSources Tree", () => {
           NodeValidators.createForInstanceNode({
             instanceKeys: [keys.rootExternalSource],
             autoExpand: true,
-            supportsFiltering: true,
+            supportsFiltering: false,
             children: [
               NodeValidators.createForCustomNode({
                 label: "Elements",
+                supportsFiltering: true,
                 children: [
                   NodeValidators.createForClassGroupingNode({
                     className: keys.element1.className,
@@ -194,13 +195,13 @@ describe("ExternalSources Tree", () => {
                       NodeValidators.createForInstanceNode({
                         instanceKeys: [keys.element1],
                         autoExpand: false,
-                        supportsFiltering: true,
+                        supportsFiltering: false,
                         children: false,
                       }),
                       NodeValidators.createForInstanceNode({
                         instanceKeys: [keys.element2],
                         autoExpand: false,
-                        supportsFiltering: true,
+                        supportsFiltering: false,
                         children: false,
                       }),
                     ],
