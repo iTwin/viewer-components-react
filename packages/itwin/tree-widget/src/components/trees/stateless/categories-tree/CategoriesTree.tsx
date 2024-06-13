@@ -111,6 +111,7 @@ export function StatelessCategoriesTree({
         onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
       }}
       reportUsage={reportUsage}
+      searchText={filter}
     />
   );
 }

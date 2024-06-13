@@ -3,19 +3,18 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Observable, OperatorFunction } from "rxjs";
 import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, mergeMap, of, reduce } from "rxjs";
 import { assert } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { reduceWhile, toVoidPromise } from "../../../common/Rxjs";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
-import { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
 import { ModelsTreeNode } from "./ModelsTreeNode";
 import { createVisibilityStatus } from "./Tooltip";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
+import type { Observable, OperatorFunction } from "rxjs";
+import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
@@ -93,8 +92,8 @@ interface VisibilityHandlerOverrides {
  */
 export interface ModelsTreeVisibilityHandlerProps {
   viewport: Viewport;
+  idsCache: ModelsTreeIdsCache;
   overrides?: VisibilityHandlerOverrides;
-  idsCache?: ModelsTreeIdsCache;
 }
 
 /**
@@ -119,9 +118,8 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
   constructor(private readonly _props: ModelsTreeVisibilityHandlerProps) {
     this._eventListener = createVisibilityChangeEventListener(_props.viewport);
-    this._idsCache =
-      this._props.idsCache ?? new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(this._props.viewport.iModel), "unbounded"));
     this._alwaysAndNeverDrawnElements = new AlwaysAndNeverDrawnElementInfo(_props.viewport);
+    this._idsCache = this._props.idsCache;
   }
 
   // istanbul ignore next

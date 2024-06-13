@@ -63,7 +63,7 @@ describe("Models tree", () => {
     it("can filter root level", async function () {
       // eslint-disable-next-line deprecation/deprecation
       const imodel = await buildTestIModel(this, async () => {});
-      const provider = createModelsTreeProvider(imodel);
+      const provider = createModelsTreeProvider({ imodel });
 
       // validate hierarchy level without filter
       validateHierarchyLevel({
@@ -161,7 +161,7 @@ describe("Models tree", () => {
 
         return { rootSubject, childSubject, model, category };
       });
-      const provider = createModelsTreeProvider(imodel);
+      const provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -258,7 +258,7 @@ describe("Models tree", () => {
         insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category2.id });
         return { rootSubject, model, category1, category2 };
       });
-      const provider = createModelsTreeProvider(imodel);
+      const provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -324,7 +324,7 @@ describe("Models tree", () => {
         const element = insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
         return { rootSubject, model, category, element };
       });
-      const provider = createModelsTreeProvider(imodel);
+      const provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -415,7 +415,7 @@ describe("Models tree", () => {
         });
         return { rootSubject, model, category, parentElement, childElement };
       });
-      const provider = createModelsTreeProvider(imodel);
+      const provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -513,7 +513,7 @@ describe("Models tree", () => {
         });
         return { rootSubject, model, category, modeledElement, modelingElement };
       });
-      const provider = createModelsTreeProvider(imodel);
+      const provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -599,7 +599,7 @@ describe("Models tree", () => {
         const aspect = insertExternalSourceAspect({ builder, elementId: element.id, identifier: "test aspect" });
         return { rootSubject, model, category, element, aspect };
       });
-      const provider = createModelsTreeProvider(imodel);
+      const provider = createModelsTreeProvider({ imodel });
       const parentNode = {
         key: {
           type: "instances" as const,
@@ -663,6 +663,162 @@ describe("Models tree", () => {
             } as NestedContentField,
           ],
         },
+      });
+    });
+
+    describe("Hierarchy configuration", () => {
+      it("filters empty models when `showEmptyModels` set to true", async function () {
+        // eslint-disable-next-line deprecation/deprecation
+        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+
+          // set up child model node
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model 2`, partitionParentId: rootSubject.id });
+
+          return { rootSubject, model };
+        });
+        const provider = createModelsTreeProvider({ imodel, hierarchyConfig: { showEmptyModels: true } });
+        const parentNode = {
+          key: {
+            type: "instances" as const,
+            instanceKeys: [keys.rootSubject],
+          },
+          parentKeys: [],
+          label: "",
+        };
+
+        // validate hierarchy level without filter
+        validateHierarchyLevel({
+          nodes: await collect(provider.getNodes({ parentNode })),
+          expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.model] })],
+        });
+
+        // validate descriptor, that is required for creating the filter
+        await validateHierarchyLevelDescriptor({
+          imodel,
+          provider,
+          parentNode,
+          expected: {
+            selectClasses: [
+              {
+                selectClassInfo: { name: PhysicalModel.classFullName },
+              },
+            ],
+            fields: physicalModelFields,
+          },
+        });
+
+        // validate filtered hierarchy level
+        validateHierarchyLevel({
+          nodes: await collect(
+            provider.getNodes({
+              parentNode,
+              instanceFilter: createInstanceFilter(keys.model.className, {
+                sourceAlias: "",
+                propertyName: "IsPrivate",
+                propertyTypeName: "boolean",
+                operator: "is-false",
+              }),
+            }),
+          ),
+          expect: [NodeValidators.createForInstanceNode({ instanceKeys: [keys.model] })],
+        });
+      });
+
+      it("filters elements when `elementClassSpecification` is provided", async function () {
+        // eslint-disable-next-line deprecation/deprecation
+        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
+          const rootSubject = { className: Subject.classFullName.replace(":", "."), id: "0x1" };
+          const category = insertSpatialCategory({ builder, codeValue: "category" });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
+          const element1 = insertPhysicalElement({
+            builder,
+            userLabel: `element`,
+            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          const element2 = insertPhysicalElement({
+            builder,
+            userLabel: `element`,
+            modelId: model.id,
+            categoryId: category.id,
+          });
+          return { rootSubject, model, category, element1, element2 };
+        });
+        const provider = createModelsTreeProvider({ imodel, hierarchyConfig: { elementClassSpecification: keys.element1.className } });
+        const parentNode = {
+          key: {
+            type: "instances" as const,
+            instanceKeys: [keys.category],
+          },
+          parentKeys: [
+            {
+              type: "instances" as const,
+              instanceKeys: [keys.rootSubject],
+            },
+            {
+              type: "instances" as const,
+              instanceKeys: [keys.model],
+            },
+          ],
+          extendedData: {
+            modelIds: [keys.model.id],
+          },
+          label: "",
+        };
+
+        // validate hierarchy level without filter
+        validateHierarchyLevel({
+          nodes: await collect(provider.getNodes({ parentNode })),
+          expect: [NodeValidators.createForClassGroupingNode({ className: keys.element1.className })],
+        });
+
+        // validate descriptor, that is required for creating the filter
+        await validateHierarchyLevelDescriptor({
+          imodel,
+          provider,
+          parentNode,
+          expected: {
+            selectClasses: [
+              {
+                selectClassInfo: { name: keys.element1.className.replace(".", ":") },
+              },
+            ],
+            fields: physicalElementFields,
+          },
+        });
+
+        // validate filtered hierarchy level
+        validateHierarchyLevel({
+          nodes: await collect(
+            provider.getNodes({
+              parentNode,
+              instanceFilter: createInstanceFilter(keys.element1.className, {
+                sourceAlias: "",
+                propertyName: "UserLabel",
+                propertyTypeName: "string",
+                operator: "is-equal",
+                value: { rawValue: "element", displayValue: "" },
+              }),
+            }),
+          ),
+          expect: [NodeValidators.createForClassGroupingNode({ className: keys.element1.className })],
+        });
+        validateHierarchyLevel({
+          nodes: await collect(
+            provider.getNodes({
+              parentNode,
+              instanceFilter: createInstanceFilter(keys.element1.className, {
+                sourceAlias: "",
+                propertyName: "UserLabel",
+                propertyTypeName: "string",
+                operator: "is-null",
+              }),
+            }),
+          ),
+          expect: [],
+        });
       });
     });
   });
