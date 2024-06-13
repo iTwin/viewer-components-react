@@ -76,10 +76,6 @@ export function useNodeHighlighting({ rootNodes, searchText, activeMatchIndex, o
     }
   }, [activeMatchIndex]);
 
-  useEffect(() => {
-    updateHighlightInfo(0, state.current.totalMatches);
-  }, [searchText, updateHighlightInfo]);
-
   const getLabel = useCallback(
     (node: PresentationHierarchyNode) => {
       const chunkInfo = getNodeChunkInfo(state.current, node.id, activeMatchIndex);
@@ -160,8 +156,7 @@ function markChunks(text: string, chunks: HighlightedChunk[], activeChunk?: numb
   const markedText: React.ReactElement[] = [];
   let previousIndex = 0;
 
-  // merge chunks if they are not highlighted
-  const mergedChunks = activeChunk !== undefined ? chunks : mergeChunks(chunks);
+  const { mergedChunks, newActiveIndex } = mergeChunks(chunks, activeChunk);
 
   for (let i = 0; i < mergedChunks.length; i++) {
     const { start, end } = mergedChunks[i];
@@ -172,7 +167,7 @@ function markChunks(text: string, chunks: HighlightedChunk[], activeChunk?: numb
 
     // add marked chunk text
     markedText.push(
-      <mark key={start} className={activeChunk === i ? "tw-active-match-highlight" : undefined}>
+      <mark key={start} className={i === newActiveIndex ? "tw-active-match-highlight" : undefined}>
         {text.substring(start, end)}
       </mark>,
     );
@@ -186,20 +181,24 @@ function markChunks(text: string, chunks: HighlightedChunk[], activeChunk?: numb
   return markedText;
 }
 
-function mergeChunks(chunks: HighlightedChunk[]) {
+function mergeChunks(chunks: HighlightedChunk[], activeChunk?: number) {
   const mergedChunks: HighlightedChunk[] = [];
-  let lastChunk: HighlightedChunk | undefined;
+  let lastChunk: { isActive: boolean; info: HighlightedChunk } | undefined;
+  let newActiveIndex: number | undefined;
 
-  for (const chunk of chunks) {
-    if (lastChunk && lastChunk.end === chunk.start) {
-      lastChunk.end = chunk.end;
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    const isActive = i === activeChunk;
+    if (lastChunk && lastChunk.info.end === chunk.start && !isActive && !lastChunk.isActive) {
+      lastChunk.info.end = chunk.end;
       continue;
     }
+    isActive && (newActiveIndex = mergedChunks.length);
     const newChunk = { start: chunk.start, end: chunk.end };
+    lastChunk = { isActive, info: newChunk };
     mergedChunks.push(newChunk);
-    lastChunk = newChunk;
   }
-  return mergedChunks;
+  return { mergedChunks, newActiveIndex };
 }
 
 function useLatest<T>(value: T) {

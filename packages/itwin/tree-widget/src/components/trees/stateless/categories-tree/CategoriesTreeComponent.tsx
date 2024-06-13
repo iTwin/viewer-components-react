@@ -55,7 +55,7 @@ function CategoriesTreeComponentImpl({
   ...treeProps
 }: StatelessCategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const categories = useCategories(IModelApp.viewManager, iModel, viewport);
-  const { filter, setFilter } = useFiltering();
+  const { filter, applyFilter } = useFiltering();
   const density = treeProps.density;
 
   const onCategoriesTreeFeatureUsed = (feature: string) => {
@@ -67,7 +67,7 @@ function CategoriesTreeComponentImpl({
   return (
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
-        <TreeHeader onFilterClear={() => setFilter("")} onFilterStart={(newFilter) => setFilter(newFilter)} onSelectedChanged={() => {}} density={density}>
+        <TreeHeader onFilterClear={() => applyFilter("")} onFilterStart={applyFilter} onSelectedChanged={() => {}} density={density}>
           {headerButtons
             ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories, onFeatureUsed: onCategoriesTreeFeatureUsed })}</Fragment>)
             : [

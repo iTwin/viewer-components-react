@@ -9,7 +9,7 @@ interface UseFilteringResult {
   filter: string;
   activeMatchIndex: number;
   totalMatches: number;
-  setFilter: (filter: string) => void;
+  applyFilter: (filter: string) => void;
   onHighlightChanged: (index: number, matches?: number) => void;
 }
 
@@ -19,10 +19,15 @@ export function useFiltering(): UseFilteringResult {
   const [activeMatchIndex, setActiveMatchIndex] = useState(0);
   const [totalMatches, setTotalMatches] = useState(0);
 
+  const applyFilter = (newFilter: string) => {
+    setActiveMatchIndex(0);
+    setFilter(newFilter);
+  };
+
   const onHighlightChanged = useCallback((index: number, matches?: number) => {
     setActiveMatchIndex(index);
     matches && setTotalMatches(matches);
   }, []);
 
-  return { filter, activeMatchIndex, totalMatches, setFilter, onHighlightChanged };
+  return { filter, activeMatchIndex, totalMatches, applyFilter, onHighlightChanged };
 }

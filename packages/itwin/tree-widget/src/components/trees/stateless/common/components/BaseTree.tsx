@@ -52,7 +52,6 @@ interface BaseTreeOwnProps {
   density?: "default" | "enlarged";
   noDataMessage?: ReactNode;
   reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
-  textToHighlight?: string;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];

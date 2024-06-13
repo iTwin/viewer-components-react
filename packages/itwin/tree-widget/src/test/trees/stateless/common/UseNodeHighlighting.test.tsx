@@ -97,24 +97,24 @@ describe.only("useNodeHighlighting", () => {
     expect(marks[0].textContent).to.be.eq("OOOO");
   });
 
-  it("does not merge adjacent chunks when one of them is active", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "OOOO" })];
+  it("does not merge active chunk", () => {
+    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "OOOOO" })];
     const onHighlightChangedStub = sinon.stub();
 
     const { result } = renderHook((props) => useNodeHighlighting(props), {
-      initialProps: { rootNodes, searchText: "O", activeMatchIndex: 0, onHighlightChanged: onHighlightChangedStub },
+      initialProps: { rootNodes, searchText: "O", activeMatchIndex: 2, onHighlightChanged: onHighlightChangedStub },
     });
 
-    expect(onHighlightChangedStub).to.be.calledWith(0, 4);
+    expect(onHighlightChangedStub).to.be.calledWith(2, 5);
     const { container } = render(result.current.getLabel(rootNodes[0]));
 
     const marks = container.querySelectorAll("mark");
 
-    expect(marks).to.have.length(4);
-    expect(marks[0].textContent).to.be.eq("O");
+    expect(marks).to.have.length(3);
+    expect(marks[0].textContent).to.be.eq("OO");
     expect(marks[1].textContent).to.be.eq("O");
-    expect(marks[2].textContent).to.be.eq("O");
-    expect(marks[3].textContent).to.be.eq("O");
+    expect(marks[1].className).to.be.eq("tw-active-match-highlight");
+    expect(marks[2].textContent).to.be.eq("OO");
   });
 
   it("adds and updates active match class", () => {
@@ -169,12 +169,11 @@ describe.only("useNodeHighlighting", () => {
 
     const marks = container.querySelectorAll("mark");
 
-    expect(marks).to.have.length(4);
-    expect(marks[0].textContent).to.be.eq("O");
+    expect(marks).to.have.length(3);
+    expect(marks[0].textContent).to.be.eq("OO");
     expect(marks[1].textContent).to.be.eq("O");
+    expect(marks[1].className).to.be.eq("tw-active-match-highlight");
     expect(marks[2].textContent).to.be.eq("O");
-    expect(marks[2].className).to.be.eq("tw-active-match-highlight");
-    expect(marks[3].textContent).to.be.eq("O");
 
     const newRootNodes = [
       createPresentationHierarchyNode({ id: "predecessor-node", label: "O" }),
@@ -200,12 +199,11 @@ describe.only("useNodeHighlighting", () => {
 
     const marks = container.querySelectorAll("mark");
 
-    expect(marks).to.have.length(4);
-    expect(marks[0].textContent).to.be.eq("O");
+    expect(marks).to.have.length(3);
+    expect(marks[0].textContent).to.be.eq("OO");
     expect(marks[1].textContent).to.be.eq("O");
+    expect(marks[1].className).to.be.eq("tw-active-match-highlight");
     expect(marks[2].textContent).to.be.eq("O");
-    expect(marks[2].className).to.be.eq("tw-active-match-highlight");
-    expect(marks[3].textContent).to.be.eq("O");
 
     const newRootNodes = [
       createPresentationHierarchyNode({ id: "node", label: "OOOO" }),
@@ -216,30 +214,6 @@ describe.only("useNodeHighlighting", () => {
     rerender({ rootNodes: newRootNodes, searchText: "O", activeMatchIndex: 2, onHighlightChanged: onHighlightChangedStub });
 
     expect(onHighlightChangedStub).to.be.calledWith(2, 5);
-  });
-
-  it("resets active index when `searchText` changes", () => {
-    const rootNodes = [createPresentationHierarchyNode({ id: "node", label: "OO" })];
-    const onHighlightChangedStub = sinon.stub();
-
-    const { result, rerender } = renderHook((props) => useNodeHighlighting(props), {
-      initialProps: { rootNodes, searchText: "O", activeMatchIndex: 1, onHighlightChanged: onHighlightChangedStub },
-    });
-
-    expect(onHighlightChangedStub).to.be.calledWith(1, 2);
-    const { container } = render(result.current.getLabel(rootNodes[0]));
-
-    const marks = container.querySelectorAll("mark");
-
-    expect(marks).to.have.length(2);
-    expect(marks[0].textContent).to.be.eq("O");
-    expect(marks[1].textContent).to.be.eq("O");
-    expect(marks[1].className).to.be.eq("tw-active-match-highlight");
-
-    onHighlightChangedStub.resetHistory();
-    rerender({ rootNodes, searchText: "K", activeMatchIndex: 1, onHighlightChanged: onHighlightChangedStub });
-
-    expect(onHighlightChangedStub).to.be.calledWith(0, 0);
   });
 
   it("returns currently active node", () => {
