@@ -20,7 +20,7 @@ interface TreeRendererOwnProps {
 
 type TreeRendererProps = Pick<
   TreeNodeRendererProps,
-  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps"
+  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps"
 > &
   Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
   Pick<LocalizationContextProviderProps, "localizedStrings"> &
@@ -36,6 +36,7 @@ export function TreeRenderer({
   isNodeSelected,
   onFilterClick,
   getIcon,
+  getLabel,
   getSublabel,
   getHierarchyLevelDetails,
   checkboxProps,
@@ -58,6 +59,7 @@ export function TreeRenderer({
           expandNode={expandNode}
           onNodeKeyDown={onNodeKeyDown}
           getIcon={getIcon}
+          getLabel={getLabel}
           getSublabel={getSublabel}
           onFilterClick={onFilterClick}
           getHierarchyLevelDetails={getHierarchyLevelDetails}
@@ -65,7 +67,7 @@ export function TreeRenderer({
         />
       );
     },
-    [expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, getHierarchyLevelDetails, getIcon, getSublabel, onFilterClick, checkboxProps],
+    [expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, getHierarchyLevelDetails, getIcon, getLabel, getSublabel, onFilterClick, checkboxProps],
   );
 
   const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
