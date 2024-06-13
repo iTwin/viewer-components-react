@@ -6,10 +6,10 @@ import { Button, ButtonGroup, ExpandableBlock, IconButton, Label, LabeledInput, 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Configuration } from "./EC3/Template";
 import React from "react";
-import type { EC3ConfigurationLabel, Group, ODataTable } from "@itwin/insights-client";
+import type { EC3ConfigurationLabel, GroupMinimal, ODataTable } from "@itwin/insights-client";
 import "./CreateAssemblyComponent.scss";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
-import { useApiContext } from "./api/APIContext";
+import { useApiContext } from "./context/APIContext";
 
 export interface CreateAssemblyProps {
   template: Configuration;
@@ -29,16 +29,16 @@ export enum CreateAssemblyDropdownType {
 export const CreateAssembly = (props: CreateAssemblyProps) => {
   const [allAssemblies, setAllAssemblies] = useState<EC3ConfigurationLabel[] | undefined>(props.label);
   const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
-  const [groups, setGroups] = useState<Group[]>([]);
+  const [groups, setGroups] = useState<GroupMinimal[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [oDataTable, setoDataTable] = useState<ODataTable[]>([]);
   const [editableAssemblyIndex, setEditableAssemblyIndex] = useState<number>();
 
   const oDataClient = useApiContext().oDataClient;
   const {
-    config: { getAccessToken, iModelId, defaultMapping },
+    config: { getAccessToken, defaultMapping },
   } = useApiContext();
-  const mappingsClient = useApiContext().mappingsClient;
+  const groupsClient = useApiContext().groupsClient;
 
   useMemo(() => {
     setAllAssemblies(props.label);
@@ -49,16 +49,11 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
       throw new Error("Default mapping missing.");
     }
     const accessToken = await getAccessToken();
-    const mappingsForiModel = await mappingsClient.getMappings(accessToken, iModelId);
-    // will replace this with hardcoded mapping once discussion is done
-    const carbonCalculationMapping = mappingsForiModel.find((mapping) => (mapping.mappingName = defaultMapping.mappingName));
-    if (carbonCalculationMapping) {
-      const carbonCalculationGroups = await mappingsClient.getGroups(accessToken, iModelId, carbonCalculationMapping.id);
-      if (carbonCalculationGroups.length > 0) {
-        setGroups(carbonCalculationGroups);
-      }
+    const carbonCalculationGroups = await groupsClient.getGroups(accessToken, defaultMapping.id);
+    if (carbonCalculationGroups.groups.length > 0) {
+      setGroups(carbonCalculationGroups.groups);
     }
-  }, [getAccessToken, iModelId, mappingsClient, defaultMapping]);
+  }, [getAccessToken, groupsClient, defaultMapping]);
 
   const onAssemblyDataChange = useCallback(
     (updatedAssembly: EC3ConfigurationLabel, index: number, action?: "add" | "delete") => {

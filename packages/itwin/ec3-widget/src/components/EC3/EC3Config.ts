@@ -3,8 +3,17 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient, Mapping } from "@itwin/insights-client";
-import { CARBON_CALCULATION_BASE_PATH, EC3ConfigurationsClient, EC3JobsClient, ODataClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IGroupsClient, IOdataClient, IReportsClient, Mapping } from "@itwin/insights-client";
+import {
+  CARBON_CALCULATION_BASE_PATH,
+  EC3ConfigurationsClient,
+  EC3JobsClient,
+  GROUPING_AND_MAPPING_BASE_PATH,
+  GroupsClient,
+  ODataClient,
+  REPORTING_BASE_PATH,
+  ReportsClient,
+} from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../context/APIContext";
 import type { EC3Token } from "./EC3Token";
 
@@ -44,6 +53,11 @@ export interface EC3ConfigCommonProps {
   carbonCalculationBasePath?: string;
 
   /**
+   * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to CARBON_CALCULATION_BASE_PATH from @itwin/insights-client.
+   */
+  groupingMappingBasePath?: string;
+
+  /**
    * A custom implementation of ReportsClient. If provided, reportingBasePath is ignored.
    */
   reportsClient?: IReportsClient;
@@ -62,6 +76,11 @@ export interface EC3ConfigCommonProps {
    * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
    */
   ec3ConfigurationsClient?: IEC3ConfigurationsClient;
+
+  /**
+   * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
+   */
+  groupingsClient?: IGroupsClient;
 }
 
 /**
@@ -113,6 +132,7 @@ export class EC3Config {
   public readonly ec3Uri?: string;
   public readonly reportingBasePath: string;
   public readonly carbonCalculationBasePath: string;
+  public readonly groupingMappingBasePath: string;
   public readonly iTwinId: string;
   public readonly iModelId: string;
   public readonly getAccessToken: GetAccessTokenFn;
@@ -124,6 +144,7 @@ export class EC3Config {
   public readonly oDataClient: IOdataClient;
   public readonly ec3JobsClient: IEC3JobsClient;
   public readonly ec3ConfigurationsClient: IEC3ConfigurationsClient;
+  public readonly groupsClient: IGroupsClient;
 
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
@@ -137,6 +158,10 @@ export class EC3Config {
       ? CARBON_CALCULATION_BASE_PATH.replace("https://api.bentley.com", props.carbonCalculationBasePath)
       : CARBON_CALCULATION_BASE_PATH;
 
+    this.groupingMappingBasePath = props.groupingMappingBasePath
+      ? GROUPING_AND_MAPPING_BASE_PATH.replace("https://api.bentley.com", props.groupingMappingBasePath)
+      : GROUPING_AND_MAPPING_BASE_PATH;
+
     this.getAccessToken = props.getAccessToken ?? (async () => (IModelApp.authorizationClient ? IModelApp.authorizationClient.getAccessToken() : ""));
 
     this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
@@ -146,6 +171,7 @@ export class EC3Config {
     this.oDataClient = props.oDataClient ?? new ODataClient(this.reportingBasePath);
     this.ec3JobsClient = props.ec3JobsClient ?? new EC3JobsClient(this.carbonCalculationBasePath);
     this.ec3ConfigurationsClient = props.ec3ConfigurationsClient ?? new EC3ConfigurationsClient(this.carbonCalculationBasePath);
+    this.groupsClient = props.groupingsClient ?? new GroupsClient(this.groupingMappingBasePath);
   }
 
   private tokenExpired(): boolean {

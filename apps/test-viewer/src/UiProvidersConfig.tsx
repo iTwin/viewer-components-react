@@ -5,7 +5,7 @@
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { SelectionMode } from "@itwin/components-react";
 import { IModelConnection } from "@itwin/core-frontend";
-import { EC3Provider } from "@itwin/ec3-widget-react";
+import { EC3Provider, GROUPING_AND_MAPPING_BASE_PATH, Mapping } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
@@ -323,7 +323,12 @@ const configuredUiItems = new Map<string, UiItem>([
           redirectUri: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
           reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
           carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
+          groupingMappingBasePath: prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, import.meta.env.IMJS_URL_PREFIX),
           iModelId: import.meta.env.IMJS_IMODEL_ID ?? "",
+          defaultMapping: {
+            id: "ff5351c1-7fd9-444b-a453-98c2d3e29b2f",
+            mappingName: "DefaultMapping_CarbonCalc",
+          } as Mapping,
         }),
       ],
     },
