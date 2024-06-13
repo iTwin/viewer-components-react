@@ -1,10 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  CalculatedPropertyType,
-} from "@itwin/insights-client";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { CalculatedPropertyType } from "@itwin/insights-client";
 import React, { useCallback } from "react";
 import { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { SelectOption } from "@itwin/itwinui-react";
@@ -30,7 +28,6 @@ export const SharedCalculatedPropertyForms = ({
   itemRenderer,
   selectedItemRenderer,
 }: SharedCalculatedPropertyFormsProps) => {
-
   const generateOptionsFromCalculatedPropertyType = useCallback(() => {
     const options: SelectOption<CalculatedPropertyType>[] = [];
 
@@ -61,11 +58,7 @@ export const SharedCalculatedPropertyForms = ({
           validator.showMessageFor("name");
         }}
         message={validator.message("name", propertyName, NAME_REQUIREMENTS)}
-        status={
-          validator.message("name", propertyName, NAME_REQUIREMENTS)
-            ? "negative"
-            : undefined
-        }
+        status={validator.message("name", propertyName, NAME_REQUIREMENTS) ? "negative" : undefined}
         onBlur={() => {
           validator.showMessageFor("name");
         }}
@@ -82,8 +75,8 @@ export const SharedCalculatedPropertyForms = ({
         onChange={setType}
         itemRenderer={itemRenderer}
         selectedItemRenderer={selectedItemRenderer}
-        onShow={() => { }}
-        onHide={() => { }}
+        onShow={() => {}}
+        onHide={() => {}}
       />
     </>
   );

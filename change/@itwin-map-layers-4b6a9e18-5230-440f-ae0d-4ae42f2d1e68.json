@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Added copy property value button in Map Layers Info widget",
-  "packageName": "@itwin/map-layers",
-  "email": "mdastous-bentley@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

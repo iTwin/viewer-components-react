@@ -1,17 +1,17 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useMemo, useState } from "react";
 import { SearchBox } from "@itwin/core-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Table, toaster } from "@itwin/itwinui-react";
 import type { Report } from "@itwin/insights-client";
-import { ReportsClient } from "@itwin/insights-client";
 import { WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
 import "./Reports.scss";
+import { useReportsClient } from "./context/ReportsClientContext";
 
 type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
@@ -19,10 +19,12 @@ type CreateTypeFromInterface<Interface> = {
 
 type Reporting = CreateTypeFromInterface<Report>;
 
-const Reports = () => {
+/**
+ * @internal
+ */
+export const Reports = () => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportsClientApi = useMemo(() => new ReportsClient(), []);
-
+  const reportsClient = useReportsClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useState<Report[]>([]);
   const [buttonIsDisabled, disableButton] = useState<boolean>(true);
@@ -49,16 +51,12 @@ const Reports = () => {
         ],
       },
     ],
-    []
+    [],
   );
 
   const onSearchBoxValueChanged = async (value: string) => {
     disableButton(true);
-    const filterReports = reports.filter(
-      (x) =>
-        x.displayName &&
-        x.displayName.toLowerCase().indexOf(value.toLowerCase()) > -1
-    );
+    const filterReports = reports.filter((x) => x.displayName && x.displayName.toLowerCase().indexOf(value.toLowerCase()) > -1);
     setFilteredReports(filterReports);
   };
 
@@ -84,18 +82,15 @@ const Reports = () => {
       }
       setSelectedReport(row.original);
     },
-    [buttonIsDisabled, selectedReport]
+    [buttonIsDisabled, selectedReport],
   );
 
   useEffect(() => {
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
+    if (!IModelApp.authorizationClient) throw new Error("AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet.");
     IModelApp.authorizationClient
       .getAccessToken()
       .then((token: string) => {
-        reportsClientApi
+        reportsClient
           .getReports(token, projectId)
           .then((data) => {
             if (data) {
@@ -117,17 +112,14 @@ const Reports = () => {
         /* eslint-disable no-console */
         console.error(err);
       });
-  }, [projectId, reportsClientApi]);
+  }, [projectId, reportsClient]);
 
   return (
     <>
       <WidgetHeader title="Reports" />
       <div className="oclca-reports-container">
         <div className="oclca-searchbox-container">
-          <SearchBox
-            onValueChanged={onSearchBoxValueChanged}
-            placeholder={"Search reports"}
-          />
+          <SearchBox onValueChanged={onSearchBoxValueChanged} placeholder={"Search reports"} />
         </div>
         <div className="oclca-scrollable-table">
           <Table<Reporting>
@@ -145,21 +137,10 @@ const Reports = () => {
           />
         </div>
       </div>
-      <Button
-        onClick={() => openModal(true)}
-        styleType="cta"
-        disabled={buttonIsDisabled}
-        className="oclca-button-center"
-      >
+      <Button onClick={() => openModal(true)} styleType="cta" disabled={buttonIsDisabled} className="oclca-button-center">
         One Click LCA Export
       </Button>
-      <ExportModal
-        isOpen={modalIsOpen}
-        close={() => openModal(false)}
-        reportId={selectedReport?.id}
-      />
+      <ExportModal isOpen={modalIsOpen} close={() => openModal(false)} reportId={selectedReport?.id} />
     </>
   );
 };
-
-export default Reports;

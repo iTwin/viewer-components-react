@@ -1,38 +1,23 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import "./ExportModal.scss";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import {
-  Alert,
-  Button,
-  LabeledInput,
-  Modal,
-  ProgressLinear,
-  ProgressRadial,
-  Text,
-  toaster,
-} from "@itwin/itwinui-react";
-import {
-  SvgVisibilityHide,
-  SvgVisibilityShow,
-} from "@itwin/itwinui-icons-react";
+import { Alert, Button, LabeledInput, Modal, ProgressLinear, ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
+import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import type { Link, OCLCAJob } from "@itwin/insights-client";
-import { CarbonUploadState, OCLCAJobsClient } from "@itwin/insights-client";
+import { CarbonUploadState } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
+import { useOCLCAJobsClient } from "./context/OCLCAJobsClientContext";
+import { OCLCAApiHelper } from "./api/OCLCAApiHelper";
 
 interface ExportProps {
   isOpen: boolean;
   close: () => void;
   reportId: string | undefined;
+  carbonCalculationBasePath?: string;
 }
 
 interface OclcaTokenCache {
@@ -40,10 +25,14 @@ interface OclcaTokenCache {
   exp: number;
 }
 
+/**
+ * @internal
+ */
 const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
   const PIN_INTERVAL = 1000;
-  const oneClickLCAClientApi = useMemo(() => new OCLCAJobsClient(), []);
+  const oneClickLCAClient = useOCLCAJobsClient();
+  const oclcaApiHelper = useMemo(() => new OCLCAApiHelper(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,15 +74,11 @@ const ExportModal = (props: ExportProps) => {
   const pinStatus = useCallback(
     (job: OCLCAJob) => {
       const intervalId = window.setInterval(async () => {
-        const token =
-          (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+        const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
         if (job.id && token) {
-          const currentJobStatus =
-            await oneClickLCAClientApi.getOCLCAJobStatus(token, job?.id);
+          const currentJobStatus = await oneClickLCAClient.getOCLCAJobStatus(token, job?.id);
           if (currentJobStatus.status) {
-            if (
-              currentJobStatus.status === CarbonUploadState.Succeeded
-            ) {
+            if (currentJobStatus.status === CarbonUploadState.Succeeded) {
               setJobLink(!!currentJobStatus?._links?.oneclicklca?.href ? { href: currentJobStatus._links.oneclicklca.href } : undefined);
             }
             setJobStatus(currentJobStatus.status);
@@ -105,22 +90,18 @@ const ExportModal = (props: ExportProps) => {
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },
-    [setJobLink, setJobStatus, oneClickLCAClientApi]
+    [setJobLink, setJobStatus, oneClickLCAClient],
   );
 
   const runJob = useCallback(
     async (token: string) => {
-      const accessToken =
-        (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.reportId && token) {
         try {
-          const jobCreated = await oneClickLCAClientApi.createJob(
-            accessToken,
-            {
-              reportId: props.reportId,
-              token,
-            }
-          );
+          const jobCreated = await oneClickLCAClient.createJob(accessToken, {
+            reportId: props.reportId,
+            token,
+          });
           if (jobCreated.id) {
             pinStatus(jobCreated);
           } else {
@@ -138,7 +119,7 @@ const ExportModal = (props: ExportProps) => {
         toaster.negative("Invalid reportId.");
       }
     },
-    [props, pinStatus, oneClickLCAClientApi]
+    [props, pinStatus, oneClickLCAClient],
   );
 
   const signin = useCallback(
@@ -146,10 +127,7 @@ const ExportModal = (props: ExportProps) => {
       e.preventDefault();
       startSigningIn(true);
       try {
-        const result = await oneClickLCAClientApi.getOCLCAAccessToken(
-          email,
-          password
-        );
+        const result = await oclcaApiHelper.getOCLCAAccessToken(email, password);
         if (result && result.access_token && result.expires_in) {
           cacheToken({
             token: result.access_token,
@@ -167,14 +145,7 @@ const ExportModal = (props: ExportProps) => {
       }
       startSigningIn(false);
     },
-    [
-      email,
-      password,
-      resetSignin,
-      cacheToken,
-      showSigninError,
-      oneClickLCAClientApi,
-    ]
+    [email, password, resetSignin, cacheToken, showSigninError, oclcaApiHelper],
   );
 
   const onClose = useCallback(() => {
@@ -187,62 +158,59 @@ const ExportModal = (props: ExportProps) => {
     props.close();
   }, [props, resetSignin]);
 
-  const getStatusComponent = useCallback(
-    (status: CarbonUploadState, link: string | undefined) => {
-      switch (status) {
-        case CarbonUploadState.Queued:
-          return (
+  const getStatusComponent = useCallback((status: CarbonUploadState, link: string | undefined) => {
+    switch (status) {
+      case CarbonUploadState.Queued:
+        return (
+          <div className="oclca-progress-radial-container">
+            <ProgressRadial indeterminate size="small" value={50} />
+            <Text variant="leading" className="oclca-status-text">
+              Export queued
+            </Text>
+          </div>
+        );
+      case CarbonUploadState.Running:
+        return (
+          <div className="oclca-progress-linear-container">
+            <ProgressLinear indeterminate />
+            <Text variant="leading" className="oclca-status-text">
+              Export running
+            </Text>
+          </div>
+        );
+      case CarbonUploadState.Succeeded:
+        return (
+          link && (
             <div className="oclca-progress-radial-container">
-              <ProgressRadial indeterminate size="small" value={50} />
-              <Text variant="leading" className="oclca-status-text">
-                Export queued
-              </Text>
+              <ProgressRadial status="positive" size="small" value={50} />
+              <a className="oclca-report-button" href={link} target="_blank" rel="noopener noreferrer">
+                <Button styleType="cta">Open in One Click LCA</Button>
+              </a>
             </div>
-          );
-        case CarbonUploadState.Running:
-          return (
-            <div className="oclca-progress-linear-container">
-              <ProgressLinear indeterminate />
-              <Text variant="leading" className="oclca-status-text">
-                Export running
-              </Text>
-            </div>
-          );
-        case CarbonUploadState.Succeeded:
-          return (
-            link && (
-              <div className="oclca-progress-radial-container">
-                <ProgressRadial status="positive" size="small" value={50} />
-                <a
-                  className="oclca-report-button"
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button styleType="cta">Open in One Click LCA</Button>
-                </a>
-              </div>
-            )
-          );
-        case CarbonUploadState.Failed:
-          return (
-            <div className="oclca-progress-radial-container">
-              <ProgressRadial status="negative" size="small" value={100} />
-              <Text variant="leading" className="oclca-status-text">
-                Export failed
-              </Text>
-            </div>
-          );
-        default:
-          return (
-            <div className="oclca-progress-radial-container">
-              <Text>Invalid Job Status <span role="img" aria-label="sad">😔</span></Text>
-            </div>
-          );
-      }
-    },
-    []
-  );
+          )
+        );
+      case CarbonUploadState.Failed:
+        return (
+          <div className="oclca-progress-radial-container">
+            <ProgressRadial status="negative" size="small" value={100} />
+            <Text variant="leading" className="oclca-status-text">
+              Export failed
+            </Text>
+          </div>
+        );
+      default:
+        return (
+          <div className="oclca-progress-radial-container">
+            <Text>
+              Invalid Job Status{" "}
+              <span role="img" aria-label="sad">
+                😔
+              </span>
+            </Text>
+          </div>
+        );
+    }
+  }, []);
 
   useEffect(() => {
     if (props.isOpen && isSignedIn && cache?.token) {
@@ -256,10 +224,7 @@ const ExportModal = (props: ExportProps) => {
   }, [props.isOpen, isSignedIn, cache, runJob]);
 
   useEffect(() => {
-    if (
-      jobStatus === CarbonUploadState.Succeeded ||
-      jobStatus === CarbonUploadState.Failed
-    ) {
+    if (jobStatus === CarbonUploadState.Succeeded || jobStatus === CarbonUploadState.Failed) {
       if (intervalRef.current) {
         window.clearInterval(intervalRef.current);
       }
@@ -277,13 +242,7 @@ const ExportModal = (props: ExportProps) => {
   }, [email, isValidEmail]);
 
   return (
-    <Modal
-      data-testid="export-modal"
-      isOpen={props.isOpen}
-      onClose={onClose}
-      title={null}
-      closeOnExternalClick={false}
-    >
+    <Modal data-testid="export-modal" isOpen={props.isOpen} onClose={onClose} title={null} closeOnExternalClick={false}>
       {!isSignedIn && (
         <div className="oclca-signin">
           <img
@@ -318,37 +277,15 @@ const ExportModal = (props: ExportProps) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 type={passwordIsVisible ? "text" : "password"}
-                svgIcon={
-                  passwordIsVisible ? (
-                    <SvgVisibilityHide
-                      onClick={() => showPassword(!passwordIsVisible)}
-                    />
-                  ) : (
-                    <SvgVisibilityShow />
-                  )
-                }
+                svgIcon={passwordIsVisible ? <SvgVisibilityHide onClick={() => showPassword(!passwordIsVisible)} /> : <SvgVisibilityShow />}
                 iconDisplayStyle="inline"
                 required
               />
             </div>
 
             <div className="oclca-signin-button-container">
-              <Button
-                className="oclca-signin-button"
-                type="submit"
-                styleType="cta"
-                disabled={!isValidSignin()}
-              >
-                {isSigningIn ? (
-                  <ProgressRadial
-                    className="oclca-signin-wait"
-                    indeterminate
-                    size="small"
-                    value={50}
-                  />
-                ) : (
-                  "Sign In"
-                )}
+              <Button className="oclca-signin-button" type="submit" styleType="cta" disabled={!isValidSignin()}>
+                {isSigningIn ? <ProgressRadial className="oclca-signin-wait" indeterminate size="small" value={50} /> : "Sign In"}
               </Button>
             </div>
           </form>

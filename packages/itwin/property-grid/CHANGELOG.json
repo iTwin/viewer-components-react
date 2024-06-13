@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Mon, 10 Jun 2024 17:40:38 GMT",
+      "version": "1.9.0",
+      "tag": "@itwin/property-grid-react_v1.9.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "e74f9cae9bf8dee9d13d783ae5580b0b1d635c8d",
+            "comment": "Do not export top level `@internal` API through barrel."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 29 Apr 2024 14:59:26 GMT",
       "version": "1.8.0",
       "tag": "@itwin/property-grid-react_v1.8.0",

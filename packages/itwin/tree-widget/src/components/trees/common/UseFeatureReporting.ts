@@ -48,3 +48,21 @@ export function useFeatureReporting(props: UseFeatureReportingProps): UseFeature
 
   return { reportUsage };
 }
+
+interface UseReportingActionProps<T> {
+  action: T;
+  featureId?: UsageTrackedFeatures;
+  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
+}
+
+/** @internal */
+// istanbul ignore next
+export function useReportingAction<T extends (...args: any[]) => void>({ action, featureId, reportUsage }: UseReportingActionProps<T>) {
+  return useCallback<(...args: Parameters<T>) => void>(
+    (...args) => {
+      reportUsage?.({ featureId, reportInteraction: true });
+      action(...args);
+    },
+    [action, reportUsage, featureId],
+  );
+}

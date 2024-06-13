@@ -32,7 +32,7 @@ import { UseMutateAsyncFunction } from '@tanstack/react-query';
 import type { Widget } from '@itwin/appui-react';
 
 // @public
-export const CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel, }: CalculatedPropertyActionProps) => JSX.Element;
+export const CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel }: CalculatedPropertyActionProps) => JSX.Element;
 
 // @public
 export interface CalculatedPropertyActionProps {
@@ -101,7 +101,7 @@ export const createMappingClient: (clientProp: IMappingsClient | ClientPrefix) =
 export const createPropertiesClient: (clientProp: IPropertiesClient | ClientPrefix) => IPropertiesClient;
 
 // @public
-export const CustomCalculationAction: ({ mappingId, groupId, customCalculation, onSaveSuccess, onClickCancel, }: CustomCalculationActionProps) => JSX.Element;
+export const CustomCalculationAction: ({ mappingId, groupId, customCalculation, onSaveSuccess, onClickCancel }: CustomCalculationActionProps) => JSX.Element;
 
 // @public
 export interface CustomCalculationActionProps {
@@ -213,7 +213,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
 }
 
 // @public
-export const GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel, }: GroupPropertyActionProps) => JSX.Element;
+export const GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => JSX.Element;
 
 // @public
 export interface GroupPropertyActionProps {
@@ -230,7 +230,7 @@ export interface GroupPropertyActionProps {
 }
 
 // @public
-export const GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView, }: GroupingCustomUIProps) => JSX.Element;
+export const GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element;
 
 // @public
 export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, }: GroupsProps) => JSX.Element;
@@ -337,7 +337,7 @@ export interface IResult<T> {
 }
 
 // @public
-export const ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery, }: GroupingCustomUIProps) => JSX.Element;
+export const ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery }: GroupingCustomUIProps) => JSX.Element;
 
 // @public
 export const MappingAction: ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => JSX.Element;
@@ -480,7 +480,7 @@ export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
 export function resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap): IResult<DataType>;
 
 // @public
-export const SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView, }: GroupingCustomUIProps) => JSX.Element;
+export const SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element;
 
 // @public
 export const useGroupingMappingApiConfig: () => GroupingMappingApiConfig;
@@ -489,7 +489,7 @@ export const useGroupingMappingApiConfig: () => GroupingMappingApiConfig;
 export const useGroupsClient: () => IGroupsClient;
 
 // @internal
-export const useGroupsOperations: ({ mappingId, }: GroupsOperationsProps) => {
+export const useGroupsOperations: ({ mappingId }: GroupsOperationsProps) => {
     groups: GroupMinimal[] | undefined;
     isLoading: boolean;
     refresh: () => Promise<void>;

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 /** Index signature holding preferences content
  *
@@ -17,8 +17,7 @@ export interface BrowserStorageOptions {
   itemKeyName: string;
 }
 
-export class BrowserStorage<Type>  {
-
+export class BrowserStorage<Type> {
   private readonly _itemKeyName;
   private readonly _throwOnDeleteMissingKey;
 
@@ -35,24 +34,28 @@ export class BrowserStorage<Type>  {
     if (itemStr === null) {
       return undefined;
     }
-    if (!itemStr || itemStr === "{}")
+    if (!itemStr || itemStr === "{}") {
       return map;
+    }
 
     map = JSON.parse(itemStr);
     return map;
   }
 
-  public get(key: string|undefined) {
+  public get(key: string | undefined) {
     const map = this.loadFromStorage();
-    if (map === undefined)
+    if (map === undefined) {
       return undefined;
+    }
 
     if (key) {
-      if (!Object.keys(map).includes(key))
+      if (!Object.keys(map).includes(key)) {
         return undefined;
+      }
 
-      return [map[key]];
-    } else {  // No key provided, return all objects
+      return map[key];
+    } else {
+      // No key provided, return all objects
       return Object.entries(map).map(([_key, value]) => value);
     }
   }
@@ -64,17 +67,19 @@ export class BrowserStorage<Type>  {
   public delete(key: string) {
     const map = this.loadFromStorage();
     if (map === undefined) {
-      if (this._throwOnDeleteMissingKey)
+      if (this._throwOnDeleteMissingKey) {
         throw new Error("Could not find key from storage.");
-      else
+      } else {
         return;
+      }
     }
 
     if (!Object.keys(map).includes(key)) {
-      if (this._throwOnDeleteMissingKey)
+      if (this._throwOnDeleteMissingKey) {
         throw Error("Could not find key from storage.");
-      else
+      } else {
         return;
+      }
     }
     delete map[key];
     window.localStorage.setItem(this._itemKeyName, JSON.stringify(map));
@@ -87,8 +92,9 @@ export class BrowserStorage<Type>  {
     }
     const contentJson = JSON.stringify(content);
     for (const [key, value] of Object.entries(map)) {
-      if (JSON.stringify(value) === contentJson)
+      if (JSON.stringify(value) === contentJson) {
         delete map[key];
+      }
     }
 
     window.localStorage.setItem(this._itemKeyName, JSON.stringify(map));
@@ -96,8 +102,9 @@ export class BrowserStorage<Type>  {
 
   public save(key: string, content: Type) {
     let map = this.loadFromStorage();
-    if (map === undefined)
+    if (map === undefined) {
       map = {};
+    }
 
     map[key] = content;
 

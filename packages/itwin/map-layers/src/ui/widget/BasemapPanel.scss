@@ -23,7 +23,6 @@ $hovered-icon-color: $buic-foreground-primary;
     align-items: center;
     width: 100%;
     margin-top: 5px;
-
   }
 
   .map-manager-base-label {
@@ -41,9 +40,8 @@ $hovered-icon-color: $buic-foreground-primary;
       overflow: hidden;
     }
 
-
     .map-manager-base-item-select {
-      width: 100%;  // makes the Select control fill empty space on the right
+      width: 100%; // makes the Select control fill empty space on the right
     }
 
     button.map-manager-base-settings-button {
@@ -64,7 +62,7 @@ $hovered-icon-color: $buic-foreground-primary;
     }
 
     .map-manager-base-item-select {
-      height: 2.0em;
+      height: 2em;
       width: 100%;
       min-width: 100px;
       margin-right: 6px;

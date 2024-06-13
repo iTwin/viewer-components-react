@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import type { Route } from "./EC3Widget";
 import { RouteStep } from "./EC3Widget";
@@ -13,11 +13,7 @@ export interface EC3RouterProps {
   goBack: () => void;
 }
 
-export const EC3Router = ({
-  currentRoute,
-  navigateTo,
-  goBack,
-}: EC3RouterProps) => {
+export const EC3Router = ({ currentRoute, navigateTo, goBack }: EC3RouterProps) => {
   const { template } = currentRoute.routingFields;
   switch (currentRoute.step) {
     case RouteStep.Templates:

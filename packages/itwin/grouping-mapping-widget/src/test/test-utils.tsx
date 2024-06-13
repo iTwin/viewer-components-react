@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { render as rtlRender } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -32,11 +32,7 @@ function render(ui: React.ReactElement, mockUIs: GroupingMappingCustomUI[] = [],
       },
     }),
   };
-  const Wrapper = ({ children }: WrapperProps) => (
-    <GroupingMappingContext {...contextProps}>
-      {children}
-    </GroupingMappingContext>
-  );
+  const Wrapper = ({ children }: WrapperProps) => <GroupingMappingContext {...contextProps}>{children}</GroupingMappingContext>;
 
   return {
     user: userEvent.setup(),

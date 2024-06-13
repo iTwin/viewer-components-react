@@ -15,13 +15,14 @@ import { StandardNodeTypes } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as categoryTree from "../../../components/trees/category-tree/CategoriesTree";
+import { CategoriesTreeComponent } from "../../../components/trees/category-tree/CategoriesTreeComponent";
 import * as categoryVisibilityHandler from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { CategoriesTreeComponent, TreeWidget } from "../../../tree-widget-react";
+import { TreeWidget } from "../../../TreeWidget";
 import { act, mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
+import type { CategoriesTreeHeaderButtonProps, CategoryInfo } from "../../../components/trees/category-tree/CategoriesTreeButtons";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { CategoriesTreeHeaderButtonProps, CategoryInfo } from "../../../tree-widget-react";
 import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";

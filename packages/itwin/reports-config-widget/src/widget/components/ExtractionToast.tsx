@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Text } from "@itwin/itwinui-react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
@@ -21,11 +21,11 @@ export const SuccessfulExtractionToast = ({ iModelName, odataFeedUrl }: Successf
   };
   return (
     <div>
-      <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionSuccess")}{iModelName}</Text>
-      <a
-        href="#"
-        onClick={onClick}
-      >
+      <Text>
+        {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionSuccess")}
+        {iModelName}
+      </Text>
+      <a href="#" onClick={onClick}>
         {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopyODataUrl")}
       </a>
     </div>
@@ -35,7 +35,10 @@ export const SuccessfulExtractionToast = ({ iModelName, odataFeedUrl }: Successf
 export const FailedExtractionToast = ({ iModelName }: ExtractionToastProps) => {
   return (
     <div>
-      <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionFailed")}{iModelName}</Text>
+      <Text>
+        {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionFailed")}
+        {iModelName}
+      </Text>
     </div>
   );
 };

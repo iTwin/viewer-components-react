@@ -24,7 +24,15 @@ import {
 } from "@itwin/presentation-testing";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory } from "../../IModelUtils";
+import {
+  insertDrawingCategory,
+  insertDrawingGraphic,
+  insertDrawingModelWithPartition,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertSpatialCategory,
+  insertSubCategory,
+} from "../../IModelUtils";
 import { mockPresentationManager, mockViewport, render, stubDOMMatrix, TestUtils, waitFor } from "../../TestUtils";
 import {
   createElementNode,
@@ -37,6 +45,7 @@ import {
   createTestPropertyInfo,
 } from "../Common";
 
+import type { CategoryInfo } from "../../../components/trees/category-tree/CategoriesTreeButtons";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
@@ -44,7 +53,7 @@ import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentat
 import type { PresentationInstanceFilterInfo, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import type { CategoryInfo } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+
 describe("CategoryTree", () => {
   describe("#unit", () => {
     const sizeProps = { width: 200, height: 200 };
@@ -829,16 +838,13 @@ describe("CategoryTree", () => {
     it("does not show private 3d categories with RULESET_CATEGORIES", async () => {
       // eslint-disable-next-line deprecation/deprecation
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => {
-        const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
-        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
-        const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
-        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
-        const categoryId = addSpatialCategory(builder, definitionModelId, "Test SpatialCategory");
-        addPhysicalObject(builder, physicalModelId, categoryId);
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-        const privateCategoryId = addSpatialCategory(builder, definitionModelId, "Private Test SpatialCategory", true);
-        addPhysicalObject(builder, physicalModelId, privateCategoryId);
+        const privateCategory = insertSpatialCategory({ builder, codeValue: "Private Test SpatialCategory", isPrivate: true });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: privateCategory.id });
       });
 
       await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", "3d");
@@ -854,16 +860,13 @@ describe("CategoryTree", () => {
     it("does not show private 3d subCategories with RULESET_CATEGORIES", async () => {
       // eslint-disable-next-line deprecation/deprecation
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", async (builder) => {
-        const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
-        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
-        const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
-        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
+        const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
 
-        const categoryId = addSpatialCategory(builder, definitionModelId, "Test SpatialCategory");
-        addPhysicalObject(builder, physicalModelId, categoryId);
+        const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+        insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
 
-        addSubCategory(builder, definitionModelId, categoryId, "Test SpatialSubCategory");
-        addSubCategory(builder, definitionModelId, categoryId, "Private Test SpatialSubCategory", true);
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test SpatialSubCategory" });
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Private Test SpatialSubCategory", isPrivate: true });
       });
 
       await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", "3d");
@@ -877,16 +880,13 @@ describe("CategoryTree", () => {
     it("does not show private 2d categories with RULESET_CATEGORIES", async () => {
       // eslint-disable-next-line deprecation/deprecation
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => {
-        const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
-        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
-        const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
-        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
+        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
-        const categoryId = addDrawingCategory(builder, definitionModelId, "Test Drawing Category");
-        addDrawingGraphic(builder, drawingModelId, categoryId);
+        const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });
+        insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: category.id });
 
-        const privateCategoryId = addDrawingCategory(builder, definitionModelId, "Private Test DrawingCategory", true);
-        addDrawingGraphic(builder, drawingModelId, privateCategoryId);
+        const privateCategory = insertDrawingCategory({ builder, codeValue: "Private Test DrawingCategory", isPrivate: true });
+        insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: privateCategory.id });
       });
 
       await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", "2d");
@@ -900,16 +900,13 @@ describe("CategoryTree", () => {
     it("does not show private 2d subCategories with RULESET_CATEGORIES", async () => {
       // eslint-disable-next-line deprecation/deprecation
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", async (builder) => {
-        const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
-        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
-        const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
-        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
+        const drawingModel = insertDrawingModelWithPartition({ builder, codeValue: "TestDrawingModel" });
 
-        const categoryId = addDrawingCategory(builder, definitionModelId, "Test Drawing Category");
-        addDrawingGraphic(builder, drawingModelId, categoryId);
+        const category = insertDrawingCategory({ builder, codeValue: "Test Drawing Category" });
+        insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: category.id });
 
-        addSubCategory(builder, definitionModelId, categoryId, "Test DrawingSubCategory");
-        addSubCategory(builder, definitionModelId, categoryId, "Private Test DrawingSubCategory", true);
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Test DrawingSubCategory" });
+        insertSubCategory({ builder, parentCategoryId: category.id, codeValue: "Private Test DrawingSubCategory", isPrivate: true });
       });
 
       await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", "2d");

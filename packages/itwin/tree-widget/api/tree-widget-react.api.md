@@ -8,34 +8,44 @@
 
 import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
 import { BeEvent } from '@itwin/core-bentley';
+import { Checkbox } from '@itwin/itwinui-react';
+import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
+import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IFilteredPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
-import type { IPropertyValueRenderer } from '@itwin/components-react';
 import type { Localization } from '@itwin/core-common';
-import type { LocalizationOptions } from '@itwin/core-i18n';
-import type { MouseEvent as MouseEvent_2 } from 'react';
+import { LocalizationContextProvider } from '@itwin/presentation-hierarchies-react';
 import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
+import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
+import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { PropertyRecord } from '@itwin/appui-abstract';
-import type { PropertyValueRendererContext } from '@itwin/components-react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
 import { Ref } from 'react';
+import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { Ruleset } from '@itwin/presentation-common';
+import type { SchemaContext } from '@itwin/ecschema-metadata';
 import type { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
+import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import type { SingleSchemaClassSpecification } from '@itwin/presentation-common';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import { Subscription } from '@itwin/components-react';
+import type { TranslationOptions } from '@itwin/core-common';
+import { Tree } from '@itwin/itwinui-react';
 import type { TreeCheckboxStateChangeEventArgs } from '@itwin/components-react';
+import { TreeEventHandler } from '@itwin/components-react';
 import type { TreeModelNode } from '@itwin/components-react';
+import type { TreeNodeEventArgs } from '@itwin/components-react';
 import type { TreeNodeItem } from '@itwin/components-react';
+import { TreeNodeRenderer as TreeNodeRenderer_2 } from '@itwin/presentation-hierarchies-react';
 import type { TreeNodeRendererProps as TreeNodeRendererProps_2 } from '@itwin/components-react';
 import type { TreeRendererProps as TreeRendererProps_2 } from '@itwin/components-react';
 import type { TreeSelectionModificationEventArgs } from '@itwin/components-react';
@@ -43,6 +53,10 @@ import type { TreeSelectionReplacementEventArgs } from '@itwin/components-react'
 import type { UiItemsProvider } from '@itwin/appui-react';
 import { UnifiedSelectionTreeEventHandler } from '@itwin/presentation-components';
 import type { UnifiedSelectionTreeEventHandlerParams } from '@itwin/presentation-components';
+import type { UsePresentationTreeStateProps } from '@itwin/presentation-components';
+import { UsePresentationTreeStateResult } from '@itwin/presentation-components';
+import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
+import type { useTree } from '@itwin/presentation-hierarchies-react';
 import type { ViewManager } from '@itwin/core-frontend';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
@@ -424,15 +438,6 @@ export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" 
     headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
 }
 
-// @internal
-export const RULESET_CATEGORIES: Ruleset;
-
-// @internal
-export const RULESET_EXTERNAL_SOURCES: Ruleset;
-
-// @internal
-export const RULESET_IMODEL_CONTENT: Ruleset;
-
 // @public
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 
@@ -454,18 +459,20 @@ export function showAllCategories(categories: string[], viewport: Viewport): Pro
 // @public
 export function showAllModels(models: string[], viewport: Viewport): Promise<void>;
 
-// @internal (undocumented)
-export class SubjectModelIdsCache {
-    constructor(imodel: IModelConnection);
-    // (undocumented)
-    getSubjectModelIds(subjectId: Id64String): Promise<Id64String[]>;
-}
+// @beta
+export const StatelessCategoriesTreeComponent: (props: StatelessCategoriesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessExternalSourcesTreeComponent: (props: StatelessExternalSourcesTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessIModelContentTreeComponent: (props: StatelessIModelContentTreeComponentProps) => JSX.Element | null;
+
+// @beta
+export const StatelessModelsTreeComponent: (props: StatelessModelsTreeComponentProps) => JSX.Element | null;
 
 // @public
 export function toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise<void>;
-
-// @internal (undocumented)
-export const TREE_NODE_LABEL_RENDERER = "visibility-tree-node-label";
 
 // @public
 export function TreeContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<TreeContextMenuItemProps>): JSX.Element;
@@ -492,28 +499,9 @@ export interface TreeDefinition {
     startIcon?: React.ReactNode;
 }
 
-// @internal (undocumented)
-export class TreeNodeLabelRenderer implements IPropertyValueRenderer {
-    // (undocumented)
-    canRender(record: PropertyRecord, _context?: PropertyValueRendererContext | undefined): boolean;
-    // (undocumented)
-    render(record: PropertyRecord, context?: PropertyValueRendererContext | undefined): ReactNode;
-}
-
 // @public
 export interface TreeNodeLabelRendererProps {
     context?: LabelRendererContext;
-    node: TreeModelNode;
-}
-
-// @internal (undocumented)
-export function TreeNodeRendererContextProvider({ nodeLabelRenderer, node, children }: TreeNodeRendererContextProviderProps): JSX.Element;
-
-// @internal (undocumented)
-export interface TreeNodeRendererContextProviderProps extends TreeNodeRendererProps {
-    // (undocumented)
-    children: ReactNode;
-    // (undocumented)
     node: TreeModelNode;
 }
 
@@ -549,7 +537,7 @@ export class TreeWidget {
     static get i18nNamespace(): string;
     static initialize(i18n?: Localization): Promise<void>;
     static terminate(): void;
-    static translate(key: string | string[], options?: LocalizationOptions): string;
+    static translate(key: string | string[], options?: TranslationOptions): string;
 }
 
 // @public
@@ -578,15 +566,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget>;
 }
 
-// @internal
-export function useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport): CategoryInfo[];
-
-// @internal (undocumented)
-export function useContextMenu({ contextMenuItems }: TreeContextMenuProps): {
-    onContextMenu: (e: MouseEvent_2, node: TreeModelNode) => void;
-    renderContextMenu: () => JSX.Element | null;
-};
-
 // @public
 export function useTreeTransientState<T extends Element>(): Ref<T>;
 
@@ -596,6 +575,25 @@ export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWit
     isFiltering: boolean;
     nodeHighlightingProps: HighlightableTreeProps | undefined;
 };
+
+// @beta
+export function useVisibilityTreeState({ imodel, ruleset, filterInfo, onFilterChange, visibilityHandler, selectionPredicate, eventHandler, reportUsage, ...props }: UseVisibilityTreeStateProps): UsePresentationTreeStateResult<VisibilityTreeEventHandler | ReportingTreeEventHandler> | undefined;
+
+// @beta
+export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeStateProps<VisibilityTreeEventHandler>, "rulesetOrId"> {
+    eventHandler?: (props: VisibilityTreeEventHandlerParams) => VisibilityTreeEventHandler;
+    filterInfo?: VisibilityTreeFilterInfo;
+    hierarchyLevelSizeLimit?: number;
+    imodel: IModelConnection;
+    onFilterChange?: (filteredDataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => void;
+    reportUsage?: (props: {
+        featureId?: UsageTrackedFeatures;
+        reportInteraction: boolean;
+    }) => void;
+    ruleset: Ruleset;
+    selectionPredicate?: VisibilityTreeSelectionPredicate;
+    visibilityHandler?: IVisibilityHandler;
+}
 
 // @public
 export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map<string, VisibilityStatus>) => void;

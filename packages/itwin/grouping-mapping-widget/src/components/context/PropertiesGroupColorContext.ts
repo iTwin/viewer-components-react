@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 
 export interface PropertiesGroupColor {
@@ -11,15 +11,13 @@ export interface PropertiesGroupColor {
 
 export const PropertiesGroupColorContext = React.createContext<PropertiesGroupColor>({
   showGroupColor: false,
-  setShowGroupColor: () => { },
+  setShowGroupColor: () => {},
 });
 
 export const usePropertiesGroupColorContext = (): PropertiesGroupColor => {
   const context = React.useContext(PropertiesGroupColorContext);
   if (!context) {
-    throw new Error(
-      "usePropertiesGroupColorContext should be used within a PropertiesGroupColorContext provider"
-    );
+    throw new Error("usePropertiesGroupColorContext should be used within a PropertiesGroupColorContext provider");
   }
   return context;
 };

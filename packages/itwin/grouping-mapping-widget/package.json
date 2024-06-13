@@ -1,6 +1,6 @@
 {
   "name": "@itwin/grouping-mapping-widget",
-  "version": "0.25.2",
+  "version": "0.26.1",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -44,7 +44,10 @@
     "plugins": [
       "@itwin"
     ],
-    "extends": "plugin:@itwin/ui",
+    "extends": [
+      "plugin:@itwin/ui",
+      "prettier"
+    ],
     "rules": {
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error",
@@ -64,16 +67,16 @@
     "@itwin/imodels-client-management": "^4.2.1",
     "@itwin/insights-client": "^0.10.1",
     "@itwin/itwins-client": "^1.1.0",
-    "@itwin/itwinui-icons-react": "^2.2.0",
     "@itwin/itwinui-icons-color-react": "2.1.0",
+    "@itwin/itwinui-icons-react": "^2.2.0",
     "@itwin/itwinui-react": "^2.11.2",
     "@tanstack/query-core": "^4.36.1",
     "@tanstack/react-query": "^4.36.1",
-    "lodash": "^4.17.21",
     "classnames": "^2.3.1",
     "cross-fetch": "^3.1.8",
     "fast-equals": "^4.0.2",
     "immer": "^9.0.7",
+    "lodash": "^4.17.21",
     "react-split": "2.0.14",
     "simple-react-validator": "^1.6.1"
   },
@@ -121,6 +124,7 @@
     "chai": "^4.2.0",
     "cpx2": "^3.0.0",
     "eslint": "^7.32.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.2.0",

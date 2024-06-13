@@ -4,24 +4,43 @@
  *--------------------------------------------------------------------------------------------*/
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { SelectionMode } from "@itwin/components-react";
+import { IModelConnection } from "@itwin/core-frontend";
 import { EC3Provider } from "@itwin/ec3-widget-react";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { ClientPrefix, GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
-import { SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
+import { SvgHierarchyTree, SvgTechnicalPreviewMiniBw } from "@itwin/itwinui-icons-react";
 import { FeatureInfoUiItemsProvider, MapLayersPrefBrowserStorage, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 import { MeasurementActionToolbar, MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 import {
-  AddFavoritePropertyContextMenuItem, AncestorsNavigationControls, CopyPropertyTextContextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider,
-  RemoveFavoritePropertyContextMenuItem, ShowHideNullValuesSettingsMenuItem,
+  AddFavoritePropertyContextMenuItem,
+  AncestorsNavigationControls,
+  CopyPropertyTextContextMenuItem,
+  PropertyGridManager,
+  PropertyGridUiItemsProvider,
+  RemoveFavoritePropertyContextMenuItem,
+  ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
 import { REPORTS_CONFIG_BASE_URL, ReportsConfigProvider, ReportsConfigWidget } from "@itwin/reports-config-widget-react";
 import {
-  CategoriesTreeComponent, ExternalSourcesTreeComponent, IModelContentTreeComponent, ModelsTreeComponent, SelectableTreeProps, TreeRenderProps,
-  TreeWidget, TreeWidgetComponent,
+  CategoriesTreeComponent,
+  ExternalSourcesTreeComponent,
+  IModelContentTreeComponent,
+  ModelsTreeComponent,
+  SelectableTreeProps,
+  StatelessCategoriesTreeComponent,
+  StatelessExternalSourcesTreeComponent,
+  StatelessIModelContentTreeComponent,
+  StatelessModelsTreeComponent,
+  TreeRenderProps,
+  TreeWidget,
+  TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
+import { unifiedSelectionStorage } from "./SelectionStorage";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -29,7 +48,7 @@ export interface UiProvidersConfig {
 }
 
 export function getUiProvidersConfig(): UiProvidersConfig {
-  const enabledWidgets = process.env.IMJS_ENABLED_WIDGETS ?? "";
+  const enabledWidgets = import.meta.env.IMJS_ENABLED_WIDGETS ?? "";
   const matchingItems = collectSupportedItems(enabledWidgets.split(" "));
 
   const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
@@ -67,6 +86,20 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
 interface UiItem {
   initialize: () => Promise<void>;
   createUiItemsProviders: () => UiItemsProvider[];
+}
+
+const schemaContextCache = new Map<string, SchemaContext>();
+function getSchemaContext(imodel: IModelConnection) {
+  const key = imodel.getRpcProps().key;
+  let schemaContext = schemaContextCache.get(key);
+  if (!schemaContext) {
+    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
+    schemaContext = new SchemaContext();
+    schemaContext.addLocater(schemaLocater);
+    schemaContextCache.set(key, schemaContext);
+    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
+  }
+  return schemaContext;
 }
 
 const configuredUiItems = new Map<string, UiItem>([
@@ -132,10 +165,65 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
                 startIcon: <SvgTechnicalPreviewMiniBw />,
               },
+              {
+                id: `stateless-${ModelsTreeComponent.id}`,
+                getLabel: () => `${ModelsTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessModelsTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    selectionMode={"extended"}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+              },
+              {
+                id: `stateless-${CategoriesTreeComponent.id}`,
+                getLabel: () => `${CategoriesTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessCategoriesTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+              },
+              {
+                id: `stateless-${IModelContentTreeComponent.id}`,
+                getLabel: () => `${IModelContentTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessIModelContentTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+              },
+              {
+                id: `stateless-${ExternalSourcesTreeComponent.id}`,
+                getLabel: () => `${ExternalSourcesTreeComponent.getLabel()} (Beta)`,
+                render: (props: TreeRenderProps) => (
+                  <StatelessExternalSourcesTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
+                startIcon: <SvgTechnicalPreviewMiniBw />,
+              },
             ];
             return [
               {
                 id: "tree-widget",
+                icon: <SvgHierarchyTree />,
                 content: <TreeWidgetWithOptions trees={trees} />,
                 layouts: {
                   standard: {
@@ -209,7 +297,11 @@ const configuredUiItems = new Map<string, UiItem>([
     "grouping-mapping-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: `${process.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix })],
+      createUiItemsProviders: () => [
+        new GroupingMappingProvider({
+          prefix: import.meta.env.IMJS_URL_PREFIX ? (`${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix) : undefined,
+        }),
+      ],
     },
   ],
   [
@@ -218,7 +310,7 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => {
         await ReportsConfigWidget.initialize();
       },
-      createUiItemsProviders: () => [new ReportsConfigProvider(undefined, prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX))],
+      createUiItemsProviders: () => [new ReportsConfigProvider({ baseUrl: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX) })],
     },
   ],
   [
@@ -227,11 +319,11 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => Promise.resolve(),
       createUiItemsProviders: () => [
         new EC3Provider({
-          clientId: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
-          redirectUri: process.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
-          reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
-          carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, process.env.IMJS_URL_PREFIX),
-          iModelId: process.env.IMJS_IMODEL_ID ?? "",
+          clientId: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",
+          redirectUri: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_REDIRECT_URI ?? "",
+          reportingBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
+          carbonCalculationBasePath: prefixUrl(REPORTS_CONFIG_BASE_URL, import.meta.env.IMJS_URL_PREFIX),
+          iModelId: import.meta.env.IMJS_IMODEL_ID ?? "",
         }),
       ],
     },

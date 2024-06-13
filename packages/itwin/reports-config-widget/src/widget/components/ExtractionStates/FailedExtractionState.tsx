@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { SvgStatusError } from "@itwin/itwinui-icons-color-react";
 import { ReportsConfigWidget } from "../../../ReportsConfigWidget";
@@ -13,12 +13,7 @@ interface ExtractionStateProps {
 }
 
 export const FailedExtractionState = ({ animation, onAnimationEnd }: ExtractionStateProps) => (
-  <div
-    title={ReportsConfigWidget.localization.getLocalizedString(
-      "ReportsConfigWidget:Failed"
-    )}
-    className="rcw-extraction-status"
-  >
+  <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Failed")} className="rcw-extraction-status">
     <div
       className={`rcw-status-icon`}
       style={{

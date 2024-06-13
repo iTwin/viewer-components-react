@@ -1,14 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  Button,
-  MiddleTextTruncation,
-  Modal,
-  ModalButtonBar,
-  Text,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { Button, MiddleTextTruncation, Modal, ModalButtonBar, Text } from "@itwin/itwinui-react";
 import { useMutation } from "@tanstack/react-query";
 import React, { useCallback, useState } from "react";
 import "./DeleteModal.scss";
@@ -20,11 +14,7 @@ export interface DeleteModalProps {
   onDelete: () => Promise<void>;
 }
 
-export const DeleteModal = ({
-  entityName,
-  onClose,
-  onDelete,
-}: DeleteModalProps) => {
+export const DeleteModal = ({ entityName, onClose, onDelete }: DeleteModalProps) => {
   const [localEntityName] = useState(entityName);
 
   const deleteMutation = useMutation({
@@ -40,34 +30,23 @@ export const DeleteModal = ({
 
   return (
     <>
-      <Modal
-        title='Confirm'
-        modalRootId='grouping-mapping-widget'
-        isOpen={!!localEntityName}
-        isDismissible={!deleteMutation.isLoading}
-        onClose={onClose}
-      >
+      <Modal title="Confirm" modalRootId="grouping-mapping-widget" isOpen={!!localEntityName} isDismissible={!deleteMutation.isLoading} onClose={onClose}>
         <div className="gmw-delete-modal-body-text">
           <Text variant="leading" as="h3">
             Are you sure you want to delete
           </Text>
-          <strong>
-            {<MiddleTextTruncation text={`${entityName}?`} />}
-          </strong>
+          <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
         </div>
         <ModalButtonBar>
-          {deleteMutation.isLoading &&
+          {deleteMutation.isLoading && (
             <div className="gmw-loading-delete">
               <LoadingSpinner />
-            </div>}
-          <Button styleType='high-visibility' onClick={deleteCallback} disabled={deleteMutation.isLoading}>
+            </div>
+          )}
+          <Button styleType="high-visibility" onClick={deleteCallback} disabled={deleteMutation.isLoading}>
             Delete
           </Button>
-          <Button
-            styleType='default'
-            onClick={onClose}
-            disabled={deleteMutation.isLoading}
-          >
+          <Button styleType="default" onClick={onClose} disabled={deleteMutation.isLoading}>
             Cancel
           </Button>
         </ModalButtonBar>

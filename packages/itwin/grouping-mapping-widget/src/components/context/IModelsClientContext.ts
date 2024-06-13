@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IModelsClientOptions } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
 import { createContext, useContext } from "react";
@@ -31,9 +31,7 @@ export const IModelsClientContext = createContext<IModelsClient>(createIModelsCl
 export const useIModelsClient = () => {
   const context = useContext(IModelsClientContext);
   if (!context) {
-    throw new Error(
-      "useIModelsClient should be used within an IModelsClientContext provider"
-    );
+    throw new Error("useIModelsClient should be used within an IModelsClientContext provider");
   }
   return context;
 };

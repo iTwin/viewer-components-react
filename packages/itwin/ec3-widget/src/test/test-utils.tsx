@@ -1,15 +1,15 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IEC3ConfigurationsClient, IEC3JobsClient, IMappingsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
 import type { RenderResult } from "@testing-library/react";
 import { act } from "@testing-library/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import type { GetAccessTokenFn } from "../components/api/APIContext";
-import { ApiContext } from "../components/api/APIContext";
+import type { GetAccessTokenFn } from "../components/context/APIContext";
+import { ApiContext } from "../components/context/APIContext";
 import * as moq from "typemoq";
 import { EC3Config } from "../components/EC3/EC3Config";
 
@@ -27,26 +27,33 @@ export interface RenderParameters {
 export const mockITwinId = "mockedITwinId";
 
 export async function renderWithContext({
-  component, ec3ConfigurationsClient, ec3JobsClient, reportsClient, mappingsClient, oDataClient, getAccessTokenFn,
+  component,
+  ec3ConfigurationsClient,
+  ec3JobsClient,
+  reportsClient, mappingsClient,
+  oDataClient,
+  getAccessTokenFn,
 }: RenderParameters): Promise<RenderResult> {
   let result: RenderResult;
   await act(async () => {
     result = render(
       <ApiContext.Provider
+
         value={{
-          reportsClient: reportsClient ?? moq.Mock.ofType<IReportsClient>().object,
-          oDataClient: oDataClient ?? moq.Mock.ofType<IOdataClient>().object,
-          ec3JobsClient: ec3JobsClient ?? moq.Mock.ofType<IEC3JobsClient>().object,
-          ec3ConfigurationsClient: ec3ConfigurationsClient ?? moq.Mock.ofType<IEC3ConfigurationsClient>().object,
-          mappingsClient: mappingsClient ?? moq.Mock.ofType<IMappingsClient>().object,
-          config: new EC3Config({
-            iTwinId: mockITwinId,
-            clientId: "",
-            redirectUri: "",
-            getAccessToken: getAccessTokenFn ?? (async () => ""),
-            iModelId: "",
-          }),
-        }}
+            reportsClient: reportsClient ?? moq.Mock.ofType<IReportsClient>().object,
+            oDataClient: oDataClient ?? moq.Mock.ofType<IOdataClient>().object,
+            ec3JobsClient: ec3JobsClient ?? moq.Mock.ofType<IEC3JobsClient>().object,
+            ec3ConfigurationsClient: ec3ConfigurationsClient ?? moq.Mock.ofType<IEC3ConfigurationsClient>().object,
+            mappingsClient: mappingsClient ?? moq.Mock.ofType<IMappingsClient>().object,
+            config: new EC3Config({
+              iTwinId: mockITwinId,
+              clientId: "",
+              redirectUri: "",
+              getAccessToken: getAccessTokenFn ?? (async () => ""),
+              iModelId: "",
+            }),
+          }}
+
       >
         {component}
       </ApiContext.Provider>,

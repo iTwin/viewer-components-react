@@ -1,6 +1,24 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Thu, 05 Oct 2023 18:48:11 GMT and should not be manually modified.
+This log was last generated on Mon, 10 Jun 2024 17:40:38 GMT and should not be manually modified.
+
+<!-- Start content -->
+
+## 0.16.0
+
+Mon, 10 Jun 2024 17:40:38 GMT
+
+### Minor changes
+
+- Add copy button to MeasurementPropertyWidget ([#843](https://github.com/iTwin/viewer-components-react/pull/843))
+
+## 0.15.0
+
+Wed, 29 May 2024 18:39:36 GMT
+
+### Minor changes
+
+- Measurement in sheets ([#837](https://github.com/iTwin/viewer-components-react/pull/837))
 
 ## 0.14.2
 Thu, 05 Oct 2023 18:48:11 GMT
@@ -221,4 +239,3 @@ Tue, 08 Jun 2021 21:23:59 GMT
 ### Minor changes
 
 - Initial release of bentley/measure-tools-react!
-

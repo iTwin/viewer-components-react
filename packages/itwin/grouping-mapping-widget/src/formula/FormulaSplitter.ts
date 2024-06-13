@@ -1,22 +1,69 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { InputStream } from "./InputStream";
 import { StringBuilder } from "./StringBuilder";
 import { isDecimalSeparator, isDigit, isLetterOrUnderscore, isStringDelimiter, isWhitespace } from "./Utils";
 
 const fourSymbolCombinations = [">>>="];
 const threeSymbolCombinations = ["**=", "<<=", ">>=", "&&=", "||=", "??=", "===", "!==", ">>>"];
-const twoSymbolCombinations = ["+=", "-=", "*=", "/=", "%=", "&=", "^=", "|=", "?=", "==", "!=", ">=", "<=", "++", "--", "**", "<<", ">>", "&&", "||", "??", "?."];
-const oneSymbolCombinations = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "=", "+", "[", "]", "{", "}", "\\", "|", ";", ":", ",", ".", "<", ">", "/", "?"];
-
-const symbolCombinations: string[][] = [
-  fourSymbolCombinations,
-  threeSymbolCombinations,
-  twoSymbolCombinations,
-  oneSymbolCombinations,
+const twoSymbolCombinations = [
+  "+=",
+  "-=",
+  "*=",
+  "/=",
+  "%=",
+  "&=",
+  "^=",
+  "|=",
+  "?=",
+  "==",
+  "!=",
+  ">=",
+  "<=",
+  "++",
+  "--",
+  "**",
+  "<<",
+  ">>",
+  "&&",
+  "||",
+  "??",
+  "?.",
 ];
+const oneSymbolCombinations = [
+  "~",
+  "!",
+  "@",
+  "#",
+  "$",
+  "%",
+  "^",
+  "&",
+  "*",
+  "(",
+  ")",
+  "-",
+  "=",
+  "+",
+  "[",
+  "]",
+  "{",
+  "}",
+  "\\",
+  "|",
+  ";",
+  ":",
+  ",",
+  ".",
+  "<",
+  ">",
+  "/",
+  "?",
+];
+
+const symbolCombinations: string[][] = [fourSymbolCombinations, threeSymbolCombinations, twoSymbolCombinations, oneSymbolCombinations];
 
 function parseScientificNotation(stream: InputStream) {
   const notationBuilder = new StringBuilder();
@@ -71,9 +118,12 @@ function parseNumber(stream: InputStream): string {
 
 function unescape(char: string): string {
   switch (char) {
-    case "n": return "\n";
-    case "t": return "\t";
-    default: return char;
+    case "n":
+      return "\n";
+    case "t":
+      return "\t";
+    default:
+      return char;
   }
 }
 

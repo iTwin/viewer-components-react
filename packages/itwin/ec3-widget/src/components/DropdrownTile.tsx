@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { ReactNode } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { LabeledSelect } from "@itwin/itwinui-react";
@@ -17,14 +17,7 @@ interface DropdownTileProps {
   required: boolean;
 }
 
-export const DropdownTile = ({
-  stringColumnOptions,
-  materialValue,
-  onMaterialChange,
-  actionGroup,
-  disabled,
-  required,
-}: DropdownTileProps) => {
+export const DropdownTile = ({ stringColumnOptions, materialValue, onMaterialChange, actionGroup, disabled, required }: DropdownTileProps) => {
   return (
     <div className="ec3w-dropdown-tile-container">
       <div className="ec3w-body">
@@ -37,7 +30,9 @@ export const DropdownTile = ({
             disabled={disabled}
             options={stringColumnOptions}
             value={materialValue}
-            onChange={(value) => { onMaterialChange(value); }}
+            onChange={(value) => {
+              onMaterialChange(value);
+            }}
           />
         </div>
         <div className="ec3w-action-button" data-testid="ec3-tile-action-button">

@@ -1,10 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
-import type { GetAccessTokenFn } from "../api/APIContext";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
+import { CARBON_CALCULATION_BASE_PATH, EC3ConfigurationsClient, EC3JobsClient, ODataClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import type { GetAccessTokenFn } from "../context/APIContext";
 import type { EC3Token } from "./EC3Token";
 
 export const EC3URI = "https://buildingtransparency.org/";
@@ -41,6 +42,26 @@ export interface EC3ConfigCommonProps {
    * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to CARBON_CALCULATION_BASE_PATH from @itwin/insights-client.
    */
   carbonCalculationBasePath?: string;
+
+  /**
+   * A custom implementation of ReportsClient. If provided, reportingBasePath is ignored.
+   */
+  reportsClient?: IReportsClient;
+
+  /**
+   * A custom implementation of OdataClient. If provided, reportingBasePath is ignored.
+   */
+  oDataClient?: IOdataClient;
+
+  /**
+   * A custom implementation of EC3JobsClient. If provided, carbonCalculationBasePath is ignored.
+   */
+  ec3JobsClient?: IEC3JobsClient;
+
+  /**
+   * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
+   */
+  ec3ConfigurationsClient?: IEC3ConfigurationsClient;
 }
 
 /**
@@ -87,6 +108,10 @@ export class EC3Config {
   public readonly getEC3AccessToken: GetAccessTokenFn;
   private token?: EC3Token;
   private readonly redirectUri?: string;
+  public readonly reportsClient: IReportsClient;
+  public readonly oDataClient: IOdataClient;
+  public readonly ec3JobsClient: IEC3JobsClient;
+  public readonly ec3ConfigurationsClient: IEC3ConfigurationsClient;
 
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
@@ -94,22 +119,20 @@ export class EC3Config {
     this.iTwinId = props.iTwinId;
     this.iModelId = props.iModelId;
 
-    this.reportingBasePath = (props.reportingBasePath)
-      ? REPORTING_BASE_PATH.replace("https://api.bentley.com", props.reportingBasePath)
-      : REPORTING_BASE_PATH;
+    this.reportingBasePath = props.reportingBasePath ? REPORTING_BASE_PATH.replace("https://api.bentley.com", props.reportingBasePath) : REPORTING_BASE_PATH;
 
-    this.carbonCalculationBasePath = (props.carbonCalculationBasePath)
+    this.carbonCalculationBasePath = props.carbonCalculationBasePath
       ? CARBON_CALCULATION_BASE_PATH.replace("https://api.bentley.com", props.carbonCalculationBasePath)
       : CARBON_CALCULATION_BASE_PATH;
 
-    this.getAccessToken = props.getAccessToken ?? (async () =>
-      (IModelApp.authorizationClient)
-        ? IModelApp.authorizationClient.getAccessToken()
-        : ""
-    );
+    this.getAccessToken = props.getAccessToken ?? (async () => (IModelApp.authorizationClient ? IModelApp.authorizationClient.getAccessToken() : ""));
 
     this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
     this.getEC3AccessToken = "getEC3AccessToken" in props ? props.getEC3AccessToken : this.getAuthWindowToken.bind(this);
+    this.reportsClient = props.reportsClient ?? new ReportsClient(this.reportingBasePath);
+    this.oDataClient = props.oDataClient ?? new ODataClient(this.reportingBasePath);
+    this.ec3JobsClient = props.ec3JobsClient ?? new EC3JobsClient(this.carbonCalculationBasePath);
+    this.ec3ConfigurationsClient = props.ec3ConfigurationsClient ?? new EC3ConfigurationsClient(this.carbonCalculationBasePath);
   }
 
   private tokenExpired(): boolean {
@@ -123,8 +146,7 @@ export class EC3Config {
         let authWindow: Window | null = null;
 
         const receiveMessage = (event: MessageEvent<EC3Token>) => {
-          if (event.data.source !== "ec3-auth")
-            return;
+          if (event.data.source !== "ec3-auth") return;
           authWindow?.close();
           window.removeEventListener("message", receiveMessage, false);
 
@@ -139,16 +161,13 @@ export class EC3Config {
 
         const url = this.getAuthorizationUrl();
         authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
-
       } else {
         resolve(this.token!.token);
       }
-
     });
   }
 
   private getAuthorizationUrl(): string {
     return `${this.ec3Uri}oauth2/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&response_type=code&scope=${this.scope}`;
   }
-
 }
