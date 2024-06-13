@@ -140,19 +140,19 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
   };
 
   return (
-    <div className="create-assembly-step">
+    <div className="ec3w-create-assembly-step">
       {isLoading ? (
-        <ProgressRadial className="loading-indicator" indeterminate />
+        <ProgressRadial className="ec3w-loading-indicator" indeterminate />
       ) : (
         <>
-          <div className="assembly-list">
+          <div className="ec3w-assembly-list">
             {allAssemblies &&
               allAssemblies.length > 0 &&
               allAssemblies?.map((assembly, i) => {
                 return (
                   <>
                     <ExpandableBlock
-                      className="assembly-expandable-block"
+                      className="ec3w-assembly-expandable-block"
                       title={`${assembly.name}`}
                       endIcon={
                         <ButtonGroup>
@@ -284,7 +284,7 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
                   </>
                 );
               })}
-            <div className="button-row-above-stepper">
+            <div className="ec3w-button-row-above-stepper">
               <Button
                 className="add-new-button"
                 styleType="borderless"
@@ -299,13 +299,13 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
               </Button>
             </div>
           </div>
-          <div className="stepper-footer">
-            <Button onClick={props.onBackClick} className="footer-button">
+          <div className="ec3w-stepper-footer">
+            <Button onClick={props.onBackClick} className="ec3w-footer-button">
               Back
             </Button>
             <Button
               styleType="high-visibility"
-              className="footer-button"
+              className="ec3w-footer-button"
               disabled={
                 allAssemblies === undefined ||
                 (allAssemblies && allAssemblies?.length === 0) ||

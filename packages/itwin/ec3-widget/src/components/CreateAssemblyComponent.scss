@@ -3,34 +3,34 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-  .create-assembly-step {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    .assembly-list {
-      height: calc(100vh - 248px);
-      overflow: auto;
-      .assembly-expandable-block {
-        margin-top: 8px;
-        .iui-svg-icon {
-          display: flex;
-          flex-direction: row-reverse;
-        }
-      }
-    }
-    .loading-indicator {
-      align-self: center;
-    }
-    .stepper-footer {
+.ec3w-create-assembly-step {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  .ec3w-assembly-list {
+    height: calc(100vh - 248px);
+    overflow: auto;
+    .ec3w-assembly-expandable-block {
       margin-top: 8px;
-      align-self: center;
-      .footer-button {
-        margin-right: 8px;
+      .iui-svg-icon {
+        display: flex;
+        flex-direction: row-reverse;
       }
-    }
-    .button-row-above-stepper {
-      justify-content: flex-end;
-      display: flex;
     }
   }
+  .ec3w-loading-indicator {
+    align-self: center;
+  }
+  .ec3w-stepper-footer {
+    margin-top: 8px;
+    align-self: center;
+    .ec3w-footer-button {
+      margin-right: 8px;
+    }
+  }
+  .ec3w-button-row-above-stepper {
+    justify-content: flex-end;
+    display: flex;
+  }
+}

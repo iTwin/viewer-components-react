@@ -61,6 +61,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
           const accessToken = await getAccessToken();
           const data = await reportsClient.getReports(accessToken, projectId);
           if (data && data.length > 0) {
+            // take report coming from consumer or take the first available report
             const fetchedReport = data.find((x) => x.displayName === defaultReport?.displayName) ?? data[0];
             if (fetchedReport) handleSelectChange(fetchedReport.id, "reportId", childTemplate, setChildTemplate);
           }
@@ -123,7 +124,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
                 }}
               />
             </div>
-            <div className="stepper-footer">
+            <div className="ec3w-stepper-footer">
               <Button
                 className="next-button"
                 styleType="high-visibility"
@@ -155,13 +156,13 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
             <div className="report-creation-step-three">
               <Text className="summary-text">Selection Summary :</Text>
               {childTemplate.labels.map((x) => (
-                <div className="assembly-list" key={x.name}>
+                <div className="ec3w-assembly-list" key={x.name}>
                   <SvgInfoCircular />
                   <Text className="assembly-name">{x.name}</Text>
                 </div>
               ))}
             </div>
-            <div className="stepper-footer">
+            <div className="ec3w-stepper-footer">
               <Button className="back-button" onClick={() => setCurrentStep(1)}>
                 Back
               </Button>
