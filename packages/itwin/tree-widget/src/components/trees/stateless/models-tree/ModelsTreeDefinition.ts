@@ -546,7 +546,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     const [schemaName, className] = this._hierarchyConfig.elementClassSpecification.split(/[\.:]/);
     if (!schemaName || !className) {
       throw new Error(
-        `Provided class specification ${this._hierarchyConfig.elementClassSpecification} should be in format {SchemaName}:{ClassName} or {SchemaName}.{ClassName`,
+        `Provided class specification ${this._hierarchyConfig.elementClassSpecification} should be in format {SchemaName}:{ClassName} or {SchemaName}.{ClassName}`,
       );
     }
 

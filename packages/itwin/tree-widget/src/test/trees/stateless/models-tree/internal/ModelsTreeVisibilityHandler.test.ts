@@ -1667,7 +1667,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
     });
   });
 
-  describe.only("#integration", () => {
+  describe("#integration", () => {
     let iModelPath: string;
     let iModel: IModelDb;
     let iModelConnection: IModelConnection;
@@ -1700,10 +1700,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           code: new Code({ scope: partitionId, spec: "", value: `Configuration_${customClassName}_${childIdx}` }),
           classFullName: childIdx !== 2 ? customClassName : "Generic:PhysicalObject",
         };
-        const element = builder.insertElement(props);
-        // eslint-disable-next-line no-console
-        console.log(`${element} - ${props.classFullName}`);
-        elements.push(element);
+        elements.push(builder.insertElement(props));
       }
 
       categoryParentElements.set(categoryId, elements);
@@ -2269,7 +2266,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
     });
 
-    describe.only("Custom Hierarchy configuration", () => {
+    describe("Custom Hierarchy configuration", () => {
       let customClassElement1: Id64String;
       let customClassElement2: Id64String;
       let nonCustomClassElement: Id64String;

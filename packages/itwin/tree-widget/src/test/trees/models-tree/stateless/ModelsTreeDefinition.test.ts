@@ -930,7 +930,7 @@ describe("Models tree", () => {
         });
       });
 
-      it("returns empty root list when invalid `elementClassSpecification` passed", async function () {
+      it("returns empty hierarchy when the iModel doesn't have any elements of `elementClassSpecification` class", async function () {
         const { imodel } = await buildIModel(this, async (builder) => {
           const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
           const partition = insertPhysicalPartition({ builder, codeValue: "model", parentId: rootSubject.id });
