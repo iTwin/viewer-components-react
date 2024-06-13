@@ -3,23 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import type {
-  SelectOption,
-} from "@itwin/itwinui-react";
-import {
-  InputGroup,
-  MenuItem,
-  ToggleSwitch,
-} from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { InputGroup, MenuItem, ToggleSwitch } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  BboxDimension,
-  BboxDimensionsDecorator,
-} from "../../../decorators/BboxDimensionsDecorator";
+import { BboxDimension, BboxDimensionsDecorator } from "../../../decorators/BboxDimensionsDecorator";
 import { visualizeElements, zoomToElements } from "../../../common/viewerUtils";
 import "./CalculatedPropertyActionWithVisuals.scss";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
-import type { CalculatedPropertyType, GroupMinimal} from "@itwin/insights-client";
+import type { CalculatedPropertyType, GroupMinimal } from "@itwin/insights-client";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 import { useGroupKeySetQuery } from "../../Groups/hooks/useKeySetHiliteQueries";
 
@@ -52,7 +43,6 @@ export const CalculatedPropertyActionWithVisuals = ({
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
   const [colorProperty, setColorProperty] = useState<boolean>(false);
   const { data } = useGroupKeySetQuery(group, iModelConnection, true);
-  
 
   const resolvedHiliteIds = useMemo(() => {
     // Resolved ids, default to an empty array if not available
@@ -74,7 +64,6 @@ export const CalculatedPropertyActionWithVisuals = ({
     }
     visualizeElements(resolvedHiliteIds, "red");
     void zoomToElements([resolvedHiliteIds[0]]);
-    
   }, [colorProperty, resolvedHiliteIds]);
 
   useEffect(() => {
@@ -93,9 +82,7 @@ export const CalculatedPropertyActionWithVisuals = ({
   useEffect(() => {
     if (bboxDecorator && calculatedPropertyType && inferredSpatialData) {
       inferredSpatialData.has(BboxDimension[calculatedPropertyType as keyof typeof BboxDimension]) && colorProperty
-        ? bboxDecorator.drawContext(
-          BboxDimension[calculatedPropertyType as keyof typeof BboxDimension],
-        )
+        ? bboxDecorator.drawContext(BboxDimension[calculatedPropertyType as keyof typeof BboxDimension])
         : bboxDecorator.clearContext();
     } else {
       bboxDecorator?.clearContext();
@@ -103,41 +90,35 @@ export const CalculatedPropertyActionWithVisuals = ({
   }, [bboxDecorator, colorProperty, inferredSpatialData, calculatedPropertyType]);
 
   const getSpatialData = (value: string | undefined) =>
-    value && inferredSpatialData?.has(
-      BboxDimension[value as keyof typeof BboxDimension],
-    ) && (
-      <div>
-        {`${inferredSpatialData
-          ?.get(BboxDimension[value as keyof typeof BboxDimension])
-          ?.toPrecision(4)}m`}
-      </div>
+    value &&
+    inferredSpatialData?.has(BboxDimension[value as keyof typeof BboxDimension]) && (
+      <div>{`${inferredSpatialData?.get(BboxDimension[value as keyof typeof BboxDimension])?.toPrecision(4)}m`}</div>
     );
 
   return (
-    <div className='gmw-calculated-properties-action-container'>
-      <InputGroup className='gmw-details-form'>
+    <div className="gmw-calculated-properties-action-container">
+      <InputGroup className="gmw-details-form">
         <ToggleSwitch
           className="gmw-field-legend-container"
-          label='Visualize Dimensions'
-          labelPosition='left'
+          label="Visualize Dimensions"
+          labelPosition="left"
           disabled={isLoading}
           checked={colorProperty}
           onChange={() => setColorProperty((b) => !b)}
-        >
-        </ToggleSwitch>
+        ></ToggleSwitch>
         <SharedCalculatedPropertyForms
           calculatedPropertyType={calculatedPropertyType}
           setCalculatedPropertyType={setCalculatedPropertyType}
           itemRenderer={(option: SelectOption<string | undefined>) => (
             <MenuItem>
-              <div className='gmw-gr-cp-menu-item'>
+              <div className="gmw-gr-cp-menu-item">
                 <div>{option.label}</div>
                 {getSpatialData(option.value)}
               </div>
             </MenuItem>
           )}
           selectedItemRenderer={(option: SelectOption<string | undefined>) => (
-            <div className='gmw-select-item'>
+            <div className="gmw-select-item">
               <div>{option.label}</div>
               {getSpatialData(option.value)}
             </div>

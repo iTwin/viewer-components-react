@@ -16,7 +16,8 @@ function validate(
   setFormulaErrorMessage: (s: string | undefined) => void,
   setIsFormulaValid: (b: boolean) => void,
   setDataType: (inferredDataType: DataType | undefined) => void,
-  providedDataType?: DataType): boolean {
+  providedDataType?: DataType,
+): boolean {
   if (!formula) {
     setFormulaErrorMessage(undefined);
     setIsFormulaValid(false);
@@ -39,17 +40,25 @@ export function useFormulaValidation(
   formula: string | undefined,
   groupProperties: Property[],
   setFormulaErrorMessage: (s: string | undefined) => void,
-  providedDataType?: DataType) {
+  providedDataType?: DataType,
+) {
   const [isFormulaValid, setIsFormulaValid] = useState(false);
   const [inferredDataType, setDataType] = useState<DataType | undefined>(undefined);
   const [propertyMap, setPropertyMap] = useState<PropertyMap>({});
   useEffect(() => setPropertyMap(convertToPropertyMap(groupProperties)), [groupProperties]);
-  useEffect(() => debouncedValidationFunc(formulaName, formula, propertyMap, setFormulaErrorMessage, setIsFormulaValid, setDataType, providedDataType), [formulaName, formula, groupProperties, setFormulaErrorMessage, propertyMap, providedDataType]);
-  return { isFormulaValid, inferredDataType, forceValidation: () => validate(formulaName, formula, propertyMap, setFormulaErrorMessage, setIsFormulaValid, setDataType, providedDataType) };
+  useEffect(
+    () => debouncedValidationFunc(formulaName, formula, propertyMap, setFormulaErrorMessage, setIsFormulaValid, setDataType, providedDataType),
+    [formulaName, formula, groupProperties, setFormulaErrorMessage, propertyMap, providedDataType],
+  );
+  return {
+    isFormulaValid,
+    inferredDataType,
+    forceValidation: () => validate(formulaName, formula, propertyMap, setFormulaErrorMessage, setIsFormulaValid, setDataType, providedDataType),
+  };
 }
 
 export const inferToPropertyDataType = (value: FormulaDataType | undefined): DataType => {
-  switch(value){
+  switch (value) {
     case "Double":
       return DataType.Double;
     case "Integer":
@@ -63,17 +72,13 @@ export const inferToPropertyDataType = (value: FormulaDataType | undefined): Dat
   }
 };
 
-const convertToPropertyMap = (
-  properties: Property[],
-  selectedPropertyName?: string
-): PropertyMap => {
+const convertToPropertyMap = (properties: Property[], selectedPropertyName?: string): PropertyMap => {
   const map: PropertyMap = {};
   const selectedLowerName = selectedPropertyName?.toLowerCase();
 
   properties.forEach((p) => {
     const lowerName = p.propertyName?.toLowerCase();
-    if (lowerName && lowerName !== selectedLowerName)
-      map[lowerName] = stringToPossibleDataType(p.dataType);
+    if (lowerName && lowerName !== selectedLowerName) map[lowerName] = stringToPossibleDataType(p.dataType);
   });
 
   return map;
@@ -81,10 +86,15 @@ const convertToPropertyMap = (
 
 const stringToPossibleDataType = (str?: string): PossibleDataType => {
   switch (str?.toLowerCase()) {
-    case "double": return "Double";
-    case "integer": return "Integer";
-    case "string": return "String";
-    case "boolean": return "Boolean";
-    default: return "Undefined";
+    case "double":
+      return "Double";
+    case "integer":
+      return "Integer";
+    case "string":
+      return "String";
+    case "boolean":
+      return "Boolean";
+    default:
+      return "Undefined";
   }
 };

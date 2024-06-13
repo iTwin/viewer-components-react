@@ -4,28 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/presentation-common";
 import type { SelectOption } from "@itwin/itwinui-react";
-import {
-  Alert,
-  Button,
-  Fieldset,
-  Icon,
-  InputGroup,
-  LabeledInput,
-  LabeledSelect,
-  Text,
-} from "@itwin/itwinui-react";
+import { Alert, Button, Fieldset, Icon, InputGroup, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { DataType, QuantityType } from "@itwin/insights-client";
-import type {
-  CalculatedPropertyType,
-
-  GroupMinimal,
-  Property,
-  PropertyModify,
-} from "@itwin/insights-client";
+import type { CalculatedPropertyType, GroupMinimal, Property, PropertyModify } from "@itwin/insights-client";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import { convertPresentationFields, convertToECProperties, fetchPresentationDescriptor, findProperties } from "./GroupPropertyUtils";
@@ -35,7 +20,7 @@ import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
-import { SvgFunction, SvgLabel,  SvgMeasure} from "@itwin/itwinui-icons-react";
+import { SvgFunction, SvgLabel, SvgMeasure } from "@itwin/itwinui-icons-react";
 import { CalculatedPropertyActionWithVisuals } from "../CalculatedProperties/CalculatedPropertyActionWithVisuals";
 import { handleError } from "../../../common/utils";
 import { CustomCalculationAction } from "../CustomCalculations/CustomCalculationAction";
@@ -70,13 +55,7 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefine
  * Component to create or update a group.
  * @public
  */
-export const GroupPropertyAction = ({
-  mappingId,
-  group,
-  groupProperty,
-  onSaveSuccess,
-  onClickCancel
-}: GroupPropertyActionProps) => {
+export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => {
   const actionContainerRef = useRef<HTMLDivElement>(null);
   const calculatedPropertyActionRef = useRef<HTMLDivElement>(null);
   const customCalculationActionRef = useRef<HTMLDivElement>(null);
@@ -110,16 +89,19 @@ export const GroupPropertyAction = ({
     setFormula(undefined);
   }, []);
 
-  const scrollToBlock = useCallback((childRef: React.RefObject<HTMLDivElement>) => {
-    setTimeout(() => {
-      if(actionContainerRef.current && childRef.current){
-        actionContainerRef.current.scrollTo({
-          top: childRef.current.offsetTop,
-          behavior: "smooth",
-        });
-      }
-    }, 500);
-  }, [actionContainerRef]);
+  const scrollToBlock = useCallback(
+    (childRef: React.RefObject<HTMLDivElement>) => {
+      setTimeout(() => {
+        if (actionContainerRef.current && childRef.current) {
+          actionContainerRef.current.scrollTo({
+            top: childRef.current.offsetTop,
+            behavior: "smooth",
+          });
+        }
+      }, 500);
+    },
+    [actionContainerRef],
+  );
 
   const fetchPropertiesMetadata = useCallback(async () => {
     if (!iModelConnection) return;
@@ -159,7 +141,7 @@ export const GroupPropertyAction = ({
         setDataType(data.groupPropertyDetails.dataType);
         if (data.groupPropertyDetails.quantityType) setQuantityType(data.groupPropertyDetails.quantityType);
 
-        if(data.groupPropertyDetails.ecProperties){
+        if (data.groupPropertyDetails.ecProperties) {
           const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
           if (properties.length === 0) {
             setPropertiesNotFoundAlert(true);
@@ -171,12 +153,11 @@ export const GroupPropertyAction = ({
   }, [data, isLoadingPropertiesSuccessful]);
 
   useEffect(() => {
-    if(calculatedPropertyType)
-      setDataType(DataType.Double);
+    if (calculatedPropertyType) setDataType(DataType.Double);
   }, [calculatedPropertyType]);
 
-  useEffect(()=> {
-    if(formulaErrorMessage){
+  useEffect(() => {
+    if (formulaErrorMessage) {
       scrollToBlock(customCalculationActionRef);
     }
   }, [formulaErrorMessage, scrollToBlock]);
@@ -227,14 +208,9 @@ export const GroupPropertyAction = ({
 
   return (
     <>
-      <div
-        className='gmw-group-property-action-container'
-        ref={actionContainerRef}>
-        <Fieldset
-          disabled={isLoading}
-          className='gmw-property-options'
-          legend='Property Details'>
-          <Text variant='small' as='small' className='gmw-field-legend'>
+      <div className="gmw-group-property-action-container" ref={actionContainerRef}>
+        <Fieldset disabled={isLoading} className="gmw-property-options" legend="Property Details">
+          <Text variant="small" as="small" className="gmw-field-legend">
             Asterisk * indicates mandatory fields.
           </Text>
           <LabeledInput
@@ -273,8 +249,8 @@ export const GroupPropertyAction = ({
               validator.showMessageFor("dataType");
             }}
             disabled={calculatedPropertyType ? true : false}
-            onShow={() => { }}
-            onHide={() => { }}
+            onShow={() => {}}
+            onHide={() => {}}
           />
           <LabeledSelect<QuantityType | undefined>
             label="Quantity Type"
@@ -299,22 +275,21 @@ export const GroupPropertyAction = ({
               <SvgLabel />
             </Icon>
           }
-          isExpanded={selectedProperties.length > 0 ? true : false}>
-          <InputGroup className='gmw-property-view-container'>
+          isExpanded={selectedProperties.length > 0 ? true : false}
+        >
+          <InputGroup className="gmw-property-view-container">
             <div className="gmw-property-view-button">
-              <Button
-                onClick={async () => setShowPropertiesSelectionModal(true)}
-                disabled={isLoading}
-              >
-              Select Properties
+              <Button onClick={async () => setShowPropertiesSelectionModal(true)} disabled={isLoading}>
+                Select Properties
               </Button>
             </div>
             <div className="gmw-properties-list">
-              {selectedProperties.length === 0 && !isLoading ?
-                <div className='gmw-empty-selection'>
+              {selectedProperties.length === 0 && !isLoading ? (
+                <div className="gmw-empty-selection">
                   <Text>No properties selected.</Text>
                   <Text>Press the &quot;Select Properties&quot; button for options.</Text>
-                </div> :
+                </div>
+              ) : (
                 selectedProperties.map((property) => (
                   <GroupPropertyListItem
                     key={property.key}
@@ -322,7 +297,8 @@ export const GroupPropertyAction = ({
                     title={`${property.actualECClassName}`}
                     description={property.categoryLabel}
                   />
-                ))}
+                ))
+              )}
             </div>
           </InputGroup>
         </PropertyExpandableBlock>
@@ -330,19 +306,20 @@ export const GroupPropertyAction = ({
           ref={calculatedPropertyActionRef}
           title={"Calculated Property"}
           endIcon={
-          <Icon fill={calculatedPropertyType ? "informational" : "default"}>
+            <Icon fill={calculatedPropertyType ? "informational" : "default"}>
               <SvgMeasure />
-          </Icon>
+            </Icon>
           }
           isExpanded={calculatedPropertyType ? true : false}
-          onToggle={(isExpanding)=> {
-            if(isExpanding === true)
-              scrollToBlock(calculatedPropertyActionRef);
-            }}>
-            <CalculatedPropertyActionWithVisuals
-              group={group}
-              calculatedPropertyType={calculatedPropertyType}
-              setCalculatedPropertyType={setCalculatedPropertyType}/>
+          onToggle={(isExpanding) => {
+            if (isExpanding === true) scrollToBlock(calculatedPropertyActionRef);
+          }}
+        >
+          <CalculatedPropertyActionWithVisuals
+            group={group}
+            calculatedPropertyType={calculatedPropertyType}
+            setCalculatedPropertyType={setCalculatedPropertyType}
+          />
         </PropertyExpandableBlock>
         <PropertyExpandableBlock
           ref={customCalculationActionRef}
@@ -353,16 +330,17 @@ export const GroupPropertyAction = ({
             </Icon>
           }
           isExpanded={formula !== undefined}
-          onToggle={(isExpanding)=> {
-            if(isExpanding === true)
-              scrollToBlock(customCalculationActionRef);
-          }}>
-            <CustomCalculationAction
-              formula={formula}
-              setFormula={setFormula}
-              formulaErrorMessage={formulaErrorMessage}
-              forceValidation={forceValidation}
-              disabled={isLoading}/>
+          onToggle={(isExpanding) => {
+            if (isExpanding === true) scrollToBlock(customCalculationActionRef);
+          }}
+        >
+          <CustomCalculationAction
+            formula={formula}
+            setFormula={setFormula}
+            formulaErrorMessage={formulaErrorMessage}
+            forceValidation={forceValidation}
+            disabled={isLoading}
+          />
         </PropertyExpandableBlock>
       </div>
       <ActionPanel
@@ -370,9 +348,7 @@ export const GroupPropertyAction = ({
         onCancel={onClickCancel}
         onCancelCapture={clearAll}
         isLoading={isLoading}
-        isSavingDisabled={
-          !propertyName || dataType === undefined || formulaErrorMessage !== undefined
-        }
+        isSavingDisabled={!propertyName || dataType === undefined || formulaErrorMessage !== undefined}
       />
       <GroupsPropertiesSelectionModal
         showModal={showPropertiesSelectionModal}

@@ -1,22 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  SvgDelete,
-  SvgEdit,
-  SvgFunction,
-  SvgLabel,
-  SvgMeasure,
-  SvgMore,
-} from "@itwin/itwinui-icons-react";
-import {
-  DropdownMenu,
-  Flex,
-  Icon,
-  IconButton,
-  MenuItem,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { SvgDelete, SvgEdit, SvgFunction, SvgLabel, SvgMeasure, SvgMore } from "@itwin/itwinui-icons-react";
+import { DropdownMenu, Flex, Icon, IconButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
 import type { Property } from "@itwin/insights-client";
@@ -46,18 +33,12 @@ export const GroupPropertyTable = ({ mappingId, groupId, onClickAdd, onClickModi
       {
         id: "propertyName",
         accessor: "propertyName",
-        Cell: (value: CellProps<Property>) => (
-          <PropertyNameCell
-            property={value.row.original}
-            onClickModify={onClickModify} />
-        ),
+        Cell: (value: CellProps<Property>) => <PropertyNameCell property={value.row.original} onClickModify={onClickModify} />,
       },
       {
         id: "propertyTypeIcons",
         Cell: (value: CellProps<Property>) => (
-          <Flex
-            flexDirection={"row"}
-            gap="xs">
+          <Flex flexDirection={"row"} gap="xs">
             <Icon fill={value.row.original.ecProperties ? "informational" : "default"}>
               <SvgLabel />
             </Icon>
