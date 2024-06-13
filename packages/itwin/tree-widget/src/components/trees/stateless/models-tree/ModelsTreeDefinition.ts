@@ -58,10 +58,16 @@ interface ModelsTreeDefinitionProps {
   hierarchyConfig: HierarchyConfiguration;
 }
 
+export interface ElementsGroupInfo {
+  parentType: "element" | "category";
+  parentKey: InstanceKey;
+  classes: string[];
+}
+
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  keys: InstanceKey[];
+  keys: Array<InstanceKey | ElementsGroupInfo>;
   hierarchyConfig: HierarchyConfiguration;
 }
 
@@ -598,9 +604,20 @@ function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
   hierarchyConfig: HierarchyConfiguration,
-  elementIds: Id64String[],
+  elementInfos: Array<Id64String | ElementsGroupInfo>,
 ): Observable<HierarchyNodeIdentifiersPath> {
   return defer(() => {
+    const elementIds = elementInfos.filter((info): info is Id64String => typeof info === "string");
+    const groupInfos = elementInfos.filter((info): info is ElementsGroupInfo => typeof info !== "string");
+
+    const elementsClause = elementIds.length > 0 ? `e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})` : undefined;
+    const classClause =
+      groupInfos.length > 0
+        ? groupInfos.map((info) => `(${info.parentType === "element" ? "e.Parent.Id" : "e.Category.Id"} = ? AND e.ECClassId IS (${info.classes.join(",")}))`)
+        : undefined;
+
+    const whereClause = [...(elementsClause ? [elementsClause] : []), ...(classClause ?? [])].join(" OR ");
+
     const ctes = [
       `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, Path) AS (
         SELECT
@@ -615,7 +632,7 @@ function createGeometricElementInstanceKeyPaths(
         FROM ${hierarchyConfig.elementClassSpecification} e
         JOIN bis.GeometricModel3d m ON m.ECInstanceId = e.Model.Id
         JOIN bis.SpatialCategory c ON c.ECInstanceId = e.Category.Id
-        WHERE e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
+        WHERE ${whereClause}
 
         UNION ALL
 
@@ -640,7 +657,17 @@ function createGeometricElementInstanceKeyPaths(
       FROM ModelsCategoriesElementsHierarchy mce
       WHERE mce.ParentId IS NULL
     `;
-    return imodelAccess.createQueryReader({ ctes, ecsql, bindings: elementIds.map((id) => ({ type: "id", value: id })) }, { rowFormat: "Indexes" });
+    return imodelAccess.createQueryReader(
+      {
+        ctes,
+        ecsql,
+        bindings: [
+          ...elementIds.map((id) => ({ type: "id" as const, value: id })),
+          ...groupInfos.map((info) => ({ type: "id" as const, value: info.parentKey.id })),
+        ],
+      },
+      { rowFormat: "Indexes" },
+    );
   }).pipe(
     map((row) => ({
       modelId: row[0],
@@ -662,11 +689,13 @@ async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceK
     models: new Array<Id64String>(),
     categories: new Array<Id64String>(),
     subjects: new Array<Id64String>(),
-    elements: new Array<Id64String>(),
+    elements: new Array<Id64String | ElementsGroupInfo>(),
   };
   await Promise.all(
     props.keys.map(async (key) => {
-      if (await props.imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
+      if ("parentKey" in key) {
+        ids.elements.push(key);
+      } else if (await props.imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
         ids.subjects.push(key.id);
       } else if (await props.imodelAccess.classDerivesFrom(key.className, "BisCore.Model")) {
         ids.models.push(key.id);

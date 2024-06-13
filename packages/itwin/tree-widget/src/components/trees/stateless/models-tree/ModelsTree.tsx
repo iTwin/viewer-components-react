@@ -6,9 +6,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { Text } from "@itwin/itwinui-react";
+import { Icon, Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { HierarchyNode } from "@itwin/presentation-hierarchies";
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
@@ -18,10 +18,13 @@ import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
+import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ElementsGroupInfo } from "./ModelsTreeDefinition";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
+import type { InstanceKey } from "@itwin/presentation-common";
 
 interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
@@ -69,7 +72,7 @@ export function StatelessModelsTree({
   );
 
   const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration);
-  const { instanceKeys: focusedInstancesKeys } = useFocusedInstancesContext();
+  const { loadInstanceKeys: loadFocusedInstancesKeys } = useFocusedInstancesContext();
   const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: StatelessModelsTreeId });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
@@ -90,17 +93,20 @@ export function StatelessModelsTree({
   );
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
-    if (!focusedInstancesKeys) {
+    if (!loadFocusedInstancesKeys) {
       return undefined;
     }
-    return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({
+    return async ({ imodelAccess }) => {
+      const targetKeys = await collectTargetKeys(loadFocusedInstancesKeys);
+
+      return ModelsTreeDefinition.createInstanceKeyPaths({
         imodelAccess,
-        keys: focusedInstancesKeys,
         idsCache: getModelsTreeIdsCache(),
+        keys: targetKeys,
         hierarchyConfig: hierarchyConfiguration,
       });
-  }, [focusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
+    };
+  }, [loadFocusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
@@ -162,7 +168,7 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
     case "icon-item":
       return <SvgItem />;
     case "icon-ec-class":
-      return <SvgItem />;
+      return <ClassGroupingIcon />;
     case "icon-imodel-hollow-2":
       return <SvgImodelHollow />;
     case "icon-folder":
@@ -209,4 +215,43 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
     getModelsTreeIdsCache,
     visibilityHandlerFactory,
   };
+}
+
+function ClassGroupingIcon() {
+  return (
+    <Icon>
+      <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M8.00933,0,0,3.97672V11.986L8.00933,16,16,11.93V3.97651ZM1.66173,11.27642c-.26155.03734-.59754-.26154-.76553-.69085-.168-.41066-.09334-.784.168-.82152.26154-.03734.59754.26154.76553.67219C1.99772,10.86577,1.92306,11.23909,1.66173,11.27642Zm0-3.32319c-.26155.03733-.59754-.28-.76553-.69086-.168-.42932-.09334-.80285.168-.84.26133-.03733.59754.28.76532.69086C1.99772,7.54236,1.92306,7.89723,1.66173,7.95323Zm4.31276,5.52621a.18186.18186,0,0,1-.16821-.01866L3.41657,12.15394a.94275.94275,0,0,1-.29887-.80285c.03754-.33621.22421-.52265.41108-.41066L5.9185,12.24727a.88656.88656,0,0,1,.28.80285A.5057.5057,0,0,1,5.97449,13.47944Zm0-3.37919a.18184.18184,0,0,1-.16821-.01867L3.41657,8.77475a.943.943,0,0,1-.29887-.80286c.03754-.3362.22421-.52286.41108-.42953L5.9185,8.86786a.83112.83112,0,0,1,.28.78419A.51684.51684,0,0,1,5.97449,10.10025Z" />
+      </svg>
+    </Icon>
+  );
+}
+
+async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
+  const targetKeys: Array<InstanceKey | ElementsGroupInfo> = [];
+  for await (const key of loadFocusedInstancesKeys()) {
+    if ("id" in key) {
+      targetKeys.push(key);
+      continue;
+    }
+
+    if (!HierarchyNodeKey.isClassGrouping(key.key)) {
+      targetKeys.push(...key.groupedInstanceKeys);
+      continue;
+    }
+
+    if (!key.nonGroupingAncestor || !HierarchyNodeKey.isInstances(key.nonGroupingAncestor.key)) {
+      continue;
+    }
+
+    const parentKey = key.nonGroupingAncestor.key.instanceKeys[0];
+    const type = key.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
+    const targetInfo = targetKeys.find((target): target is ElementsGroupInfo => !("id" in target) && target.parentKey.id === parentKey.id);
+    if (targetInfo) {
+      targetInfo.classes.push(key.key.className);
+    } else {
+      targetKeys.push({ classes: [key.key.className], parentType: type, parentKey });
+    }
+  }
+  return targetKeys;
 }

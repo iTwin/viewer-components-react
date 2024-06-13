@@ -54,7 +54,7 @@ export async function buildIModel<TResult extends {} | undefined>(
       builder,
       `
         <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
-        <ECEntityClass typeName="SubModelabalePhysicalObject" displayLabel="Test Physical Object" modifier="Sealed" description="Similar to generic:PhysicalObject but also sub-modelable.">
+        <ECEntityClass typeName="SubModelablePhysicalObject" displayLabel="Test Physical Object" modifier="Sealed" description="Similar to generic:PhysicalObject but also sub-modelable.">
           <BaseClass>bis:PhysicalElement</BaseClass>
           <BaseClass>bis:ISubModeledElement</BaseClass>
         </ECEntityClass>
@@ -68,7 +68,7 @@ export async function buildIModel<TResult extends {} | undefined>(
 }
 
 interface TestSchemaDefinition extends ImportSchemaResult {
-  items: { SubModelabalePhysicalObject: { name: string; fullName: string; label: string } };
+  items: { SubModelablePhysicalObject: { name: string; fullName: string; label: string } };
 }
 
 interface ImportSchemaResult {
