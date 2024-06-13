@@ -49,17 +49,19 @@ export async function buildIModel<TResult extends {} | undefined>(
   let res!: TResult;
   // eslint-disable-next-line deprecation/deprecation
   const imodel = await buildTestIModel(mochaContext, async (builder) => {
-    const testSchema = importSchema(
+    const testSchema = (await importSchema({
       mochaContext,
       builder,
-      `
+      schemaContentXml: `
         <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
         <ECEntityClass typeName="SubModelabalePhysicalObject" displayLabel="Test Physical Object" modifier="Sealed" description="Similar to generic:PhysicalObject but also sub-modelable.">
           <BaseClass>bis:PhysicalElement</BaseClass>
           <BaseClass>bis:ISubModeledElement</BaseClass>
         </ECEntityClass>
       `,
-    ) as TestSchemaDefinition;
+      schemaName: "TestSchema",
+      schemaAlias: "test",
+    })) as TestSchemaDefinition;
     if (setup) {
       res = await setup(builder, testSchema, mochaContext);
     }
@@ -76,11 +78,22 @@ interface ImportSchemaResult {
   schemaAlias: string;
   items: { [className: string]: { name: string; fullName: string; label: string } };
 }
-export function importSchema(mochaContext: Mocha.Context, imodel: { importSchema: (xml: string) => void }, schemaContentXml: string): ImportSchemaResult {
-  const schemaName = `SCHEMA_${mochaContext.test!.fullTitle()}`.replace(/[^\w\d_]/gi, "_").replace(/_+/g, "_");
-  const schemaAlias = `test`;
+export async function importSchema({
+  mochaContext,
+  builder,
+  schemaContentXml,
+  ...props
+}: {
+  mochaContext: Mocha.Context;
+  builder: TestIModelBuilder;
+  schemaContentXml: string;
+  schemaAlias: string;
+  schemaName?: string;
+}): Promise<ImportSchemaResult> {
+  const schemaName = props.schemaName ?? `SCHEMA_${mochaContext.test!.fullTitle()}`.replace(/[^\w\d_]/gi, "_").replace(/_+/g, "_");
+  const schemaAlias = props.schemaAlias;
   const schemaXml = getFullSchemaXml({ schemaName, schemaAlias, schemaContentXml });
-  imodel.importSchema(schemaXml);
+  await builder.importSchema(schemaXml);
 
   const parsedSchema = new XMLParser({
     ignoreAttributes: false,
@@ -107,6 +120,7 @@ export function importSchema(mochaContext: Mocha.Context, imodel: { importSchema
     }, {}),
   };
 }
+
 function getFullSchemaXml(props: { schemaName: string; schemaAlias?: string; schemaContentXml: string }) {
   const schemaAlias = props.schemaAlias ?? `test`;
   return `
