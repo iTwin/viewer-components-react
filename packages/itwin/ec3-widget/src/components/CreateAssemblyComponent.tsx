@@ -6,7 +6,7 @@ import { Button, ButtonGroup, ExpandableBlock, IconButton, Label, LabeledInput, 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Configuration } from "./EC3/Template";
 import React from "react";
-import type { EC3ConfigurationLabel, GroupMinimal, ODataTable } from "@itwin/insights-client";
+import type { EC3ConfigurationLabel, ODataTable } from "@itwin/insights-client";
 import "./CreateAssemblyComponent.scss";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
 import { useApiContext } from "./context/APIContext";
@@ -29,31 +29,18 @@ export enum CreateAssemblyDropdownType {
 export const CreateAssembly = (props: CreateAssemblyProps) => {
   const [allAssemblies, setAllAssemblies] = useState<EC3ConfigurationLabel[] | undefined>(props.label);
   const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
-  const [groups, setGroups] = useState<GroupMinimal[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [oDataTable, setoDataTable] = useState<ODataTable[]>([]);
   const [editableAssemblyIndex, setEditableAssemblyIndex] = useState<number>();
 
   const oDataClient = useApiContext().oDataClient;
   const {
-    config: { getAccessToken, defaultMapping },
+    config: { getAccessToken },
   } = useApiContext();
-  const groupsClient = useApiContext().groupsClient;
 
   useMemo(() => {
     setAllAssemblies(props.label);
   }, [props.label]);
-
-  const getGroups = useCallback(async () => {
-    if (!defaultMapping) {
-      throw new Error("Default mapping missing.");
-    }
-    const accessToken = await getAccessToken();
-    const carbonCalculationGroups = await groupsClient.getGroups(accessToken, defaultMapping.id);
-    if (carbonCalculationGroups.groups.length > 0) {
-      setGroups(carbonCalculationGroups.groups);
-    }
-  }, [getAccessToken, groupsClient, defaultMapping]);
 
   const onAssemblyDataChange = useCallback(
     (updatedAssembly: EC3ConfigurationLabel, index: number, action?: "add" | "delete") => {
@@ -94,7 +81,7 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
     }
   };
 
-  const initGroupSelection = useCallback(async () => {
+  const initReportTableSelection = useCallback(async () => {
     if (!props.template.reportId) throw new Error("Invalid report.");
     const token = await getAccessToken();
     const reportMetadataResponse = await oDataClient.getODataReportMetadata(token, props.template.reportId);
@@ -119,32 +106,30 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
 
   const init = useCallback(async () => {
     setIsLoading(true);
-    await getGroups();
-    await initGroupSelection();
+    await initReportTableSelection();
     if (props.label === undefined || props.label.length === 0) {
       addNewEmptyAssembly();
     }
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getGroups, initGroupSelection, props.label]);
+  }, [initReportTableSelection, props.label]);
 
   useEffect(() => {
     void init();
     // eslint-disable-next-line
   }, []);
 
-  // map reportTables and groups
   const reportTableLabels = useMemo(() => {
     return (
       reportTables?.map((g) => ({
-        label: groups.find((group) => g.includes(group.groupName))?.groupName ?? g,
+        label: g,
         value: g,
       })) ?? []
     );
-  }, [groups, reportTables]);
+  }, [reportTables]);
 
-  // skip groups that have already been used in other assemblies
-  const getGroupOptions = (assembly: EC3ConfigurationLabel) => {
+  // skip reportTables that have already been used in other assemblies
+  const getReportTableOptions = (assembly: EC3ConfigurationLabel) => {
     const existingAssembly = reportTableLabels.find((x) => x.value === assembly.reportTable);
     if (existingAssembly) {
       const allAssem = reportTableLabels.filter((x) => !allAssemblies?.map((p) => p.reportTable).includes(x.value));
@@ -209,9 +194,9 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
                           disabled={i !== editableAssemblyIndex}
                         />
                         <LabeledSelect
-                          label="Select Group"
+                          label="Select ReportTable"
                           data-testid="ec3-report-table-select"
-                          options={getGroupOptions(assembly)}
+                          options={getReportTableOptions(assembly)}
                           value={assembly.reportTable}
                           onChange={async (selectedReportTable) => {
                             // reset all related fields
@@ -242,7 +227,7 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
                             onAssemblyDataChange({ ...assembly, elementNameColumn: value }, i);
                           }}
                           disabled={isLoading || assembly.reportTable === "" || i !== editableAssemblyIndex}
-                          placeholder={isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select group first" : "Select element"}
+                          placeholder={isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select report table first" : "Select element"}
                         />
                         <LabeledSelect
                           data-testid="ec3-element-quantity-select"
@@ -258,7 +243,7 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
                             onAssemblyDataChange({ ...assembly, elementQuantityColumn: value }, i);
                           }}
                           disabled={isLoading || assembly.reportTable === "" || i !== editableAssemblyIndex}
-                          placeholder={isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select group first" : "Select element quantity"}
+                          placeholder={isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select report table first" : "Select element quantity"}
                         />
                         <Label htmlFor="combo-input" required>
                           Materials
@@ -286,7 +271,11 @@ export const CreateAssembly = (props: CreateAssemblyProps) => {
                             }
                           }}
                           placeholder={
-                            isLoading ? "Loading elements" : assembly.reportTable === "" ? "Select group first" : "Select property containing material names"
+                            isLoading
+                              ? "Loading elements"
+                              : assembly.reportTable === ""
+                                ? "Select report table first"
+                                : "Select property containing material names"
                           }
                           multiple
                         />

@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
-import type { IEC3ConfigurationsClient, IEC3JobsClient, IGroupsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
-import { GroupsClient } from "@itwin/insights-client";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
 import { EC3ConfigurationsClient, EC3JobsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 import { EC3Config } from "../EC3/EC3Config";
@@ -25,7 +24,6 @@ export interface EC3ApiContext {
   ec3JobsClient: IEC3JobsClient;
   ec3ConfigurationsClient: IEC3ConfigurationsClient;
   config: EC3Config;
-  groupsClient: IGroupsClient;
 }
 
 export const createApiContext = (config: EC3Config) => {
@@ -35,7 +33,6 @@ export const createApiContext = (config: EC3Config) => {
     ec3JobsClient: config.ec3JobsClient,
     ec3ConfigurationsClient: config.ec3ConfigurationsClient,
     config,
-    groupsClient: config.groupsClient,
   };
 };
 
@@ -45,12 +42,10 @@ export const ApiContext = createContext<EC3ApiContext>(
       iTwinId: "",
       clientId: "",
       redirectUri: "",
-      iModelId: "",
       reportsClient: new ReportsClient(),
       oDataClient: new ODataClient(),
       ec3JobsClient: new EC3JobsClient(),
       ec3ConfigurationsClient: new EC3ConfigurationsClient(),
-      groupingsClient: new GroupsClient(),
     }),
   ),
 );

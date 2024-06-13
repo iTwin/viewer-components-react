@@ -30,7 +30,7 @@ export interface TemplateMenuProps {
  */
 export const TemplateMenu = (props: TemplateMenuProps) => {
   const {
-    config: { getAccessToken, iTwinId: projectId },
+    config: { getAccessToken, iTwinId: projectId, defaultReport },
   } = useApiContext();
   const [childTemplate, setChildTemplate] = useState<Configuration>({
     reportId: undefined,
@@ -60,8 +60,8 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
         try {
           const accessToken = await getAccessToken();
           const data = await reportsClient.getReports(accessToken, projectId);
-          if (data) {
-            const fetchedReport = data.find((x) => x.displayName === `DefaultMapping_CarbonCalcReport`);
+          if (data && data.length > 0) {
+            const fetchedReport = data.find((x) => x.displayName === defaultReport?.displayName) ?? data[0];
             if (fetchedReport) handleSelectChange(fetchedReport.id, "reportId", childTemplate, setChildTemplate);
           }
         } catch (err) {

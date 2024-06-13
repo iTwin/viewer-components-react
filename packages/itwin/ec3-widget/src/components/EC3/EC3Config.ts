@@ -3,17 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import type { IEC3ConfigurationsClient, IEC3JobsClient, IGroupsClient, IOdataClient, IReportsClient, Mapping } from "@itwin/insights-client";
-import {
-  CARBON_CALCULATION_BASE_PATH,
-  EC3ConfigurationsClient,
-  EC3JobsClient,
-  GROUPING_AND_MAPPING_BASE_PATH,
-  GroupsClient,
-  ODataClient,
-  REPORTING_BASE_PATH,
-  ReportsClient,
-} from "@itwin/insights-client";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient, Report } from "@itwin/insights-client";
+import { CARBON_CALCULATION_BASE_PATH, EC3ConfigurationsClient, EC3JobsClient, ODataClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../context/APIContext";
 import type { EC3Token } from "./EC3Token";
 
@@ -29,7 +20,6 @@ export interface EC3ConfigCommonProps {
    */
   clientId: string;
   iTwinId: string;
-  iModelId: string;
 
   /**
    * A callback function that returns an access token for authenticating API requests.
@@ -53,11 +43,6 @@ export interface EC3ConfigCommonProps {
   carbonCalculationBasePath?: string;
 
   /**
-   * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to CARBON_CALCULATION_BASE_PATH from @itwin/insights-client.
-   */
-  groupingMappingBasePath?: string;
-
-  /**
    * A custom implementation of ReportsClient. If provided, reportingBasePath is ignored.
    */
   reportsClient?: IReportsClient;
@@ -76,11 +61,6 @@ export interface EC3ConfigCommonProps {
    * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
    */
   ec3ConfigurationsClient?: IEC3ConfigurationsClient;
-
-  /**
-   * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
-   */
-  groupingsClient?: IGroupsClient;
 }
 
 /**
@@ -106,21 +86,21 @@ export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
 };
 
 /**
- * EC3 Config Props with default mapping
+ * EC3 Config Props with default report
  * @beta
  */
-export type EC3ConfigPropsWithDefaultMapping = EC3ConfigCommonProps & {
+export type EC3ConfigPropsWithDefaultReport = EC3ConfigCommonProps & {
   /**
-   * The default mapping to be used for EC3 configuration
+   * The default report to be used for EC3 configuration
    */
-  defaultMapping?: Mapping;
+  defaultReport?: Report;
 };
 
 /**
  * EC3 Config Props
  * @beta
  */
-export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultMapping;
+export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultReport;
 
 export const getDefaultEC3Uri = (ec3Uri?: string) => {
   return ec3Uri ?? EC3URI;
@@ -132,25 +112,21 @@ export class EC3Config {
   public readonly ec3Uri?: string;
   public readonly reportingBasePath: string;
   public readonly carbonCalculationBasePath: string;
-  public readonly groupingMappingBasePath: string;
   public readonly iTwinId: string;
-  public readonly iModelId: string;
   public readonly getAccessToken: GetAccessTokenFn;
   public readonly getEC3AccessToken: GetAccessTokenFn;
-  public readonly defaultMapping?: Mapping;
+  public readonly defaultReport?: Report;
   private token?: EC3Token;
   private readonly redirectUri?: string;
   public readonly reportsClient: IReportsClient;
   public readonly oDataClient: IOdataClient;
   public readonly ec3JobsClient: IEC3JobsClient;
   public readonly ec3ConfigurationsClient: IEC3ConfigurationsClient;
-  public readonly groupsClient: IGroupsClient;
 
   constructor(props: EC3ConfigProps) {
     this.clientId = props.clientId;
     this.ec3Uri = getDefaultEC3Uri(props.ec3Uri);
     this.iTwinId = props.iTwinId;
-    this.iModelId = props.iModelId;
 
     this.reportingBasePath = props.reportingBasePath ? REPORTING_BASE_PATH.replace("https://api.bentley.com", props.reportingBasePath) : REPORTING_BASE_PATH;
 
@@ -158,20 +134,15 @@ export class EC3Config {
       ? CARBON_CALCULATION_BASE_PATH.replace("https://api.bentley.com", props.carbonCalculationBasePath)
       : CARBON_CALCULATION_BASE_PATH;
 
-    this.groupingMappingBasePath = props.groupingMappingBasePath
-      ? GROUPING_AND_MAPPING_BASE_PATH.replace("https://api.bentley.com", props.groupingMappingBasePath)
-      : GROUPING_AND_MAPPING_BASE_PATH;
-
     this.getAccessToken = props.getAccessToken ?? (async () => (IModelApp.authorizationClient ? IModelApp.authorizationClient.getAccessToken() : ""));
 
     this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
     this.getEC3AccessToken = "getEC3AccessToken" in props ? props.getEC3AccessToken : this.getAuthWindowToken.bind(this);
-    this.defaultMapping = "defaultMapping" in props ? props.defaultMapping : undefined;
+    this.defaultReport = "defaultReport" in props ? props.defaultReport : undefined;
     this.reportsClient = props.reportsClient ?? new ReportsClient(this.reportingBasePath);
     this.oDataClient = props.oDataClient ?? new ODataClient(this.reportingBasePath);
     this.ec3JobsClient = props.ec3JobsClient ?? new EC3JobsClient(this.carbonCalculationBasePath);
     this.ec3ConfigurationsClient = props.ec3ConfigurationsClient ?? new EC3ConfigurationsClient(this.carbonCalculationBasePath);
-    this.groupsClient = props.groupingsClient ?? new GroupsClient(this.groupingMappingBasePath);
   }
 
   private tokenExpired(): boolean {

@@ -2,7 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import type { IEC3ConfigurationsClient, IEC3JobsClient, IGroupsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
 import type { RenderResult } from "@testing-library/react";
 import { act } from "@testing-library/react";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -19,7 +19,6 @@ export interface RenderParameters {
   ec3JobsClient?: IEC3JobsClient;
   reportsClient?: IReportsClient;
   oDataClient?: IOdataClient;
-  groupsClient?: IGroupsClient;
   getAccessTokenFn?: GetAccessTokenFn;
   iTwinId?: string;
 }
@@ -31,7 +30,6 @@ export async function renderWithContext({
   ec3ConfigurationsClient,
   ec3JobsClient,
   reportsClient,
-  groupsClient,
   oDataClient,
   getAccessTokenFn,
 }: RenderParameters): Promise<RenderResult> {
@@ -44,13 +42,11 @@ export async function renderWithContext({
           oDataClient: oDataClient ?? moq.Mock.ofType<IOdataClient>().object,
           ec3JobsClient: ec3JobsClient ?? moq.Mock.ofType<IEC3JobsClient>().object,
           ec3ConfigurationsClient: ec3ConfigurationsClient ?? moq.Mock.ofType<IEC3ConfigurationsClient>().object,
-          groupsClient: groupsClient ?? moq.Mock.ofType<IGroupsClient>().object,
           config: new EC3Config({
             iTwinId: mockITwinId,
             clientId: "",
             redirectUri: "",
             getAccessToken: getAccessTokenFn ?? (async () => ""),
-            iModelId: "",
           }),
         }}
       >
