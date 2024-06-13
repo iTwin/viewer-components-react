@@ -21,7 +21,9 @@ import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/mo
 import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../../../IModelUtils";
+import {
+  buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject,
+} from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport, createIModelAccess } from "../../../Common";
 import {
@@ -1695,6 +1697,9 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
       // eslint-disable-next-line @itwin/no-internal
       ECSchemaRpcImpl.register();
+
+      // Logger.initializeToConsole();
+      // Logger.setLevelDefault(LogLevel.Trace);
     });
 
     after(async () => {
@@ -2166,16 +2171,18 @@ describe("HierarchyBasedVisibilityHandler", () => {
     describe("filtered nodes", () => {
       const rootSubjectInstanceKey: InstanceKey = { id: IModel.rootSubjectId, className: "BisCore.Subject" };
 
-      async function getNodeMatchingPath(provider: HierarchyProvider, identifierPath: InstanceKey[]) {
-        let parentNode: HierarchyNode | undefined;
-
-        for (const pathKey of identifierPath) {
+      async function getNodeMatchingPath(provider: HierarchyProvider, identifierPath: InstanceKey[], parentNode?: HierarchyNode): Promise<HierarchyNode> {
+        for (const [idx, pathKey] of identifierPath.entries()) {
           let newParentNode: HierarchyNode | undefined;
           for await (const node of provider.getNodes({ parentNode })) {
-            if (!HierarchyNode.isInstancesNode(node)) {
+            if (HierarchyNode.isClassGroupingNode(node)) {
+              if (node.key.className === pathKey.className) {
+                return getNodeMatchingPath(provider, identifierPath.slice(idx + 1), node);
+              }
               continue;
             }
 
+            assert(HierarchyNode.isInstancesNode(node));
             const nodeKey = node.key.instanceKeys[0];
             if (nodeKey.id === pathKey.id && nodeKey.className === pathKey.className) {
               newParentNode = node;
@@ -2200,9 +2207,9 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
             const filterTargetElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
 
-            const otherCategory = insertSpatialCategory({ builder, codeValue: "otherCategory" });
-            const otherModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
-            insertPhysicalElement({ builder, modelId: otherModel.id, categoryId: otherCategory.id });
+            const unfilteredCategory = insertSpatialCategory({ builder, codeValue: "otherCategory" });
+            const unfilteredModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+            insertPhysicalElement({ builder, modelId: unfilteredModel.id, categoryId: unfilteredCategory.id });
 
             return {
               model,
@@ -2259,12 +2266,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
               const filterTarget = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
               paths.push([rootSubjectInstanceKey, model, category, filterTarget]);
               filterTargets.add(filterTarget.id);
+
               insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
             });
 
-            const otherCategory = insertSpatialCategory({ builder, codeValue: "otherCategory" });
-            const otherModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
-            insertPhysicalElement({ builder, modelId: otherModel.id, categoryId: otherCategory.id });
+            const unfilteredCategory = insertSpatialCategory({ builder, codeValue: "otherCategory" });
+            const unfilteredModel = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "2" });
+            insertPhysicalElement({ builder, modelId: unfilteredModel.id, categoryId: unfilteredCategory.id });
 
             return {
               model,
@@ -2446,6 +2454,77 @@ describe("HierarchyBasedVisibilityHandler", () => {
               viewport,
               expectedVisibility,
             });
+          });
+        });
+      });
+
+      it("class grouping node visibility only takes into account grouped elements", async function () {
+        const { imodel, filterPaths, firstElement, pathToFirstElement } = await buildIModel(this, async (builder) => {
+          const schemaContentXml = `
+            <ECSchemaReference name="BisCore" version="01.00.16" alias="bis" />
+            <ECEntityClass typeName="PhysicalElement1">
+              <BaseClass>bis:PhysicalElement</BaseClass>
+            </ECEntityClass>
+            <ECEntityClass typeName="PhysicalElement2">
+              <BaseClass>bis:PhysicalElement</BaseClass>
+            </ECEntityClass>
+          `;
+
+          const { PhysicalElement1, PhysicalElement2 } = (
+            await importSchema({
+              mochaContext: this,
+              builder,
+              schemaContentXml,
+              schemaAlias: "test1",
+            })
+          ).items;
+
+          const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" });
+          const category = insertSpatialCategory({ builder, codeValue: "category1" });
+          const element1 = insertPhysicalElement({ builder, classFullName: PhysicalElement1.fullName, modelId: model.id, categoryId: category.id });
+          const element2 = insertPhysicalElement({ builder, classFullName: PhysicalElement2.fullName, modelId: model.id, categoryId: category.id });
+
+          const paths = [
+            [rootSubjectInstanceKey, model, category, element1],
+            [rootSubjectInstanceKey, model, category, element2],
+          ];
+
+          return {
+            firstElement: element1.id,
+            pathToFirstElement: paths[0],
+            filterPaths: paths,
+          };
+        });
+
+        const { handler, viewport, ...props } = createHandler(imodel);
+        const defaultProvider = createProvider(props);
+        const filteredProvider = createProvider({ ...props, filterPaths });
+
+        await using(handler, async (_) => {
+          const node = await getNodeMatchingPath(filteredProvider, pathToFirstElement);
+          await handler.changeVisibility(node, true);
+          viewport.renderFrame();
+
+          const expectedVisibility: ValidateNodeProps["expectedVisibility"] = {
+            subject: () => "partial",
+            model: () => "partial",
+            category: () => "partial",
+            groupingNode: ({ elementIds }) => (elementIds.includes(firstElement) ? "visible" : "hidden"),
+            element: ({ elementId }) => (elementId === firstElement ? "visible" : "hidden"),
+          };
+
+          await validateHierarchyVisibility({
+            provider: filteredProvider,
+            handler,
+            viewport,
+            expectedVisibility,
+          });
+
+          await validateHierarchyVisibility({
+            provider: defaultProvider,
+            handler,
+            viewport,
+            expectedVisibility,
           });
         });
       });

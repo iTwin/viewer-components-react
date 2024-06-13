@@ -193,11 +193,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     }
 
     if (HierarchyNode.isClassGroupingNode(node)) {
-      const ancestor = node.nonGroupingAncestor;
-      if (ancestor && HierarchyNode.isInstancesNode(ancestor) && ancestor.filtering?.filteredChildrenIdentifierPaths) {
-        return this.getVisibilityStatusObs(ancestor);
-      }
-
       return this.getClassGroupingNodeDisplayStatus(node);
     }
 
