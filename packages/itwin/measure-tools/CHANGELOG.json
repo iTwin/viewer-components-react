@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Thu, 13 Jun 2024 15:17:40 GMT",
+      "version": "0.16.1",
+      "tag": "@itwin/measure-tools-react_v0.16.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "125395992+Maxime-Brassard@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "18fe506414bc0c8f394977fb43563579227ad1cc",
+            "comment": "Export SheetMeasurementHelper in measure-tools-react package"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 10 Jun 2024 17:40:38 GMT",
       "version": "0.16.0",
       "tag": "@itwin/measure-tools-react_v0.16.0",
