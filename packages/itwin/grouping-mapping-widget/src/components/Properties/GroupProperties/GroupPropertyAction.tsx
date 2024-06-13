@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/presentation-common";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { Alert, Button, Fieldset, Icon, InputGroup, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
+import { Alert, Button, Fieldset, Icon, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -26,7 +26,7 @@ import { handleError } from "../../../common/utils";
 import { CustomCalculationAction } from "../CustomCalculations/CustomCalculationAction";
 import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
-import { PropertyExpandableBlock } from "../PropertyExpandableBlock";
+import { ScrollableExpandableBlock } from "../ScrollableExpandableBlock";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -268,7 +268,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             selection is made and saved.
           </Alert>
         )}
-        <PropertyExpandableBlock
+        <ScrollableExpandableBlock
           title={"Mapped Properties"}
           endIcon={
             <Icon fill={selectedProperties.length > 0 ? "informational" : "default"}>
@@ -277,7 +277,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
           }
           isExpanded={selectedProperties.length > 0 ? true : false}
         >
-          <InputGroup className="gmw-property-view-container">
+          <div className="gmw-property-view-container">
             <div className="gmw-property-view-button">
               <Button onClick={async () => setShowPropertiesSelectionModal(true)} disabled={isLoading}>
                 Select Properties
@@ -300,9 +300,10 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
                 ))
               )}
             </div>
-          </InputGroup>
-        </PropertyExpandableBlock>
-        <PropertyExpandableBlock
+          </div>
+        </ScrollableExpandableBlock>
+        <ScrollableExpandableBlock
+          parentRef={actionContainerRef}
           ref={calculatedPropertyActionRef}
           title={"Calculated Property"}
           endIcon={
@@ -311,17 +312,15 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             </Icon>
           }
           isExpanded={calculatedPropertyType ? true : false}
-          onToggle={(isExpanding) => {
-            if (isExpanding === true) scrollToBlock(calculatedPropertyActionRef);
-          }}
         >
           <CalculatedPropertyActionWithVisuals
             group={group}
             calculatedPropertyType={calculatedPropertyType}
             setCalculatedPropertyType={setCalculatedPropertyType}
           />
-        </PropertyExpandableBlock>
-        <PropertyExpandableBlock
+        </ScrollableExpandableBlock>
+        <ScrollableExpandableBlock
+          parentRef={actionContainerRef}
           ref={customCalculationActionRef}
           title={"Custom Calculation"}
           endIcon={
@@ -330,9 +329,6 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             </Icon>
           }
           isExpanded={formula !== undefined}
-          onToggle={(isExpanding) => {
-            if (isExpanding === true) scrollToBlock(customCalculationActionRef);
-          }}
         >
           <CustomCalculationAction
             formula={formula}
@@ -341,7 +337,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             forceValidation={forceValidation}
             disabled={isLoading}
           />
-        </PropertyExpandableBlock>
+        </ScrollableExpandableBlock>
       </div>
       <ActionPanel
         onSave={handleSaveClick}
