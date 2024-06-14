@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
-    "lib": ["DOM"],
+    "lib": ["DOM"]
   },
-  "include": ["src"],
+  "include": ["src"]
 }

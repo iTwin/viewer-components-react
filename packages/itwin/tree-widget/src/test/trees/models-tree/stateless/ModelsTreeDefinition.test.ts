@@ -64,7 +64,7 @@ describe("Models tree", () => {
         });
         const rootElement2 = insertPhysicalElement({
           builder,
-          classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+          classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
           userLabel: `root element 2`,
           modelId: model.id,
           categoryId: category.id,
@@ -665,7 +665,7 @@ describe("Models tree", () => {
           });
           const rootElement2 = insertPhysicalElement({
             builder,
-            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             userLabel: `root element 2`,
             modelId: model.id,
             categoryId: category.id,
@@ -757,7 +757,7 @@ describe("Models tree", () => {
           });
           const rootElement2 = insertPhysicalElement({
             builder,
-            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             userLabel: `root element 2`,
             modelId: model.id,
             categoryId: category.id,
@@ -869,7 +869,7 @@ describe("Models tree", () => {
           const parentElement2 = insertPhysicalElement({
             builder,
             userLabel: `parent element 2`,
-            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             modelId: model.id,
             categoryId: category.id,
           });
@@ -883,7 +883,7 @@ describe("Models tree", () => {
           const childElement2 = insertPhysicalElement({
             builder,
             userLabel: `child element 2`,
-            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             modelId: model.id,
             categoryId: category.id,
             parentId: parentElement2.id,
