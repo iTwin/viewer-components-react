@@ -53,7 +53,7 @@ interface VisibilityOverrides {
 
 type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
-describe.only("HierarchyBasedVisibilityHandler", () => {
+describe("HierarchyBasedVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
     return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
       ...defaultHierarchyConfiguration,
@@ -1951,6 +1951,13 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
         viewport.setAlwaysDrawn(new Set(ids.allElements));
         viewport.renderFrame();
 
+        await validateHierarchyVisibility({
+          provider,
+          handler,
+          viewport,
+          visibilityExpectations: VisibilityExpectations.all("hidden"),
+        });
+
         await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: elementToShow }), true);
         viewport.renderFrame();
 
@@ -2379,7 +2386,10 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
     describe("filtered nodes", () => {
       const rootSubjectInstanceKey: InstanceKey = { id: IModel.rootSubjectId, className: "BisCore.Subject" };
 
-      function createFilteredVisibilityTestData({ imodel, filterPaths }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
+      function createFilteredVisibilityTestData({
+        imodel,
+        filterPaths,
+      }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
         const commonProps = createCommonProps(imodel);
         const handler = createModelsTreeVisibilityHandler(commonProps);
         const defaultProvider = createProvider({ ...commonProps });
