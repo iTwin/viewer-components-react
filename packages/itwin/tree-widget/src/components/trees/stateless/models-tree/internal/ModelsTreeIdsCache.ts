@@ -304,11 +304,14 @@ export class ModelsTreeIdsCache {
     const reader = this._queryExecutor.createQueryReader(
       {
         ctes: [
-          `
+          /* sql */ `
             CategoryElements(id) AS (
               SELECT ECInstanceId id
               FROM ${this._hierarchyConfig.elementClassSpecification}
-              WHERE Model.Id = ? AND Category.Id = ?
+              WHERE
+                Model.Id = ?
+                AND Category.Id = ?
+                AND Parent IS NULL
 
               UNION ALL
 

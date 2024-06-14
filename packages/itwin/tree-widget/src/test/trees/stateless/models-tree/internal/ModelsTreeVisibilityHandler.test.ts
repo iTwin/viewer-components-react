@@ -9,7 +9,7 @@ import fs from "fs";
 import path from "path";
 import { EMPTY, expand, filter, first, from, mergeMap, shareReplay } from "rxjs";
 import sinon from "sinon";
-import { assert } from "@itwin/core-bentley";
+import { assert, using } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, RenderMode } from "@itwin/core-common";
 import {
   IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SnapshotConnection, SpatialViewState, ViewRect,
@@ -26,7 +26,10 @@ import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/mo
 import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
-import { createLocalIModel, insertPhysicalPartition, insertPhysicalSubModel, insertSpatialCategory } from "../../../../IModelUtils";
+import {
+  buildIModel, createLocalIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
+  insertSpatialCategory,
+} from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport } from "../../../Common";
 import {
@@ -2261,6 +2264,68 @@ describe("HierarchyBasedVisibilityHandler", () => {
                 mergeMap(() => expect(handler.getVisibilityStatus(parent)).to.eventually.include({ state: "partial" })),
               ),
             );
+          });
+        });
+      });
+
+      describe("child element category is different than parent's", () => {
+        // TODO: these tests should be merged with the ones refactored by
+        // https://github.com/iTwin/viewer-components-react/pull/931
+
+        it("model visibility only takes into account parent element categories", async function () {
+          const { imodel, modelId, parentCategoryId } = await buildIModel(this, async (builder) => {
+            const parentCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
+            const childCategory = insertSpatialCategory({ builder, codeValue: "childCategory" });
+            const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+
+            const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
+            insertPhysicalElement({ builder, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
+            return { modelId: model.id, parentCategoryId: parentCategory.id };
+          });
+          const idsCache = createIdsCache(imodel);
+          viewport = OffScreenViewport.create({
+            view: createBlankViewState(imodel),
+            viewRect: new ViewRect(),
+          });
+          const visibilityHandler = createModelsTreeVisibilityHandler({ idsCache, viewport });
+          const modelNode = createModelHierarchyNode(modelId);
+          const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
+
+          await using(visibilityHandler, async (_) => {
+            await visibilityHandler.changeVisibility(parentCategoryNode, true);
+            await expect(visibilityHandler.getVisibilityStatus(modelNode)).to.eventually.include({ state: "visible" });
+          });
+        });
+
+        it("category visibility only takes into account element trees that start with those that have no parents", async function () {
+          const { imodel, modelId, categoryId, elementId, unrelatedCategoryId } = await buildIModel(this, async (builder) => {
+            const category = insertSpatialCategory({ builder, codeValue: "parentCategory" });
+            const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+            const element = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+
+            const unrelatedParentCategory = insertSpatialCategory({ builder, codeValue: "differentParentCategory" });
+            const unrelatedParentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: unrelatedParentCategory.id });
+            insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: unrelatedParentElement.id });
+
+            return { modelId: model.id, categoryId: category.id, elementId: element.id, unrelatedCategoryId: unrelatedParentCategory.id };
+          });
+          const idsCache = createIdsCache(imodel);
+          viewport = OffScreenViewport.create({
+            view: createBlankViewState(imodel),
+            viewRect: new ViewRect(),
+          });
+          const visibilityHandler = createModelsTreeVisibilityHandler({ idsCache, viewport });
+          const modelNode = createModelHierarchyNode(modelId);
+          const categoryNode = createCategoryHierarchyNode(modelId, categoryId);
+          const elementNode = createElementHierarchyNode({ modelId, categoryId, elementId });
+          const unrelatedCategoryNode = createCategoryHierarchyNode(modelId, unrelatedCategoryId);
+
+          await using(visibilityHandler, async (_) => {
+            await visibilityHandler.changeVisibility(elementNode, true);
+            viewport.renderFrame();
+            await expect(visibilityHandler.getVisibilityStatus(modelNode)).to.eventually.include({ state: "partial" });
+            await expect(visibilityHandler.getVisibilityStatus(categoryNode)).to.eventually.include({ state: "visible" });
+            await expect(visibilityHandler.getVisibilityStatus(unrelatedCategoryNode)).to.eventually.include({ state: "hidden" });
           });
         });
       });
