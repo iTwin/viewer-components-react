@@ -31,7 +31,7 @@ import {
   createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../../Common";
-import { ExpectedVisibility, validateHierarchyVisibility } from "./VisibilityValidation";
+import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
 
 import type { GeometricElement3dProps } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
@@ -1751,10 +1751,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "hidden",
-            model: () => ({ handler: "hidden", selector: false }),
-            category: () => ({ handler: "hidden", selector: false, override: "none" }),
+            model: () => ({ tree: "hidden", modelSelector: false }),
+            category: () => ({ tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" }),
             groupingNode: () => "hidden",
             element: () => "hidden",
           },
@@ -1777,10 +1777,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "visible",
-            model: () => ({ handler: "visible", selector: true }),
-            category: () => ({ handler: "visible", selector: false, override: "show" }),
+            model: () => ({ tree: "visible", modelSelector: true }),
+            category: () => ({ tree: "visible", categorySelector: false, perModelCategoryOverride: "show" }),
             groupingNode: () => "visible",
             element: () => "visible",
           },
@@ -1808,16 +1808,16 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
             model: (id) => {
-              return id === ids.model ? { handler: "visible", selector: true } : { handler: "hidden", selector: false };
+              return id === ids.model ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false };
             },
             category: ({ modelId }) => {
               if (modelId === ids.model) {
-                return { handler: "visible", selector: false, override: "show" };
+                return { tree: "visible", categorySelector: false, perModelCategoryOverride: "show" };
               }
-              return { handler: "hidden", selector: false, override: "none" };
+              return { tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" };
             },
             groupingNode: ({ modelId }) => (modelId === ids.model ? "visible" : "hidden"),
             element: ({ modelId }) => (modelId === ids.model ? "visible" : "hidden"),
@@ -1848,10 +1848,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
-            model: () => ({ handler: "partial", selector: true }),
-            category: () => ({ handler: "partial", selector: false, override: "show" }),
+            model: () => ({ tree: "partial", modelSelector: true }),
+            category: () => ({ tree: "partial", categorySelector: false, perModelCategoryOverride: "show" }),
             groupingNode: () => "partial",
             element: ({ elementId }) => (elementId === ids.hiddenElement ? "hidden" : "visible"),
           },
@@ -1881,10 +1881,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
-            model: () => ({ handler: "partial", selector: true }),
-            category: () => ({ handler: "partial", selector: false, override: "show" }),
+            model: () => ({ tree: "partial", modelSelector: true }),
+            category: () => ({ tree: "partial", categorySelector: false, perModelCategoryOverride: "show" }),
             groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
             element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
           },
@@ -1918,13 +1918,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
-            model: () => ({ handler: "partial", selector: true }),
+            model: () => ({ tree: "partial", modelSelector: true }),
             category: ({ categoryId }) =>
               categoryId === ids.category
-                ? { handler: "partial", selector: false, override: "none" }
-                : { handler: "hidden", selector: false, override: "none" },
+                ? { tree: "partial", categorySelector: false, perModelCategoryOverride: "none" }
+                : { tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" },
             groupingNode: ({ categoryId }) => (categoryId === ids.category ? "partial" : "hidden"),
             element: ({ elementId }) => (elementId === ids.elementToShow ? "visible" : "hidden"),
           },
@@ -1968,10 +1968,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
-            model: (id) => (id === ids.model ? { handler: "partial", selector: true } : { handler: "hidden", selector: false }),
-            category: ({ modelId }) => ({ handler: modelId === ids.model ? "partial" : "hidden", selector: false, override: "none" }),
+            model: (id) => (id === ids.model ? { tree: "partial", modelSelector: true } : { tree: "hidden", modelSelector: false }),
+            category: ({ modelId }) => ({ tree: modelId === ids.model ? "partial" : "hidden", categorySelector: false, perModelCategoryOverride: "none" }),
             groupingNode: ({ elementIds }) => (elementIds.includes(elementToShow) ? "partial" : "hidden"),
             element: ({ elementId }) => (elementId === elementToShow ? "visible" : "hidden"),
           },
@@ -2001,19 +2001,19 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
             model: (id) => {
               if (id === ids.exclusiveModel) {
-                return { handler: "partial", selector: true };
+                return { tree: "partial", modelSelector: true };
               }
-              return { handler: "hidden", selector: true };
+              return { tree: "hidden", modelSelector: true };
             },
             category: ({ modelId }) => {
               if (modelId === ids.exclusiveModel) {
-                return { handler: "partial", selector: false, override: "show" };
+                return { tree: "partial", categorySelector: false, perModelCategoryOverride: "show" };
               }
-              return { handler: "hidden", selector: false, override: "show" };
+              return { tree: "hidden", categorySelector: false, perModelCategoryOverride: "show" };
             },
             groupingNode: ({ modelId }) => (modelId === ids.exclusiveModel ? "partial" : "hidden"),
             element: ({ elementId }) => (elementId === ids.exclusiveElement ? "visible" : "hidden"),
@@ -2039,10 +2039,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "visible",
-            model: () => ({ handler: "visible", selector: true }),
-            category: () => ({ handler: "visible", selector: false, override: "show" }),
+            model: () => ({ tree: "visible", modelSelector: true }),
+            category: () => ({ tree: "visible", categorySelector: false, perModelCategoryOverride: "show" }),
             groupingNode: () => "visible",
             element: () => "visible",
           },
@@ -2075,11 +2075,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
-            model: () => ({ handler: "partial", selector: true }),
+            model: () => ({ tree: "partial", modelSelector: true }),
             category: ({ categoryId }) =>
-              categoryId === ids.category ? { handler: "hidden", selector: true, override: "hide" } : { handler: "visible", selector: false, override: "show" },
+              categoryId === ids.category
+                ? { tree: "hidden", categorySelector: true, perModelCategoryOverride: "hide" }
+                : { tree: "visible", categorySelector: false, perModelCategoryOverride: "show" },
             groupingNode: ({ categoryId }) => (categoryId === ids.category ? "hidden" : "visible"),
             element: ({ categoryId }) => (categoryId === ids.category ? "hidden" : "visible"),
           },
@@ -2118,13 +2120,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
-            model: () => ({ handler: "partial", selector: true }),
+            model: () => ({ tree: "partial", modelSelector: true }),
             category: ({ categoryId }) =>
               categoryId === ids.category
-                ? { handler: "partial", selector: false, override: "none" }
-                : { handler: "hidden", selector: false, override: "none" },
+                ? { tree: "partial", categorySelector: false, perModelCategoryOverride: "none" }
+                : { tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" },
             groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "visible" : "hidden"),
             element: ({ elementId }) => (elementId === ids.parentElement ? "visible" : "hidden"),
           },
@@ -2165,10 +2167,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
           provider,
           handler,
           viewport,
-          expectedVisibility: {
+          visibilityExpectations: {
             subject: () => "partial",
-            model: () => ({ handler: "partial", selector: true }),
-            category: ({ categoryId }) => ({ handler: categoryId === ids.category ? "partial" : "visible", selector: false, override: "show" }),
+            model: () => ({ tree: "partial", modelSelector: true }),
+            category: ({ categoryId }) => ({
+              tree: categoryId === ids.category ? "partial" : "visible",
+              categorySelector: false,
+              perModelCategoryOverride: "show",
+            }),
             groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
             element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
           },
@@ -2240,7 +2246,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             provider,
             handler,
             viewport,
-            expectedVisibility: ExpectedVisibility.all("hidden"),
+            visibilityExpectations: VisibilityExpectations.all("hidden"),
           });
         });
 
@@ -2254,7 +2260,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             provider,
             handler,
             viewport,
-            expectedVisibility: ExpectedVisibility.all("visible"),
+            visibilityExpectations: VisibilityExpectations.all("visible"),
           });
         });
 
@@ -2268,10 +2274,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
             provider,
             handler,
             viewport,
-            expectedVisibility: {
+            visibilityExpectations: {
               subject: () => "partial",
-              model: (id) => (id === emptyModelId ? { handler: "visible", selector: true } : { handler: "hidden", selector: false }),
-              category: () => ({ handler: "hidden", selector: false, override: "none" }),
+              model: (id) => (id === emptyModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
+              category: () => ({ tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" }),
               groupingNode: () => "hidden",
               element: () => "hidden",
             },
@@ -2290,10 +2296,10 @@ describe("HierarchyBasedVisibilityHandler", () => {
             provider,
             handler,
             viewport,
-            expectedVisibility: {
-              ...ExpectedVisibility.all("visible"),
+            visibilityExpectations: {
+              ...VisibilityExpectations.all("visible"),
               subject: () => "partial",
-              model: (id) => (id === configurationModelId ? { handler: "visible", selector: true } : { handler: "hidden", selector: false }),
+              model: (id) => (id === configurationModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
             },
           });
         });
@@ -2319,13 +2325,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
             provider,
             handler,
             viewport,
-            expectedVisibility: {
+            visibilityExpectations: {
               subject: () => "partial",
-              model: (id) => (id === configurationModelId ? { handler: "partial", selector: true } : { handler: "hidden", selector: false }),
+              model: (id) => (id === configurationModelId ? { tree: "partial", modelSelector: true } : { tree: "hidden", modelSelector: false }),
               category: ({ modelId }) => ({
-                handler: modelId === configurationModelId ? "partial" : "hidden",
-                selector: false,
-                override: "none",
+                tree: modelId === configurationModelId ? "partial" : "hidden",
+                categorySelector: false,
+                perModelCategoryOverride: "none",
               }),
               groupingNode: () => "partial",
               element: ({ elementId }) => (elementId === customClassElement1 ? "visible" : "hidden"),
@@ -2364,13 +2370,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
             provider,
             handler,
             viewport,
-            expectedVisibility: {
+            visibilityExpectations: {
               subject: () => "partial",
-              model: (id) => (id === configurationModelId ? { handler: "visible", selector: true } : { handler: "hidden", selector: false }),
+              model: (id) => (id === configurationModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
               category: ({ modelId }) => ({
-                handler: modelId === configurationModelId ? "visible" : "hidden",
-                selector: false,
-                override: "none",
+                tree: modelId === configurationModelId ? "visible" : "hidden",
+                categorySelector: false,
+                perModelCategoryOverride: "none",
               }),
               groupingNode: ({ elementIds }) => (elementIds.includes(nonCustomClassElement) ? "hidden" : "visible"),
               element: ({ modelId }) => (modelId === nonCustomClassElement ? "hidden" : "visible"),
@@ -2444,14 +2450,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
               provider: filteredProvider,
               handler,
               viewport,
-              expectedVisibility: ExpectedVisibility.all("visible"),
+              visibilityExpectations: VisibilityExpectations.all("visible"),
             });
 
             await validateHierarchyVisibility({
               provider: defaultProvider,
               handler,
               viewport,
-              expectedVisibility: {
+              visibilityExpectations: {
                 subject: () => "partial",
                 model: (id) => (id === keys.model.id ? "visible" : "hidden"),
                 category: ({ modelId }) => (modelId === keys.model.id ? "visible" : "hidden"),
@@ -2511,14 +2517,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
               provider: filteredProvider,
               handler,
               viewport,
-              expectedVisibility: ExpectedVisibility.all("visible"),
+              visibilityExpectations: VisibilityExpectations.all("visible"),
             });
 
             await validateHierarchyVisibility({
               provider: defaultProvider,
               handler,
               viewport,
-              expectedVisibility: {
+              visibilityExpectations: {
                 subject: () => "partial",
                 model: (id) => (id === keys.model.id ? "partial" : "hidden"),
                 category: ({ modelId }) => (modelId === keys.model.id ? "partial" : "hidden"),
@@ -2547,7 +2553,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               provider: filteredProvider,
               handler,
               viewport,
-              expectedVisibility: {
+              visibilityExpectations: {
                 subject: () => "partial",
                 model: () => "partial",
                 category: ({ categoryId }) => (categoryId === clickedCategoryId ? "visible" : "hidden"),
@@ -2560,7 +2566,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               provider: defaultProvider,
               handler,
               viewport,
-              expectedVisibility: {
+              visibilityExpectations: {
                 subject: () => "partial",
                 model: (id) => (id === keys.model.id ? "partial" : "hidden"),
                 category: ({ categoryId }) => (categoryId === clickedCategoryId ? "partial" : "hidden"),
@@ -2616,14 +2622,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
               provider: filteredProvider,
               handler,
               viewport,
-              expectedVisibility: ExpectedVisibility.all("visible"),
+              visibilityExpectations: VisibilityExpectations.all("visible"),
             });
 
             await validateHierarchyVisibility({
               provider: defaultProvider,
               handler,
               viewport,
-              expectedVisibility: ExpectedVisibility.all("visible"),
+              visibilityExpectations: VisibilityExpectations.all("visible"),
             });
           });
         });
@@ -2640,7 +2646,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             await handler.changeVisibility(node, true);
             viewport.renderFrame();
 
-            const expectedVisibility: ValidateNodeProps["expectedVisibility"] = {
+            const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
               subject: (id) => {
                 if (id === rootSubjectInstanceKey.id) {
                   return "partial";
@@ -2657,14 +2663,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
               provider: filteredProvider,
               handler,
               viewport,
-              expectedVisibility,
+              visibilityExpectations,
             });
 
             await validateHierarchyVisibility({
               provider: defaultProvider,
               handler,
               viewport,
-              expectedVisibility,
+              visibilityExpectations,
             });
           });
         });
@@ -2717,7 +2723,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           await handler.changeVisibility(node, true);
           viewport.renderFrame();
 
-          const expectedVisibility: ValidateNodeProps["expectedVisibility"] = {
+          const visibilityExpectations: ValidateNodeProps["visibilityExpectations"] = {
             subject: () => "partial",
             model: () => "partial",
             category: () => "partial",
@@ -2729,14 +2735,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
             provider: filteredProvider,
             handler,
             viewport,
-            expectedVisibility,
+            visibilityExpectations,
           });
 
           await validateHierarchyVisibility({
             provider: defaultProvider,
             handler,
             viewport,
-            expectedVisibility,
+            visibilityExpectations,
           });
         });
       });
