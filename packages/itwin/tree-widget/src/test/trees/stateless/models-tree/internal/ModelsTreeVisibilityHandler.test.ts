@@ -53,7 +53,7 @@ interface VisibilityOverrides {
 
 type ModelsTreeHierarchyConfiguration = Partial<ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"]>;
 
-describe("HierarchyBasedVisibilityHandler", () => {
+describe.only("HierarchyBasedVisibilityHandler", () => {
   function createIdsCache(iModel: IModelConnection, hierarchyConfig?: ModelsTreeHierarchyConfiguration) {
     return new ModelsTreeIdsCache(createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(iModel), "unbounded"), {
       ...defaultHierarchyConfiguration,
@@ -1705,23 +1705,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
       await terminatePresentationTesting();
     });
 
-    let createdHandlers = new Array<ModelsTreeVisibilityHandler>();
-
-    afterEach(() => {
-      createdHandlers.forEach((x) => x.dispose());
-      createdHandlers = [];
-    });
-
-    function createHandler(imodel: IModelConnection, hierarchyConfig = defaultHierarchyConfiguration) {
+    function createCommonProps(imodel: IModelConnection, hierarchyConfig = defaultHierarchyConfiguration) {
       const imodelAccess = createIModelAccess(imodel);
       const viewport = OffScreenViewport.create({
         view: createBlankViewState(imodel),
         viewRect: new ViewRect(),
       });
       const idsCache = new ModelsTreeIdsCache(imodelAccess, hierarchyConfig);
-      const handler = createModelsTreeVisibilityHandler({ imodelAccess, viewport, idsCache });
-      createdHandlers.push(handler);
-      return { handler, imodelAccess, viewport, idsCache };
+      return { imodelAccess, viewport, idsCache };
     }
 
     function createProvider(props: {
@@ -1737,6 +1728,13 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
     }
 
+    function createVisibilityTestData({ imodel, hierarchyConfig }: { imodel: IModelConnection; hierarchyConfig?: typeof defaultHierarchyConfiguration }) {
+      const commonProps = createCommonProps(imodel, hierarchyConfig);
+      const handler = createModelsTreeVisibilityHandler(commonProps);
+      const provider = createProvider({ ...commonProps, hierarchyConfig });
+      return { handler, provider, ...commonProps };
+    }
+
     it("by default everything is hidden", async function () {
       const { imodel } = await buildIModel(this, async (builder) => {
         const categoryId = insertSpatialCategory({ builder, codeValue: "category" }).id;
@@ -1744,8 +1742,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         insertPhysicalElement({ builder, modelId, categoryId });
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await validateHierarchyVisibility({
           provider,
@@ -1769,8 +1766,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         insertPhysicalElement({ builder, modelId, categoryId });
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createSubjectHierarchyNode(IModel.rootSubjectId), true);
         await validateHierarchyVisibility({
@@ -1799,8 +1795,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createModelHierarchyNode(ids.model), true);
         viewport.renderFrame();
@@ -1838,8 +1833,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, hiddenElement: elements[0] };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createModelHierarchyNode(ids.model), true);
         viewport.setNeverDrawn(new Set([ids.hiddenElement]));
@@ -1869,8 +1863,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, category, parentElement };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createModelHierarchyNode(ids.model), true);
         viewport.renderFrame();
@@ -1908,8 +1901,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, category, elementToShow: elements[0] };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createElementHierarchyNode({ modelId: ids.model, categoryId: ids.category, elementId: ids.elementToShow }), true);
         viewport.renderFrame();
@@ -1953,8 +1945,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, category, modelElements, otherModelElements, allElements: [...modelElements, ...otherModelElements] };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         const elementToShow = ids.modelElements[0];
         viewport.setAlwaysDrawn(new Set(ids.allElements));
@@ -1991,8 +1982,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { exclusiveModel, exclusiveElement };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createSubjectHierarchyNode("0x1"), true);
         viewport.setAlwaysDrawn(new Set([ids.exclusiveElement]), true);
@@ -2030,8 +2020,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, category };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createCategoryHierarchyNode(ids.model, ids.category), true);
         viewport.renderFrame();
@@ -2061,8 +2050,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, category };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createSubjectHierarchyNode(IModel.rootSubjectId), true);
         viewport.changeCategoryDisplay(ids.category, true, true);
@@ -2103,8 +2091,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, category, parentElement };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(
           createClassGroupingHierarchyNode({
@@ -2148,8 +2135,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         return { model, category, parentElement };
       });
 
-      const { handler, viewport, ...props } = createHandler(imodel);
-      const provider = createProvider(props);
+      const { handler, provider, viewport } = createVisibilityTestData({ imodel });
       await using(handler, async (_) => {
         await handler.changeVisibility(createSubjectHierarchyNode(IModel.rootSubjectId), true);
         viewport.renderFrame();
@@ -2239,8 +2225,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("empty model hidden by default", async function () {
           const { imodel, hierarchyConfig } = await createHierarchyConfigurationModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
-          const provider = createProvider({ ...props, hierarchyConfig });
+          const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
           await validateHierarchyVisibility({
             provider,
@@ -2252,8 +2237,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("showing it makes empty model visible", async function () {
           const { imodel, hierarchyConfig } = await createHierarchyConfigurationModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
-          const provider = createProvider({ ...props, hierarchyConfig });
+          const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
           await handler.changeVisibility(node, true);
           await validateHierarchyVisibility({
@@ -2266,8 +2250,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("gets partial when only empty model is visible", async function () {
           const { imodel, hierarchyConfig, emptyModelId } = await createHierarchyConfigurationModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
-          const provider = createProvider({ ...props, hierarchyConfig });
+          const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
           await handler.changeVisibility(createModelHierarchyNode(emptyModelId), true);
           await validateHierarchyVisibility({
@@ -2288,8 +2271,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       describe("model with custom class specification elements", () => {
         it("showing it makes it, all its categories and elements visible", async function () {
           const { imodel, hierarchyConfig, configurationModelId } = await createHierarchyConfigurationModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
-          const provider = createProvider({ ...props, hierarchyConfig });
+          const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
           await handler.changeVisibility(createModelHierarchyNode(configurationModelId), true);
           await validateHierarchyVisibility({
@@ -2306,8 +2288,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("gets partial when custom class element is visible", async function () {
           const { imodel, hierarchyConfig, configurationModelId, configurationCategoryId, customClassElement1 } = await createHierarchyConfigurationModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
-          const provider = createProvider({ ...props, hierarchyConfig });
+          const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
           await handler.changeVisibility(
             createElementHierarchyNode({
@@ -2342,8 +2323,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
         it("gets visible when all custom class elements are visible", async function () {
           const { imodel, hierarchyConfig, configurationModelId, configurationCategoryId, customClassElement1, customClassElement2, nonCustomClassElement } =
             await createHierarchyConfigurationModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel, hierarchyConfig);
-          const provider = createProvider({ ...props, hierarchyConfig });
+          const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
           await handler.changeVisibility(
             createElementHierarchyNode({
@@ -2388,6 +2368,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
     describe("filtered nodes", () => {
       const rootSubjectInstanceKey: InstanceKey = { id: IModel.rootSubjectId, className: "BisCore.Subject" };
+
+      function createFilteredVisibilityTestData({ imodel, filterPaths }: Parameters<typeof createVisibilityTestData>[0] & { filterPaths: HierarchyNodeIdentifiersPath[] }) {
+        const commonProps = createCommonProps(imodel);
+        const handler = createModelsTreeVisibilityHandler(commonProps);
+        const defaultProvider = createProvider({ ...commonProps });
+        const filteredProvider = createProvider({ ...commonProps, filterPaths });
+        return { handler, defaultProvider, filteredProvider, ...commonProps };
+      }
 
       async function getNodeMatchingPath(provider: HierarchyProvider, identifierPath: InstanceKey[], parentNode?: HierarchyNode): Promise<HierarchyNode> {
         for (const [idx, pathKey] of identifierPath.entries()) {
@@ -2437,10 +2425,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
             };
           });
 
-          const { handler, viewport, ...props } = createHandler(imodel);
-          const defaultProvider = createProvider(props);
-          const filteredProvider = createProvider({ ...props, filterPaths });
-
+          const { handler, viewport, defaultProvider, filteredProvider } = createFilteredVisibilityTestData({ imodel, filterPaths });
           await using(handler, async (_) => {
             const node = await getRootNode(filteredProvider);
             await handler.changeVisibility(node, true);
@@ -2503,10 +2488,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("switches on only filtered hierarchy when root node is clicked", async function () {
           const { imodel, filterPaths, filterTargetElements, ...keys } = await createIModel(this);
-
-          const { handler, viewport, ...props } = createHandler(imodel);
-          const defaultProvider = createProvider(props);
-          const filteredProvider = createProvider({ ...props, filterPaths });
+          const { handler, viewport, defaultProvider, filteredProvider } = createFilteredVisibilityTestData({ imodel, filterPaths });
 
           await using(handler, async (_) => {
             const node = await getRootNode(filteredProvider);
@@ -2537,9 +2519,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("switches on only filtered hierarchy when one of the filtered categories is clicked", async function () {
           const { imodel, filterPaths, filteredCategories, filterTargetElements, ...keys } = await createIModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel);
-          const defaultProvider = createProvider(props);
-          const filteredProvider = createProvider({ ...props, filterPaths });
+          const { handler, viewport, defaultProvider, filteredProvider } = createFilteredVisibilityTestData({ imodel, filterPaths });
 
           await using(handler, async (_) => {
             const pathToCategory = [rootSubjectInstanceKey, keys.model, filteredCategories[0]];
@@ -2609,9 +2589,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("when clicking on root subject turns on category and all its elements", async function () {
           const { imodel, filterPaths } = await createIModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel);
-          const defaultProvider = createProvider(props);
-          const filteredProvider = createProvider({ ...props, filterPaths });
+          const { handler, viewport, defaultProvider, filteredProvider } = createFilteredVisibilityTestData({ imodel, filterPaths });
 
           await using(handler, async (_) => {
             const node = await getRootNode(filteredProvider);
@@ -2636,9 +2614,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
         it("when clicking on one of the categories it turns on only that category", async function () {
           const { imodel, filterPaths, subjectIds, modelIds } = await createIModel(this);
-          const { handler, viewport, ...props } = createHandler(imodel);
-          const defaultProvider = createProvider(props);
-          const filteredProvider = createProvider({ ...props, filterPaths });
+          const { handler, viewport, defaultProvider, filteredProvider } = createFilteredVisibilityTestData({ imodel, filterPaths });
 
           await using(handler, async (_) => {
             const pathToCategory = filterPaths[0];
@@ -2714,9 +2690,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           };
         });
 
-        const { handler, viewport, ...props } = createHandler(imodel);
-        const defaultProvider = createProvider(props);
-        const filteredProvider = createProvider({ ...props, filterPaths });
+        const { handler, viewport, defaultProvider, filteredProvider } = createFilteredVisibilityTestData({ imodel, filterPaths });
 
         await using(handler, async (_) => {
           const node = await getNodeMatchingPath(filteredProvider, pathToFirstElement);
