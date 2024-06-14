@@ -2239,12 +2239,14 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
           const { imodel, hierarchyConfig } = await createHierarchyConfigurationModel(this);
           const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
-          await handler.changeVisibility(node, true);
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            visibilityExpectations: VisibilityExpectations.all("visible"),
+          await using(handler, async (_) => {
+            await handler.changeVisibility(node, true);
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: VisibilityExpectations.all("visible"),
+            });
           });
         });
 
@@ -2252,18 +2254,20 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
           const { imodel, hierarchyConfig, emptyModelId } = await createHierarchyConfigurationModel(this);
           const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
-          await handler.changeVisibility(createModelHierarchyNode(emptyModelId), true);
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: (id) => (id === emptyModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
-              category: () => ({ tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" }),
-              groupingNode: () => "hidden",
-              element: () => "hidden",
-            },
+          await using(handler, async (_) => {
+            await handler.changeVisibility(createModelHierarchyNode(emptyModelId), true);
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: {
+                subject: () => "partial",
+                model: (id) => (id === emptyModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
+                category: () => ({ tree: "hidden", categorySelector: false, perModelCategoryOverride: "none" }),
+                groupingNode: () => "hidden",
+                element: () => "hidden",
+              },
+            });
           });
         });
       });
@@ -2273,16 +2277,18 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
           const { imodel, hierarchyConfig, configurationModelId } = await createHierarchyConfigurationModel(this);
           const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
-          await handler.changeVisibility(createModelHierarchyNode(configurationModelId), true);
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            visibilityExpectations: {
-              ...VisibilityExpectations.all("visible"),
-              subject: () => "partial",
-              model: (id) => (id === configurationModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
-            },
+          await using(handler, async (_) => {
+            await handler.changeVisibility(createModelHierarchyNode(configurationModelId), true);
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: {
+                ...VisibilityExpectations.all("visible"),
+                subject: () => "partial",
+                model: (id) => (id === configurationModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
+              },
+            });
           });
         });
 
@@ -2290,33 +2296,35 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
           const { imodel, hierarchyConfig, configurationModelId, configurationCategoryId, customClassElement1 } = await createHierarchyConfigurationModel(this);
           const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
-          await handler.changeVisibility(
-            createElementHierarchyNode({
-              modelId: configurationModelId,
-              categoryId: configurationCategoryId,
-              hasChildren: true,
-              elementId: customClassElement1,
-            }),
-            true,
-          );
-          expect(viewport.alwaysDrawn).to.deep.eq(new Set([customClassElement1]));
-          viewport.renderFrame();
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: (id) => (id === configurationModelId ? { tree: "partial", modelSelector: true } : { tree: "hidden", modelSelector: false }),
-              category: ({ modelId }) => ({
-                tree: modelId === configurationModelId ? "partial" : "hidden",
-                categorySelector: false,
-                perModelCategoryOverride: "none",
+          await using(handler, async (_) => {
+            await handler.changeVisibility(
+              createElementHierarchyNode({
+                modelId: configurationModelId,
+                categoryId: configurationCategoryId,
+                hasChildren: true,
+                elementId: customClassElement1,
               }),
-              groupingNode: () => "partial",
-              element: ({ elementId }) => (elementId === customClassElement1 ? "visible" : "hidden"),
-            },
+              true,
+            );
+            expect(viewport.alwaysDrawn).to.deep.eq(new Set([customClassElement1]));
+            viewport.renderFrame();
+
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: {
+                subject: () => "partial",
+                model: (id) => (id === configurationModelId ? { tree: "partial", modelSelector: true } : { tree: "hidden", modelSelector: false }),
+                category: ({ modelId }) => ({
+                  tree: modelId === configurationModelId ? "partial" : "hidden",
+                  categorySelector: false,
+                  perModelCategoryOverride: "none",
+                }),
+                groupingNode: () => "partial",
+                element: ({ elementId }) => (elementId === customClassElement1 ? "visible" : "hidden"),
+              },
+            });
           });
         });
 
@@ -2325,42 +2333,44 @@ describe.only("HierarchyBasedVisibilityHandler", () => {
             await createHierarchyConfigurationModel(this);
           const { handler, provider, viewport } = createVisibilityTestData({ imodel, hierarchyConfig });
 
-          await handler.changeVisibility(
-            createElementHierarchyNode({
-              modelId: configurationModelId,
-              categoryId: configurationCategoryId,
-              hasChildren: true,
-              elementId: customClassElement1,
-            }),
-            true,
-          );
-          await handler.changeVisibility(
-            createElementHierarchyNode({
-              modelId: configurationModelId,
-              categoryId: configurationCategoryId,
-              hasChildren: true,
-              elementId: customClassElement2,
-            }),
-            true,
-          );
-          expect(viewport.alwaysDrawn).to.deep.eq(new Set([customClassElement1, customClassElement2]));
-          viewport.renderFrame();
-
-          await validateHierarchyVisibility({
-            provider,
-            handler,
-            viewport,
-            visibilityExpectations: {
-              subject: () => "partial",
-              model: (id) => (id === configurationModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
-              category: ({ modelId }) => ({
-                tree: modelId === configurationModelId ? "visible" : "hidden",
-                categorySelector: false,
-                perModelCategoryOverride: "none",
+          await using(handler, async (_) => {
+            await handler.changeVisibility(
+              createElementHierarchyNode({
+                modelId: configurationModelId,
+                categoryId: configurationCategoryId,
+                hasChildren: true,
+                elementId: customClassElement1,
               }),
-              groupingNode: ({ elementIds }) => (elementIds.includes(nonCustomClassElement) ? "hidden" : "visible"),
-              element: ({ modelId }) => (modelId === nonCustomClassElement ? "hidden" : "visible"),
-            },
+              true,
+            );
+            await handler.changeVisibility(
+              createElementHierarchyNode({
+                modelId: configurationModelId,
+                categoryId: configurationCategoryId,
+                hasChildren: true,
+                elementId: customClassElement2,
+              }),
+              true,
+            );
+            expect(viewport.alwaysDrawn).to.deep.eq(new Set([customClassElement1, customClassElement2]));
+            viewport.renderFrame();
+
+            await validateHierarchyVisibility({
+              provider,
+              handler,
+              viewport,
+              visibilityExpectations: {
+                subject: () => "partial",
+                model: (id) => (id === configurationModelId ? { tree: "visible", modelSelector: true } : { tree: "hidden", modelSelector: false }),
+                category: ({ modelId }) => ({
+                  tree: modelId === configurationModelId ? "visible" : "hidden",
+                  categorySelector: false,
+                  perModelCategoryOverride: "none",
+                }),
+                groupingNode: ({ elementIds }) => (elementIds.includes(nonCustomClassElement) ? "hidden" : "visible"),
+                element: ({ modelId }) => (modelId === nonCustomClassElement ? "hidden" : "visible"),
+              },
+            });
           });
         });
       });
