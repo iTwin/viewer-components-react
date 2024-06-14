@@ -58,10 +58,24 @@ interface ModelsTreeDefinitionProps {
   hierarchyConfig: HierarchyConfiguration;
 }
 
+export interface ElementsGroupInfo {
+  parent:
+    | {
+        ids: Id64String[];
+        type: "element";
+      }
+    | {
+        ids: Id64String[];
+        modelIds: Id64String[];
+        type: "category";
+      };
+  classes: string[];
+}
+
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  keys: InstanceKey[];
+  keys: Array<InstanceKey | ElementsGroupInfo>;
   hierarchyConfig: HierarchyConfiguration;
 }
 
@@ -598,9 +612,25 @@ function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
   hierarchyConfig: HierarchyConfiguration,
-  elementIds: Id64String[],
+  elementInfos: Array<Id64String | ElementsGroupInfo>,
 ): Observable<HierarchyNodeIdentifiersPath> {
   return defer(() => {
+    const elementIds = elementInfos.filter((info): info is Id64String => typeof info === "string");
+    const groupInfos = elementInfos.filter((info): info is ElementsGroupInfo => typeof info !== "string");
+
+    const elementsClause = elementIds.length > 0 ? `e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})` : undefined;
+
+    const createParentElementClause = (parent: { ids: Id64String[] }) => `e.Parent.Id IN (${parent.ids.map(() => "?").join(",")})`;
+    const createParentCategoryClause = ({ ids, modelIds }: { ids: Id64String[]; modelIds: Id64String[] }) =>
+      `e.Category.Id IN (${ids.map(() => "?").join(",")}) AND e.Model.Id IN (${modelIds.map(() => "?").join(",")})`;
+
+    const classClause = groupInfos.map(
+      ({ parent, classes }) =>
+        `(${parent.type === "element" ? createParentElementClause(parent) : createParentCategoryClause(parent)} AND e.ECClassId IS (${classes.join(",")}))`,
+    );
+
+    const whereClause = [...(elementsClause ? [elementsClause] : []), ...(classClause ?? [])].join(" OR ");
+
     const ctes = [
       `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, Path) AS (
         SELECT
@@ -615,7 +645,7 @@ function createGeometricElementInstanceKeyPaths(
         FROM ${hierarchyConfig.elementClassSpecification} e
         JOIN bis.GeometricModel3d m ON m.ECInstanceId = e.Model.Id
         JOIN bis.SpatialCategory c ON c.ECInstanceId = e.Category.Id
-        WHERE e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
+        WHERE ${whereClause}
 
         UNION ALL
 
@@ -640,7 +670,24 @@ function createGeometricElementInstanceKeyPaths(
       FROM ModelsCategoriesElementsHierarchy mce
       WHERE mce.ParentId IS NULL
     `;
-    return imodelAccess.createQueryReader({ ctes, ecsql, bindings: elementIds.map((id) => ({ type: "id", value: id })) }, { rowFormat: "Indexes" });
+    const createIdBinding = (id: Id64String) => ({ type: "id" as const, value: id });
+    const createCategoryElementsBindings = ({ ids, modelIds }: { ids: Id64String[]; modelIds: Id64String[] }) => [
+      ...ids.map(createIdBinding),
+      ...modelIds.map(createIdBinding),
+    ];
+    return imodelAccess.createQueryReader(
+      {
+        ctes,
+        ecsql,
+        bindings: [
+          ...elementIds.map(createIdBinding),
+          ...groupInfos.flatMap((info) =>
+            info.parent.type === "element" ? info.parent.ids.map(createIdBinding) : createCategoryElementsBindings(info.parent),
+          ),
+        ],
+      },
+      { rowFormat: "Indexes" },
+    );
   }).pipe(
     map((row) => ({
       modelId: row[0],
@@ -662,11 +709,13 @@ async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceK
     models: new Array<Id64String>(),
     categories: new Array<Id64String>(),
     subjects: new Array<Id64String>(),
-    elements: new Array<Id64String>(),
+    elements: new Array<Id64String | ElementsGroupInfo>(),
   };
   await Promise.all(
     props.keys.map(async (key) => {
-      if (await props.imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
+      if ("parent" in key) {
+        ids.elements.push(key);
+      } else if (await props.imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
         ids.subjects.push(key.id);
       } else if (await props.imodelAccess.classDerivesFrom(key.className, "BisCore.Model")) {
         ids.models.push(key.id);
