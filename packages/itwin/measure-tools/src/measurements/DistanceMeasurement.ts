@@ -476,7 +476,7 @@ export class DistanceMeasurement extends Measurement {
 
     const distance = this.worldScale * this._startPoint.distance(this._endPoint);
     const run = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
-    const rise = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * this._endPoint.y - this._startPoint.y: this._endPoint.z - this._startPoint.z;
+    const rise = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
