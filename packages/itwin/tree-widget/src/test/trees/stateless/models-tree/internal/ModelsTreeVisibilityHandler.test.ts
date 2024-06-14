@@ -34,9 +34,9 @@ import {
 } from "../../Common";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
 
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
 import type {
   ModelsTreeVisibilityHandler,
@@ -2171,6 +2171,70 @@ describe("HierarchyBasedVisibilityHandler", () => {
             groupingNode: ({ elementIds }) => (elementIds.includes(ids.parentElement) ? "hidden" : "visible"),
             element: ({ elementId }) => (elementId === ids.parentElement ? "hidden" : "visible"),
           },
+        });
+      });
+    });
+
+    describe("child element category is different than parent's", () => {
+      it("model visibility only takes into account parent element categories", async function () {
+        const { imodel, modelId, parentCategoryId } = await buildIModel(this, async (builder) => {
+          const parentCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
+          const childCategory = insertSpatialCategory({ builder, codeValue: "childCategory" });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+
+          const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
+          return { modelId: model.id, parentCategoryId: parentCategory.id };
+        });
+        const { handler, viewport, ...props } = createVisibilityTestData({ imodel });
+        const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
+
+        await using(handler, async (_) => {
+          await handler.changeVisibility(parentCategoryNode, true);
+          viewport.renderFrame();
+          await validateHierarchyVisibility({
+            ...props,
+            handler,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("visible"),
+          });
+        });
+      });
+
+      it("category visibility only takes into account element trees that start with those that have no parents", async function () {
+        const { imodel, modelId, categoryId, elementId } = await buildIModel(this, async (builder) => {
+          const category = insertSpatialCategory({ builder, codeValue: "parentCategory" });
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+          const element = insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id });
+
+          const unrelatedParentCategory = insertSpatialCategory({ builder, codeValue: "differentParentCategory" });
+          const unrelatedParentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: unrelatedParentCategory.id });
+          insertPhysicalElement({ builder, modelId: model.id, categoryId: category.id, parentId: unrelatedParentElement.id });
+
+          return { modelId: model.id, categoryId: category.id, elementId: element.id, unrelatedCategoryId: unrelatedParentCategory.id };
+        });
+        const { handler, viewport, ...testProps } = createVisibilityTestData({ imodel });
+        const elementNode = createElementHierarchyNode({ modelId, categoryId, elementId });
+
+        await using(handler, async (_) => {
+          await handler.changeVisibility(elementNode, true);
+          viewport.renderFrame();
+          await validateHierarchyVisibility({
+            ...testProps,
+            handler,
+            viewport,
+            visibilityExpectations: {
+              subject: () => "partial",
+              model: () => ({ tree: "partial", modelSelector: true }),
+              category: (props) => ({
+                tree: props.categoryId === categoryId ? "visible" : "hidden",
+                categorySelector: false,
+                perModelCategoryOverride: "none",
+              }),
+              groupingNode: ({ elementIds }) => (elementIds.includes(elementId) ? "visible" : "hidden"),
+              element: (props) => (props.elementId === elementId ? "visible" : "hidden"),
+            },
+          });
         });
       });
     });
