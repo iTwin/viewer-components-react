@@ -2,36 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-.ec3-report-creation-stepper {
+.ec3w-template-creation-stepper {
   display: flex;
   flex-direction: column;
   height: 100%;
-  .report-creation-step-one {
-    height: 100%;
-  }
-  .report-creation-step-three {
-    height: 100%;
-    .summary-text {
-      font-weight: var(--iui-font-weight-bold);
-    }
-    .ec3w-assembly-list {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      margin-left: 16px;
-      margin-top: 8px;
-      .assembly-name{
-        margin-left: 8px;
-      }
-    }
-  }
-  .ec3w-stepper-footer {
-    align-self: center;
-    .back-button {
-      margin-right: 8px;
-    }
-    .next-button {
-      margin-right: 8px;
-    }
-  }
 }

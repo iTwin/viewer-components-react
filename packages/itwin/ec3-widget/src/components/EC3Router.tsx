@@ -22,7 +22,7 @@ export const EC3Router = ({ currentRoute, navigateTo, goBack }: EC3RouterProps) 
           onClickCreate={() =>
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
-              title: "Create Report",
+              title: "Create Template",
               routingFields: {},
             }))
           }

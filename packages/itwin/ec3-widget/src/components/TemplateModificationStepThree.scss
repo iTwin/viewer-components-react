@@ -1,0 +1,22 @@
+.ec3w-template-creation-step-three {
+  height: 100%;
+  .summary-text {
+    font-weight: var(--iui-font-weight-bold);
+  }
+  .ec3w-assembly-name-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 16px;
+    margin-top: var(--iui-size-xs);
+    .assembly-name {
+      margin-left: var(--iui-size-xs);
+    }
+  }
+}
+.ec3w-stepper-footer {
+  align-self: center;
+  .ec3w-footer-button {
+    margin-right: var(--iui-size-xs);
+  }
+}

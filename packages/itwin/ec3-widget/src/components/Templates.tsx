@@ -57,7 +57,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
       });
       setTemplates(configurations);
     } else {
-      toaster.negative("Invalid iTwinId");
+      toaster.negative("Invalid iTwinId.");
     }
 
     setIsLoading(false);
@@ -105,9 +105,9 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
           <LoadingOverlay />
         ) : templates.length === 0 ? (
           <>
-            <EmptyMessage message="It looks like you haven't added any reports yet. Click the button below to create your first report." />
+            <EmptyMessage message="It looks like you haven't added any templates yet. Click the button below to create your first template." />
             <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
-              Add New Report
+              Add New Template
             </Button>
           </>
         ) : (
