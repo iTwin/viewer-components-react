@@ -202,9 +202,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
           IIF(c.ChildCount > 1, sc.ECInstanceId, NULL) AS SubcategoryId
         FROM RootCategories c
         JOIN SubCategoriesWithLabels sc ON sc.ParentId = c.ECInstanceId
-        WHERE sc.DisplayLabel LIKE '%' || ? || '%'
+        WHERE sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
       `,
-      bindings: [{ type: "string", value: props.label }],
+      bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
     },
     { restartToken: "tree-widget/categories-tree/filter-by-label-query" },
   );
