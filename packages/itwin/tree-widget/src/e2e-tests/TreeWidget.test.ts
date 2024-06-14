@@ -329,7 +329,7 @@ test.describe("tree widget", () => {
         await takeScreenshot(page, treeWidget);
       });
 
-      test.only("instances focus - too many results", async ({ page }) => {
+      test("instances focus - too many results", async ({ page }) => {
         const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
         await physicalModelNode.getByLabel("Expand").click();
 
