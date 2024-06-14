@@ -314,6 +314,51 @@ test.describe("tree widget", () => {
         await takeScreenshot(page, treeWidget);
       });
 
+      test("search - too many results", async ({ page }) => {
+        const node = locateNode(treeWidget, "ProcessPhysicalModel");
+        await node.getByLabel("Expand").click();
+
+        // wait for node at the bottom to be visible/loaded
+        await locateNode(treeWidget, "Tag-Category").waitFor();
+
+        await treeWidget.getByTitle("Search for something").click();
+        await treeWidget.getByPlaceholder("Search...").fill("x");
+
+        // wait for error message to be displayed
+        await treeWidget.getByText(`There are too many matches for the given filter. Please be more specific.`).waitFor();
+        await takeScreenshot(page, treeWidget);
+      });
+
+      test.only("instances focus - too many results", async ({ page }) => {
+        const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
+        await physicalModelNode.getByLabel("Expand").click();
+
+        // wait for all children nodes to be visible
+        await locateNode(treeWidget, "Structure").waitFor();
+
+        // when enlarged layout is used the instances focus button is not visible
+        if (enlarged) {
+          await treeWidget.getByTitle("More").click();
+          await page.locator(".tree-header-button-dropdown-container").waitFor();
+        }
+
+        // enable instances focus and select a node
+        await page.getByTitle("Enable Instance Focus").click();
+
+        // select all elements in viewport
+        const viewport = await page.getByTestId("viewport-component").boundingBox();
+        expect(viewport).not.toBeNull();
+
+        await page.mouse.move(0, 0);
+        await page.mouse.down();
+        await page.mouse.move(viewport!.width - 50, viewport!.height - 50);
+        await page.mouse.up();
+
+        // wait for error message to be displayed
+        await treeWidget.getByText(`There are too many elements selected for focus mode.`).waitFor();
+        await takeScreenshot(page, treeWidget);
+      });
+
       test("button dropdown", async ({ page }) => {
         await treeWidget.getByTitle("Search for something").click();
         await treeWidget.getByTitle("More").click();
