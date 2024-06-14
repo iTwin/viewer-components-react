@@ -1892,7 +1892,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
     });
 
-    it("if model is hidden, showing element adds it to AD set and makes model and category visible in the viewport", async function () {
+    it("if model is hidden, showing element adds it to always drawn set and makes model and category visible in the viewport", async function () {
       const { imodel, ...ids } = await buildIModel(this, async (builder) => {
         const category = insertSpatialCategory({ builder, codeValue: "category" }).id;
         const model = insertPhysicalModelWithPartition({ builder, partitionParentId: IModel.rootSubjectId, codeValue: "1" }).id;
