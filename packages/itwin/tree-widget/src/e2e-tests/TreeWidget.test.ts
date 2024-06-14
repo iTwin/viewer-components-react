@@ -357,6 +357,19 @@ test.describe("tree widget", () => {
         // wait for error message to be displayed
         await treeWidget.getByText(`There are too many elements selected for focus mode.`).waitFor();
         await takeScreenshot(page, treeWidget);
+
+        // click the disable focus text
+        await treeWidget.getByText("Disable the focus mode").click();
+
+        // when enlarged layout is used the instances focus button is not visible
+        if (enlarged) {
+          await treeWidget.getByTitle("More").click();
+          await page.locator(".tree-header-button-dropdown-container").waitFor();
+        }
+
+        // ensure instance focus is turned off and hierarchy is visible
+        await page.getByTitle("Enable Instance Focus").waitFor();
+        await locateNode(treeWidget, "BayTown").waitFor();
       });
 
       test("button dropdown", async ({ page }) => {
