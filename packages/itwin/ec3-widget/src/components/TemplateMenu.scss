@@ -5,5 +5,6 @@
 .ec3w-template-creation-stepper {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 0;
+  flex-grow: 1;
 }
