@@ -37,6 +37,8 @@ import type {
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
+const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+
 interface HierarchyConfiguration {
   /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";
@@ -658,6 +660,9 @@ function createGeometricElementInstanceKeyPaths(
 }
 
 async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceKeyPathsFromInstanceKeysProps): Promise<HierarchyNodeIdentifiersPath[]> {
+  if (props.keys.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
+    throw new Error(`Filter matches more than ${MAX_FILTERING_INSTANCE_KEY_COUNT} items`);
+  }
   const ids = {
     models: new Array<Id64String>(),
     categories: new Array<Id64String>(),
@@ -722,6 +727,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
             AND json_extract(e.JsonProperties, '$.GraphicalPartition3d.Model.Content') IS NULL
         )
         WHERE Label LIKE '%' || ? || '%' ESCAPE '\\'
+        LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}
       `,
       bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
     },

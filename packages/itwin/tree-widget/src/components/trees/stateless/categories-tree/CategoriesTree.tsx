@@ -20,6 +20,8 @@ import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
 
+type StatelessCategoriesTreeError = "tooManyFilterMatches" | "unknownFilterError";
+
 interface StatelessCategoriesTreeOwnProps {
   filter: string;
   activeView: Viewport;
@@ -29,6 +31,7 @@ interface StatelessCategoriesTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
+  onError?: (error: StatelessCategoriesTreeError) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -57,6 +60,7 @@ export function StatelessCategoriesTree({
   selectionMode,
   onPerformanceMeasured,
   onFeatureUsed,
+  onError,
 }: StatelessModelsTreeProps) {
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessCategoriesVisibilityHandler({
@@ -89,9 +93,15 @@ export function StatelessCategoriesTree({
     }
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
-      return CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
+      try {
+        return await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
+      } catch (e) {
+        const error = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        onError?.(error);
+        return [];
+      }
     };
-  }, [filter, activeView, reportUsage]);
+  }, [filter, activeView, reportUsage, onError]);
 
   return (
     <VisibilityTree

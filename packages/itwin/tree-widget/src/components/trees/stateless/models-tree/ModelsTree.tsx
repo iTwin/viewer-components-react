@@ -23,12 +23,15 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
 
+type StatelessModelsTreeError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
+
 interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   filter?: string;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
+  onError?: (error: StatelessModelsTreeError) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -58,6 +61,7 @@ export function StatelessModelsTree({
   selectionMode,
   onPerformanceMeasured,
   onFeatureUsed,
+  onError,
 }: StatelessModelsTreeProps) {
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
@@ -93,14 +97,21 @@ export function StatelessModelsTree({
     if (!focusedInstancesKeys) {
       return undefined;
     }
-    return async ({ imodelAccess }) =>
-      ModelsTreeDefinition.createInstanceKeyPaths({
-        imodelAccess,
-        keys: focusedInstancesKeys,
-        idsCache: getModelsTreeIdsCache(),
-        hierarchyConfig: hierarchyConfiguration,
-      });
-  }, [focusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
+    return async ({ imodelAccess }) => {
+      try {
+        return await ModelsTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          keys: focusedInstancesKeys,
+          idsCache: getModelsTreeIdsCache(),
+          hierarchyConfig: hierarchyConfiguration,
+        });
+      } catch (e) {
+        const error = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
+        onError?.(error);
+        return [];
+      }
+    };
+  }, [focusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration, onError]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
     if (!filter) {
@@ -108,14 +119,20 @@ export function StatelessModelsTree({
     }
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
-      return ModelsTreeDefinition.createInstanceKeyPaths({
-        imodelAccess,
-        label: filter,
-        idsCache: getModelsTreeIdsCache(),
-        hierarchyConfig: hierarchyConfiguration,
-      });
+      try {
+        return await ModelsTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: filter,
+          idsCache: getModelsTreeIdsCache(),
+          hierarchyConfig: hierarchyConfiguration,
+        });
+      } catch (e) {
+        const error = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        onError?.(error);
+        return [];
+      }
     };
-  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration]);
+  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration, onError]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
