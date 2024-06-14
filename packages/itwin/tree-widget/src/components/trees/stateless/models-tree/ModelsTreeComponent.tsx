@@ -5,10 +5,10 @@
 
 import "../Tree.scss";
 import classNames from "classnames";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgCursorClick } from "@itwin/itwinui-icons-react";
-import { Anchor, Flex, IconButton, Text } from "@itwin/itwinui-react";
+import { IconButton } from "@itwin/itwinui-react";
 import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { TreeHeader } from "../../../tree-header/TreeHeader";
@@ -25,7 +25,6 @@ import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { ModelsTreeHeaderButtonProps } from "../../models-tree/ModelsTreeButtons";
 
 type StatelessModelsTreeProps = ComponentPropsWithoutRef<typeof StatelessModelsTree>;
-type StatelessModelsTreeError = Parameters<Required<StatelessModelsTreeProps>["onError"]>[0];
 
 interface StatelessModelsTreeComponentProps
   extends Pick<
@@ -59,60 +58,21 @@ function ModelsTreeComponentImpl({
   selectionStorage,
   ...treeProps
 }: StatelessModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const [error, setError] = useState<StatelessModelsTreeError | undefined>();
   const availableModels = useAvailableModels(iModel);
   const { filter, applyFilter } = useFiltering();
-  const errorRef = useLatest(error);
   const density = treeProps.density;
 
-  useEffect(() => {
-    return selectionStorage.selectionChangeEvent.addListener(() => {
-      if (isInstanceFocusError(errorRef.current)) {
-        setError(undefined);
-      }
-    });
-  }, [selectionStorage, errorRef]);
-
   const onModelsTreeFeatureUsed = (feature: string) => {
-    if (feature === "instancesfocus" && isInstanceFocusError(error)) {
-      setError(undefined);
-    }
     if (treeProps.onFeatureUsed) {
       treeProps.onFeatureUsed(`${StatelessModelsTreeId}-${feature}`);
     }
-  };
-
-  const onFilterChanged = (newFilter: string) => {
-    isFilterError(error) && setError(undefined);
-    applyFilter(newFilter);
-  };
-
-  const getErrorMessage = () => {
-    if (isFilterError(error)) {
-      return <FilterError error={error!} />;
-    }
-    if (isInstanceFocusError(error)) {
-      return <InstanceFocusError error={error!} onFeatureUsed={onModelsTreeFeatureUsed} />;
-    }
-    return undefined;
-  };
-
-  const renderContent = (width: number, height: number) => {
-    if (error) {
-      return (
-        <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
-          {getErrorMessage()}
-        </Flex>
-      );
-    }
-    return <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} onError={setError} />;
   };
 
   return (
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
-          <TreeHeader onFilterClear={() => onFilterChanged("")} onFilterStart={onFilterChanged} onSelectedChanged={() => {}} density={density}>
+          <TreeHeader onFilterClear={() => applyFilter("")} onFilterStart={applyFilter} onSelectedChanged={() => {}} density={density}>
             {headerButtons
               ? headerButtons.map((btn, index) => (
                   <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed: onModelsTreeFeatureUsed })}</Fragment>
@@ -127,7 +87,11 @@ function ModelsTreeComponentImpl({
                 ]}
           </TreeHeader>
           <div className="tw-tree-content">
-            <AutoSizer>{({ width, height }) => renderContent(width, height)}</AutoSizer>
+            <AutoSizer>
+              {({ width, height }) => (
+                <StatelessModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />
+              )}
+            </AutoSizer>
           </div>
         </FocusedInstancesContextProvider>
       </UnifiedSelectionProvider>
@@ -152,62 +116,4 @@ function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "def
       <SvgCursorClick />
     </IconButton>
   );
-}
-
-function isFilterError(error: StatelessModelsTreeError | undefined) {
-  return error === "tooManyFilterMatches" || error === "unknownFilterError";
-}
-
-function FilterError({ error }: { error: StatelessModelsTreeError }) {
-  return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
-}
-
-function isInstanceFocusError(error: StatelessModelsTreeError | undefined) {
-  return error === "tooManyInstancesFocused" || error === "unknownInstanceFocusError";
-}
-
-function InstanceFocusError({ onFeatureUsed, error }: { onFeatureUsed: (feature: string) => void; error: StatelessModelsTreeError }) {
-  const { toggle } = useFocusedInstancesContext();
-  const localizedMessage = createLocalizedMessage(TreeWidget.translate(`stateless.${error}`), () => {
-    onFeatureUsed?.("instancesfocus");
-    toggle();
-  });
-  return <Text>{localizedMessage}</Text>;
-}
-
-function createLocalizedMessage(message: string, onClick?: () => void) {
-  const exp = new RegExp("<link>(.*)</link>");
-  const match = message.match(exp);
-
-  if (!match) {
-    return message;
-  }
-
-  const [fullText, innerText] = match;
-  const [textBefore, textAfter] = message.split(fullText);
-
-  return (
-    <>
-      {textBefore ? textBefore : null}
-      <Anchor
-        underline
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick?.();
-        }}
-      >
-        {innerText}
-      </Anchor>
-      {textAfter ? textAfter : null}
-    </>
-  );
-}
-
-function useLatest<T>(value: T) {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref;
 }

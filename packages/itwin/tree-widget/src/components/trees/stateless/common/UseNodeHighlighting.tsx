@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { useLatest } from "./UseLatest";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 
@@ -199,13 +200,4 @@ function mergeChunks(chunks: HighlightedChunk[], activeChunk?: number) {
     mergedChunks.push(newChunk);
   }
   return { mergedChunks, newActiveIndex };
-}
-
-function useLatest<T>(value: T) {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref;
 }

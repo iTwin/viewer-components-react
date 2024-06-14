@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { Text } from "@itwin/itwinui-react";
+import { Anchor, Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
@@ -14,6 +14,7 @@ import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
+import { useLatest } from "../common/UseLatest";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
@@ -31,7 +32,6 @@ interface StatelessModelsTreeOwnProps {
   filter?: string;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
-  onError?: (error: StatelessModelsTreeError) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -61,8 +61,9 @@ export function StatelessModelsTree({
   selectionMode,
   onPerformanceMeasured,
   onFeatureUsed,
-  onError,
 }: StatelessModelsTreeProps) {
+  const [error, setError] = useState<StatelessModelsTreeError | undefined>(undefined);
+  const errorRef = useLatest(error);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
       ...defaultHierarchyConfiguration,
@@ -94,6 +95,7 @@ export function StatelessModelsTree({
   );
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    isInstanceFocusError(errorRef.current) && setError(undefined);
     if (!focusedInstancesKeys) {
       return undefined;
     }
@@ -106,14 +108,15 @@ export function StatelessModelsTree({
           hierarchyConfig: hierarchyConfiguration,
         });
       } catch (e) {
-        const error = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
-        onError?.(error);
+        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
+        setError(newError);
         return [];
       }
     };
-  }, [focusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration, onError]);
+  }, [focusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration, errorRef]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    isFilterError(errorRef.current) && setError(undefined);
     if (!filter) {
       return undefined;
     }
@@ -127,12 +130,12 @@ export function StatelessModelsTree({
           hierarchyConfig: hierarchyConfiguration,
         });
       } catch (e) {
-        const error = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
-        onError?.(error);
+        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        setError(newError);
         return [];
       }
     };
-  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration, onError]);
+  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration, errorRef]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -149,7 +152,7 @@ export function StatelessModelsTree({
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       getIcon={getIcon}
       density={density}
-      noDataMessage={getNoDataMessage(filter)}
+      noDataMessage={getNoDataMessage(filter, error)}
       selectionMode={selectionMode}
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
@@ -161,11 +164,31 @@ export function StatelessModelsTree({
   );
 }
 
-function getNoDataMessage(filter?: string) {
+function getNoDataMessage(filter?: string, error?: StatelessModelsTreeError) {
+  if (isInstanceFocusError(error)) {
+    return <InstanceFocusError error={error!} />;
+  }
+  if (isFilterError(error)) {
+    return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
+  }
   if (filter) {
     return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
   return undefined;
+}
+
+function isFilterError(error: StatelessModelsTreeError | undefined) {
+  return error === "tooManyFilterMatches" || error === "unknownFilterError";
+}
+
+function isInstanceFocusError(error: StatelessModelsTreeError | undefined) {
+  return error === "tooManyInstancesFocused" || error === "unknownInstanceFocusError";
+}
+
+function InstanceFocusError({ error }: { error: StatelessModelsTreeError }) {
+  const { toggle } = useFocusedInstancesContext();
+  const localizedMessage = createLocalizedMessage(TreeWidget.translate(`stateless.${error}`), () => toggle());
+  return <Text>{localizedMessage}</Text>;
 }
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
@@ -226,4 +249,31 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
     getModelsTreeIdsCache,
     visibilityHandlerFactory,
   };
+}
+
+function createLocalizedMessage(message: string, onClick?: () => void) {
+  const exp = new RegExp("<link>(.*)</link>");
+  const match = message.match(exp);
+  if (!match) {
+    return message;
+  }
+
+  const [fullText, innerText] = match;
+  const [textBefore, textAfter] = message.split(fullText);
+
+  return (
+    <>
+      {textBefore ? textBefore : null}
+      <Anchor
+        underline
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+      >
+        {innerText}
+      </Anchor>
+      {textAfter ? textAfter : null}
+    </>
+  );
 }

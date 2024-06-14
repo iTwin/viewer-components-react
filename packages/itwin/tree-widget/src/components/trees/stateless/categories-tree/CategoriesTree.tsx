@@ -3,13 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
+import { useLatest } from "../common/UseLatest";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
@@ -31,7 +32,6 @@ interface StatelessCategoriesTreeOwnProps {
   hierarchyLevelConfig?: Omit<HierarchyLevelConfig, "isFilteringEnabled">;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
-  onError?: (error: StatelessCategoriesTreeError) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
@@ -60,8 +60,10 @@ export function StatelessCategoriesTree({
   selectionMode,
   onPerformanceMeasured,
   onFeatureUsed,
-  onError,
 }: StatelessModelsTreeProps) {
+  const [error, setError] = useState<StatelessCategoriesTreeError | undefined>();
+  const errorRef = useLatest(error);
+
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessCategoriesVisibilityHandler({
       imodel,
@@ -88,6 +90,7 @@ export function StatelessCategoriesTree({
   );
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    errorRef.current && setError(undefined);
     if (!filter) {
       return undefined;
     }
@@ -96,12 +99,12 @@ export function StatelessCategoriesTree({
       try {
         return await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
       } catch (e) {
-        const error = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
-        onError?.(error);
+        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        setError(newError);
         return [];
       }
     };
-  }, [filter, activeView, reportUsage, onError]);
+  }, [filter, activeView, reportUsage, errorRef]);
 
   return (
     <VisibilityTree
@@ -117,7 +120,7 @@ export function StatelessCategoriesTree({
       getSublabel={getSublabel}
       getIcon={getIcon}
       density={density}
-      noDataMessage={getNoDataMessage(filter)}
+      noDataMessage={getNoDataMessage(filter, error)}
       selectionMode={selectionMode ?? "none"}
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
@@ -128,7 +131,10 @@ export function StatelessCategoriesTree({
   );
 }
 
-function getNoDataMessage(filter: string) {
+function getNoDataMessage(filter: string, error?: StatelessCategoriesTreeError) {
+  if (error) {
+    return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
+  }
   if (filter) {
     return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
