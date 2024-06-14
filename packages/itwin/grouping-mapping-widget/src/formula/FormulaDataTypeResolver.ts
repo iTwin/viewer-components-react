@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { DataType } from "@itwin/insights-client";
 import { splitFormula } from "./FormulaSplitter";
 import { resolveTokensDataType } from "./FormulaTokensDataTypeResolver";
@@ -20,6 +20,7 @@ import { inferToPropertyDataType } from "../components/Properties/hooks/useFormu
  * @returns `dataType` if formula is valid. `errorMessage` otherwise.
  * @public
  */
+
 export function resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap, providedDataType?: DataType): IResult<FormulaDataType> {
   const parenthesisState = validateParenthesis(formula);
   if (ParenthesisState.NotClosed === parenthesisState) {
@@ -49,10 +50,10 @@ export function resolveFormulaDataType(formulaName: string, formula: string, pro
 
   const tokensDataType = resolveTokensDataType(formulaName, postfixFormulaTokens.value, properties);
 
-  if(providedDataType && !tokensDataType.errorMessage){
+  if (providedDataType && !tokensDataType.errorMessage) {
     const formulaDataType = inferToPropertyDataType(tokensDataType.value);
-    if(providedDataType !== formulaDataType){
-      return { errorMessage: `The formula result data type ${formulaDataType} does not match the provided data type ${providedDataType}`};
+    if (providedDataType !== formulaDataType) {
+      return { errorMessage: `The formula result data type ${formulaDataType} does not match the provided data type ${providedDataType}` };
     }
   }
 

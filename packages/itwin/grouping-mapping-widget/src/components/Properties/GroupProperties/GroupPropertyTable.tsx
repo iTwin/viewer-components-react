@@ -12,6 +12,7 @@ import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
+
 export interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
