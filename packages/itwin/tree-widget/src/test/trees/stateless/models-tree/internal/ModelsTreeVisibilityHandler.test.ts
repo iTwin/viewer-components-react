@@ -14,6 +14,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
+import { InstanceKey } from "@itwin/presentation-shared";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
@@ -43,7 +44,6 @@ import type {
 } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import type { Visibility } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 
-import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ValidateNodeProps } from "./VisibilityValidation";
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
@@ -2402,7 +2402,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
             assert(HierarchyNode.isInstancesNode(node));
             const nodeKey = node.key.instanceKeys[0];
-            if (nodeKey.id === pathKey.id && nodeKey.className === pathKey.className) {
+            if (InstanceKey.equals(nodeKey, pathKey)) {
               newParentNode = node;
               break;
             }

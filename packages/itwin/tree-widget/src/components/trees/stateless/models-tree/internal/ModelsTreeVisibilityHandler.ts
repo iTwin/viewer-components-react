@@ -1036,7 +1036,7 @@ function reduceFilterPaths(paths: HierarchyNodeIdentifiersPath[]) {
   return paths;
 }
 
-function arraySortedByLengthContainsPrefix<T>(targetArray: T[][], source: T[]) {
+function arraySortedByLengthContainsPrefix(targetArray: HierarchyNodeIdentifiersPath[], source: HierarchyNodeIdentifiersPath) {
   for (const targetVal of targetArray) {
     if (targetVal.length >= source.length) {
       break;
@@ -1044,7 +1044,7 @@ function arraySortedByLengthContainsPrefix<T>(targetArray: T[][], source: T[]) {
 
     let isPrefix = true;
     for (let i = 0; i < targetVal.length; ++i) {
-      if (targetVal[i] !== source[i]) {
+      if (!HierarchyNodeIdentifier.equal(targetVal[i], source[i])) {
         isPrefix = false;
         break;
       }
