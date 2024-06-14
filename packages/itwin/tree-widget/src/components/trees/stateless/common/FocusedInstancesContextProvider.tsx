@@ -4,13 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from "react";
+import { HierarchyNode } from "@itwin/presentation-hierarchies-react";
 import { Selectable, Selectables } from "@itwin/unified-selection";
 import { focusedInstancesContext } from "./FocusedInstancesContext";
 
+import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { PropsWithChildren } from "react";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { FocusedInstancesContext } from "./FocusedInstancesContext";
+import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 /** @internal */
 export function FocusedInstancesContextProvider({
@@ -28,19 +30,43 @@ export function FocusedInstancesContextProvider({
 
   useEffect(() => {
     if (!enabled) {
-      setState((prev) => ({ ...prev, instanceKeys: undefined }));
+      setState((prev) => ({ ...prev, loadInstanceKeys: undefined }));
       return;
     }
 
     const onSelectionChanged = () => {
       const selection = selectionStorage.getSelection({ imodelKey, level: 0 });
-      const selectedInstanceKeys: InstanceKey[] = [];
-      Selectables.forEach(selection, (key) => {
-        if (Selectable.isInstanceKey(key)) {
-          selectedInstanceKeys.push(key);
+      if (Selectables.isEmpty(selection)) {
+        setState((prev) => ({ ...prev, loadInstanceKeys: undefined }));
+        return;
+      }
+
+      const selected: Array<InstanceKey | GroupingHierarchyNode | (() => AsyncIterableIterator<InstanceKey>)> = [];
+      Selectables.forEach(selection, (selectable) => {
+        if (Selectable.isInstanceKey(selectable)) {
+          selected.push(selectable);
+          return;
         }
+
+        if (isHierarchyNode(selectable.data) && HierarchyNode.isGroupingNode(selectable.data)) {
+          selected.push(selectable.data);
+          return;
+        }
+
+        selected.push(selectable.loadInstanceKeys);
       });
-      setState((prev) => ({ ...prev, instanceKeys: selectedInstanceKeys.length === 0 ? undefined : selectedInstanceKeys }));
+
+      const loadInstanceKeys: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode> = async function* () {
+        for (const item of selected) {
+          if (typeof item === "function") {
+            yield* item();
+          } else {
+            yield item;
+          }
+        }
+      };
+
+      setState((prev) => ({ ...prev, loadInstanceKeys }));
     };
 
     onSelectionChanged();
@@ -53,4 +79,8 @@ export function FocusedInstancesContextProvider({
   }, [enabled, imodelKey, selectionStorage]);
 
   return <focusedInstancesContext.Provider value={state}>{children}</focusedInstancesContext.Provider>;
+}
+
+function isHierarchyNode(data: unknown): data is HierarchyNode {
+  return !!data && typeof data === "object" && "key" in data;
 }

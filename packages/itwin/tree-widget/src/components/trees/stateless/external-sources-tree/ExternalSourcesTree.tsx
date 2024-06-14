@@ -41,7 +41,7 @@ export function StatelessExternalSourcesTree({ onPerformanceMeasured, onFeatureU
       reportUsage={reportUsage}
     />
   );
-};
+}
 
 function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
   return new ExternalSourcesTreeDefinition(props);

@@ -15,21 +15,29 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { ModelsTreeIdsCache } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../../components/trees/stateless/models-tree/ModelsTreeDefinition";
 import {
-  buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
-  insertSpatialCategory, insertSubject,
+  buildIModel,
+  importSchema,
+  insertPhysicalElement,
+  insertPhysicalModelWithPartition,
+  insertPhysicalPartition,
+  insertPhysicalSubModel,
+  insertSpatialCategory,
+  insertSubject,
 } from "../../../../IModelUtils";
 import { TestUtils } from "../../../../TestUtils";
 import { createFakeSinonViewport, createIModelAccess } from "../../../Common";
 import {
-  createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
+  createCategoryHierarchyNode,
+  createClassGroupingHierarchyNode,
+  createElementHierarchyNode,
+  createFakeIdsCache,
+  createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../../Common";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
@@ -2254,7 +2262,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
           const emptyPartitionId = insertPhysicalPartition({ builder, codeValue: "EmptyPhysicalModel", parentId: IModel.rootSubjectId }).id;
           const emptyModelId = insertPhysicalSubModel({ builder, modeledElementId: emptyPartitionId }).id;
 
-          const customClassName = schema.items.SubModelabalePhysicalObject.fullName;
+          const customClassName = schema.items.SubModelablePhysicalObject.fullName;
 
           const partitionId = insertPhysicalPartition({ builder, codeValue: "ConfigurationPhysicalModel ", parentId: IModel.rootSubjectId }).id;
           const configurationModelId = insertPhysicalSubModel({ builder, modeledElementId: partitionId }).id;
