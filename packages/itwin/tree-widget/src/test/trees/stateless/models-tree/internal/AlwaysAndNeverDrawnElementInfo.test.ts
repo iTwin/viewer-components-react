@@ -8,7 +8,8 @@ import { firstValueFrom } from "rxjs";
 import sinon from "sinon";
 import { using } from "@itwin/core-bentley";
 import {
-  AlwaysAndNeverDrawnElementInfo, SET_CHANGE_DEBOUNCE_TIME,
+  AlwaysAndNeverDrawnElementInfo,
+  SET_CHANGE_DEBOUNCE_TIME,
 } from "../../../../../components/trees/stateless/models-tree/internal/AlwaysAndNeverDrawnElementInfo";
 import { createResolvablePromise } from "../../../../TestUtils";
 import { createFakeSinonViewport } from "../../../Common";

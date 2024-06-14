@@ -5,9 +5,9 @@
 
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
+import { collect } from "./Common";
 
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-
 export interface HierarchyDef<TNode> {
   node: TNode;
   children?: Array<HierarchyDef<TNode>> | boolean;
@@ -324,14 +324,6 @@ export function validateHierarchyLevel(props: { nodes: HierarchyNode[]; expect: 
     const expectation = expect[i];
     expectation.node(nodes[i]);
   }
-}
-
-export async function collect<T>(items: AsyncIterableIterator<T>) {
-  const result: T[] = [];
-  for await (const item of items) {
-    result.push(item);
-  }
-  return result;
 }
 
 function hasChildren(node: { children?: boolean | Array<unknown> }): boolean {

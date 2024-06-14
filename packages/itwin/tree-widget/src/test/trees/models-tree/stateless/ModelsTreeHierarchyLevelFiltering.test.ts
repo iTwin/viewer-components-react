@@ -27,14 +27,14 @@ import {
   insertSpatialCategory,
   insertSubject,
 } from "../../../IModelUtils";
-import { collect, NodeValidators, validateHierarchyLevel } from "../../HierarchyValidation";
+import { collect } from "../../Common";
+import { NodeValidators, validateHierarchyLevel } from "../../HierarchyValidation";
 import { createModelsTreeProvider } from "./Utils";
 
 import type { GenericInstanceFilter, GenericInstanceFilterRule } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Descriptor, NestedContentField, PropertiesField } from "@itwin/presentation-common";
 import type { DefineHierarchyLevelProps, HierarchyProvider } from "@itwin/presentation-hierarchies";
-
 describe("Models tree", () => {
   describe("Hierarchy level filtering", () => {
     before(async function () {
@@ -499,7 +499,7 @@ describe("Models tree", () => {
         const model = insertPhysicalModelWithPartition({ builder, codeValue: `model`, partitionParentId: rootSubject.id });
         const modeledElement = insertPhysicalElement({
           builder,
-          classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+          classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
           userLabel: `parent element`,
           modelId: model.id,
           categoryId: category.id,
@@ -734,7 +734,7 @@ describe("Models tree", () => {
           const element1 = insertPhysicalElement({
             builder,
             userLabel: `element`,
-            classFullName: testSchema.items.SubModelabalePhysicalObject.fullName,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
             modelId: model.id,
             categoryId: category.id,
           });

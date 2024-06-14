@@ -3,9 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  BehaviorSubject, debounceTime, EMPTY, first, from, fromEventPattern, map, reduce, share, startWith, Subject, switchMap, takeUntil, tap,
-} from "rxjs";
+import { BehaviorSubject, debounceTime, EMPTY, first, from, fromEventPattern, map, reduce, share, startWith, Subject, switchMap, takeUntil, tap } from "rxjs";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { pushToMap } from "../../common/Utils";
 
