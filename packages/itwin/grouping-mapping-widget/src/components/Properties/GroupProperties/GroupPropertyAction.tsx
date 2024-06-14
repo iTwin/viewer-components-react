@@ -339,6 +339,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
       <ActionPanel
         onSave={handleSaveClick}
         onCancel={onClickCancel}
+        onSaveCapture={clearAll}
         onCancelCapture={clearAll}
         isLoading={isLoading}
         isSavingDisabled={!propertyName || dataType === undefined || formulaErrorMessage !== undefined}
