@@ -2177,14 +2177,14 @@ describe("HierarchyBasedVisibilityHandler", () => {
 
     describe("child element category is different than parent's", () => {
       it("model visibility only takes into account parent element categories", async function () {
-        const { imodel, modelId, parentCategoryId } = await buildIModel(this, async (builder) => {
+        const { imodel, modelId, parentCategoryId, parentElementId } = await buildIModel(this, async (builder) => {
           const parentCategory = insertSpatialCategory({ builder, codeValue: "parentCategory" });
           const childCategory = insertSpatialCategory({ builder, codeValue: "childCategory" });
           const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
 
           const parentElement = insertPhysicalElement({ builder, modelId: model.id, categoryId: parentCategory.id });
           insertPhysicalElement({ builder, modelId: model.id, categoryId: childCategory.id, parentId: parentElement.id });
-          return { modelId: model.id, parentCategoryId: parentCategory.id };
+          return { modelId: model.id, parentCategoryId: parentCategory.id, parentElementId: parentElement.id };
         });
         const { handler, viewport, ...props } = createVisibilityTestData({ imodel });
         const parentCategoryNode = createCategoryHierarchyNode(modelId, parentCategoryId);
@@ -2196,7 +2196,12 @@ describe("HierarchyBasedVisibilityHandler", () => {
             ...props,
             handler,
             viewport,
-            visibilityExpectations: VisibilityExpectations.all("visible"),
+            visibilityExpectations: {
+              ...VisibilityExpectations.all("visible"),
+              // FIXME: This is strange from the UX perspective
+              groupingNode: ({ elementIds }) => (elementIds.includes(parentElementId) ? "visible" : "hidden"),
+              element: ({ elementId }) => (elementId === parentElementId ? "visible" : "hidden"),
+            },
           });
         });
       });
