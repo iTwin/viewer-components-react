@@ -61,29 +61,6 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
     [allAssemblies],
   );
 
-  const getMetadataColumns = useMemo(
-    () => (assembly: EC3ConfigurationLabel, optionType: AssemblyCreationDropdownType) => {
-      const oDataTableData = oDataTable.find((x) => x.name === assembly.reportTable);
-      if (!oDataTableData) {
-        return;
-      }
-      switch (optionType) {
-        case AssemblyCreationDropdownType.elementName: {
-          return oDataTableData.columns
-            .filter((x) => x.type === "Edm.String" && !assembly.materials.map((p) => p.nameColumn).includes(x.name))
-            .map((x) => x.name);
-        }
-        case AssemblyCreationDropdownType.elementQuantity: {
-          return oDataTableData.columns.filter((x) => x.type === "Edm.Double").map((x) => x.name);
-        }
-        case AssemblyCreationDropdownType.material: {
-          return oDataTableData.columns.filter((x) => x.type === "Edm.String" && assembly.elementNameColumn !== x.name).map((x) => x.name);
-        }
-      }
-    },
-    [oDataTable],
-  );
-
   const isNextDisabled = useMemo(
     () =>
       !allAssemblies ||
@@ -105,6 +82,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
       setReportTables(reportMetadataResponse.map((d) => d.name ?? ""));
       setIsLoading(false);
     } catch (e) {
+      setIsLoading(false);
       throw new Error("Could not get Odata Tables");
     }
   }, [getAccessToken, oDataClient, props.template.reportId]);
@@ -126,38 +104,11 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
 
   useEffect(() => {
     const init = async () => {
-      if (props.template.reportId) {
-        await initReportTableSelection();
-      }
-      if (allAssemblies === undefined || allAssemblies.length === 0) {
-        addNewEmptyAssembly();
-      }
+      if (allAssemblies === undefined || allAssemblies.length === 0) addNewEmptyAssembly();
+      if (oDataTable === undefined || oDataTable.length === 0) await initReportTableSelection();
     };
     init(); // eslint-disable-line @typescript-eslint/no-floating-promises
-  }, [addNewEmptyAssembly, allAssemblies, initReportTableSelection, props.template.labels, props.template.reportId]);
-
-  const reportTableLabels = useMemo(() => {
-    return (
-      reportTables?.map((g) => ({
-        label: g,
-        value: g,
-      })) ?? []
-    );
-  }, [reportTables]);
-
-  // skip reportTables that have already been used in other assemblies
-  const getReportTableOptions = useCallback(
-    (assembly: EC3ConfigurationLabel) => {
-      const existingAssembly = reportTableLabels.find((x) => x.value === assembly.reportTable);
-      if (existingAssembly) {
-        const allAssem = reportTableLabels.filter((x) => !allAssemblies?.map((p) => p.reportTable).includes(x.value));
-        allAssem.push(existingAssembly);
-        return allAssem;
-      }
-      return reportTableLabels.filter((x) => !allAssemblies?.map((p) => p.reportTable).includes(x.value));
-    },
-    [reportTableLabels, allAssemblies],
-  );
+  }, [addNewEmptyAssembly, allAssemblies, initReportTableSelection, oDataTable]);
 
   return (
     <div className="ec3w-create-template-step-two">
@@ -199,11 +150,11 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
               >
                 <AssemblyItem
                   assembly={assembly}
+                  allAssemblies={allAssemblies}
                   currentAssemblyIndex={i}
                   editableAssemblyIndex={editableAssemblyIndex}
-                  fetchedReports={props.fetchedReports}
-                  getMetadataColumns={getMetadataColumns}
-                  getReportTableOptions={getReportTableOptions}
+                  oDataTable={oDataTable}
+                  reportTables={reportTables}
                   isLoading={isLoading}
                   onAssemblyDataChange={onAssemblyDataChange}
                   setTemplate={props.setTemplate}
@@ -217,7 +168,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
             className="add-new-button"
             styleType="borderless"
             title="Add new"
-            disabled={allAssemblies?.length === reportTableLabels.length}
+            disabled={allAssemblies?.length === reportTables?.length}
             startIcon={<SvgAdd />}
             onClick={() => {
               // add new empty item to the assemblies array

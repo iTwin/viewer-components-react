@@ -106,7 +106,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
         ) : templates.length === 0 ? (
           <>
             <EmptyMessage message="It looks like you haven't added any templates yet. Click the button below to create your first template." />
-            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
+            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="Add New Template">
               Add New Template
             </Button>
           </>

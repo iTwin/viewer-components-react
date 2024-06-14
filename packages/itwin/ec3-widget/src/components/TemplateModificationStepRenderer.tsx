@@ -13,6 +13,7 @@ export interface TemplateModificationStepRendererProps {
   onCancelClick: () => void;
   onSaveClick: () => Promise<void>;
   fetchedReports: Report[];
+  isLoading: boolean;
 }
 
 export const TemplateModificationStepRenderer = (props: TemplateModificationStepRendererProps) => {

@@ -14,6 +14,11 @@
     flex-grow: 1;
     .ec3w-assembly-expandable-block {
       margin-top: var(--iui-size-xs);
+      // TODO: This is being done because there is no-way to add custom-classnames for nested classes in itwinui-react v2.
+      .iui-svg-icon {
+        display: flex;
+        flex-direction: row-reverse;
+      }
     }
   }
   .ec3w-button-row-above-stepper {

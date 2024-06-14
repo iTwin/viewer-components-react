@@ -1,6 +1,6 @@
 .ec3w-template-creation-step-three {
   height: 100%;
-  .summary-text {
+  .ec3w-summary-text {
     font-weight: var(--iui-font-weight-bold);
   }
   .ec3w-assembly-name-list {
@@ -9,7 +9,7 @@
     align-items: center;
     margin-left: 16px;
     margin-top: var(--iui-size-xs);
-    .assembly-name {
+    .ec3w-assembly-name {
       margin-left: var(--iui-size-xs);
     }
   }

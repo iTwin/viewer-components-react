@@ -30,6 +30,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
   } = useApiContext();
 
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [childTemplate, setChildTemplate] = useState<Configuration>({
     reportId: undefined,
     description: "",
@@ -46,6 +47,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
       const token = await getAccessToken();
 
       if (props.template) {
+        setIsLoading(true);
         const data = await reportsClient.getReports(token, projectId);
         if (data && data.length > 0) {
           setFetchedReports(data);
@@ -60,21 +62,25 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
           labels: configuration.labels,
         };
         setChildTemplate(childConfig);
+        setIsLoading(false);
       } else {
         try {
           // check if defaultReport exists (set by the consuming application), else fetch all reports and allow user to select
           if (defaultReport) {
             setChildTemplate({ ...childTemplate, reportId: defaultReport.id });
           } else {
+            setIsLoading(true);
             const data = await reportsClient.getReports(token, projectId);
             if (data && data.length > 0) {
               setFetchedReports(data);
             }
+            setIsLoading(false);
           }
         } catch (err) {
           toaster.negative("You are not authorized to use this system.");
           /* eslint-disable no-console */
           console.error(err);
+          setIsLoading(false);
         }
       }
     };
@@ -117,6 +123,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
       />
       <TemplateModificationStepRenderer
         childTemplate={childTemplate}
+        isLoading={isLoading}
         currentStep={currentStep}
         onCancelClick={props.onClickCancel}
         onSaveClick={saveConfiguration}
