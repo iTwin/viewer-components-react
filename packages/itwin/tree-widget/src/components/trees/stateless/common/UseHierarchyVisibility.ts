@@ -27,6 +27,7 @@ interface UseHierarchyVisibilityProps {
 interface UseHierarchyVisibilityResult {
   onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
   getCheckboxState: (node: PresentationHierarchyNode) => TreeNodeCheckboxState;
+  triggerRefresh: () => void;
 }
 
 /** @internal */
@@ -35,6 +36,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
   const [state, setState] = useState<UseHierarchyVisibilityResult>({
     getCheckboxState: () => ({ state: "off", isDisabled: true }),
     onCheckboxClicked: () => {},
+    triggerRefresh: () => {},
   });
 
   useEffect(() => {
@@ -45,6 +47,20 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     const calculate = new Subject<PresentationHierarchyNode>();
     const calculateNodeStatus = (node: PresentationHierarchyNode) => {
       calculate.next(node);
+    };
+
+    const resetCache = () => {
+      nodesStateMap.current.forEach((value) => {
+        value.needsRefresh = true;
+      });
+      visibilityChanged.next();
+    };
+
+    const triggerCheckboxUpdate = () => {
+      setState((prev) => ({
+        ...prev,
+        getCheckboxState: createStateGetter(nodesStateMap, calculateNodeStatus),
+      }));
     };
 
     const subscription = calculate
@@ -63,10 +79,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
             },
             needsRefresh: false,
           });
-          setState((prev) => ({
-            ...prev,
-            getCheckboxState: createStateGetter(nodesStateMap, calculateNodeStatus),
-          }));
+          triggerCheckboxUpdate();
         },
       });
 
@@ -78,24 +91,21 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       }
       entry.state.state = checked ? "on" : "off";
       entry.state.tooltip = undefined;
-      setState((prev) => ({ ...prev, getCheckboxState: createStateGetter(nodesStateMap, calculateNodeStatus) }));
+      triggerCheckboxUpdate();
     };
 
     setState({
       onCheckboxClicked: changeVisibility,
       getCheckboxState: createStateGetter(nodesStateMap, calculateNodeStatus),
+      triggerRefresh: () => {
+        resetCache();
+        triggerCheckboxUpdate();
+      },
     });
 
     const removeListener = handler.onVisibilityChange.addListener(() => {
-      nodesStateMap.current.forEach((value) => {
-        value.needsRefresh = true;
-      });
-
-      visibilityChanged.next();
-      setState((prev) => ({
-        ...prev,
-        getCheckboxState: createStateGetter(nodesStateMap, calculateNodeStatus),
-      }));
+      resetCache();
+      triggerCheckboxUpdate();
     });
 
     return () => {

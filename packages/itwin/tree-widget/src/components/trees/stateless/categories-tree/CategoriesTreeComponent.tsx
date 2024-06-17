@@ -5,7 +5,7 @@
 
 import "../Tree.scss";
 import classNames from "classnames";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
@@ -13,6 +13,7 @@ import { TreeHeader } from "../../../tree-header/TreeHeader";
 import { AutoSizer } from "../../../utils/AutoSizer";
 import { HideAllButton, InvertAllButton, ShowAllButton } from "../../category-tree/CategoriesTreeButtons";
 import { useCategories } from "../../category-tree/CategoryVisibilityHandler";
+import { useFiltering } from "../common/UseFiltering";
 import { StatelessCategoriesTree, StatelessCategoriesTreeId } from "./CategoriesTree";
 
 import type { ComponentPropsWithoutRef } from "react";
@@ -54,7 +55,7 @@ function CategoriesTreeComponentImpl({
   ...treeProps
 }: StatelessCategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const categories = useCategories(IModelApp.viewManager, iModel, viewport);
-  const [filter, setFilter] = useState("");
+  const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
 
   const onCategoriesTreeFeatureUsed = (feature: string) => {
@@ -66,7 +67,7 @@ function CategoriesTreeComponentImpl({
   return (
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
-        <TreeHeader onFilterClear={() => setFilter("")} onFilterStart={(newFilter) => setFilter(newFilter)} onSelectedChanged={() => {}} density={density}>
+        <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
           {headerButtons
             ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories, onFeatureUsed: onCategoriesTreeFeatureUsed })}</Fragment>)
             : [

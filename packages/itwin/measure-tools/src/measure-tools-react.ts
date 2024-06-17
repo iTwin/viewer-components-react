@@ -19,6 +19,7 @@ export * from "./api/MeasurementUIEvents";
 export * from "./api/MeasurementViewTarget";
 export * from "./api/MeasureToolsLoggerCategory";
 export * from "./api/Polygon";
+export * from "./api/SheetMeasurementHelper";
 export * from "./api/TextMarker";
 export * from "./api/ViewHelper";
 

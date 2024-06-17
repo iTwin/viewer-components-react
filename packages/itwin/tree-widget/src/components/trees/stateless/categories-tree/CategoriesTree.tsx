@@ -3,8 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { IModelApp } from "@itwin/core-frontend";
+import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
@@ -12,12 +13,14 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
-import type { ComponentPropsWithoutRef, ReactElement } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import type { CategoryInfo } from "../../category-tree/CategoriesTreeButtons";
 import type { ViewManager, Viewport } from "@itwin/core-frontend";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
+
+type StatelessCategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
 interface StatelessCategoriesTreeOwnProps {
   filter: string;
@@ -57,6 +60,7 @@ export function StatelessCategoriesTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
+  const [filteringError, setFilteringError] = useState<StatelessCategoriesTreeFilteringError | undefined>();
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessCategoriesVisibilityHandler({
       imodel,
@@ -83,12 +87,19 @@ export function StatelessCategoriesTree({
   );
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    setFilteringError(undefined);
     if (!filter) {
       return undefined;
     }
     return async ({ imodelAccess }) => {
       reportUsage?.({ featureId: "filtering", reportInteraction: true });
-      return CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
+      try {
+        return await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
+      } catch (e) {
+        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        setFilteringError(newError);
+        return [];
+      }
     };
   }, [filter, activeView, reportUsage]);
 
@@ -104,24 +115,33 @@ export function StatelessCategoriesTree({
       getFilteredPaths={getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       getSublabel={getSublabel}
+      getIcon={getIcon}
       density={density}
-      noDataMessage={getNoDataMessage(filter)}
+      noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode ?? "none"}
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
       }}
       reportUsage={reportUsage}
+      searchText={filter}
     />
   );
 }
 
-function getNoDataMessage(filter: string) {
+function getNoDataMessage(filter: string, error?: StatelessCategoriesTreeFilteringError) {
+  if (error) {
+    return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
+  }
   if (filter) {
     return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
   }
   return undefined;
 }
 
-function getSublabel(node: PresentationHierarchyNode): ReactElement | undefined {
-  return <div style={{ marginBottom: "10px" }}>{node.extendedData?.description}</div>;
+function getIcon() {
+  return <SvgLayers />;
+}
+
+function getSublabel(node: PresentationHierarchyNode) {
+  return node.extendedData?.description;
 }
