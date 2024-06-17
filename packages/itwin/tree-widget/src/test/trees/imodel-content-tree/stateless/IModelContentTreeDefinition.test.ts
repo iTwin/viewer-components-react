@@ -22,6 +22,7 @@ import {
   insertModelWithPartition,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
+  insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubject,
   insertSubModel,
@@ -787,11 +788,17 @@ describe("IModelContent tree", () => {
     describe("elements' children", () => {
       it("creates childless node when element has no child or modeling elements", async function () {
         // eslint-disable-next-line deprecation/deprecation
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
           const category = insertSpatialCategory({ builder, codeValue: "test category" });
-          const physicalElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          return { rootSubject, dictionaryModel, physicalModel, category, physicalElement };
+          const physicalElement = insertPhysicalElement({
+            builder,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+            modelId: physicalModel.id,
+            categoryId: category.id,
+          });
+          const subModel = insertPhysicalSubModel({ builder, modeledElementId: physicalElement.id });
+          return { rootSubject, dictionaryModel, physicalModel, category, physicalElement, subModel };
         });
         await validateHierarchy({
           provider: createIModelContentTreeProvider(imodel),
