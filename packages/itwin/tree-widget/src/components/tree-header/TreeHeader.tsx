@@ -62,10 +62,7 @@ export function TreeHeader(props: TreeHeaderProps) {
       <DebouncedSearchBox
         isOpened={isSearchOpen}
         onOpen={() => setIsSearchOpen(true)}
-        onClose={() => {
-          onFilterClear();
-          setIsSearchOpen(false);
-        }}
+        onClose={() => setIsSearchOpen(false)}
         onChange={(value) => (value ? onFilterStart(value) : onFilterClear())}
         delay={500}
         selectedResultIndex={selectedIndex}
