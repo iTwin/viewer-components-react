@@ -314,43 +314,12 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
       return from(this._idsCache.getModelCategories(modelId)).pipe(
         concatAll(),
-        mergeMap((categoryId) => {
-          if (
-            viewport.perModelCategoryVisibility.getOverride(modelId, categoryId) === PerModelCategoryVisibility.Override.None &&
-            !viewport.view.viewsCategory(categoryId)
-          ) {
-            // If all category elements are always drawn it's actually visible.
-            return this.getCategoryDisplayStatus({ modelId, categoryId });
-          }
-          return of(this.getDefaultCategoryVisibilityStatus({ categoryId, modelId }));
-        }),
+        mergeMap((categoryId) => this.getCategoryDisplayStatus({ modelId, categoryId })),
         map((x) => x.state),
         getVisibilityFromTreeNodeChildren,
-        mergeMap((visibilityByCategories) => {
-          if (visibilityByCategories === "empty") {
-            return of(createVisibilityStatus("visible"));
-          }
-
-          // If different categories have different visibilities,
-          // then there's no need to check for their elements.
-          if (visibilityByCategories === "partial") {
-            return of(createVisibilityStatus("partial", "model.someCategoriesHidden"));
-          }
-
-          return this.getVisibilityFromAlwaysAndNeverDrawnElements({
-            queryProps: { modelId },
-            tooltips: {
-              allElementsInAlwaysDrawnList: "model.allElementsInAlwaysDrawnList",
-              allElementsInNeverDrawnList: "model.allElementsHidden",
-              elementsInBothAlwaysAndNeverDrawn: "model.elementsInAlwaysAndNeverDrawnList",
-              noElementsInExclusiveAlwaysDrawnList: "model.noElementsInExclusiveAlwaysDrawnList",
-            },
-            defaultStatus: () =>
-              createVisibilityStatus(
-                visibilityByCategories,
-                visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden"
-              ),
-          });
+        map((visibilityByCategories) => {
+          const state = visibilityByCategories === "empty" ? "visible" : visibilityByCategories;
+          return createVisibilityStatus(state, `model.allCategories${state ? "Visible" : "Hidden"}`);
         }),
       );
     });
