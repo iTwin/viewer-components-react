@@ -51,8 +51,8 @@ import type {
   ModelsTreeVisibilityHandlerProps,
 } from "../../../../../components/trees/stateless/models-tree/internal/ModelsTreeVisibilityHandler";
 import type { Visibility } from "../../../../../components/trees/stateless/models-tree/internal/Tooltip";
-
 import type { ValidateNodeProps } from "./VisibilityValidation";
+
 interface VisibilityOverrides {
   models?: Map<Id64String, Visibility>;
   categories?: Map<Id64String, Visibility>;
@@ -578,7 +578,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               idsCache,
               viewport: createFakeSinonViewport({
                 neverDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ elementId: "0x100", modelId, categoryId: "0xff" }],
+                queryHandler: () => [{ elementId: "0x100", modelId, categoryId: "0x10" }],
               }),
             });
             const result = await handler.getVisibilityStatus(node);
@@ -600,7 +600,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
               viewport: createFakeSinonViewport({
                 isAlwaysDrawnExclusive: true,
                 alwaysDrawn: new Set(["0x100"]),
-                queryHandler: () => [{ elementId: "0x100", modelId, categoryId: "0xff" }],
+                queryHandler: () => [{ elementId: "0x100", modelId, categoryId: "0x10" }],
               }),
             });
             const result = await handler.getVisibilityStatus(node);
@@ -2247,6 +2247,205 @@ describe("HierarchyBasedVisibilityHandler", () => {
               groupingNode: ({ elementIds }) => (elementIds.includes(elementId) ? "visible" : "hidden"),
               element: (props) => (props.elementId === elementId ? "visible" : "hidden"),
             },
+          });
+        });
+      });
+    });
+
+    describe("reacting to category selector", () => {
+      async function createIModel(context: Mocha.Context) {
+        return buildIModel(context, async (builder) => {
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
+
+          const category1 = insertSpatialCategory({ builder, codeValue: "category1" });
+          const elements1 = [
+            insertPhysicalElement({ builder, categoryId: category1.id, modelId: model.id }).id,
+            insertPhysicalElement({ builder, categoryId: category1.id, modelId: model.id }).id,
+          ];
+
+          const category2 = insertSpatialCategory({ builder, codeValue: "category2" });
+          const elements2 = [
+            insertPhysicalElement({ builder, categoryId: category2.id, modelId: model.id }).id,
+            insertPhysicalElement({ builder, categoryId: category2.id, modelId: model.id }).id,
+          ];
+          return { firstCategoryId: category1.id, secondCategoryId: category2.id, modelId: model.id, elements1, elements2 };
+        });
+      }
+
+      it("showing category via the selector makes category and all elements visible when it has no always or never drawn elements", async function () {
+        const { imodel, firstCategoryId, secondCategoryId, modelId } = await createIModel(this);
+        const { handler, provider, viewport } = createVisibilityTestData({ imodel });
+        await using(handler, async (_) => {
+          await viewport.addViewedModels(modelId);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("hidden"),
+          });
+
+          viewport.changeCategoryDisplay([firstCategoryId, secondCategoryId], true, true);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("visible"),
+          });
+        });
+      });
+
+      it("hiding category via the selector makes category and all elements hidden when it has no always or never drawn elements", async function () {
+        const { imodel, firstCategoryId, secondCategoryId, modelId } = await createIModel(this);
+        const { handler, provider, viewport } = createVisibilityTestData({ imodel });
+        await using(handler, async (_) => {
+          await viewport.addViewedModels(modelId);
+          viewport.changeCategoryDisplay([firstCategoryId, secondCategoryId], true, true);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("visible"),
+          });
+
+          viewport.changeCategoryDisplay([firstCategoryId, secondCategoryId], false);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("hidden"),
+          });
+        });
+      });
+
+      it("hiding category via the selector makes it hidden when it only has never drawn elements", async function () {
+        const { imodel, firstCategoryId, modelId, elements1 } = await createIModel(this);
+        const { handler, provider, viewport } = createVisibilityTestData({ imodel });
+        await using(handler, async (_) => {
+          await viewport.addViewedModels(modelId);
+          viewport.changeCategoryDisplay(firstCategoryId, true, true);
+          const elementId = elements1[0];
+          viewport.setNeverDrawn(new Set([elementId]));
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: {
+              subject: () => "partial",
+              model: () => ({ tree: "partial", modelSelector: true }),
+              category: ({ categoryId }) => (categoryId === firstCategoryId ? "partial" : "hidden"),
+              groupingNode: ({ categoryId }) => (categoryId === firstCategoryId ? "partial" : "hidden"),
+              element: (props) => (props.categoryId === firstCategoryId && props.elementId !== elementId ? "visible" : "hidden"),
+            },
+          });
+
+          viewport.changeCategoryDisplay([firstCategoryId], false);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("hidden"),
+          });
+        });
+      });
+
+      it("showing category via the selector makes it visible when it only has always drawn elements", async function () {
+        const { imodel, firstCategoryId, secondCategoryId, elements1, modelId } = await createIModel(this);
+        const { handler, provider, viewport } = createVisibilityTestData({ imodel });
+        await using(handler, async (_) => {
+          await viewport.addViewedModels(modelId);
+          viewport.changeCategoryDisplay(secondCategoryId, true, true);
+          const elementId = elements1[0];
+          viewport.setAlwaysDrawn(new Set([elementId]));
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: {
+              subject: () => "partial",
+              model: () => ({ tree: "partial", modelSelector: true }),
+              category: ({ categoryId }) => (categoryId === firstCategoryId ? "partial" : "visible"),
+              groupingNode: ({ categoryId }) => (categoryId === firstCategoryId ? "partial" : "visible"),
+              element: (props) => (props.categoryId === firstCategoryId && props.elementId !== elementId ? "hidden" : "visible"),
+            },
+          });
+
+          viewport.changeCategoryDisplay(firstCategoryId, true, true);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("visible"),
+          });
+        });
+      });
+
+      it("model is visible if category is disabled in selector but all category's elements are always drawn", async function () {
+        const { imodel, firstCategoryId, secondCategoryId, elements1, modelId } = await createIModel(this);
+        const { handler, provider, viewport } = createVisibilityTestData({ imodel });
+        await using(handler, async (_) => {
+          await viewport.addViewedModels(modelId);
+          viewport.changeCategoryDisplay([firstCategoryId, secondCategoryId], true, true);
+          viewport.setAlwaysDrawn(new Set(elements1));
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("visible"),
+          });
+
+          viewport.changeCategoryDisplay(firstCategoryId, false);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("visible"),
+          });
+        });
+      });
+
+      it("model is hidden if category is enabled in selector but all category's elements are never drawn", async function () {
+        const { imodel, firstCategoryId, elements1, modelId } = await createIModel(this);
+        const { handler, provider, viewport } = createVisibilityTestData({ imodel });
+        await using(handler, async (_) => {
+          await viewport.addViewedModels(modelId);
+          viewport.setNeverDrawn(new Set(elements1));
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("hidden"),
+          });
+
+          viewport.changeCategoryDisplay(firstCategoryId, true, true);
+          viewport.renderFrame();
+
+          await validateHierarchyVisibility({
+            handler,
+            provider,
+            viewport,
+            visibilityExpectations: VisibilityExpectations.all("hidden"),
           });
         });
       });
