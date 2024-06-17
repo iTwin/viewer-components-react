@@ -1,0 +1,7 @@
+{
+  "type": "prerelease",
+  "comment": "Fix category nodes in iModel content tree showing an expander when they don't have any child nodes",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
