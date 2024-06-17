@@ -49,9 +49,10 @@ export function TreeHeader(props: TreeHeaderProps) {
   useEffect(() => {
     // istanbul ignore if
     if (instanceFocusEnabled) {
+      onFilterClear();
       setIsSearchOpen(false);
     }
-  }, [instanceFocusEnabled]);
+  }, [instanceFocusEnabled, onFilterClear]);
 
   return (
     <div className={classnames("tree-widget-tree-header", className)}>
@@ -61,7 +62,10 @@ export function TreeHeader(props: TreeHeaderProps) {
       <DebouncedSearchBox
         isOpened={isSearchOpen}
         onOpen={() => setIsSearchOpen(true)}
-        onClose={() => setIsSearchOpen(false)}
+        onClose={() => {
+          onFilterClear();
+          setIsSearchOpen(false);
+        }}
         onChange={(value) => (value ? onFilterStart(value) : onFilterClear())}
         delay={500}
         selectedResultIndex={selectedIndex}
