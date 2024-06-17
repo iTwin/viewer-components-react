@@ -5,6 +5,7 @@
 
 import { useCallback, useMemo } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
+import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../../TreeWidget";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
@@ -73,7 +74,11 @@ export function BaseTree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAcce
     return providedIModelAccess ?? createIModelAccess({ getSchemaContext, imodel: props.imodel });
   }, [providedIModelAccess, getSchemaContext, props.imodel]);
 
-  return <BaseTreeRenderer {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />;
+  return (
+    <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
+      <BaseTreeRenderer {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
+    </SchemaMetadataContextProvider>
+  );
 }
 
 /** @internal */
