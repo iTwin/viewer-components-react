@@ -342,7 +342,19 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                     className: categoryClass,
                   }),
                 },
-                hasChildren: true,
+                hasChildren: {
+                  selector: `
+                    IFNULL((
+                      SELECT 1
+                      FROM ${elementClass} e
+                      WHERE
+                        e.Category.Id = this.ECInstanceId
+                        AND e.Model.Id IN (${modelIds.map(() => "?").join(",")})
+                        AND e.Parent IS NULL
+                      LIMIT 1
+                    ), 0)
+                  `,
+                },
                 grouping: { byLabel: { action: "merge", groupId: "category" } },
                 extendedData: {
                   imageId: "icon-layers",
@@ -354,10 +366,16 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             FROM ${categoryFilterClauses.from} this
             ${categoryFilterClauses.joins}
             WHERE
-              EXISTS (SELECT 1 FROM ${elementClass} e WHERE e.Category.Id = this.ECInstanceId AND e.Model.Id IN (${modelIds.map(() => "?").join(",")}))
+              EXISTS (
+                SELECT 1
+                FROM ${elementClass} e
+                WHERE
+                  e.Category.Id = this.ECInstanceId
+                  AND e.Model.Id IN (${modelIds.map(() => "?").join(",")})
+              )
               ${categoryFilterClauses.where ? `AND ${categoryFilterClauses.where}` : ""}
           `,
-          bindings: modelIds.map((id) => ({ type: "id", value: id })),
+          bindings: [...modelIds.map((id): ECSqlBinding => ({ type: "id", value: id })), ...modelIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
         },
       },
       {
