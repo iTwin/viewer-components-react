@@ -318,8 +318,8 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         map((x) => x.state),
         getVisibilityFromTreeNodeChildren,
         map((visibilityByCategories) => {
-          const state = visibilityByCategories === "empty" ? "visible" : visibilityByCategories;
-          return createVisibilityStatus(state, `model.allCategories${state ? "Visible" : "Hidden"}`);
+          const visible = visibilityByCategories !== "hidden";
+          return createVisibilityStatus(visible ? "visible" : "hidden", `model.allCategories${visible ? "Visible" : "Hidden"}`);
         }),
       );
     });
