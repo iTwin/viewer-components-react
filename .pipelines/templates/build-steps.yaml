@@ -13,7 +13,7 @@ steps:
 
   - script: |
       corepack enable
-      corepack prepare pnpm@9.1.2 --activate
+      corepack prepare pnpm@9.3.0 --activate
     displayName: "Setup pnpm"
 
   - script: |
