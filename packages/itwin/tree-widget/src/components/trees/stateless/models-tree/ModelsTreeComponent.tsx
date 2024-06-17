@@ -59,7 +59,7 @@ function ModelsTreeComponentImpl({
   ...treeProps
 }: StatelessModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const availableModels = useAvailableModels(iModel);
-  const { filter, applyFilter } = useFiltering();
+  const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
 
   const onModelsTreeFeatureUsed = (feature: string) => {
@@ -72,7 +72,7 @@ function ModelsTreeComponentImpl({
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
         <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
-          <TreeHeader onFilterClear={() => applyFilter("")} onFilterStart={applyFilter} onSelectedChanged={() => {}} density={density}>
+          <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
             {headerButtons
               ? headerButtons.map((btn, index) => (
                   <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed: onModelsTreeFeatureUsed })}</Fragment>
