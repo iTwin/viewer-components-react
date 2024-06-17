@@ -345,12 +345,11 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
               elementsInBothAlwaysAndNeverDrawn: "model.elementsInAlwaysAndNeverDrawnList",
               noElementsInExclusiveAlwaysDrawnList: "model.noElementsInExclusiveAlwaysDrawnList",
             },
-            defaultStatus: () => {
-              return createVisibilityStatus(
+            defaultStatus: () =>
+              createVisibilityStatus(
                 visibilityByCategories,
-                visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden",
-              );
-            },
+                visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden"
+              ),
           });
         }),
       );

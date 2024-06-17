@@ -2252,7 +2252,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
       });
     });
 
-    describe("interference from the category selector when there's no per model override", () => {
+    describe("reacting to category selector", () => {
       async function createIModel(context: Mocha.Context) {
         return buildIModel(context, async (builder) => {
           const category = insertSpatialCategory({ builder, codeValue: "category" });
