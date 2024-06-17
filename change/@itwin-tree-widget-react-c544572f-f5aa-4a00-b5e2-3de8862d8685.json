@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Escape special SQL characters when searching by label in stateless CategoriesTree",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
