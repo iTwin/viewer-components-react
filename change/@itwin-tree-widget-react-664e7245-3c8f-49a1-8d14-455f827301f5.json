@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "Fix the way visibility is determined when category visibility is changed via selector",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "yato333@users.noreply.github.com",
+  "dependentChangeType": "none"
+}

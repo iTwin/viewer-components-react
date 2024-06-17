@@ -314,7 +314,16 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
       return from(this._idsCache.getModelCategories(modelId)).pipe(
         concatAll(),
-        map((categoryId) => this.getDefaultCategoryVisibilityStatus(categoryId, modelId)),
+        mergeMap((categoryId) => {
+          if (
+            viewport.perModelCategoryVisibility.getOverride(modelId, categoryId) === PerModelCategoryVisibility.Override.None &&
+            !viewport.view.viewsCategory(categoryId)
+          ) {
+            // If all category elements are always drawn it's actually visible.
+            return this.getCategoryDisplayStatus({ modelId, categoryId });
+          }
+          return of(this.getDefaultCategoryVisibilityStatus({ categoryId, modelId }));
+        }),
         map((x) => x.state),
         getVisibilityFromTreeNodeChildren,
         mergeMap((visibilityByCategories) => {
@@ -328,13 +337,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
             return of(createVisibilityStatus("partial", "model.someCategoriesHidden"));
           }
 
-          const createStatusByCategories = () => {
-            return createVisibilityStatus(
-              visibilityByCategories,
-              visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden",
-            );
-          };
-
           return this.getVisibilityFromAlwaysAndNeverDrawnElements({
             queryProps: { modelId },
             tooltips: {
@@ -343,7 +345,12 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
               elementsInBothAlwaysAndNeverDrawn: "model.elementsInAlwaysAndNeverDrawnList",
               noElementsInExclusiveAlwaysDrawnList: "model.noElementsInExclusiveAlwaysDrawnList",
             },
-            defaultStatus: createStatusByCategories,
+            defaultStatus: () => {
+              return createVisibilityStatus(
+                visibilityByCategories,
+                visibilityByCategories === "visible" ? "model.allCategoriesVisible" : "model.allCategoriesHidden",
+              );
+            },
           });
         }),
       );
@@ -353,7 +360,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     return ovr ? from(ovr(this.createOverrideProps({ id: modelId }, result))) : result;
   }
 
-  private getDefaultCategoryVisibilityStatus(categoryId: Id64String, modelId: Id64String): NonPartialVisibilityStatus {
+  private getDefaultCategoryVisibilityStatus({ modelId, categoryId }: { categoryId: Id64String; modelId: Id64String }): NonPartialVisibilityStatus {
     const viewport = this._props.viewport;
 
     if (!viewport.view.viewsModel(modelId)) {
@@ -387,7 +394,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
           elementsInBothAlwaysAndNeverDrawn: "category.someElementsAreHidden",
           noElementsInExclusiveAlwaysDrawnList: "category.allElementsHidden",
         },
-        defaultStatus: () => this.getDefaultCategoryVisibilityStatus(props.categoryId, props.modelId),
+        defaultStatus: () => this.getDefaultCategoryVisibilityStatus(props),
       });
     });
 
@@ -407,7 +414,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       return this.getVisibilityFromAlwaysAndNeverDrawnElements({
         elements: elementIds,
         defaultStatus: () => {
-          const status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+          const status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
           return createVisibilityStatus(status.state, `groupingNode.${status.state}ThroughCategory`);
         },
         tooltips: {
@@ -456,7 +463,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         return of(status);
       }
 
-      status = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+      status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
       return of(createVisibilityStatus(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "element.hiddenThroughCategory"));
     });
 
@@ -740,7 +747,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       return concat(
         on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
         defer(() => {
-          const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return from(elementIds).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
         }),
@@ -762,7 +769,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       return concat(
         props.on && !viewport.view.viewsModel(modelId) ? this.showModelWithoutAnyCategoriesOrElements(modelId) : EMPTY,
         defer(() => {
-          const categoryVisibility = this.getDefaultCategoryVisibilityStatus(categoryId, modelId);
+          const categoryVisibility = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
           const isDisplayedByDefault = categoryVisibility.state === "visible";
           return of(elementId).pipe(this.changeElementStateNoChildrenOperator({ on, isDisplayedByDefault }));
         }),
@@ -838,11 +845,11 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         : createVisibilityStatus("hidden", props.tooltips.noElementsInExclusiveAlwaysDrawnList);
     }
 
-    if (!neverDrawn?.size && !alwaysDrawn?.size) {
-      return props.defaultStatus();
+    const status = props.defaultStatus();
+    if ((status.state === "visible" && neverDrawn?.size) || (status.state === "hidden" && alwaysDrawn?.size)) {
+      return createVisibilityStatus("partial");
     }
-
-    return createVisibilityStatus("partial", props.tooltips.elementsInBothAlwaysAndNeverDrawn);
+    return status;
   }
 
   private getVisibilityFromAlwaysAndNeverDrawnElements(
@@ -976,7 +983,7 @@ interface GetVisibilityFromAlwaysAndNeverDrawnElementsProps {
     noElementsInExclusiveAlwaysDrawnList: string;
   };
   /** Status when always/never lists are empty and exclusive mode is off */
-  defaultStatus: () => NonPartialVisibilityStatus;
+  defaultStatus: () => VisibilityStatus;
 }
 
 function getVisibilityFromTreeNodeChildren(obs: Observable<Visibility>): Observable<Visibility | "empty"> {
