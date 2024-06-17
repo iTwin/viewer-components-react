@@ -49,9 +49,10 @@ export function TreeHeader(props: TreeHeaderProps) {
   useEffect(() => {
     // istanbul ignore if
     if (instanceFocusEnabled) {
+      onFilterClear();
       setIsSearchOpen(false);
     }
-  }, [instanceFocusEnabled]);
+  }, [instanceFocusEnabled, onFilterClear]);
 
   return (
     <div className={classnames("tree-widget-tree-header", className)}>
