@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Handle blank imodel connection in SheetMeasurementHelper",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "88331924+saaaaaally@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

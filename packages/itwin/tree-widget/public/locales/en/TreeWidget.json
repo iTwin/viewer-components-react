@@ -97,6 +97,10 @@
     "matchingInstancesCount": "Current filter matching instances count: {{count}}",
     "filterExceedsLimit": "Current filter exceeds instances count of {{limit}}",
     "dataIsNotAvailable": "The data required for this tree layout is not available in this iModel.",
+    "unknownFilterError": "An unknown error occurred while filtering the tree.",
+    "unknownInstanceFocusError": "An unknown error occurred while focusing instances. <link>Disable the focus mode</link>.",
+    "tooManyFilterMatches": "There are too many matches for the given filter. Please be more specific.",
+    "tooManyInstancesFocused": "There are too many elements selected for focus mode. Please select fewer elements or <link>disable the focus mode</link>.",
     "hierarchies": {
       "unspecified": "Unspecified",
       "other": "Other",

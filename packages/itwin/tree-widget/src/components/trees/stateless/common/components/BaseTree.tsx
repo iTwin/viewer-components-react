@@ -3,22 +3,21 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
-import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
-import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
-import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 import { TreeWidget } from "../../../../../TreeWidget";
 import { useReportingAction } from "../../../common/UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useIModelChangeListener } from "../UseIModelChangeListener";
 import { useNodeHighlighting } from "../UseNodeHighlighting";
+import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 import { TreeRenderer } from "./TreeRenderer";
 
+import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
@@ -47,6 +46,7 @@ interface BaseTreeOwnProps {
   height: number;
   width: number;
   treeName: string;
+  imodelAccess?: IModelAccess;
   treeRenderer?: (treeProps: TreeRendererProps) => ReactNode;
   hierarchyLevelSizeLimit?: number;
   density?: "default" | "enlarged";
@@ -66,25 +66,14 @@ type BaseTreeProps = BaseTreeOwnProps &
   Pick<TreeRendererProps, "getIcon" | "getSublabel" | "onNodeDoubleClick">;
 
 /** @internal */
-export function BaseTree({ imodel, getSchemaContext, hierarchyLevelSizeLimit, ...props }: BaseTreeProps) {
-  const [imodelAccess, setIModelAccess] = useState<IModelAccess>();
+export function BaseTree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAccess: providedIModelAccess, ...props }: BaseTreeProps) {
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
 
-  useEffect(() => {
-    const schemas = getSchemaContext(imodel);
-    const schemaProvider = createECSchemaProvider(schemas);
-    setIModelAccess({
-      ...schemaProvider,
-      ...createCachingECClassHierarchyInspector({ schemaProvider }),
-      ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
-    });
-  }, [imodel, getSchemaContext]);
+  const imodelAccess = useMemo(() => {
+    return providedIModelAccess ?? createIModelAccess({ getSchemaContext, imodel: props.imodel });
+  }, [providedIModelAccess, getSchemaContext, props.imodel]);
 
-  if (!imodelAccess) {
-    return null;
-  }
-
-  return <BaseTreeRenderer {...props} imodel={imodel} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />;
+  return <BaseTreeRenderer {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />;
 }
 
 /** @internal */
@@ -107,7 +96,7 @@ function BaseTreeRenderer({
   getSublabel,
   onNodeDoubleClick,
   searchText,
-}: Omit<BaseTreeProps, "getSchemaContext"> & { imodelAccess: IModelAccess; defaultHierarchyLevelSizeLimit: number }) {
+}: MarkRequired<Omit<BaseTreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const {
     rootNodes,

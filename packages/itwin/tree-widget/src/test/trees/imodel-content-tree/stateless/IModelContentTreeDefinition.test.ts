@@ -22,6 +22,7 @@ import {
   insertModelWithPartition,
   insertPhysicalElement,
   insertPhysicalModelWithPartition,
+  insertPhysicalSubModel,
   insertSpatialCategory,
   insertSubject,
   insertSubModel,
@@ -135,8 +136,8 @@ describe("IModelContent tree", () => {
       });
     });
 
-    describe("models' children", () => {
-      it("creates drawing category child nodes for 2d models", async function () {
+    describe("2d models' children", () => {
+      it("creates drawing category child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const documentModel = insertModelWithPartition({
@@ -228,7 +229,149 @@ describe("IModelContent tree", () => {
         });
       });
 
-      it("creates spatial category child nodes for 3d models", async function () {
+      it("loads only categories with root elements", async function () {
+        // eslint-disable-next-line deprecation/deprecation
+        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+          const documentModel = insertModelWithPartition({
+            builder,
+            modelClassFullName: "BisCore.DocumentListModel",
+            partitionClassFullName: "BisCore.DocumentPartition",
+            partitionParentId: IModel.rootSubjectId,
+            codeValue: "document model",
+          });
+          const drawingElement = insertDrawingElement({ builder, modelId: documentModel.id, codeValue: "test drawing" });
+          const drawingModel = insertDrawingSubModel({
+            builder,
+            modeledElementId: drawingElement.id,
+          });
+          const drawingCategory1 = insertDrawingCategory({ builder, modelId: IModel.dictionaryId, codeValue: "drawing category 1" });
+          const drawingCategory2 = insertDrawingCategory({ builder, modelId: IModel.dictionaryId, codeValue: "drawing category 2" });
+          const parentDrawingGraphic = insertDrawingGraphic({ builder, modelId: drawingModel.id, categoryId: drawingCategory1.id });
+          const childDrawingGraphic = insertDrawingGraphic({
+            builder,
+            modelId: drawingModel.id,
+            categoryId: drawingCategory2.id,
+            parentId: parentDrawingGraphic.id,
+          });
+          return {
+            rootSubject,
+            dictionaryModel,
+            documentModel,
+            drawingElement,
+            drawingModel,
+            drawingCategory1,
+            drawingCategory2,
+            parentDrawingGraphic,
+            childDrawingGraphic,
+          };
+        });
+        await validateHierarchy({
+          provider: createIModelContentTreeProvider(imodel),
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.dictionaryModel],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.drawingCategory1.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.drawingCategory1],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: "BisCore.SubCategory",
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  label: "drawing category 1",
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.drawingCategory2],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: "BisCore.SubCategory",
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  label: "drawing category 2",
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.documentModel],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.drawingElement.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.drawingElement],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.drawingCategory1],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.parentDrawingGraphic.className,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.parentDrawingGraphic],
+                                      supportsFiltering: true,
+                                      children: [
+                                        NodeValidators.createForClassGroupingNode({
+                                          className: keys.childDrawingGraphic.className,
+                                          children: [
+                                            NodeValidators.createForInstanceNode({
+                                              instanceKeys: [keys.childDrawingGraphic],
+                                              supportsFiltering: true,
+                                              children: false,
+                                            }),
+                                          ],
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.drawingCategory2],
+                              supportsFiltering: true,
+                              children: false,
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+    });
+
+    describe("3d models' children", () => {
+      it("creates spatial category child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
@@ -298,7 +441,112 @@ describe("IModelContent tree", () => {
         });
       });
 
-      it("creates element child nodes for non-graphical models", async function () {
+      it("loads only categories with root elements", async function () {
+        // eslint-disable-next-line deprecation/deprecation
+        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+          const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "physical model" });
+          const category1 = insertSpatialCategory({ builder, codeValue: "test category 1" });
+          const category2 = insertSpatialCategory({ builder, codeValue: "test category 2" });
+          const parentElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category1.id });
+          const childElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category2.id, parentId: parentElement.id });
+          return { rootSubject, dictionaryModel, physicalModel, category1, category2, parentElement, childElement };
+        });
+        await validateHierarchy({
+          provider: createIModelContentTreeProvider(imodel),
+          expect: [
+            NodeValidators.createForInstanceNode({
+              instanceKeys: [keys.rootSubject],
+              autoExpand: true,
+              supportsFiltering: true,
+              children: [
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.dictionaryModel],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForClassGroupingNode({
+                      className: keys.category1.className,
+                      children: [
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.category1],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: "BisCore.SubCategory",
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  label: "test category 1",
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        NodeValidators.createForInstanceNode({
+                          instanceKeys: [keys.category2],
+                          supportsFiltering: true,
+                          children: [
+                            NodeValidators.createForClassGroupingNode({
+                              className: "BisCore.SubCategory",
+                              children: [
+                                NodeValidators.createForInstanceNode({
+                                  label: "test category 2",
+                                  children: false,
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                NodeValidators.createForInstanceNode({
+                  instanceKeys: [keys.physicalModel],
+                  supportsFiltering: true,
+                  children: [
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category1],
+                      supportsFiltering: true,
+                      children: [
+                        NodeValidators.createForClassGroupingNode({
+                          className: keys.parentElement.className,
+                          children: [
+                            NodeValidators.createForInstanceNode({
+                              instanceKeys: [keys.parentElement],
+                              supportsFiltering: true,
+                              children: [
+                                NodeValidators.createForClassGroupingNode({
+                                  className: keys.childElement.className,
+                                  children: [
+                                    NodeValidators.createForInstanceNode({
+                                      instanceKeys: [keys.childElement],
+                                      supportsFiltering: true,
+                                      children: false,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                    NodeValidators.createForInstanceNode({
+                      instanceKeys: [keys.category2],
+                      supportsFiltering: true,
+                      children: false,
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+      });
+    });
+
+    describe("non-geometric models' children", () => {
+      it("creates element child nodes", async function () {
         // eslint-disable-next-line deprecation/deprecation
         const { imodel, ...keys } = await buildIModel(this, async (builder) => {
           const documentModel = insertModelWithPartition({
@@ -540,11 +788,17 @@ describe("IModelContent tree", () => {
     describe("elements' children", () => {
       it("creates childless node when element has no child or modeling elements", async function () {
         // eslint-disable-next-line deprecation/deprecation
-        const { imodel, ...keys } = await buildIModel(this, async (builder) => {
+        const { imodel, ...keys } = await buildIModel(this, async (builder, testSchema) => {
           const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "test partition" });
           const category = insertSpatialCategory({ builder, codeValue: "test category" });
-          const physicalElement = insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-          return { rootSubject, dictionaryModel, physicalModel, category, physicalElement };
+          const physicalElement = insertPhysicalElement({
+            builder,
+            classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
+            modelId: physicalModel.id,
+            categoryId: category.id,
+          });
+          const subModel = insertPhysicalSubModel({ builder, modeledElementId: physicalElement.id });
+          return { rootSubject, dictionaryModel, physicalModel, category, physicalElement, subModel };
         });
         await validateHierarchy({
           provider: createIModelContentTreeProvider(imodel),
