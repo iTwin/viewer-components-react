@@ -14,7 +14,6 @@ import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
-import { useLatest } from "../common/UseLatest";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
@@ -28,7 +27,7 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 import type { HierarchyLevelConfig } from "../../common/Types";
 import type { InstanceKey } from "@itwin/presentation-common";
 
-type StatelessModelsTreeError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
+type StatelessModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
 interface StatelessModelsTreeOwnProps {
   activeView: Viewport;
@@ -66,8 +65,7 @@ export function StatelessModelsTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const [error, setError] = useState<StatelessModelsTreeError | undefined>(undefined);
-  const errorRef = useLatest(error);
+  const [filteringError, setFilteringError] = useState<StatelessModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
       ...defaultHierarchyConfiguration,
@@ -99,7 +97,7 @@ export function StatelessModelsTree({
   );
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
-    isInstanceFocusError(errorRef.current) && setError(undefined);
+    setFilteringError(undefined);
     if (!loadFocusedInstancesKeys) {
       return undefined;
     }
@@ -114,14 +112,14 @@ export function StatelessModelsTree({
         });
       } catch (e) {
         const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
-        setError(newError);
+        setFilteringError(newError);
         return [];
       }
     };
-  }, [loadFocusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration, errorRef]);
+  }, [loadFocusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
-    isFilterError(errorRef.current) && setError(undefined);
+    setFilteringError(undefined);
     if (!filter) {
       return undefined;
     }
@@ -136,11 +134,11 @@ export function StatelessModelsTree({
         });
       } catch (e) {
         const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
-        setError(newError);
+        setFilteringError(newError);
         return [];
       }
     };
-  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration, errorRef]);
+  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -157,7 +155,7 @@ export function StatelessModelsTree({
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       getIcon={getIcon}
       density={density}
-      noDataMessage={getNoDataMessage(filter, error)}
+      noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode}
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessModelsTreeId}-${action}`, duration);
@@ -169,7 +167,7 @@ export function StatelessModelsTree({
   );
 }
 
-function getNoDataMessage(filter?: string, error?: StatelessModelsTreeError) {
+function getNoDataMessage(filter?: string, error?: StatelessModelsTreeFilteringError) {
   if (isInstanceFocusError(error)) {
     return <InstanceFocusError error={error!} />;
   }
@@ -182,15 +180,15 @@ function getNoDataMessage(filter?: string, error?: StatelessModelsTreeError) {
   return undefined;
 }
 
-function isFilterError(error: StatelessModelsTreeError | undefined) {
+function isFilterError(error: StatelessModelsTreeFilteringError | undefined) {
   return error === "tooManyFilterMatches" || error === "unknownFilterError";
 }
 
-function isInstanceFocusError(error: StatelessModelsTreeError | undefined) {
+function isInstanceFocusError(error: StatelessModelsTreeFilteringError | undefined) {
   return error === "tooManyInstancesFocused" || error === "unknownInstanceFocusError";
 }
 
-function InstanceFocusError({ error }: { error: StatelessModelsTreeError }) {
+function InstanceFocusError({ error }: { error: StatelessModelsTreeFilteringError }) {
   const { toggle } = useFocusedInstancesContext();
   const localizedMessage = createLocalizedMessage(TreeWidget.translate(`stateless.${error}`), () => toggle());
   return <Text>{localizedMessage}</Text>;

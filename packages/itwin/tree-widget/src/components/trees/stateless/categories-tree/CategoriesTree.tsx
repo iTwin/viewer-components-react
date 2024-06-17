@@ -10,7 +10,6 @@ import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useFeatureReporting } from "../../common/UseFeatureReporting";
 import { VisibilityTree } from "../common/components/VisibilityTree";
-import { useLatest } from "../common/UseLatest";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { StatelessCategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
@@ -21,7 +20,7 @@ import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { HierarchyLevelConfig } from "../../common/Types";
 
-type StatelessCategoriesTreeError = "tooManyFilterMatches" | "unknownFilterError";
+type StatelessCategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
 interface StatelessCategoriesTreeOwnProps {
   filter: string;
@@ -61,9 +60,7 @@ export function StatelessCategoriesTree({
   onPerformanceMeasured,
   onFeatureUsed,
 }: StatelessModelsTreeProps) {
-  const [error, setError] = useState<StatelessCategoriesTreeError | undefined>();
-  const errorRef = useLatest(error);
-
+  const [filteringError, setFilteringError] = useState<StatelessCategoriesTreeFilteringError | undefined>();
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new StatelessCategoriesVisibilityHandler({
       imodel,
@@ -90,7 +87,7 @@ export function StatelessCategoriesTree({
   );
 
   const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
-    errorRef.current && setError(undefined);
+    setFilteringError(undefined);
     if (!filter) {
       return undefined;
     }
@@ -100,11 +97,11 @@ export function StatelessCategoriesTree({
         return await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
       } catch (e) {
         const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
-        setError(newError);
+        setFilteringError(newError);
         return [];
       }
     };
-  }, [filter, activeView, reportUsage, errorRef]);
+  }, [filter, activeView, reportUsage]);
 
   return (
     <VisibilityTree
@@ -120,7 +117,7 @@ export function StatelessCategoriesTree({
       getSublabel={getSublabel}
       getIcon={getIcon}
       density={density}
-      noDataMessage={getNoDataMessage(filter, error)}
+      noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode ?? "none"}
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${StatelessCategoriesTreeId}-${action}`, duration);
@@ -131,7 +128,7 @@ export function StatelessCategoriesTree({
   );
 }
 
-function getNoDataMessage(filter: string, error?: StatelessCategoriesTreeError) {
+function getNoDataMessage(filter: string, error?: StatelessCategoriesTreeFilteringError) {
   if (error) {
     return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
   }
