@@ -268,7 +268,7 @@ Components from this package allows consumers to track the usage of specific fea
 This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent` or `TreeWidgetUiItemsProvider`. The function is invoked with feature id as the component is being used. List of tracked features:
 
 - `"choose-{tree}"` - when a tree is selected in the tree selector.
-- `"use-{tree}"` - when an interaction with a tree hierarchy happens (a node is expanded or collapsed).
+- `"use-{tree}"` - when an interaction with a tree hierarchy happens. This includes any kind of interaction with nodes, including them being expanded/collapsed, selected, filtered, their visibility change, etc.
 - `"{tree}-visibility-change"` - when visibility is toggled using an "eye" button.
 - `"models-tree-showall"` - when "Show All" button is used in `ModelsTreeComponent`.
 - `"models-tree-hideall"` - when "Hide All" button is used in `ModelsTreeComponent`.
