@@ -116,7 +116,6 @@ const forceIncludes = [
   "@floating-ui/react",
   "@tippyjs/react",
   "@tanstack/react-query",
-  "@itwin/itwinui-react",
   "@itwin/insights-client",
   "@itwin/presentation-frontend",
   "@itwin/presentation-components",
