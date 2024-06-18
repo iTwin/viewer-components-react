@@ -32,10 +32,10 @@ import type { UiItemsProvider } from '@itwin/appui-react';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
 import type { Widget } from '@itwin/appui-react';
 
-// @public
+// @public @deprecated (undocumented)
 export const CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel }: CalculatedPropertyActionProps) => JSX.Element;
 
-// @public
+// @public @deprecated (undocumented)
 export interface CalculatedPropertyActionProps {
     // (undocumented)
     calculatedProperty?: Property;

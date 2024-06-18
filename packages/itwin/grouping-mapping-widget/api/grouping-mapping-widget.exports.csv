@@ -1,7 +1,9 @@
 sep=;
 Release Tag;API Item
 public;CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel }: CalculatedPropertyActionProps) => JSX.Element
+deprecated;CalculatedPropertyAction: ({ mappingId, group, calculatedProperty, onSaveSuccess, onClickCancel }: CalculatedPropertyActionProps) => JSX.Element
 public;CalculatedPropertyActionProps
+deprecated;CalculatedPropertyActionProps
 public;ClientPrefix = "" | "dev" | "qa" | undefined
 public;ContextCustomUI 
 public;ContextCustomUIProps
