@@ -5,6 +5,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedAsyncValue } from "@itwin/components-react";
+import { ProgressRadial } from "@itwin/itwinui-react";
 import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
 import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -116,31 +117,42 @@ interface MatchingInstancesCountProps {
 }
 
 function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierarchyLevelDetails }: MatchingInstancesCountProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const { value } = useDebouncedAsyncValue(
     useCallback(async () => {
       const instanceFilter = toGenericFilter(filter);
       try {
+        setIsLoading(true);
         const instanceKeys = await collectInstanceKeys(
           hierarchyLevelDetails.getInstanceKeysIterator({
             instanceFilter,
             hierarchyLevelSizeLimit: hierarchyLevelDetails.sizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
-        return TreeWidget.translate("stateless.matchingInstancesCount", { count: instanceKeys.length });
+        return TreeWidget.translate("stateless.matchingInstancesCount", {
+          instanceCount: instanceKeys.length.toLocaleString(undefined, { useGrouping: true }),
+        });
       } catch (e) {
         if (e instanceof RowsLimitExceededError) {
-          return TreeWidget.translate("stateless.filterExceedsLimit", { limit: e.limit });
+          return TreeWidget.translate("stateless.filterExceedsLimit", { limit: e.limit.toLocaleString(undefined, { useGrouping: true }) });
         }
         return TreeWidget.translate("stateless.failedToCalculateMatchingInstances");
+      } finally {
+        setIsLoading(false);
       }
     }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit]),
   );
 
-  if (!value) {
-    return null;
+  if (isLoading) {
+    return (
+      <>
+        {TreeWidget.translate("stateless.matchingInstancesCount", { instanceCount: "" })}
+        <ProgressRadial size="x-small" />
+      </>
+    );
   }
 
-  return <>{value}</>;
+  return value ? <>{value}</> : null;
 }
 
 async function collectInstanceKeys(iterator: AsyncIterableIterator<InstanceKey>) {
