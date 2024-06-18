@@ -41,7 +41,7 @@ export function StatelessIModelContentTree({ onPerformanceMeasured, onFeatureUse
       reportUsage={reportUsage}
     />
   );
-};
+}
 
 function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
   return new IModelContentTreeDefinition(props);

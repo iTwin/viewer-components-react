@@ -6,10 +6,11 @@
 import { createContext, useContext } from "react";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
+import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 /** @internal */
 export interface FocusedInstancesContext {
-  instanceKeys?: InstanceKey[];
+  loadInstanceKeys?: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>;
   enabled: boolean;
   toggle: () => void;
 }
