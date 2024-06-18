@@ -7,8 +7,6 @@ import "./PropertyMenu.scss";
 import { GroupPropertyTable } from "./GroupProperties/GroupPropertyTable";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 import type { GroupMinimal, Mapping, Property } from "@itwin/insights-client";
-import { CalculatedPropertyTable } from "./CalculatedProperties/CalculatedPropertyTable";
-import { CustomCalculationTable } from "./CustomCalculations/CustomCalculationTable";
 import { usePropertiesQuery } from "./hooks/usePropertiesQuery";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../context/PropertiesClientContext";
@@ -40,13 +38,7 @@ export const PropertyMenu = ({
   group,
   onClickAddGroupProperty,
   onClickModifyGroupProperty,
-  onClickAddCalculatedProperty,
-  onClickModifyCalculatedProperty,
-  onClickAddCustomCalculationProperty,
-  onClickModifyCustomCalculation,
-  hideGroupProps = false,
-  hideCalculatedProps = false,
-  hideCustomCalculationProps = false,
+  hideGroupProps = false
 }: PropertyMenuProps) => {
   const groupId = group.id;
   const mappingId = mapping.id;
@@ -72,28 +64,6 @@ export const PropertyMenu = ({
           onClickModify={onClickModifyGroupProperty}
           isLoading={isLoadingGroupProperties}
           groupProperties={groupProperties ? groupProperties.properties : []}
-          refresh={refreshGroupProperties}
-        />
-      )}
-      {!hideCalculatedProps && (
-        <CalculatedPropertyTable
-          mappingId={mappingId}
-          groupId={groupId}
-          onClickAdd={onClickAddCalculatedProperty}
-          onClickModify={onClickModifyCalculatedProperty}
-          isLoading={isLoadingGroupProperties}
-          calculatedProperties={groupProperties ? groupProperties.properties : []}
-          refresh={refreshGroupProperties}
-        />
-      )}
-      {!hideCustomCalculationProps && (
-        <CustomCalculationTable
-          mappingId={mappingId}
-          groupId={groupId}
-          onClickAdd={onClickAddCustomCalculationProperty}
-          onClickModify={onClickModifyCustomCalculation}
-          isLoading={isLoadingGroupProperties}
-          customCalculations={groupProperties ? groupProperties.properties : []}
           refresh={refreshGroupProperties}
         />
       )}

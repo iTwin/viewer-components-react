@@ -4,35 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 import { CalculatedPropertyType } from "@itwin/insights-client";
 import React, { useCallback } from "react";
-import { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { LabeledInput, LabeledSelect } from "@itwin/itwinui-react";
-import type SimpleReactValidator from "simple-react-validator";
+import { LabeledSelect } from "@itwin/itwinui-react";
 
 interface SharedCalculatedPropertyFormsProps {
-  propertyName: string;
-  setPropertyName: (value: string) => void;
-  type: CalculatedPropertyType | undefined;
-  setType: (value: CalculatedPropertyType | undefined) => void;
-  validator: SimpleReactValidator;
-  itemRenderer?: (option: SelectOption<string>) => JSX.Element;
-  selectedItemRenderer?: (option: SelectOption<string>) => JSX.Element;
+  calculatedPropertyType: CalculatedPropertyType | undefined;
+  setCalculatedPropertyType: (value: CalculatedPropertyType | undefined) => void;
+  itemRenderer?: (option: SelectOption<string | undefined>) => JSX.Element;
+  selectedItemRenderer?: (option: SelectOption<string | undefined>) => JSX.Element;
 }
 
 export const SharedCalculatedPropertyForms = ({
-  propertyName,
-  setPropertyName,
-  type,
-  setType,
-  validator,
+  calculatedPropertyType,
+  setCalculatedPropertyType,
   itemRenderer,
   selectedItemRenderer,
 }: SharedCalculatedPropertyFormsProps) => {
   const generateOptionsFromCalculatedPropertyType = useCallback(() => {
-    const options: SelectOption<CalculatedPropertyType>[] = [];
-
+    const options: SelectOption<CalculatedPropertyType | undefined>[] = [];
     const indexableEnum = CalculatedPropertyType as unknown as { [key: string]: string };
-
+    
+    options.push({value: undefined, label: "No Calculated Property Type"});
     for (const key in indexableEnum) {
       if (typeof indexableEnum[key] === "string" && key !== "Undefined") {
         // Generate labels by adding space between capitals
@@ -48,35 +40,16 @@ export const SharedCalculatedPropertyForms = ({
 
   return (
     <>
-      <LabeledInput
-        value={propertyName}
-        required
-        name="name"
-        label="Name"
-        onChange={(event) => {
-          setPropertyName(event.target.value);
-          validator.showMessageFor("name");
-        }}
-        message={validator.message("name", propertyName, NAME_REQUIREMENTS)}
-        status={validator.message("name", propertyName, NAME_REQUIREMENTS) ? "negative" : undefined}
-        onBlur={() => {
-          validator.showMessageFor("name");
-        }}
-        onBlurCapture={(event) => {
-          setPropertyName(event.target.value);
-          validator.showMessageFor("name");
-        }}
-      />
-      <LabeledSelect<CalculatedPropertyType>
-        label="Quantity Type"
-        required
+      <LabeledSelect<CalculatedPropertyType | undefined>
+        label="Calculated Property Type"
         options={generateOptionsFromCalculatedPropertyType()}
-        value={type}
-        onChange={setType}
+        value={calculatedPropertyType}
+        onChange={setCalculatedPropertyType}
         itemRenderer={itemRenderer}
         selectedItemRenderer={selectedItemRenderer}
-        onShow={() => {}}
-        onHide={() => {}}
+        placeholder = 'No Calculated Property Type'
+        onShow={() => { }}
+        onHide={() => { }}
       />
     </>
   );
