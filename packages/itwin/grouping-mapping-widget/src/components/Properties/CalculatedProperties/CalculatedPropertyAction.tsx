@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 /**
+ * @deprecated in 0.27.0 The CalculatedPropertyActionProps has been superseded by the CalculatedPropertyActionWithVisualsProps and should not be used, use GroupPropertyActionProps and GroupPropertyAction component instead.
  * Props for the {@link CalculatedPropertyAction} component.
  * @public
  */
@@ -27,6 +28,7 @@ export interface CalculatedPropertyActionProps {
 }
 
 /**
+ * @deprecated in 0.27.0 The CalculatedPropertyAction has been superseded by the CalculatedPropertyActionWithVisuals and should not be used as a stand alone component, use GroupPropertyAction component instead.
  * Component to create or update a calculated property.
  * @public
  */
