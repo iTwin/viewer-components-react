@@ -1,5 +1,7 @@
 .ec3w-template-creation-step-three {
-  height: 100%;
+  flex-grow: 1;
+  overflow: auto;
+  margin-top: var(--iui-size-xs);
   .ec3w-summary-text {
     font-weight: var(--iui-font-weight-bold);
   }

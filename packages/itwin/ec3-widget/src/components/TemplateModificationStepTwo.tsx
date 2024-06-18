@@ -180,7 +180,13 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
         </div>
       </div>
       <div className="ec3w-stepper-footer">
-        <Button onClick={() => props.updateCurrentStep(0)} className="ec3w-footer-button">
+        <Button
+          onClick={() => {
+            props.updateCurrentStep(0);
+            props.setTemplate({ ...props.template, labels: allAssemblies ?? [] });
+          }}
+          className="ec3w-footer-button"
+        >
           Back
         </Button>
         <Button

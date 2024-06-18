@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { RequiredFieldsNotice } from "./RequiredFieldsNotice";
 import { Button, LabeledInput, LabeledSelect } from "@itwin/itwinui-react";
 import type { Configuration, Report } from "../ec3-widget-react";
@@ -39,6 +39,18 @@ export const TemplateModificationStepOne = (props: TemplateModificationStepOnePr
     },
     [props],
   );
+
+  const reportSelectionOptions = useMemo(() => {
+    return (
+      props.fetchedReports?.map((x) => {
+        return {
+          label: x.displayName,
+          value: x.id,
+        };
+      }) ?? []
+    );
+  }, [props.fetchedReports]);
+
   return (
     <>
       <div className="ec3w-template-creation-step-one">
@@ -66,14 +78,7 @@ export const TemplateModificationStepOne = (props: TemplateModificationStepOnePr
             label="Select Report"
             className="ec3w-input-form"
             data-testid="ec3-report-selection"
-            options={
-              props.fetchedReports?.map((x) => {
-                return {
-                  label: x.displayName,
-                  value: x.id,
-                };
-              }) ?? []
-            }
+            options={reportSelectionOptions}
             value={props.fetchedReports?.find((rp) => rp.id === props.childTemplate.reportId)?.id}
             onChange={onTemplateReportChange}
             placeholder={props.isLoading ? "Loading reports..." : "Select report"}

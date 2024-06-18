@@ -37,7 +37,7 @@ export const TemplateModificationStepRenderer = (props: TemplateModificationStep
         return <TemplateModificationStepThree {...props} />;
       }
       default:
-        return <></>;
+        return null;
     }
   };
   return renderSteps();

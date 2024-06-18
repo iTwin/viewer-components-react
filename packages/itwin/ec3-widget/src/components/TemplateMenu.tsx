@@ -38,7 +38,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
     displayName: "",
     labels: [],
   });
-  const [fetchedReports, setFetchedReports] = useState<Report[]>([]);
+  const [fetchedReports, setFetchedReports] = useState<Report[]>();
 
   const configurationsClient = useApiContext().ec3ConfigurationsClient;
   const reportsClient = useApiContext().reportsClient;
@@ -70,12 +70,14 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
           if (defaultReport) {
             setChildTemplate({ ...childTemplate, reportId: defaultReport.id });
           } else {
-            setIsLoading(true);
-            const data = await reportsClient.getReports(token, projectId);
-            if (data && data.length > 0) {
-              setFetchedReports(data);
+            if (!fetchedReports) {
+              setIsLoading(true);
+              const data = await reportsClient.getReports(token, projectId);
+              if (data && data.length > 0) {
+                setFetchedReports(data);
+              }
+              setIsLoading(false);
             }
-            setIsLoading(false);
           }
         } catch (err) {
           toaster.negative("You are not authorized to use this system.");
@@ -86,8 +88,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
       }
     };
     void fetchReports();
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [projectId, props.template]);
+  }, [childTemplate, configurationsClient, defaultReport, fetchedReports, getAccessToken, projectId, props.template, reportsClient]);
 
   const saveConfiguration = async () => {
     try {
@@ -130,7 +131,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
         onSaveClick={saveConfiguration}
         updateChildTemplate={setChildTemplate}
         updateCurrentStep={setCurrentStep}
-        fetchedReports={fetchedReports}
+        fetchedReports={fetchedReports ?? []}
       />
     </div>
   );
