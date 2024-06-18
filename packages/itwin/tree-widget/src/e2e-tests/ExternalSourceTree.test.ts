@@ -5,25 +5,18 @@
 
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
-import { initTreeWidgetTest, locateNode, selectTree, takeScreenshot, withDifferentDensities } from "./utils";
+import { initTreeWidgetTest, selectTree, takeScreenshot, withDifferentDensities } from "./utils";
 
-test.describe("Widget", () => {
+test.describe("External sources tree", () => {
   let treeWidget: Locator;
 
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
-    await locateNode(treeWidget, "BayTown").getByRole("checkbox", { name: "Visible: All models are visible", exact: true }).waitFor();
+    await selectTree(treeWidget, "External Sources");
   });
 
   withDifferentDensities(() => {
-    test("tree selector", async ({ page }) => {
-      await treeWidget.getByRole("combobox").click();
-      await page.getByRole("listbox").waitFor();
-      await takeScreenshot(page, treeWidget);
-    });
-
-    test("tree selector badge", async ({ page }) => {
-      await selectTree(treeWidget, "External Sources");
+    test("no data in imodel", async ({ page }) => {
       await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
       await takeScreenshot(page, treeWidget);
     });

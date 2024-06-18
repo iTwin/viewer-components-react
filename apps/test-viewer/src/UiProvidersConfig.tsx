@@ -2,8 +2,8 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
-import { SelectionMode } from "@itwin/components-react";
 import { IModelConnection } from "@itwin/core-frontend";
 import { EC3Provider } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
@@ -116,58 +116,7 @@ const configuredUiItems = new Map<string, UiItem>([
             const trees = [
               {
                 id: ModelsTreeComponent.id,
-                getLabel: ModelsTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
-                  <ModelsTreeComponent
-                    selectionPredicate={() => true}
-                    selectionMode={SelectionMode.Multiple}
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-              },
-              {
-                id: CategoriesTreeComponent.id,
-                getLabel: CategoriesTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
-                  <CategoriesTreeComponent
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-              },
-              {
-                id: IModelContentTreeComponent.id,
-                getLabel: IModelContentTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
-                  <IModelContentTreeComponent
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-              },
-              {
-                id: ExternalSourcesTreeComponent.id,
-                getLabel: ExternalSourcesTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
-                  <ExternalSourcesTreeComponent
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-                startIcon: <SvgTechnicalPreviewMiniBw />,
-              },
-              {
-                id: `stateless-${ModelsTreeComponent.id}`,
-                getLabel: () => `${ModelsTreeComponent.getLabel()} (Beta)`,
+                getLabel: () => ModelsTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
                   <StatelessModelsTreeComponent
                     getSchemaContext={getSchemaContext}
@@ -180,8 +129,8 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
-                id: `stateless-${CategoriesTreeComponent.id}`,
-                getLabel: () => `${CategoriesTreeComponent.getLabel()} (Beta)`,
+                id: CategoriesTreeComponent.id,
+                getLabel: () => CategoriesTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
                   <StatelessCategoriesTreeComponent
                     getSchemaContext={getSchemaContext}
@@ -193,8 +142,8 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
-                id: `stateless-${IModelContentTreeComponent.id}`,
-                getLabel: () => `${IModelContentTreeComponent.getLabel()} (Beta)`,
+                id: IModelContentTreeComponent.id,
+                getLabel: () => IModelContentTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
                   <StatelessIModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
@@ -206,8 +155,8 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
-                id: `stateless-${ExternalSourcesTreeComponent.id}`,
-                getLabel: () => `${ExternalSourcesTreeComponent.getLabel()} (Beta)`,
+                id: ExternalSourcesTreeComponent.id,
+                getLabel: () => ExternalSourcesTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
                   <StatelessExternalSourcesTreeComponent
                     getSchemaContext={getSchemaContext}
@@ -297,7 +246,11 @@ const configuredUiItems = new Map<string, UiItem>([
     "grouping-mapping-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: import.meta.env.IMJS_URL_PREFIX ? `${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix : undefined })],
+      createUiItemsProviders: () => [
+        new GroupingMappingProvider({
+          prefix: import.meta.env.IMJS_URL_PREFIX ? (`${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix) : undefined,
+        }),
+      ],
     },
   ],
   [
