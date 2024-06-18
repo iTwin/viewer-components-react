@@ -144,7 +144,6 @@ describe("TemplateMenu", () => {
 
     const items = await getSelectOptions(screen.getByTestId("ec3-report-selection"));
     items.forEach((item, index) => {
-      // eslint-disable-next-line no-console
       expect(item).toHaveTextContent(`report_${index}`);
     });
   });

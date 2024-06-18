@@ -113,7 +113,6 @@ export async function getComboboxOptions(rootElement: HTMLElement) {
 
 export async function getSelectOptions(rootElement: HTMLElement) {
   const input = rootElement.querySelector(".iui-select-button") as HTMLInputElement;
-  // eslint-disable-next-line no-console
   await act(async () => {
     fireEvent.click(input);
   });
