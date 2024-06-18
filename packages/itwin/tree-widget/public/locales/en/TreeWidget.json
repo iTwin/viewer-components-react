@@ -94,7 +94,7 @@
     "disableInstanceFocus": "Disable Instance Focus",
     "noNodesMatchFilter": "There are no nodes matching filter - \"{{filter}}\"",
     "failedToCalculateMatchingInstances": "Failed to calculate matching instances count",
-    "matchingInstancesCount": "Current filter matching instances count: {{count}}",
+    "matchingInstancesCount": "Current filter matching instances count: {{instanceCount}}",
     "filterExceedsLimit": "Current filter exceeds instances count of {{limit}}",
     "dataIsNotAvailable": "The data required for this tree layout is not available in this iModel.",
     "unknownFilterError": "An unknown error occurred while filtering the tree.",
