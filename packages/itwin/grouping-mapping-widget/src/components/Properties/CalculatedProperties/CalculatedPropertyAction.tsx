@@ -85,10 +85,7 @@ export const CalculatedPropertyAction = ({ mappingId, group, calculatedProperty,
               Asterisk * indicates mandatory fields.
             </Text>
           </div>
-          <SharedCalculatedPropertyForms
-            calculatedPropertyType={type}
-            setCalculatedPropertyType={setType}
-          />
+          <SharedCalculatedPropertyForms calculatedPropertyType={type} setCalculatedPropertyType={setType} />
         </Fieldset>
       </div>
       <ActionPanel onSave={onSave} onCancel={onClickCancel} isSavingDisabled={!(type && propertyName)} isLoading={isLoading} />

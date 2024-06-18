@@ -153,7 +153,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
   useEffect(() => {
     if (calculatedPropertyType) {
       setDataType(DataType.Double);
-    } 
+    }
 
     if (isCalculatedBlockExpanded === false || !calculatedPropertyType) {
       clearAll();
@@ -280,7 +280,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             </Icon>
           }
           isExpanded={selectedProperties.length > 0}
-          setIsExpanded={()=> {}}
+          setIsExpanded={() => {}}
         >
           <div className="gmw-property-view-container">
             <div className="gmw-property-view-button">
@@ -335,7 +335,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             </Icon>
           }
           isExpanded={formula !== undefined}
-          setIsExpanded={()=> {}}
+          setIsExpanded={() => {}}
         >
           <CustomCalculationAction
             formula={formula}
