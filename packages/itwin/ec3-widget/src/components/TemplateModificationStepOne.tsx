@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useMemo } from "react";
 import { RequiredFieldsNotice } from "./RequiredFieldsNotice";
 import { Button, LabeledInput, LabeledSelect } from "@itwin/itwinui-react";
@@ -82,13 +86,13 @@ export const TemplateModificationStepOne = (props: TemplateModificationStepOnePr
             value={props.fetchedReports?.find((rp) => rp.id === props.childTemplate.reportId)?.id}
             onChange={onTemplateReportChange}
             placeholder={props.isLoading ? "Loading reports..." : "Select report"}
-            disabled={props.isLoading}
+            disabled={props.isLoading || props.childTemplate.reportId !== undefined}
           />
         )}
       </div>
       <div className="ec3w-stepper-footer">
         <Button
-          data-testid="ec3-next-button"
+          data-testid="ec3-step-one-next-button"
           className="ec3w-footer-button"
           styleType="high-visibility"
           onClick={() => props.updateCurrentStep(1)}

@@ -198,6 +198,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
         <Button
           styleType="high-visibility"
           className="ec3w-footer-button"
+          data-testid="ec3-step-two-next-button"
           disabled={isNextDisabled}
           onClick={() => {
             // send back updated assemblies to the parent

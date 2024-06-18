@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
@@ -47,7 +46,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
     const fetchReports = async () => {
       const token = await getAccessToken();
 
-      if (props.template) {
+      if (props.template && !childTemplate.reportId) {
         setIsLoading(true);
         const data = await reportsClient.getReports(token, projectId);
         if (data && data.length > 0) {

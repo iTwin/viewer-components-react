@@ -126,6 +126,7 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         className="ec3w-input-form"
         id="name"
         name="name"
+        data-testid="ec3-assembly-name-input"
         label="Assembly Name"
         value={props.assembly.name}
         onChange={onAssemblyNameChange}
@@ -175,6 +176,7 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         Materials
       </Label>
       <Select
+        data-testid="ec3-material-select"
         className="ec3w-input-form"
         disabled={props.isLoading || props.assembly.reportTable === "" || props.currentAssemblyIndex !== props.editableAssemblyIndex}
         options={

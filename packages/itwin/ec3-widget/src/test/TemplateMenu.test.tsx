@@ -62,21 +62,28 @@ describe("TemplateMenu", () => {
       ],
     },
   ];
-
   const configId = "1234-1234-1234-1234";
+
+  const template: Configuration = {
+    id: configId,
+    displayName: "TestTemplate",
+    description: "",
+    labels: [
+      {
+        elementNameColumn: "UserLabel",
+        elementQuantityColumn: "area",
+        materials: [{ nameColumn: "material" }],
+        name: "TestAssembly",
+        reportTable: "Roof_RoofGrouping_Mapping_1",
+      },
+    ],
+    reportId: "0",
+  };
   const config: EC3Configuration = {
     id: configId,
     displayName: "mocked_configuration",
     description: "mocked_description",
-    labels: [
-      {
-        name: "mocked_label",
-        reportTable: "",
-        elementNameColumn: "",
-        elementQuantityColumn: "",
-        materials: [],
-      },
-    ],
+    labels: template.labels,
     createdBy: "",
     modifiedBy: "",
     createdOn: "",
@@ -86,14 +93,6 @@ describe("TemplateMenu", () => {
         href: "link/reports/0",
       },
     },
-  };
-
-  const template: Configuration = {
-    id: configId,
-    displayName: "",
-    description: "",
-    labels: [],
-    reportId: "",
   };
 
   const iTwinId = mockITwinId;
@@ -148,7 +147,7 @@ describe("TemplateMenu", () => {
     });
   });
 
-  it("Selecting name and report should enable save button, saving calls client", async () => {
+  it("Creating Assembly should enable save button, saving calls client", async () => {
     await renderWithContext({
       component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
       reportsClient: reportsClient.object,
@@ -160,14 +159,67 @@ describe("TemplateMenu", () => {
     expect(screen.getByTestId("ec3w-template-creation-stepper")).toBeDefined();
     expect(screen.getByTestId("ec3-report-selection")).toBeDefined();
 
-    const button: HTMLInputElement = screen.getByTestId("ec3-next-button");
-    expect(button.disabled).toBe(true);
+    const stepOneButton: HTMLInputElement = screen.getByTestId("ec3-step-one-next-button");
+    expect(stepOneButton.disabled).toBe(true);
     await simulateSelect(screen.getByTestId("ec3-report-selection"), "report_0");
-    expect(button.disabled).toBe(true);
+    expect(stepOneButton.disabled).toBe(true);
     await simulateTextInput(screen.getByTestId("ec3-template-name-input"), "Test Name");
-    expect(button.disabled).toBe(false);
+    expect(stepOneButton.disabled).toBe(false);
 
-    await simulateClick(button);
+    await simulateClick(stepOneButton);
     oDataClient.verify(async (x) => x.getODataReportMetadata(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
+
+    // step-two
+    const stepTwoButton: HTMLInputElement = screen.getByTestId("ec3-step-two-next-button");
+
+    expect(screen.getByTestId("ec3-assembly-name-input")).toBeDefined();
+    await simulateTextInput(screen.getByTestId("ec3-assembly-name-input"), "TestAssembly");
+    expect(stepTwoButton.disabled).toBe(true);
+    expect(screen.getByTestId("ec3-report-table-select")).toBeDefined();
+    await simulateSelect(screen.getByTestId("ec3-report-table-select"), "Roof_RoofGrouping_Mapping_1");
+    expect(stepTwoButton.disabled).toBe(true);
+    expect(screen.getByTestId("ec3-element-select")).toBeDefined();
+    expect(screen.getByText("UserLabel")).toBeInTheDocument();
+    expect(stepTwoButton.disabled).toBe(true);
+    expect(screen.getByTestId("ec3-element-quantity-select")).toBeDefined();
+    await simulateSelect(screen.getByTestId("ec3-element-quantity-select"), "area");
+    expect(stepTwoButton.disabled).toBe(true);
+    expect(screen.getByTestId("ec3-material-select")).toBeDefined();
+    await simulateSelect(screen.getByTestId("ec3-material-select"), "material");
+    expect(stepTwoButton.disabled).toBe(false);
+    await simulateClick(stepTwoButton);
+
+    // step-three
+    expect(screen.getByTestId("ec3-assembly-name-list")).toBeDefined();
+    expect(screen.getByText("TestAssembly")).toBeInTheDocument();
+    const stepThreeButton: HTMLInputElement = screen.getByTestId("ec3-save-button");
+    expect(stepThreeButton.disabled).toBe(false);
+    await simulateClick(stepThreeButton);
+    configClient.verify(async (x) => x.createConfiguration(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
+  });
+
+  it("Saving existing template updates it", async () => {
+    await renderWithContext({
+      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
+      reportsClient: reportsClient.object,
+      ec3ConfigurationsClient: configClient.object,
+      oDataClient: oDataClient.object,
+      getAccessTokenFn,
+    });
+
+    expect(screen.getByTestId("ec3w-template-creation-stepper")).toBeDefined();
+    const stepOneButton: HTMLInputElement = screen.getByTestId("ec3-step-one-next-button");
+    expect(stepOneButton.disabled).toBe(false);
+    await simulateClick(stepOneButton);
+
+    const stepTwoButton: HTMLInputElement = screen.getByTestId("ec3-step-two-next-button");
+    expect(stepTwoButton.disabled).toBe(false);
+    await simulateClick(stepTwoButton);
+
+    const stepThreeButton: HTMLInputElement = screen.getByTestId("ec3-save-button");
+    expect(stepThreeButton.disabled).toBe(false);
+    await simulateClick(stepThreeButton);
+
+    configClient.verify(async (x) => x.updateConfiguration(accessToken, configId, moq.It.isAny()), moq.Times.atLeastOnce());
   });
 });

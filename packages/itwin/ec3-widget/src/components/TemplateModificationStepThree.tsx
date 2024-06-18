@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
 import { Button, Text } from "@itwin/itwinui-react";
 import React from "react";
@@ -20,7 +24,9 @@ export const TemplateModificationStepThree = (props: TemplateModificationStepThr
         {props.childTemplate.labels.map((x) => (
           <div className="ec3w-assembly-name-list" key={x.name}>
             <SvgInfoCircular />
-            <Text className="ec3w-assembly-name">{x.name}</Text>
+            <Text data-testid="ec3-assembly-name-list" className="ec3w-assembly-name">
+              {x.name}
+            </Text>
           </div>
         ))}
       </div>
@@ -29,6 +35,7 @@ export const TemplateModificationStepThree = (props: TemplateModificationStepThr
           Back
         </Button>
         <Button
+          data-testid="ec3-save-button"
           className="ec3w-footer-button"
           styleType="high-visibility"
           onClick={async () => {
