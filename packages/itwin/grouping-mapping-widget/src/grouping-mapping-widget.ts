@@ -38,11 +38,6 @@ export { PropertyMenu, PropertyMenuProps } from "./components/Properties/Propert
 export { PropertyMenuWithVisualization, PropertyMenuWithVisualizationProps } from "./components/Properties/PropertyMenuWithVisualization";
 export { GroupPropertyAction, GroupPropertyActionProps } from "./components/Properties/GroupProperties/GroupPropertyAction";
 export { CalculatedPropertyAction, CalculatedPropertyActionProps } from "./components/Properties/CalculatedProperties/CalculatedPropertyAction";
-export {
-  CalculatedPropertyActionWithVisuals,
-  CalculatedPropertyActionWithVisualsProps,
-} from "./components/Properties/CalculatedProperties/CalculatedPropertyActionWithVisuals";
-export { CustomCalculationAction, CustomCalculationActionProps } from "./components/Properties/CustomCalculations/CustomCalculationAction";
 export { SearchGroupingCustomUI } from "./components/customUI/SearchGroupingCustomUI";
 export { ManualGroupingCustomUI } from "./components/customUI/ManualGroupingCustomUI";
 export { GroupQueryBuilderCustomUI } from "./components/customUI/GroupQueryBuilderCustomUI";
