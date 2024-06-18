@@ -47,6 +47,7 @@ export const TemplateModificationStepOne = (props: TemplateModificationStepOnePr
           id="reportName"
           label="Name"
           className="ec3w-input-form"
+          data-testid="ec3-template-name-input"
           name="displayName"
           value={props.childTemplate.displayName}
           required
@@ -64,7 +65,7 @@ export const TemplateModificationStepOne = (props: TemplateModificationStepOnePr
           <LabeledSelect
             label="Select Report"
             className="ec3w-input-form"
-            data-testid="ec3-report-select"
+            data-testid="ec3-report-selection"
             options={
               props.fetchedReports?.map((x) => {
                 return {
@@ -82,6 +83,7 @@ export const TemplateModificationStepOne = (props: TemplateModificationStepOnePr
       </div>
       <div className="ec3w-stepper-footer">
         <Button
+          data-testid="ec3-next-button"
           className="ec3w-footer-button"
           styleType="high-visibility"
           onClick={() => props.updateCurrentStep(1)}

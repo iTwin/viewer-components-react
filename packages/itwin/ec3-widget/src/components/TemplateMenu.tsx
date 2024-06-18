@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
@@ -115,7 +116,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
   };
 
   return (
-    <div className="ec3w-template-creation-stepper">
+    <div className="ec3w-template-creation-stepper" data-testid="ec3w-template-creation-stepper">
       <Stepper
         steps={[{ name: "Create a template" }, { name: "Add Assembly(s)" }, { name: "Send report to EC3" }]}
         currentStep={currentStep}

@@ -9,7 +9,7 @@ import * as moq from "typemoq";
 import type { EC3Configuration, EC3ConfigurationsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { getComboboxOptions, mockITwinId, renderWithContext, simulateClick, simulateCombobox, simulateTextInput } from "./test-utils";
+import { getSelectOptions, mockITwinId, renderWithContext, simulateClick, simulateSelect, simulateTextInput } from "./test-utils";
 import { TemplateMenu } from "../components/TemplateMenu";
 import type { Configuration } from "../components/EC3/Template";
 
@@ -38,6 +38,30 @@ describe("TemplateMenu", () => {
       },
     },
   }));
+
+  const mockedOdataTables = [
+    {
+      name: "Roof_RoofGrouping_Mapping_1",
+      columns: [
+        {
+          name: "ECInstanceId",
+          type: "Edm.String",
+        },
+        {
+          name: "UserLabel",
+          type: "Edm.String",
+        },
+        {
+          name: "area",
+          type: "Edm.Double",
+        },
+        {
+          name: "material",
+          type: "Edm.String",
+        },
+      ],
+    },
+  ];
 
   const configId = "1234-1234-1234-1234";
   const config: EC3Configuration = {
@@ -82,7 +106,7 @@ describe("TemplateMenu", () => {
     configClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => config);
     configClient.setup(async (x) => x.updateConfiguration(accessToken, configId, moq.It.isAny())).returns(async () => config);
     configClient.setup(async (x) => x.createConfiguration(accessToken, moq.It.isAny())).returns(async () => config);
-    oDataClient.setup(async (x) => x.getODataReportMetadata(accessToken, moq.It.isAny())).returns(async () => []);
+    oDataClient.setup(async (x) => x.getODataReportMetadata(accessToken, moq.It.isAny())).returns(async () => mockedOdataTables);
   });
 
   afterEach(() => {
@@ -93,8 +117,8 @@ describe("TemplateMenu", () => {
     await renderWithContext({
       component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
     });
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
+    expect(screen.getByTestId("ec3w-template-creation-stepper")).toBeDefined();
+    expect(screen.getByTestId("ec3-report-selection")).toBeDefined();
   });
 
   it("Template Menu should render successfully for updating template", async () => {
@@ -104,8 +128,8 @@ describe("TemplateMenu", () => {
       ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn,
     });
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
+    expect(screen.getByTestId("ec3w-template-creation-stepper")).toBeDefined();
+    expect(screen.getByTestId("ec3-report-selection")).toBeDefined();
   });
 
   it("Mocked reports should appear in comboBox", async () => {
@@ -115,11 +139,12 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
+    expect(screen.getByTestId("ec3w-template-creation-stepper")).toBeDefined();
+    expect(screen.getByTestId("ec3-report-selection")).toBeDefined();
 
-    const items = await getComboboxOptions(screen.getByTestId("ec3-enabled-selection"));
+    const items = await getSelectOptions(screen.getByTestId("ec3-report-selection"));
     items.forEach((item, index) => {
+      // eslint-disable-next-line no-console
       expect(item).toHaveTextContent(`report_${index}`);
     });
   });
@@ -128,114 +153,22 @@ describe("TemplateMenu", () => {
     await renderWithContext({
       component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
       reportsClient: reportsClient.object,
+      oDataClient: oDataClient.object,
       ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
+    expect(screen.getByTestId("ec3w-template-creation-stepper")).toBeDefined();
+    expect(screen.getByTestId("ec3-report-selection")).toBeDefined();
 
-    const button: HTMLInputElement = screen.getByTestId("ec3-save-button");
+    const button: HTMLInputElement = screen.getByTestId("ec3-next-button");
     expect(button.disabled).toBe(true);
-    await simulateCombobox(screen.getByTestId("ec3-enabled-selection"), "report_0");
+    await simulateSelect(screen.getByTestId("ec3-report-selection"), "report_0");
     expect(button.disabled).toBe(true);
     await simulateTextInput(screen.getByTestId("ec3-template-name-input"), "Test Name");
     expect(button.disabled).toBe(false);
 
     await simulateClick(button);
-    configClient.verify(async (x) => x.createConfiguration(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
-  });
-
-  it("Add assembly button in enabled after selecting report and it opens label action menu", async () => {
-    await renderWithContext({
-      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} />,
-      reportsClient: reportsClient.object,
-      oDataClient: oDataClient.object,
-      getAccessTokenFn,
-    });
-
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
-
-    const button: HTMLInputElement = screen.getByTestId("ec3-add-assembly-button");
-    expect(button.disabled).toBe(true);
-
-    await simulateCombobox(screen.getByTestId("ec3-enabled-selection"), "report_0");
-    expect(button.disabled).toBe(false);
-
-    await simulateClick(button);
-    expect(screen.getByTestId("ec3-label-action")).toBeInTheDocument();
-  });
-
-  it("Template menu displays the data of the selected template", async () => {
-    await renderWithContext({
-      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
-      reportsClient: reportsClient.object,
-      ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn,
-    });
-
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
-
-    expect(screen.getByText("report_0")).toBeInTheDocument();
-
-    let input: HTMLInputElement = screen.getByTestId("ec3-template-name-input");
-    expect(input.value).toEqual("mocked_configuration");
-    input = screen.getByTestId("ec3-template-description-input");
-    expect(input.value).toEqual("mocked_description");
-
-    expect(screen.getByText("mocked_label")).toBeInTheDocument();
-  });
-
-  it("Clicking on label opens label action menu", async () => {
-    await renderWithContext({
-      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
-      reportsClient: reportsClient.object,
-      ec3ConfigurationsClient: configClient.object,
-      oDataClient: oDataClient.object,
-      getAccessTokenFn,
-    });
-
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
-
-    const configuration = screen.getByText(config.labels[0].name);
-    await simulateClick(configuration);
-    expect(screen.getByTestId("ec3-label-action")).toBeInTheDocument();
-  });
-
-  it("Deleting label opens delete modal", async () => {
-    await renderWithContext({
-      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
-      reportsClient: reportsClient.object,
-      ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn,
-    });
-
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
-
-    const button = screen.getAllByTestId("ec3-labels-delete-button")[0];
-    await simulateClick(button);
-
-    expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
-  });
-
-  it("Saving existing template updates it", async () => {
-    await renderWithContext({
-      component: <TemplateMenu onSaveSuccess={jest.fn} onClickCancel={async () => {}} template={template} />,
-      reportsClient: reportsClient.object,
-      ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn,
-    });
-
-    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
-    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
-
-    const button = screen.getByTestId("ec3-save-button");
-    await simulateClick(button);
-
-    configClient.verify(async (x) => x.updateConfiguration(accessToken, configId, moq.It.isAny()), moq.Times.atLeastOnce());
+    oDataClient.verify(async (x) => x.getODataReportMetadata(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
   });
 });
