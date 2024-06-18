@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Show only 1 spinner when toggling extraction",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "hansraj.koravenciah@bentley.com",
+  "dependentChangeType": "patch"
+}

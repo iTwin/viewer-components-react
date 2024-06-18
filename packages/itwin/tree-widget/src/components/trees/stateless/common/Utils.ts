@@ -3,7 +3,13 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
+import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
+
 import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
 
 /** @internal */
 export function createIdsSelector(ids: string[]): string {
@@ -20,7 +26,6 @@ export function createIdsSelector(ids: string[]): string {
   return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
 }
 
-
 /** @internal */
 export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: TKey, value: TValue) {
   let set = targetMap.get(key);
@@ -29,4 +34,14 @@ export function pushToMap<TKey, TValue>(targetMap: Map<TKey, Set<TValue>>, key: 
     targetMap.set(key, set);
   }
   set.add(value);
+}
+
+export function createIModelAccess({ imodel, getSchemaContext }: { imodel: IModelConnection; getSchemaContext: (imodel: IModelConnection) => SchemaContext }) {
+  const schemas = getSchemaContext(imodel);
+  const schemaProvider = createECSchemaProvider(schemas);
+  return {
+    ...schemaProvider,
+    ...createCachingECClassHierarchyInspector({ schemaProvider }),
+    ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
+  };
 }

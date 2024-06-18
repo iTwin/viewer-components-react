@@ -28,6 +28,10 @@ export namespace SheetMeasurementsHelper {
   export async function getDrawingId(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
     const { ecsql, parameters } = getDrawingInfoECSQL(id);
 
+    if (imodel.isBlank) {
+      return undefined;
+    }
+
     const iter = imodel.createQueryReader(ecsql, QueryBinder.from(parameters));
 
     for await (const row of iter) {

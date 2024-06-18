@@ -364,3 +364,11 @@ export function createIModelAccess(imodel: IModelConnection) {
     ...createLimitingECSqlQueryExecutor(createECSqlQueryExecutor(imodel), 1000),
   };
 }
+
+export async function collect<T>(items: AsyncIterableIterator<T>) {
+  const result: T[] = [];
+  for await (const item of items) {
+    result.push(item);
+  }
+  return result;
+}

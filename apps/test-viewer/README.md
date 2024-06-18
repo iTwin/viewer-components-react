@@ -14,7 +14,7 @@ Prior to running this app, you will need to [configure environment variables](#e
 
 `npm run start:dev`
 
-By default `pnpm` symlinks dependencies to the modules directory. But this causes problems if workspace package `devDependencies` and app `dependencies` have different versions of the same package. To avoid this problem workspace packages should be [injected](https://pnpm.io/package_json#dependenciesmetainjected) into app. However, this breaks `webpack` hot reloading feature.
+By default `pnpm` symlinks dependencies to the modules directory. But this causes problems if workspace package `devDependencies` and app `dependencies` have different versions of the same package. To avoid this problem workspace packages should be [injected](https://pnpm.io/package_json#dependenciesmetainjected) into app. However, this breaks hot reloading feature.
 
 In order to restore hot reloading for workspace packages [`linkWorkspaceDeps.js`](./scripts/linkWorkspaceDeps.js) script was added. It sets up watcher for changes in workspace package output and copies changed files to app `node_modules`.
 
