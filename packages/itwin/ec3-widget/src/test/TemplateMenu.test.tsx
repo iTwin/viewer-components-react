@@ -99,7 +99,7 @@ describe("TemplateMenu", () => {
   const accessToken = faker.datatype.uuid();
   const getAccessTokenFn = async () => accessToken;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     reportsClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     configClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => config);
