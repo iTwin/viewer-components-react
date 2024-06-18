@@ -73,7 +73,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
   const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType ?? undefined);
-  const [isCalculatedBlockExpanded, setIsCalculatedBlockExpanded] = useState<boolean>(calculatedPropertyType ? true : false);
+  const [isCalculatedBlockExpanded, setIsCalculatedBlockExpanded] = useState<boolean>(!!calculatedPropertyType);
   const [formula, setFormula] = useState<string | undefined>(groupProperty?.formula ?? undefined);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
 
