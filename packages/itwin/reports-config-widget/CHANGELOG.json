@@ -2,6 +2,35 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "date": "Tue, 11 Jun 2024 15:52:38 GMT",
+      "version": "0.7.0",
+      "tag": "@itwin/reports-config-widget-react_v0.7.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/reports-config-widget-react",
+            "commit": "3da5297647e428425165200c5596f7a760925961",
+            "comment": "Fixed an issue where custom base URL's were not being used."
+          }
+        ],
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/reports-config-widget-react",
+            "commit": "3da5297647e428425165200c5596f7a760925961",
+            "comment": "UIProvider props has been changed to extend from ReportsConfigContext."
+          },
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/reports-config-widget-react",
+            "commit": "3da5297647e428425165200c5596f7a760925961",
+            "comment": "Changed client prop types to use corresponding interfaces."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 10 Jun 2024 17:40:38 GMT",
       "version": "0.6.0",
       "tag": "@itwin/reports-config-widget-react_v0.6.0",

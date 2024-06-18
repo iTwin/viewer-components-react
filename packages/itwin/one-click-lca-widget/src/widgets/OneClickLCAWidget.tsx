@@ -6,9 +6,12 @@ import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import OneClickLCA from "../components/OneClickLCA";
 import React from "react";
+import type { OneClickLCAProps } from "../components/OneClickLCAProps";
 
 export class OneClickLCAProvider implements UiItemsProvider {
   public readonly id = "OneClickLCAProvider";
+
+  constructor(private readonly _props?: OneClickLCAProps) {}
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];
@@ -16,7 +19,7 @@ export class OneClickLCAProvider implements UiItemsProvider {
       const OneClickLCAWidget: Widget = {
         id: "OneClickLCAWidget",
         label: "One Click LCA",
-        content: <OneClickLCA />,
+        content: <OneClickLCA {...this._props} />,
       };
 
       widgets.push(OneClickLCAWidget);

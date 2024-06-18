@@ -18,6 +18,8 @@ import type {
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 
+const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+
 interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
   viewType: "2d" | "3d";
@@ -202,9 +204,10 @@ async function createInstanceKeyPathsFromInstanceLabel(
           IIF(c.ChildCount > 1, sc.ECInstanceId, NULL) AS SubcategoryId
         FROM RootCategories c
         JOIN SubCategoriesWithLabels sc ON sc.ParentId = c.ECInstanceId
-        WHERE sc.DisplayLabel LIKE '%' || ? || '%'
+        WHERE sc.DisplayLabel LIKE '%' || ? || '%' ESCAPE '\\'
+        LIMIT ${MAX_FILTERING_INSTANCE_KEY_COUNT + 1}
       `,
-      bindings: [{ type: "string", value: props.label }],
+      bindings: [{ type: "string", value: props.label.replace(/[%_\\]/g, "\\$&") }],
     },
     { restartToken: "tree-widget/categories-tree/filter-by-label-query" },
   );
@@ -213,6 +216,9 @@ async function createInstanceKeyPathsFromInstanceLabel(
     const path = [{ className: row.CategoryClass, id: row.CategoryId }];
     row.SubcategoryId && path.push({ className: row.SubcategoryClass, id: row.SubcategoryId });
     paths.push(path);
+  }
+  if (paths.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
+    throw new Error(`Filter matches more than ${MAX_FILTERING_INSTANCE_KEY_COUNT} items`);
   }
   return paths;
 }

@@ -8,13 +8,16 @@ import { IModelApp } from "@itwin/core-frontend";
 import { Alert, Button, LabeledInput, Modal, ProgressLinear, ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import type { Link, OCLCAJob } from "@itwin/insights-client";
-import { CarbonUploadState, OCLCAJobsClient } from "@itwin/insights-client";
+import { CarbonUploadState } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
+import { useOCLCAJobsClient } from "./context/OCLCAJobsClientContext";
+import { OCLCAApiHelper } from "./api/OCLCAApiHelper";
 
 interface ExportProps {
   isOpen: boolean;
   close: () => void;
   reportId: string | undefined;
+  carbonCalculationBasePath?: string;
 }
 
 interface OclcaTokenCache {
@@ -22,10 +25,14 @@ interface OclcaTokenCache {
   exp: number;
 }
 
+/**
+ * @internal
+ */
 const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
   const PIN_INTERVAL = 1000;
-  const oneClickLCAClientApi = useMemo(() => new OCLCAJobsClient(), []);
+  const oneClickLCAClient = useOCLCAJobsClient();
+  const oclcaApiHelper = useMemo(() => new OCLCAApiHelper(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,7 +76,7 @@ const ExportModal = (props: ExportProps) => {
       const intervalId = window.setInterval(async () => {
         const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
         if (job.id && token) {
-          const currentJobStatus = await oneClickLCAClientApi.getOCLCAJobStatus(token, job?.id);
+          const currentJobStatus = await oneClickLCAClient.getOCLCAJobStatus(token, job?.id);
           if (currentJobStatus.status) {
             if (currentJobStatus.status === CarbonUploadState.Succeeded) {
               setJobLink(!!currentJobStatus?._links?.oneclicklca?.href ? { href: currentJobStatus._links.oneclicklca.href } : undefined);
@@ -83,7 +90,7 @@ const ExportModal = (props: ExportProps) => {
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },
-    [setJobLink, setJobStatus, oneClickLCAClientApi],
+    [setJobLink, setJobStatus, oneClickLCAClient],
   );
 
   const runJob = useCallback(
@@ -91,7 +98,7 @@ const ExportModal = (props: ExportProps) => {
       const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.reportId && token) {
         try {
-          const jobCreated = await oneClickLCAClientApi.createJob(accessToken, {
+          const jobCreated = await oneClickLCAClient.createJob(accessToken, {
             reportId: props.reportId,
             token,
           });
@@ -112,7 +119,7 @@ const ExportModal = (props: ExportProps) => {
         toaster.negative("Invalid reportId.");
       }
     },
-    [props, pinStatus, oneClickLCAClientApi],
+    [props, pinStatus, oneClickLCAClient],
   );
 
   const signin = useCallback(
@@ -120,7 +127,7 @@ const ExportModal = (props: ExportProps) => {
       e.preventDefault();
       startSigningIn(true);
       try {
-        const result = await oneClickLCAClientApi.getOCLCAAccessToken(email, password);
+        const result = await oclcaApiHelper.getOCLCAAccessToken(email, password);
         if (result && result.access_token && result.expires_in) {
           cacheToken({
             token: result.access_token,
@@ -138,7 +145,7 @@ const ExportModal = (props: ExportProps) => {
       }
       startSigningIn(false);
     },
-    [email, password, resetSignin, cacheToken, showSigninError, oneClickLCAClientApi],
+    [email, password, resetSignin, cacheToken, showSigninError, oclcaApiHelper],
   );
 
   const onClose = useCallback(() => {

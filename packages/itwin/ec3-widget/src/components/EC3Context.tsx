@@ -5,7 +5,7 @@
 import React, { useMemo } from "react";
 import type { EC3ConfigProps } from "./EC3/EC3Config";
 import { EC3Config } from "./EC3/EC3Config";
-import { ApiContext, createApiContext } from "./api/APIContext";
+import { ApiContext, createApiContext } from "./context/APIContext";
 
 /**
  * EC3 Context props

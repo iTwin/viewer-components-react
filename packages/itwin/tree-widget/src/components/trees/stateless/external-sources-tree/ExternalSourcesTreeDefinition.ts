@@ -97,7 +97,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                   imageId: "icon-document",
                 },
                 autoExpand: true,
-                supportsFiltering: true,
+                supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
             FROM ${instanceFilterClauses.from} this
             ${instanceFilterClauses.joins}
@@ -133,7 +133,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 extendedData: {
                   imageId: "icon-document",
                 },
-                supportsFiltering: true,
+                supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceGroupGroupsSources esggs ON esggs.TargetECInstanceId = this.ECInstanceId
@@ -172,7 +172,7 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                 extendedData: {
                   imageId: "icon-document",
                 },
-                supportsFiltering: true,
+                supportsFiltering: { selector: this.createExternalSourceSupportsFilteringSelector("this") },
               })}
             FROM ${instanceFilterClauses.from} this
             JOIN BisCore.ExternalSourceAttachment esa ON esa.Attaches.Id = this.ECInstanceId
@@ -202,6 +202,20 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
     ];
   }
 
+  private createExternalSourceSupportsFilteringSelector(alias: string) {
+    return `
+      IFNULL((
+        SELECT 1
+        FROM (
+          SELECT 1 FROM BisCore.ExternalSourceGroupGroupsSources WHERE SourceECInstanceId = ${alias}.ECInstanceId
+          UNION ALL
+          SELECT 1 FROM BisCore.ExternalSourceAttachment WHERE Parent.Id = ${alias}.ECInstanceId
+        )
+        LIMIT 1
+      ), 0)
+    `;
+  }
+
   private async createElementsNodeChildrenQuery({ parentNode, instanceFilter }: DefineCustomNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
     const sourceIds: string[] = parentNode.extendedData?.sourceIds;
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
@@ -227,7 +241,6 @@ export class ExternalSourcesTreeDefinition implements HierarchyDefinition {
                   imageId: "icon-item",
                 },
                 grouping: { byClass: true },
-                supportsFiltering: true,
                 hasChildren: false,
               })}
             FROM ${instanceFilterClauses.from} this
