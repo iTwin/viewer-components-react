@@ -316,7 +316,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
               <SvgMeasure />
             </Icon>
           }
-          isExpanded={calculatedPropertyType ? true : false}
+          isExpanded={!!calculatedPropertyType}
           setIsExpanded={setIsCalculatedBlockExpanded}
         >
           <CalculatedPropertyActionWithVisuals
