@@ -1,0 +1,7 @@
+{
+  "type": "prerelease",
+  "comment": "Supply schema metadata context to tree renderers to support units in filtering dialog",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

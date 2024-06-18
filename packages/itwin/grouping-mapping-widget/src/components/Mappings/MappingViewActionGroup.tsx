@@ -15,7 +15,7 @@ interface MappingUIActionGroupProps {
   setShowDeleteModal: (mapping?: Mapping) => void;
 }
 
-export const MappingViewActionGroup = ({ mapping, onToggleExtraction, onRefresh, onClickMappingModify, setShowDeleteModal }: MappingUIActionGroupProps) => {
+export const MappingViewActionGroup = ({ mapping, onToggleExtraction, onClickMappingModify, setShowDeleteModal }: MappingUIActionGroupProps) => {
   return (
     <DropdownMenu
       menuItems={(close: () => void) =>
@@ -39,7 +39,6 @@ export const MappingViewActionGroup = ({ mapping, onToggleExtraction, onRefresh,
             onClick={async () => {
               close();
               await onToggleExtraction(mapping);
-              await onRefresh();
             }}
             icon={<SvgProcess />}
           >
