@@ -7,7 +7,7 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import { InputGroup, MenuItem, ToggleSwitch } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { BboxDimension, BboxDimensionsDecorator } from "../../../decorators/BboxDimensionsDecorator";
-import { visualizeElements, zoomToElements } from "../../../common/viewerUtils";
+import { clearAll, visualizeElements, zoomToElements } from "../../../common/viewerUtils";
 import "./CalculatedPropertyActionWithVisuals.scss";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { CalculatedPropertyType, GroupMinimal } from "@itwin/insights-client";
@@ -60,6 +60,7 @@ export const CalculatedPropertyActionWithVisuals = ({
 
   useEffect(() => {
     if (!colorProperty || resolvedHiliteIds.length === 0) {
+      clearAll();
       return;
     }
     visualizeElements(resolvedHiliteIds, "red");

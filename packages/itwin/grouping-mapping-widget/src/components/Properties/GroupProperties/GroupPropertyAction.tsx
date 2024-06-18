@@ -73,6 +73,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
   const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType ?? undefined);
+  const [isCalculatedBlockExpanded, setIsCalculatedBlockExpanded] = useState<boolean>(calculatedPropertyType ? true : false);
   const [formula, setFormula] = useState<string | undefined>(groupProperty?.formula ?? undefined);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
 
@@ -150,8 +151,14 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
   }, [data, isLoadingPropertiesSuccessful]);
 
   useEffect(() => {
-    if (calculatedPropertyType) setDataType(DataType.Double);
-  }, [calculatedPropertyType]);
+    if (calculatedPropertyType) {
+      setDataType(DataType.Double);
+    } 
+
+    if (isCalculatedBlockExpanded === false || !calculatedPropertyType) {
+      clearAll();
+    }
+  }, [calculatedPropertyType, isCalculatedBlockExpanded]);
 
   useEffect(() => {
     if (formulaErrorMessage) {
@@ -273,6 +280,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             </Icon>
           }
           isExpanded={selectedProperties.length > 0}
+          setIsExpanded={()=> {}}
         >
           <div className="gmw-property-view-container">
             <div className="gmw-property-view-button">
@@ -309,6 +317,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             </Icon>
           }
           isExpanded={calculatedPropertyType ? true : false}
+          setIsExpanded={setIsCalculatedBlockExpanded}
         >
           <CalculatedPropertyActionWithVisuals
             group={group}
@@ -326,6 +335,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             </Icon>
           }
           isExpanded={formula !== undefined}
+          setIsExpanded={()=> {}}
         >
           <CustomCalculationAction
             formula={formula}

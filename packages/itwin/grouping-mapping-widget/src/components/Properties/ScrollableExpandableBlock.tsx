@@ -10,10 +10,12 @@ import { useForwardRef } from "./hooks/useForwardRef";
 interface ScrollableExpandableBlockProps extends ExpandableBlockProps {
   parentRef?: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
+  isExpanded: boolean;
+  setIsExpanded: (isExpanded: boolean) => void;
 }
 
 export const ScrollableExpandableBlock = forwardRef<HTMLDivElement, ScrollableExpandableBlockProps>(function ExpandableBlockWithRef(props, forwardRef) {
-  const { parentRef, children, ...rest } = props;
+  const { parentRef, children, isExpanded, setIsExpanded,...rest } = props;
   const forwardedRef = useForwardRef<HTMLDivElement>(forwardRef);
 
   const scrollToBlock = useCallback(() => {
@@ -29,14 +31,19 @@ export const ScrollableExpandableBlock = forwardRef<HTMLDivElement, ScrollableEx
 
   const handleToggle = useCallback(
     (isExpanding: boolean) => {
-      if (isExpanding === true) scrollToBlock();
+      if (isExpanding === true) {
+        setIsExpanded(true);
+        scrollToBlock();
+      }else {
+        setIsExpanded(false);
+      }
     },
-    [scrollToBlock],
+    [scrollToBlock, setIsExpanded],
   );
 
   return (
     <div ref={forwardedRef}>
-      <ExpandableBlock onToggle={handleToggle} {...rest}>
+      <ExpandableBlock onToggle={handleToggle} isExpanded={isExpanded} {...rest}>
         {children}
       </ExpandableBlock>
     </div>
