@@ -110,6 +110,22 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
     init(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }, [addNewEmptyAssembly, allAssemblies, initReportTableSelection, oDataTable]);
 
+  const onAssemblyEdit = useCallback(
+    (index: number) => (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      setEditableAssemblyIndex(index);
+      e.stopPropagation();
+    },
+    [setEditableAssemblyIndex],
+  );
+
+  const onAssemblyDelete = useCallback(
+    (assembly: EC3ConfigurationLabel, index: number) => (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.stopPropagation();
+      onAssemblyDataChange(assembly, index, "delete");
+    },
+    [onAssemblyDataChange],
+  );
+
   return (
     <div className="ec3w-create-template-step-two">
       <div className="ec3w-assembly-list">
@@ -122,24 +138,14 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
                 title={`${assembly.name}`}
                 endIcon={
                   <ButtonGroup>
-                    <IconButton
-                      key={`edit-assembly${i}`}
-                      styleType="borderless"
-                      onClick={(e) => {
-                        setEditableAssemblyIndex(i);
-                        e.stopPropagation();
-                      }}
-                    >
+                    <IconButton key={`edit-assembly${i}`} styleType="borderless" onClick={onAssemblyEdit(i)}>
                       <SvgEdit />
                     </IconButton>
                     <IconButton
                       key={`delete-assembly${i}`}
                       disabled={allAssemblies.length === 1}
                       styleType="borderless"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAssemblyDataChange(assembly, i, "delete");
-                      }}
+                      onClick={onAssemblyDelete(assembly, i)}
                     >
                       <SvgDelete />
                     </IconButton>
