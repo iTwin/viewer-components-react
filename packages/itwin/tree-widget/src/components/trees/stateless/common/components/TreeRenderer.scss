@@ -13,10 +13,14 @@
     z-index: 1;
     background-color: var(--iui-color-background);
     padding-left: calc(var(--iui-size-2xs) + var(--iui-size-3xs));
+    height: calc(100% - var(--iui-size-2xs));
+    align-content: center;
   }
 
   .tw-tree-node-checkbox::before {
     background-color: var(--iui-color-background);
+    z-index: -1;
+    inset: calc(-1 * var(--iui-size-xs)) calc(-1 * var(--iui-size-xs) / 2);
   }
 
   .tw-tree-node-action-buttons {
@@ -28,6 +32,7 @@
 
   .tw-tree-node {
     padding-inline: 1px;
+    margin-left: 2px;
   }
 
   .tw-tree-node-content {

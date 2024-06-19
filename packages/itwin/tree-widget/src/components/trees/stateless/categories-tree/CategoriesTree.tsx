@@ -124,6 +124,7 @@ export function StatelessCategoriesTree({
       }}
       reportUsage={reportUsage}
       searchText={filter}
+      nodeHeight={46}
     />
   );
 }
