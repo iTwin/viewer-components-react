@@ -172,14 +172,15 @@ const configuredUiItems = new Map<string, UiItem>([
             return [
               {
                 id: "tree-widget",
+                label: TreeWidget.translate("treeview"),
                 icon: <SvgHierarchyTree />,
-                content: <TreeWidgetWithOptions trees={trees} />,
                 layouts: {
                   standard: {
                     section: StagePanelSection.Start,
                     location: StagePanelLocation.Right,
                   },
                 },
+                content: <TreeWidgetWithOptions trees={trees} />,
               },
             ];
           },

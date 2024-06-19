@@ -9,7 +9,7 @@ import { Children, useEffect, useRef, useState } from "react";
 import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, Divider, DropdownMenu, IconButton, SearchBox } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../TreeWidget";
-import { useFocusedInstancesContext } from "../trees/stateless/common/FocusedInstancesContext";
+import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesContext";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { CommonProps } from "@itwin/core-react";

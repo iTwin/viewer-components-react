@@ -11,12 +11,13 @@ import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
+import * as modelsVisibilityHandler from "../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeComponent } from "../../../components/trees/models-tree/ModelsTreeComponent";
-import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { TreeWidget } from "../../../TreeWidget";
 import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
+import type { ComponentPropsWithoutRef } from "react";
 import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../components/trees/models-tree/ModelsTreeButtons";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
@@ -32,6 +33,10 @@ describe("<ModelsTreeComponent />", () => {
     await IModelApp.shutdown();
   });
 
+  const defaultModelsTreeComponentProps: ComponentPropsWithoutRef<typeof ModelsTreeComponent> = {
+    getSchemaContext: () => ({}) as any,
+    selectionStorage: {} as any,
+  };
   let vpMock = moq.Mock.ofType<Viewport>();
 
   afterEach(() => {
@@ -54,7 +59,7 @@ describe("<ModelsTreeComponent />", () => {
   it("returns null if iModel is undefined", async () => {
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => ({}) as Viewport);
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree");
-    const result = render(<ModelsTreeComponent />);
+    const result = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
     await waitFor(() => {
       expect(result.container.children).to.be.empty;
       expect(modelsTreeSpy).to.not.be.called;
@@ -64,7 +69,7 @@ describe("<ModelsTreeComponent />", () => {
   it("returns null if viewport is undefined", async () => {
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree");
-    const result = render(<ModelsTreeComponent />);
+    const result = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
     await waitFor(() => {
       expect(result.container.children).to.be.empty;
       expect(modelsTreeSpy).to.not.be.called;
@@ -75,7 +80,7 @@ describe("<ModelsTreeComponent />", () => {
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree").returns(<></>);
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
-    const result = render(<ModelsTreeComponent />);
+    const result = render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
     await waitFor(() => {
       expect(result.container.children).to.not.be.empty;
       expect(modelsTreeSpy).to.be.called;
@@ -107,7 +112,7 @@ describe("<ModelsTreeComponent />", () => {
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
-      render(<ModelsTreeComponent headerButtons={[spy]} density="enlarged" />);
+      render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} headerButtons={[spy]} />);
       await waitFor(() =>
         expect(spy).to.be.calledWith(
           sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels"),
@@ -126,7 +131,7 @@ describe("<ModelsTreeComponent />", () => {
           },
         },
       } as unknown as IModelConnection);
-      render(<ModelsTreeComponent headerButtons={[spy]} />);
+      render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} headerButtons={[spy]} />);
       await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 0)));
     });
   });
@@ -137,9 +142,9 @@ describe("<ModelsTreeComponent />", () => {
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
-      render(<ModelsTreeComponent />);
+      render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} />);
       await waitFor(() => {
-        expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 5));
+        expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 6));
       });
     });
 
@@ -149,7 +154,7 @@ describe("<ModelsTreeComponent />", () => {
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
-      render(<ModelsTreeComponent headerButtons={[spy]} />);
+      render(<ModelsTreeComponent {...defaultModelsTreeComponentProps} headerButtons={[spy]} />);
       await waitFor(() => {
         expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 1));
         expect(spy).to.be.called;

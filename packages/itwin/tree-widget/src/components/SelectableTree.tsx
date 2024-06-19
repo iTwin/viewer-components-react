@@ -15,20 +15,14 @@ import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
 
-/**
- * Props for rendering trees
- * @public
- */
+/** Props for rendering trees */
 export interface TreeRenderProps {
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
 
-/**
- * Definition of a tree component displayed in [[SelectableTree]]
- * @public
- */
+/** Definition of a tree component displayed in `SelectableTree` */
 export interface TreeDefinition {
   /** Id of the tree */
   id: string;
@@ -45,10 +39,7 @@ export interface TreeDefinition {
   startIcon?: React.ReactNode;
 }
 
-/**
- * Props for [[SelectableTree]]
- * @public
- */
+/** Props for `SelectableTree` */
 export interface SelectableTreeProps {
   trees: TreeDefinition[];
   density?: "enlarged" | "default";
@@ -62,11 +53,9 @@ export interface SelectableTreeProps {
  */
 export function SelectableTree(props: SelectableTreeProps) {
   const imodel = useActiveIModelConnection();
-
   if (!imodel) {
     return null;
   }
-
   return <SelectableTreeContent {...props} imodel={imodel} />;
 }
 

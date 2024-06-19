@@ -3,324 +3,329 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "../VisibilityTreeBase.scss";
-import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SelectionMode } from "@itwin/components-react";
-import { isPresentationTreeNodeItem, PresentationTree } from "@itwin/presentation-components";
+import { IModelApp } from "@itwin/core-frontend";
+import { SvgFolder, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
+import { Anchor, Icon, Text } from "@itwin/itwinui-react";
+import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
+import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget";
-import { FilterableTreeRenderer } from "../common/TreeRenderer";
-import { ClassGroupingOption } from "../common/Types";
+import { VisibilityTree } from "../common/components/VisibilityTree";
+import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
-import { usePerformanceReporting } from "../common/UsePerformanceReporting";
-import { useVisibilityTreeState } from "../common/UseVisibilityTreeState";
-import { addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, combineTreeNodeItemCustomizations } from "../common/Utils";
-import { createVisibilityTreeRenderer, FilterableVisibilityTreeNodeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { useIModelChangeListener } from "../common/UseIModelChangeListener";
+import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
+import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
-import { ModelsTreeEventHandler } from "./ModelsTreeEventHandler";
-import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
-import { addModelsTreeNodeItemIcons, createRuleset, createSearchRuleset } from "./Utils";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
-import type { FilterableTreeNodeRendererProps } from "../common/TreeRenderer";
-import type { UsageTrackedFeatures } from "../common/UseFeatureReporting";
-import type { VisibilityTreeEventHandlerParams } from "../VisibilityTreeEventHandler";
-import type { Ruleset, SingleSchemaClassSpecification } from "@itwin/presentation-common";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { BaseFilterableTreeProps, HierarchyLevelConfig } from "../common/Types";
-import type { ModelsTreeSelectionPredicate, ModelsVisibilityHandlerProps } from "./ModelsVisibilityHandler";
+import type { Id64String } from "@itwin/core-bentley";
+import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { ElementsGroupInfo } from "./ModelsTreeDefinition";
+import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { ComponentPropsWithoutRef, ReactElement } from "react";
+import type { Viewport } from "@itwin/core-frontend";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
-const PAGING_SIZE = 20;
+type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
-/**
- * Props for configuring the hierarchy in [[ModelsTree]].
- * @public
- */
-export interface ModelsTreeHierarchyConfiguration {
-  /** Should the tree group displayed element nodes by class. Defaults to `ClassGroupingOption.No`. */
-  enableElementsClassGrouping?: ClassGroupingOption;
-  /**
-   * Defines the `bis.GeometricElement3d` sub-class that should be used to load element nodes.
-   * Defaults to `bis.GeometricElement3d`. It's expected for the given class to derive from it.
-   */
-  elementClassSpecification?: SingleSchemaClassSpecification;
-  /** Should the tree show models without elements. */
-  showEmptyModels?: boolean;
-}
-
-/**
- * Props for [[ModelsTree]] component.
- * @public
- */
-export interface ModelsTreeProps extends BaseFilterableTreeProps {
-  /**
-   * Predicate which indicates whether node can be selected or no
-   */
-  selectionPredicate?: ModelsTreeSelectionPredicate;
-  /**
-   * Active view used to determine and control visibility
-   */
+interface ModelsTreeOwnProps {
   activeView: Viewport;
-  /**
-   * Configuration options for the hierarchy loaded in the component.
-   */
-  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
-  /**
-   * Auto-update the hierarchy when data in the iModel changes.
-   * @alpha
-   * @deprecated in 2.0.1. It does not have any effect, auto update is always on.
-   */
-  enableHierarchyAutoUpdate?: boolean;
-  /**
-   * Custom visibility handler.
-   */
-  modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
-  /**
-   * Props for configuring hierarchy level.
-   * @beta
-   */
-  hierarchyLevelConfig?: HierarchyLevelConfig;
-  /**
-   * Reports performance of a feature.
-   * @param featureId ID of the feature.
-   * @param elapsedTime Elapsed time of the feature.
-   * @beta
-   */
-  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-  /**
-   * Callback that is invoked when a tracked feature is used.
-   * @param featureId ID of the feature.
-   * @beta
-   */
+  hierarchyLevelConfig?: {
+    sizeLimit?: number;
+  };
+  filter?: string;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
 
-/**
- * A tree component that shows a subject - model - category - element
- * hierarchy along with checkboxes that represent and allow changing
- * the display of those instances.
- * @public
- */
-export function ModelsTree(props: ModelsTreeProps) {
-  const { hierarchyLevelConfig, density, height, width, selectionMode, onFeatureUsed } = props;
-  const { reportUsage } = useFeatureReporting({ treeIdentifier: ModelsTreeComponent.id, onFeatureUsed });
-  const state = useModelsTreeState({ ...props, reportUsage });
+type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
+type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
+type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
+type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-  const baseRendererProps = {
-    reportUsage,
-    contextMenuItems: props.contextMenuItems,
-    nodeLabelRenderer: props.nodeLabelRenderer,
-    density: props.density,
-    nodeRendererProps: {
-      iconsEnabled: true,
-      descriptionEnabled: false,
-      levelOffset: 10,
-      disableRootNodeCollapse: true,
-      onVisibilityToggled: () => reportUsage({ featureId: "visibility-change", reportInteraction: true }),
-    },
+type ModelsTreeProps = ModelsTreeOwnProps &
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> & {
+    hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   };
 
-  // istanbul ignore next
-  const noFilteredDataRenderer = useCallback(() => {
-    return (
-      <VisibilityTreeNoFilteredData title={TreeWidget.translate("modelTree.noModelFound")} message={TreeWidget.translate("modelTree.noMatchingModelNames")} />
-    );
-  }, []);
-
-  if (!state) {
-    return null;
-  }
-
-  const isFilterApplied = state.filteringResult?.filteredProvider !== undefined;
-  const overlay = state.filteringResult?.isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
-  return (
-    <div className={classNames("tree-widget-visibility-tree-base", "tree-widget-tree-container")}>
-      <PresentationTree
-        state={state}
-        selectionMode={selectionMode || SelectionMode.None}
-        treeRenderer={
-          hierarchyLevelConfig?.isFilteringEnabled
-            ? (rendererProps) => (
-                <FilterableTreeRenderer
-                  {...rendererProps}
-                  {...baseRendererProps}
-                  nodeLoader={state.nodeLoader}
-                  nodeRenderer={(nodeProps) => <ModelsTreeNodeRenderer {...nodeProps} density={density} />}
-                />
-              )
-            : createVisibilityTreeRenderer(baseRendererProps)
-        }
-        noDataRenderer={isFilterApplied ? noFilteredDataRenderer : undefined}
-        width={width}
-        height={height}
-      />
-      {overlay}
-    </div>
-  );
-}
-
-interface ModelsTreeNodeRendererProps extends FilterableTreeNodeRendererProps {
-  density?: "default" | "enlarged";
-}
-
-function ModelsTreeNodeRenderer(props: ModelsTreeNodeRendererProps) {
-  return (
-    <FilterableVisibilityTreeNodeRenderer
-      {...props}
-      iconsEnabled={true}
-      descriptionEnabled={false}
-      levelOffset={10}
-      disableRootNodeCollapse={true}
-      isEnlarged={props.density === "enlarged"}
-      onVisibilityToggled={() => props.reportUsage?.({ featureId: "visibility-change", reportInteraction: true })}
-    />
-  );
-}
-
-interface UseModelsTreeStateProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
-  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
-}
-
-function useModelsTreeState({ filterInfo, onFilterApplied, ...props }: UseModelsTreeStateProps) {
-  const rulesets = {
-    general: useMemo(
-      () =>
-        createRuleset({
-          enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
-          elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-          showEmptyModels: props.hierarchyConfig?.showEmptyModels,
-        }),
-      [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels],
-    ),
-    search: useMemo(
-      () =>
-        createSearchRuleset({
-          elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
-          showEmptyModels: props.hierarchyConfig?.showEmptyModels,
-        }),
-      [props.hierarchyConfig?.elementClassSpecification, props.hierarchyConfig?.showEmptyModels],
-    ),
-  };
-
-  const treeState = useTreeState({
-    ...props,
-    ruleset: rulesets.general,
-  });
-
-  const filteredTreeState = useTreeState({
-    ...props,
-    ruleset: rulesets.search,
-    filterInfo,
-    onFilterApplied,
-  });
-
-  return filterInfo?.filter ? filteredTreeState : treeState;
-}
-
-interface UseTreeProps extends Omit<ModelsTreeProps, "onFeatureUsed"> {
-  ruleset: Ruleset;
-  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
-}
-
-function useTreeState({
-  modelsVisibilityHandler,
+/** @internal */
+export function ModelsTree({
+  imodel,
+  getSchemaContext,
+  height,
+  width,
   activeView,
-  selectionPredicate,
-  hierarchyConfig,
-  iModel,
-  ruleset,
-  filterInfo,
-  onFilterApplied,
+  filter,
+  density,
   hierarchyLevelConfig,
+  hierarchyConfig,
+  selectionMode,
   onPerformanceMeasured,
-  reportUsage,
-}: UseTreeProps) {
-  const visibilityHandler = useVisibilityHandler(ruleset.id, iModel, activeView, modelsVisibilityHandler);
-  const selectionPredicateRef = useRef(selectionPredicate);
-  useEffect(() => {
-    selectionPredicateRef.current = selectionPredicate;
-  }, [selectionPredicate]);
-
-  const onFilterChange = useCallback(
-    (dataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => {
-      if (dataProvider && matchesCount !== undefined) {
-        reportUsage({ featureId: "filtering", reportInteraction: false });
-        onFilterApplied?.(dataProvider, matchesCount);
-      }
-
-      if (visibilityHandler) {
-        visibilityHandler.setFilteredDataProvider(dataProvider);
-      }
-    },
-    [onFilterApplied, reportUsage, visibilityHandler],
+  onFeatureUsed,
+}: ModelsTreeProps) {
+  const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
+  const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
+    () => ({
+      ...defaultHierarchyConfiguration,
+      ...hierarchyConfig,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Object.values(hierarchyConfig ?? {}),
   );
 
-  const { onNodeLoaded } = usePerformanceReporting({
-    treeIdentifier: ModelsTreeComponent.id,
-    onPerformanceMeasured,
-  });
+  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration);
+  const { loadInstanceKeys: loadFocusedInstancesKeys } = useFocusedInstancesContext();
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: ModelsTreeComponent.id });
 
-  const eventHandlerFactory = useCallback(
-    (handlerProps: VisibilityTreeEventHandlerParams) => {
-      return new ModelsTreeEventHandler({ ...handlerProps, reportUsage });
+  const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
+    ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
+    [getModelsTreeIdsCache, hierarchyConfiguration],
+  );
+
+  const onNodeDoubleClick = useCallback(
+    async ({ nodeData, extendedData }: PresentationHierarchyNode) => {
+      if (!HierarchyNode.isInstancesNode(nodeData) || (extendedData && (extendedData.isSubject || extendedData.isModel || extendedData.isCategory))) {
+        return;
+      }
+      const instanceIds = nodeData.key.instanceKeys.map((instanceKey) => instanceKey.id);
+      await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
+      reportUsage({ featureId: "zoom-to-node", reportInteraction: false });
     },
     [reportUsage],
   );
 
-  return useVisibilityTreeState({
-    imodel: iModel,
-    ruleset,
-    pagingSize: PAGING_SIZE,
-    appendChildrenCountForGroupingNodes: hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts,
-    enableHierarchyAutoUpdate: true,
-    customizeTreeNodeItem,
-    visibilityHandler,
-    filterInfo,
-    onFilterChange,
-    selectionPredicate: useCallback(
-      (node: TreeNodeItem) =>
-        !selectionPredicateRef.current || !isPresentationTreeNodeItem(node)
-          ? true
-          : selectionPredicateRef.current(node.key, ModelsVisibilityHandler.getNodeType(node)),
-      [],
-    ),
-    eventHandler: eventHandlerFactory,
-    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
-    onNodeLoaded: filterInfo ? undefined : onNodeLoaded,
-    reportUsage: filterInfo ? undefined : reportUsage,
-    onHierarchyLimitExceeded: () => reportUsage({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
-  });
+  const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    setFilteringError(undefined);
+    if (!loadFocusedInstancesKeys) {
+      return undefined;
+    }
+    return async ({ imodelAccess }) => {
+      try {
+        const targetKeys = await collectTargetKeys(loadFocusedInstancesKeys);
+        return await ModelsTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          idsCache: getModelsTreeIdsCache(),
+          keys: targetKeys,
+          hierarchyConfig: hierarchyConfiguration,
+        });
+      } catch (e) {
+        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
+        setFilteringError(newError);
+        return [];
+      }
+    };
+  }, [loadFocusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
+
+  const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+    setFilteringError(undefined);
+    if (!filter) {
+      return undefined;
+    }
+    return async ({ imodelAccess }) => {
+      reportUsage?.({ featureId: "filtering", reportInteraction: true });
+      try {
+        return await ModelsTreeDefinition.createInstanceKeyPaths({
+          imodelAccess,
+          label: filter,
+          idsCache: getModelsTreeIdsCache(),
+          hierarchyConfig: hierarchyConfiguration,
+        });
+      } catch (e) {
+        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        setFilteringError(newError);
+        return [];
+      }
+    };
+  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration]);
+
+  const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
+
+  return (
+    <VisibilityTree
+      height={height}
+      width={width}
+      imodel={imodel}
+      treeName={ModelsTreeComponent.id}
+      getSchemaContext={getSchemaContext}
+      visibilityHandlerFactory={visibilityHandlerFactory}
+      getHierarchyDefinition={getHierarchyDefinition}
+      getFilteredPaths={getFilteredPaths}
+      hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
+      getIcon={getIcon}
+      density={density}
+      noDataMessage={getNoDataMessage(filter, filteringError)}
+      selectionMode={selectionMode}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${ModelsTreeComponent.id}-${action}`, duration);
+      }}
+      reportUsage={reportUsage}
+      onNodeDoubleClick={onNodeDoubleClick}
+      searchText={filter}
+    />
+  );
 }
 
-function useVisibilityHandler(
-  rulesetId: string,
-  iModel: IModelConnection,
-  activeView: Viewport,
-  visibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler),
-) {
-  const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
-  const [state, setState] = useState<ModelsVisibilityHandler>();
+function getNoDataMessage(filter?: string, error?: ModelsTreeFilteringError) {
+  if (isInstanceFocusError(error)) {
+    return <InstanceFocusError error={error!} />;
+  }
+  if (isFilterError(error)) {
+    return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
+  }
+  if (filter) {
+    return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
+  }
+  return undefined;
+}
+
+function isFilterError(error: ModelsTreeFilteringError | undefined) {
+  return error === "tooManyFilterMatches" || error === "unknownFilterError";
+}
+
+function isInstanceFocusError(error: ModelsTreeFilteringError | undefined) {
+  return error === "tooManyInstancesFocused" || error === "unknownInstanceFocusError";
+}
+
+function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
+  const { toggle } = useFocusedInstancesContext();
+  const localizedMessage = createLocalizedMessage(TreeWidget.translate(`stateless.${error}`), () => toggle());
+  return <Text>{localizedMessage}</Text>;
+}
+
+function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
+  if (node.extendedData?.imageId === undefined) {
+    return undefined;
+  }
+
+  switch (node.extendedData.imageId) {
+    case "icon-layers":
+      return <SvgLayers />;
+    case "icon-item":
+      return <SvgItem />;
+    case "icon-ec-class":
+      return <SvgClassGrouping />;
+    case "icon-imodel-hollow-2":
+      return <SvgImodelHollow />;
+    case "icon-folder":
+      return <SvgFolder />;
+    case "icon-model":
+      return <SvgModel />;
+  }
+
+  return undefined;
+}
+
+function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: () => ModelsTreeIdsCache) {
+  return (imodelAccess: ECClassHierarchyInspector) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
+}
+
+function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration) {
+  const cacheRef = useRef<ModelsTreeIdsCache>();
+  const currentIModelRef = useRef(activeView.iModel);
+
+  const getModelsTreeIdsCache = useCallback(() => {
+    if (!cacheRef.current) {
+      cacheRef.current = new ModelsTreeIdsCache(createECSqlQueryExecutor(currentIModelRef.current), hierarchyConfig);
+    }
+    return cacheRef.current;
+  }, [hierarchyConfig]);
+
+  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+
+  useIModelChangeListener({
+    imodel: activeView.iModel,
+    action: useCallback(() => {
+      cacheRef.current = undefined;
+      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+    }, [activeView, getModelsTreeIdsCache]),
+  });
 
   useEffect(() => {
-    if (visibilityHandler && typeof visibilityHandler !== "function") {
-      return;
-    }
+    currentIModelRef.current = activeView.iModel;
+    cacheRef.current = undefined;
+    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+  }, [activeView, getModelsTreeIdsCache]);
 
-    const visibilityHandlerProps: ModelsVisibilityHandlerProps = {
-      rulesetId,
-      viewport: activeView,
-      subjectModelIdsCache,
-    };
-
-    const handler = visibilityHandler ? visibilityHandler(visibilityHandlerProps) : new ModelsVisibilityHandler(visibilityHandlerProps);
-    setState(handler);
-    return () => {
-      handler.dispose();
-    };
-  }, [rulesetId, activeView, subjectModelIdsCache, visibilityHandler]);
-
-  return visibilityHandler && typeof visibilityHandler !== "function" ? visibilityHandler : state;
+  return {
+    getModelsTreeIdsCache,
+    visibilityHandlerFactory,
+  };
 }
 
-const customizeTreeNodeItem = combineTreeNodeItemCustomizations([addCustomTreeNodeItemLabelRenderer, addTreeNodeItemCheckbox, addModelsTreeNodeItemIcons]);
+function SvgClassGrouping() {
+  return (
+    <Icon>
+      <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M8.00933,0,0,3.97672V11.986L8.00933,16,16,11.93V3.97651ZM1.66173,11.27642c-.26155.03734-.59754-.26154-.76553-.69085-.168-.41066-.09334-.784.168-.82152.26154-.03734.59754.26154.76553.67219C1.99772,10.86577,1.92306,11.23909,1.66173,11.27642Zm0-3.32319c-.26155.03733-.59754-.28-.76553-.69086-.168-.42932-.09334-.80285.168-.84.26133-.03733.59754.28.76532.69086C1.99772,7.54236,1.92306,7.89723,1.66173,7.95323Zm4.31276,5.52621a.18186.18186,0,0,1-.16821-.01866L3.41657,12.15394a.94275.94275,0,0,1-.29887-.80285c.03754-.33621.22421-.52265.41108-.41066L5.9185,12.24727a.88656.88656,0,0,1,.28.80285A.5057.5057,0,0,1,5.97449,13.47944Zm0-3.37919a.18184.18184,0,0,1-.16821-.01867L3.41657,8.77475a.943.943,0,0,1-.29887-.80286c.03754-.3362.22421-.52286.41108-.42953L5.9185,8.86786a.83112.83112,0,0,1,.28.78419A.51684.51684,0,0,1,5.97449,10.10025Z" />
+      </svg>
+    </Icon>
+  );
+}
+
+async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
+  const targetKeys: Array<InstanceKey | ElementsGroupInfo> = [];
+  const groupingNodeInfos: Array<{ parentKey: InstancesNodeKey; parentType: "element" | "category"; classes: string[]; modelIds: Id64String[] }> = [];
+  for await (const key of loadFocusedInstancesKeys()) {
+    if ("id" in key) {
+      targetKeys.push(key);
+      continue;
+    }
+
+    if (!HierarchyNodeKey.isClassGrouping(key.key)) {
+      targetKeys.push(...key.groupedInstanceKeys);
+      continue;
+    }
+
+    if (!key.nonGroupingAncestor || !HierarchyNodeKey.isInstances(key.nonGroupingAncestor.key)) {
+      continue;
+    }
+
+    const parentKey = key.nonGroupingAncestor.key;
+    const type = key.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
+    const modelIds = ((key.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
+    const groupInfo = groupingNodeInfos.find((group) => HierarchyNodeKey.equals(group.parentKey, parentKey));
+    if (groupInfo) {
+      groupInfo.classes.push(key.key.className);
+    } else {
+      groupingNodeInfos.push({ classes: [key.key.className], parentType: type, parentKey, modelIds });
+    }
+  }
+  targetKeys.push(
+    ...groupingNodeInfos.map(({ parentKey, parentType, classes, modelIds }) => ({
+      parent:
+        parentType === "element"
+          ? { type: "element" as const, ids: parentKey.instanceKeys.map((key) => key.id) }
+          : { type: "category" as const, ids: parentKey.instanceKeys.map((key) => key.id), modelIds },
+      classes,
+    })),
+  );
+  return targetKeys;
+}
+
+function createLocalizedMessage(message: string, onClick?: () => void) {
+  const exp = new RegExp("<link>(.*)</link>");
+  const match = message.match(exp);
+  if (!match) {
+    return message;
+  }
+
+  const [fullText, innerText] = match;
+  const [textBefore, textAfter] = message.split(fullText);
+
+  return (
+    <>
+      {textBefore ? textBefore : null}
+      <Anchor
+        underline
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+      >
+        {innerText}
+      </Anchor>
+      {textAfter ? textAfter : null}
+    </>
+  );
+}

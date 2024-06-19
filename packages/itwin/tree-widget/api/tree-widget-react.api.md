@@ -6,333 +6,72 @@
 
 /// <reference types="react" />
 
-import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
-import { BeEvent } from '@itwin/core-bentley';
+import type { BeEvent } from '@itwin/core-bentley';
 import { Checkbox } from '@itwin/itwinui-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { DefineHierarchyLevelProps } from '@itwin/presentation-hierarchies';
-import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import type { ECSchemaProvider } from '@itwin/presentation-shared';
 import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
 import type { HierarchyLevelDefinition } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { HierarchyNodeIdentifiersPath } from '@itwin/presentation-hierarchies';
-import { HighlightableTreeProps } from '@itwin/components-react';
 import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
-import type { IFilteredPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
-import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { LimitingECSqlQueryExecutor } from '@itwin/presentation-hierarchies';
 import type { Localization } from '@itwin/core-common';
 import { LocalizationContextProvider } from '@itwin/presentation-hierarchies-react';
-import type { NodeCheckboxRenderProps } from '@itwin/core-react';
-import { NodeKey } from '@itwin/presentation-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
-import type { PresentationTreeNodeRendererProps } from '@itwin/presentation-components';
 import type { ProcessedHierarchyNode } from '@itwin/presentation-hierarchies';
-import type { PropertyRecord } from '@itwin/appui-abstract';
-import type { PropsWithChildren } from 'react';
 import type { ReactNode } from 'react';
-import { Ref } from 'react';
 import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
-import type { Ruleset } from '@itwin/presentation-common';
 import type { SchemaContext } from '@itwin/ecschema-metadata';
-import type { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
-import type { SingleSchemaClassSpecification } from '@itwin/presentation-common';
-import { StagePanelLocation } from '@itwin/appui-react';
-import { StagePanelSection } from '@itwin/appui-react';
-import { Subscription } from '@itwin/components-react';
 import type { TranslationOptions } from '@itwin/core-common';
 import { Tree } from '@itwin/itwinui-react';
-import type { TreeCheckboxStateChangeEventArgs } from '@itwin/components-react';
-import { TreeEventHandler } from '@itwin/components-react';
-import type { TreeModelNode } from '@itwin/components-react';
-import type { TreeNodeEventArgs } from '@itwin/components-react';
-import type { TreeNodeItem } from '@itwin/components-react';
 import { TreeNodeRenderer as TreeNodeRenderer_2 } from '@itwin/presentation-hierarchies-react';
-import type { TreeNodeRendererProps as TreeNodeRendererProps_2 } from '@itwin/components-react';
-import type { TreeRendererProps as TreeRendererProps_2 } from '@itwin/components-react';
-import type { TreeSelectionModificationEventArgs } from '@itwin/components-react';
-import type { TreeSelectionReplacementEventArgs } from '@itwin/components-react';
-import type { UiItemsProvider } from '@itwin/appui-react';
-import { UnifiedSelectionTreeEventHandler } from '@itwin/presentation-components';
-import type { UnifiedSelectionTreeEventHandlerParams } from '@itwin/presentation-components';
-import type { UsePresentationTreeStateProps } from '@itwin/presentation-components';
-import { UsePresentationTreeStateResult } from '@itwin/presentation-components';
 import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
 import type { useTree } from '@itwin/presentation-hierarchies-react';
 import type { ViewManager } from '@itwin/core-frontend';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
-// @public
-export function areAllModelsVisible(models: string[], viewport: Viewport): boolean;
-
-// @public
-export interface BaseFilterableTreeProps extends BaseTreeProps {
-    filterInfo?: VisibilityTreeFilterInfo;
-    onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
-}
-
-// @public
-export interface BaseTreeProps extends TreeRendererBaseProps {
-    height: number;
-    iModel: IModelConnection;
-    selectionMode?: SelectionMode_2;
-    width: number;
-}
-
-// @public
+// @beta
 export const CategoriesTreeComponent: {
     (props: CategoriesTreeComponentProps): JSX.Element | null;
-    ShowAllButton: typeof ShowAllButton;
-    HideAllButton: typeof HideAllButton;
+    ShowAllButton: typeof ShowAllButton_2;
+    HideAllButton: typeof HideAllButton_2;
     InvertAllButton: typeof InvertAllButton;
     id: string;
     getLabel(): string;
 };
 
 // @public
-export interface CategoriesTreeComponentProps extends Omit<CategoryTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied" | "categories" | "categoryVisibilityHandler" | "viewManager"> {
-    headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
-}
+export function createTreeWidget(props: TreeWidgetProps): Widget;
 
-// @public
-export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
-    categories: CategoryInfo[];
-    filteredCategories?: CategoryInfo[];
-}
-
-// @public
-export interface CategoryInfo {
-    // (undocumented)
-    categoryId: string;
-    // (undocumented)
-    subCategoryIds?: string[];
-}
-
-// @public
-export function CategoryTree(props: CategoryTreeProps): JSX.Element | null;
-
-// @public
-export interface CategoryTreeProps extends BaseFilterableTreeProps {
-    activeView: Viewport;
-    allViewports?: boolean;
-    categories: CategoryInfo[];
-    // @internal
-    categoryVisibilityHandler?: CategoryVisibilityHandler;
-    // @beta
-    hierarchyLevelConfig?: HierarchyLevelConfig;
-    // @beta
-    onFeatureUsed?: (feature: string) => void;
-    // @beta
-    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-    // @internal
-    viewManager?: ViewManager;
-}
-
-// @public
-export class CategoryVisibilityHandler implements IVisibilityHandler {
-    constructor(params: CategoryVisibilityHandlerParams);
-    // (undocumented)
-    changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void>;
-    // (undocumented)
-    dispose(): void;
-    // (undocumented)
-    enableCategory(ids: string[], enabled: boolean, enableAllSubCategories?: boolean): Promise<void>;
-    // (undocumented)
-    enableSubCategory(key: string, enabled: boolean): void;
-    // (undocumented)
-    getCategoryVisibility(id: string): "visible" | "hidden";
-    // (undocumented)
-    static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey): string;
-    // (undocumented)
-    getParent(key: string): CategoryInfo | undefined;
-    // (undocumented)
-    getSubCategoryVisibility(id: string): "visible" | "hidden";
-    // (undocumented)
-    getVisibilityStatus(node: TreeNodeItem): VisibilityStatus;
-    // (undocumented)
-    onVisibilityChange: BeEvent<VisibilityChangeListener>;
-}
-
-// @public
-export interface CategoryVisibilityHandlerParams {
-    // (undocumented)
-    activeView: Viewport;
-    // (undocumented)
-    allViewports?: boolean;
-    // (undocumented)
-    categories: CategoryInfo[];
-    // (undocumented)
-    imodel: IModelConnection;
-    // (undocumented)
-    viewManager: ViewManager;
-}
-
-// @public
-export enum ClassGroupingOption {
-    No = 0,
-    Yes = 1,
-    YesWithCounts = 2
-}
-
-// @public
-export interface ContextMenuItemProps {
-    // (undocumented)
-    node: TreeModelNode;
-}
-
-// @public
-export function createVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled, onVisibilityToggled, }: VisibilityTreeNodeRendererProps): (treeNodeProps: TreeNodeRendererProps_2) => JSX.Element;
-
-// @public
-export function createVisibilityTreeRenderer({ nodeRendererProps, ...restProps }: VisibilityTreeRendererProps): (treeProps: TreeRendererProps) => JSX.Element;
-
-// @public
-export function DefaultLabelRenderer({ label, context }: DefaultLabelRendererProps): React.JSX.Element;
-
-// @public
-export interface DefaultLabelRendererProps {
-    context?: LabelRendererContext;
-    label: PropertyRecord;
-}
-
-// @alpha
-export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element | null;
-
-// @alpha
+// @beta
 export const ExternalSourcesTreeComponent: {
     (props: ExternalSourcesTreeComponentProps): JSX.Element | null;
     id: string;
     getLabel(): string;
 };
 
-// @alpha
-export type ExternalSourcesTreeComponentProps = Omit<ExternalSourcesTreeProps, "iModel" | "width" | "height">;
-
-// @alpha
-export interface ExternalSourcesTreeProps extends BaseTreeProps {
-    // @beta
-    hierarchyLevelConfig?: HierarchyLevelConfig;
-    // @beta
-    onFeatureUsed?: (feature: string) => void;
-    // @beta
-    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-}
-
 // @beta
-export interface FilterableTreeNodeRendererProps extends PresentationTreeNodeRendererProps {
-    // (undocumented)
-    reportUsage?: (props: {
-        featureId?: UsageTrackedFeatures;
-        reportInteraction: boolean;
-    }) => void;
-}
-
-// @beta
-export function FilterableTreeRenderer({ nodeRenderer, nodeLoader, reportUsage, ...restProps }: FilterableTreeRendererProps): JSX.Element;
-
-// @beta
-export interface FilterableTreeRendererProps extends Omit<TreeRendererProps, "nodeLoader" | "nodeRenderer"> {
-    // (undocumented)
-    nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
-    // (undocumented)
-    nodeRenderer: (props: FilterableTreeNodeRendererProps) => React.ReactNode;
-    // (undocumented)
-    reportUsage?: (props: {
-        featureId?: UsageTrackedFeatures;
-        reportInteraction: boolean;
-    }) => void;
-}
-
-// @beta
-export function FilterableVisibilityTreeNodeRenderer({ levelOffset, disableRootNodeCollapse, descriptionEnabled, isEnlarged, onVisibilityToggled, ...restProps }: FilterableVisibilityTreeNodeRendererProps): JSX.Element;
-
-// @beta
-export type FilterableVisibilityTreeNodeRendererProps = Omit<PresentationTreeNodeRendererProps, "descriptionEnabled"> & VisibilityTreeNodeRendererProps;
-
-// @public
-export function hideAllCategories(categories: string[], viewport: Viewport): Promise<void>;
-
-// @public
-export function hideAllModels(models: string[], viewport: Viewport): Promise<void>;
-
-// @beta
-export interface HierarchyLevelConfig {
-    // (undocumented)
-    isFilteringEnabled: true;
-    // (undocumented)
-    sizeLimit?: number;
-}
-
-// @public
-export const IModelContentTree: (props: IModelContentTreeProps) => JSX.Element | null;
-
-// @public
 export const IModelContentTreeComponent: {
     (props: IModelContentTreeComponentProps): JSX.Element | null;
     id: string;
     getLabel(): string;
 };
 
-// @public
-export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
-
-// @public
-export interface IModelContentTreeProps extends BaseTreeProps {
-    // @beta
-    hierarchyLevelConfig?: HierarchyLevelConfig;
-    // @beta
-    onFeatureUsed?: (feature: string) => void;
-    // @beta
-    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-}
-
-// @public
-export function invertAllCategories(categories: CategoryInfo[], viewport: Viewport): Promise<void>;
-
-// @public
-export function invertAllModels(models: string[], viewport: Viewport): Promise<void>;
-
-// @public
-export interface IVisibilityHandler extends IDisposable {
-    // (undocumented)
-    changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void>;
-    // (undocumented)
-    getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
-    // (undocumented)
-    onVisibilityChange: BeEvent<VisibilityChangeListener>;
-}
-
-// @public
-export interface LabelRendererContext {
-    style?: React.CSSProperties;
-    textHighlighter?: (text: string) => React.ReactNode;
-}
-
-// @public
-export interface ModelInfo {
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    isPlanProjection?: boolean;
-}
-
-// @public
-export function ModelsTree(props: ModelsTreeProps): JSX.Element | null;
-
-// @public
+// @beta
 export const ModelsTreeComponent: {
-    (props: ModelTreeComponentProps): JSX.Element | null;
-    ShowAllButton: typeof ShowAllButton_2;
-    HideAllButton: typeof HideAllButton_2;
+    (props: ModelsTreeComponentProps): JSX.Element | null;
+    ShowAllButton: typeof ShowAllButton;
+    HideAllButton: typeof HideAllButton;
     InvertButton: typeof InvertButton;
     View2DButton: typeof View2DButton;
     View3DButton: typeof View3DButton;
@@ -341,205 +80,7 @@ export const ModelsTreeComponent: {
 };
 
 // @public
-export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
-    models: ModelInfo[];
-}
-
-// @public
-export interface ModelsTreeHierarchyConfiguration {
-    elementClassSpecification?: SingleSchemaClassSpecification;
-    enableElementsClassGrouping?: ClassGroupingOption;
-    showEmptyModels?: boolean;
-}
-
-// @public
-export enum ModelsTreeNodeType {
-    // (undocumented)
-    Category = 3,
-    // (undocumented)
-    Element = 4,
-    // (undocumented)
-    Grouping = 5,
-    // (undocumented)
-    Model = 2,
-    // (undocumented)
-    Subject = 1,
-    // (undocumented)
-    Unknown = 0
-}
-
-// @public
-export interface ModelsTreeProps extends BaseFilterableTreeProps {
-    activeView: Viewport;
-    // @alpha @deprecated
-    enableHierarchyAutoUpdate?: boolean;
-    hierarchyConfig?: ModelsTreeHierarchyConfiguration;
-    // @beta
-    hierarchyLevelConfig?: HierarchyLevelConfig;
-    modelsVisibilityHandler?: ModelsVisibilityHandler | ((props: ModelsVisibilityHandlerProps) => ModelsVisibilityHandler);
-    // @beta
-    onFeatureUsed?: (feature: string) => void;
-    // @beta
-    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-    selectionPredicate?: ModelsTreeSelectionPredicate;
-}
-
-// @public
-export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
-
-// @public
-export class ModelsVisibilityHandler implements IVisibilityHandler {
-    constructor(props: ModelsVisibilityHandlerProps);
-    // (undocumented)
-    protected changeCategoryState(categoryId: Id64String, parentModelId: Id64String | undefined, on: boolean): void;
-    // (undocumented)
-    protected changeElementGroupingNodeState(key: ECClassGroupingNodeKey, on: boolean): Promise<void>;
-    // (undocumented)
-    protected changeElementsState(modelId: Id64String | undefined, categoryId: Id64String | undefined, elementIds: AsyncGenerator<Id64String>, on: boolean): Promise<void>;
-    // (undocumented)
-    protected changeElementState(id: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined, on: boolean, hasChildren?: boolean): Promise<void>;
-    // (undocumented)
-    protected changeModelState(id: Id64String, on: boolean): Promise<void>;
-    // (undocumented)
-    protected changeModelsVisibility(ids: Id64String[], visible: boolean): Promise<void>;
-    // (undocumented)
-    protected changeSubjectNodeState(ids: Id64String[], node: TreeNodeItem, on: boolean): Promise<void | void[]>;
-    changeVisibility(node: TreeNodeItem, on: boolean): Promise<void>;
-    // (undocumented)
-    dispose(): void;
-    // (undocumented)
-    protected getCategoryDisplayStatus(id: Id64String, parentModelId: Id64String | undefined): VisibilityStatus;
-    // (undocumented)
-    protected getElementDisplayStatus(elementId: Id64String, modelId: Id64String | undefined, categoryId: Id64String | undefined): VisibilityStatus;
-    // (undocumented)
-    protected getElementGroupingNodeDisplayStatus(_id: string, key: ECClassGroupingNodeKey): Promise<VisibilityStatus>;
-    // (undocumented)
-    protected getModelDisplayStatus(id: Id64String): VisibilityStatus;
-    // (undocumented)
-    static getNodeType(item: TreeNodeItem): ModelsTreeNodeType;
-    // (undocumented)
-    protected getSubjectNodeVisibility(ids: Id64String[], node: TreeNodeItem): Promise<VisibilityStatus>;
-    getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
-    // (undocumented)
-    static isCategoryNode(node: TreeNodeItem): any;
-    // (undocumented)
-    static isModelNode(node: TreeNodeItem): any;
-    // (undocumented)
-    static isSubjectNode(node: TreeNodeItem): any;
-    // (undocumented)
-    onVisibilityChange: BeEvent<VisibilityChangeListener>;
-    setFilteredDataProvider(provider: IFilteredPresentationTreeDataProvider | undefined): void;
-}
-
-// @public
-export interface ModelsVisibilityHandlerProps {
-    // (undocumented)
-    hierarchyAutoUpdateEnabled?: boolean;
-    // (undocumented)
-    rulesetId: string;
-    // @internal (undocumented)
-    subjectModelIdsCache?: SubjectModelIdsCache;
-    // (undocumented)
-    viewport: Viewport;
-}
-
-// @public
-export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied"> {
-    headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
-}
-
-// @public
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
-
-// @public
-export interface SelectableTreeProps {
-    // (undocumented)
-    density?: "enlarged" | "default";
-    // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
-    // (undocumented)
-    trees: TreeDefinition[];
-}
-
-// @public
-export function showAllCategories(categories: string[], viewport: Viewport): Promise<void>;
-
-// @public
-export function showAllModels(models: string[], viewport: Viewport): Promise<void>;
-
-// @beta
-export const StatelessCategoriesTreeComponent: (props: StatelessCategoriesTreeComponentProps) => JSX.Element | null;
-
-// @beta
-export const StatelessExternalSourcesTreeComponent: (props: StatelessExternalSourcesTreeComponentProps) => JSX.Element | null;
-
-// @beta
-export const StatelessIModelContentTreeComponent: (props: StatelessIModelContentTreeComponentProps) => JSX.Element | null;
-
-// @beta
-export const StatelessModelsTreeComponent: (props: StatelessModelsTreeComponentProps) => JSX.Element | null;
-
-// @public
-export function toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise<void>;
-
-// @public
-export function TreeContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<TreeContextMenuItemProps>): JSX.Element;
-
-// @public
-export interface TreeContextMenuItemProps {
-    id: string;
-    onSelect: () => void;
-    title?: string;
-}
-
-// @public
-export interface TreeContextMenuProps {
-    // (undocumented)
-    contextMenuItems?: Array<(props: ContextMenuItemProps) => ReactNode>;
-}
-
-// @public
-export interface TreeDefinition {
-    getLabel: () => string;
-    id: string;
-    render: (props: TreeRenderProps) => React.ReactNode;
-    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
-    startIcon?: React.ReactNode;
-}
-
-// @public
-export interface TreeNodeLabelRendererProps {
-    context?: LabelRendererContext;
-    node: TreeModelNode;
-}
-
-// @public
-export interface TreeNodeRendererProps {
-    nodeLabelRenderer?: (props: TreeNodeLabelRendererProps) => ReactNode;
-}
-
-// @public
-export function TreeRenderer({ contextMenuItems, nodeRenderer, nodeLabelRenderer, density, ...restProps }: TreeRendererProps): JSX.Element;
-
-// @public
-export interface TreeRendererBaseProps extends TreeContextMenuProps, TreeNodeRendererProps {
-    density?: "default" | "enlarged";
-}
-
-// @public
-export type TreeRendererProps = TreeRendererProps_2 & TreeRendererBaseProps;
-
-// @public
-export interface TreeRenderProps {
-    // (undocumented)
-    density?: "enlarged" | "default";
-    // (undocumented)
-    onFeatureUsed?: (feature: string) => void;
-    // (undocumented)
-    onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-}
 
 // @public
 export class TreeWidget {
@@ -549,135 +90,6 @@ export class TreeWidget {
     static terminate(): void;
     static translate(key: string | string[], options?: TranslationOptions): string;
 }
-
-// @public
-export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
-
-// @public
-export const TreeWidgetId = "tree-widget-react:trees";
-
-// @public
-export interface TreeWidgetOptions {
-    defaultPanelLocation?: StagePanelLocation;
-    defaultPanelSection?: StagePanelSection;
-    defaultTreeWidgetPriority?: number;
-    density?: "enlarged" | "default";
-    onFeatureUsed?: (feature: string) => void;
-    onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
-    trees?: TreeDefinition[];
-}
-
-// @public
-export class TreeWidgetUiItemsProvider implements UiItemsProvider {
-    constructor(_treeWidgetOptions?: TreeWidgetOptions | undefined);
-    // (undocumented)
-    readonly id = "TreeWidgetUiItemsProvider";
-    // (undocumented)
-    provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget>;
-}
-
-// @public
-export function useTreeTransientState<T extends Element>(): Ref<T>;
-
-// @public @deprecated
-export function useVisibilityTreeFiltering(nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>, filterInfo?: VisibilityTreeFilterInfo, onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void): {
-    filteredNodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>;
-    isFiltering: boolean;
-    nodeHighlightingProps: HighlightableTreeProps | undefined;
-};
-
-// @beta
-export function useVisibilityTreeState({ imodel, ruleset, filterInfo, onFilterChange, visibilityHandler, selectionPredicate, eventHandler, reportUsage, ...props }: UseVisibilityTreeStateProps): UsePresentationTreeStateResult<VisibilityTreeEventHandler | ReportingTreeEventHandler> | undefined;
-
-// @beta
-export interface UseVisibilityTreeStateProps extends Omit<UsePresentationTreeStateProps<VisibilityTreeEventHandler>, "rulesetOrId"> {
-    eventHandler?: (props: VisibilityTreeEventHandlerParams) => VisibilityTreeEventHandler;
-    filterInfo?: VisibilityTreeFilterInfo;
-    hierarchyLevelSizeLimit?: number;
-    imodel: IModelConnection;
-    onFilterChange?: (filteredDataProvider?: IFilteredPresentationTreeDataProvider, matchesCount?: number) => void;
-    reportUsage?: (props: {
-        featureId?: UsageTrackedFeatures;
-        reportInteraction: boolean;
-    }) => void;
-    ruleset: Ruleset;
-    selectionPredicate?: VisibilityTreeSelectionPredicate;
-    visibilityHandler?: IVisibilityHandler;
-}
-
-// @public
-export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map<string, VisibilityStatus>) => void;
-
-// @public
-export interface VisibilityStatus {
-    // (undocumented)
-    isDisabled?: boolean;
-    // (undocumented)
-    state: "visible" | "partial" | "hidden";
-    // (undocumented)
-    tooltip?: string;
-}
-
-// @public
-export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler {
-    constructor(params: VisibilityTreeEventHandlerParams);
-    // (undocumented)
-    dispose(): void;
-    // (undocumented)
-    onCheckboxStateChanged(event: TreeCheckboxStateChangeEventArgs): undefined;
-    // (undocumented)
-    onSelectionModified({ modifications }: TreeSelectionModificationEventArgs): Subscription | undefined;
-    // (undocumented)
-    onSelectionReplaced({ replacements }: TreeSelectionReplacementEventArgs): Subscription | undefined;
-}
-
-// @public
-export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEventHandlerParams {
-    // (undocumented)
-    selectionPredicate?: VisibilityTreeSelectionPredicate;
-    // (undocumented)
-    visibilityHandler: IVisibilityHandler;
-}
-
-// @public
-export interface VisibilityTreeFilterInfo {
-    // (undocumented)
-    activeMatchIndex?: number;
-    // (undocumented)
-    filter: string;
-}
-
-// @public
-export function VisibilityTreeNodeCheckbox(props: VisibilityTreeNodeCheckboxProps): JSX.Element;
-
-// @public
-export interface VisibilityTreeNodeRendererProps {
-    descriptionEnabled: boolean;
-    disableRootNodeCollapse?: boolean;
-    iconsEnabled: boolean;
-    isEnlarged?: boolean;
-    levelOffset?: number;
-    onVisibilityToggled?: (enabled: boolean) => void;
-}
-
-// @public
-export function VisibilityTreeNoFilteredData(props: VisibilityTreeNoFilteredDataProps): JSX.Element;
-
-// @public
-export interface VisibilityTreeNoFilteredDataProps {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    title: string;
-}
-
-// @public
-export interface VisibilityTreeRendererProps extends TreeRendererBaseProps {
-    nodeRendererProps: VisibilityTreeNodeRendererProps;
-}
-
-// @public
-export type VisibilityTreeSelectionPredicate = (node: TreeNodeItem) => boolean;
 
 // (No @packageDocumentation comment for this package)
 

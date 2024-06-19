@@ -22,7 +22,7 @@ import { useControlledTreeLayoutStorage } from "@itwin/components-react";
  * }
  * ```
  *
- * @public
+ * @internal
  */
 export function useTreeTransientState<T extends Element>() {
   const { ref, persist, restore } = useControlledTreeLayoutStorage<T>();

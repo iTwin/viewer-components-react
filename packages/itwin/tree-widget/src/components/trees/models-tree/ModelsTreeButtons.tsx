@@ -4,15 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
+import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
-import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
-import { queryModelsForHeaderActions } from "./Utils";
+import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler";
 
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-
 /**
  * Information about a single Model.
  * @public
@@ -47,6 +46,24 @@ export function useAvailableModels(imodel: IModelConnection) {
   }, [imodel]);
 
   return availableModels;
+}
+
+async function queryModelsForHeaderActions(iModel: IModelConnection) {
+  const queryParams: ModelQueryParams = {
+    from: "BisCore.GeometricModel3d",
+    where: `
+        EXISTS (
+          SELECT 1
+          FROM BisCore.Element e
+          WHERE e.ECClassId IS (BisCore.GeometricElement3d, BisCore.InformationPartitionElement)
+            AND e.ECInstanceId = GeometricModel3d.ModeledElement.Id
+        )
+      `,
+    wantPrivate: false,
+  };
+
+  const modelProps = await iModel.models.queryProps(queryParams);
+  return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
 }
 
 /** @internal */
