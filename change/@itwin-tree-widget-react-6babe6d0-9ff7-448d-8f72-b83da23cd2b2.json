@@ -1,0 +1,7 @@
+{
+  "type": "prerelease",
+  "comment": "IModel content tree: Improve performance of creating Subjects' and Models' hierarchies",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "35135765+grigasp@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

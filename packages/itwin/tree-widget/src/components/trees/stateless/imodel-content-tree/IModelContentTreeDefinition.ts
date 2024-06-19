@@ -21,22 +21,27 @@ import type {
   DefineRootHierarchyLevelProps,
   HierarchyDefinition,
   HierarchyLevelDefinition,
+  HierarchyNodesDefinition,
   NodesQueryClauseFactory,
   ProcessedHierarchyNode,
 } from "@itwin/presentation-hierarchies";
+import type { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
 
 interface IModelContentTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
+  idsCache: IModelContentTreeIdsCache;
 }
 
 export class IModelContentTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
+  private _idsCache: IModelContentTreeIdsCache;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   private _classHierarchyInspector: ECClassHierarchyInspector;
 
   public constructor(props: IModelContentTreeDefinitionProps) {
     this._classHierarchyInspector = props.imodelAccess;
+    this._idsCache = props.idsCache;
     this._impl = createClassBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
       hierarchy: {
@@ -151,93 +156,67 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: subjectIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const selectColumnNames = Object.values(NodeSelectClauseColumnNames).join(", ");
-    const subjectFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: "BisCore.Subject", alias: "this" },
-    });
-    const modelFilterClauses = await this._selectQueryFactory.createFilterClauses({
-      filter: instanceFilter,
-      contentClass: { fullName: "BisCore.Model", alias: "this" },
-    });
-    const ctes = [
-      `
-        subjects(${selectColumnNames}, ParentId) AS (
-          SELECT
-            ${await this._selectQueryFactory.createSelectClause({
-              ecClassId: { selector: "this.ECClassId" },
-              ecInstanceId: { selector: "this.ECInstanceId" },
-              nodeLabel: {
-                selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
-                  classAlias: "this",
-                  className: "BisCore.Subject",
-                }),
-              },
-              hideNodeInHierarchy: {
-                selector: `
-                  CASE
-                    WHEN (
-                      json_extract(this.JsonProperties, '$.Subject.Job.Bridge') IS NOT NULL
-                      OR json_extract(this.JsonProperties, '$.Subject.Model.Type') = 'Hierarchy'
-                    ) THEN 1
-                    ELSE 0
-                  END
-                `,
-              },
-              extendedData: {
-                imageId: "icon-folder",
-                isSubject: true,
-              },
-              supportsFiltering: true,
-            })},
-            this.Parent.Id
-          FROM BisCore.Subject this
-        )
-      `,
-      `
-        child_subjects(${selectColumnNames}, ParentId, RootId) AS (
-          SELECT *, s.ParentId RootId FROM subjects s
-          UNION ALL
-          SELECT s.*, p.RootId
-          FROM child_subjects p
-          JOIN subjects s ON s.ParentId = p.ECInstanceId
-          WHERE p.${NodeSelectClauseColumnNames.HideNodeInHierarchy} = 1
-        )
-      `,
-    ];
-    return [
-      {
+    const [subjectFilterClauses, modelFilterClauses] = await Promise.all([
+      this._selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: "BisCore.Subject", alias: "this" },
+      }),
+      this._selectQueryFactory.createFilterClauses({
+        filter: instanceFilter,
+        contentClass: { fullName: "BisCore.Model", alias: "this" },
+      }),
+    ]);
+    const [childSubjectIds, childModelIds] = await Promise.all([
+      this._idsCache.getChildSubjectIds(subjectIds),
+      this._idsCache.getChildSubjectModelIds(subjectIds),
+    ]);
+    const defs = new Array<HierarchyNodesDefinition>();
+    childSubjectIds.length &&
+      defs.push({
         fullClassName: "BisCore.Subject",
         query: {
-          ctes,
           ecsql: `
             SELECT
-              ${Object.values(NodeSelectClauseColumnNames)
-                .map((name: string) => `cs.${name} AS ${name}`)
-                .join(", ")},
-              ParentId
-            FROM child_subjects cs
-            JOIN ${subjectFilterClauses.from} this ON this.ECInstanceId = cs.ECInstanceId
+              ${await this._selectQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
+                    classAlias: "this",
+                    className: "BisCore.Subject",
+                  }),
+                },
+                hasChildren: { selector: `InVirtualSet(?, this.ECInstanceId)` },
+                grouping: { byLabel: { action: "merge", groupId: "subject" } },
+                extendedData: {
+                  imageId: "icon-folder",
+                  isSubject: true,
+                },
+                supportsFiltering: true,
+              })}
+            FROM ${subjectFilterClauses.from} this
             ${subjectFilterClauses.joins}
             WHERE
-              cs.RootId IN (${subjectIds.map(() => "?").join(",")})
-              AND NOT cs.${NodeSelectClauseColumnNames.HideNodeInHierarchy}
+              this.ECInstanceId IN (${childSubjectIds.map(() => "?").join(",")})
               ${subjectFilterClauses.where ? `AND ${subjectFilterClauses.where}` : ""}
           `,
-          bindings: [...subjectIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
+          bindings: [
+            { type: "idset", value: await this._idsCache.getParentSubjectIds() },
+            ...childSubjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
+          ],
         },
-      },
-      {
+      });
+    childModelIds.length &&
+      defs.push({
         fullClassName: "BisCore.Model",
         query: {
-          ctes,
           ecsql: `
-            SELECT childModel.ECInstanceId AS ECInstanceId, childModel.*
+            SELECT model.ECInstanceId AS ECInstanceId, model.*
             FROM (
               SELECT
                 ${await this._selectQueryFactory.createSelectClause({
-                  ecClassId: { selector: "model.ECClassId" },
-                  ecInstanceId: { selector: "model.ECInstanceId" },
+                  ecClassId: { selector: "m.ECClassId" },
+                  ecInstanceId: { selector: "m.ECInstanceId" },
                   nodeLabel: {
                     selector: await this._nodeLabelSelectClauseFactory.createSelectClause({
                       classAlias: "partition",
@@ -257,34 +236,23 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   },
                   extendedData: {
                     imageId: "icon-model",
+                    isModel: true,
                   },
                   supportsFiltering: true,
                 })}
-              FROM BisCore.Model model
-              JOIN bis.InformationPartitionElement [partition] ON [partition].ECInstanceId = model.ModeledElement.Id
-              JOIN bis.Subject [subject] ON [subject].ECInstanceId = [partition].Parent.Id OR json_extract([subject].JsonProperties,'$.Subject.Model.TargetPartition') = printf('0x%x', [partition].ECInstanceId)
+              FROM BisCore.Model m
+              JOIN BisCore.InformationPartitionElement [partition] ON [partition].ECInstanceId = m.ModeledElement.Id
               WHERE
-                NOT model.IsPrivate
-                AND (
-                  [subject].ECInstanceId IN (${subjectIds.map(() => "?").join(",")})
-                  OR [subject].ECInstanceId IN (
-                    SELECT s.ECInstanceId
-                    FROM child_subjects s
-                    WHERE s.RootId IN (${subjectIds.map(() => "?").join(",")}) AND s.${NodeSelectClauseColumnNames.HideNodeInHierarchy}
-                  )
-                )
-            ) childModel
-            JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = childModel.ECInstanceId
+                m.ECInstanceId IN (${childModelIds.map(() => "?").join(",")})
+            ) model
+            JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
-            ${modelFilterClauses.where ? `AND (childModel.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
+            ${modelFilterClauses.where ? `AND (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
           `,
-          bindings: [
-            ...subjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
-            ...subjectIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
-          ],
+          bindings: childModelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
-      },
-    ];
+      });
+    return defs;
   }
 
   private async createISubModeledElementChildrenQuery({
@@ -320,7 +288,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     instanceFilter,
     viewType,
   }: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
-    const { categoryClass, elementClass } = getClassNameByViewType(viewType);
+    const childCategoryIds = await this._idsCache.getModelCategories(modelIds);
+
+    const { categoryClass } = getClassNameByViewType(viewType);
     const categoryFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: categoryClass, alias: "this" },
@@ -329,8 +299,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
       filter: instanceFilter,
       contentClass: { fullName: "BisCore.InformationContentElement", alias: "this" },
     });
-    return [
-      {
+
+    const defs = new Array<HierarchyNodesDefinition>();
+    childCategoryIds.length &&
+      defs.push({
         fullClassName: categoryClass,
         query: {
           ecsql: `
@@ -344,46 +316,28 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                     className: categoryClass,
                   }),
                 },
-                hasChildren: {
-                  selector: `
-                    IFNULL((
-                      SELECT 1
-                      FROM ${elementClass} e
-                      WHERE
-                        e.Category.Id = this.ECInstanceId
-                        AND e.Model.Id IN (${modelIds.map(() => "?").join(",")})
-                        AND e.Parent IS NULL
-                      LIMIT 1
-                    ), 0)
-                  `,
-                },
                 grouping: { byLabel: { action: "merge", groupId: "category" } },
                 extendedData: {
                   imageId: "icon-layers",
                   modelIds: { selector: createIdsSelector(modelIds) },
                   isCategory: true,
                 },
+                hasChildren: true,
                 supportsFiltering: true,
               })}
             FROM ${categoryFilterClauses.from} this
             ${categoryFilterClauses.joins}
             WHERE
-              EXISTS (
-                SELECT 1
-                FROM ${elementClass} e
-                WHERE
-                  e.Category.Id = this.ECInstanceId
-                  AND e.Model.Id IN (${modelIds.map(() => "?").join(",")})
-              )
+              this.ECInstanceId IN (${childCategoryIds.map(() => "?").join(",")})
               ${categoryFilterClauses.where ? `AND ${categoryFilterClauses.where}` : ""}
           `,
-          bindings: [...modelIds.map((id): ECSqlBinding => ({ type: "id", value: id })), ...modelIds.map((id): ECSqlBinding => ({ type: "id", value: id }))],
+          bindings: childCategoryIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
-      },
-      {
-        fullClassName: "BisCore.InformationContentElement",
-        query: {
-          ecsql: `
+      });
+    defs.push({
+      fullClassName: "BisCore.InformationContentElement",
+      query: {
+        ecsql: `
             SELECT
               ${await this._selectQueryFactory.createSelectClause({
                 ecClassId: { selector: "this.ECClassId" },
@@ -409,10 +363,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               this.Model.Id IN (${modelIds.map(() => "?").join(",")})
               ${informationContentElementFilterClauses.where ? `AND ${informationContentElementFilterClauses.where}` : ""}
           `,
-          bindings: modelIds.map((id) => ({ type: "id", value: id })),
-        },
+        bindings: modelIds.map((id) => ({ type: "id", value: id })),
       },
-    ];
+    });
+    return defs;
   }
 
   private async createCategoryChildrenQuery({
