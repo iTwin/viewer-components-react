@@ -1,0 +1,37 @@
+{
+  "TemplateCreationStepper": {
+    "stepOneTitle": "Çréâtë ä témplàtë",
+    "stepTwoTitle": "Àdd Ássêmblÿ(s)",
+    "stepThreeTitle": "$éñd rëpört tø Ê(3",
+    "templateName": "Ñámê",
+    "templateDescription": "Ðés¢rïptìøñ",
+    "reportSelection": "$élêçt Rèpørt",
+    "reportSelectionPlaceholderLoading": "£óâdïñg Répòrts...",
+    "reportSelectionPlaceholderSelect": "$élêçt Rèpørt",
+    "assemblyName": "Àssémblý Ñämé",
+    "reportTable": "Rèpórt Tâblë",
+    "element": "Èlémêñt",
+    "elementPlaceholderSelect": "$élêçt èlémêñt",
+    "elementPlaceholderLoading": "£óâdïñg élêmëñts...",
+    "selectReportTableFirstPlaceholder": "$élêçt rèpørt tàblë fìrst",
+    "reportTablesPlaceholderLoading": "£óâdïñg répòrt táblès...",
+    "reportTablesPlaceholderSelect": "$élêçt Rèpørt Tàblë",
+    "elementQuantity": "Èlémêñt qüåñtïtý",
+    "elementQuantityPlaceholderSelect": "$élêçt èlémêñt qûãñtïtý",
+    "materials": "Màtérîãls",
+    "materialsSelectPlaceholder": "$élêçt pröpértý çôñtäïñíñg mãtèríàl ñâmés",
+    "backButton": "ßá¢k",
+    "nextButton": "Ñé×t",
+    "cancelButton": "Çáñçèl",
+    "savingFailedToasterMsg": "$ávîñg Fäílêd.",
+    "unAuthorisedUserMsg": "Ýóú ãrè ñòt áûthõrîzëd tò ûsê thïs sýstém.",
+    "addNewAssembly": "Àdd Ñêw",
+    "selectionSummary": "$élêçtìøñ §ûmmãrý :",
+    "saveButton": "$ávê",
+    "requiredFieldNotice": "Àstérîsk * ïñdí¢átès mãñdåtòrÿ fîëlds.",
+    "createTemplate": "Çréâtë Tèmplåtê"
+  },
+  "TemplateListView": {
+    "noTemplateMsg": "Ìt lóôks lïkè ÿòú hâvéñ't åddèd áñÿ tèmplåtês ÿèt. (lîçk thè bµttôñ bèløw tò çrèãtê ÿòúr fîrst tëmpläté."
+  }
+}

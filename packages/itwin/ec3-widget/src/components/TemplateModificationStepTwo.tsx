@@ -11,6 +11,8 @@ import "./TemplateModificationStepTwo.scss";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
 import { useApiContext } from "./context/APIContext";
 import { AssemblyItem } from "./AssemblyItem";
+import type { useEC3WidgetLocalizationResult } from "../common/UseEC3WidgetLocalization";
+import { useEC3WidgetLocalization } from "../common/UseEC3WidgetLocalization";
 
 export interface TemplateModificationStepTwoProps {
   template: Configuration;
@@ -18,6 +20,7 @@ export interface TemplateModificationStepTwoProps {
   onCancelClick?: () => void;
   setTemplate: (template: Configuration) => void;
   fetchedReports?: Report[];
+  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 
 export enum AssemblyCreationDropdownType {
@@ -32,7 +35,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [oDataTable, setoDataTable] = useState<ODataTable[]>([]);
   const [editableAssemblyIndex, setEditableAssemblyIndex] = useState<number>();
-
+  const localizedStrings = useEC3WidgetLocalization(props.localizedStrings);
   const oDataClient = useApiContext().oDataClient;
   const {
     config: { getAccessToken },
@@ -165,6 +168,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
                   onAssemblyDataChange={onAssemblyDataChange}
                   setTemplate={props.setTemplate}
                   template={props.template}
+                  localizedStrings={props.localizedStrings}
                 />
               </ExpandableBlock>
             );
@@ -181,7 +185,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
               addNewEmptyAssembly();
             }}
           >
-            Add new
+            {localizedStrings.addNewAssembly}
           </Button>
         </div>
       </div>
@@ -193,7 +197,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
           }}
           className="ec3w-footer-button"
         >
-          Back
+          {localizedStrings.backButton}
         </Button>
         <Button
           styleType="high-visibility"
@@ -206,9 +210,9 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
             props.updateCurrentStep(2);
           }}
         >
-          Next
+          {localizedStrings.nextButton}
         </Button>
-        <Button onClick={props.onCancelClick}>Cancel</Button>
+        <Button onClick={props.onCancelClick}> {localizedStrings.cancelButton}</Button>
       </div>
     </div>
   );

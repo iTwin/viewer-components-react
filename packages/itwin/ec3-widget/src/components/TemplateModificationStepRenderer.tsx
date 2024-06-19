@@ -8,6 +8,7 @@ import { TemplateModificationStepThree } from "./TemplateModificationStepThree";
 import type { Configuration } from "./EC3/Template";
 import { TemplateModificationStepTwo } from "./TemplateModificationStepTwo";
 import type { Report } from "@itwin/insights-client";
+import type { useEC3WidgetLocalizationResult } from "../common/UseEC3WidgetLocalization";
 
 export interface TemplateModificationStepRendererProps {
   currentStep: number;
@@ -18,6 +19,7 @@ export interface TemplateModificationStepRendererProps {
   onSaveClick: () => Promise<void>;
   fetchedReports: Report[];
   isLoading: boolean;
+  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 
 export const TemplateModificationStepRenderer = (props: TemplateModificationStepRendererProps) => {
@@ -29,6 +31,7 @@ export const TemplateModificationStepRenderer = (props: TemplateModificationStep
       case 1: {
         return (
           <TemplateModificationStepTwo
+            localizedStrings={props.localizedStrings}
             template={props.childTemplate}
             updateCurrentStep={props.updateCurrentStep}
             onCancelClick={props.onCancelClick}

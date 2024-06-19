@@ -7,6 +7,7 @@ import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsCl
 import { CARBON_CALCULATION_BASE_PATH, EC3ConfigurationsClient, EC3JobsClient, ODataClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../context/APIContext";
 import type { EC3Token } from "./EC3Token";
+import type { useEC3WidgetLocalizationResult } from "../../common/UseEC3WidgetLocalization";
 
 export const EC3URI = "https://buildingtransparency.org/";
 
@@ -61,6 +62,8 @@ export interface EC3ConfigCommonProps {
    * A custom implementation of EC3ConfigurationClient. If provided, carbonCalculationBasePath is ignored.
    */
   ec3ConfigurationsClient?: IEC3ConfigurationsClient;
+
+  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 
 /**

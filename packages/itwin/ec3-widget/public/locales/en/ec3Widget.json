@@ -1,0 +1,37 @@
+{
+  "TemplateCreationStepper": {
+    "stepOneTitle": "Create a template",
+    "stepTwoTitle": "Add Assembly(s)",
+    "stepThreeTitle": "Send report to EC3",
+    "templateName": "Name",
+    "templateDescription": "Description",
+    "reportSelection": "Select Report",
+    "reportSelectionPlaceholderLoading": "Loading Reports...",
+    "reportSelectionPlaceholderSelect": "Select Report",
+    "assemblyName": "Assembly Name",
+    "reportTable": "Report Table",
+    "element": "Element",
+    "elementPlaceholderSelect": "Select element",
+    "elementPlaceholderLoading": "Loading elements...",
+    "selectReportTableFirstPlaceholder": "Select report table first",
+    "reportTablesPlaceholderLoading": "Loading report tables...",
+    "reportTablesPlaceholderSelect": "Select Report Table",
+    "elementQuantity": "Element quantity",
+    "elementQuantityPlaceholderSelect": "Select element quantity",
+    "materials": "Materials",
+    "materialsSelectPlaceholder": "Select property containing material names",
+    "backButton": "Back",
+    "nextButton": "Next",
+    "cancelButton": "Cancel",
+    "savingFailedToasterMsg": "Saving Failed.",
+    "unAuthorisedUserMsg": "You are not authorized to use this system.",
+    "addNewAssembly": "Add New",
+    "selectionSummary": "Selection Summary :",
+    "saveButton": "Save",
+    "requiredFieldNotice": "Asterisk * indicates mandatory fields.",
+    "createTemplate": "Create Template"
+  },
+  "TemplateListView": {
+    "noTemplateMsg": "It looks like you haven't added any templates yet. Click the button below to create your first template."
+  }
+}

@@ -4,6 +4,8 @@ import { AssemblyCreationDropdownType } from "./TemplateModificationStepTwo";
 import type { EC3ConfigurationLabel, ODataTable } from "@itwin/insights-client";
 import type { Configuration } from "../ec3-widget-react";
 import "./AssemblyItem.scss";
+import type { useEC3WidgetLocalizationResult } from "../common/UseEC3WidgetLocalization";
+import { useEC3WidgetLocalization } from "../common/UseEC3WidgetLocalization";
 
 export interface AssemblyItemProps {
   assembly: EC3ConfigurationLabel;
@@ -16,8 +18,10 @@ export interface AssemblyItemProps {
   allAssemblies: EC3ConfigurationLabel[];
   onAssemblyDataChange: (updatedAssembly: EC3ConfigurationLabel, index: number, action?: "add" | "delete") => void;
   setTemplate: (template: Configuration) => void;
+  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 export const AssemblyItem = (props: AssemblyItemProps) => {
+  const localizedStrings = useEC3WidgetLocalization(props.localizedStrings);
   const getMetadataColumns = useMemo(
     () => (assembly: EC3ConfigurationLabel, optionType: AssemblyCreationDropdownType) => {
       const oDataTableData = props.oDataTable?.find((x) => x.name === assembly.reportTable);
@@ -127,26 +131,26 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         id="name"
         name="name"
         data-testid="ec3-assembly-name-input"
-        label="Assembly Name"
+        label={localizedStrings.assemblyName}
         value={props.assembly.name}
         onChange={onAssemblyNameChange}
         disabled={props.currentAssemblyIndex !== props.editableAssemblyIndex}
       />
       <LabeledSelect
-        label="Select ReportTable"
+        label={localizedStrings.reportTable}
         className="ec3w-input-form"
         data-testid="ec3-report-table-select"
         options={getReportTableOptions(props.assembly)}
         value={props.assembly.reportTable}
         onChange={onReportTableSelectChange}
         disabled={props.currentAssemblyIndex !== props.editableAssemblyIndex || !props.template.reportId || props.isLoading}
-        placeholder={props.isLoading ? "Loading report tables..." : "Select report table"}
+        placeholder={props.isLoading ? localizedStrings.reportTablesPlaceholderLoading : localizedStrings.reportTablesPlaceholderSelect}
       />
       <LabeledSelect
         data-testid="ec3-element-select"
         className="ec3w-input-form"
         required
-        label={"Element"}
+        label={localizedStrings.element}
         options={
           getMetadataColumns(props.assembly, AssemblyCreationDropdownType.elementName)?.map((x) => {
             return { label: x, value: x };
@@ -155,13 +159,19 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         value={props.assembly.elementNameColumn}
         onChange={onElementSelectChange}
         disabled={props.isLoading || props.assembly.reportTable === "" || props.currentAssemblyIndex !== props.editableAssemblyIndex}
-        placeholder={props.isLoading ? "Loading elements" : props.assembly.reportTable === "" ? "Select report table first" : "Select element"}
+        placeholder={
+          props.isLoading
+            ? localizedStrings.elementPlaceholderLoading
+            : props.assembly.reportTable === ""
+              ? localizedStrings.selectReportTableFirstPlaceholder
+              : localizedStrings.elementPlaceholderSelect
+        }
       />
       <LabeledSelect
         data-testid="ec3-element-quantity-select"
         className="ec3w-input-form"
         required
-        label={"Element quantity"}
+        label={localizedStrings.elementQuantity}
         options={
           getMetadataColumns(props.assembly, AssemblyCreationDropdownType.elementQuantity)?.map((x) => {
             return { label: x, value: x };
@@ -170,10 +180,16 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         value={props.assembly.elementQuantityColumn}
         onChange={onElementQuantitySelectChange}
         disabled={props.isLoading || props.assembly.reportTable === "" || props.currentAssemblyIndex !== props.editableAssemblyIndex}
-        placeholder={props.isLoading ? "Loading elements" : props.assembly.reportTable === "" ? "Select report table first" : "Select element quantity"}
+        placeholder={
+          props.isLoading
+            ? localizedStrings.elementPlaceholderLoading
+            : props.assembly.reportTable === ""
+              ? localizedStrings.selectReportTableFirstPlaceholder
+              : localizedStrings.elementQuantityPlaceholderSelect
+        }
       />
       <Label htmlFor="combo-input" required>
-        Materials
+        {localizedStrings.materials}
       </Label>
       <Select
         data-testid="ec3-material-select"
@@ -187,7 +203,11 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         value={props.assembly.materials.map((x) => x?.nameColumn)}
         onChange={onMaterialSelectChange}
         placeholder={
-          props.isLoading ? "Loading elements" : props.assembly.reportTable === "" ? "Select report table first" : "Select property containing material names"
+          props.isLoading
+            ? localizedStrings.elementPlaceholderLoading
+            : props.assembly.reportTable === ""
+              ? localizedStrings.selectReportTableFirstPlaceholder
+              : localizedStrings.materialsSelectPlaceholder
         }
         multiple
       />

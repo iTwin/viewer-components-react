@@ -14,6 +14,8 @@ import React from "react";
 import { useApiContext } from "./context/APIContext";
 import { ExportModal } from "./ExportModal";
 import { DeleteModal } from "./DeleteModal";
+import type { useEC3WidgetLocalizationResult } from "../common/UseEC3WidgetLocalization";
+import { useEC3WidgetLocalization } from "../common/UseEC3WidgetLocalization";
 
 /**
  * Template props
@@ -22,13 +24,14 @@ import { DeleteModal } from "./DeleteModal";
 export interface TemplateProps {
   onClickCreate?: () => void;
   onClickTemplateTitle?: (template: Configuration) => void;
+  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 
 /**
  * Templates component to display list of templates
  * @beta
  */
-export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => {
+export const Templates = ({ onClickCreate, onClickTemplateTitle, localizedStrings }: TemplateProps) => {
   const {
     config: { getAccessToken, iTwinId, getEC3AccessToken },
   } = useApiContext();
@@ -40,7 +43,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
   const configClient = useApiContext().ec3ConfigurationsClient;
   const [token, setToken] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
-
+  const widgetLocalizedStrings = useEC3WidgetLocalization(localizedStrings);
   const load = useCallback(async () => {
     setIsLoading(true);
     if (iTwinId) {
@@ -105,7 +108,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
           <LoadingOverlay />
         ) : templates.length === 0 ? (
           <>
-            <EmptyMessage message="It looks like you haven't added any templates yet. Click the button below to create your first template." />
+            <EmptyMessage message={widgetLocalizedStrings.noTemplateMsg} />
             <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="Add New Template">
               Add New Template
             </Button>

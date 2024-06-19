@@ -49,7 +49,7 @@ export const EC3Widget = (props: EC3WidgetProps) => {
     <EC3Context {...props} iTwinId={iTwinId}>
       <div className="ec3w-container">
         <EC3Header currentRoute={currentRoute} />
-        <EC3Router currentRoute={currentRoute} navigateTo={navigateTo} goBack={goBack} />
+        <EC3Router currentRoute={currentRoute} navigateTo={navigateTo} goBack={goBack} localizedStrings={props.localizedStrings} />
       </div>
     </EC3Context>
   );

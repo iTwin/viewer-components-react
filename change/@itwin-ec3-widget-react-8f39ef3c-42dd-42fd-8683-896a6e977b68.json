@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "added support for localization for ec3 widget",
+  "packageName": "@itwin/ec3-widget-react",
+  "email": "pari.deshpande@bentley.com",
+  "dependentChangeType": "patch"
+}
