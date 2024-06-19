@@ -288,6 +288,9 @@ export interface DrawingMetadata {
   /** Represents the transform from sheet points to 3d points */
   transform?: SheetMeasurementsHelper.SheetTransformProps;
 
+  /** Transforms points from sheet coordinates to a point where (X) is the distance along the profile alignement and (Y) is the elevation over/under */
+  profileTransform?: Transform;
+
 }
 
 /** Handler function that modifies the data sent to the widget for display. */

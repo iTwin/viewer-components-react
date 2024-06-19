@@ -43,15 +43,19 @@ export namespace SheetMeasurementsHelper {
           // Within y extents
           const jsonProp = JSON.parse(row[3]);
           const scale = jsonProp.scale;
-          const transform: SheetTransformProps = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
-          const result: DrawingMetadata = {
-            drawingId: row[0],
-            origin: new Point2d(row[1].X, row[1].Y),
-            extents: new Point2d(row[2].X, row[2].Y),
-            worldScale: scale,
-            transform,
-          };
-          return result;
+          if (jsonProp.civilimodelconn) {
+            const transform: SheetTransformProps = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
+            const profileTransform = Transform.fromJSON(jsonProp.civilimodelconn.sheetToProfileTransform);
+            const result: DrawingMetadata = {
+              drawingId: row[0],
+              origin: new Point2d(row[1].X, row[1].Y),
+              extents: new Point2d(row[2].X, row[2].Y),
+              worldScale: scale,
+              transform,
+              profileTransform,
+            };
+            return result;
+          }
         }
       }
     }
