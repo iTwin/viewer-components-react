@@ -89,6 +89,12 @@ export namespace SheetMeasurementsHelper {
     return areaBuilder;
   }
 
+  /**
+   * Uses drawing metaData to transform a point from sheet coordinates to 3d world coordinates
+   * @param point In sheet coordinates
+   * @param transform
+   * @returns Point in world coordinates
+   */
   export function measurementTransform(point: Point3d, transform: SheetTransformProps): Point3d {
     const drawingPoint = transform.sheetTov8Drawing.multiplyPoint3d(point);
     const adjustedDrawingPoint = new Point3d(drawingPoint.x, drawingPoint.y, transform.masterOrigin.z);

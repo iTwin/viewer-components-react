@@ -99,7 +99,6 @@ MeasureLocationToolModel
     if (this._enableSheetMeasurements) {
       if (ev.viewport.view.id !== undefined) {
         const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
-        this.toolModel.sheetViewId = ev.viewport.view.id;
 
         if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
           const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents, transform: drawingInfo.transform};
@@ -123,6 +122,7 @@ MeasureLocationToolModel
     const props: AddLocationProps = {
       location: ev.point.clone(),
       viewType: MeasurementViewTarget.classifyViewport(ev.viewport!),
+      viewId: ev.viewport?.view.id,
       drawingMetadata: (await this.sheetMeasurementsDataButtonDown(ev)) as DrawingMetadataProps,
     };
 

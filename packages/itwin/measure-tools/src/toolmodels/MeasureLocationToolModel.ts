@@ -18,6 +18,7 @@ type LocationMeasurementPropsOnly = Omit<LocationMeasurementProps, keyof Measure
 export interface AddLocationProps extends Omit<LocationMeasurementPropsOnly, "location"> {
   location: Point3d;
   viewType: string;
+  viewId?: string | undefined;
   drawingMetadata?: DrawingMetadataProps | undefined;
 }
 
@@ -44,6 +45,7 @@ export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasu
 
     if (!this._currentMeasurement) {
       this._currentMeasurement = new LocationMeasurement(rest);
+      this.sheetViewId = props.viewId;
       this._currentMeasurement.viewTarget.include(viewType);
       this._currentMeasurement.isDynamic = isDynamic;
       this.notifyNewMeasurement();
