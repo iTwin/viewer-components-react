@@ -13,6 +13,7 @@ import type { IEC3JobsClient } from '@itwin/insights-client';
 import type { IOdataClient } from '@itwin/insights-client';
 import type { IReportsClient } from '@itwin/insights-client';
 import { default as React_2 } from 'react';
+import type { Report } from '@itwin/insights-client';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
@@ -48,7 +49,7 @@ export interface EC3ConfigCommonProps {
 }
 
 // @beta
-export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken;
+export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultReport;
 
 // @beta
 export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
@@ -94,12 +95,12 @@ export type GetAccessTokenFn = () => Promise<AccessToken>;
 export function handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source?: string): void;
 
 // @beta
-export const TemplateMenu: ({ template, onSaveSuccess, onClickCancel }: TemplateMenuProps) => JSX.Element;
+export const TemplateMenu: (props: TemplateMenuProps) => JSX.Element;
 
 // @beta
 export interface TemplateMenuProps {
     // (undocumented)
-    onClickCancel?: () => void;
+    onClickCancel: () => void;
     // (undocumented)
     onSaveSuccess: () => void;
     // (undocumented)
