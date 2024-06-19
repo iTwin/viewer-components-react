@@ -8,6 +8,7 @@ import { BaseTree } from "../common/components/BaseTree";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
+import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
 
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
@@ -44,7 +45,10 @@ export function IModelContentTree({ onPerformanceMeasured, onFeatureUsed, ...pro
 }
 
 function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
-  return new IModelContentTreeDefinition(props);
+  return new IModelContentTreeDefinition({
+    imodelAccess: props.imodelAccess,
+    idsCache: new IModelContentTreeIdsCache(props.imodelAccess),
+  });
 }
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {

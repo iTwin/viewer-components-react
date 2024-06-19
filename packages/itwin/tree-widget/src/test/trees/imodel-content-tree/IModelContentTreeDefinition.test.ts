@@ -11,6 +11,7 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createHierarchyProvider } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { IModelContentTreeDefinition } from "../../../components/trees/imodel-content-tree/IModelContentTreeDefinition";
+import { IModelContentTreeIdsCache } from "../../../components/trees/imodel-content-tree/internal/IModelContentTreeIdsCache";
 import {
   buildIModel,
   insertDrawingCategory,
@@ -352,11 +353,6 @@ describe("iModel content tree", () => {
                                 }),
                               ],
                             }),
-                            NodeValidators.createForInstanceNode({
-                              instanceKeys: [keys.drawingCategory2],
-                              supportsFiltering: true,
-                              children: false,
-                            }),
                           ],
                         }),
                       ],
@@ -530,11 +526,6 @@ describe("iModel content tree", () => {
                           ],
                         }),
                       ],
-                    }),
-                    NodeValidators.createForInstanceNode({
-                      instanceKeys: [keys.category2],
-                      supportsFiltering: true,
-                      children: false,
                     }),
                   ],
                 }),
@@ -1011,6 +1002,9 @@ function createIModelContentTreeProvider(imodel: IModelConnection) {
   const imodelAccess = createIModelAccess(imodel);
   return createHierarchyProvider({
     imodelAccess,
-    hierarchyDefinition: new IModelContentTreeDefinition({ imodelAccess }),
+    hierarchyDefinition: new IModelContentTreeDefinition({
+      imodelAccess,
+      idsCache: new IModelContentTreeIdsCache(imodelAccess),
+    }),
   });
 }
