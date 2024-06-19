@@ -51,6 +51,15 @@ test.describe("Models tree", () => {
       await takeScreenshot(page, treeWidget);
     });
 
+    test("selected node", async ({ page }) => {
+      const node = locateNode(treeWidget, "BayTown");
+      await node.click();
+
+      // wait for node to become selected
+      await expect(node).toHaveAttribute("aria-selected", "true");
+      await takeScreenshot(page, treeWidget);
+    });
+
     test("node with active filtering", async ({ page }) => {
       const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
 
@@ -105,39 +114,16 @@ test.describe("Models tree", () => {
       await takeScreenshot(page, treeWidget);
     });
 
-    test("instances focus", async ({ page }) => {
-      const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
-      await physicalModelNode.getByLabel("Expand").click();
-
-      // wait for all children nodes to be visible
-      await locateNode(treeWidget, "Structure").waitFor();
-
-      // when enlarged layout is used the instances focus button is not visible
-      if (density === "enlarged") {
-        await treeWidget.getByTitle("More").click();
-        await page.locator(".tree-header-button-dropdown-container").waitFor();
-      }
-
-      // enable instances focus and select a node
-      await page.getByTitle("Enable Instance Focus").click();
-      const pipeSupportNode = locateNode(treeWidget, "PipeSupport");
-      await pipeSupportNode.click();
-
-      // wait for non selected node to no longer be visible
-      await locateNode(treeWidget, "Structure").waitFor({ state: "hidden" });
-      await takeScreenshot(page, treeWidget);
-    });
-
-    test("selected node", async ({ page }) => {
-      const node = locateNode(treeWidget, "BayTown");
-      await node.click();
-
-      // wait for node to become selected
-      await expect(node).toHaveAttribute("aria-selected", "true");
-      await takeScreenshot(page, treeWidget);
-    });
-
     test("search", async ({ page }) => {
+      await treeWidget.getByTitle("Search for something").click();
+      await treeWidget.getByPlaceholder("Search...").fill("[4-1F5]");
+
+      // wait for node to be found
+      await treeWidget.getByText(`E-104B-TOP [4-1F5]`).waitFor();
+      await takeScreenshot(page, treeWidget);
+    });
+
+    test("search - not found", async ({ page }) => {
       const node = locateNode(treeWidget, "ProcessPhysicalModel");
       await node.getByLabel("Expand").click();
 
@@ -164,6 +150,29 @@ test.describe("Models tree", () => {
 
       // wait for error message to be displayed
       await treeWidget.getByText(`There are too many matches for the given filter. Please be more specific.`).waitFor();
+      await takeScreenshot(page, treeWidget);
+    });
+
+    test("instances focus", async ({ page }) => {
+      const physicalModelNode = locateNode(treeWidget, "ProcessPhysicalModel");
+      await physicalModelNode.getByLabel("Expand").click();
+
+      // wait for all children nodes to be visible
+      await locateNode(treeWidget, "Structure").waitFor();
+
+      // when enlarged layout is used the instances focus button is not visible
+      if (density === "enlarged") {
+        await treeWidget.getByTitle("More").click();
+        await page.locator(".tree-header-button-dropdown-container").waitFor();
+      }
+
+      // enable instances focus and select a node
+      await page.getByTitle("Enable Instance Focus").click();
+      const pipeSupportNode = locateNode(treeWidget, "PipeSupport");
+      await pipeSupportNode.click();
+
+      // wait for non selected node to no longer be visible
+      await locateNode(treeWidget, "Structure").waitFor({ state: "hidden" });
       await takeScreenshot(page, treeWidget);
     });
 
