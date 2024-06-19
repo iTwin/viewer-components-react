@@ -64,6 +64,7 @@ export default defineConfig(({ mode }) => {
         },
       ],
     },
+    ...(disableReloading ? { optimizeDeps: { force: true } } : undefined),
     envPrefix: ENV_PREFIX,
     define: {
       "process.env.IMJS_URL_PREFIX": env.IMJS_URL_PREFIX ? `"${env.IMJS_URL_PREFIX}"` : `""`,
