@@ -5,11 +5,13 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedAsyncValue } from "@itwin/components-react";
+import { ProgressRadial } from "@itwin/itwinui-react";
 import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
 import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
+import { Delayed } from "./components/Delayed";
 
 import type { UsageTrackedFeatures } from "../../common/UseFeatureReporting";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -116,7 +118,7 @@ interface MatchingInstancesCountProps {
 }
 
 function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierarchyLevelDetails }: MatchingInstancesCountProps) {
-  const { value } = useDebouncedAsyncValue(
+  const { value, inProgress } = useDebouncedAsyncValue(
     useCallback(async () => {
       const instanceFilter = toGenericFilter(filter);
       try {
@@ -138,11 +140,16 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
     }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit]),
   );
 
-  if (!value) {
-    return null;
+  if (inProgress) {
+    return (
+      <Delayed show={true}>
+        {TreeWidget.translate("stateless.matchingInstancesCount", { instanceCount: "" })}
+        <ProgressRadial size="x-small" />
+      </Delayed>
+    );
   }
 
-  return <>{value}</>;
+  return value ? <>{value}</> : null;
 }
 
 async function collectInstanceKeys(iterator: AsyncIterableIterator<InstanceKey>) {
