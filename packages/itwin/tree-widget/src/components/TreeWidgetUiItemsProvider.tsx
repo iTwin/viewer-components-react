@@ -11,7 +11,6 @@ import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
 import { SelectableTree } from "./SelectableTree";
-import { useTreeTransientState } from "./utils/UseTreeTransientState";
 
 import type { Widget } from "@itwin/appui-react";
 import type { SelectableTreeProps, TreeDefinition } from "./SelectableTree";
@@ -68,9 +67,8 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
  * @public
  */
 export function TreeWidgetComponent(props: SelectableTreeProps) {
-  const ref = useTreeTransientState<HTMLDivElement>();
   return (
-    <div ref={ref} className="tree-widget">
+    <div className="tree-widget">
       <ErrorBoundary FallbackComponent={ErrorState}>
         <SelectableTree {...props} />
       </ErrorBoundary>

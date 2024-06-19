@@ -4,14 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { createRef } from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import * as selectableTreeModule from "../components/SelectableTree";
 import { createTreeWidget } from "../components/TreeWidgetUiItemsProvider";
-import * as useTreeTransientStateModule from "../components/utils/UseTreeTransientState";
 import { TreeWidget } from "../TreeWidget";
 import { render, TestUtils, waitFor } from "./TestUtils";
 
@@ -20,10 +18,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 describe("createTreeWidget", () => {
   beforeEach(async () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({ onSelectedViewportChanged: new BeEvent() }));
-
-    const ref = createRef<HTMLDivElement>();
-    sinon.stub(useTreeTransientStateModule, "useTreeTransientState").callsFake(() => ref);
-
     await TestUtils.initialize();
   });
 
