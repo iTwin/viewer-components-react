@@ -82,6 +82,19 @@ export async function simulateCombobox(rootElement: HTMLElement, text: string) {
   expect(input.value).toEqual(text);
 }
 
+export async function simulateSelect(rootElement: HTMLElement, text: string) {
+  Element.prototype.scrollIntoView = jest.fn();
+  const input = rootElement.querySelector(".iui-select-button") as HTMLInputElement;
+  await act(async () => {
+    fireEvent.click(input);
+  });
+  const item = screen.getByText(text);
+  await act(async () => {
+    await userEvent.click(item);
+  });
+  expect(input.querySelector(".iui-content")).toHaveTextContent(text);
+}
+
 export async function simulateTextInput(rootElement: HTMLElement, text: string) {
   const input = rootElement as HTMLInputElement;
   await act(async () => {
@@ -94,6 +107,14 @@ export async function getComboboxOptions(rootElement: HTMLElement) {
   const input = rootElement.querySelector(".iui-input") as HTMLInputElement;
   await act(async () => {
     fireEvent.focus(input);
+  });
+  return document.querySelectorAll(".iui-menu-item");
+}
+
+export async function getSelectOptions(rootElement: HTMLElement) {
+  const input = rootElement.querySelector(".iui-select-button") as HTMLInputElement;
+  await act(async () => {
+    fireEvent.click(input);
   });
   return document.querySelectorAll(".iui-menu-item");
 }

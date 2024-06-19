@@ -4,14 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useState } from "react";
-import type { EC3ConfigPropsWithGetEC3AccessToken, EC3ConfigPropsWithRedirectUri } from "./EC3/EC3Config";
+import type { EC3ConfigPropsWithDefaultReport, EC3ConfigPropsWithGetEC3AccessToken, EC3ConfigPropsWithRedirectUri } from "./EC3/EC3Config";
 import { EC3Context } from "./EC3Context";
 import { EC3Header } from "./EC3Header";
 import { EC3Router } from "./EC3Router";
 import type { Configuration } from "./EC3/Template";
 import "./EC3Widget.scss";
 
-export type EC3WidgetProps = Omit<EC3ConfigPropsWithRedirectUri, "iTwinId"> | Omit<EC3ConfigPropsWithGetEC3AccessToken, "iTwinId">;
+export type EC3WidgetProps =
+  | Omit<EC3ConfigPropsWithRedirectUri, "iTwinId">
+  | Omit<EC3ConfigPropsWithGetEC3AccessToken, "iTwinId">
+  | Omit<EC3ConfigPropsWithDefaultReport, "iTwinId">;
 
 export enum RouteStep {
   Templates,

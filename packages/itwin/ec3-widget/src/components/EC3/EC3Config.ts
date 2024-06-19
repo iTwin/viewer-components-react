@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient, Report } from "@itwin/insights-client";
 import { CARBON_CALCULATION_BASE_PATH, EC3ConfigurationsClient, EC3JobsClient, ODataClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../context/APIContext";
 import type { EC3Token } from "./EC3Token";
@@ -86,10 +86,21 @@ export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
 };
 
 /**
+ * EC3 Config Props with default report
+ * @beta
+ */
+export type EC3ConfigPropsWithDefaultReport = EC3ConfigCommonProps & {
+  /**
+   * The default report to be used for EC3 configuration
+   */
+  defaultReport?: Report;
+};
+
+/**
  * EC3 Config Props
  * @beta
  */
-export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken;
+export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultReport;
 
 export const getDefaultEC3Uri = (ec3Uri?: string) => {
   return ec3Uri ?? EC3URI;
@@ -104,6 +115,7 @@ export class EC3Config {
   public readonly iTwinId: string;
   public readonly getAccessToken: GetAccessTokenFn;
   public readonly getEC3AccessToken: GetAccessTokenFn;
+  public readonly defaultReport?: Report;
   private token?: EC3Token;
   private readonly redirectUri?: string;
   public readonly reportsClient: IReportsClient;
@@ -126,6 +138,7 @@ export class EC3Config {
 
     this.redirectUri = "redirectUri" in props ? props.redirectUri : undefined;
     this.getEC3AccessToken = "getEC3AccessToken" in props ? props.getEC3AccessToken : this.getAuthWindowToken.bind(this);
+    this.defaultReport = "defaultReport" in props ? props.defaultReport : undefined;
     this.reportsClient = props.reportsClient ?? new ReportsClient(this.reportingBasePath);
     this.oDataClient = props.oDataClient ?? new ODataClient(this.reportingBasePath);
     this.ec3JobsClient = props.ec3JobsClient ?? new EC3JobsClient(this.carbonCalculationBasePath);
