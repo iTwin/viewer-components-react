@@ -12,7 +12,7 @@ test.describe("External sources tree", () => {
 
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
-    await selectTree(treeWidget, "External Sources");
+    await selectTree(treeWidget, "External sources");
   });
 
   withDifferentDensities(() => {

@@ -148,7 +148,7 @@ test.describe("Models tree", () => {
       await treeWidget.getByPlaceholder("Search...").fill("Test");
 
       // wait for no nodes to be found matching search input
-      await treeWidget.getByText(`There are no nodes matching filter - "Test"`).waitFor();
+      await treeWidget.getByText(`There are no nodes matching filter "Test"`).waitFor();
       await takeScreenshot(page, treeWidget);
     });
 
@@ -181,7 +181,7 @@ test.describe("Models tree", () => {
       }
 
       // enable instances focus and select a node
-      await page.getByTitle("Enable Instance Focus").click();
+      await page.getByTitle("Enable instance focus mode").click();
 
       // select all elements in viewport
       const viewport = await page.getByTestId("viewport-component").boundingBox();
@@ -197,7 +197,7 @@ test.describe("Models tree", () => {
       await takeScreenshot(page, treeWidget);
 
       // click the disable focus text
-      await treeWidget.getByText("Disable the focus mode").click();
+      await treeWidget.getByText("disable the focus mode").click();
 
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
@@ -206,7 +206,7 @@ test.describe("Models tree", () => {
       }
 
       // ensure instance focus is turned off and hierarchy is visible
-      await page.getByTitle("Enable Instance Focus").waitFor();
+      await page.getByTitle("Enable instance focus mode").waitFor();
       await locateNode(treeWidget, "BayTown").waitFor();
     });
 

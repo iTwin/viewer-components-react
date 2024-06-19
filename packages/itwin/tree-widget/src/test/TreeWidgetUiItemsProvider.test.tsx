@@ -72,6 +72,6 @@ describe("createTreeWidget", () => {
     const widget = createTreeWidget({ trees });
     const { queryByText } = render(<>{widget.content}</>);
 
-    await waitFor(() => expect(queryByText(TreeWidget.translate("error"))).to.not.be.null);
+    await waitFor(() => expect(queryByText(TreeWidget.translate("errorState.title"))).to.not.be.null);
   });
 });

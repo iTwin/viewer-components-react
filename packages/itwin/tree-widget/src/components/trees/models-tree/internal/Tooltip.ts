@@ -26,13 +26,13 @@ export function createVisibilityStatus(status: Visibility | "disabled", tooltipS
 
 /** @internal */
 export function createTooltip(status: Visibility | "disabled", tooltipStringId: string | undefined): string {
-  const statusStringId = `modelTree.status.${status}`;
+  const statusStringId = `modelsTree.visibilityTooltips.status.${status}`;
   const statusString = TreeWidget.translate(statusStringId);
   if (!tooltipStringId) {
     return statusString;
   }
 
-  tooltipStringId = `modelTree.tooltips.${tooltipStringId}`;
+  tooltipStringId = `modelsTree.visibilityTooltips.${tooltipStringId}`;
   const tooltipString = TreeWidget.translate(tooltipStringId);
   return `${statusString}: ${tooltipString}`;
 }

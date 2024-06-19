@@ -137,7 +137,7 @@ function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProp
         {
           id: "no-trees",
           label: "",
-          render: () => <FillCentered>{TreeWidget.translate("noTrees")}</FillCentered>,
+          render: () => <FillCentered>{TreeWidget.translate("selectableTree.noTrees")}</FillCentered>,
         },
       ],
     };

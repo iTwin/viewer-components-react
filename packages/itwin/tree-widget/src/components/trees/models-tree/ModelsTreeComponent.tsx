@@ -103,7 +103,7 @@ ModelsTreeComponent.id = "models-tree-v2";
  * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
-ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
+ModelsTreeComponent.getLabel = () => TreeWidget.translate("modelsTree.label");
 
 function ModelsTreeComponentImpl({
   iModel,
@@ -153,7 +153,9 @@ function ModelsTreeComponentImpl({
 
 function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "default" | "enlarged"; onFeatureUsed?: (feature: string) => void }) {
   const { enabled, toggle } = useFocusedInstancesContext();
-  const title = enabled ? TreeWidget.translate("stateless.disableInstanceFocus") : TreeWidget.translate("stateless.enableInstanceFocus");
+  const title = enabled
+    ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
+    : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
   return (
     <IconButton
       styleType="borderless"

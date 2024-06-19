@@ -83,7 +83,7 @@ CategoriesTreeComponent.id = "categories-tree-v2";
  * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
-CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categories");
+CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categoriesTree.label");
 
 function CategoriesTreeComponentImpl({
   iModel,

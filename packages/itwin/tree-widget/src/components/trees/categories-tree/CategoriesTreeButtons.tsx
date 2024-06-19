@@ -30,7 +30,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("showAll")}
+      title={TreeWidget.translate("categoriesTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-showall`);
         void showAllCategories(
@@ -50,7 +50,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("hideAll")}
+      title={TreeWidget.translate("categoriesTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.(`${CategoriesTreeComponent.id}-hideall`);
         void hideAllCategories(
@@ -68,7 +68,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
-      title={TreeWidget.translate("invert")}
+      title={TreeWidget.translate("categoriesTree.buttons.invert.tooltip")}
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
       onClick={() => {

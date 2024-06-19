@@ -432,7 +432,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       }
 
       status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
-      return of(createVisibilityStatus(status.state, status.state === "visible" ? "element.visibleThroughCategory" : "element.hiddenThroughCategory"));
+      return of(createVisibilityStatus(status.state, status.state === "visible" ? undefined : "element.hiddenThroughCategory"));
     });
 
     const ovr = this._props.overrides?.getElementDisplayStatus;

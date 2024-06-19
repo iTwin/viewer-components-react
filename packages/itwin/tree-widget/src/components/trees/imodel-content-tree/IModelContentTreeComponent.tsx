@@ -46,4 +46,4 @@ IModelContentTreeComponent.id = "imodel-content-tree-v2";
  * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
-IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodel-content");
+IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContentTree.label");

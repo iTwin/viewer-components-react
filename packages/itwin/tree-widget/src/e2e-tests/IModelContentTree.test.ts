@@ -22,7 +22,7 @@ test.describe("iModel content tree", () => {
 
   test.beforeEach(async ({ page, baseURL }) => {
     treeWidget = await initTreeWidgetTest({ page, baseURL });
-    await selectTree(treeWidget, "iModel Content");
+    await selectTree(treeWidget, "iModel content");
   });
 
   withDifferentDensities(() => {

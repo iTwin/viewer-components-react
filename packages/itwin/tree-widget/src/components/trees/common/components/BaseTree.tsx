@@ -147,7 +147,7 @@ function BaseTreeRenderer({
   if (rootNodes.length === 0 && !isLoading) {
     return (
       <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
-        {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("stateless.dataIsNotAvailable")}</Text>}
+        {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("baseTree.dataIsNotAvailable")}</Text>}
       </Flex>
     );
   }

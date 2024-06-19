@@ -90,7 +90,7 @@ describe("<ModelsTreeComponent />", () => {
   it("getLabel returns translated label of the component", () => {
     const translateSpy = sinon.stub(TreeWidget, "translate").returns("test models label");
     expect(ModelsTreeComponent.getLabel()).to.be.eq(TreeWidget.translate("test models label"));
-    expect(translateSpy).to.be.calledWith("models");
+    expect(translateSpy).to.be.calledWith("modelsTree.label");
   });
 
   describe("available models", () => {

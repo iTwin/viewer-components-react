@@ -171,10 +171,10 @@ function getNoDataMessage(filter?: string, error?: ModelsTreeFilteringError) {
     return <InstanceFocusError error={error!} />;
   }
   if (isFilterError(error)) {
-    return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
+    return <Text>{TreeWidget.translate(`modelsTree.filtering.${error}`)}</Text>;
   }
   if (filter) {
-    return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
+    return <Text>{TreeWidget.translate("modelsTree.filtering.noMatches", { filter })}</Text>;
   }
   return undefined;
 }
@@ -189,7 +189,7 @@ function isInstanceFocusError(error: ModelsTreeFilteringError | undefined) {
 
 function InstanceFocusError({ error }: { error: ModelsTreeFilteringError }) {
   const { toggle } = useFocusedInstancesContext();
-  const localizedMessage = createLocalizedMessage(TreeWidget.translate(`stateless.${error}`), () => toggle());
+  const localizedMessage = createLocalizedMessage(TreeWidget.translate(`modelsTree.filtering.${error}`), () => toggle());
   return <Text>{localizedMessage}</Text>;
 }
 

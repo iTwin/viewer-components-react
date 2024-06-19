@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler";
 
+import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 /**
@@ -72,7 +72,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("showAll")}
+      title={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("showall");
         void showAllModels(
@@ -92,7 +92,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("hideAll")}
+      title={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("hideall");
         void hideAllModels(
@@ -112,7 +112,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("invert")}
+      title={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("invert");
         void invertAllModels(
@@ -143,7 +143,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
     <Button
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("toggle2DViews")}
+      title={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("view2d");
         void toggleModels(models2d, is2dToggleActive, props.viewport);
@@ -151,7 +151,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
       disabled={models2d.length === 0}
       endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
-      {TreeWidget.translate("label2D")}
+      {TreeWidget.translate("modelsTree.buttons.toggle2d.label")}
     </Button>
   );
 }
@@ -173,7 +173,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
     <Button
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("toggle3DViews")}
+      title={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
       onClick={() => {
         props.onFeatureUsed?.("view3d");
         void toggleModels(models3d, is3dToggleActive, props.viewport);
@@ -181,7 +181,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       disabled={models3d.length === 0}
       endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
-      {TreeWidget.translate("label3D")}
+      {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
     </Button>
   );
 }

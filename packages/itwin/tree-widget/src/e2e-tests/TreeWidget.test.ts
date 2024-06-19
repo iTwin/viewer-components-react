@@ -23,7 +23,7 @@ test.describe("Widget", () => {
     });
 
     test("tree selector badge", async ({ page }) => {
-      await selectTree(treeWidget, "External Sources");
+      await selectTree(treeWidget, "External sources");
       await page.getByText("The data required for this tree layout is not available in this iModel.").waitFor();
       await takeScreenshot(page, treeWidget);
     });

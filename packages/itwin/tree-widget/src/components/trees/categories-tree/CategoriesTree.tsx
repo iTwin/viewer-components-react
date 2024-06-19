@@ -128,10 +128,10 @@ export function CategoriesTree({
 
 function getNoDataMessage(filter: string, error?: CategoriesTreeFilteringError) {
   if (error) {
-    return <Text>{TreeWidget.translate(`stateless.${error}`)}</Text>;
+    return <Text>{TreeWidget.translate(`categoriesTree.filtering.${error}`)}</Text>;
   }
   if (filter) {
-    return <Text>{TreeWidget.translate("stateless.noNodesMatchFilter", { filter })}</Text>;
+    return <Text>{TreeWidget.translate("categoriesTree.filtering.noMatches", { filter })}</Text>;
   }
   return undefined;
 }

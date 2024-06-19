@@ -128,14 +128,14 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
             hierarchyLevelSizeLimit: hierarchyLevelDetails.sizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
-        return TreeWidget.translate("stateless.matchingInstancesCount", {
+        return TreeWidget.translate("filteringDialog.matchingInstancesCount", {
           instanceCount: instanceKeys.length.toLocaleString(undefined, { useGrouping: true }),
         });
       } catch (e) {
         if (e instanceof RowsLimitExceededError) {
-          return TreeWidget.translate("stateless.filterExceedsLimit", { limit: e.limit.toLocaleString(undefined, { useGrouping: true }) });
+          return TreeWidget.translate("filteringDialog.filterExceedsLimit", { limit: e.limit.toLocaleString(undefined, { useGrouping: true }) });
         }
-        return TreeWidget.translate("stateless.failedToCalculateMatchingInstances");
+        return TreeWidget.translate("filteringDialog.failedToCalculateMatchingInstancesCount");
       }
     }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit]),
   );

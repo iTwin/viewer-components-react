@@ -48,4 +48,4 @@ ExternalSourcesTreeComponent.id = "external-sources-tree-v2";
  * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
  * @public
  */
-ExternalSourcesTreeComponent.getLabel = () => TreeWidget.translate("external-sources");
+ExternalSourcesTreeComponent.getLabel = () => TreeWidget.translate("externalSourcesTree.label");

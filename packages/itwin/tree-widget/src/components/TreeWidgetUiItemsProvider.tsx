@@ -44,7 +44,7 @@ interface TreeWidgetProps {
 export function createTreeWidget(props: TreeWidgetProps): Widget {
   return {
     id: "tree-widget-react:trees",
-    label: TreeWidget.translate("treeview"),
+    label: TreeWidget.translate("widget.label"),
     icon: <SvgHierarchyTree />,
     layouts: {
       standard: {
@@ -81,11 +81,11 @@ function ErrorState({ resetErrorBoundary }: FallbackProps) {
   return (
     <NonIdealState
       svg={<SvgError />}
-      heading={TreeWidget.translate("error")}
-      description={TreeWidget.translate("generic-error-description")}
+      heading={TreeWidget.translate("errorState.title")}
+      description={TreeWidget.translate("errorState.description")}
       actions={
         <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>
-          {TreeWidget.translate("retry")}
+          {TreeWidget.translate("errorState.retryButtonLabel")}
         </Button>
       }
     />
