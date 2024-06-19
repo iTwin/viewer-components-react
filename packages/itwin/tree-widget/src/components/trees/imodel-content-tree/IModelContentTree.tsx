@@ -34,7 +34,7 @@ export function IModelContentTree({ onPerformanceMeasured, onFeatureUsed, ...pro
       treeName={IModelContentTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
       getIcon={getIcon}
-      selectionMode={props.selectionMode ?? "none"}
+      selectionMode={props.selectionMode ?? "extended"}
       onPerformanceMeasured={(action, duration) => {
         onPerformanceMeasured?.(`${IModelContentTreeComponent.id}-${action}`, duration);
       }}

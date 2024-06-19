@@ -10,20 +10,26 @@ The `@itwin/tree-widget-react` package provides React components to build a widg
 
 The new `3.0` version of the package contains a few notable changes, compared to the previous `2.x` generation.
 
+- To allow easier customization of widget placement, the package now delivers a `createTreeWidget()` function that creates a tree widget definition, instead of a full `UiItemsProvider` implementation. See [Usage](#usage) section for details on how to use the new function.
+
 - The underlying engine for building hierarchies has been changed from `@itwin/presentation-components` to `@itwin/presentation-hierarchies-react`. This is a significant change as the new library runs plain ECSQL queries and handles hierarchy creation on the frontend, as opposed to the previous version that relied on the backend to provide hierarchy data. This change allows this package to use more optimal queries and to be more flexible in terms of hierarchy creation.
 
-- The tree components delivered with the package have been updated to use the [`Tree` component from `@itwin/itwinui-react` package](https://itwinui.bentley.com/docs/tree) instead of `ControlledTree` from `@itwin/components-react`. The new component is a little less dense, provides better accessibility and customization options.
+  This change adds a requirement for all tree components in this package to access iModels' metadata, which is achieved through a required `getSchemaContext` prop. See [Creating schema context](#creating-schema-context) section for an example implementation of this function.
+
+  In addition, the new tree components don't rely on the global selection manager provided by `@itwin/presentation-frontend` package. Instead, they require a unified selection storage object created using `createStorage()` function from `@itwin/unified-selection` package. See sections of individual tree components for how to supply it to them, and [Creating unified selection storage](#creating-unified-selection-storage) section for an example for how to create the storage.
+
+- The tree components delivered with the package have been updated to use the [`Tree` component from `@itwin/itwinui-react` package](https://itwinui.bentley.com/docs/tree) instead of [`ControlledTree` from `@itwin/components-react`](https://www.itwinjs.org/reference/components-react/tree/controlledtree/). The new component is a little less dense, provides better accessibility and customization options.
 
   | 2.x                                             | 3.0                                             |
   | ----------------------------------------------- | ----------------------------------------------- |
   | ![Tree widget 2.x](./media/tree-widget-2.x.png) | ![Tree widget 3.0](./media/tree-widget-3.0.png) |
 
-- The tree components now have hierarchy level [size limiting](#hierarchy-level-size-limiting) and [filtering](#hierarchy-level-filtering) features always turned on. The features were already available in `2.x` versions, but were not enabled by default.
+- The tree components now have hierarchy level size limiting and filtering features always turned on. The features were already available in `2.x` versions, but were not enabled by default. See [Hierarchy level size limiting](#hierarchy-level-size-limiting) and [Hierarchy level filtering](#hierarchy-level-filtering) sections for more details.
 
 - Models tree:
   - The label filtering feature has been expanded to filter not only up to Models, but the whole hierarchy. This allows filtering the hierarchy to additionally find Category or Element nodes.
   - [Focus mode](#focus-mode) feature has been added to allow automatic hierarchy filtering as the application selection changes.
-  - Display states' control has been modified to be hierarchy based. This means changing display state of something deep in the hierarchy affects checkbox state of all its ancestors. And vice versa - changing display state of an ancestor affects all its descendants.
+  - Display states' control has been modified to be hierarchy based. This means that changing display state of something deep in the hierarchy affects checkbox state of all its ancestors. And vice versa - changing display state of an ancestor affects all its descendants.
 
 ## Usage
 
@@ -34,60 +40,52 @@ In any case, **before** using any APIs or components delivered with the package,
 ```ts
 import { IModelApp } from "@itwin/core-frontend";
 import { TreeWidget } from "@itwin/tree-widget-react";
-...
+
 await TreeWidget.initialize(IModelApp.localization);
 ```
 
-In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `TreeWidgetUiItemsProvider` that can be used to add the tree widget to UI:
+In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `createTreeWidget` function that can be used to add the tree widget to UI through a `UiItemsProvider`:
 
 ```ts
 import { UiItemsManager } from "@itwin/appui-react";
-import { TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
-...
-UiItemsManager.register(
-  new TreeWidgetUiItemsProvider()
-);
+import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
+
+UiItemsManager.register({
+  id: "tree-widget-provider",
+  getWidgets: () => [
+    createTreeWidget({
+      trees: [
+        // add the Models tree component delivered with the package
+        {
+          id: ModelsTreeComponent.id,
+          getLabel: () => ModelsTreeComponent.getLabel(),
+          render: (props) => (
+            <ModelsTreeComponent
+              // see "Models tree" section for details regarding `getSchemaContext` and `selectionStorage` props
+              getSchemaContext={getSchemaContext}
+              selectionStorage={unifiedSelectionStorage}
+              selectionMode={"extended"}
+            />
+          ),
+        },
+        // add a custom component
+        {
+          id: "my-tree-id",
+          startIcon: <MyTreeIcon />,
+          getLabel: () => "My Custom Tree",
+          render: () => <>This is my custom tree.</>,
+        },
+      ],
+    }),
+  ],
+});
 ```
 
-The above example uses default widget parameters and results in a component similar to the one visible at the top of this README. Customization is also possible:
-
-```ts
-import { UiItemsManager } from "@itwin/appui-react";
-import { TreeWidgetUiItemsProvider, TreeWidgetId, ModelsTreeComponent } from "@itwin/tree-widget-react";
-...
-UiItemsManager.register(
-  new TreeWidgetUiItemsProvider({
-    // defaults to `StagePanelLocation.Right`
-    defaultPanelLocation: StagePanelLocation.Left,
-    // defaults to `StagePanelSection.Start`
-    defaultPanelSection: StagePanelSection.End,
-    // defaults to whatever the default `Widget.priority` in AppUI is
-    defaultTreeWidgetPriority: 1000,
-    // defaults to more dense "default" value
-    density: "enlarged",
-    // optional performance and feature telemetry reporting
-    onPerformanceMeasured: (feature, elapsedTime) => logPerformance(`${TreeWidgetId}: ${feature}`, elapsedTime),
-    onFeatureUsed: (feature) => logFeatureUsage(`${TreeWidgetId}: ${feature}`),
-    // defaults to `ModelsTreeComponent` and `CategoriesTreeComponent`
-    trees: [{
-        id: ModelsTreeComponent.id,
-        getLabel: ModelsTreeComponent.getLabel,
-        render: () => <ModelsTreeComponent />,
-    }, {
-        id: "my-tree-id",
-        getLabel: "My Custom Tree",
-        render: () => <>This is my custom tree.</>,
-        startIcon: <MyTreeIcon />;
-    }];
-  })
-);
-```
-
-As seen in the above code snippet, `TreeWidgetUiItemsProvider` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
+As seen in the above code snippet, `createTreeWidget` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
 
 ## Components
 
-While we expect this package to be mostly used with [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) and widget created through `TreeWidgetUiItemsProvider`, the package delivers components used within the widget to meet other use cases:
+While we expect this package to be mostly used with [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) and widget created through `createTreeWidget`, the package delivers components used within the widget to meet other use cases.
 
 ### Selectable tree
 
@@ -104,23 +102,27 @@ Typical usage:
 ```tsx
 import { IModelConnection } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
-import { createStorage } from "@itwin/unified-selection";
-import { StatelessModelsTreeComponent, ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { SelectionStorage } from "@itwin/unified-selection";
+import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 
-const unifiedSelectionStorage = createStorage();
-IModelConnection.onClose.addListener((imodel) => {
-  unifiedSelectionStorage.clearStorage({ imodelKey: imodel.key });
-});
+// The Models tree requires a unified selection storage to support selection synchronization with the
+// application. The storage should be created once per application and shared across multiple selection-enabled
+// components.
+function getUnifiedSelectionStorage(): SelectionStorage {
+  // see "Creating unified selection storage" section for example implementation
+}
 
+// Schema context is used by Models tree to access iModels metadata. Similar to selection storage, it should be
+// created once per application and shared across multiple components.
 function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // return cached schema context for the iModel
+  // see "Creating schema context" section for example implementation
 }
 
 function MyWidget() {
   return (
-    <StatelessModelsTreeComponent
+    <ModelsTreeComponent
       getSchemaContext={getSchemaContext}
-      selectionStorage={unifiedSelectionStorage}
+      selectionStorage={getUnifiedSelectionStorage()}
       headerButtons={[
         (props) => <ModelsTreeComponent.ShowAllButton {...props} />,
         (props) => <ModelsTreeComponent.HideAllButton {...props} />,
@@ -160,23 +162,27 @@ Typical usage:
 ```tsx
 import { IModelConnection } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
-import { createStorage } from "@itwin/unified-selection";
-import { StatelessCategoriesTreeComponent, CategoriesTreeComponent } from "@itwin/tree-widget-react";
+import { SelectionStorage } from "@itwin/unified-selection";
+import { CategoriesTreeComponent, CategoriesTreeComponent } from "@itwin/tree-widget-react";
 
-const unifiedSelectionStorage = createStorage();
-IModelConnection.onClose.addListener((imodel) => {
-  unifiedSelectionStorage.clearStorage({ imodelKey: imodel.key });
-});
+// The Categories tree requires a unified selection storage to support selection synchronization with the
+// application. The storage should be created once per application and shared across multiple selection-enabled
+// components.
+function getUnifiedSelectionStorage(): SelectionStorage {
+  // see "Creating unified selection storage" section for example implementation
+}
 
+// Schema context is used by Categories tree to access iModels metadata. Similar to selection storage, it should be
+// created once per application and shared across multiple components.
 function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // return cached schema context for the iModel
+  // see "Creating schema context" section for example implementation
 }
 
 function MyWidget() {
   return (
     <CategoriesTreeComponent
       getSchemaContext={getSchemaContext}
-      selectionStorage={unifiedSelectionStorage}
+      selectionStorage={getUnifiedSelectionStorage()}
       headerButtons={[
         (props) => <CategoriesTreeComponent.ShowAllButton {...props} />,
         (props) => <CategoriesTreeComponent.HideAllButton {...props} />,
@@ -211,23 +217,27 @@ Typical usage:
 ```tsx
 import { IModelConnection } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
-import { createStorage } from "@itwin/unified-selection";
-import { StatelessIModelContentTreeComponent } from "@itwin/tree-widget-react";
+import { SelectionStorage } from "@itwin/unified-selection";
+import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 
-const unifiedSelectionStorage = createStorage();
-IModelConnection.onClose.addListener((imodel) => {
-  unifiedSelectionStorage.clearStorage({ imodelKey: imodel.key });
-});
+// The iModel content tree requires a unified selection storage to support selection synchronization with the
+// application. The storage should be created once per application and shared across multiple selection-enabled
+// components.
+function getUnifiedSelectionStorage(): SelectionStorage {
+  // see "Creating unified selection storage" section for example implementation
+}
 
+// Schema context is used by iModel content tree to access iModels metadata. Similar to selection storage, it should be
+// created once per application and shared across multiple components.
 function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // return cached schema context for the iModel
+  // see "Creating schema context" section for example implementation
 }
 
 function MyWidget() {
   return (
-    <StatelessIModelContentTreeComponent
+    <IModelContentTreeComponent
       getSchemaContext={getSchemaContext}
-      selectionStorage={unifiedSelectionStorage}
+      selectionStorage={getUnifiedSelectionStorage()}
     />
   );
 }
@@ -246,6 +256,66 @@ By default, the limit is set to `1000` nodes and components allow users to incre
 All tree components in this package allow users to filter nodes at each hierarchy level. The filter is applied to a single hierarchy level, which allows users to reduce amount of nodes being loaded - this is especially useful when a [hierarchy level size limit](#hierarchy-level-size-limiting) is hit:
 
 ![Hierarchy level filtering example](./media/hierarchy-level-filtering-example.gif)
+
+### Creating unified selection storage
+
+Tree components that support selection synchronization, require a unified selection storage object created using `createStorage()` function from `@itwin/unified-selection` package.
+
+Typically, we want one unified selection storage per application - this makes sure that selection in all application's components is synchronized. Below is an example implementation of `getUnifiedSelectionStorage` function that creates the storage and clears it when an iModel is closed:
+
+```ts
+import { IModelConnection } from "@itwin/core-frontend";
+import { createStorage, SelectionStorage } from "@itwin/unified-selection";
+
+let unifiedSelectionStorage: SelectionStorage | undefined;
+function getUnifiedSelectionStorage(): SelectionStorage {
+  if (!unifiedSelectionStorage) {
+    unifiedSelectionStorage = createStorage();
+    IModelConnection.onClose.addListener((imodel) => {
+      unifiedSelectionStorage!.clearStorage({ imodelKey: imodel.key });
+    });
+  }
+  return unifiedSelectionStorage;
+}
+```
+
+In case the application is also using components driven by APIs from `@itwin/presentation-frontend` package, which has its own selection manager, the single unified selection storage object should be passed to [`Presentation.initialize`](https://www.itwinjs.org/reference/presentation-frontend/core/presentation/initializestatic/) function, e.g.:
+
+```ts
+import { Presentation } from "@itwin/presentation-frontend";
+
+Presentation.initialize({
+  selection: {
+    selectionStorage: getUnifiedSelectionStorage(),
+  },
+});
+```
+
+### Creating schema context
+
+All tree components delivered with the package require a [`SchemaContext`](https://www.itwinjs.org/reference/ecschema-metadata/context/schemacontext/) to be able to access iModels metadata.
+
+Typically, we want one schema context per iModel per application - this allows schema information to be shared across components, saving memory and time required to access the metadata. Below is an example implementation of `getSchemaContext` function, required by tree components:
+
+```ts
+import { IModelConnection } from "@itwin/core-frontend";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
+
+const schemaContextCache = new Map<string, SchemaContext>();
+function getSchemaContext(imodel: IModelConnection) {
+  const key = imodel.getRpcProps().key;
+  let schemaContext = schemaContextCache.get(key);
+  if (!schemaContext) {
+    const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
+    schemaContext = new SchemaContext();
+    schemaContext.addLocater(schemaLocater);
+    schemaContextCache.set(key, schemaContext);
+    imodel.onClose.addOnce(() => schemaContextCache.delete(key));
+  }
+  return schemaContext;
+}
+```
 
 ## Telemetry
 
@@ -306,11 +376,11 @@ UiItemsManager.register(
 For individual tree components the callbacks should be supplied through props:
 
 ```ts
-import { StatelessModelsTreeComponent } from "@itwin/tree-widget-react";
+import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <StatelessModelsTreeComponent
+    <ModelsTreeComponent
       {...otherProps}
       onPerformanceMeasured={(feature, elapsedTime) => {
         console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`)

@@ -31,10 +31,6 @@ import {
   IModelContentTreeComponent,
   ModelsTreeComponent,
   SelectableTreeProps,
-  StatelessCategoriesTreeComponent,
-  StatelessExternalSourcesTreeComponent,
-  StatelessIModelContentTreeComponent,
-  StatelessModelsTreeComponent,
   TreeRenderProps,
   TreeWidget,
   TreeWidgetComponent,
@@ -118,7 +114,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
-                  <StatelessModelsTreeComponent
+                  <ModelsTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
@@ -132,7 +128,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: CategoriesTreeComponent.id,
                 getLabel: () => CategoriesTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
-                  <StatelessCategoriesTreeComponent
+                  <CategoriesTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
@@ -145,7 +141,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: IModelContentTreeComponent.id,
                 getLabel: () => IModelContentTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
-                  <StatelessIModelContentTreeComponent
+                  <IModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
@@ -156,9 +152,10 @@ const configuredUiItems = new Map<string, UiItem>([
               },
               {
                 id: ExternalSourcesTreeComponent.id,
+                startIcon: <SvgTechnicalPreviewMiniBw />,
                 getLabel: () => ExternalSourcesTreeComponent.getLabel(),
                 render: (props: TreeRenderProps) => (
-                  <StatelessExternalSourcesTreeComponent
+                  <ExternalSourcesTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
@@ -166,7 +163,6 @@ const configuredUiItems = new Map<string, UiItem>([
                     onFeatureUsed={props.onFeatureUsed}
                   />
                 ),
-                startIcon: <SvgTechnicalPreviewMiniBw />,
               },
             ];
             return [
