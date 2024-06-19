@@ -40,7 +40,7 @@ import type { ViewManager } from '@itwin/core-frontend';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
-// @beta
+// @public
 export const CategoriesTreeComponent: {
     (props: CategoriesTreeComponentProps): JSX.Element | null;
     ShowAllButton: typeof ShowAllButton_2;
@@ -67,7 +67,7 @@ export const IModelContentTreeComponent: {
     getLabel(): string;
 };
 
-// @beta
+// @public
 export const ModelsTreeComponent: {
     (props: ModelsTreeComponentProps): JSX.Element | null;
     ShowAllButton: typeof ShowAllButton;
@@ -83,6 +83,15 @@ export const ModelsTreeComponent: {
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 
 // @public
+export interface TreeDefinition {
+    getLabel: () => string;
+    id: string;
+    render: (props: TreeRenderProps) => React.ReactNode;
+    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+    startIcon?: React.ReactNode;
+}
+
+// @public
 export class TreeWidget {
     static get i18n(): Localization;
     static get i18nNamespace(): string;
@@ -90,6 +99,9 @@ export class TreeWidget {
     static terminate(): void;
     static translate(key: string | string[], options?: TranslationOptions): string;
 }
+
+// @public
+export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
 
 // (No @packageDocumentation comment for this package)
 

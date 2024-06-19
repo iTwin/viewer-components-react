@@ -30,8 +30,7 @@ import {
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
-  SelectableTreeProps,
-  TreeRenderProps,
+  TreeDefinition,
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
@@ -109,11 +108,11 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const trees = [
+            const trees: TreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
                 getLabel: () => ModelsTreeComponent.getLabel(),
-                render: (props: TreeRenderProps) => (
+                render: (props) => (
                   <ModelsTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
@@ -127,7 +126,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: CategoriesTreeComponent.id,
                 getLabel: () => CategoriesTreeComponent.getLabel(),
-                render: (props: TreeRenderProps) => (
+                render: (props) => (
                   <CategoriesTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
@@ -140,7 +139,7 @@ const configuredUiItems = new Map<string, UiItem>([
               {
                 id: IModelContentTreeComponent.id,
                 getLabel: () => IModelContentTreeComponent.getLabel(),
-                render: (props: TreeRenderProps) => (
+                render: (props) => (
                   <IModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
@@ -154,7 +153,7 @@ const configuredUiItems = new Map<string, UiItem>([
                 id: ExternalSourcesTreeComponent.id,
                 startIcon: <SvgTechnicalPreviewMiniBw />,
                 getLabel: () => ExternalSourcesTreeComponent.getLabel(),
-                render: (props: TreeRenderProps) => (
+                render: (props) => (
                   <ExternalSourcesTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
@@ -282,9 +281,8 @@ const configuredUiItems = new Map<string, UiItem>([
   ],
 ]);
 
-function TreeWidgetWithOptions(props: SelectableTreeProps) {
+function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
   const { density } = useViewerOptionsContext();
-
   return (
     <TreeWidgetComponent
       trees={props.trees}

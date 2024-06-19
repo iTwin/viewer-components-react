@@ -22,7 +22,7 @@ export interface ModelInfo {
 }
 
 /**
- * Props that get passed to [[ModelsTreeComponent]] header button renderer.
+ * Props that get passed to `ModelsTreeComponent` header button renderer.
  * @see ModelTreeComponentProps.headerButtons
  * @public
  */

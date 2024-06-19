@@ -21,7 +21,7 @@ interface ExternalSourcesTreeComponentProps
 }
 
 /**
- * A component that renders [[ExternalSourcesTree]].
+ * A component that renders `ExternalSourcesTree`.
  * @beta
  */
 export const ExternalSourcesTreeComponent = (props: ExternalSourcesTreeComponentProps) => {
@@ -39,13 +39,13 @@ export const ExternalSourcesTreeComponent = (props: ExternalSourcesTreeComponent
 };
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
- * @public
+ * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @beta
  */
 ExternalSourcesTreeComponent.id = "external-sources-tree-v2";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
- * @public
+ * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @beta
  */
 ExternalSourcesTreeComponent.getLabel = () => TreeWidget.translate("externalSourcesTree.label");

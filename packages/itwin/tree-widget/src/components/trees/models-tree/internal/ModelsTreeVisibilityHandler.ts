@@ -92,7 +92,7 @@ interface FilterTargets {
 }
 
 /**
- * Properties for a method of [[ModelsTreeVisibilityHandler]] that can be overridden.
+ * Properties for a method of `ModelsTreeVisibilityHandler` that can be overridden.
  */
 type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
   ? TProps & {
@@ -107,13 +107,13 @@ type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infe
   : never;
 
 /**
- * Function type for an overridden method of [[ModelsTreeVisibilityHandler]].
+ * Function type for an overridden method of `ModelsTreeVisibilityHandler`.
  */
 type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverridableMethodProps<TFunc>) => TResult : never;
 
 /**
- * Functionality of [[ModelsTreeVisibilityHandler]] that can be overridden.
- * Each callback will be provided original implementation and reference to a [[HierarchyVisibilityHandler]].
+ * Functionality of `ModelsTreeVisibilityHandler` that can be overridden.
+ * Each callback will be provided original implementation and reference to a `HierarchyVisibilityHandler`.
  */
 interface VisibilityHandlerOverrides {
   getSubjectNodeVisibility?: OverridableMethod<(props: { ids: Id64Array }) => Promise<VisibilityStatus>>;
@@ -130,7 +130,7 @@ interface VisibilityHandlerOverrides {
 }
 
 /**
- * Properties for [[ModelsTreeVisibilityHandler]].
+ * Properties for `ModelsTreeVisibilityHandler`.
  * @internal
  */
 export interface ModelsTreeVisibilityHandlerProps {
@@ -148,7 +148,7 @@ export interface ModelsTreeVisibilityHandlerProps {
 export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
 
 /**
- * Creates an instance if [[ModelsTreeVisibilityHandler]].
+ * Creates an instance if `ModelsTreeVisibilityHandler`.
  * @internal
  */
 export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): ModelsTreeVisibilityHandler {

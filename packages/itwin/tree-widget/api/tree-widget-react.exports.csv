@@ -1,9 +1,11 @@
 sep=;
 Release Tag;API Item
-beta;CategoriesTreeComponent:
+public;CategoriesTreeComponent:
 public;createTreeWidget(props: TreeWidgetProps): Widget
 beta;ExternalSourcesTreeComponent:
 beta;IModelContentTreeComponent:
-beta;ModelsTreeComponent:
+public;ModelsTreeComponent:
 public;SelectableTree(props: SelectableTreeProps): JSX.Element | null
+public;TreeDefinition
 public;TreeWidget
+public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element

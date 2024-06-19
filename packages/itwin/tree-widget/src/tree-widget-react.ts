@@ -4,6 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 export { TreeWidget } from "./TreeWidget";
-export { createTreeWidget } from "./components/TreeWidgetUiItemsProvider";
-export { SelectableTree } from "./components/SelectableTree";
+export { createTreeWidget, TreeWidgetComponent } from "./components/TreeWidgetUiItemsProvider";
+export { SelectableTree, TreeDefinition } from "./components/SelectableTree";
 export * from "./components/trees";

@@ -22,7 +22,10 @@ export interface TreeRenderProps {
   onFeatureUsed?: (feature: string) => void;
 }
 
-/** Definition of a tree component displayed in `SelectableTree` */
+/**
+ * Definition of a tree component displayed in `SelectableTree`.
+ * @public
+ */
 export interface TreeDefinition {
   /** Id of the tree */
   id: string;

@@ -65,8 +65,9 @@ export function createTreeWidget(props: TreeWidgetProps): Widget {
 
 /**
  * Tree widget component which allows selecting which tree to render.
+ * @public
  */
-function TreeWidgetComponent(props: SelectableTreeProps) {
+export function TreeWidgetComponent(props: SelectableTreeProps) {
   const ref = useTreeTransientState<HTMLDivElement>();
   return (
     <div ref={ref} className="tree-widget">

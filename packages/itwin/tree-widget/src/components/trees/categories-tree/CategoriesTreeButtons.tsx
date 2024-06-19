@@ -13,7 +13,7 @@ import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 
 /**
- * Props that get passed to [[CategoriesTreeComponent]] header button renderer.
+ * Props that get passed to `CategoriesTreeComponent` header button renderer.
  * @see CategoriesTreeComponentProps.headerButtons
  * @public
  */

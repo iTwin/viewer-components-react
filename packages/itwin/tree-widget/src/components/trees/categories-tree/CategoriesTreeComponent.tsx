@@ -41,8 +41,8 @@ interface CategoriesTreeComponentProps
 }
 
 /**
- * A component that renders [[CategoriesTree]] and a header with filtering capabilities and header buttons.
- * @beta
+ * A component that renders `CategoriesTree` and a header with filtering capabilities and header buttons.
+ * @public
  */
 export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
@@ -74,13 +74,13 @@ CategoriesTreeComponent.HideAllButton = HideAllButton;
 CategoriesTreeComponent.InvertAllButton = InvertAllButton;
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
+ * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
 CategoriesTreeComponent.id = "categories-tree-v2";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
+ * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
 CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categoriesTree.label");

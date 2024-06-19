@@ -48,9 +48,10 @@ interface ModelsTreeComponentProps
 }
 
 /**
- * A component that renders [[ModelsTree]] and a header with filtering capabilities
+ * A component that renders `ModelsTree` and a header with filtering capabilities
  * and header buttons.
- * @beta
+ *
+ * @public
  */
 export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
@@ -94,13 +95,13 @@ ModelsTreeComponent.View2DButton = View2DButton;
 ModelsTreeComponent.View3DButton = View3DButton;
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
+ * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
 ModelsTreeComponent.id = "models-tree-v2";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
+ * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
 ModelsTreeComponent.getLabel = () => TreeWidget.translate("modelsTree.label");

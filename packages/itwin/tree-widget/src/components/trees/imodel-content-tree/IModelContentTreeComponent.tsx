@@ -19,7 +19,7 @@ interface IModelContentTreeComponentProps
 }
 
 /**
- * A component that renders [[IModelContentTree]].
+ * A component that renders `IModelContentTree`.
  * @beta
  */
 export const IModelContentTreeComponent = (props: IModelContentTreeComponentProps) => {
@@ -37,13 +37,13 @@ export const IModelContentTreeComponent = (props: IModelContentTreeComponentProp
 };
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
- * @public
+ * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @beta
  */
 IModelContentTreeComponent.id = "imodel-content-tree-v2";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
- * @public
+ * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @beta
  */
 IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContentTree.label");
