@@ -95,29 +95,16 @@ function CategoriesTreeComponentImpl({
   const categories = useCategories(IModelApp.viewManager, iModel, viewport);
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
-
-  const onCategoriesTreeFeatureUsed = (feature: string) => {
-    if (treeProps.onFeatureUsed) {
-      treeProps.onFeatureUsed(`${CategoriesTreeComponent.id}-${feature}`);
-    }
-  };
-
   return (
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
         <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
           {headerButtons
-            ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories, onFeatureUsed: onCategoriesTreeFeatureUsed })}</Fragment>)
+            ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories, onFeatureUsed: treeProps.onFeatureUsed })}</Fragment>)
             : [
-                <ShowAllButton viewport={viewport} categories={categories} key="show-all-btn" density={density} onFeatureUsed={onCategoriesTreeFeatureUsed} />,
-                <HideAllButton viewport={viewport} categories={categories} key="hide-all-btn" density={density} onFeatureUsed={onCategoriesTreeFeatureUsed} />,
-                <InvertAllButton
-                  viewport={viewport}
-                  categories={categories}
-                  key="invert-all-btn"
-                  density={density}
-                  onFeatureUsed={onCategoriesTreeFeatureUsed}
-                />,
+                <ShowAllButton viewport={viewport} categories={categories} key="show-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                <HideAllButton viewport={viewport} categories={categories} key="hide-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                <InvertAllButton viewport={viewport} categories={categories} key="invert-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
               ]}
         </TreeHeader>
         <div className="tw-tree-content">

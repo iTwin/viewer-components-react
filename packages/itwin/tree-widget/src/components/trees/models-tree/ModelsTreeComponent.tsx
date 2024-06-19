@@ -116,13 +116,6 @@ function ModelsTreeComponentImpl({
   const availableModels = useAvailableModels(iModel);
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
-
-  const onModelsTreeFeatureUsed = (feature: string) => {
-    if (treeProps.onFeatureUsed) {
-      treeProps.onFeatureUsed(`${ModelsTreeComponent.id}-${feature}`);
-    }
-  };
-
   return (
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
       <UnifiedSelectionProvider storage={selectionStorage}>
@@ -130,15 +123,15 @@ function ModelsTreeComponentImpl({
           <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
             {headerButtons
               ? headerButtons.map((btn, index) => (
-                  <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed: onModelsTreeFeatureUsed })}</Fragment>
+                  <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed: treeProps.onFeatureUsed })}</Fragment>
                 ))
               : [
-                  <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
-                  <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
-                  <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
-                  <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
-                  <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
-                  <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onModelsTreeFeatureUsed} />,
+                  <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                  <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                  <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                  <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                  <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                  <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
                 ]}
           </TreeHeader>
           <div className="tw-tree-content">
@@ -163,7 +156,7 @@ function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "def
       size={density === "enlarged" ? "large" : "small"}
       title={title}
       onClick={() => {
-        onFeatureUsed?.("instancesfocus");
+        onFeatureUsed?.("models-tree-instancesfocus");
         toggle();
       }}
       isActive={enabled}

@@ -12,6 +12,7 @@ import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, tog
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+
 /**
  * Information about a single Model.
  * @public
@@ -74,7 +75,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("showall");
+        props.onFeatureUsed?.("models-tree-showall");
         void showAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -94,7 +95,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("hideall");
+        props.onFeatureUsed?.("models-tree-hideall");
         void hideAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -114,7 +115,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("invert");
+        props.onFeatureUsed?.("models-tree-invert");
         void invertAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -145,7 +146,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("view2d");
+        props.onFeatureUsed?.("models-tree-view2d");
         void toggleModels(models2d, is2dToggleActive, props.viewport);
       }}
       disabled={models2d.length === 0}
@@ -175,7 +176,7 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
       styleType="borderless"
       title={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("view3d");
+        props.onFeatureUsed?.("models-tree-view3d");
         void toggleModels(models3d, is3dToggleActive, props.viewport);
       }}
       disabled={models3d.length === 0}

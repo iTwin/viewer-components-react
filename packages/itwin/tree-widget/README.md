@@ -345,6 +345,7 @@ This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeCompo
 - `"models-tree-invert"` - when "Invert" button is used in `ModelsTreeComponent`.
 - `"models-tree-view2d"` - when "Toggle 2D Views" button is used in `ModelsTreeComponent`.
 - `"models-tree-view3d"` - when "Toggle 3D Views" button is used in `ModelsTreeComponent`.
+- `"models-tree-instancesfocus"` - when "Instances focus mode" toggle button is used in `ModelsTreeComponent`.
 - `"models-tree-zoom-to-node"` - when node is zoomed to in `ModelsTree`.
 - `"models-tree-filtering"` - when a filter is applied in `ModelsTree`.
 - `"models-tree-hierarchy-level-filtering"` - when a hierarchy level filter is applied in the `ModelsTree`.
