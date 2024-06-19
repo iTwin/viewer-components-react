@@ -1,5 +1,5 @@
 {
-  "type": "minor",
+  "type": "patch",
   "comment": "Added a loading indicator when matching instances count is being calculated in hierarchy level filtering dialog.",
   "packageName": "@itwin/tree-widget-react",
   "email": "33428304+jasdom@users.noreply.github.com",
