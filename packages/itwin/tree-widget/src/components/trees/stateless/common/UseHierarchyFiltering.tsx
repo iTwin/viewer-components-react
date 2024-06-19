@@ -19,6 +19,7 @@ import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
 import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
 import type { HierarchyLevelDetails } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
+
 interface UseHierarchyLevelFilteringProps {
   imodel: IModelConnection;
   defaultHierarchyLevelSizeLimit: number;
