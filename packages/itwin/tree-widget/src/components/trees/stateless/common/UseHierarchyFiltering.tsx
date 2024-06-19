@@ -11,6 +11,7 @@ import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@i
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../../TreeWidget";
+import { Delayed } from "./components/Delayed";
 
 import type { UsageTrackedFeatures } from "../../common/UseFeatureReporting";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -18,7 +19,6 @@ import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
 import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
 import type { HierarchyLevelDetails } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
-
 interface UseHierarchyLevelFilteringProps {
   imodel: IModelConnection;
   defaultHierarchyLevelSizeLimit: number;
@@ -145,10 +145,10 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
 
   if (isLoading) {
     return (
-      <>
+      <Delayed show={true}>
         {TreeWidget.translate("stateless.matchingInstancesCount", { instanceCount: "" })}
         <ProgressRadial size="x-small" />
-      </>
+      </Delayed>
     );
   }
 
