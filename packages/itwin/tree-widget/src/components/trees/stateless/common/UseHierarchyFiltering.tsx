@@ -118,12 +118,10 @@ interface MatchingInstancesCountProps {
 }
 
 function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierarchyLevelDetails }: MatchingInstancesCountProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { value } = useDebouncedAsyncValue(
+  const { value, inProgress } = useDebouncedAsyncValue(
     useCallback(async () => {
       const instanceFilter = toGenericFilter(filter);
       try {
-        setIsLoading(true);
         const instanceKeys = await collectInstanceKeys(
           hierarchyLevelDetails.getInstanceKeysIterator({
             instanceFilter,
@@ -138,13 +136,11 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
           return TreeWidget.translate("stateless.filterExceedsLimit", { limit: e.limit.toLocaleString(undefined, { useGrouping: true }) });
         }
         return TreeWidget.translate("stateless.failedToCalculateMatchingInstances");
-      } finally {
-        setIsLoading(false);
       }
     }, [filter, hierarchyLevelDetails, defaultHierarchyLevelSizeLimit]),
   );
 
-  if (isLoading) {
+  if (inProgress) {
     return (
       <Delayed show={true}>
         {TreeWidget.translate("stateless.matchingInstancesCount", { instanceCount: "" })}
