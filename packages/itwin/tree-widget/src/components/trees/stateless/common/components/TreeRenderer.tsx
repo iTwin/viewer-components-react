@@ -16,7 +16,6 @@ interface TreeRendererOwnProps {
   rootNodes: PresentationTreeNode[];
   isNodeSelected: (nodeId: string) => boolean;
   onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
-  nodeHeight?: number;
 }
 
 type TreeRendererProps = Pick<
@@ -42,7 +41,6 @@ export function TreeRenderer({
   getHierarchyLevelDetails,
   checkboxProps,
   localizedStrings,
-  nodeHeight,
   ...props
 }: TreeRendererProps) {
   const nodeRenderer = useCallback<TreeProps<RenderedTreeNode>["nodeRenderer"]>(
@@ -50,7 +48,6 @@ export function TreeRenderer({
       return (
         <TreeNodeRenderer
           {...nodeProps}
-          nodeProps={nodeHeight ? { style: { height: `${nodeHeight}px` } } : undefined}
           onNodeClick={(node, isSelected, event) => {
             if (onNodeDoubleClick && event.detail === 2) {
               onNodeDoubleClick?.(node, !!nodeProps.isSelected);
@@ -67,22 +64,11 @@ export function TreeRenderer({
           onFilterClick={onFilterClick}
           getHierarchyLevelDetails={getHierarchyLevelDetails}
           checkboxProps={checkboxProps}
+          className={getSublabel ? "with-description" : "without-description"}
         />
       );
     },
-    [
-      expandNode,
-      onNodeClick,
-      onNodeKeyDown,
-      onNodeDoubleClick,
-      getHierarchyLevelDetails,
-      getIcon,
-      getLabel,
-      getSublabel,
-      onFilterClick,
-      checkboxProps,
-      nodeHeight,
-    ],
+    [expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, getHierarchyLevelDetails, getIcon, getLabel, getSublabel, onFilterClick, checkboxProps],
   );
 
   const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);

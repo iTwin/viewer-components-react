@@ -164,7 +164,6 @@ export function StatelessModelsTree({
       reportUsage={reportUsage}
       onNodeDoubleClick={onNodeDoubleClick}
       searchText={filter}
-      nodeHeight={36}
     />
   );
 }
