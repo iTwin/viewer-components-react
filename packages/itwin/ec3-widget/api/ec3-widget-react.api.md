@@ -12,10 +12,12 @@ import type { IEC3ConfigurationsClient } from '@itwin/insights-client';
 import type { IEC3JobsClient } from '@itwin/insights-client';
 import type { IOdataClient } from '@itwin/insights-client';
 import type { IReportsClient } from '@itwin/insights-client';
+import type { Localization } from '@itwin/core-common';
 import { default as React_2 } from 'react';
 import type { Report } from '@itwin/insights-client';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
+import type { TranslationOptions } from '@itwin/core-common';
 import type { UiItemsProvider } from '@itwin/appui-react';
 import type { Widget } from '@itwin/appui-react';
 
@@ -43,6 +45,8 @@ export interface EC3ConfigCommonProps {
     getAccessToken?: GetAccessTokenFn;
     // (undocumented)
     iTwinId: string;
+    // (undocumented)
+    localizedStrings?: useEC3WidgetLocalizationResult;
     oDataClient?: IOdataClient;
     reportingBasePath?: string;
     reportsClient?: IReportsClient;
@@ -88,6 +92,17 @@ export interface EC3Token {
     token: string;
 }
 
+// @beta
+export class EC3WidgetUI {
+    static initialize(config?: EC3WidgetConfig): Promise<void>;
+    // (undocumented)
+    static localization: Localization;
+    static get localizationNamespace(): string;
+    static terminate(): void;
+    // (undocumented)
+    static translate(key: string | string[], options?: TranslationOptions): string;
+}
+
 // @public
 export type GetAccessTokenFn = () => Promise<AccessToken>;
 
@@ -100,6 +115,8 @@ export const TemplateMenu: (props: TemplateMenuProps) => JSX.Element;
 // @beta
 export interface TemplateMenuProps {
     // (undocumented)
+    localizedStrings?: useEC3WidgetLocalizationResult;
+    // (undocumented)
     onClickCancel: () => void;
     // (undocumented)
     onSaveSuccess: () => void;
@@ -110,13 +127,15 @@ export interface TemplateMenuProps {
 // @beta
 export interface TemplateProps {
     // (undocumented)
+    localizedStrings?: useEC3WidgetLocalizationResult;
+    // (undocumented)
     onClickCreate?: () => void;
     // (undocumented)
     onClickTemplateTitle?: (template: Configuration) => void;
 }
 
 // @beta
-export const Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element;
+export const Templates: ({ onClickCreate, onClickTemplateTitle, localizedStrings }: TemplateProps) => JSX.Element;
 
 
 export * from "@itwin/insights-client";

@@ -63,6 +63,9 @@ export interface EC3ConfigCommonProps {
    */
   ec3ConfigurationsClient?: IEC3ConfigurationsClient;
 
+  /**
+   * A custom implementation of useEC3WidgetLocalizationResult. If provided, corresponding default strings will ignored.
+   */
   localizedStrings?: useEC3WidgetLocalizationResult;
 }
 
