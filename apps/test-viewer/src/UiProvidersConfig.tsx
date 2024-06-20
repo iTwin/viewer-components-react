@@ -2,8 +2,8 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
-import { SelectionMode } from "@itwin/components-react";
 import { IModelConnection } from "@itwin/core-frontend";
 import { EC3Provider } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
@@ -30,12 +30,7 @@ import {
   ExternalSourcesTreeComponent,
   IModelContentTreeComponent,
   ModelsTreeComponent,
-  SelectableTreeProps,
-  StatelessCategoriesTreeComponent,
-  StatelessExternalSourcesTreeComponent,
-  StatelessIModelContentTreeComponent,
-  StatelessModelsTreeComponent,
-  TreeRenderProps,
+  TreeDefinition,
   TreeWidget,
   TreeWidgetComponent,
 } from "@itwin/tree-widget-react";
@@ -113,63 +108,12 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "TreeWidgetUIProvider",
           getWidgets: () => {
-            const trees = [
+            const trees: TreeDefinition[] = [
               {
                 id: ModelsTreeComponent.id,
-                getLabel: ModelsTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
+                getLabel: () => ModelsTreeComponent.getLabel(),
+                render: (props) => (
                   <ModelsTreeComponent
-                    selectionPredicate={() => true}
-                    selectionMode={SelectionMode.Multiple}
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-              },
-              {
-                id: CategoriesTreeComponent.id,
-                getLabel: CategoriesTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
-                  <CategoriesTreeComponent
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-              },
-              {
-                id: IModelContentTreeComponent.id,
-                getLabel: IModelContentTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
-                  <IModelContentTreeComponent
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-              },
-              {
-                id: ExternalSourcesTreeComponent.id,
-                getLabel: ExternalSourcesTreeComponent.getLabel,
-                render: (props: TreeRenderProps) => (
-                  <ExternalSourcesTreeComponent
-                    hierarchyLevelConfig={{ isFilteringEnabled: true }}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                    density={props.density}
-                  />
-                ),
-                startIcon: <SvgTechnicalPreviewMiniBw />,
-              },
-              {
-                id: `stateless-${ModelsTreeComponent.id}`,
-                getLabel: () => `${ModelsTreeComponent.getLabel()} (Beta)`,
-                render: (props: TreeRenderProps) => (
-                  <StatelessModelsTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
@@ -180,10 +124,10 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
-                id: `stateless-${CategoriesTreeComponent.id}`,
-                getLabel: () => `${CategoriesTreeComponent.getLabel()} (Beta)`,
-                render: (props: TreeRenderProps) => (
-                  <StatelessCategoriesTreeComponent
+                id: CategoriesTreeComponent.id,
+                getLabel: () => CategoriesTreeComponent.getLabel(),
+                render: (props) => (
+                  <CategoriesTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
@@ -193,10 +137,10 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
-                id: `stateless-${IModelContentTreeComponent.id}`,
-                getLabel: () => `${IModelContentTreeComponent.getLabel()} (Beta)`,
-                render: (props: TreeRenderProps) => (
-                  <StatelessIModelContentTreeComponent
+                id: IModelContentTreeComponent.id,
+                getLabel: () => IModelContentTreeComponent.getLabel(),
+                render: (props) => (
+                  <IModelContentTreeComponent
                     getSchemaContext={getSchemaContext}
                     density={props.density}
                     selectionStorage={unifiedSelectionStorage}
@@ -206,31 +150,32 @@ const configuredUiItems = new Map<string, UiItem>([
                 ),
               },
               {
-                id: `stateless-${ExternalSourcesTreeComponent.id}`,
-                getLabel: () => `${ExternalSourcesTreeComponent.getLabel()} (Beta)`,
-                render: (props: TreeRenderProps) => (
-                  <StatelessExternalSourcesTreeComponent
-                    getSchemaContext={getSchemaContext}
-                    density={props.density}
-                    selectionStorage={unifiedSelectionStorage}
-                    onPerformanceMeasured={props.onPerformanceMeasured}
-                    onFeatureUsed={props.onFeatureUsed}
-                  />
-                ),
+                id: ExternalSourcesTreeComponent.id,
                 startIcon: <SvgTechnicalPreviewMiniBw />,
+                getLabel: () => ExternalSourcesTreeComponent.getLabel(),
+                render: (props) => (
+                  <ExternalSourcesTreeComponent
+                    getSchemaContext={getSchemaContext}
+                    density={props.density}
+                    selectionStorage={unifiedSelectionStorage}
+                    onPerformanceMeasured={props.onPerformanceMeasured}
+                    onFeatureUsed={props.onFeatureUsed}
+                  />
+                ),
               },
             ];
             return [
               {
                 id: "tree-widget",
+                label: TreeWidget.translate("widget.label"),
                 icon: <SvgHierarchyTree />,
-                content: <TreeWidgetWithOptions trees={trees} />,
                 layouts: {
                   standard: {
                     section: StagePanelSection.Start,
                     location: StagePanelLocation.Right,
                   },
                 },
+                content: <TreeWidgetWithOptions trees={trees} />,
               },
             ];
           },
@@ -297,7 +242,11 @@ const configuredUiItems = new Map<string, UiItem>([
     "grouping-mapping-widget",
     {
       initialize: async () => Promise.resolve(),
-      createUiItemsProviders: () => [new GroupingMappingProvider({ prefix: import.meta.env.IMJS_URL_PREFIX ? `${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix : undefined })],
+      createUiItemsProviders: () => [
+        new GroupingMappingProvider({
+          prefix: import.meta.env.IMJS_URL_PREFIX ? (`${import.meta.env.IMJS_URL_PREFIX}`.slice(0, -1) as ClientPrefix) : undefined,
+        }),
+      ],
     },
   ],
   [
@@ -332,9 +281,8 @@ const configuredUiItems = new Map<string, UiItem>([
   ],
 ]);
 
-function TreeWidgetWithOptions(props: SelectableTreeProps) {
+function TreeWidgetWithOptions(props: { trees: TreeDefinition[] }) {
   const { density } = useViewerOptionsContext();
-
   return (
     <TreeWidgetComponent
       trees={props.trees}

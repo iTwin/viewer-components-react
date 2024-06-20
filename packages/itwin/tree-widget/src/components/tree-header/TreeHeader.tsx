@@ -9,7 +9,7 @@ import { Children, useEffect, useRef, useState } from "react";
 import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, Divider, DropdownMenu, IconButton, SearchBox } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../TreeWidget";
-import { useFocusedInstancesContext } from "../trees/stateless/common/FocusedInstancesContext";
+import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesContext";
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { CommonProps } from "@itwin/core-react";
@@ -132,14 +132,14 @@ function DebouncedSearchBox({
     >
       <SearchBox.CollapsedState>
         <SearchBox.ExpandButton
-          title={TreeWidget.translate("searchBox.searchForSomething")}
-          aria-label={TreeWidget.translate("searchBox.open")}
+          title={TreeWidget.translate("header.searchBox.searchForSomething")}
+          aria-label={TreeWidget.translate("header.searchBox.open")}
           size={size}
           styleType="borderless"
         />
       </SearchBox.CollapsedState>
       <SearchBox.ExpandedState>
-        <SearchBox.Input placeholder={TreeWidget.translate("searchBox.search")} onChange={(e) => setInputValue(e.currentTarget.value)} />
+        <SearchBox.Input placeholder={TreeWidget.translate("header.searchBox.search")} onChange={(e) => setInputValue(e.currentTarget.value)} />
         <SearchResultStepper selectedIndex={selectedResultIndex} total={resultCount} onStep={onSelectedResultChanged} size={size} />
         <SearchBox.CollapseButton
           onClick={() => {
@@ -147,7 +147,7 @@ function DebouncedSearchBox({
             onClose();
           }}
           size={size}
-          aria-label={TreeWidget.translate("searchBox.close")}
+          aria-label={TreeWidget.translate("header.searchBox.close")}
         />
       </SearchBox.ExpandedState>
     </SearchBox>
@@ -179,7 +179,7 @@ function HeaderButtons(props: HeaderButtonsProps) {
           }
           className="tree-header-button-dropdown-container"
         >
-          <IconButton title={TreeWidget.translate("dropdownMore")} styleType="borderless" size={props.size}>
+          <IconButton title={TreeWidget.translate("header.dropdownMore")} styleType="borderless" size={props.size}>
             <SvgMore />
           </IconButton>
         </DropdownMenu>
@@ -208,7 +208,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
       <span className="searchbox-stepping-count">{`${selectedIndex}/${total}`}</span>
       <Divider orientation="vertical" />
       <SearchBox.Button
-        title={TreeWidget.translate("searchBox.previous")}
+        title={TreeWidget.translate("header.searchBox.previous")}
         size={props.size}
         onClick={() => {
           if (selectedIndex > 1) {
@@ -219,7 +219,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         <SvgCaretUpSmall />
       </SearchBox.Button>
       <SearchBox.Button
-        title={TreeWidget.translate("searchBox.next")}
+        title={TreeWidget.translate("header.searchBox.next")}
         size={props.size}
         onClick={() => {
           if (selectedIndex < total) {
