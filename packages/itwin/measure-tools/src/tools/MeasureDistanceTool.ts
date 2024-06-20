@@ -34,6 +34,7 @@ MeasureDistanceToolModel
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
   private _enableSheetMeasurements: boolean;
+  private _drawingTypeCache?: SheetMeasurementsHelper.DrawingTypeData;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -58,6 +59,26 @@ MeasureDistanceToolModel
   constructor(enableSheetMeasurements = false) {
     super();
     this._enableSheetMeasurements = enableSheetMeasurements;
+  }
+
+  private async updateDrawingTypeCache() {
+    const sheetIds = [];
+    if (this._enableSheetMeasurements) {
+      for (const viewport of IModelApp.viewManager) {
+        if (viewport.view.classFullName === "BisCore:SheetViewDefinition") {
+          sheetIds.push(viewport.view.id);
+        }
+      }
+    }
+
+    for (const id of sheetIds) {
+      const list = await SheetMeasurementsHelper.getSheetTypes(this.iModel, id);
+      console.log(list);
+    }
+  }
+
+  public override async onPostInstall(): Promise<void> {
+    await this.updateDrawingTypeCache();
   }
 
   public async onRestartTool(): Promise<void> {

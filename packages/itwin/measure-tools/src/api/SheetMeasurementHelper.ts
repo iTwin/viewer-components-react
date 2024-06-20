@@ -13,17 +13,29 @@ import type { DrawingMetadata } from "./Measurement";
 
 export namespace SheetMeasurementsHelper {
 
+  export enum DrawingType {
+    CrossSection = 3,
+    Profile = 5,
+    Plan = 6
+  }
+
   export interface SheetTransformProps {
     masterOrigin: Point3d;
     sheetTov8Drawing: Transform;
     v8DrawingToDesign: Transform;
   }
 
+  export interface DrawingTypeData {
+    origin: Point2d;
+    extents: Point2d;
+    type: DrawingType;
+  }
+
   /**
    * @param imodel
    * @param id SheetViewDefinition ID
    * @param mousePos position of the mouse click
-   * @returns Id of the clicked on drawing
+   * @returns Drawing metadata
    */
   export async function getDrawingId(imodel: IModelConnection, id: string, mousePos: Point3d): Promise<DrawingMetadata | undefined> {
     const { ecsql, parameters } = getDrawingInfoECSQL(id);
@@ -104,5 +116,29 @@ export namespace SheetMeasurementsHelper {
     const adjustedDrawingPoint = new Point3d(drawingPoint.x, drawingPoint.y, transform.masterOrigin.z);
     const final3dPoint = transform.v8DrawingToDesign.multiplyPoint3d(adjustedDrawingPoint);
     return final3dPoint;
+  }
+
+  export async function getSheetTypes(imodel: IModelConnection, id: string) {
+    const { ecsql, parameters } = getDrawingInfoECSQL(id);
+
+    if (imodel.isBlank) {
+      return [];
+    }
+
+    const iter = imodel.createQueryReader(ecsql, QueryBinder.from(parameters));
+
+    const result = [];
+
+    for await (const row of iter) {
+      const jsonProp = JSON.parse(row[3]);
+      if (jsonProp.civilimodelconn) {
+        const origin = new Point2d(row[1].X, row[1].Y);
+        const extents = new Point2d(row[2].X, row[2].Y);
+        const viewType = jsonProp.civilimodelconn.viewType;
+        result.push({origin, extents, viewType});
+      }
+    }
+
+    return result;
   }
 }
