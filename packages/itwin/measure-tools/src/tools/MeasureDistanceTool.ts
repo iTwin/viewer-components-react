@@ -34,7 +34,8 @@ MeasureDistanceToolModel
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
   private _enableSheetMeasurements: boolean;
-  private _drawingTypeCache?: SheetMeasurementsHelper.DrawingTypeData;
+  private _drawingTypeCache: SheetMeasurementsHelper.DrawingTypeData[] = [];
+  private _sheetChangeListener: () => void = () => {};
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -62,18 +63,19 @@ MeasureDistanceToolModel
   }
 
   private async updateDrawingTypeCache() {
+    this._sheetChangeListener();
     const sheetIds = [];
     if (this._enableSheetMeasurements) {
       for (const viewport of IModelApp.viewManager) {
         if (viewport.view.classFullName === "BisCore:SheetViewDefinition") {
+          this._sheetChangeListener = viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache());
           sheetIds.push(viewport.view.id);
         }
       }
     }
 
     for (const id of sheetIds) {
-      const list = await SheetMeasurementsHelper.getSheetTypes(this.iModel, id);
-      console.log(list);
+      this._drawingTypeCache = await SheetMeasurementsHelper.getSheetTypes(this.iModel, id);
     }
   }
 
@@ -137,7 +139,18 @@ MeasureDistanceToolModel
   }
 
   public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
-    if (!this._enableSheetMeasurements || this.toolModel.drawingMetadata?.drawingId === undefined || this.toolModel.drawingMetadata?.origin === undefined || this.toolModel.drawingMetadata?.extents === undefined)
+    if (!this._enableSheetMeasurements)
+      return true;
+
+    for (const drawing of this._drawingTypeCache) {
+      if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
+        if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
+          return false;
+        }
+      }
+    }
+
+    if (this.toolModel.drawingMetadata?.drawingId === undefined || this.toolModel.drawingMetadata?.origin === undefined || this.toolModel.drawingMetadata?.extents === undefined)
       return true;
 
     return SheetMeasurementsHelper.checkIfInDrawing(ev.point, this.toolModel.drawingMetadata?.origin, this.toolModel.drawingMetadata?.extents);

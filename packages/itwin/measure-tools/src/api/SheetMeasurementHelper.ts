@@ -118,7 +118,7 @@ export namespace SheetMeasurementsHelper {
     return final3dPoint;
   }
 
-  export async function getSheetTypes(imodel: IModelConnection, id: string) {
+  export async function getSheetTypes(imodel: IModelConnection, id: string): Promise<DrawingTypeData[]> {
     const { ecsql, parameters } = getDrawingInfoECSQL(id);
 
     if (imodel.isBlank) {
@@ -135,7 +135,7 @@ export namespace SheetMeasurementsHelper {
         const origin = new Point2d(row[1].X, row[1].Y);
         const extents = new Point2d(row[2].X, row[2].Y);
         const viewType = jsonProp.civilimodelconn.viewType;
-        result.push({origin, extents, viewType});
+        result.push({origin, extents, type: viewType});
       }
     }
 
