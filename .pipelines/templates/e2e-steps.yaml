@@ -26,6 +26,9 @@ steps:
       IMJS_AUTH_CLIENT_CLIENT_ID: $(IMJS_AUTH_CLIENT_CLIENT_ID)
       IMJS_USER_EMAIL: $(IMJS_USER_EMAIL)
       IMJS_USER_PASSWORD: $(IMJS_USER_PASSWORD)
+    # job timeout is 60 minutes - make this timeout sooner to allow for publishing artifacts, which
+    # may help us find out why the timeout occurs
+    timeoutInMinutes: 45
 
   - publish: $(System.DefaultWorkingDirectory)/packages/itwin/tree-widget/test-results
     artifact: TreeWidgetE2ETestResults
