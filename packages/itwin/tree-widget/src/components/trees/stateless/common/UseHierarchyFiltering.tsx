@@ -3,22 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useMemo, useState } from "react";
 import { useDebouncedAsyncValue } from "@itwin/components-react";
+import { CompressedId64Set } from "@itwin/core-bentley";
 import { ProgressRadial } from "@itwin/itwinui-react";
 import { DefaultContentDisplayTypes, KeySet } from "@itwin/presentation-common";
 import { PresentationInstanceFilter, PresentationInstanceFilterDialog } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
+import { useCallback, useMemo, useState } from "react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { Delayed } from "./components/Delayed";
 
-import type { UsageTrackedFeatures } from "../../common/UseFeatureReporting";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
 import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
 import type { HierarchyLevelDetails } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
+import type { UsageTrackedFeatures } from "../../common/UseFeatureReporting";
 
 interface UseHierarchyLevelFilteringProps {
   imodel: IModelConnection;
@@ -36,8 +38,8 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
     }
 
     return async () => {
-      const inputKeys = await collectInstanceKeys(filteringOptions.getInstanceKeysIterator());
-      if (inputKeys.length === 0) {
+      const keySet = await collectInstanceKeys(filteringOptions.getInstanceKeysIterator());
+      if (keySet.isEmpty) {
         throw new Error("Hierarchy level is empty - unable to create content descriptor.");
       }
 
@@ -57,13 +59,13 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
           ],
         },
         displayType: DefaultContentDisplayTypes.PropertyPane,
-        keys: new KeySet(inputKeys),
+        keys: keySet,
       });
       if (!descriptor) {
         throw new Error("Failed to create content descriptor");
       }
 
-      return { descriptor, inputKeys };
+      return { descriptor, inputKeys: keySet };
     };
   }, [filteringOptions, imodel]);
 
@@ -122,14 +124,14 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
     useCallback(async () => {
       const instanceFilter = toGenericFilter(filter);
       try {
-        const instanceKeys = await collectInstanceKeys(
+        const instanceCount = await countInstanceKeys(
           hierarchyLevelDetails.getInstanceKeysIterator({
             instanceFilter,
             hierarchyLevelSizeLimit: hierarchyLevelDetails.sizeLimit ?? defaultHierarchyLevelSizeLimit,
           }),
         );
         return TreeWidget.translate("stateless.matchingInstancesCount", {
-          instanceCount: instanceKeys.length.toLocaleString(undefined, { useGrouping: true }),
+          instanceCount: instanceCount.toLocaleString(undefined, { useGrouping: true }),
         });
       } catch (e) {
         if (e instanceof RowsLimitExceededError) {
@@ -152,12 +154,30 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
   return value ? <>{value}</> : null;
 }
 
-async function collectInstanceKeys(iterator: AsyncIterableIterator<InstanceKey>) {
-  const inputKeys = [];
-  for await (const inputKey of iterator) {
-    inputKeys.push(inputKey);
+async function countInstanceKeys(iterator: AsyncIterableIterator<InstanceKey>) {
+  let result = 0;
+  for await (const _ of iterator) {
+    result++;
   }
-  return inputKeys;
+  return result;
+}
+
+async function collectInstanceKeys(iterator: AsyncIterableIterator<InstanceKey>) {
+  const idsByClassName = new Map<Id64String, Id64Array>();
+  for await (const { className, id } of iterator) {
+    let idSet = idsByClassName.get(className);
+    if (!idSet) {
+      idSet = [];
+      idsByClassName.set(className, idSet);
+    }
+    idSet.push(id);
+  }
+
+  const instanceKeys = new Array<[className: string, compressedIds: CompressedId64Set]>();
+  for (const [className, ids] of idsByClassName) {
+    instanceKeys.push([className.toLowerCase(), CompressedId64Set.sortAndCompress(ids)]);
+  }
+  return KeySet.fromJSON({ instanceKeys, nodeKeys: [] });
 }
 
 function fromGenericFilter(descriptor: Descriptor, filter: GenericInstanceFilter): PresentationInstanceFilterInfo {
