@@ -378,6 +378,47 @@ test.describe("tree widget", () => {
         await page.locator(".tree-header-button-dropdown-container").waitFor();
         await takeScreenshot(page, treeWidget);
       });
+
+      test("shows outlines when focused using keyboard", async ({ page }) => {
+        // shrink panel
+        await expandStagePanel(page, "right", -100);
+
+        // select node to show selected outline
+        const node = locateNode(treeWidget, "ProcessPhysicalModel");
+        await node.click();
+
+        // wait for node to become selected
+        await expect(node).toHaveAttribute("aria-selected", "true");
+
+        // focus on checkbox using keyboard
+        await page.keyboard.press("Tab");
+
+        // ensure checkbox is focused
+        const checkbox = node.getByTitle("Visible: All categories visible");
+        await expect(checkbox).toBeFocused();
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // scroll to the right side
+        await page.mouse.wheel(10000, 0);
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // focus on expander
+        await page.keyboard.press("Tab");
+        const expander = node.getByLabel("Expand");
+        await expect(expander).toBeFocused();
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // navigate back to focus on the already selected node
+        await page.keyboard.press("ArrowUp");
+        await page.keyboard.press("ArrowDown");
+
+        await expect(node).toBeFocused();
+        await expect(node).toHaveAttribute("aria-selected", "true");
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+      });
     });
   };
 
@@ -472,6 +513,43 @@ test.describe("tree widget", () => {
         await treeWidget.getByTitle("More").click();
         await page.locator(".tree-header-button-dropdown-container").waitFor();
         await takeScreenshot(page, treeWidget);
+      });
+
+      test("shows outlines when focused using keyboard", async ({ page }) => {
+        // shrink panel
+        await expandStagePanel(page, "right", -100);
+
+        // click to focus on node
+        const node = locateNode(treeWidget, "Equipment");
+        await node.click();
+
+        // focus on checkbox using keyboard
+        await page.keyboard.press("Tab");
+
+        // ensure checkbox is focused
+        const checkbox = node.locator(".tw-tree-node-checkbox");
+        await expect(checkbox).toBeFocused();
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // scroll to the right side
+        await page.mouse.wheel(10000, 0);
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // focus on expander
+        await page.keyboard.press("Tab");
+        const expander = node.getByLabel("Expand");
+        await expect(expander).toBeFocused();
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // navigate back to focus on the already selected node
+        await page.keyboard.press("ArrowUp");
+        await page.keyboard.press("ArrowDown");
+
+        await expect(node).toBeFocused();
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
       });
     });
   };

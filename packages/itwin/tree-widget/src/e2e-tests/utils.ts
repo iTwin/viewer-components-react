@@ -40,8 +40,38 @@ export const expandStagePanel = async (page: Page, side: PanelSide, px: number) 
   await page.mouse.up();
 };
 
-export async function takeScreenshot(page: Page, component: Locator) {
-  const boundingBox = await component.boundingBox();
-  assert(boundingBox);
-  await expect(page).toHaveScreenshot({ clip: boundingBox });
+export async function takeScreenshot(
+  page: Page,
+  component: Locator,
+  expandBy?: { top?: number; right?: number; bottom?: number; left?: number },
+  boundingComponent?: Locator,
+) {
+  const boundingBox = await getBoundedBoundingBox(component, boundingComponent);
+  const expansion = { ...{ top: 0, right: 0, bottom: 0, left: 0 }, ...expandBy };
+  const clip = {
+    x: boundingBox.x - expansion.left,
+    y: boundingBox.y - expansion.top,
+    width: boundingBox.width + expansion.left + expansion.right,
+    height: boundingBox.height + expansion.top + expansion.bottom,
+  };
+
+  await expect(page).toHaveScreenshot({ clip });
+}
+
+async function getBoundedBoundingBox(component: Locator, boundingComponent?: Locator) {
+  const box = await component.boundingBox();
+  assert(box);
+
+  if (boundingComponent) {
+    const bounds = await boundingComponent.boundingBox();
+    assert(bounds);
+    return {
+      x: Math.max(box.x, bounds.x),
+      y: Math.max(box.y, bounds.y),
+      width: box.width - Math.max(0, box.x + box.width - (bounds.x + bounds.width)),
+      height: box.height - Math.max(0, box.y + box.height - (bounds.y + bounds.height)),
+    };
+  }
+
+  return box;
 }
