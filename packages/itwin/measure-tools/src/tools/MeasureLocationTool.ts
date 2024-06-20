@@ -46,6 +46,8 @@ MeasureLocationToolModel
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
   private _enableSheetMeasurements: boolean;
+  private _drawingTypeCache: SheetMeasurementsHelper.DrawingTypeData[] = [];
+  private _sheetChangeListener: () => void = () => {};
 
   private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
@@ -75,11 +77,32 @@ MeasureLocationToolModel
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
+  private async updateDrawingTypeCache() {
+    this._sheetChangeListener();
+    const sheetIds = [];
+    if (this._enableSheetMeasurements) {
+      for (const viewport of IModelApp.viewManager) {
+        if (viewport.view.classFullName === "BisCore:SheetViewDefinition") {
+          this._sheetChangeListener = viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache());
+          sheetIds.push(viewport.view.id);
+        }
+      }
+    }
+
+    for (const id of sheetIds) {
+      this._drawingTypeCache = await SheetMeasurementsHelper.getSheetTypes(this.iModel, id);
+    }
+  }
+
   public async onRestartTool(): Promise<void> {
     const tool = new MeasureLocationTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
+  }
+
+  public override async onPostInstall(): Promise<void> {
+    await this.updateDrawingTypeCache();
   }
 
   public override async onDataButtonDown(
@@ -142,6 +165,21 @@ MeasureLocationToolModel
 
   protected createToolModel(): MeasureLocationToolModel {
     return new MeasureLocationToolModel();
+  }
+
+  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+    if (!this._enableSheetMeasurements)
+      return true;
+
+    for (const drawing of this._drawingTypeCache) {
+      if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
+        if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   protected async requestSnap(
