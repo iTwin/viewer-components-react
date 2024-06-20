@@ -45,7 +45,6 @@ export interface EC3ConfigCommonProps {
     getAccessToken?: GetAccessTokenFn;
     // (undocumented)
     iTwinId: string;
-    // (undocumented)
     localizedStrings?: useEC3WidgetLocalizationResult;
     oDataClient?: IOdataClient;
     reportingBasePath?: string;
