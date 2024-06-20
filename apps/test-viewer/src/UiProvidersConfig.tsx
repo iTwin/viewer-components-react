@@ -167,7 +167,7 @@ const configuredUiItems = new Map<string, UiItem>([
             return [
               {
                 id: "tree-widget",
-                label: TreeWidget.translate("treeview"),
+                label: TreeWidget.translate("widget.label"),
                 icon: <SvgHierarchyTree />,
                 layouts: {
                   standard: {
