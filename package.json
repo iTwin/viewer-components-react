@@ -12,7 +12,7 @@
     "build": "lage build --grouped",
     "cover": "lage cover --grouped --continue",
     "test": "lage test --grouped --continue",
-    "test:e2e": "lage test:e2e --grouped --continue",
+    "test:e2e": "lage test:e2e --continue",
     "lint": "lage lint --grouped --continue",
     "clean": "lage clean --grouped --continue",
     "extract-api": "lage extract-api --grouped --continue",
