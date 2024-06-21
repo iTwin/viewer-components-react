@@ -10,8 +10,7 @@ import { useApiContext } from "./context/APIContext";
 import { TemplateModificationStepRenderer } from "./TemplateModificationStepRenderer";
 import type { Report } from "@itwin/insights-client";
 import "./TemplateMenu.scss";
-import type { useEC3WidgetLocalizationResult } from "../common/UseEC3WidgetLocalization";
-import { useEC3WidgetLocalization } from "../common/UseEC3WidgetLocalization";
+import { EC3Widget } from "../EC3Widget";
 /**
  * Props for {@link TemplateMenu}
  * @beta
@@ -20,7 +19,6 @@ export interface TemplateMenuProps {
   template?: Configuration;
   onSaveSuccess: () => void;
   onClickCancel: () => void;
-  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 
 /**
@@ -44,7 +42,6 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
 
   const configurationsClient = useApiContext().ec3ConfigurationsClient;
   const reportsClient = useApiContext().reportsClient;
-  const localizedStrings = useEC3WidgetLocalization(props.localizedStrings);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -83,7 +80,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
             }
           }
         } catch (err) {
-          toaster.negative(localizedStrings.unAuthorisedUserMsg);
+          toaster.negative(EC3Widget.translate("unauthorisedUserMsg"));
           /* eslint-disable no-console */
           console.error(err);
           setIsLoading(false);
@@ -91,17 +88,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
       }
     };
     void fetchReports();
-  }, [
-    childTemplate,
-    configurationsClient,
-    defaultReport,
-    fetchedReports,
-    getAccessToken,
-    localizedStrings.unAuthorisedUserMsg,
-    projectId,
-    props.template,
-    reportsClient,
-  ]);
+  }, [childTemplate, configurationsClient, defaultReport, fetchedReports, getAccessToken, projectId, props.template, reportsClient]);
 
   const saveConfiguration = async () => {
     try {
@@ -122,7 +109,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
         return undefined;
       }
     } catch (e) {
-      toaster.negative(localizedStrings.savingFailedToasterMsg);
+      toaster.negative(EC3Widget.translate("savingFailedToasterMsg"));
       // eslint-disable-next-line no-console
       console.error(e);
       return undefined;
@@ -132,7 +119,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
   return (
     <div className="ec3w-template-creation-stepper" data-testid="ec3w-template-creation-stepper">
       <Stepper
-        steps={[{ name: localizedStrings.stepOneTitle }, { name: localizedStrings.stepTwoTitle }, { name: localizedStrings.stepThreeTitle }]}
+        steps={[{ name: EC3Widget.translate("stepOneTitle") }, { name: EC3Widget.translate("stepTwoTitle") }, { name: EC3Widget.translate("stepThreeTitle") }]}
         currentStep={currentStep}
         onStepClick={(index: number) => setCurrentStep(index)}
       />
@@ -145,7 +132,6 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
         updateChildTemplate={setChildTemplate}
         updateCurrentStep={setCurrentStep}
         fetchedReports={fetchedReports ?? []}
-        localizedStrings={props.localizedStrings}
       />
     </div>
   );

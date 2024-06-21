@@ -1,5 +1,5 @@
 {
-  "TemplateCreationStepper": {
+  "ec3Widget": {
     "stepOneTitle": "Create a template",
     "stepTwoTitle": "Add Assembly(s)",
     "stepThreeTitle": "Send report to EC3",
@@ -24,14 +24,12 @@
     "nextButton": "Next",
     "cancelButton": "Cancel",
     "savingFailedToasterMsg": "Saving Failed.",
-    "unAuthorisedUserMsg": "You are not authorized to use this system.",
+    "unauthorisedUserMsg": "You are not authorized to use this system.",
     "addNewAssembly": "Add New",
     "selectionSummary": "Selection Summary :",
     "saveButton": "Save",
     "requiredFieldNotice": "Asterisk * indicates mandatory fields.",
-    "createTemplate": "Create Template"
-  },
-  "TemplateListView": {
+    "createTemplate": "Create Template",
     "noTemplateMsg": "It looks like you haven't added any templates yet. Click the button below to create your first template."
   }
 }

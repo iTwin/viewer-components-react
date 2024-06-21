@@ -5,7 +5,7 @@
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { SelectionMode } from "@itwin/components-react";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { EC3Provider, EC3WidgetUI } from "@itwin/ec3-widget-react";
+import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
@@ -312,7 +312,7 @@ const configuredUiItems = new Map<string, UiItem>([
   [
     "ec3-widget",
     {
-      initialize: async () => EC3WidgetUI.initialize({ localization: IModelApp.localization }),
+      initialize: async () => EC3Widget.initialize(),
       createUiItemsProviders: () => [
         new EC3Provider({
           clientId: import.meta.env.IMJS_EC3_PORTAL_AUTH_CLIENT_ID ?? "",

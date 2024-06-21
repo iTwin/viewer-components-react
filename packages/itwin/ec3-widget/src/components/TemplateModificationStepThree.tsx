@@ -7,8 +7,7 @@ import { Button, Text } from "@itwin/itwinui-react";
 import React from "react";
 import type { Configuration } from "./EC3/Template";
 import "./TemplateModificationStepThree.scss";
-import type { useEC3WidgetLocalizationResult } from "../common/UseEC3WidgetLocalization";
-import { useEC3WidgetLocalization } from "../common/UseEC3WidgetLocalization";
+import { EC3Widget } from "../EC3Widget";
 
 export interface TemplateModificationStepThreeProps {
   currentStep: number;
@@ -16,15 +15,13 @@ export interface TemplateModificationStepThreeProps {
   childTemplate: Configuration;
   onCancelClick: () => void;
   onSaveClick: () => Promise<void>;
-  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 
 export const TemplateModificationStepThree = (props: TemplateModificationStepThreeProps) => {
-  const localizedStrings = useEC3WidgetLocalization(props.localizedStrings);
   return (
     <>
       <div className="ec3w-template-creation-step-three">
-        <Text className="ec3w-summary-text">{localizedStrings.selectionSummary}</Text>
+        <Text className="ec3w-summary-text">{EC3Widget.translate("selectionSummary")}</Text>
         {props.childTemplate.labels.map((x) => (
           <div className="ec3w-assembly-name-list" key={x.name}>
             <SvgInfoCircular />
@@ -36,7 +33,7 @@ export const TemplateModificationStepThree = (props: TemplateModificationStepThr
       </div>
       <div className="ec3w-stepper-footer">
         <Button className="ec3w-footer-button" onClick={() => props.updateCurrentStep(1)}>
-          {localizedStrings.backButton}
+          {EC3Widget.translate("backButton")}
         </Button>
         <Button
           data-testid="ec3-save-button"
@@ -46,9 +43,9 @@ export const TemplateModificationStepThree = (props: TemplateModificationStepThr
             await props.onSaveClick();
           }}
         >
-          {localizedStrings.saveButton}
+          {EC3Widget.translate("saveButton")}
         </Button>
-        <Button onClick={props.onCancelClick}>{localizedStrings.cancelButton}</Button>
+        <Button onClick={props.onCancelClick}>{EC3Widget.translate("cancelButton")}</Button>
       </div>
     </>
   );

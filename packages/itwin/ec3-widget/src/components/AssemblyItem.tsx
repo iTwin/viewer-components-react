@@ -3,9 +3,8 @@ import React, { useCallback, useMemo } from "react";
 import { AssemblyCreationDropdownType } from "./TemplateModificationStepTwo";
 import type { EC3ConfigurationLabel, ODataTable } from "@itwin/insights-client";
 import type { Configuration } from "../ec3-widget-react";
+import { EC3Widget } from "../EC3Widget";
 import "./AssemblyItem.scss";
-import type { useEC3WidgetLocalizationResult } from "../common/UseEC3WidgetLocalization";
-import { useEC3WidgetLocalization } from "../common/UseEC3WidgetLocalization";
 
 export interface AssemblyItemProps {
   assembly: EC3ConfigurationLabel;
@@ -18,10 +17,8 @@ export interface AssemblyItemProps {
   allAssemblies: EC3ConfigurationLabel[];
   onAssemblyDataChange: (updatedAssembly: EC3ConfigurationLabel, index: number, action?: "add" | "delete") => void;
   setTemplate: (template: Configuration) => void;
-  localizedStrings?: useEC3WidgetLocalizationResult;
 }
 export const AssemblyItem = (props: AssemblyItemProps) => {
-  const localizedStrings = useEC3WidgetLocalization(props.localizedStrings);
   const getMetadataColumns = useMemo(
     () => (assembly: EC3ConfigurationLabel, optionType: AssemblyCreationDropdownType) => {
       const oDataTableData = props.oDataTable?.find((x) => x.name === assembly.reportTable);
@@ -131,26 +128,26 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         id="name"
         name="name"
         data-testid="ec3-assembly-name-input"
-        label={localizedStrings.assemblyName}
+        label={EC3Widget.translate("assemblyName")}
         value={props.assembly.name}
         onChange={onAssemblyNameChange}
         disabled={props.currentAssemblyIndex !== props.editableAssemblyIndex}
       />
       <LabeledSelect
-        label={localizedStrings.reportTable}
+        label={EC3Widget.translate("reportTable")}
         className="ec3w-input-form"
         data-testid="ec3-report-table-select"
         options={getReportTableOptions(props.assembly)}
         value={props.assembly.reportTable}
         onChange={onReportTableSelectChange}
         disabled={props.currentAssemblyIndex !== props.editableAssemblyIndex || !props.template.reportId || props.isLoading}
-        placeholder={props.isLoading ? localizedStrings.reportTablesPlaceholderLoading : localizedStrings.reportTablesPlaceholderSelect}
+        placeholder={props.isLoading ? EC3Widget.translate("reportTablesPlaceholderLoading") : EC3Widget.translate("reportTablesPlaceholderSelect")}
       />
       <LabeledSelect
         data-testid="ec3-element-select"
         className="ec3w-input-form"
         required
-        label={localizedStrings.element}
+        label={EC3Widget.translate("element")}
         options={
           getMetadataColumns(props.assembly, AssemblyCreationDropdownType.elementName)?.map((x) => {
             return { label: x, value: x };
@@ -161,17 +158,17 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         disabled={props.isLoading || props.assembly.reportTable === "" || props.currentAssemblyIndex !== props.editableAssemblyIndex}
         placeholder={
           props.isLoading
-            ? localizedStrings.elementPlaceholderLoading
+            ? EC3Widget.translate("elementPlaceholderLoading")
             : props.assembly.reportTable === ""
-              ? localizedStrings.selectReportTableFirstPlaceholder
-              : localizedStrings.elementPlaceholderSelect
+              ? EC3Widget.translate("selectReportTableFirstPlaceholder")
+              : EC3Widget.translate("elementPlaceholderSelect")
         }
       />
       <LabeledSelect
         data-testid="ec3-element-quantity-select"
         className="ec3w-input-form"
         required
-        label={localizedStrings.elementQuantity}
+        label={EC3Widget.translate("elementQuantity")}
         options={
           getMetadataColumns(props.assembly, AssemblyCreationDropdownType.elementQuantity)?.map((x) => {
             return { label: x, value: x };
@@ -182,14 +179,14 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         disabled={props.isLoading || props.assembly.reportTable === "" || props.currentAssemblyIndex !== props.editableAssemblyIndex}
         placeholder={
           props.isLoading
-            ? localizedStrings.elementPlaceholderLoading
+            ? EC3Widget.translate("elementPlaceholderLoading")
             : props.assembly.reportTable === ""
-              ? localizedStrings.selectReportTableFirstPlaceholder
-              : localizedStrings.elementQuantityPlaceholderSelect
+              ? EC3Widget.translate("selectReportTableFirstPlaceholder")
+              : EC3Widget.translate("elementQuantityPlaceholderSelect")
         }
       />
       <Label htmlFor="combo-input" required>
-        {localizedStrings.materials}
+        {EC3Widget.translate("materials")}
       </Label>
       <Select
         data-testid="ec3-material-select"
@@ -204,10 +201,10 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         onChange={onMaterialSelectChange}
         placeholder={
           props.isLoading
-            ? localizedStrings.elementPlaceholderLoading
+            ? EC3Widget.translate("elementPlaceholderLoading")
             : props.assembly.reportTable === ""
-              ? localizedStrings.selectReportTableFirstPlaceholder
-              : localizedStrings.materialsSelectPlaceholder
+              ? EC3Widget.translate("selectReportTableFirstPlaceholder")
+              : EC3Widget.translate("materialsSelectPlaceholder")
         }
         multiple
       />
