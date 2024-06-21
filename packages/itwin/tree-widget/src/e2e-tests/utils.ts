@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import assert from "assert";
-import { expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import type { Locator, Page } from "@playwright/test";
 
@@ -39,6 +39,69 @@ export const expandStagePanel = async (page: Page, side: PanelSide, px: number) 
   }
   await page.mouse.up();
 };
+
+export async function initTreeWidgetTest({ page, baseURL }: { page: Page; baseURL: string | undefined }) {
+  assert(baseURL);
+  await page.goto(baseURL, { waitUntil: "networkidle" });
+  await page.evaluate(async () => document.fonts.ready);
+  // expand panel size to ~300px
+  await expandStagePanel(page, "right", 100);
+  const widget = locateWidget(page, "tree");
+  await widget.waitFor();
+  return widget;
+}
+
+// make sure to open the filter dialog before calling this.
+export async function selectPropertyInDialog(page: Page, propertyText: string) {
+  const filterBuilder = page.locator(".presentation-property-filter-builder");
+
+  await filterBuilder.getByPlaceholder("Choose property").click();
+
+  // ensure that options are loaded
+  await page.getByRole("menuitem", { name: "Model", exact: true }).waitFor();
+  await page.getByRole("menuitem", { name: propertyText, exact: true }).click();
+}
+
+// make sure to open the filter dialog before calling this.
+export async function selectOperatorInDialog(page: Page, operatorText: string) {
+  const filterBuilder = page.locator(".presentation-property-filter-builder");
+
+  await filterBuilder.getByText("Contains").click();
+  await page.getByRole("option", { name: operatorText, exact: true }).click();
+
+  await filterBuilder.getByText("Contains").waitFor({ state: "hidden" });
+  await filterBuilder.getByText(operatorText).waitFor();
+}
+
+// make sure to open the filter dialog before calling this.
+export async function selectValueInDialog(page: Page, valueText: string) {
+  const filterBuilder = page.locator(".presentation-property-filter-builder");
+
+  // search for one character less to not have to differentiate between entered value and option in dropdown
+  await page.locator(".presentation-async-select-values-container input").fill(valueText.slice(0, -1));
+  await page.getByText(valueText, { exact: true }).click();
+
+  await filterBuilder.getByText(`option ${valueText}, selected.`).waitFor();
+}
+
+export async function selectTree(widget: Locator, treeLabel: string) {
+  await widget.getByText("BayTown").waitFor();
+  await widget.getByRole("combobox").click();
+  await widget.page().getByRole("listbox").getByText(treeLabel, { exact: true }).click();
+}
+
+export function withDifferentDensities(cb: (density: "default" | "enlarged") => void) {
+  ["default" as const, "enlarged" as const].forEach((density) => {
+    test.describe(`Density: ${density}`, () => {
+      density === "enlarged" &&
+        test.beforeEach(async ({ page }) => {
+          const expandedLayoutToggleButton = page.getByTitle("Toggle expanded layout");
+          await expandedLayoutToggleButton.click();
+        });
+      cb(density);
+    });
+  });
+}
 
 export async function takeScreenshot(page: Page, component: Locator) {
   const boundingBox = await component.boundingBox();

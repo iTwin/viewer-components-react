@@ -4,22 +4,29 @@
  *--------------------------------------------------------------------------------------------*/
 import { PropertyValueFormat } from "@itwin/presentation-common";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { Alert, Button, Fieldset, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useState } from "react";
+import { Alert, Button, Fieldset, Icon, LabeledInput, LabeledSelect, Text } from "@itwin/itwinui-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { DataType, QuantityType } from "@itwin/insights-client";
-import type { GroupMinimal, Property, PropertyModify } from "@itwin/insights-client";
+import type { CalculatedPropertyType, GroupMinimal, Property, PropertyModify } from "@itwin/insights-client";
 import "./GroupPropertyAction.scss";
 import type { PropertyMetaData } from "./GroupPropertyUtils";
 import { convertPresentationFields, convertToECProperties, fetchPresentationDescriptor, findProperties } from "./GroupPropertyUtils";
-import { manufactureKeys } from "../../../common/viewerUtils";
+import { clearAll, manufactureKeys } from "../../../common/viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { GroupsPropertiesSelectionModal } from "./GroupsPropertiesSelectionModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupPropertyListItem } from "./GroupPropertyListItem";
 import { usePropertiesClient } from "../../context/PropertiesClientContext";
+import { SvgFunction, SvgLabel, SvgMeasure } from "@itwin/itwinui-icons-react";
+import { CalculatedPropertyActionWithVisuals } from "../CalculatedProperties/CalculatedPropertyActionWithVisuals";
+import { handleError } from "../../../common/utils";
+import { CustomCalculationAction } from "../CustomCalculations/CustomCalculationAction";
+import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
+import { useFormulaValidation } from "../hooks/useFormulaValidation";
+import { ScrollableExpandableBlock } from "../ScrollableExpandableBlock";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -49,24 +56,38 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType | undefine
  * @public
  */
 export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => {
-  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
+  const actionContainerRef = useRef<HTMLDivElement>(null);
+  const calculatedPropertyActionRef = useRef<HTMLDivElement>(null);
+  const customCalculationActionRef = useRef<HTMLDivElement>(null);
   const propertiesClient = usePropertiesClient();
+  const queryClient = useQueryClient();
+
   const [propertyName, setPropertyName] = useState<string>("");
   const [oldPropertyName, setOldPropertyName] = useState<string>("");
-  const [dataType, setDataType] = useState<DataType>(DataType.String);
-  const [quantityType, setQuantityType] = useState<QuantityType>();
+  const [dataType, setDataType] = useState<DataType>(groupProperty?.dataType ?? DataType.String);
+  const [quantityType, setQuantityType] = useState<QuantityType | undefined>(groupProperty?.quantityType ?? undefined);
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>([]);
   const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
   const [showPropertiesSelectionModal, setShowPropertiesSelectionModal] = useState<boolean>(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
-  const queryClient = useQueryClient();
+  const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType ?? undefined);
+  const [isCalculatedBlockExpanded, setIsCalculatedBlockExpanded] = useState<boolean>(!!calculatedPropertyType);
+  const [formula, setFormula] = useState<string | undefined>(groupProperty?.formula ?? undefined);
+  const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
+
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
+  const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, group.id, getAccessToken, propertiesClient);
+  const { forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, groupProperties?.properties ?? [], setFormulaErrorMessage, dataType);
 
   const reset = useCallback(() => {
     setPropertyName("");
     setDataType(DataType.String);
+    setQuantityType(undefined);
     setSelectedProperties([]);
+    setCalculatedPropertyType(undefined);
+    setFormula(undefined);
   }, []);
 
   const fetchPropertiesMetadata = useCallback(async () => {
@@ -91,6 +112,17 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
     return { propertiesMetaData, groupPropertyDetails };
   }, [getAccessToken, group.id, group.query, groupProperty, iModelConnection, mappingId, propertiesClient]);
 
+  const scrollToFormulaErrorMessage = useCallback(() => {
+    setTimeout(() => {
+      if (actionContainerRef.current && customCalculationActionRef.current) {
+        actionContainerRef.current.scrollTo({
+          top: customCalculationActionRef.current.offsetTop,
+          behavior: "smooth",
+        });
+      }
+    }, 500);
+  }, [actionContainerRef]);
+
   const {
     data,
     isFetching: isLoadingProperties,
@@ -107,15 +139,32 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
         setDataType(data.groupPropertyDetails.dataType);
         if (data.groupPropertyDetails.quantityType) setQuantityType(data.groupPropertyDetails.quantityType);
 
-        const properties = findProperties(data.groupPropertyDetails.ecProperties ?? [], data.propertiesMetaData);
-        if (properties.length === 0) {
-          setPropertiesNotFoundAlert(true);
+        if (data.groupPropertyDetails.ecProperties) {
+          const properties = findProperties(data.groupPropertyDetails.ecProperties, data.propertiesMetaData);
+          if (properties.length === 0) {
+            setPropertiesNotFoundAlert(true);
+          }
+          setSelectedProperties(properties);
         }
-
-        setSelectedProperties(properties);
       }
     }
   }, [data, isLoadingPropertiesSuccessful]);
+
+  useEffect(() => {
+    if (calculatedPropertyType) {
+      setDataType(DataType.Double);
+    }
+
+    if (isCalculatedBlockExpanded === false || !calculatedPropertyType) {
+      clearAll();
+    }
+  }, [calculatedPropertyType, isCalculatedBlockExpanded]);
+
+  useEffect(() => {
+    if (formulaErrorMessage) {
+      scrollToFormulaErrorMessage();
+    }
+  }, [formulaErrorMessage, scrollToFormulaErrorMessage]);
 
   const { mutate: onSave, isLoading: isSaving } = useMutation({
     mutationFn: async () => {
@@ -125,6 +174,8 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
         dataType,
         quantityType,
         ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
+        calculatedPropertyType,
+        formula,
       };
 
       return groupProperty
@@ -135,6 +186,9 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
       onSaveSuccess();
       reset();
       await queryClient.invalidateQueries(["properties", iModelId, mappingId, group.id]);
+    },
+    onError(error: any) {
+      handleError(error.status);
     },
   });
 
@@ -154,11 +208,11 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
     setShowSaveConfirmationModal(false);
   };
 
-  const isLoading = isLoadingProperties || isSaving;
+  const isLoading = isLoadingProperties || isSaving || isLoadingGroupProperties;
 
   return (
     <>
-      <div className="gmw-group-property-action-container">
+      <div className="gmw-group-property-action-container" ref={actionContainerRef}>
         <Fieldset disabled={isLoading} className="gmw-property-options" legend="Property Details">
           <Text variant="small" as="small" className="gmw-field-legend">
             Asterisk * indicates mandatory fields.
@@ -188,7 +242,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
               { value: DataType.String, label: "String" },
             ]}
             required
-            value={dataType}
+            value={calculatedPropertyType ? DataType.Double : dataType}
             onChange={(value) => {
               validator.showMessageFor("dataType");
               setDataType(value);
@@ -198,6 +252,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             onBlur={() => {
               validator.showMessageFor("dataType");
             }}
+            disabled={calculatedPropertyType ? true : false}
             onShow={() => {}}
             onHide={() => {}}
           />
@@ -217,36 +272,87 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
             selection is made and saved.
           </Alert>
         )}
-        <Fieldset className="gmw-property-view-container" legend="Mapped Properties">
-          <div className="gmw-property-view-button">
-            <Button onClick={async () => setShowPropertiesSelectionModal(true)} disabled={isLoading}>
-              Select Properties
-            </Button>
+        <ScrollableExpandableBlock
+          title={"Mapped Properties"}
+          endIcon={
+            <Icon fill={selectedProperties.length > 0 ? "informational" : "default"}>
+              <SvgLabel />
+            </Icon>
+          }
+          isExpanded={selectedProperties.length > 0}
+          setIsExpanded={() => {}}
+        >
+          <div className="gmw-property-view-container">
+            <div className="gmw-property-view-button">
+              <Button onClick={async () => setShowPropertiesSelectionModal(true)} disabled={isLoading}>
+                Select Properties
+              </Button>
+            </div>
+            <div className="gmw-properties-list">
+              {selectedProperties.length === 0 && !isLoading ? (
+                <div className="gmw-empty-selection">
+                  <Text>No properties selected.</Text>
+                  <Text>Press the &quot;Select Properties&quot; button for options.</Text>
+                </div>
+              ) : (
+                selectedProperties.map((property) => (
+                  <GroupPropertyListItem
+                    key={property.key}
+                    content={`${property.displayLabel}`}
+                    title={`${property.actualECClassName}`}
+                    description={property.categoryLabel}
+                  />
+                ))
+              )}
+            </div>
           </div>
-          <div className="gmw-properties-list">
-            {selectedProperties.length === 0 && !isLoading ? (
-              <div className="gmw-empty-selection">
-                <Text>No properties selected.</Text>
-                <Text>Press the &quot;Select Properties&quot; button for options.</Text>
-              </div>
-            ) : (
-              selectedProperties.map((property) => (
-                <GroupPropertyListItem
-                  key={property.key}
-                  content={`${property.displayLabel}`}
-                  title={`${property.actualECClassName}`}
-                  description={property.categoryLabel}
-                />
-              ))
-            )}
-          </div>
-        </Fieldset>
+        </ScrollableExpandableBlock>
+        <ScrollableExpandableBlock
+          parentRef={actionContainerRef}
+          ref={calculatedPropertyActionRef}
+          title={"Calculated Property"}
+          endIcon={
+            <Icon fill={calculatedPropertyType ? "informational" : "default"}>
+              <SvgMeasure />
+            </Icon>
+          }
+          isExpanded={!!calculatedPropertyType}
+          setIsExpanded={setIsCalculatedBlockExpanded}
+        >
+          <CalculatedPropertyActionWithVisuals
+            group={group}
+            calculatedPropertyType={calculatedPropertyType}
+            setCalculatedPropertyType={setCalculatedPropertyType}
+          />
+        </ScrollableExpandableBlock>
+        <ScrollableExpandableBlock
+          parentRef={actionContainerRef}
+          ref={customCalculationActionRef}
+          title={"Custom Calculation"}
+          endIcon={
+            <Icon fill={formula ? "informational" : "default"}>
+              <SvgFunction />
+            </Icon>
+          }
+          isExpanded={formula !== undefined}
+          setIsExpanded={() => {}}
+        >
+          <CustomCalculationAction
+            formula={formula}
+            setFormula={setFormula}
+            formulaErrorMessage={formulaErrorMessage}
+            forceValidation={forceValidation}
+            disabled={isLoading}
+          />
+        </ScrollableExpandableBlock>
       </div>
       <ActionPanel
         onSave={handleSaveClick}
         onCancel={onClickCancel}
+        onSaveCapture={clearAll}
+        onCancelCapture={clearAll}
         isLoading={isLoading}
-        isSavingDisabled={selectedProperties.length === 0 || !propertyName || dataType === undefined}
+        isSavingDisabled={!propertyName || dataType === undefined || formulaErrorMessage !== undefined}
       />
       <GroupsPropertiesSelectionModal
         showModal={showPropertiesSelectionModal}

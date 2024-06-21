@@ -11,7 +11,7 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import type { TreeRenderProps } from "./SelectableTree";
 
 /**
- * A definition for trees displayed in [[TreeSelector]]
+ * A definition for trees displayed in `TreeSelector`
  * @internal
  */
 export interface TreeContentDefinition {
@@ -22,7 +22,7 @@ export interface TreeContentDefinition {
 }
 
 /**
- * Props for [[TreeSelector]]
+ * Props for `TreeSelector`
  * @internal
  */
 export interface TreeSelectorProps {
