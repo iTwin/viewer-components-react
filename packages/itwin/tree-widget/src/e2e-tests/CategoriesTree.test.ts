@@ -4,17 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Locator } from "@playwright/test";
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import {
-  initTreeWidgetTest,
-  locateInstanceFilter,
-  locateNode,
-  selectOperatorInDialog,
-  selectPropertyInDialog,
-  selectTree,
-  selectValueInDialog,
-  takeScreenshot,
-  withDifferentDensities,
+  expandStagePanel, initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree,
+  selectValueInDialog, takeScreenshot, withDifferentDensities,
 } from "./utils";
 
 test.describe("Categories tree", () => {
@@ -60,7 +53,7 @@ test.describe("Categories tree", () => {
       await locateNode(treeWidget, "Equipment - Insulation").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
-      await page.mouse.wheel(-10000, -10000);
+      await scrollTree(page, -10000, -10000);
 
       // hover the node for the button to appear
       await node.hover();
@@ -86,7 +79,7 @@ test.describe("Categories tree", () => {
       await treeWidget.getByText("No child nodes match current filter").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
-      await page.mouse.wheel(-10000, -10000);
+      await scrollTree(page, -10000, -10000);
 
       // hover the node for the button to appear
       await node.hover();
@@ -111,6 +104,96 @@ test.describe("Categories tree", () => {
       await treeWidget.getByTitle("More").click();
       await page.locator(".tree-header-button-dropdown-container").waitFor();
       await takeScreenshot(page, treeWidget);
+    });
+
+    test("shows outlines when focused using keyboard", async ({ page }) => {
+      // click to focus on node
+      const node = locateNode(treeWidget, "Equipment", 1);
+      await node.click();
+
+      // focus on checkbox using keyboard
+      await page.keyboard.press("Tab");
+
+      // ensure checkbox is focused
+      const checkbox = node.locator(".tw-tree-node-checkbox");
+      await expect(checkbox).toBeFocused();
+
+      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+
+      // shrink panel
+      await expandStagePanel(page, "right", -100);
+
+      // re-focus on checkbox after resizing the panel
+      await node.click();
+      await page.keyboard.press("Tab");
+
+      // scroll to the right side
+      await scrollTree(page, 10000, 0);
+      await takeScreenshot(page, node, { boundingComponent: treeWidget, expandBy: { top: 10, bottom: 10 } });
+
+      // expand panel
+      await expandStagePanel(page, "right", 100);
+
+      // scroll to origin to avoid flakiness due to auto-scroll
+      await scrollTree(page, -10000, -10000);
+
+      // re-focus on checkbox after resizing the panel
+      await node.click();
+      await page.keyboard.press("Tab");
+
+      // focus on expander
+      await page.keyboard.press("Tab");
+      const expander = node.getByLabel("Expand");
+      await expect(expander).toBeFocused();
+
+      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+
+      // navigate back to focus on the already selected node
+      await page.keyboard.press("ArrowUp");
+      await page.keyboard.press("ArrowDown");
+
+      await expect(node).toBeFocused();
+
+      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+
+      // Focus on apply filter button
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+
+      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+
+      // open filtering dialog
+      await page.keyboard.press("Enter");
+
+      await locateInstanceFilter(page).waitFor();
+      await selectPropertyInDialog(page, "Code");
+      await selectOperatorInDialog(page, "Equal");
+      await selectValueInDialog(page, "Equipment - Insulation");
+
+      await page.getByRole("button", { name: "Apply" }).click();
+
+      // bring focus on the node
+      await node.click();
+
+      // navigate to clear filter button
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+
+      // scroll to origin to avoid flakiness due to auto-scroll
+      await scrollTree(page, -10000, -10000);
+
+      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+
+      // navigate to apply filter button
+      await page.keyboard.press("Tab");
+
+      // scroll to origin to avoid flakiness due to auto-scroll
+      await scrollTree(page, -10000, -10000);
+
+      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
     });
   });
 });

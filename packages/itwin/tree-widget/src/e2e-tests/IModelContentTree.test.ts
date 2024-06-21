@@ -6,15 +6,8 @@
 import type { Locator } from "@playwright/test";
 import { test } from "@playwright/test";
 import {
-  initTreeWidgetTest,
-  locateInstanceFilter,
-  locateNode,
-  selectOperatorInDialog,
-  selectPropertyInDialog,
-  selectTree,
-  selectValueInDialog,
-  takeScreenshot,
-  withDifferentDensities,
+  initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree, selectValueInDialog,
+  takeScreenshot, withDifferentDensities,
 } from "./utils";
 
 test.describe("iModel content tree", () => {
@@ -71,7 +64,7 @@ test.describe("iModel content tree", () => {
       await locateNode(treeWidget, "PipeSupport").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
-      await page.mouse.wheel(-10000, -10000);
+      await scrollTree(page, -10000, -10000);
 
       // hover the node for the button to appear
       await node.hover();
@@ -97,7 +90,7 @@ test.describe("iModel content tree", () => {
       await treeWidget.getByText("No child nodes match current filter").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
-      await page.mouse.wheel(-10000, -10000);
+      await scrollTree(page, -10000, -10000);
 
       // hover the node for the button to appear
       await node.hover();

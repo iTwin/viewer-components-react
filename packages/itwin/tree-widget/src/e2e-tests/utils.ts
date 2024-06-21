@@ -90,67 +90,15 @@ export async function selectTree(widget: Locator, treeLabel: string) {
   await widget.page().getByRole("listbox").getByText(treeLabel, { exact: true }).click();
 }
 
-export function withDifferentDensities(cb: (density: "default" | "enlarged") => void) {
-  ["default" as const, "enlarged" as const].forEach((density) => {
-    test.describe(`Density: ${density}`, () => {
-      density === "enlarged" &&
-        test.beforeEach(async ({ page }) => {
-          const expandedLayoutToggleButton = page.getByTitle("Toggle expanded layout");
-          await expandedLayoutToggleButton.click();
-        });
-      cb(density);
-    });
-  });
-}
-
-export async function initTreeWidgetTest({ page, baseURL }: { page: Page; baseURL: string | undefined }) {
-  assert(baseURL);
-  await page.goto(baseURL, { waitUntil: "networkidle" });
-  await page.evaluate(async () => document.fonts.ready);
-  // expand panel size to ~300px
-  await expandStagePanel(page, "right", 100);
-  const widget = locateWidget(page, "tree");
-  await widget.waitFor();
-  return widget;
-}
-
-// make sure to open the filter dialog before calling this.
-export async function selectPropertyInDialog(page: Page, propertyText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
-
-  await filterBuilder.getByPlaceholder("Choose property").click();
-
-  // ensure that options are loaded
-  await page.getByRole("menuitem", { name: "Model", exact: true }).waitFor();
-  await page.getByRole("menuitem", { name: propertyText, exact: true }).click();
-}
-
-// make sure to open the filter dialog before calling this.
-export async function selectOperatorInDialog(page: Page, operatorText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
-
-  await filterBuilder.getByText("Contains").click();
-  await page.getByRole("option", { name: operatorText, exact: true }).click();
-
-  await filterBuilder.getByText("Contains").waitFor({ state: "hidden" });
-  await filterBuilder.getByText(operatorText).waitFor();
-}
-
-// make sure to open the filter dialog before calling this.
-export async function selectValueInDialog(page: Page, valueText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
-
-  // search for one character less to not have to differentiate between entered value and option in dropdown
-  await page.locator(".presentation-async-select-values-container input").fill(valueText.slice(0, -1));
-  await page.getByText(valueText, { exact: true }).click();
-
-  await filterBuilder.getByText(`option ${valueText}, selected.`).waitFor();
-}
-
-export async function selectTree(widget: Locator, treeLabel: string) {
-  await widget.getByText("BayTown").waitFor();
-  await widget.getByRole("combobox").click();
-  await widget.page().getByRole("listbox").getByText(treeLabel, { exact: true }).click();
+export async function scrollTree(page: Page, x: number, y: number) {
+  // get the parent of the tree renderer that is scrollable
+  const container = page.locator("div:has(> .tw-tree-renderer)");
+  await container.evaluate(
+    (e: SVGElement | HTMLElement, scrollAmount: { left: number; top: number }) => {
+      e.scrollBy(scrollAmount);
+    },
+    { left: x, top: y },
+  );
 }
 
 export function withDifferentDensities(cb: (density: "default" | "enlarged") => void) {
@@ -166,14 +114,14 @@ export function withDifferentDensities(cb: (density: "default" | "enlarged") => 
   });
 }
 
-export async function takeScreenshot(
-  page: Page,
-  component: Locator,
-  expandBy?: { top?: number; right?: number; bottom?: number; left?: number },
-  boundingComponent?: Locator,
-) {
-  const boundingBox = await getBoundedBoundingBox(component, boundingComponent);
-  const expansion = { ...{ top: 0, right: 0, bottom: 0, left: 0 }, ...expandBy };
+interface TakeScreenshotOptions {
+  expandBy?: { top?: number; right?: number; bottom?: number; left?: number };
+  boundingComponent?: Locator;
+}
+
+export async function takeScreenshot(page: Page, component: Locator, options?: TakeScreenshotOptions) {
+  const boundingBox = await getBoundedBoundingBox(component, options?.boundingComponent);
+  const expansion = { ...{ top: 0, right: 0, bottom: 0, left: 0 }, ...options?.expandBy };
   const clip = {
     x: boundingBox.x - expansion.left,
     y: boundingBox.y - expansion.top,
