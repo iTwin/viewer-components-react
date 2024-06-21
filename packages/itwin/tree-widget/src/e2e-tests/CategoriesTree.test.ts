@@ -48,8 +48,7 @@ test.describe("Categories tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await node.getByLabel("Expand").click();
+      // wait for filtered children to appear
       await locateNode(treeWidget, "Equipment - Insulation").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
@@ -74,8 +73,7 @@ test.describe("Categories tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await node.getByLabel("Expand").click();
+      // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
@@ -156,8 +154,14 @@ test.describe("Categories tree", () => {
 
       await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
 
+      // click on a different node to avoid showing filtering buttons due to hover
+      const hexNode = locateNode(treeWidget, "E-HEX");
+      await hexNode.click();
+
+      // focus back on the node we want to filter
+      await page.keyboard.press("ArrowDown");
+
       // Focus on apply filter button
-      await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");

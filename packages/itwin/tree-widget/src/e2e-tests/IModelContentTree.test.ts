@@ -59,8 +59,7 @@ test.describe("iModel content tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await node.getByLabel("Expand").click();
+      // wait for filtered children to appear
       await locateNode(treeWidget, "PipeSupport").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
@@ -85,8 +84,7 @@ test.describe("iModel content tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await node.getByLabel("Expand").click();
+      // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll

@@ -67,8 +67,7 @@ test.describe("Models tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await physicalModelNode.getByLabel("Expand").click();
+      // wait for filtered children to appear
       await locateNode(treeWidget, "PipeSupport").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
@@ -93,8 +92,7 @@ test.describe("Models tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await physicalModelNode.getByLabel("Expand").click();
+      // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
@@ -273,8 +271,14 @@ test.describe("Models tree", () => {
 
       await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
 
+      // hover on a different node to avoid showing filtering buttons due to hover
+      const bayTownNode = locateNode(treeWidget, "BayTown");
+      await bayTownNode.click();
+
+      // focus back on the node we want to filter
+      await page.keyboard.press("ArrowDown");
+
       // Focus on apply filter button
-      await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
