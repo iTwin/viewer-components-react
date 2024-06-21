@@ -377,23 +377,15 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     }
 
     return Promise.all(
-      (
-        await Promise.all(
-          getElementsSelectProps({ modelClass }).map(async (props) =>
-            (await this._classHierarchyInspector.classDerivesFrom(elementClass, props.classFullName)) ? props : undefined,
-          ),
-        )
-      )
-        .filter(<T>(props: T | undefined): props is T => !!props)
-        .map(async ({ selectProps, whereClause }) => {
-          const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
-            filter: instanceFilter,
-            contentClass: { fullName: elementClass, alias: "this" },
-          });
-          return {
-            fullClassName: elementClass,
-            query: {
-              ecsql: `
+      getElementsSelectProps({ modelClass, elementClass }).map(async ({ selectProps, whereClause }) => {
+        const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+          filter: instanceFilter,
+          contentClass: { fullName: elementClass, alias: "this" },
+        });
+        return {
+          fullClassName: elementClass,
+          query: {
+            ecsql: `
               SELECT
                 ${await this._selectQueryFactory.createSelectClause({
                   ecClassId: { selector: "this.ECClassId" },
@@ -422,10 +414,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
             `,
-              bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
-            },
-          };
-        }),
+            bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
+          },
+        };
+      }),
     );
   }
 
@@ -659,21 +651,22 @@ function getClassNameByViewType(view: "2d" | "3d") {
   return { categoryClass: "BisCore.SpatialCategory", elementClass: "BisCore.GeometricElement3d", modelClass: "BisCore.GeometricModel3d" };
 }
 
-function getElementsSelectProps(props?: { modelClass?: string }) {
+function getElementsSelectProps(props?: { modelClass?: string; elementClass?: string }) {
   const modelClassFullName = props?.modelClass ?? "BisCore.Model";
-  return [
+  const elementClassFullName = props?.elementClass ?? "BisCore.Element";
+  const result = [
     {
-      classFullName: "BisCore.Element",
-      whereClause: "this.ECClassId IS NOT (BisCore.GroupInformationElement)",
+      classFullName: elementClassFullName,
+      whereClause: "this.ECClassId IS NOT (BisCore.GroupInformationElement) AND this.ECClassId IS NOT (BisCore.Category)",
       selectProps: {
         hasChildren: {
           selector: `
           IFNULL((
             SELECT 1
             FROM (
-              SELECT Parent.Id ParentId FROM BisCore.Element
+              SELECT Parent.Id ParentId FROM ${elementClassFullName}
               UNION ALL
-              SELECT sm.ModeledElement.Id ParentId FROM ${modelClassFullName} sm WHERE EXISTS (SELECT 1 FROM BisCore.Element WHERE Model.Id = sm.ECInstanceId)
+              SELECT sm.ModeledElement.Id ParentId FROM ${modelClassFullName} sm WHERE EXISTS (SELECT 1 FROM ${elementClassFullName} WHERE Model.Id = sm.ECInstanceId)
             )
             WHERE ParentId = this.ECInstanceId
             LIMIT 1
@@ -683,9 +676,12 @@ function getElementsSelectProps(props?: { modelClass?: string }) {
         supportsFiltering: true,
       },
     },
-    {
+  ];
+
+  if (!props?.elementClass) {
+    result.push({
       classFullName: "BisCore.GroupInformationElement",
-      whereClause: "this.ECClassId IS (BisCore.GroupInformationElement)",
+      whereClause: "",
       selectProps: {
         hasChildren: {
           selector: `
@@ -703,6 +699,8 @@ function getElementsSelectProps(props?: { modelClass?: string }) {
         },
         supportsFiltering: false,
       },
-    },
-  ];
+    });
+  }
+
+  return result;
 }
