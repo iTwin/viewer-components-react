@@ -50,13 +50,13 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement ?? true));
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement ?? false));
       }
       if (!featureFlags?.hideAreaTool) {
-        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props?.enableSheetMeasurement ?? true));
+        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props?.enableSheetMeasurement ?? false));
       }
       if (!featureFlags?.hideLocationTool) {
-        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props?.enableSheetMeasurement ?? true));
+        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props?.enableSheetMeasurement ?? false));
       }
       if (!featureFlags?.hideRadiusTool) {
         tools.push(MeasureToolDefinitions.measureRadiusToolCommand);
