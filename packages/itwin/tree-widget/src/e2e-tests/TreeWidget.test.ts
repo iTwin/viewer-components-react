@@ -60,6 +60,17 @@ async function selectTree(page: Page, tree: string) {
   await page.getByText(tree, { exact: true }).click();
 }
 
+async function scrollTree(page: Page, x: number, y: number) {
+  // get the parent of the tree renderer that is scrollable
+  const container = page.locator("div:has(> .tw-tree-renderer)");
+  await container.evaluate(
+    (e: SVGElement | HTMLElement, scrollAmount: { left: number; top: number }) => {
+      e.scrollBy(scrollAmount);
+    },
+    { left: x, top: y },
+  );
+}
+
 test.describe("tree widget", () => {
   const testCases = (lastNodeLabel: string) => {
     test.beforeEach(async () => {
@@ -232,7 +243,7 @@ test.describe("tree widget", () => {
         await locateNode(treeWidget, "PipeSupport").waitFor();
 
         // scroll to origin to avoid flakiness due to auto-scroll
-        await page.mouse.wheel(-10000, -10000);
+        await scrollTree(page, -10000, -10000);
 
         // hover the node for the button to appear
         await physicalModelNode.hover();
@@ -258,7 +269,7 @@ test.describe("tree widget", () => {
         await treeWidget.getByText("No child nodes match current filter").waitFor();
 
         // scroll to origin to avoid flakiness due to auto-scroll
-        await page.mouse.wheel(-10000, -10000);
+        await scrollTree(page, -10000, -10000);
 
         // hover the node for the button to appear
         await physicalModelNode.hover();
@@ -380,9 +391,6 @@ test.describe("tree widget", () => {
       });
 
       test("shows outlines when focused using keyboard", async ({ page }) => {
-        // shrink panel
-        await expandStagePanel(page, "right", -100);
-
         // select node to show selected outline
         const node = locateNode(treeWidget, "ProcessPhysicalModel");
         await node.click();
@@ -399,9 +407,26 @@ test.describe("tree widget", () => {
 
         await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
 
+        // shrink panel
+        await expandStagePanel(page, "right", -100);
+
+        // re-focus on checkbox after resizing the panel
+        await node.click();
+        await page.keyboard.press("Tab");
+
         // scroll to the right side
-        await page.mouse.wheel(10000, 0);
+        await scrollTree(page, 10000, 0);
         await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // expand panel
+        await expandStagePanel(page, "right", 100);
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await scrollTree(page, -10000, -10000);
+
+        // re-focus on checkbox after resizing the panel
+        await node.click();
+        await page.keyboard.press("Tab");
 
         // focus on expander
         await page.keyboard.press("Tab");
@@ -416,6 +441,45 @@ test.describe("tree widget", () => {
 
         await expect(node).toBeFocused();
         await expect(node).toHaveAttribute("aria-selected", "true");
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // Focus on apply filter button
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // open filtering dialog
+        await page.keyboard.press("Enter");
+
+        await locateInstanceFilter(page).waitFor();
+        await selectPropertyInDialog(page, "Code");
+        await selectOperatorInDialog(page, "Equal");
+        await selectValueInDialog(page, "PipeSupport");
+
+        await page.getByRole("button", { name: "Apply" }).click();
+
+        // bring focus on the node
+        await node.click();
+
+        // navigate to clear filter button
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await scrollTree(page, -10000, -10000);
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // navigate to apply filter button
+        await page.keyboard.press("Tab");
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await scrollTree(page, -10000, -10000);
 
         await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
       });
@@ -462,7 +526,7 @@ test.describe("tree widget", () => {
         await locateNode(treeWidget, "Equipment - Insulation").waitFor();
 
         // scroll to origin to avoid flakiness due to auto-scroll
-        await page.mouse.wheel(-10000, -10000);
+        await scrollTree(page, -10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
@@ -488,7 +552,7 @@ test.describe("tree widget", () => {
         await treeWidget.getByText("No child nodes match current filter").waitFor();
 
         // scroll to origin to avoid flakiness due to auto-scroll
-        await page.mouse.wheel(-10000, -10000);
+        await scrollTree(page, -10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
@@ -516,11 +580,8 @@ test.describe("tree widget", () => {
       });
 
       test("shows outlines when focused using keyboard", async ({ page }) => {
-        // shrink panel
-        await expandStagePanel(page, "right", -100);
-
         // click to focus on node
-        const node = locateNode(treeWidget, "Equipment");
+        const node = locateNode(treeWidget, "Equipment", 1);
         await node.click();
 
         // focus on checkbox using keyboard
@@ -532,9 +593,26 @@ test.describe("tree widget", () => {
 
         await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
 
+        // shrink panel
+        await expandStagePanel(page, "right", -100);
+
+        // re-focus on checkbox after resizing the panel
+        await node.click();
+        await page.keyboard.press("Tab");
+
         // scroll to the right side
-        await page.mouse.wheel(10000, 0);
+        await scrollTree(page, 10000, 0);
         await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // expand panel
+        await expandStagePanel(page, "right", 100);
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await scrollTree(page, -10000, -10000);
+
+        // re-focus on checkbox after resizing the panel
+        await node.click();
+        await page.keyboard.press("Tab");
 
         // focus on expander
         await page.keyboard.press("Tab");
@@ -548,6 +626,45 @@ test.describe("tree widget", () => {
         await page.keyboard.press("ArrowDown");
 
         await expect(node).toBeFocused();
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // Focus on apply filter button
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // open filtering dialog
+        await page.keyboard.press("Enter");
+
+        await locateInstanceFilter(page).waitFor();
+        await selectPropertyInDialog(page, "Code");
+        await selectOperatorInDialog(page, "Equal");
+        await selectValueInDialog(page, "Equipment - Insulation");
+
+        await page.getByRole("button", { name: "Apply" }).click();
+
+        // bring focus on the node
+        await node.click();
+
+        // navigate to clear filter button
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Tab");
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await scrollTree(page, -10000, -10000);
+
+        await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
+
+        // navigate to apply filter button
+        await page.keyboard.press("Tab");
+
+        // scroll to origin to avoid flakiness due to auto-scroll
+        await scrollTree(page, -10000, -10000);
 
         await takeScreenshot(page, node, { top: 10, bottom: 10 }, treeWidget);
       });
@@ -605,7 +722,7 @@ test.describe("tree widget", () => {
         await locateNode(treeWidget, "PipeSupport").waitFor();
 
         // scroll to origin to avoid flakiness due to auto-scroll
-        await page.mouse.wheel(-10000, -10000);
+        await scrollTree(page, -10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
@@ -631,7 +748,7 @@ test.describe("tree widget", () => {
         await treeWidget.getByText("No child nodes match current filter").waitFor();
 
         // scroll to origin to avoid flakiness due to auto-scroll
-        await page.mouse.wheel(-10000, -10000);
+        await scrollTree(page, -10000, -10000);
 
         // hover the node for the button to appear
         await node.hover();
