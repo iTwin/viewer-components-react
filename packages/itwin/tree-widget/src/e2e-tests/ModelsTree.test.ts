@@ -69,13 +69,10 @@ test.describe("Models tree", () => {
 
       // wait for filtered children to appear
       await locateNode(treeWidget, "PipeSupport").waitFor();
+      await treeWidget.getByTitle("Clear active filter").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
       await scrollTree(page, -10000, -10000);
-
-      // hover the node for the button to appear
-      await physicalModelNode.hover();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
 
       await takeScreenshot(page, treeWidget);
     });
@@ -94,13 +91,10 @@ test.describe("Models tree", () => {
 
       // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
+      await treeWidget.getByTitle("Clear active filter").waitFor();
 
       // scroll to origin to avoid flakiness due to auto-scroll
       await scrollTree(page, -10000, -10000);
-
-      // hover the node for the button to appear
-      await physicalModelNode.hover();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
 
       await takeScreenshot(page, treeWidget);
     });

@@ -95,7 +95,7 @@ export async function scrollTree(page: Page, x: number, y: number) {
   const container = page.locator("div:has(> .tw-tree-renderer)");
   await container.evaluate(
     (e: SVGElement | HTMLElement, scrollAmount: { left: number; top: number }) => {
-      e.scrollBy(scrollAmount);
+      e.scrollBy({ ...scrollAmount, behavior: "instant" } as unknown as ScrollToOptions);
     },
     { left: x, top: y },
   );
