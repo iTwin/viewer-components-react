@@ -45,7 +45,6 @@ export interface EC3ConfigCommonProps {
     getAccessToken?: GetAccessTokenFn;
     // (undocumented)
     iTwinId: string;
-    localizedStrings?: useEC3WidgetLocalizationResult;
     oDataClient?: IOdataClient;
     reportingBasePath?: string;
     reportsClient?: IReportsClient;
@@ -92,7 +91,7 @@ export interface EC3Token {
 }
 
 // @beta
-export class EC3WidgetUI {
+export class EC3Widget {
     static initialize(config?: EC3WidgetConfig): Promise<void>;
     // (undocumented)
     static localization: Localization;
@@ -114,8 +113,6 @@ export const TemplateMenu: (props: TemplateMenuProps) => JSX.Element;
 // @beta
 export interface TemplateMenuProps {
     // (undocumented)
-    localizedStrings?: useEC3WidgetLocalizationResult;
-    // (undocumented)
     onClickCancel: () => void;
     // (undocumented)
     onSaveSuccess: () => void;
@@ -126,15 +123,13 @@ export interface TemplateMenuProps {
 // @beta
 export interface TemplateProps {
     // (undocumented)
-    localizedStrings?: useEC3WidgetLocalizationResult;
-    // (undocumented)
     onClickCreate?: () => void;
     // (undocumented)
     onClickTemplateTitle?: (template: Configuration) => void;
 }
 
 // @beta
-export const Templates: ({ onClickCreate, onClickTemplateTitle, localizedStrings }: TemplateProps) => JSX.Element;
+export const Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element;
 
 
 export * from "@itwin/insights-client";

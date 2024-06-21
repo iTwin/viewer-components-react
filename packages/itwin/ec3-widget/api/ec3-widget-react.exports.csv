@@ -9,10 +9,10 @@ beta;EC3Context: (props: EC3ContextProps) => JSX.Element
 beta;EC3ContextProps = EC3ConfigProps &
 beta;EC3Provider 
 public;EC3Token
-beta;EC3WidgetUI
+beta;EC3Widget
 public;GetAccessTokenFn = () => Promise
 beta;handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source?: string): void
 beta;TemplateMenu: (props: TemplateMenuProps) => JSX.Element
 beta;TemplateMenuProps
 beta;TemplateProps
-beta;Templates: ({ onClickCreate, onClickTemplateTitle, localizedStrings }: TemplateProps) => JSX.Element
+beta;Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element
