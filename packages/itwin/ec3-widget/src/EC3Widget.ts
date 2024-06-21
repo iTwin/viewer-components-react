@@ -7,7 +7,7 @@ import { IModelApp } from "@itwin/core-frontend";
 
 export interface EC3WidgetConfig {
   // Provide custom localized strings to override default localized strings. Corresponding keys can be found in EC3Widget.json
-  overRiddenStrings?: Map<string, string>;
+  localizationOverrides?: Map<string, string>;
   localization?: Localization;
 }
 
@@ -26,7 +26,7 @@ export class EC3Widget {
   public static async initialize(config?: EC3WidgetConfig): Promise<void> {
     // register namespace containing localized strings for this package
     EC3Widget.localization = config?.localization ?? IModelApp.localization;
-    EC3Widget.localizationOverrides = config?.overRiddenStrings;
+    EC3Widget.localizationOverrides = config?.localizationOverrides;
     await EC3Widget.localization.registerNamespace(EC3Widget.localizationNamespace);
   }
 
