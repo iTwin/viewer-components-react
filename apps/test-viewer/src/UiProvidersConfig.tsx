@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-react";
 import { SelectionMode } from "@itwin/components-react";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import { IModelConnection } from "@itwin/core-frontend";
 import { EC3Provider, EC3Widget } from "@itwin/ec3-widget-react";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";

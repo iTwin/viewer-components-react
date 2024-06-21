@@ -98,7 +98,7 @@ export class EC3Widget {
     static get localizationNamespace(): string;
     static terminate(): void;
     // (undocumented)
-    static translate(key: string | string[], options?: TranslationOptions): string;
+    static translate(key: string, options?: TranslationOptions): string;
 }
 
 // @public
