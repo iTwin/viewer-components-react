@@ -74,6 +74,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
           },
           {
             parentNodeClassName: "BisCore.Model",
+            onlyIfNotHandled: true,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createModelChildrenQuery(requestProps),
           },
           {
@@ -361,18 +362,16 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     return defs;
   }
 
-  private async createCategoryChildrenQuery({
-    parentNodeInstanceIds: categoryIds,
-    parentNode,
-    instanceFilter,
-    viewType,
-  }: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
-    const { elementClass, modelClass } = getClassNameByViewType(viewType);
+  private async createCategoryChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
+    const { parentNodeInstanceIds: categoryIds, parentNode, instanceFilter, viewType } = props;
     const modelIds = parseIdsSelectorResult(parentNode.extendedData?.modelIds);
+
+    // We only want to handle a category added as a child of `GeometricModel2d` or `GeometricModel3d`.
     if (modelIds.length === 0) {
-      throw new Error(`Invalid category node "${parentNode.label}" - missing model information.`);
+      return this.createElementChildrenQuery(props);
     }
 
+    const { elementClass, modelClass } = getClassNameByViewType(viewType);
     return Promise.all(
       getElementsSelectProps({ modelClass, elementClass }).map(async ({ selectProps, whereClause }) => {
         const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
@@ -452,11 +451,9 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 supportsFiltering: selectProps?.supportsFiltering,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN BisCore.Model m ON m.ECInstanceId = this.Model.id
             ${instanceFilterClauses.joins}
             WHERE
-              m.ECClassId IS NOT (BisCore.GeometricModel)
-              AND this.Parent IS NULL
+              this.Parent IS NULL
               AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
               ${whereClause ? `AND ${whereClause}` : ""}
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
@@ -654,7 +651,7 @@ function getElementsSelectProps(props?: { modelClass?: string; elementClass?: st
   const result = [
     {
       classFullName: elementClassFullName,
-      whereClause: "this.ECClassId IS NOT (BisCore.GroupInformationElement) AND this.ECClassId IS NOT (BisCore.Category)",
+      whereClause: "this.ECClassId IS NOT (BisCore.GroupInformationElement)",
       selectProps: {
         hasChildren: {
           selector: `
