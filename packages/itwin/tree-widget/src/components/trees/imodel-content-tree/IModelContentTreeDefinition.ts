@@ -13,7 +13,6 @@ import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/present
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
-import type { Id64String } from "@itwin/core-bentley";
 import type {
   DefineCustomNodeChildHierarchyLevelProps,
   DefineHierarchyLevelProps,
@@ -37,10 +36,8 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   private _idsCache: IModelContentTreeIdsCache;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
-  private _classHierarchyInspector: ECClassHierarchyInspector;
 
   public constructor(props: IModelContentTreeDefinitionProps) {
-    this._classHierarchyInspector = props.imodelAccess;
     this._idsCache = props.idsCache;
     this._impl = createClassBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
