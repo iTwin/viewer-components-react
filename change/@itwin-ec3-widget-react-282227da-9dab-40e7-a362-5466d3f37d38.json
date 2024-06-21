@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "added support for localization for ec3 widget",
+  "comment": "Added localization support.",
   "packageName": "@itwin/ec3-widget-react",
   "email": "pari.deshpande@bentley.com",
   "dependentChangeType": "patch"

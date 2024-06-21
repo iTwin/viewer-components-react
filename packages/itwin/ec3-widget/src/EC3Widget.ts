@@ -11,12 +11,6 @@ export interface EC3WidgetConfig {
   localization?: Localization;
 }
 
-/** EC3Widget is use when the package is used as a dependency to another app.
- * '''ts
- *  await EC3Widget.initialize({...EC3WidgetConfigProps});
- * '''
- * @beta
- */
 export class EC3Widget {
   private static _defaultNs = "EC3Widget";
   public static localization: Localization;
