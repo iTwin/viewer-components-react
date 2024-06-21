@@ -3,23 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { readFileSync } from "fs";
 import { defineConfig, loadEnv, Plugin } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import react from "@vitejs/plugin-react";
 
 const ENV_PREFIX = "IMJS_";
-
-const injectedPackages = [
-  "@itwin/property-grid-react",
-  "@itwin/tree-widget-react",
-  "@itwin/measure-tools-react",
-  "@itwin/map-layers",
-  "@itwin/geo-tools-react",
-  "@itwin/grouping-mapping-widget",
-  "@itwin/reports-config-widget-react",
-  "@itwin/ec3-widget-react",
-  "@itwin/one-click-lca-react",
-];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -35,7 +24,7 @@ export default defineConfig(({ mode }) => {
     throw new Error("Please add a valid redirect URI to the .env file and restart. See the README for more information.");
   }
 
-  const disableReloading = !!env.IMJS_DISABLE_HOT_RELOAD;
+  const reloadConfig = getReloadConfig(env.IMJS_ENABLE_HOT_RELOAD);
 
   return {
     plugins: [
@@ -49,11 +38,14 @@ export default defineConfig(({ mode }) => {
           },
         ],
       }),
-      ...(disableReloading ? [] : [reloadInjectedPackages(injectedPackages)]),
+      ...(reloadConfig ? [reloadInjectedPackages(reloadConfig)] : []),
     ],
     server: {
       port: 3000,
       strictPort: true,
+    },
+    optimizeDeps: {
+      force: true,
     },
     resolve: {
       alias: [
@@ -71,53 +63,53 @@ export default defineConfig(({ mode }) => {
   };
 });
 
-function reloadInjectedPackages(modules: string[]): Plugin {
+function getReloadConfig(config?: string) {
+  if (!!config) {
+    return config === "polling" ? { usePolling: true } : {};
+  }
+  return undefined;
+}
+
+function reloadInjectedPackages(config: { usePolling?: boolean }): Plugin {
+  const { rootDependencies, injectedPackages } = getRootConfig();
+  const include = [...injectedPackages, "@itwin/itwinui-react"].flatMap((mod) => getModuleIncludes(mod));
   return {
     name: "watch-node-modules",
     configureServer: (server) => {
       server.watcher.options = {
         ...server.watcher.options,
-        ignored: modules.map((m) => `!**/node_modules/${m}/**`),
+        ...config,
+        ignored: ["**/build/**", "**/node_modules/.vite/**", ...injectedPackages.map((mod) => `!**/node_modules/${mod}/lib/esm/**`)],
       };
-
       (server.watcher as any)._userIgnored = undefined;
     },
     config: () => {
       return {
         optimizeDeps: {
           force: true,
-          exclude: [...modules, "@itwin/itwinui-react"],
-          include: modules.flatMap((mod) => forceIncludes.map((inc) => `${mod} > ${inc}`)),
-        },
-        resolve: {
-          dedupe: ["@itwin/imodels-access-common", "@itwin/imodels-access-frontend"],
+          exclude: [...injectedPackages, "@itwin/itwinui-react"],
+          include: [...rootDependencies, ...include, ...forceInclude],
         },
       };
     },
   };
 }
 
-// list of dependencies that should be force optimized. This is needed to avoid errors like this:
-// Uncaught SyntaxError: The requested module '/node_modules/.pnpm/someDep*' does not provide an export named 'someExport'
-const forceIncludes = [
-  "lodash",
-  "react-split",
-  "react-table",
-  "react-dom",
-  "react-dom/server",
-  "react-redux",
-  "react-transition-group",
-  "simple-react-validator",
-  "classnames",
-  "ts-key-enum",
-  "natural-compare-lite",
-  "@emotion/react",
-  "@seznam/compose-react-refs",
-  "@floating-ui/react",
-  "@tippyjs/react",
-  "@tanstack/react-query",
-  "@itwin/insights-client",
-  "@itwin/presentation-frontend",
-  "@itwin/presentation-components",
-  "@itwin/imodel-components-react",
-];
+function getRootConfig() {
+  const packageJson = JSON.parse(readFileSync("./package.json", { encoding: "utf-8" }));
+  const injectedPackages = Object.keys(packageJson.dependenciesMeta);
+  const excluded = [...excludedDeps, ...injectedPackages, "@itwin/itwinui-react"];
+  return {
+    injectedPackages,
+    rootDependencies: Object.keys(packageJson.dependencies).filter((dep) => !excluded.includes(dep)),
+  };
+}
+
+function getModuleIncludes(module: string) {
+  const packageJson = JSON.parse(readFileSync(`./node_modules/${module}/package.json`, { encoding: "utf-8" }));
+  const deps = Object.keys(packageJson.dependencies);
+  return deps.filter((dep) => !excludedDeps.includes(dep)).map((dep) => `${module} > ${dep}`);
+}
+
+const excludedDeps = ["@bentley/icons-generic-webfont", "@bentley/icons-generic", "@itwin/imodels-access-common"];
+const forceInclude = ["react-dom/server"];

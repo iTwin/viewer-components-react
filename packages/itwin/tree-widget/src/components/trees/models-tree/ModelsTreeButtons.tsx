@@ -7,9 +7,9 @@ import { useEffect, useMemo, useState } from "react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
-import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
-import { queryModelsForHeaderActions } from "./Utils";
+import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler";
 
+import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
@@ -23,7 +23,7 @@ export interface ModelInfo {
 }
 
 /**
- * Props that get passed to [[ModelsTreeComponent]] header button renderer.
+ * Props that get passed to `ModelsTreeComponent` header button renderer.
  * @see ModelTreeComponentProps.headerButtons
  * @public
  */
@@ -49,15 +49,33 @@ export function useAvailableModels(imodel: IModelConnection) {
   return availableModels;
 }
 
+async function queryModelsForHeaderActions(iModel: IModelConnection) {
+  const queryParams: ModelQueryParams = {
+    from: "BisCore.GeometricModel3d",
+    where: `
+        EXISTS (
+          SELECT 1
+          FROM BisCore.Element e
+          WHERE e.ECClassId IS (BisCore.GeometricElement3d, BisCore.InformationPartitionElement)
+            AND e.ECInstanceId = GeometricModel3d.ModeledElement.Id
+        )
+      `,
+    wantPrivate: false,
+  };
+
+  const modelProps = await iModel.models.queryProps(queryParams);
+  return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
+}
+
 /** @internal */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("showAll")}
+      title={TreeWidget.translate("modelsTree.buttons.showAll.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("showall");
+        props.onFeatureUsed?.("models-tree-showall");
         void showAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -75,9 +93,9 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("hideAll")}
+      title={TreeWidget.translate("modelsTree.buttons.hideAll.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("hideall");
+        props.onFeatureUsed?.("models-tree-hideall");
         void hideAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -95,9 +113,9 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
     <IconButton
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("invert")}
+      title={TreeWidget.translate("modelsTree.buttons.invert.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("invert");
+        props.onFeatureUsed?.("models-tree-invert");
         void invertAllModels(
           props.models.map((model) => model.id),
           props.viewport,
@@ -126,15 +144,15 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
     <Button
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("toggle2DViews")}
+      title={TreeWidget.translate("modelsTree.buttons.toggle2d.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("view2d");
+        props.onFeatureUsed?.("models-tree-view2d");
         void toggleModels(models2d, is2dToggleActive, props.viewport);
       }}
       disabled={models2d.length === 0}
       endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
-      {TreeWidget.translate("label2D")}
+      {TreeWidget.translate("modelsTree.buttons.toggle2d.label")}
     </Button>
   );
 }
@@ -156,15 +174,15 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
     <Button
       size={props.density === "enlarged" ? "large" : "small"}
       styleType="borderless"
-      title={TreeWidget.translate("toggle3DViews")}
+      title={TreeWidget.translate("modelsTree.buttons.toggle3d.tooltip")}
       onClick={() => {
-        props.onFeatureUsed?.("view3d");
+        props.onFeatureUsed?.("models-tree-view3d");
         void toggleModels(models3d, is3dToggleActive, props.viewport);
       }}
       disabled={models3d.length === 0}
       endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
-      {TreeWidget.translate("label3D")}
+      {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
     </Button>
   );
 }
