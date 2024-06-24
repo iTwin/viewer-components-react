@@ -5,7 +5,7 @@
 import "./ExportModal.scss";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Modal, ProgressLinear, ProgressRadial, Text } from "@itwin/itwinui-react";
-import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
+import type { EC3Job, EC3JobCreate, EC3JobStatus } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
 import { useApiContext } from "./context/APIContext";
 
@@ -35,6 +35,8 @@ interface ExportProps {
   close: () => void;
   templateId: string | undefined;
   token: string | undefined;
+  onExportSucceeded?: (status: EC3JobStatus) => void;
+  onExportFailed?: (status: EC3JobStatus) => void;
 }
 
 export const ExportModal = (props: ExportProps) => {
@@ -52,14 +54,19 @@ export const ExportModal = (props: ExportProps) => {
         const token = await getAccessToken();
         if (!(job.id && token)) return;
         const currentJobStatus = await ec3JobsClient.getEC3JobStatus(token, job.id);
-        if (currentJobStatus.status === CarbonUploadState.Succeeded)
+        if (currentJobStatus.status === CarbonUploadState.Succeeded) {
           setJobStatus({ status: CarbonUploadState.Succeeded, link: currentJobStatus._links.ec3Project.href });
-        else if (currentJobStatus.status === CarbonUploadState.Failed) setJobStatus({ status: CarbonUploadState.Failed, message: currentJobStatus.message! });
-        else setJobStatus({ status: currentJobStatus.status });
+          props?.onExportSucceeded?.(currentJobStatus);
+        } else if (currentJobStatus.status === CarbonUploadState.Failed) {
+          setJobStatus({ status: CarbonUploadState.Failed, message: currentJobStatus.message! });
+          props?.onExportFailed?.(currentJobStatus);
+        } else {
+          setJobStatus({ status: currentJobStatus.status });
+        }
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },
-    [setJobStatus, ec3JobsClient, getAccessToken],
+    [setJobStatus, ec3JobsClient, getAccessToken, props],
   );
 
   const runJob = useCallback(
