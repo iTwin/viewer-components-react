@@ -9,5 +9,8 @@ import type {
   EC3ConfigPropsWithRedirectUri,
 } from "./EC3/EC3Config";
 
+/**
+ * @internal
+ */
 export type EC3WidgetProps = EC3ConfigPropsWithCallbacks &
   (Omit<EC3ConfigPropsWithRedirectUri, "iTwinId"> | Omit<EC3ConfigPropsWithGetEC3AccessToken, "iTwinId"> | Omit<EC3ConfigPropsWithDefaultReport, "iTwinId">);

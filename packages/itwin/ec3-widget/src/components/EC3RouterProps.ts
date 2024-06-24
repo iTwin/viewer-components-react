@@ -5,6 +5,9 @@
 import type { EC3ConfigPropsWithCallbacks } from "./EC3/EC3Config";
 import type { Route } from "./EC3Widget";
 
+/**
+ * @internal
+ */
 export type EC3RouterProps = Omit<EC3ConfigPropsWithCallbacks, "iTwinId" | "clientId"> & {
   currentRoute: Route;
   navigateTo: (getNextRoute: (prev: Route | undefined) => Route) => void;

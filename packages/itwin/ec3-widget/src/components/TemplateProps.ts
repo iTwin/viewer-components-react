@@ -5,6 +5,10 @@
 import type { Configuration } from "./EC3/Template";
 import type { EC3ConfigPropsWithCallbacks } from "./EC3/EC3Config";
 
+/**
+ * Props for the {@link Templates} component.
+ * @public
+ */
 export type TemplateProps = Omit<EC3ConfigPropsWithCallbacks, "iTwinId" | "clientId"> & {
   onClickCreate?: () => void;
   onClickTemplateTitle?: (template: Configuration) => void;

@@ -14,7 +14,4 @@ export { Templates } from "./components/Templates";
 export { TemplateMenu, TemplateMenuProps } from "./components/TemplateMenu";
 export { Configuration } from "./components/EC3/Template";
 export { EC3Token } from "./components/EC3/EC3Token";
-
-export { EC3RouterProps } from "./components/EC3RouterProps";
-export { EC3WidgetProps } from "./components/EC3WidgetProps";
 export { TemplateProps } from "./components/TemplateProps";
