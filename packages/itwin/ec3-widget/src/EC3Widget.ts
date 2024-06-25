@@ -11,6 +11,11 @@ export interface EC3WidgetConfig {
   localization?: Localization;
 }
 
+/**
+ * Entry point for static initialization required by various
+ * components used in the package.
+ * @public
+ */
 export class EC3Widget {
   private static _defaultNs = "EC3Widget";
   public static localization: Localization;

@@ -90,7 +90,7 @@ export interface EC3Token {
     token: string;
 }
 
-// @beta
+// @public
 export class EC3Widget {
     static initialize(config?: EC3WidgetConfig): Promise<void>;
     // (undocumented)
