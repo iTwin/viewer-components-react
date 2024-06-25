@@ -265,9 +265,12 @@ test.describe("Models tree", () => {
 
       await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
 
-      // hover on a different node to avoid showing filtering buttons due to hover
+      // click on a different node to avoid showing filtering buttons due to hover
       const bayTownNode = locateNode(treeWidget, "BayTown");
       await bayTownNode.click();
+
+      // deselect the node so the outline would not be shown
+      await bayTownNode.click({ modifiers: ["Control"] });
 
       // focus back on the node we want to filter
       await page.keyboard.press("ArrowDown");
@@ -289,13 +292,8 @@ test.describe("Models tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // bring focus on the node
-      await node.click();
-
       // navigate to clear filter button
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
 
       // scroll to origin to avoid flakiness due to auto-scroll
       await scrollTree(page, -10000, -10000);

@@ -172,14 +172,8 @@ test.describe("Categories tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // bring focus on the node
-      await hexNode.click();
-      await page.keyboard.press("ArrowDown");
-
       // navigate to clear filter button
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
 
       // scroll to origin to avoid flakiness due to auto-scroll
       await scrollTree(page, -10000, -10000);
