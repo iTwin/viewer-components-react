@@ -168,7 +168,7 @@ function BaseTreeRenderer({
 
   return (
     <div style={{ position: "relative", height, overflow: "hidden" }}>
-      <div style={{ overflow: "auto", height: "100%" }}>
+      <div className="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
         {treeRenderer ? treeRenderer(treeRendererProps) : <TreeRenderer {...treeRendererProps} />}
         {filteringDialog}
       </div>
