@@ -15,21 +15,13 @@ import { useApiContext } from "./context/APIContext";
 import { ExportModal } from "./ExportModal";
 import { DeleteModal } from "./DeleteModal";
 import { EC3Widget } from "../EC3Widget";
-
-/**
- * Template props
- * @beta
- */
-export interface TemplateProps {
-  onClickCreate?: () => void;
-  onClickTemplateTitle?: (template: Configuration) => void;
-}
+import type { TemplateProps } from "./TemplateProps";
 
 /**
  * Templates component to display list of templates
  * @beta
  */
-export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => {
+export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult }: TemplateProps) => {
   const {
     config: { getAccessToken, iTwinId, getEC3AccessToken },
   } = useApiContext();
@@ -179,6 +171,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
         close={() => openModal(false)}
         templateId={selectedTemplate?.id}
         token={token}
+        onExportResult={onExportResult}
       />
 
       <DeleteModal

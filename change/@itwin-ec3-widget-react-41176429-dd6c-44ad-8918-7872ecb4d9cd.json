@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added callback props for EC3 export",
+  "packageName": "@itwin/ec3-widget-react",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}

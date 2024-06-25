@@ -2,7 +2,7 @@ sep=;
 Release Tag;API Item
 public;Configuration
 beta;EC3ConfigCommonProps
-beta;EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultReport
+beta;EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultReport | EC3ConfigPropsWithCallbacks
 beta;EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps &
 beta;EC3ConfigPropsWithRedirectUri = EC3ConfigCommonProps &
 beta;EC3Context: (props: EC3ContextProps) => JSX.Element
@@ -14,5 +14,5 @@ public;GetAccessTokenFn = () => Promise
 beta;handleEC3AuthCallback(ec3Config: EC3AuthCallbackConfigProps, source?: string): void
 beta;TemplateMenu: (props: TemplateMenuProps) => JSX.Element
 beta;TemplateMenuProps
-beta;TemplateProps
-beta;Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element
+public;TemplateProps = Omit
+beta;Templates: ({ onClickCreate, onClickTemplateTitle, onExportResult }: TemplateProps) => JSX.Element

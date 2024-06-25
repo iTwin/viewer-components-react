@@ -8,6 +8,7 @@
 
 import type { AccessToken } from '@itwin/core-bentley';
 import type { EC3ConfigurationLabel } from '@itwin/insights-client';
+import type { EC3JobStatus } from '@itwin/insights-client';
 import type { IEC3ConfigurationsClient } from '@itwin/insights-client';
 import type { IEC3JobsClient } from '@itwin/insights-client';
 import type { IOdataClient } from '@itwin/insights-client';
@@ -51,7 +52,7 @@ export interface EC3ConfigCommonProps {
 }
 
 // @beta
-export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultReport;
+export type EC3ConfigProps = EC3ConfigPropsWithRedirectUri | EC3ConfigPropsWithGetEC3AccessToken | EC3ConfigPropsWithDefaultReport | EC3ConfigPropsWithCallbacks;
 
 // @beta
 export type EC3ConfigPropsWithGetEC3AccessToken = EC3ConfigCommonProps & {
@@ -120,16 +121,14 @@ export interface TemplateMenuProps {
     template?: Configuration;
 }
 
-// @beta
-export interface TemplateProps {
-    // (undocumented)
+// @public
+export type TemplateProps = Omit<EC3ConfigPropsWithCallbacks, "iTwinId" | "clientId"> & {
     onClickCreate?: () => void;
-    // (undocumented)
     onClickTemplateTitle?: (template: Configuration) => void;
-}
+};
 
 // @beta
-export const Templates: ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => JSX.Element;
+export const Templates: ({ onClickCreate, onClickTemplateTitle, onExportResult }: TemplateProps) => JSX.Element;
 
 
 export * from "@itwin/insights-client";
