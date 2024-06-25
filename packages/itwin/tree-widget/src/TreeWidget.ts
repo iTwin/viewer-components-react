@@ -5,7 +5,6 @@
 
 import { BentleyError, BentleyStatus } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import { registerRenderers } from "./components/trees/common/Utils";
 
 import type { Localization, TranslationOptions } from "@itwin/core-common";
 
@@ -16,7 +15,6 @@ import type { Localization, TranslationOptions } from "@itwin/core-common";
 export class TreeWidget {
   private static _i18n?: Localization;
   private static _initialized?: boolean;
-  private static _dispose?: () => void;
 
   /**
    * Called by IModelApp to initialize the Tree Widget
@@ -29,7 +27,6 @@ export class TreeWidget {
 
     TreeWidget._initialized = true;
     TreeWidget._i18n = i18n ?? IModelApp.localization;
-    TreeWidget._dispose = registerRenderers();
     return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace);
   }
 
@@ -38,11 +35,6 @@ export class TreeWidget {
     if (TreeWidget._i18n) {
       TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace);
       TreeWidget._i18n = undefined;
-    }
-
-    if (TreeWidget._dispose) {
-      TreeWidget._dispose();
-      TreeWidget._dispose = undefined;
     }
 
     TreeWidget._initialized = false;

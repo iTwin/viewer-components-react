@@ -56,7 +56,7 @@ describe("<SelectableTree />", () => {
   it("renders without trees", async () => {
     const trees: TreeDefinition[] = [];
     const { queryByText } = render(<SelectableTree trees={trees} />);
-    await waitFor(() => expect(queryByText(TreeWidget.translate("noTrees"))).to.not.be.null);
+    await waitFor(() => expect(queryByText(TreeWidget.translate("selectableTree.noTrees"))).to.not.be.null);
   });
 
   it("renders supplied trees", async () => {
