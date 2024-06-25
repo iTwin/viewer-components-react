@@ -3,17 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import type { Route } from "./EC3Widget";
 import { RouteStep } from "./EC3Widget";
 import { TemplateMenu } from "./TemplateMenu";
 import { Templates } from "./Templates";
-export interface EC3RouterProps {
-  currentRoute: Route;
-  navigateTo: (getNextRoute: (prev: Route | undefined) => Route) => void;
-  goBack: () => void;
-}
+import type { EC3RouterProps } from "./EC3RouterProps";
 
-export const EC3Router = ({ currentRoute, navigateTo, goBack }: EC3RouterProps) => {
+export const EC3Router = ({ currentRoute, navigateTo, goBack, onExportResult }: EC3RouterProps) => {
   const { template } = currentRoute.routingFields;
   switch (currentRoute.step) {
     case RouteStep.Templates:
@@ -33,6 +28,7 @@ export const EC3Router = ({ currentRoute, navigateTo, goBack }: EC3RouterProps) 
               routingFields: { template: t },
             }))
           }
+          onExportResult={onExportResult}
         />
       );
     case RouteStep.TemplateMenu:
