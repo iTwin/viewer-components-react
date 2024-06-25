@@ -20,7 +20,7 @@ import type { TemplateProps } from "./TemplateProps";
  * Templates component to display list of templates
  * @beta
  */
-export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportSucceeded, onExportFailed }: TemplateProps) => {
+export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult }: TemplateProps) => {
   const {
     config: { getAccessToken, iTwinId, getEC3AccessToken },
   } = useApiContext();
@@ -171,8 +171,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportSucceed
         close={() => openModal(false)}
         templateId={selectedTemplate?.id}
         token={token}
-        onExportSucceeded={onExportSucceeded}
-        onExportFailed={onExportFailed}
+        onExportResult={onExportResult}
       />
 
       <DeleteModal

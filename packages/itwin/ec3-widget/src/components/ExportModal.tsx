@@ -5,9 +5,10 @@
 import "./ExportModal.scss";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Modal, ProgressLinear, ProgressRadial, Text } from "@itwin/itwinui-react";
-import type { EC3Job, EC3JobCreate, EC3JobStatus } from "@itwin/insights-client";
+import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
 import { useApiContext } from "./context/APIContext";
+import type { EC3ConfigPropsWithCallbacks } from "./EC3/EC3Config";
 
 interface JobSuccess {
   status: CarbonUploadState.Succeeded;
@@ -29,15 +30,13 @@ interface JobRunning {
 
 type JobStatus = JobSuccess | JobFailed | JobQueued | JobRunning;
 
-interface ExportProps {
+type ExportProps = Omit<EC3ConfigPropsWithCallbacks, "iTwinId" | "clientId"> & {
   projectName: string;
   isOpen: boolean;
   close: () => void;
   templateId: string | undefined;
   token: string | undefined;
-  onExportSucceeded?: (status: EC3JobStatus) => void;
-  onExportFailed?: (status: EC3JobStatus) => void;
-}
+};
 
 export const ExportModal = (props: ExportProps) => {
   const PIN_INTERVAL = 5000;
@@ -56,13 +55,12 @@ export const ExportModal = (props: ExportProps) => {
         const currentJobStatus = await ec3JobsClient.getEC3JobStatus(token, job.id);
         if (currentJobStatus.status === CarbonUploadState.Succeeded) {
           setJobStatus({ status: CarbonUploadState.Succeeded, link: currentJobStatus._links.ec3Project.href });
-          props?.onExportSucceeded?.(currentJobStatus);
         } else if (currentJobStatus.status === CarbonUploadState.Failed) {
           setJobStatus({ status: CarbonUploadState.Failed, message: currentJobStatus.message! });
-          props?.onExportFailed?.(currentJobStatus);
         } else {
           setJobStatus({ status: currentJobStatus.status });
         }
+        props?.onExportResult?.(currentJobStatus);
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },

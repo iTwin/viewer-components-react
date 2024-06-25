@@ -8,7 +8,7 @@ import { TemplateMenu } from "./TemplateMenu";
 import { Templates } from "./Templates";
 import type { EC3RouterProps } from "./EC3RouterProps";
 
-export const EC3Router = ({ currentRoute, navigateTo, goBack, onExportSucceeded, onExportFailed }: EC3RouterProps) => {
+export const EC3Router = ({ currentRoute, navigateTo, goBack, onExportResult }: EC3RouterProps) => {
   const { template } = currentRoute.routingFields;
   switch (currentRoute.step) {
     case RouteStep.Templates:
@@ -28,8 +28,7 @@ export const EC3Router = ({ currentRoute, navigateTo, goBack, onExportSucceeded,
               routingFields: { template: t },
             }))
           }
-          onExportSucceeded={onExportSucceeded}
-          onExportFailed={onExportFailed}
+          onExportResult={onExportResult}
         />
       );
     case RouteStep.TemplateMenu:

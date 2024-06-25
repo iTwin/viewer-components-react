@@ -98,14 +98,9 @@ export type EC3ConfigPropsWithDefaultReport = EC3ConfigCommonProps & {
 
 export type EC3ConfigPropsWithCallbacks = EC3ConfigCommonProps & {
   /**
-   * The callback function for EC3 export success.
+   * The callback function for export status.
    */
-  onExportSucceeded?: (status: EC3JobStatus) => void;
-
-  /**
-   * The callback function for EC3 export failure.
-   */
-  onExportFailed?: (status: EC3JobStatus) => void;
+  onExportResult?: (status: EC3JobStatus) => void;
 };
 
 /**

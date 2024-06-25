@@ -48,8 +48,7 @@ export const EC3Widget = (props: EC3WidgetProps) => {
           currentRoute={currentRoute}
           navigateTo={navigateTo}
           goBack={goBack}
-          onExportSucceeded={props.onExportSucceeded}
-          onExportFailed={props.onExportFailed}
+          onExportResult={props.onExportResult}
         />
       </div>
     </EC3Context>
