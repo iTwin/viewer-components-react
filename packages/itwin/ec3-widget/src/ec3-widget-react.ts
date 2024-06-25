@@ -10,7 +10,8 @@ export { EC3ConfigProps, EC3ConfigPropsWithRedirectUri, EC3ConfigPropsWithGetEC3
 export { GetAccessTokenFn } from "./components/context/APIContext";
 
 export { EC3Context, EC3ContextProps } from "./components/EC3Context";
-export { Templates, TemplateProps } from "./components/Templates";
+export { Templates } from "./components/Templates";
 export { TemplateMenu, TemplateMenuProps } from "./components/TemplateMenu";
 export { Configuration } from "./components/EC3/Template";
 export { EC3Token } from "./components/EC3/EC3Token";
+export { TemplateProps } from "./components/TemplateProps";
