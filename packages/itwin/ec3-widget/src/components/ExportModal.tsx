@@ -8,6 +8,7 @@ import { Button, Modal, ProgressLinear, ProgressRadial, Text } from "@itwin/itwi
 import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
 import { useApiContext } from "./context/APIContext";
+import type { EC3ConfigPropsWithCallbacks } from "./EC3/EC3Config";
 
 interface JobSuccess {
   status: CarbonUploadState.Succeeded;
@@ -29,13 +30,13 @@ interface JobRunning {
 
 type JobStatus = JobSuccess | JobFailed | JobQueued | JobRunning;
 
-interface ExportProps {
+type ExportProps = Omit<EC3ConfigPropsWithCallbacks, "iTwinId" | "clientId"> & {
   projectName: string;
   isOpen: boolean;
   close: () => void;
   templateId: string | undefined;
   token: string | undefined;
-}
+};
 
 export const ExportModal = (props: ExportProps) => {
   const PIN_INTERVAL = 5000;
@@ -52,14 +53,18 @@ export const ExportModal = (props: ExportProps) => {
         const token = await getAccessToken();
         if (!(job.id && token)) return;
         const currentJobStatus = await ec3JobsClient.getEC3JobStatus(token, job.id);
-        if (currentJobStatus.status === CarbonUploadState.Succeeded)
+        if (currentJobStatus.status === CarbonUploadState.Succeeded) {
           setJobStatus({ status: CarbonUploadState.Succeeded, link: currentJobStatus._links.ec3Project.href });
-        else if (currentJobStatus.status === CarbonUploadState.Failed) setJobStatus({ status: CarbonUploadState.Failed, message: currentJobStatus.message! });
-        else setJobStatus({ status: currentJobStatus.status });
+        } else if (currentJobStatus.status === CarbonUploadState.Failed) {
+          setJobStatus({ status: CarbonUploadState.Failed, message: currentJobStatus.message! });
+        } else {
+          setJobStatus({ status: currentJobStatus.status });
+        }
+        props?.onExportResult?.(currentJobStatus);
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },
-    [setJobStatus, ec3JobsClient, getAccessToken],
+    [setJobStatus, ec3JobsClient, getAccessToken, props],
   );
 
   const runJob = useCallback(
