@@ -40,7 +40,6 @@ import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 import { MeasureTools } from "../MeasureTools";
-import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 
 /**
  * Props for serializing a [[LocationMeasurement]].
@@ -288,9 +287,7 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    let adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
-    if (this.drawingMetadata?.sheetToWorldTransform)
-      adjustedLocation = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.sheetToWorldTransform);
+    const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const fCoordinates = await FormatterUtils.formatCoordinates(adjustedLocation);
 
     let title = MeasureTools.localization.getLocalizedString(
