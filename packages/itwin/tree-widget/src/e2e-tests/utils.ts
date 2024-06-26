@@ -92,7 +92,7 @@ export async function selectTree(widget: Locator, treeLabel: string) {
 
 export async function scrollTree(page: Page, x: number, y: number) {
   // get the parent of the tree renderer that is scrollable
-  const container = page.locator("div:has(> .tw-tree-renderer)");
+  const container = page.locator("#tw-tree-renderer-container");
   await container.evaluate(
     (e: SVGElement | HTMLElement, scrollAmount: { left: number; top: number }) => {
       e.scrollBy({ ...scrollAmount, behavior: "instant" } as unknown as ScrollToOptions);
@@ -117,6 +117,7 @@ export function withDifferentDensities(cb: (density: "default" | "enlarged") => 
 interface TakeScreenshotOptions {
   expandBy?: { top?: number; right?: number; bottom?: number; left?: number };
   boundingComponent?: Locator;
+  resetScroll?: boolean;
 }
 
 export async function takeScreenshot(page: Page, component: Locator, options?: TakeScreenshotOptions) {
@@ -128,6 +129,10 @@ export async function takeScreenshot(page: Page, component: Locator, options?: T
     width: boundingBox.width + expansion.left + expansion.right,
     height: boundingBox.height + expansion.top + expansion.bottom,
   };
+
+  if (options?.resetScroll) {
+    await scrollTree(page, -10000, -10000);
+  }
 
   await expect(page).toHaveScreenshot({ clip });
 }

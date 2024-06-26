@@ -71,10 +71,7 @@ test.describe("Models tree", () => {
       await locateNode(treeWidget, "PipeSupport").waitFor();
       await treeWidget.getByTitle("Clear active filter").waitFor();
 
-      // scroll to origin to avoid flakiness due to auto-scroll
-      await scrollTree(page, -10000, -10000);
-
-      await takeScreenshot(page, treeWidget);
+      await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
 
     test("node with active filtering - information message", async ({ page }) => {
@@ -93,10 +90,7 @@ test.describe("Models tree", () => {
       await treeWidget.getByText("No child nodes match current filter").waitFor();
       await treeWidget.getByTitle("Clear active filter").waitFor();
 
-      // scroll to origin to avoid flakiness due to auto-scroll
-      await scrollTree(page, -10000, -10000);
-
-      await takeScreenshot(page, treeWidget);
+      await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
 
     test("search", async ({ page }) => {
@@ -280,6 +274,9 @@ test.describe("Models tree", () => {
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
 
+      const applyFilterButton = node.getByTitle("Apply filter");
+      await expect(applyFilterButton).toBeFocused();
+
       await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
 
       // open filtering dialog
@@ -291,22 +288,15 @@ test.describe("Models tree", () => {
       await selectValueInDialog(page, "PipeSupport");
 
       await page.getByRole("button", { name: "Apply" }).click();
+      await expect(applyFilterButton).toBeFocused();
 
       // navigate to clear filter button
       await page.keyboard.press("Shift+Tab");
+      await takeScreenshot(page, node, { resetScroll: true, expandBy: { top: 10, bottom: 10 } });
 
-      // scroll to origin to avoid flakiness due to auto-scroll
-      await scrollTree(page, -10000, -10000);
-
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
-
-      // navigate to apply filter button
-      await page.keyboard.press("Tab");
-
-      // scroll to origin to avoid flakiness due to auto-scroll
-      await scrollTree(page, -10000, -10000);
-
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      // click the clear filter button
+      await page.keyboard.press("Enter");
+      await expect(applyFilterButton).toBeFocused();
     });
   });
 });

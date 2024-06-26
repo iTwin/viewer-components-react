@@ -920,8 +920,8 @@ packages:
       '@itwin/ecschema-metadata': ^4.6.0
       '@itwin/presentation-common': ^4.6.0
 
-  '@itwin/presentation-hierarchies-react@0.5.1':
-    resolution: {integrity: sha512-sTO330kTRdx+Xh0jMibPm90ck5H5lxEPlBYWOj3xfE2QS44iidoOAdD2zu+hxeBS3+XlVmwLKIDCGGUhV2TabQ==}
+  '@itwin/presentation-hierarchies-react@0.5.3':
+    resolution: {integrity: sha512-mvoxTvpsnscYEH9STwLTs3ZKmCRk5gVdkBtKpF8/E2vWNLz4cvrv0rinHzCUh0EjfdyIslezP/0NOetwiCwuXA==}
     peerDependencies:
       '@itwin/itwinui-react': ^3.11.3
       react: ^17.0.0 || ^18.0.0
@@ -4043,7 +4043,7 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@0.5.1(@itwin/itwinui-react@3.11.3(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@itwin/presentation-hierarchies-react@0.5.3(@itwin/itwinui-react@3.11.3(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -4153,7 +4153,7 @@ snapshots:
       '@itwin/presentation-components': 5.3.3(vrzktwjwvhcjtlwx3kyu5fi3tm)
       '@itwin/presentation-core-interop': 0.2.3(@itwin/core-bentley@4.6.0)(@itwin/core-common@4.6.0(@itwin/core-bentley@4.6.0)(@itwin/core-geometry@4.6.0))(@itwin/core-geometry@4.6.0)(@itwin/core-quantity@4.6.0(@itwin/core-bentley@4.6.0))(@itwin/ecschema-metadata@4.6.0(@itwin/core-bentley@4.6.0)(@itwin/core-quantity@4.6.0(@itwin/core-bentley@4.6.0)))
       '@itwin/presentation-hierarchies': 0.2.0
-      '@itwin/presentation-hierarchies-react': 0.5.1(@itwin/itwinui-react@3.11.3(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@itwin/presentation-hierarchies-react': 0.5.3(@itwin/itwinui-react@3.11.3(@types/react@18.2.57)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/presentation-shared': 0.3.1
       '@itwin/unified-selection': 0.4.4
       classnames: 2.5.1

@@ -27,8 +27,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@itwin/presentation-hierarchies-react':
-        specifier: ^0.5.1
-        version: 0.5.1(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-shared':
         specifier: ^0.3.1
         version: 0.3.1
@@ -827,10 +827,10 @@ packages:
       '@itwin/ecschema-metadata': ^4.5.1
       '@itwin/presentation-common': ^4.5.1
 
-  '@itwin/presentation-hierarchies-react@0.5.1':
-    resolution: {integrity: sha512-sTO330kTRdx+Xh0jMibPm90ck5H5lxEPlBYWOj3xfE2QS44iidoOAdD2zu+hxeBS3+XlVmwLKIDCGGUhV2TabQ==}
+  '@itwin/presentation-hierarchies-react@0.5.3':
+    resolution: {integrity: sha512-mvoxTvpsnscYEH9STwLTs3ZKmCRk5gVdkBtKpF8/E2vWNLz4cvrv0rinHzCUh0EjfdyIslezP/0NOetwiCwuXA==}
     peerDependencies:
-      '@itwin/itwinui-react': ^3.11.3
+      '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -4820,7 +4820,7 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@0.5.1(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
+  '@itwin/presentation-hierarchies-react@0.5.3(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
     dependencies:
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)

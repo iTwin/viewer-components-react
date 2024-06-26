@@ -65,7 +65,7 @@
     "@itwin/itwinui-react": "^3.11.1",
     "@itwin/presentation-core-interop": "^0.2.3",
     "@itwin/presentation-hierarchies": "^0.2.0",
-    "@itwin/presentation-hierarchies-react": "^0.5.1",
+    "@itwin/presentation-hierarchies-react": "^0.5.3",
     "@itwin/presentation-shared": "^0.3.1",
     "@itwin/unified-selection": "^0.4.4",
     "classnames": "^2.3.1",
