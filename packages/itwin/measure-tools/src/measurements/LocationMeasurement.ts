@@ -233,28 +233,25 @@ export class LocationMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
-    let convertedSheetPoint;
-    if (this.drawingMetadata?.sheetToWorldTransform)
-      convertedSheetPoint = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.sheetToWorldTransform);
+    const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_x"
         ),
-        value: await FormatterUtils.formatLength(convertedSheetPoint?.x ?? adjustedLocation.x),
+        value: await FormatterUtils.formatLength(adjustedLocation.x),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_y"
         ),
-        value: await FormatterUtils.formatLength(convertedSheetPoint?.y ?? adjustedLocation.y),
+        value: await FormatterUtils.formatLength(adjustedLocation.y),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
-        value: await FormatterUtils.formatLength(convertedSheetPoint?.z ?? adjustedLocation.z),
+        value: await FormatterUtils.formatLength(adjustedLocation.z),
       },
     ];
 

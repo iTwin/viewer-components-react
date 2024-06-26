@@ -17,7 +17,7 @@ import { MeasurementPreferences } from "./MeasurementPreferences";
 import type { MeasurementProps } from "./MeasurementProps";
 import { MeasurementViewTarget } from "./MeasurementViewTarget";
 import { ShimFunctions } from "./ShimFunctions";
-import type { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
+import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
 
 /** A property value on a measurement that can be aggregated with other similarly-named properties from other measurements so aggregate totals can be displayed in the UI. */
 export interface AggregatableValue {
@@ -63,13 +63,13 @@ export namespace DrawingMetadata {
     const sheetTov8Drawing = obj.sheetToWorldTransform?.sheetTov8Drawing.toJSON();
     const v8DrawingToDesign = obj.sheetToWorldTransform?.v8DrawingToDesign.toJSON();
     if (origin !== undefined)
-      return { origin, extents, worldScale: obj.worldScale, drawingId: obj.drawingId, transform: (masterOrigin !== undefined && sheetTov8Drawing !== undefined && v8DrawingToDesign !== undefined) ? {masterOrigin, sheetTov8Drawing, v8DrawingToDesign}: undefined };
+      return { origin, extents, worldScale: obj.worldScale, drawingId: obj.drawingId, sheetToWorldTransform: (masterOrigin !== undefined && sheetTov8Drawing !== undefined && v8DrawingToDesign !== undefined) ? {masterOrigin, sheetTov8Drawing, v8DrawingToDesign}: undefined };
     return undefined;
   }
 
   export function fromJSON(json: DrawingMetadataProps): DrawingMetadata {
 
-    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents), sheetToWorldTransform: { masterOrigin: Point3d.fromJSON(json.transform?.masterOrigin), sheetTov8Drawing: Transform.fromJSON(json.transform?.sheetTov8Drawing), v8DrawingToDesign: Transform.fromJSON(json.transform?.v8DrawingToDesign)}};
+    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents), sheetToWorldTransform: { masterOrigin: Point3d.fromJSON(json.sheetToWorldTransform?.masterOrigin), sheetTov8Drawing: Transform.fromJSON(json.sheetToWorldTransform?.sheetTov8Drawing), v8DrawingToDesign: Transform.fromJSON(json.sheetToWorldTransform?.v8DrawingToDesign)}};
 
   }
 
@@ -262,10 +262,10 @@ export interface MeasurementEqualityOptions {
   angleTolerance?: number;
 }
 
-export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents" | "transform"> {
+export interface DrawingMetadataProps extends Omit<DrawingMetadata, "origin" | "extents" | "sheetToWorldTransform"> {
   origin: XYProps;
   extents?: XYProps;
-  transform?: {
+  sheetToWorldTransform?: {
     masterOrigin: XYZProps;
     sheetTov8Drawing: TransformProps;
     v8DrawingToDesign: TransformProps;
@@ -674,6 +674,15 @@ export abstract class Measurement {
         return point.minus(globalOrigin);
       }
     }
+    return point;
+  }
+
+  /** Adjusts point with the sheetToWorldTransform
+   * This is used to display 3d world information in sheets
+   */
+  protected adjustPointWithSheetToWorldTransform(point: Point3d): Readonly<Point3d> {
+    if (this.drawingMetadata?.sheetToWorldTransform)
+      return SheetMeasurementsHelper.measurementTransform(point, this.drawingMetadata.sheetToWorldTransform);
     return point;
   }
 
