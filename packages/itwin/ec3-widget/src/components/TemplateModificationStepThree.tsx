@@ -7,6 +7,7 @@ import { Button, Text } from "@itwin/itwinui-react";
 import React from "react";
 import type { Configuration } from "./EC3/Template";
 import "./TemplateModificationStepThree.scss";
+import { EC3Widget } from "../EC3Widget";
 
 export interface TemplateModificationStepThreeProps {
   currentStep: number;
@@ -20,7 +21,7 @@ export const TemplateModificationStepThree = (props: TemplateModificationStepThr
   return (
     <>
       <div className="ec3w-template-creation-step-three">
-        <Text className="ec3w-summary-text">Selection Summary :</Text>
+        <Text className="ec3w-summary-text">{EC3Widget.translate("selectionSummary")}</Text>
         {props.childTemplate.labels.map((x) => (
           <div className="ec3w-assembly-name-list" key={x.name}>
             <SvgInfoCircular />
@@ -32,7 +33,7 @@ export const TemplateModificationStepThree = (props: TemplateModificationStepThr
       </div>
       <div className="ec3w-stepper-footer">
         <Button className="ec3w-footer-button" onClick={() => props.updateCurrentStep(1)}>
-          Back
+          {EC3Widget.translate("backButton")}
         </Button>
         <Button
           data-testid="ec3-save-button"
@@ -42,9 +43,9 @@ export const TemplateModificationStepThree = (props: TemplateModificationStepThr
             await props.onSaveClick();
           }}
         >
-          Save
+          {EC3Widget.translate("saveButton")}
         </Button>
-        <Button onClick={props.onCancelClick}>Cancel</Button>
+        <Button onClick={props.onCancelClick}>{EC3Widget.translate("cancelButton")}</Button>
       </div>
     </>
   );
