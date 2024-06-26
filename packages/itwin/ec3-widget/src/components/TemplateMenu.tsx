@@ -10,6 +10,7 @@ import { useApiContext } from "./context/APIContext";
 import { TemplateModificationStepRenderer } from "./TemplateModificationStepRenderer";
 import type { Report } from "@itwin/insights-client";
 import "./TemplateMenu.scss";
+import { EC3Widget } from "../EC3Widget";
 /**
  * Props for {@link TemplateMenu}
  * @beta
@@ -79,7 +80,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
             }
           }
         } catch (err) {
-          toaster.negative("You are not authorized to use this system.");
+          toaster.negative(EC3Widget.translate("unauthorisedUserMsg"));
           /* eslint-disable no-console */
           console.error(err);
           setIsLoading(false);
@@ -108,7 +109,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
         return undefined;
       }
     } catch (e) {
-      toaster.negative("Saving failed.");
+      toaster.negative(EC3Widget.translate("savingFailedToasterMsg"));
       // eslint-disable-next-line no-console
       console.error(e);
       return undefined;
@@ -118,7 +119,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
   return (
     <div className="ec3w-template-creation-stepper" data-testid="ec3w-template-creation-stepper">
       <Stepper
-        steps={[{ name: "Create a template" }, { name: "Add Assembly(s)" }, { name: "Send report to EC3" }]}
+        steps={[{ name: EC3Widget.translate("stepOneTitle") }, { name: EC3Widget.translate("stepTwoTitle") }, { name: EC3Widget.translate("stepThreeTitle") }]}
         currentStep={currentStep}
         onStepClick={(index: number) => setCurrentStep(index)}
       />

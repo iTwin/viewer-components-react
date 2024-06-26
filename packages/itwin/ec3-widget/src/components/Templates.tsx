@@ -14,21 +14,14 @@ import React from "react";
 import { useApiContext } from "./context/APIContext";
 import { ExportModal } from "./ExportModal";
 import { DeleteModal } from "./DeleteModal";
-
-/**
- * Template props
- * @beta
- */
-export interface TemplateProps {
-  onClickCreate?: () => void;
-  onClickTemplateTitle?: (template: Configuration) => void;
-}
+import { EC3Widget } from "../EC3Widget";
+import type { TemplateProps } from "./TemplateProps";
 
 /**
  * Templates component to display list of templates
  * @beta
  */
-export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps) => {
+export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult }: TemplateProps) => {
   const {
     config: { getAccessToken, iTwinId, getEC3AccessToken },
   } = useApiContext();
@@ -40,7 +33,6 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
   const configClient = useApiContext().ec3ConfigurationsClient;
   const [token, setToken] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
-
   const load = useCallback(async () => {
     setIsLoading(true);
     if (iTwinId) {
@@ -105,7 +97,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
           <LoadingOverlay />
         ) : templates.length === 0 ? (
           <>
-            <EmptyMessage message="It looks like you haven't added any templates yet. Click the button below to create your first template." />
+            <EmptyMessage message={EC3Widget.translate("noTemplateMsg")} />
             <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="Add New Template">
               Add New Template
             </Button>
@@ -179,6 +171,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle }: TemplateProps
         close={() => openModal(false)}
         templateId={selectedTemplate?.id}
         token={token}
+        onExportResult={onExportResult}
       />
 
       <DeleteModal

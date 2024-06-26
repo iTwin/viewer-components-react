@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Updated tree widget to persist scroll position when switching between widgets.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "33428304+jasdom@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

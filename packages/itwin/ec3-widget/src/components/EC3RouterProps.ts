@@ -2,13 +2,14 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import React from "react";
-import { Text } from "@itwin/itwinui-react";
-import "./RequiredFieldsNotice.scss";
-import { EC3Widget } from "../EC3Widget";
+import type { EC3ConfigPropsWithCallbacks } from "./EC3/EC3Config";
+import type { Route } from "./EC3Widget";
 
-export const RequiredFieldsNotice = () => (
-  <Text variant="small" className="ec3w-template-field-legend">
-    {EC3Widget.translate("requiredFieldNotice")}
-  </Text>
-);
+/**
+ * @internal
+ */
+export type EC3RouterProps = Omit<EC3ConfigPropsWithCallbacks, "iTwinId" | "clientId"> & {
+  currentRoute: Route;
+  navigateTo: (getNextRoute: (prev: Route | undefined) => Route) => void;
+  goBack: () => void;
+};

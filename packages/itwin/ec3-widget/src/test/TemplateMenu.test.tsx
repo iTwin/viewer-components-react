@@ -9,7 +9,7 @@ import * as moq from "typemoq";
 import type { EC3Configuration, EC3ConfigurationsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { getSelectOptions, mockITwinId, renderWithContext, simulateClick, simulateSelect, simulateTextInput } from "./test-utils";
+import { getSelectOptions, mockITwinId, renderWithContext, simulateClick, simulateSelect, simulateTextInput, TestUtils } from "./test-utils";
 import { TemplateMenu } from "../components/TemplateMenu";
 import type { Configuration } from "../components/EC3/Template";
 
@@ -100,6 +100,7 @@ describe("TemplateMenu", () => {
   const getAccessTokenFn = async () => accessToken;
 
   beforeEach(async () => {
+    await TestUtils.initialize();
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     reportsClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     configClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => config);
