@@ -80,6 +80,7 @@ MeasureDistanceToolModel
   }
 
   public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
     await this.updateDrawingTypeCache();
   }
 
