@@ -13,6 +13,7 @@ import type { DrawingMetadata } from "./Measurement";
 
 export namespace SheetMeasurementsHelper {
 
+  /** This maps directly to the viewType field found in the schema on BisCore.viewAttachment */
   export enum DrawingType {
     CrossSection = 3,
     Profile = 5,
