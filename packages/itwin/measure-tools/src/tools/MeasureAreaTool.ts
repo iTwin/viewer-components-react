@@ -68,7 +68,7 @@ MeasureAreaToolModel
     const sheetIds = [];
     if (this._enableSheetMeasurements) {
       for (const viewport of IModelApp.viewManager) {
-        if (viewport.view.classFullName === "BisCore:SheetViewDefinition") {
+        if (viewport.view.isSheetView()) {
           this._sheetChangeListener = viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache());
           sheetIds.push(viewport.view.id);
         }
