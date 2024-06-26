@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
-export * from "./widget/EC3Widget";
+export * from "./widget/EC3Provider";
 export * from "@itwin/insights-client";
 export { handleEC3AuthCallback } from "./components/EC3/EC3AuthCallback";
 export { EC3ConfigProps, EC3ConfigPropsWithRedirectUri, EC3ConfigPropsWithGetEC3AccessToken, EC3ConfigCommonProps } from "./components/EC3/EC3Config";
@@ -14,4 +14,5 @@ export { Templates } from "./components/Templates";
 export { TemplateMenu, TemplateMenuProps } from "./components/TemplateMenu";
 export { Configuration } from "./components/EC3/Template";
 export { EC3Token } from "./components/EC3/EC3Token";
+export { EC3Widget } from "./EC3Widget";
 export { TemplateProps } from "./components/TemplateProps";

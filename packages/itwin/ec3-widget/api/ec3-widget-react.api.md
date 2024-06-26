@@ -13,10 +13,12 @@ import type { IEC3ConfigurationsClient } from '@itwin/insights-client';
 import type { IEC3JobsClient } from '@itwin/insights-client';
 import type { IOdataClient } from '@itwin/insights-client';
 import type { IReportsClient } from '@itwin/insights-client';
+import type { Localization } from '@itwin/core-common';
 import { default as React_2 } from 'react';
 import type { Report } from '@itwin/insights-client';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
+import type { TranslationOptions } from '@itwin/core-common';
 import type { UiItemsProvider } from '@itwin/appui-react';
 import type { Widget } from '@itwin/appui-react';
 
@@ -87,6 +89,17 @@ export interface EC3Token {
     source: string;
     // (undocumented)
     token: string;
+}
+
+// @public
+export class EC3Widget {
+    static initialize(config?: EC3WidgetConfig): Promise<void>;
+    // (undocumented)
+    static localization: Localization;
+    static get localizationNamespace(): string;
+    static terminate(): void;
+    // (undocumented)
+    static translate(key: string, options?: TranslationOptions): string;
 }
 
 // @public

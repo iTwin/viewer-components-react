@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { AssemblyCreationDropdownType } from "./TemplateModificationStepTwo";
 import type { EC3ConfigurationLabel, ODataTable } from "@itwin/insights-client";
 import type { Configuration } from "../ec3-widget-react";
+import { EC3Widget } from "../EC3Widget";
 import "./AssemblyItem.scss";
 
 export interface AssemblyItemProps {
@@ -127,26 +128,26 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         id="name"
         name="name"
         data-testid="ec3-assembly-name-input"
-        label="Assembly Name"
+        label={EC3Widget.translate("assemblyName")}
         value={props.assembly.name}
         onChange={onAssemblyNameChange}
         disabled={props.currentAssemblyIndex !== props.editableAssemblyIndex}
       />
       <LabeledSelect
-        label="Select ReportTable"
+        label={EC3Widget.translate("reportTable")}
         className="ec3w-input-form"
         data-testid="ec3-report-table-select"
         options={getReportTableOptions(props.assembly)}
         value={props.assembly.reportTable}
         onChange={onReportTableSelectChange}
         disabled={props.currentAssemblyIndex !== props.editableAssemblyIndex || !props.template.reportId || props.isLoading}
-        placeholder={props.isLoading ? "Loading report tables..." : "Select report table"}
+        placeholder={props.isLoading ? EC3Widget.translate("reportTablesPlaceholderLoading") : EC3Widget.translate("reportTablesPlaceholderSelect")}
       />
       <LabeledSelect
         data-testid="ec3-element-select"
         className="ec3w-input-form"
         required
-        label={"Element"}
+        label={EC3Widget.translate("element")}
         options={
           getMetadataColumns(props.assembly, AssemblyCreationDropdownType.elementName)?.map((x) => {
             return { label: x, value: x };
@@ -155,13 +156,19 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         value={props.assembly.elementNameColumn}
         onChange={onElementSelectChange}
         disabled={props.isLoading || props.assembly.reportTable === "" || props.currentAssemblyIndex !== props.editableAssemblyIndex}
-        placeholder={props.isLoading ? "Loading elements" : props.assembly.reportTable === "" ? "Select report table first" : "Select element"}
+        placeholder={
+          props.isLoading
+            ? EC3Widget.translate("elementPlaceholderLoading")
+            : props.assembly.reportTable === ""
+              ? EC3Widget.translate("selectReportTableFirstPlaceholder")
+              : EC3Widget.translate("elementPlaceholderSelect")
+        }
       />
       <LabeledSelect
         data-testid="ec3-element-quantity-select"
         className="ec3w-input-form"
         required
-        label={"Element quantity"}
+        label={EC3Widget.translate("elementQuantity")}
         options={
           getMetadataColumns(props.assembly, AssemblyCreationDropdownType.elementQuantity)?.map((x) => {
             return { label: x, value: x };
@@ -170,10 +177,16 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         value={props.assembly.elementQuantityColumn}
         onChange={onElementQuantitySelectChange}
         disabled={props.isLoading || props.assembly.reportTable === "" || props.currentAssemblyIndex !== props.editableAssemblyIndex}
-        placeholder={props.isLoading ? "Loading elements" : props.assembly.reportTable === "" ? "Select report table first" : "Select element quantity"}
+        placeholder={
+          props.isLoading
+            ? EC3Widget.translate("elementPlaceholderLoading")
+            : props.assembly.reportTable === ""
+              ? EC3Widget.translate("selectReportTableFirstPlaceholder")
+              : EC3Widget.translate("elementQuantityPlaceholderSelect")
+        }
       />
       <Label htmlFor="combo-input" required>
-        Materials
+        {EC3Widget.translate("materials")}
       </Label>
       <Select
         data-testid="ec3-material-select"
@@ -187,7 +200,11 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
         value={props.assembly.materials.map((x) => x?.nameColumn)}
         onChange={onMaterialSelectChange}
         placeholder={
-          props.isLoading ? "Loading elements" : props.assembly.reportTable === "" ? "Select report table first" : "Select property containing material names"
+          props.isLoading
+            ? EC3Widget.translate("elementPlaceholderLoading")
+            : props.assembly.reportTable === ""
+              ? EC3Widget.translate("selectReportTableFirstPlaceholder")
+              : EC3Widget.translate("materialsSelectPlaceholder")
         }
         multiple
       />

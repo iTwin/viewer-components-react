@@ -11,6 +11,7 @@ import "./TemplateModificationStepTwo.scss";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
 import { useApiContext } from "./context/APIContext";
 import { AssemblyItem } from "./AssemblyItem";
+import { EC3Widget } from "../EC3Widget";
 
 export interface TemplateModificationStepTwoProps {
   template: Configuration;
@@ -32,7 +33,6 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [oDataTable, setoDataTable] = useState<ODataTable[]>([]);
   const [editableAssemblyIndex, setEditableAssemblyIndex] = useState<number>();
-
   const oDataClient = useApiContext().oDataClient;
   const {
     config: { getAccessToken },
@@ -181,7 +181,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
               addNewEmptyAssembly();
             }}
           >
-            Add new
+            {EC3Widget.translate("addNewAssembly")}
           </Button>
         </div>
       </div>
@@ -193,7 +193,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
           }}
           className="ec3w-footer-button"
         >
-          Back
+          {EC3Widget.translate("backButton")}
         </Button>
         <Button
           styleType="high-visibility"
@@ -206,9 +206,9 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
             props.updateCurrentStep(2);
           }}
         >
-          Next
+          {EC3Widget.translate("nextButton")}
         </Button>
-        <Button onClick={props.onCancelClick}>Cancel</Button>
+        <Button onClick={props.onCancelClick}> {EC3Widget.translate("cancelButton")}</Button>
       </div>
     </div>
   );
