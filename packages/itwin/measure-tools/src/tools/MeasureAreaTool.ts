@@ -27,6 +27,7 @@ import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
+import { DrawingDataCache } from "../api/DrawingTypeDataCache";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -35,8 +36,7 @@ MeasureAreaToolModel
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
   private _enableSheetMeasurements: boolean;
-  private _drawingTypeCache: SheetMeasurementsHelper.DrawingTypeData[] = [];
-  private _sheetChangeListener: () => void = () => {};
+  private _drawingTypeCache?: DrawingDataCache;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -63,23 +63,6 @@ MeasureAreaToolModel
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
-  private async updateDrawingTypeCache() {
-    this._sheetChangeListener();
-    const sheetIds = [];
-    if (this._enableSheetMeasurements) {
-      for (const viewport of IModelApp.viewManager) {
-        if (viewport.view.isSheetView()) {
-          this._sheetChangeListener = viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache());
-          sheetIds.push(viewport.view.id);
-        }
-      }
-    }
-
-    for (const id of sheetIds) {
-      this._drawingTypeCache = await SheetMeasurementsHelper.getSheetTypes(this.iModel, id);
-    }
-  }
-
   public async onRestartTool(): Promise<void> {
     const tool = new MeasureAreaTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
@@ -89,7 +72,10 @@ MeasureAreaToolModel
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
-    await this.updateDrawingTypeCache();
+    if (this._enableSheetMeasurements) {
+      this._drawingTypeCache = new DrawingDataCache();
+      await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
+    }
   }
 
   public override async onReinitialize(): Promise<void> {
@@ -165,10 +151,12 @@ MeasureAreaToolModel
     if (!this._enableSheetMeasurements)
       return true;
 
-    for (const drawing of this._drawingTypeCache) {
-      if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
-        if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
-          return false;
+    if (this._drawingTypeCache) {
+      for (const drawing of this._drawingTypeCache.drawingtypes) {
+        if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
+          if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
+            return false;
+          }
         }
       }
     }
