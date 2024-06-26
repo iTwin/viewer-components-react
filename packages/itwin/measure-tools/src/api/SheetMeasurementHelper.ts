@@ -49,18 +49,20 @@ export namespace SheetMeasurementsHelper {
     for await (const row of iter) {
       const x = mousePos.x;
       const y = mousePos.y;
-      if (x >= row[1].X && x <= row[1].X + row[2].X) {
+      const highX = row[3].X - row[2].X;
+      const highY = row[3].Y - row[2].Y;
+      if (x >= row[1].X && x <= row[1].X + highX) {
         // Within x extents
-        if (y >= row[1].Y && y <= row[1].Y + row[2].Y) {
+        if (y >= row[1].Y && y <= row[1].Y + highY) {
           // Within y extents
-          const jsonProp = JSON.parse(row[3]);
+          const jsonProp = JSON.parse(row[4]);
           const scale = jsonProp.scale;
           if (jsonProp.civilimodelconn) {
             const transform: SheetTransformProps = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
             const result: DrawingMetadata = {
               drawingId: row[0],
               origin: new Point2d(row[1].X, row[1].Y),
-              extents: new Point2d(row[2].X, row[2].Y),
+              extents: new Point2d(highX, highY),
               worldScale: scale,
               transform,
             };
@@ -75,8 +77,9 @@ export namespace SheetMeasurementsHelper {
 
   function getDrawingInfoECSQL(id: string) {
     const ecsql = "SELECT [d].ECInstanceId, \
-      [dvd].origin, \
-      [dvd].Extents, \
+      [va].origin, \
+      [va].BBoxLow, \
+      [va].BBoxHigh, \
       [va].JsonProperties \
       FROM Biscore.sheetViewDefinition [svd], Biscore.sheet [s], Biscore.viewAttachment [va], Biscore.DrawingViewDefinition [dvd], Biscore.drawing [d] \
       WHERE [svd].ECInstanceId =:[id] \
@@ -128,10 +131,12 @@ export namespace SheetMeasurementsHelper {
     const result = [];
 
     for await (const row of iter) {
-      const jsonProp = JSON.parse(row[3]);
+      const highX = row[3].X - row[2].X;
+      const highY = row[3].Y - row[2].Y;
+      const jsonProp = JSON.parse(row[4]);
       if (jsonProp.civilimodelconn) {
         const origin = new Point2d(row[1].X, row[1].Y);
-        const extents = new Point2d(row[2].X, row[2].Y);
+        const extents = new Point2d(highX, highY);
         const viewType = jsonProp.civilimodelconn.viewType;
         result.push({origin, extents, type: viewType});
       }

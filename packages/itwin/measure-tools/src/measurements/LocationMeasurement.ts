@@ -312,7 +312,7 @@ export class LocationMeasurement extends Measurement {
       value: fCoordinates,
     });
 
-    if (this._geoLocation)
+    if (this._geoLocation && this.drawingMetadata?.transform !== undefined)
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.latLong"
