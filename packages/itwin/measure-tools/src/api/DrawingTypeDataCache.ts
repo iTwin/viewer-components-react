@@ -10,9 +10,9 @@ import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
 export class DrawingDataCache {
 
   private _drawingTypeCache: SheetMeasurementsHelper.DrawingTypeData[];
-  private _sheetChangeListener: () => void = () => {};
+  private _sheetChangeListener: VoidFunction[] = [];
 
-  public get drawingtypes() {
+  public get drawingtypes(): ReadonlyArray<SheetMeasurementsHelper.DrawingTypeData> {
     return this._drawingTypeCache;
   }
 
@@ -21,12 +21,14 @@ export class DrawingDataCache {
   }
 
   public async updateDrawingTypeCache(iModel: IModelConnection) {
-    this._sheetChangeListener();
+    this._sheetChangeListener.forEach((func) => {
+      func();
+    });
     const sheetIds = [];
 
     for (const viewport of IModelApp.viewManager) {
       if (viewport.view.isSheetView()) {
-        this._sheetChangeListener = viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache(iModel));
+        this._sheetChangeListener.push(viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache(iModel)));
         sheetIds.push(viewport.view.id);
       }
     }
