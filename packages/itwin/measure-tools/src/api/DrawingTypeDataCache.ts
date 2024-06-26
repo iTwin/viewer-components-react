@@ -24,17 +24,20 @@ export class DrawingDataCache {
     this._sheetChangeListener.forEach((func) => {
       func();
     });
-    const sheetIds = [];
+    this._sheetChangeListener = [];
+    this._drawingTypeCache = [];
+
+    const sheetIds = new Set<string>();
 
     for (const viewport of IModelApp.viewManager) {
       if (viewport.view.isSheetView()) {
         this._sheetChangeListener.push(viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache(iModel)));
-        sheetIds.push(viewport.view.id);
+        sheetIds.add(viewport.view.id);
       }
     }
 
     for (const id of sheetIds) {
-      this._drawingTypeCache = await SheetMeasurementsHelper.getSheetTypes(iModel, id);
+      this._drawingTypeCache = this._drawingTypeCache.concat(await SheetMeasurementsHelper.getSheetTypes(iModel, id));
     }
   }
 
