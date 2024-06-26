@@ -19,7 +19,10 @@ export namespace SheetMeasurementsHelper {
     Plan = 6
   }
 
-  export interface SheetTransformProps {
+  /**
+   * Used as parameter for measurement transform operation which is a 3 step process
+   */
+  export interface SheetTransformParams {
     masterOrigin: Point3d;
     sheetTov8Drawing: Transform;
     v8DrawingToDesign: Transform;
@@ -58,7 +61,7 @@ export namespace SheetMeasurementsHelper {
           const jsonProp = JSON.parse(row[4]);
           const scale = jsonProp.scale;
           if (jsonProp.civilimodelconn) {
-            const transform: SheetTransformProps = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
+            const transform: SheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
             const result: DrawingMetadata = {
               drawingId: row[0],
               origin: new Point2d(row[1].X, row[1].Y),
@@ -112,7 +115,7 @@ export namespace SheetMeasurementsHelper {
    * @param transform
    * @returns Point in world coordinates
    */
-  export function measurementTransform(point: Point3d, transform: SheetTransformProps): Point3d {
+  export function measurementTransform(point: Point3d, transform: SheetTransformParams): Point3d {
     const drawingPoint = transform.sheetTov8Drawing.multiplyPoint3d(point);
     const adjustedDrawingPoint = new Point3d(drawingPoint.x, drawingPoint.y, transform.masterOrigin.z);
     const final3dPoint = transform.v8DrawingToDesign.multiplyPoint3d(adjustedDrawingPoint);

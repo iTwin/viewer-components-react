@@ -286,7 +286,7 @@ export interface DrawingMetadata {
   extents?: Point2d;
 
   /** Represents the transform from sheet points to 3d points */
-  transform?: SheetMeasurementsHelper.SheetTransformProps;
+  transform?: SheetMeasurementsHelper.SheetTransformParams;
 
 }
 
