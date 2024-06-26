@@ -235,8 +235,8 @@ export class LocationMeasurement extends Measurement {
   private async createTextMarker(): Promise<void> {
     const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
     let convertedSheetPoint;
-    if (this.drawingMetadata?.transform)
-      convertedSheetPoint = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.transform);
+    if (this.drawingMetadata?.sheetToWorldTransform)
+      convertedSheetPoint = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.sheetToWorldTransform);
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
@@ -292,8 +292,8 @@ export class LocationMeasurement extends Measurement {
   MeasurementWidgetData | undefined
   > {
     let adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
-    if (this.drawingMetadata?.transform)
-      adjustedLocation = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.transform);
+    if (this.drawingMetadata?.sheetToWorldTransform)
+      adjustedLocation = SheetMeasurementsHelper.measurementTransform(this._location, this.drawingMetadata.sheetToWorldTransform);
     const fCoordinates = await FormatterUtils.formatCoordinates(adjustedLocation);
 
     let title = MeasureTools.localization.getLocalizedString(
@@ -312,7 +312,7 @@ export class LocationMeasurement extends Measurement {
       value: fCoordinates,
     });
 
-    if (this._geoLocation && this.drawingMetadata?.transform !== undefined)
+    if (this._geoLocation && this.drawingMetadata?.sheetToWorldTransform !== undefined)
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.latLong"
@@ -332,7 +332,7 @@ export class LocationMeasurement extends Measurement {
         value: await FormatterUtils.formatLength(adjustedLocation.z),
       });
     }
-    if (this.drawingMetadata?.transform === undefined) {
+    if (this.drawingMetadata?.sheetToWorldTransform === undefined) {
       let slopeValue: string;
       if (undefined !== this._slope)
         slopeValue = FormatterUtils.formatSlope(100.0 * this._slope, true);

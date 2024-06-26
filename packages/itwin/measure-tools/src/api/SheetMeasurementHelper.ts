@@ -62,13 +62,13 @@ export namespace SheetMeasurementsHelper {
           const jsonProp = JSON.parse(row[4]);
           const scale = jsonProp.scale;
           if (jsonProp.civilimodelconn) {
-            const transform: SheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
+            const sheetToWorldTransform: SheetTransformParams = { masterOrigin: Point3d.fromJSON(jsonProp.civilimodelconn.masterOrigin), sheetTov8Drawing: Transform.fromJSON(jsonProp.civilimodelconn.sheetToV8DrawingTransform), v8DrawingToDesign: Transform.fromJSON(jsonProp.civilimodelconn.v8DrawingToDesignTransform)};
             const result: DrawingMetadata = {
               drawingId: row[0],
               origin: new Point2d(row[1].X, row[1].Y),
               extents: new Point2d(highX, highY),
               worldScale: scale,
-              transform,
+              sheetToWorldTransform,
             };
             return result;
           }
