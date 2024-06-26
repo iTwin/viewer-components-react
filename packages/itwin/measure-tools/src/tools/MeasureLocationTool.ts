@@ -158,6 +158,10 @@ MeasureLocationToolModel
     if (!this._enableSheetMeasurements)
       return true;
 
+    if (true !== ev.viewport?.view.isSheetView()) {
+      return true;
+    }
+
     if (this._drawingTypeCache) {
       for (const drawing of this._drawingTypeCache.drawingtypes) {
         if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {

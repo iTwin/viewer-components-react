@@ -69,7 +69,17 @@ export namespace DrawingMetadata {
 
   export function fromJSON(json: DrawingMetadataProps): DrawingMetadata {
 
-    return { origin: Point2d.fromJSON(json.origin), worldScale: json.worldScale, drawingId: json.drawingId, extents: Point2d.fromJSON(json.extents), sheetToWorldTransform: { masterOrigin: Point3d.fromJSON(json.sheetToWorldTransform?.masterOrigin), sheetTov8Drawing: Transform.fromJSON(json.sheetToWorldTransform?.sheetTov8Drawing), v8DrawingToDesign: Transform.fromJSON(json.sheetToWorldTransform?.v8DrawingToDesign)}};
+    return {
+      origin: Point2d.fromJSON(json.origin),
+      worldScale: json.worldScale,
+      drawingId: json.drawingId,
+      extents: Point2d.fromJSON(json.extents),
+      sheetToWorldTransform: json.sheetToWorldTransform ? {
+        masterOrigin: Point3d.fromJSON(json.sheetToWorldTransform?.masterOrigin),
+        sheetTov8Drawing: Transform.fromJSON(json.sheetToWorldTransform?.sheetTov8Drawing),
+        v8DrawingToDesign: Transform.fromJSON(json.sheetToWorldTransform?.v8DrawingToDesign),
+      }: undefined,
+    };
 
   }
 
