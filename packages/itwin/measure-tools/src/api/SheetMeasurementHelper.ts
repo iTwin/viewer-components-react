@@ -6,7 +6,7 @@
 import { ColorDef, QueryBinder } from "@itwin/core-common";
 import type { DecorateContext, GraphicBuilder, IModelConnection } from "@itwin/core-frontend";
 import { GraphicType } from "@itwin/core-frontend";
-import { Point3d} from "@itwin/core-geometry";
+import { Point3d } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { DrawingMetadata } from "./Measurement";
