@@ -29,7 +29,14 @@ type ModelsTreeProps = ComponentPropsWithoutRef<typeof ModelsTree>;
 interface ModelsTreeComponentProps
   extends Pick<
     ModelsTreeProps,
-    "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured" | "onFeatureUsed" | "hierarchyConfig"
+    | "getSchemaContext"
+    | "density"
+    | "hierarchyLevelConfig"
+    | "selectionMode"
+    | "onPerformanceMeasured"
+    | "onFeatureUsed"
+    | "hierarchyConfig"
+    | "visibilityHandlerOverrides"
   > {
   /**
    * Renderers of header buttons. Defaults to:

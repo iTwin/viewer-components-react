@@ -20,12 +20,12 @@ import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
 import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
 import type { HierarchyLevelDetails } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { UsageTrackedFeatures } from "./UseFeatureReporting";
+import type { ReportUsageCallback } from "./UseFeatureReporting";
 
 interface UseHierarchyLevelFilteringProps {
   imodel: IModelConnection;
   defaultHierarchyLevelSizeLimit: number;
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
+  reportUsage?: ReportUsageCallback<"hierarchy-level-filtering">;
 }
 
 /** @internal */

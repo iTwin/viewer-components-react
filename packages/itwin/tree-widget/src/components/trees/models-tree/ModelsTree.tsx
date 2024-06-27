@@ -11,6 +11,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
+import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
@@ -19,21 +20,26 @@ import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibili
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
+import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
+import type { VisibilityTreeUsageTrackedFeatures } from "../common/components/VisibilityTree";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { ElementsGroupInfo } from "./ModelsTreeDefinition";
+import type { ElementsGroupInfo, HierarchyConfiguration } from "./ModelsTreeDefinition";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
+type ModelsTreeUsageTrackedFeatures = VisibilityTreeUsageTrackedFeatures | "zoom-to-node" | "filtering";
 
 interface ModelsTreeOwnProps {
   activeView: Viewport;
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
+  hierarchyConfig?: Partial<HierarchyConfiguration>;
+  visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   filter?: string;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -42,12 +48,8 @@ interface ModelsTreeOwnProps {
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
-type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 
-type ModelsTreeProps = ModelsTreeOwnProps &
-  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> & {
-    hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
-  };
+type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> & {};
 
 /** @internal */
 export function ModelsTree({
@@ -63,9 +65,10 @@ export function ModelsTree({
   selectionMode,
   onPerformanceMeasured,
   onFeatureUsed,
+  visibilityHandlerOverrides,
 }: ModelsTreeProps) {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
-  const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
+  const hierarchyConfiguration = useMemo<HierarchyConfiguration>(
     () => ({
       ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
@@ -74,9 +77,9 @@ export function ModelsTree({
     Object.values(hierarchyConfig ?? {}),
   );
 
-  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration);
+  const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
   const { loadInstanceKeys: loadFocusedInstancesKeys } = useFocusedInstancesContext();
-  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: ModelsTreeComponent.id });
+  const { reportUsage } = useFeatureReporting<ModelsTreeUsageTrackedFeatures>({ onFeatureUsed, treeIdentifier: ModelsTreeComponent.id });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
@@ -152,7 +155,6 @@ export function ModelsTree({
       getHierarchyDefinition={getHierarchyDefinition}
       getFilteredPaths={getFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
-      getIcon={getIcon}
       density={density}
       noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode}
@@ -160,8 +162,8 @@ export function ModelsTree({
         onPerformanceMeasured?.(`${ModelsTreeComponent.id}-${action}`, duration);
       }}
       reportUsage={reportUsage}
-      onNodeDoubleClick={onNodeDoubleClick}
       searchText={filter}
+      treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getIcon={getIcon} onNodeDoubleClick={onNodeDoubleClick} />}
     />
   );
 }
@@ -216,11 +218,12 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
-function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: () => ModelsTreeIdsCache) {
-  return (imodelAccess: ECClassHierarchyInspector) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess });
+function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: () => ModelsTreeIdsCache, overrides?: ModelsTreeVisibilityHandlerOverrides) {
+  return (imodelAccess: ECClassHierarchyInspector) =>
+    createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides });
 }
 
-function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration) {
+function useCachedVisibility(activeView: Viewport, hierarchyConfig: HierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const currentIModelRef = useRef(activeView.iModel);
 
@@ -231,21 +234,21 @@ function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHi
     return cacheRef.current;
   }, [hierarchyConfig]);
 
-  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
+  const [visibilityHandlerFactory, setVisibilityHandlerFactory] = useState(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
 
   useIModelChangeListener({
     imodel: activeView.iModel,
     action: useCallback(() => {
       cacheRef.current = undefined;
-      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
-    }, [activeView, getModelsTreeIdsCache]),
+      setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
+    }, [activeView, getModelsTreeIdsCache, overrides]),
   });
 
   useEffect(() => {
     currentIModelRef.current = activeView.iModel;
     cacheRef.current = undefined;
-    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache));
-  }, [activeView, getModelsTreeIdsCache]);
+    setVisibilityHandlerFactory(() => createVisibilityHandlerFactory(activeView, getModelsTreeIdsCache, overrides));
+  }, [activeView, getModelsTreeIdsCache, overrides]);
 
   return {
     getModelsTreeIdsCache,

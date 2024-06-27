@@ -10,8 +10,8 @@ import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-rea
 import type { PresentationHierarchyNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef } from "react";
 
-/** @internal */
-export interface TreeNodeCheckboxState {
+/** Data structure that describes tree node checkbox state. */
+interface TreeNodeCheckboxState {
   state: "on" | "off" | "partial";
   isDisabled?: boolean;
   tooltip?: string;
@@ -19,7 +19,9 @@ export interface TreeNodeCheckboxState {
 
 interface TreeNodeCheckboxOwnProps {
   node: RenderedTreeNode;
+  /** Callback that should be invoked when checkbox is clicked. */
   onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
+  /** Callback that should be used to determine current checkbox state. */
   getCheckboxState: (node: PresentationHierarchyNode) => TreeNodeCheckboxState;
 }
 

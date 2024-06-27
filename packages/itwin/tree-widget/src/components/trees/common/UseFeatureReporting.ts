@@ -5,28 +5,26 @@
 
 import { useCallback, useEffect, useRef } from "react";
 
-/** @internal */
-export interface UseFeatureReportingProps {
+/**
+ * Defines callback that is used by `Tree` component to report usage of features.
+ * @beta
+ */
+export type ReportUsageCallback<TFeatures extends string> = (props: { featureId?: TFeatures; reportInteraction: boolean }) => void;
+
+interface UseFeatureReportingProps {
   treeIdentifier: string;
   onFeatureUsed?: (featureId: string) => void;
 }
 
-/** @internal */
-export interface UseFeatureReportingResult {
-  reportUsage: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+interface UseFeatureReportingResult<TFeatures extends string> {
+  reportUsage: ReportUsageCallback<TFeatures>;
 }
 
 /**
- * Features that are tracked for usage.
- * @internal
+ * Creates callback that can be passed to `Tree` component to track feature usage.
+ * @beta
  */
-export type UsageTrackedFeatures = "visibility-change" | "hierarchy-level-filtering" | "filtering" | "hierarchy-level-size-limit-hit" | "zoom-to-node";
-
-/**
- * Enables feature reporting for a tree component.
- * @internal
- */
-export function useFeatureReporting(props: UseFeatureReportingProps): UseFeatureReportingResult {
+export function useFeatureReporting<TFeatures extends string>(props: UseFeatureReportingProps): UseFeatureReportingResult<TFeatures> {
   const { treeIdentifier, onFeatureUsed } = props;
   const onFeatureUsedRef = useRef(onFeatureUsed);
 
@@ -35,7 +33,7 @@ export function useFeatureReporting(props: UseFeatureReportingProps): UseFeature
   }, [onFeatureUsed]);
 
   const reportUsage = useCallback(
-    ({ featureId, reportInteraction }: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => {
+    ({ featureId, reportInteraction }: { featureId?: TFeatures; reportInteraction: boolean }) => {
       if (reportInteraction !== false) {
         onFeatureUsedRef.current?.(`use-${treeIdentifier}`);
       }
@@ -49,16 +47,19 @@ export function useFeatureReporting(props: UseFeatureReportingProps): UseFeature
   return { reportUsage };
 }
 
-interface UseReportingActionProps<T> {
-  action: T;
-  featureId?: UsageTrackedFeatures;
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: true }) => void;
+interface UseReportingActionProps<TAction, TFeatures> {
+  action: TAction;
+  featureId?: TFeatures;
+  reportUsage?: (props: { featureId?: TFeatures; reportInteraction: true }) => void;
 }
 
 /** @internal */
-// istanbul ignore next
-export function useReportingAction<T extends (...args: any[]) => void>({ action, featureId, reportUsage }: UseReportingActionProps<T>) {
-  return useCallback<(...args: Parameters<T>) => void>(
+export function useReportingAction<TAction extends (...args: any[]) => void, TFeatures extends string>({
+  action,
+  featureId,
+  reportUsage,
+}: UseReportingActionProps<TAction, TFeatures>) {
+  return useCallback<(...args: Parameters<TAction>) => void>(
     (...args) => {
       reportUsage?.({ featureId, reportInteraction: true });
       action(...args);

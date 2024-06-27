@@ -7,14 +7,17 @@ import "./TreeRenderer.scss";
 import { useCallback } from "react";
 import { Tree } from "@itwin/itwinui-react";
 import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
+import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { TreeNodeRenderer } from "./TreeNodeRenderer";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { PresentationHierarchyNode, PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
-
 interface TreeRendererOwnProps {
+  /** Tree nodes to render. */
   rootNodes: PresentationTreeNode[];
+  /** Callback to check if specific node is selected. */
   isNodeSelected: (nodeId: string) => boolean;
+  /** Callback that is invoked when node is double clicked. */
   onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
 }
 
@@ -23,10 +26,12 @@ type TreeRendererProps = Pick<
   "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps"
 > &
   Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
-  Pick<LocalizationContextProviderProps, "localizedStrings"> &
   TreeRendererOwnProps;
 
-/** @internal */
+/**
+ * Default renderer for rendering tree data.
+ * @beta
+ */
 export function TreeRenderer({
   rootNodes,
   expandNode,
@@ -40,9 +45,9 @@ export function TreeRenderer({
   getSublabel,
   getHierarchyLevelDetails,
   checkboxProps,
-  localizedStrings,
   ...props
 }: TreeRendererProps) {
+  const localizedStrings = useHierarchiesLocalization();
   const nodeRenderer = useCallback<TreeProps<RenderedTreeNode>["nodeRenderer"]>(
     (nodeProps) => {
       return (
@@ -89,4 +94,3 @@ export function TreeRenderer({
 
 type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;
-type LocalizationContextProviderProps = ComponentPropsWithoutRef<typeof LocalizationContextProvider>;
