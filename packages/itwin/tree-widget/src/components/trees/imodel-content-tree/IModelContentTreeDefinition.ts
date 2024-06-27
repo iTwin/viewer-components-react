@@ -4,10 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  createClassBasedHierarchyDefinition,
-  createNodesQueryClauseFactory,
-  HierarchyNode,
-  NodeSelectClauseColumnNames,
+  createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
@@ -233,7 +230,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   },
                   extendedData: {
                     imageId: "icon-model",
-                    isModel: true,
                   },
                   supportsFiltering: true,
                 })}
@@ -244,7 +240,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
-            ${modelFilterClauses.where ? `AND (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
+            ${modelFilterClauses.where ? `WHERE (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
           `,
           bindings: childModelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
@@ -367,6 +363,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     const modelIds = parseIdsSelectorResult(parentNode.extendedData?.modelIds);
 
     // We only want to handle a category added as a child of `GeometricModel2d` or `GeometricModel3d`.
+    // ModelIds is not empty only if parent node is a geometric model.
     if (modelIds.length === 0) {
       return this.createElementChildrenQuery(props);
     }
@@ -625,8 +622,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN BisCore.Element p ON p.ECInstanceId = this.Parent.Id
               ${instanceFilterClauses.joins}
               WHERE
-                p.ECInstanceId IN (${elementIds.map(() => "?").join(",")}) AND
-                p.ECClassId IS NOT (BisCore.ISubModeledElement)
+                p.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
             `,
@@ -640,12 +636,12 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
 
 function getClassNameByViewType(view: "2d" | "3d") {
   if (view === "2d") {
-    return { categoryClass: "BisCore.DrawingCategory", elementClass: "BisCore.GeometricElement2d", modelClass: "BisCore.GeometricModel2d" };
+    return { categoryClass: "BisCore.DrawingCategory", elementClass: "BisCore.GeometricElement2d", modelClass: "BisCore.GeometricModel2d" } as const;
   }
-  return { categoryClass: "BisCore.SpatialCategory", elementClass: "BisCore.GeometricElement3d", modelClass: "BisCore.GeometricModel3d" };
+  return { categoryClass: "BisCore.SpatialCategory", elementClass: "BisCore.GeometricElement3d", modelClass: "BisCore.GeometricModel3d" } as const;
 }
 
-function getElementsSelectProps(props?: { modelClass?: string; elementClass?: string }) {
+function getElementsSelectProps(props?: { modelClass?: string; elementClass?: "BisCore.GeometricElement3d" | "BisCore.GeometricElement2d" }) {
   const modelClassFullName = props?.modelClass ?? "BisCore.Model";
   const elementClassFullName = props?.elementClass ?? "BisCore.Element";
   const result = [
