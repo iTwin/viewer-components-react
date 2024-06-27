@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Reduce redundancies in tree definitions by using `onlyIfNotHandled` flag.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "yato333@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}

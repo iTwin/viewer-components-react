@@ -4,16 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  createClassBasedHierarchyDefinition,
-  createNodesQueryClauseFactory,
-  HierarchyNode,
-  NodeSelectClauseColumnNames,
+  createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
-import { createIdsSelector } from "../common/Utils";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 import type { ECClassHierarchyInspector, ECSchemaProvider, ECSqlBinding, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
-import type { Id64String } from "@itwin/core-bentley";
 import type {
   DefineCustomNodeChildHierarchyLevelProps,
   DefineHierarchyLevelProps,
@@ -37,10 +33,8 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   private _idsCache: IModelContentTreeIdsCache;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
-  private _classHierarchyInspector: ECClassHierarchyInspector;
 
   public constructor(props: IModelContentTreeDefinitionProps) {
-    this._classHierarchyInspector = props.imodelAccess;
     this._idsCache = props.idsCache;
     this._impl = createClassBasedHierarchyDefinition({
       classHierarchyInspector: props.imodelAccess,
@@ -77,6 +71,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
           },
           {
             parentNodeClassName: "BisCore.Model",
+            onlyIfNotHandled: true,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createModelChildrenQuery(requestProps),
           },
           {
@@ -93,6 +88,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
           },
           {
             parentNodeClassName: "BisCore.Element",
+            onlyIfNotHandled: true,
             definitions: async (requestProps: DefineInstanceNodeChildHierarchyLevelProps) => this.createElementChildrenQuery(requestProps),
           },
         ],
@@ -136,7 +132,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 },
                 extendedData: {
                   imageId: "icon-imodel-hollow-2",
-                  isSubject: true,
                 },
                 autoExpand: true,
                 supportsFiltering: true,
@@ -190,7 +185,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 grouping: { byLabel: { action: "merge", groupId: "subject" } },
                 extendedData: {
                   imageId: "icon-folder",
-                  isSubject: true,
                 },
                 supportsFiltering: true,
               })}
@@ -236,7 +230,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   },
                   extendedData: {
                     imageId: "icon-model",
-                    isModel: true,
                   },
                   supportsFiltering: true,
                 })}
@@ -247,7 +240,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
             ) model
             JOIN ${modelFilterClauses.from} this ON this.ECInstanceId = model.ECInstanceId
             ${modelFilterClauses.joins}
-            ${modelFilterClauses.where ? `AND (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
+            ${modelFilterClauses.where ? `WHERE (model.${NodeSelectClauseColumnNames.HideNodeInHierarchy} OR ${modelFilterClauses.where})` : ""}
           `,
           bindings: childModelIds.map((id): ECSqlBinding => ({ type: "id", value: id })),
         },
@@ -320,7 +313,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 extendedData: {
                   imageId: "icon-layers",
                   modelIds: { selector: createIdsSelector(modelIds) },
-                  isCategory: true,
                 },
                 hasChildren: true,
                 supportsFiltering: true,
@@ -348,9 +340,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                     className: "BisCore.InformationContentElement",
                   }),
                 },
-                extendedData: {
-                  isInformationContentElement: true,
-                },
                 hasChildren: true,
                 grouping: {
                   byClass: true,
@@ -369,46 +358,27 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
     return defs;
   }
 
-  private async createCategoryChildrenQuery({
-    parentNodeInstanceIds: categoryIds,
-    parentNode,
-    instanceFilter,
-    viewType,
-  }: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
+  private async createCategoryChildrenQuery(props: DefineInstanceNodeChildHierarchyLevelProps & { viewType: "2d" | "3d" }): Promise<HierarchyLevelDefinition> {
+    const { parentNodeInstanceIds: categoryIds, parentNode, instanceFilter, viewType } = props;
+    const modelIds = parseIdsSelectorResult(parentNode.extendedData?.modelIds);
+
     // We only want to handle a category added as a child of `GeometricModel2d` or `GeometricModel3d`.
-    if (!parentNode.extendedData?.isCategory) {
-      return [];
-    }
-    const { elementClass, modelClass } = getClassNameByViewType(viewType);
-    const modelIds: Id64String[] =
-      parentNode.extendedData && parentNode.extendedData.hasOwnProperty("modelIds") && Array.isArray(parentNode.extendedData.modelIds)
-        ? parentNode.extendedData.modelIds.reduce(
-            (arr, ids: Id64String | Id64String[]) => [...arr, ...(Array.isArray(ids) ? ids : [ids])],
-            new Array<Id64String>(),
-          )
-        : [];
+    // ModelIds is not empty only if parent node is a geometric model.
     if (modelIds.length === 0) {
-      throw new Error(`Invalid category node "${parentNode.label}" - missing model information.`);
+      return this.createElementChildrenQuery(props);
     }
 
+    const { elementClass, modelClass } = getClassNameByViewType(viewType);
     return Promise.all(
-      (
-        await Promise.all(
-          getElementsSelectProps({ modelClass }).map(async (props) =>
-            (await this._classHierarchyInspector.classDerivesFrom(elementClass, props.classFullName)) ? props : undefined,
-          ),
-        )
-      )
-        .filter(<T>(props: T | undefined): props is T => !!props)
-        .map(async ({ selectProps, whereClause }) => {
-          const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
-            filter: instanceFilter,
-            contentClass: { fullName: elementClass, alias: "this" },
-          });
-          return {
-            fullClassName: elementClass,
-            query: {
-              ecsql: `
+      getElementsSelectProps({ modelClass, elementClass }).map(async ({ selectProps, whereClause }) => {
+        const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
+          filter: instanceFilter,
+          contentClass: { fullName: elementClass, alias: "this" },
+        });
+        return {
+          fullClassName: elementClass,
+          query: {
+            ecsql: `
               SELECT
                 ${await this._selectQueryFactory.createSelectClause({
                   ecClassId: { selector: "this.ECClassId" },
@@ -424,7 +394,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   },
                   extendedData: {
                     imageId: "icon-item",
-                    ...selectProps.extendedData,
                   },
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
@@ -438,10 +407,10 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
             `,
-              bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
-            },
-          };
-        }),
+            bindings: [...categoryIds.map((id) => ({ type: "id", value: id })), ...modelIds.map((id) => ({ type: "id", value: id }))] as ECSqlBinding[],
+          },
+        };
+      }),
     );
   }
 
@@ -474,17 +443,14 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                 },
                 extendedData: {
                   imageId: "icon-item",
-                  ...selectProps.extendedData,
                 },
                 hasChildren: selectProps?.hasChildren,
                 supportsFiltering: selectProps?.supportsFiltering,
               })}
             FROM ${instanceFilterClauses.from} this
-            JOIN BisCore.Model m ON m.ECInstanceId = this.Model.id
             ${instanceFilterClauses.joins}
             WHERE
-              m.ECClassId IS NOT (BisCore.GeometricModel)
-              AND this.Parent IS NULL
+              this.Parent IS NULL
               AND this.Model.Id IN (${modelIds.map(() => "?").join(",")})
               ${whereClause ? `AND ${whereClause}` : ""}
               ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
@@ -555,7 +521,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   },
                   extendedData: {
                     imageId: "icon-item",
-                    ...selectProps.extendedData,
                   },
                   grouping: { byClass: true },
                   hasChildren: selectProps.hasChildren,
@@ -603,7 +568,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   grouping: { byClass: true },
                   extendedData: {
                     imageId: "icon-item",
-                    ...selectProps.extendedData,
                   },
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
@@ -626,12 +590,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
   private async createElementChildrenQuery({
     parentNodeInstanceIds: elementIds,
     instanceFilter,
-    parentNode,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const data = parentNode.extendedData;
-    if (data?.isCategory || data?.isSubject || data?.isInformationContentElement || data?.isGroupInformationElement) {
-      return [];
-    }
     return Promise.all(
       getElementsSelectProps().map(async ({ classFullName, whereClause, selectProps }) => {
         const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
@@ -655,7 +614,6 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
                   grouping: { byClass: true },
                   extendedData: {
                     imageId: "icon-item",
-                    ...selectProps.extendedData,
                   },
                   hasChildren: selectProps.hasChildren,
                   supportsFiltering: selectProps.supportsFiltering,
@@ -664,8 +622,7 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
               JOIN BisCore.Element p ON p.ECInstanceId = this.Parent.Id
               ${instanceFilterClauses.joins}
               WHERE
-                p.ECInstanceId IN (${elementIds.map(() => "?").join(",")}) AND
-                p.ECClassId IS NOT (BisCore.ISubModeledElement)
+                p.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
                 ${whereClause ? `AND ${whereClause}` : ""}
                 ${instanceFilterClauses.where ? `AND ${instanceFilterClauses.where}` : ""}
             `,
@@ -679,16 +636,17 @@ export class IModelContentTreeDefinition implements HierarchyDefinition {
 
 function getClassNameByViewType(view: "2d" | "3d") {
   if (view === "2d") {
-    return { categoryClass: "BisCore.DrawingCategory", elementClass: "BisCore.GeometricElement2d", modelClass: "BisCore.GeometricModel2d" };
+    return { categoryClass: "BisCore.DrawingCategory", elementClass: "BisCore.GeometricElement2d", modelClass: "BisCore.GeometricModel2d" } as const;
   }
-  return { categoryClass: "BisCore.SpatialCategory", elementClass: "BisCore.GeometricElement3d", modelClass: "BisCore.GeometricModel3d" };
+  return { categoryClass: "BisCore.SpatialCategory", elementClass: "BisCore.GeometricElement3d", modelClass: "BisCore.GeometricModel3d" } as const;
 }
 
-function getElementsSelectProps(props?: { modelClass?: string }) {
+function getElementsSelectProps(props?: { modelClass?: string; elementClass?: "BisCore.GeometricElement3d" | "BisCore.GeometricElement2d" }) {
   const modelClassFullName = props?.modelClass ?? "BisCore.Model";
-  return [
+  const elementClassFullName = props?.elementClass ?? "BisCore.Element";
+  const result = [
     {
-      classFullName: "BisCore.Element",
+      classFullName: elementClassFullName,
       whereClause: "this.ECClassId IS NOT (BisCore.GroupInformationElement)",
       selectProps: {
         hasChildren: {
@@ -696,9 +654,9 @@ function getElementsSelectProps(props?: { modelClass?: string }) {
           IFNULL((
             SELECT 1
             FROM (
-              SELECT Parent.Id ParentId FROM BisCore.Element
+              SELECT Parent.Id ParentId FROM ${elementClassFullName}
               UNION ALL
-              SELECT sm.ModeledElement.Id ParentId FROM ${modelClassFullName} sm WHERE EXISTS (SELECT 1 FROM BisCore.Element WHERE Model.Id = sm.ECInstanceId)
+              SELECT sm.ModeledElement.Id ParentId FROM ${modelClassFullName} sm WHERE EXISTS (SELECT 1 FROM ${elementClassFullName} WHERE Model.Id = sm.ECInstanceId)
             )
             WHERE ParentId = this.ECInstanceId
             LIMIT 1
@@ -708,13 +666,13 @@ function getElementsSelectProps(props?: { modelClass?: string }) {
         supportsFiltering: true,
       },
     },
-    {
+  ];
+
+  if (!props?.elementClass) {
+    result.push({
       classFullName: "BisCore.GroupInformationElement",
-      whereClause: "this.ECClassId IS (BisCore.GroupInformationElement)",
+      whereClause: "",
       selectProps: {
-        extendedData: {
-          isGroupInformationElement: true,
-        },
         hasChildren: {
           selector: `
             IFNULL((
@@ -731,6 +689,8 @@ function getElementsSelectProps(props?: { modelClass?: string }) {
         },
         supportsFiltering: false,
       },
-    },
-  ];
+    });
+  }
+
+  return result;
 }

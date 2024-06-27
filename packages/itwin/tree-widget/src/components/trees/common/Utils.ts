@@ -7,12 +7,12 @@ import { createECSchemaProvider, createECSqlQueryExecutor } from "@itwin/present
 import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchies";
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
-import type { Id64String } from "@itwin/core-bentley";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 
 /** @internal */
-export function createIdsSelector(ids: string[]): string {
+export function createIdsSelector(ids: Id64Array): string {
   // Note: `json_array` function only accepts up to 127 arguments and we may have more `ids` than that. As a workaround,
   // we're creating an array of arrays
   const slices = new Array<Id64String[]>();
@@ -24,6 +24,14 @@ export function createIdsSelector(ids: string[]): string {
     slices.push(ids.slice(sliceStartIndex, sliceEndIndex));
   }
   return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
+}
+
+/** @internal */
+export function parseIdsSelectorResult(selectorResult: any): Id64Array {
+  if (!Array.isArray(selectorResult)) {
+    return [];
+  }
+  return selectorResult.reduce((arr, ids: Id64String | Id64String[]) => [...arr, ...(Array.isArray(ids) ? ids : [ids])], new Array<Id64String>());
 }
 
 /** @internal */
