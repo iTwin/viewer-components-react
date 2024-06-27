@@ -64,6 +64,7 @@ export function TreeRenderer({
           onFilterClick={onFilterClick}
           getHierarchyLevelDetails={getHierarchyLevelDetails}
           checkboxProps={checkboxProps}
+          className={getSublabel ? "with-description" : "without-description"}
         />
       );
     },
