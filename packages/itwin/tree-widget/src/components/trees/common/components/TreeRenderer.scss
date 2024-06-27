@@ -7,16 +7,30 @@
   width: fit-content;
   min-width: 100%;
 
+  .tw-tree-node.without-description {
+    height: 36px;
+  }
+
+  .tw-tree-node.with-description {
+    height: 42px;
+  }
+
   .tw-tree-node-checkbox-container {
     position: sticky;
     left: 0;
     z-index: 1;
     background-color: var(--iui-color-background);
     padding-left: calc(var(--iui-size-2xs) + var(--iui-size-3xs));
+    height: calc(100% - var(--iui-size-2xs));
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .tw-tree-node-checkbox::before {
     background-color: var(--iui-color-background);
+    inset: calc(-1 * var(--iui-size-xs)) calc(-1 * var(--iui-size-xs) / 2);
+    z-index: -1;
   }
 
   .tw-tree-node-action-buttons {
@@ -24,10 +38,6 @@
     right: 0;
     z-index: 1;
     background-color: var(--iui-color-background);
-  }
-
-  .tw-tree-node {
-    padding-inline: 1px;
   }
 
   .tw-tree-node-content {

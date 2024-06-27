@@ -145,7 +145,7 @@ function MatchingInstancesCount({ filter, defaultHierarchyLevelSizeLimit, hierar
   if (inProgress) {
     return (
       <Delayed show={true}>
-        {TreeWidget.translate("stateless.matchingInstancesCount", { instanceCount: "" })}
+        {TreeWidget.translate("filteringDialog.matchingInstancesCount", { instanceCount: "" })}
         <ProgressRadial size="x-small" />
       </Delayed>
     );
