@@ -111,7 +111,7 @@ export function CategoriesTree({
       density={density}
       noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode ?? "none"}
-      searchText={filter}
+      highlight={filter === undefined ? undefined : { text: filter }}
       treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getIcon={getIcon} getSublabel={getSublabel} />}
     />
   );

@@ -152,7 +152,7 @@ export function ModelsTree({
       density={density}
       noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode}
-      searchText={filter}
+      highlight={filter === undefined ? undefined : { text: filter }}
       treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getIcon={getIcon} onNodeDoubleClick={onNodeDoubleClick} />}
     />
   );

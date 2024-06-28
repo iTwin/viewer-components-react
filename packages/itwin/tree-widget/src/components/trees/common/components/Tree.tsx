@@ -17,6 +17,7 @@ import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 
+import type { HighlightInfo } from "../UseNodeHighlighting";
 import type { TreeRenderer } from "./TreeRenderer";
 import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -61,17 +62,15 @@ interface TreeOwnProps {
   noDataMessage?: ReactNode;
   /** Callback that this invoked when tree reloads. */
   onReload?: () => void;
+  /** Options for highlighting node labels. */
+  highlight?: HighlightInfo;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
-type UseNodeHighlightingProps = Parameters<typeof useNodeHighlighting>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
 
-type TreeProps = TreeOwnProps &
-  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> &
-  Pick<Partial<UseSelectionHandlerProps>, "selectionMode"> &
-  Pick<UseNodeHighlightingProps, "searchText">;
+type TreeProps = TreeOwnProps & Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> & Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
 
 /**
  * Default tree component that manages tree state and renders using supplied `treeRenderer`.
@@ -106,7 +105,7 @@ function TreeImpl({
   onReload,
   treeRenderer,
   density,
-  searchText,
+  highlight,
 }: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
@@ -143,7 +142,7 @@ function TreeImpl({
   });
   const reportingExpandNode = useReportingAction({ action: expandNode });
   const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
-  const { getLabel } = useNodeHighlighting({ rootNodes, searchText });
+  const { getLabel } = useNodeHighlighting({ rootNodes, highlight });
 
   if (rootNodes === undefined) {
     return (

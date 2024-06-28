@@ -3,7 +3,8 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
+import { useLatest } from "./Utils";
 
 import type { PropsWithChildren } from "react";
 
@@ -71,12 +72,4 @@ export function useReportingAction<TAction extends (...args: any[]) => void>({ a
     },
     [action, featureId, onFeatureUsed],
   );
-}
-
-function useLatest<T>(value: T) {
-  const ref = useRef<T>(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
 }
