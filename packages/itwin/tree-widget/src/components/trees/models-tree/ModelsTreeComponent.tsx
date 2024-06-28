@@ -16,6 +16,7 @@ import { AutoSizer } from "../../utils/AutoSizer";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
 import { useFiltering } from "../common/UseFiltering";
+import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ModelsTree } from "./ModelsTree";
 import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "./ModelsTreeButtons";
 
@@ -27,17 +28,7 @@ import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 type ModelsTreeProps = ComponentPropsWithoutRef<typeof ModelsTree>;
 
 interface ModelsTreeComponentProps
-  extends Pick<
-    ModelsTreeProps,
-    | "getSchemaContext"
-    | "density"
-    | "hierarchyLevelConfig"
-    | "selectionMode"
-    | "onPerformanceMeasured"
-    | "onFeatureUsed"
-    | "hierarchyConfig"
-    | "visibilityHandlerOverrides"
-  > {
+  extends Pick<ModelsTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig" | "visibilityHandlerOverrides"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -52,6 +43,8 @@ interface ModelsTreeComponentProps
    */
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
   selectionStorage: SelectionStorage;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -102,6 +95,12 @@ ModelsTreeComponent.View2DButton = View2DButton;
 ModelsTreeComponent.View3DButton = View3DButton;
 
 /**
+ * Renders a "Enable/Disable instances focus" button that enables/disabled instances focusing mode.
+ * @public
+ */
+ModelsTreeComponent.ToggleInstancesFocusButton = ToggleInstancesFocusButton;
+
+/**
  * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
@@ -118,37 +117,39 @@ function ModelsTreeComponentImpl({
   viewport,
   headerButtons,
   selectionStorage,
+  onFeatureUsed,
+  onPerformanceMeasured,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const availableModels = useAvailableModels(iModel);
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
   return (
-    <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
-      <UnifiedSelectionProvider storage={selectionStorage}>
-        <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
-          <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
-            {headerButtons
-              ? headerButtons.map((btn, index) => (
-                  <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed: treeProps.onFeatureUsed })}</Fragment>
-                ))
-              : [
-                  <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                ]}
-          </TreeHeader>
-          <div className="tw-tree-content">
-            <AutoSizer>
-              {({ width, height }) => <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
-            </AutoSizer>
-          </div>
-        </FocusedInstancesContextProvider>
-      </UnifiedSelectionProvider>
-    </div>
+    <TelemetryContextProvider identifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+      <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
+        <UnifiedSelectionProvider storage={selectionStorage}>
+          <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
+            <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
+              {headerButtons
+                ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed })}</Fragment>)
+                : [
+                    <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                    <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                    <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                    <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                    <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                    <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                  ]}
+            </TreeHeader>
+            <div className="tw-tree-content">
+              <AutoSizer>
+                {({ width, height }) => <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
+              </AutoSizer>
+            </div>
+          </FocusedInstancesContextProvider>
+        </UnifiedSelectionProvider>
+      </div>
+    </TelemetryContextProvider>
   );
 }
 

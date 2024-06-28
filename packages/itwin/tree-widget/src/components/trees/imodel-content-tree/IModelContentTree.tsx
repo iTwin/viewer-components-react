@@ -6,21 +6,17 @@
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree";
 import { TreeRenderer } from "../common/components/TreeRenderer";
-import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
 
 import type { ReactElement } from "react";
-import type { TreeUsageTrackedFeatures } from "../common/components/Tree";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 interface IModelContentTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-  onPerformanceMeasured?: (featureId: string, duration: number) => void;
-  onFeatureUsed?: (feature: string) => void;
 }
 
 type TreeProps = Parameters<typeof Tree>[0];
@@ -28,18 +24,13 @@ type GetHierarchyDefinitionsProviderCallback = TreeProps["getHierarchyDefinition
 type IModelContentTreeProps = IModelContentTreeOwnProps & Pick<TreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
-export function IModelContentTree({ onPerformanceMeasured, onFeatureUsed, ...props }: IModelContentTreeProps) {
-  const { reportUsage } = useFeatureReporting<TreeUsageTrackedFeatures>({ onFeatureUsed, treeIdentifier: IModelContentTreeComponent.id });
+export function IModelContentTree(props: IModelContentTreeProps) {
   return (
     <Tree
       {...props}
       treeName={IModelContentTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
       selectionMode={props.selectionMode ?? "extended"}
-      onPerformanceMeasured={(action, duration) => {
-        onPerformanceMeasured?.(`${IModelContentTreeComponent.id}-${action}`, duration);
-      }}
-      reportUsage={reportUsage}
       treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
     />
   );

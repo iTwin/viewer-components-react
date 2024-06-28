@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { defer, distinct, mergeMap, Subject, takeUntil } from "rxjs";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef, MutableRefObject } from "react";
@@ -41,7 +42,6 @@ export interface HierarchyVisibilityHandler extends IDisposable {
 
 interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
-  reportUsage?: (props: { featureId: "visibility-change"; reportInteraction: true }) => void;
 }
 
 interface UseHierarchyVisibilityResult {
@@ -53,13 +53,14 @@ interface UseHierarchyVisibilityResult {
 }
 
 /** @internal */
-export function useHierarchyVisibility({ visibilityHandlerFactory, reportUsage }: UseHierarchyVisibilityProps): UseHierarchyVisibilityResult {
+export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): UseHierarchyVisibilityResult {
   const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>());
   const [state, setState] = useState<UseHierarchyVisibilityResult>({
     getCheckboxState: () => ({ state: "off", isDisabled: true }),
     onCheckboxClicked: () => {},
     triggerRefresh: () => {},
   });
+  const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
     visibilityStatusMap.current.clear();
@@ -102,7 +103,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory, reportUsage }
       });
 
     const changeVisibility = (node: PresentationHierarchyNode, checked: boolean) => {
-      reportUsage?.({ featureId: "visibility-change", reportInteraction: true });
+      onFeatureUsed({ featureId: "visibility-change", reportInteraction: true });
       void handler.changeVisibility(node.nodeData, checked);
       const entry = visibilityStatusMap.current.get(node.id);
       if (!entry) {
@@ -132,7 +133,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory, reportUsage }
       removeListener();
       handler.dispose();
     };
-  }, [visibilityHandlerFactory, reportUsage]);
+  }, [visibilityHandlerFactory, onFeatureUsed]);
 
   return state;
 }

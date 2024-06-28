@@ -13,6 +13,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { GenericInstanceFilter, RowsLimitExceededError } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget";
 import { Delayed } from "./components/Delayed";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -20,17 +21,16 @@ import type { ClassInfo, Descriptor } from "@itwin/presentation-common";
 import type { PresentationInstanceFilterInfo, PresentationInstanceFilterPropertiesSource } from "@itwin/presentation-components";
 import type { HierarchyLevelDetails } from "@itwin/presentation-hierarchies-react";
 import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ReportUsageCallback } from "./UseFeatureReporting";
 
 interface UseHierarchyLevelFilteringProps {
   imodel: IModelConnection;
   defaultHierarchyLevelSizeLimit: number;
-  reportUsage?: ReportUsageCallback<"hierarchy-level-filtering">;
 }
 
 /** @internal */
-export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit, reportUsage }: UseHierarchyLevelFilteringProps) {
+export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit }: UseHierarchyLevelFilteringProps) {
   const [filteringOptions, setFilteringOptions] = useState<HierarchyLevelDetails>();
+  const { onFeatureUsed } = useTelemetryContext();
 
   const propertiesSource = useMemo<(() => Promise<PresentationInstanceFilterPropertiesSource>) | undefined>(() => {
     if (!filteringOptions) {
@@ -86,7 +86,7 @@ export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLi
         if (!filteringOptions) {
           return;
         }
-        reportUsage?.({ featureId: info ? "hierarchy-level-filtering" : undefined, reportInteraction: true });
+        onFeatureUsed({ featureId: info ? "hierarchy-level-filtering" : undefined, reportInteraction: true });
         filteringOptions.setInstanceFilter(toGenericFilter(info));
         setFilteringOptions(undefined);
       }}

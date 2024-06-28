@@ -13,6 +13,6 @@ export { VisibilityTreeUsageTrackedFeatures, VisibilityTreeRendererProps, Visibi
 export { TreeRenderer } from "./common/components/TreeRenderer";
 export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer";
 export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility";
-export { ReportUsageCallback, useFeatureReporting } from "./common/UseFeatureReporting";
+export { TelemetryContextProvider } from "./common/UseTelemetryContext";
 
 export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/ModelsTreeVisibilityHandler";

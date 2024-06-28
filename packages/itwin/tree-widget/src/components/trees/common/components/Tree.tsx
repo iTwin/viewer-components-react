@@ -8,11 +8,11 @@ import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
 import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget";
-import { useReportingAction } from "../UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useIModelChangeListener } from "../UseIModelChangeListener";
 import { useNodeHighlighting } from "../UseNodeHighlighting";
+import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext";
 import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
@@ -23,8 +23,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import type { ReportUsageCallback } from "../UseFeatureReporting";
-
 /**
  * Tree features that are tracked for usage.
  * @beta
@@ -61,8 +59,8 @@ interface TreeOwnProps {
   density?: "default" | "enlarged";
   /** Message that should be renderer if there are no tree nodes. */
   noDataMessage?: ReactNode;
-  /** Callback used to report tracked features usage. */
-  reportUsage?: ReportUsageCallback<TreeUsageTrackedFeatures>;
+  /** Callback that this invoked when tree reloads. */
+  onReload?: () => void;
 }
 
 type UseTreeProps = Parameters<typeof useTree>[0];
@@ -71,7 +69,7 @@ type UseNodeHighlightingProps = Parameters<typeof useNodeHighlighting>[0];
 type IModelAccess = UseTreeProps["imodelAccess"];
 
 type TreeProps = TreeOwnProps &
-  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
+  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> &
   Pick<Partial<UseSelectionHandlerProps>, "selectionMode"> &
   Pick<UseNodeHighlightingProps, "searchText">;
 
@@ -105,13 +103,13 @@ function TreeImpl({
   defaultHierarchyLevelSizeLimit,
   getHierarchyDefinition,
   selectionMode,
-  onPerformanceMeasured,
-  reportUsage,
+  onReload,
   treeRenderer,
   density,
   searchText,
 }: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
+  const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
   const {
     rootNodes,
     isLoading,
@@ -127,20 +125,24 @@ function TreeImpl({
     imodelKey: imodel.key,
     sourceName: treeName,
     localizedStrings,
-    onPerformanceMeasured,
-    onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
+    onPerformanceMeasured: (action, duration) => {
+      if (action === "reload") {
+        onReload?.();
+      }
+      onPerformanceMeasured(action, duration);
+    },
+    onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
 
   useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
-  const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
+  const reportingSelectNodes = useReportingAction({ action: selectNodes });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     defaultHierarchyLevelSizeLimit,
-    reportUsage,
   });
-  const reportingExpandNode = useReportingAction({ action: expandNode, reportUsage });
-  const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
+  const reportingExpandNode = useReportingAction({ action: expandNode });
+  const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
   const { getLabel } = useNodeHighlighting({ rootNodes, searchText });
 
   if (rootNodes === undefined) {

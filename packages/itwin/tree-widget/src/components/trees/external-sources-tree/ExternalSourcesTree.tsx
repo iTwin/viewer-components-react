@@ -6,20 +6,16 @@
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
 import { Tree } from "../common/components/Tree";
 import { TreeRenderer } from "../common/components/TreeRenderer";
-import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 
 import type { ReactElement } from "react";
-import type { TreeUsageTrackedFeatures } from "../common/components/Tree";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 interface ExternalSourcesTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-  onPerformanceMeasured?: (featureId: string, duration: number) => void;
-  onFeatureUsed?: (feature: string) => void;
 }
 
 type TreeProps = Parameters<typeof Tree>[0];
@@ -27,18 +23,13 @@ type GetHierarchyDefinitionsProviderCallback = TreeProps["getHierarchyDefinition
 type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps & Pick<TreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
-export function ExternalSourcesTree({ onPerformanceMeasured, onFeatureUsed, ...props }: ExternalSourcesTreeProps) {
-  const { reportUsage } = useFeatureReporting<TreeUsageTrackedFeatures>({ onFeatureUsed, treeIdentifier: ExternalSourcesTreeComponent.id });
+export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   return (
     <Tree
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
       selectionMode={props.selectionMode ?? "none"}
-      onPerformanceMeasured={(action, duration) => {
-        onPerformanceMeasured?.(`${ExternalSourcesTreeComponent.id}-${action}`, duration);
-      }}
-      reportUsage={reportUsage}
       treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
     />
   );

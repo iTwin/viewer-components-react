@@ -13,15 +13,14 @@ import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { useFeatureReporting } from "../common/UseFeatureReporting";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
+import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
-import type { VisibilityTreeUsageTrackedFeatures } from "../common/components/VisibilityTree";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ElementsGroupInfo, HierarchyConfiguration } from "./ModelsTreeDefinition";
@@ -31,7 +30,6 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
-type ModelsTreeUsageTrackedFeatures = VisibilityTreeUsageTrackedFeatures | "zoom-to-node" | "filtering";
 
 interface ModelsTreeOwnProps {
   activeView: Viewport;
@@ -41,15 +39,13 @@ interface ModelsTreeOwnProps {
   hierarchyConfig?: Partial<HierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   filter?: string;
-  onPerformanceMeasured?: (featureId: string, duration: number) => void;
-  onFeatureUsed?: (feature: string) => void;
 }
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
-type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode"> & {};
+type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
 export function ModelsTree({
@@ -63,8 +59,6 @@ export function ModelsTree({
   hierarchyLevelConfig,
   hierarchyConfig,
   selectionMode,
-  onPerformanceMeasured,
-  onFeatureUsed,
   visibilityHandlerOverrides,
 }: ModelsTreeProps) {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
@@ -76,10 +70,10 @@ export function ModelsTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     Object.values(hierarchyConfig ?? {}),
   );
+  const { onFeatureUsed } = useTelemetryContext();
 
   const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
   const { loadInstanceKeys: loadFocusedInstancesKeys } = useFocusedInstancesContext();
-  const { reportUsage } = useFeatureReporting<ModelsTreeUsageTrackedFeatures>({ onFeatureUsed, treeIdentifier: ModelsTreeComponent.id });
 
   const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
@@ -93,9 +87,9 @@ export function ModelsTree({
       }
       const instanceIds = nodeData.key.instanceKeys.map((instanceKey) => instanceKey.id);
       await IModelApp.viewManager.selectedView?.zoomToElements(instanceIds);
-      reportUsage({ featureId: "zoom-to-node", reportInteraction: false });
+      onFeatureUsed({ featureId: "zoom-to-node", reportInteraction: false });
     },
-    [reportUsage],
+    [onFeatureUsed],
   );
 
   const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
@@ -126,7 +120,7 @@ export function ModelsTree({
       return undefined;
     }
     return async ({ imodelAccess }) => {
-      reportUsage?.({ featureId: "filtering", reportInteraction: true });
+      onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
         return await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
@@ -140,7 +134,7 @@ export function ModelsTree({
         return [];
       }
     };
-  }, [filter, getModelsTreeIdsCache, reportUsage, hierarchyConfiguration]);
+  }, [filter, getModelsTreeIdsCache, onFeatureUsed, hierarchyConfiguration]);
 
   const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
 
@@ -158,10 +152,6 @@ export function ModelsTree({
       density={density}
       noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode}
-      onPerformanceMeasured={(action, duration) => {
-        onPerformanceMeasured?.(`${ModelsTreeComponent.id}-${action}`, duration);
-      }}
-      reportUsage={reportUsage}
       searchText={filter}
       treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getIcon={getIcon} onNodeDoubleClick={onNodeDoubleClick} />}
     />
