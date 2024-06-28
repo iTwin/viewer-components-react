@@ -2,6 +2,33 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Fri, 28 Jun 2024 13:10:54 GMT",
+      "version": "0.8.0",
+      "tag": "@itwin/ec3-widget-react_v0.8.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "pari.deshpande@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "d9e1360e59a7694b9ba35c141f7537889d03d34e",
+            "comment": "Added localization support."
+          },
+          {
+            "author": "tejas.sutar@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "a4619aeb21fc623d55f0f28f7bc1dc55ea35fd8d",
+            "comment": "Added callback props for EC3 export"
+          },
+          {
+            "author": "pari.deshpande@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "a089599b915077cc85a1b041dc45a7a53df45324",
+            "comment": "UX revamp for EC3 template creation workflow"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 11 Jun 2024 15:52:38 GMT",
       "version": "0.7.0",
       "tag": "@itwin/ec3-widget-react_v0.7.0",

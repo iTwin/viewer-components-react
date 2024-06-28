@@ -36,6 +36,7 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
@@ -359,19 +360,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    function createModelIdsSelector(): string {
-      // Note: `json_array` function only accepts up to 127 arguments and we may have more `modelIds` than that. As a workaround,
-      // we're creating an array of arrays
-      const slices = new Array<Id64String[]>();
-      for (let sliceStartIndex = 0; sliceStartIndex < modelIds.length; sliceStartIndex += 127) {
-        let sliceEndIndex: number | undefined = sliceStartIndex + 127;
-        if (sliceEndIndex > modelIds.length) {
-          sliceEndIndex = undefined;
-        }
-        slices.push(modelIds.slice(sliceStartIndex, sliceEndIndex));
-      }
-      return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
-    }
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
@@ -396,7 +384,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 extendedData: {
                   imageId: "icon-layers",
                   isCategory: true,
-                  modelIds: { selector: createModelIdsSelector() },
+                  modelIds: { selector: createIdsSelector(modelIds) },
                 },
                 supportsFiltering: true,
               })}
@@ -424,13 +412,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNode,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const modelIds: Id64String[] =
-      parentNode.extendedData && parentNode.extendedData.hasOwnProperty("modelIds") && Array.isArray(parentNode.extendedData.modelIds)
-        ? parentNode.extendedData.modelIds.reduce(
-            (arr, ids: Id64String | Id64String[]) => [...arr, ...(Array.isArray(ids) ? ids : [ids])],
-            new Array<Id64String>(),
-          )
-        : [];
+    const modelIds = parseIdsSelectorResult(parentNode.extendedData?.modelIds);
     if (modelIds.length === 0) {
       throw new Error(`Invalid category node "${parentNode.label}" - missing model information.`);
     }

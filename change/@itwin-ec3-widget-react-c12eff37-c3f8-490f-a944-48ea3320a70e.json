@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "UX revamp for EC3 template creation workflow",
-  "packageName": "@itwin/ec3-widget-react",
-  "email": "pari.deshpande@bentley.com",
-  "dependentChangeType": "patch"
-}

@@ -1,8 +1,18 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Tue, 11 Jun 2024 15:52:38 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Jun 2024 13:10:54 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.8.0
+
+Fri, 28 Jun 2024 13:10:54 GMT
+
+### Minor changes
+
+- Added localization support. ([#968](https://github.com/iTwin/viewer-components-react/pull/968))
+- Added callback props for EC3 export ([#972](https://github.com/iTwin/viewer-components-react/pull/972))
+- UX revamp for EC3 template creation workflow ([#940](https://github.com/iTwin/viewer-components-react/pull/940))
 
 ## 0.7.0
 

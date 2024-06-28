@@ -23,7 +23,6 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-shared';
 import type { LimitingECSqlQueryExecutor } from '@itwin/presentation-hierarchies';
 import type { Localization } from '@itwin/core-common';
-import { LocalizationContextProvider } from '@itwin/presentation-hierarchies-react';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { ProcessedHierarchyNode } from '@itwin/presentation-hierarchies';
