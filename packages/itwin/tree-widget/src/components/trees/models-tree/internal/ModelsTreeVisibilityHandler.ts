@@ -114,8 +114,9 @@ type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult 
 /**
  * Functionality of `ModelsTreeVisibilityHandler` that can be overridden.
  * Each callback will be provided original implementation and reference to a `HierarchyVisibilityHandler`.
+ * @beta
  */
-interface VisibilityHandlerOverrides {
+export interface ModelsTreeVisibilityHandlerOverrides {
   getSubjectNodeVisibility?: OverridableMethod<(props: { ids: Id64Array }) => Promise<VisibilityStatus>>;
   getModelDisplayStatus?: OverridableMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
   getCategoryDisplayStatus?: OverridableMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
@@ -137,7 +138,7 @@ export interface ModelsTreeVisibilityHandlerProps {
   viewport: Viewport;
   idsCache: ModelsTreeIdsCache;
   imodelAccess: ECClassHierarchyInspector;
-  overrides?: VisibilityHandlerOverrides;
+  overrides?: ModelsTreeVisibilityHandlerOverrides;
 }
 
 /**

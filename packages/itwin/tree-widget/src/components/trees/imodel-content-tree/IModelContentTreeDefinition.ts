@@ -4,7 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
+  createClassBasedHierarchyDefinition,
+  createNodesQueryClauseFactory,
+  HierarchyNode,
+  NodeSelectClauseColumnNames,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";

@@ -12,6 +12,7 @@ import {
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
@@ -36,11 +37,11 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
-import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
-interface HierarchyConfiguration {
+/** Defines hierarchy configuration supported by `ModelsTree`. */
+export interface HierarchyConfiguration {
   /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";
   /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d` */
