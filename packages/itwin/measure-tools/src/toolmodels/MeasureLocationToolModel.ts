@@ -8,6 +8,7 @@ import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import type { LocationMeasurementProps } from "../measurements/LocationMeasurement";
 import { LocationMeasurement } from "../measurements/LocationMeasurement";
 import type { MeasurementProps } from "../api/MeasurementProps";
+import type { DrawingMetadataProps } from "../api/Measurement";
 
 // Properties of LocationMeasurementProps that are NOT inherited from MeasurementProps
 // We don't want to expose anything from the MeasurementProps for addLocation
@@ -17,6 +18,8 @@ type LocationMeasurementPropsOnly = Omit<LocationMeasurementProps, keyof Measure
 export interface AddLocationProps extends Omit<LocationMeasurementPropsOnly, "location"> {
   location: Point3d;
   viewType: string;
+  viewId?: string | undefined;
+  drawingMetadata?: DrawingMetadataProps | undefined;
 }
 
 export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasurement> {
@@ -28,11 +31,21 @@ export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasu
     super();
   }
 
+  public set sheetViewId(id: string | undefined) {
+    if (this._currentMeasurement)
+      this._currentMeasurement.sheetViewId = id;
+  }
+
+  public get sheetViewId(): string | undefined {
+    return this._currentMeasurement?.sheetViewId;
+  }
+
   public addLocation(props: AddLocationProps, isDynamic: boolean): void {
     const { viewType, ...rest } = props;
 
     if (!this._currentMeasurement) {
       this._currentMeasurement = new LocationMeasurement(rest);
+      this.sheetViewId = props.viewId;
       this._currentMeasurement.viewTarget.include(viewType);
       this._currentMeasurement.isDynamic = isDynamic;
       this.notifyNewMeasurement();
