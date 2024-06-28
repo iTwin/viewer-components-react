@@ -33,7 +33,7 @@
     "@itwin/map-layers-auth": "^4.7.3",
     "@itwin/map-layers-formats": "^4.7.3",
     "@itwin/measure-tools-react": "workspace:*",
-    "@itwin/oidc-signin-tool": "^4.3.5",
+    "@itwin/oidc-signin-tool": "^4.3.6",
     "@itwin/one-click-lca-react": "workspace:*",
     "@itwin/presentation-common": "^4.7.3",
     "@itwin/presentation-components": "^5.3.3",
