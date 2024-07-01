@@ -115,7 +115,7 @@ test.describe("Categories tree", () => {
 
       // scroll to the right side
       await scrollTree(page, 10000, 0);
-      await takeScreenshot(page, node, { boundingComponent: treeWidget, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
 
       // expand panel
       await expandStagePanel(page, "right", 100);
