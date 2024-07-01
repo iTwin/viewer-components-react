@@ -1,11 +1,71 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IResult } from "./IResult";
 import type { DataType, PossibleDataType } from "./Types";
 
-const allOperators = ["+", "-", "*", "%", "**", "/", "`", "~", "!", "@", "#", "$", "^", "&", "=", "[", "]", "{", "}", "\\", "|", ";", ":", "'", "\"", "<", ">", "?", "+=", "-=", "*=", "/=", "%=", "&=", "^=", "|=", "?=", "==", "!=", ">=", "<=", "++", "--", "<<", ">>", "&&", "||", "??", "?.", "**=", "<<=", ">>=", "&&=", "||=", "??=", "===", "!==", ">>>", ">>>="];
+const allOperators = [
+  "+",
+  "-",
+  "*",
+  "%",
+  "**",
+  "/",
+  "`",
+  "~",
+  "!",
+  "@",
+  "#",
+  "$",
+  "^",
+  "&",
+  "=",
+  "[",
+  "]",
+  "{",
+  "}",
+  "\\",
+  "|",
+  ";",
+  ":",
+  "'",
+  '"',
+  "<",
+  ">",
+  "?",
+  "+=",
+  "-=",
+  "*=",
+  "/=",
+  "%=",
+  "&=",
+  "^=",
+  "|=",
+  "?=",
+  "==",
+  "!=",
+  ">=",
+  "<=",
+  "++",
+  "--",
+  "<<",
+  ">>",
+  "&&",
+  "||",
+  "??",
+  "?.",
+  "**=",
+  "<<=",
+  ">>=",
+  "&&=",
+  "||=",
+  "??=",
+  "===",
+  "!==",
+  ">>>",
+  ">>>=",
+];
 
 export enum OperatorType {
   UnaryPlus,
@@ -38,30 +98,49 @@ export function isOperator(token: string): boolean {
 
 export function getBinaryOperator(token: string): OperatorType | undefined {
   switch (token) {
-    case "**": return OperatorType.Exponentiation;
-    case "*": return OperatorType.Multiplication;
-    case "/": return OperatorType.Division;
-    case "%": return OperatorType.Remainder;
-    case "+": return OperatorType.Addition;
-    case "-": return OperatorType.Subtraction;
-    case "<": return OperatorType.LessThan;
-    case "<=": return OperatorType.LessThanOrEqual;
-    case ">": return OperatorType.GreaterThan;
-    case ">=": return OperatorType.GreaterThanOrEqual;
-    case "==": return OperatorType.Equality;
-    case "!=": return OperatorType.Inequality;
-    case "&&": return OperatorType.LogicalAnd;
-    case "||": return OperatorType.LogicalOr;
-    default: return undefined;
+    case "**":
+      return OperatorType.Exponentiation;
+    case "*":
+      return OperatorType.Multiplication;
+    case "/":
+      return OperatorType.Division;
+    case "%":
+      return OperatorType.Remainder;
+    case "+":
+      return OperatorType.Addition;
+    case "-":
+      return OperatorType.Subtraction;
+    case "<":
+      return OperatorType.LessThan;
+    case "<=":
+      return OperatorType.LessThanOrEqual;
+    case ">":
+      return OperatorType.GreaterThan;
+    case ">=":
+      return OperatorType.GreaterThanOrEqual;
+    case "==":
+      return OperatorType.Equality;
+    case "!=":
+      return OperatorType.Inequality;
+    case "&&":
+      return OperatorType.LogicalAnd;
+    case "||":
+      return OperatorType.LogicalOr;
+    default:
+      return undefined;
   }
 }
 
 export function getUnaryOperator(token: string): OperatorType | undefined {
   switch (token) {
-    case "+": return OperatorType.UnaryPlus;
-    case "-": return OperatorType.UnaryNegation;
-    case "!": return OperatorType.LogicalNot;
-    default: return undefined;
+    case "+":
+      return OperatorType.UnaryPlus;
+    case "-":
+      return OperatorType.UnaryNegation;
+    case "!":
+      return OperatorType.LogicalNot;
+    default:
+      return undefined;
   }
 }
 
@@ -93,7 +172,8 @@ export function getOperatorPrecedence(op: OperatorType | undefined): number {
       return 5;
     case OperatorType.LogicalOr:
       return 4;
-    default: return 1;
+    default:
+      return 1;
   }
 }
 
@@ -129,33 +209,47 @@ export function isSupportedOperator(token: string): boolean {
 
 export function getOperatorArgumentCountBounds(token: string): [number, number] | undefined {
   switch (token) {
-    case "**": return [2, 2];
-    case "*": return [2, 2];
-    case "/": return [2, 2];
-    case "%": return [2, 2];
-    case "+": return [1, 2];
-    case "-": return [1, 2];
-    case "!": return [1, 1];
-    case "<": return [2, 2];
-    case "<=": return [2, 2];
-    case ">": return [2, 2];
-    case ">=": return [2, 2];
-    case "==": return [2, 2];
-    case "!=": return [2, 2];
-    case "&&": return [2, 2];
-    case "||": return [2, 2];
-    default: return undefined;
+    case "**":
+      return [2, 2];
+    case "*":
+      return [2, 2];
+    case "/":
+      return [2, 2];
+    case "%":
+      return [2, 2];
+    case "+":
+      return [1, 2];
+    case "-":
+      return [1, 2];
+    case "!":
+      return [1, 1];
+    case "<":
+      return [2, 2];
+    case "<=":
+      return [2, 2];
+    case ">":
+      return [2, 2];
+    case ">=":
+      return [2, 2];
+    case "==":
+      return [2, 2];
+    case "!=":
+      return [2, 2];
+    case "&&":
+      return [2, 2];
+    case "||":
+      return [2, 2];
+    default:
+      return undefined;
   }
 }
 
 export function getOperatorReturnType(token: string, arg1: PossibleDataType, arg2?: PossibleDataType): IResult<DataType> {
-  if (!arg2 && !getUnaryOperator(token))
-    return { errorMessage: `Unary operator "${token}" is not supported.` };
+  if (!arg2 && !getUnaryOperator(token)) return { errorMessage: `Unary operator "${token}" is not supported.` };
 
-  if (arg2 && !getBinaryOperator(token))
-    return { errorMessage: `Binary operator "${token}" is not supported.` };
+  if (arg2 && !getBinaryOperator(token)) return { errorMessage: `Binary operator "${token}" is not supported.` };
 
-  if ((arg1 === "Undefined" || arg2 === "Undefined") && (token !== "==" && token !== "!="))
+  if ((arg1 === "Undefined" || arg2 === "Undefined") && token !== "==" && token !== "!=")
     return { errorMessage: `${!arg2 ? "Unary" : "Binary"} operator "${token}" does not support null operands.` };
 
   switch (token) {
@@ -163,18 +257,14 @@ export function getOperatorReturnType(token: string, arg1: PossibleDataType, arg
     case "*":
     case "/":
     case "%":
-      return arg1 === "String" || arg2 === "String" ?
-        { errorMessage: `Binary operator "${token}" does not support string operands.` } :
-        { value: "Number" };
+      return arg1 === "String" || arg2 === "String" ? { errorMessage: `Binary operator "${token}" does not support string operands.` } : { value: "Double" };
     case "-":
-      return arg1 === "String" || arg2 === "String" ?
-        { errorMessage: `${!arg2 ? "Unary" : "Binary"} operator "${token}" does not support string operands.` } :
-        { value: "Number" };
+      return arg1 === "String" || arg2 === "String"
+        ? { errorMessage: `${!arg2 ? "Unary" : "Binary"} operator "${token}" does not support string operands.` }
+        : { value: "Double" };
     case "+":
-      if (!arg2)
-        return { value: arg1 as DataType };
-      else
-        return arg1 === "String" || arg2 === "String" ? { value: "String" } : { value: "Number" };
+      if (!arg2) return { value: arg1 as DataType };
+      else return arg1 === "String" || arg2 === "String" ? { value: "String" } : { value: "Double" };
     case "!":
     case "<":
     case "<=":

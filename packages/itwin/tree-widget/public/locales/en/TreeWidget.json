@@ -1,65 +1,150 @@
 {
-  "showAll": "Show All",
-  "hideAll": "Hide All",
-  "invert": "Invert",
-  "toggle2DViews": "Toggle 2D Views",
-  "toggle3DViews": "Toggle 3D Views",
-  "label2D": "2D",
-  "label3D": "3D",
-  "dropdownMore": "More",
-  "models": "Models",
-  "categories": "Categories",
-  "imodelContent": "iModel Content",
-  "externalSources": "External Sources",
-  "treeview": "Tree View",
-  "noTrees": "There are no trees available for this iModel.",
-  "error": "Error",
-  "retry": "Retry",
-  "generic-error-description": "An error occurred while loading tree content.",
-  "categoriesTree": {
-    "noCategoryFound": "No category found.",
-    "noMatchingCategoryNames": "There are no category names matching your search."
+  "widget": {
+    "label": "Tree view"
   },
-  "modelTree": {
-    "status": {
-      "visible": "Visible",
-      "hidden": "Hidden",
-      "disabled": "Disabled"
+  "header": {
+    "dropdownMore": "More",
+    "searchBox": {
+      "searchForSomething": "Search for something",
+      "search": "Search...",
+      "open": "Open",
+      "close": "Close",
+      "next": "Next",
+      "previous": "Previous"
+    }
+  },
+  "selectableTree": {
+    "noTrees": "There are no trees available for this iModel."
+  },
+  "errorState": {
+    "title": "Error",
+    "description": "An error occurred while loading tree content.",
+    "retryButtonLabel": "Retry"
+  },
+  "categoriesTree": {
+    "label": "Categories",
+    "buttons": {
+      "showAll": {
+        "tooltip": "Show all"
+      },
+      "hideAll": {
+        "tooltip": "Hide all"
+      },
+      "invert": {
+        "tooltip": "Invert"
+      }
     },
-    "tooltips": {
+    "filtering": {
+      "noMatches": "There are no categories matching filter \"{{filter}}\"",
+      "unknownFilterError": "An unknown error occurred while filtering the tree.",
+      "tooManyFilterMatches": "There are too many matches for the given filter. Please be more specific."
+    }
+  },
+  "modelsTree": {
+    "label": "Models",
+    "buttons": {
+      "showAll": {
+        "tooltip": "Show all"
+      },
+      "hideAll": {
+        "tooltip": "Hide all"
+      },
+      "invert": {
+        "tooltip": "Invert"
+      },
+      "toggle2d": {
+        "tooltip": "Toggle 2D views",
+        "label": "2D"
+      },
+      "toggle3d": {
+        "tooltip": "Toggle 3D views",
+        "label": "3D"
+      },
+      "toggleFocusMode": {
+        "enable": {
+          "tooltip": "Enable instance focus mode"
+        },
+        "disable": {
+          "tooltip": "Disable instance focus mode"
+        }
+      }
+    },
+    "visibilityTooltips": {
+      "status": {
+        "visible": "Visible",
+        "hidden": "Hidden",
+        "disabled": "Disabled",
+        "partial": "Partially visible"
+      },
       "subject": {
         "nonSpatialView": "Active view is not spatial",
-        "atLeastOneModelVisible": "At least one model is visible",
-        "allModelsHidden": "All models are hidden"
+        "allModelsHidden": "All models are hidden",
+        "someModelsHidden": "Some models are hidden",
+        "allModelsVisible": "All models are visible"
       },
       "model": {
-        "nonSpatialView": "Active view is not spatial"
+        "nonSpatialView": "Active view is not spatial",
+        "hiddenThroughModelSelector": "Model display is hidden through model selector",
+        "someCategoriesHidden": "Some categories are visible and some are hidden",
+        "allCategoriesVisible": "All categories visible",
+        "allCategoriesHidden": "All categories hidden"
       },
       "category": {
-        "modelNotDisplayed": "Can't control category display if model is not displayed",
         "displayedThroughPerModelOverride": "Per-model category override set to 'Show'",
         "hiddenThroughPerModelOverride": "Per-model category override set to 'Hide'",
         "displayedThroughCategorySelector": "Category display enabled through category selector",
-        "hiddenThroughCategorySelector": "Category display disabled through category selector"
+        "hiddenThroughCategorySelector": "Category display disabled through category selector",
+        "allElementsHidden": "All category elements are in the never drawn list or none of the category elements are in the exclusive always drawn list",
+        "someElementsAreHidden": "There are both visible and hidden elements in this category",
+        "allElementsVisible": "All category elements are in the always drawn list",
+        "hiddenThroughModel": "Model is hidden"
       },
       "element": {
-        "modelNotDisplayed": "Can't control element display if model is not displayed",
         "hiddenThroughNeverDrawnList": "Element(s) in \"never drawn\" list",
         "displayedThroughAlwaysDrawnList": "Element(s) in \"always drawn\" list",
         "hiddenDueToOtherElementsExclusivelyAlwaysDrawn": "Other elements in \"exclusively always drawn\" list",
-        "hiddenThroughCategory": "Category not displayed"
+        "hiddenThroughModel": "Model is not displayed",
+        "hiddenThroughCategory": "Category is not displayed"
+      },
+      "groupingNode": {
+        "allElementsHidden": "All elements are in the never drawn list or none of the elements are in the exclusive always drawn list",
+        "someElementsAreHidden": "There are both visible and hidden elements",
+        "allElementsVisible": "All elements are in the always drawn list"
       }
     },
-    "noModelFound": "No model found.",
-    "noMatchingModelNames": "There are no model names matching your search."
+    "filtering": {
+      "noMatches": "There are no nodes matching filter \"{{filter}}\"",
+      "unknownFilterError": "An unknown error occurred while filtering the tree.",
+      "unknownInstanceFocusError": "An unknown error occurred while focusing instances. <link>Disable the focus mode</link>.",
+      "tooManyFilterMatches": "There are too many matches for the given filter. Please be more specific.",
+      "tooManyInstancesFocused": "There are too many elements selected for focus mode. Please select fewer elements or <link>disable the focus mode</link>."
+    }
   },
-  "searchBox": {
-    "searchForSomething": "Search for something",
-    "search": "Search...",
-    "tree": "Tree search",
-    "open": "Open",
-    "close": "Close",
-    "next": "Next",
-    "previous": "Previous"
+  "imodelContentTree": {
+    "label": "iModel content"
+  },
+  "externalSourcesTree": {
+    "label": "External sources"
+  },
+  "baseTree": {
+    "dataIsNotAvailable": "The data required for this tree layout is not available in this iModel."
+  },
+  "filteringDialog": {
+    "failedToCalculateMatchingInstancesCount": "Failed to calculate matching instances count",
+    "matchingInstancesCount": "Number of instances matching current filter: {{instanceCount}}",
+    "filterExceedsLimit": "Number of instances matching current filter exceeds the limit of {{limit}}"
+  },
+  "presentation-hierarchies": {
+    "unspecified": "Unspecified",
+    "other": "Other",
+    "loading": "Loading...",
+    "filterHierarchyLevel": "Apply filter",
+    "clearHierarchyLevelFilter": "Clear active filter",
+    "noFilteredChildren": "No child nodes match current filter",
+    "resultLimitExceeded": "There are more items than allowed limit of {{limit}}.",
+    "resultLimitExceededWithFiltering": "Please provide <link>additional filtering</link> - there are more items than allowed limit of {{limit}}.",
+    "increaseHierarchyLimit": "<link>Increase the hierarchy level size limit to {{limit}}.</link>",
+    "increaseHierarchyLimitWithFiltering": "Or, <link>increase the hierarchy level size limit to {{limit}}.</link>",
+    "retry": "Retry"
   }
 }

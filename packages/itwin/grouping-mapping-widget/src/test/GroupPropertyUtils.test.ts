@@ -1,12 +1,17 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type { ECProperty } from "@itwin/insights-client";
-import { DataType } from "@itwin/insights-client";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { ECPropertyReference } from "@itwin/insights-client";
 import type { PropertyMetaData } from "../components/Properties/GroupProperties/GroupPropertyUtils";
 import { convertPresentationFields, convertToECProperties, findProperties } from "../components/Properties/GroupProperties/GroupPropertyUtils";
-import { createTestECClassInfo, createTestNestedContentField, createTestPropertiesContentField, createTestPropertyInfo, createTestRelatedClassInfo } from "./PropertyFieldsHelpers";
+import {
+  createTestECClassInfo,
+  createTestNestedContentField,
+  createTestPropertiesContentField,
+  createTestPropertyInfo,
+  createTestRelatedClassInfo,
+} from "./PropertyFieldsHelpers";
 import { assert, expect } from "chai";
 import type { NavigationPropertyInfo, StructTypeDescription } from "@itwin/presentation-common";
 import { PropertyValueFormat, RelationshipMeaning } from "@itwin/presentation-common";
@@ -23,7 +28,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["PropertyName"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -36,7 +40,8 @@ describe("Group properties utilities", () => {
   });
 
   it("multiple primitive properies of different types", () => {
-    const testProperties = [createTestPropertyInfo({ name: "propString" }),
+    const testProperties = [
+      createTestPropertyInfo({ name: "propString" }),
       createTestPropertyInfo({ name: "propInt", type: "int" }),
       createTestPropertyInfo({ name: "propBool", type: "boolean" }),
       createTestPropertyInfo({ name: "propEnum", type: "enum" }),
@@ -53,7 +58,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propString"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -65,7 +69,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propInt"],
-        propertyType: DataType.Integer,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -77,7 +80,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propBool"],
-        propertyType: DataType.Boolean,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -89,7 +91,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propEnum"],
-        propertyType: DataType.Integer,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -101,7 +102,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propLong"],
-        propertyType: DataType.Integer,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -113,7 +113,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propNumber"],
-        propertyType: DataType.Number,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -152,7 +151,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "SchemaName",
         sourceClassName: "ClassName",
         ecPropertyTraversal: ["prop1"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: "SchemaName:ClassName",
@@ -162,11 +160,9 @@ describe("Group properties utilities", () => {
     ];
 
     assert.deepEqual(result, expectedResult);
-
   });
 
   it("one BisCore:ElementOwnsMultiAspects nested property", () => {
-
     const propertiesField = createTestPropertiesContentField({
       properties: [{ property: createTestPropertyInfo({ name: "prop1" }) }],
     });
@@ -193,7 +189,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "SchemaName",
         sourceClassName: "ClassName",
         ecPropertyTraversal: ["prop1"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: "SchemaName:ClassName",
@@ -203,11 +198,9 @@ describe("Group properties utilities", () => {
     ];
 
     assert.deepEqual(result, expectedResult);
-
   });
 
   it("one BisCore:GeometricElement3dHasTypeDefinition nested property", () => {
-
     const propertiesField = createTestPropertiesContentField({
       properties: [{ property: createTestPropertyInfo({ name: "prop1" }) }],
     });
@@ -237,18 +230,15 @@ describe("Group properties utilities", () => {
         key: "SchemaName:ClassName|SchemaName:ClassName|TypeDefinition|prop1",
         parentPropertyClassName: "SchemaName:ClassName",
         primitiveNavigationClass: "",
-        propertyType: DataType.String,
         sourceClassName: "*",
         sourceSchema: "*",
       },
     ];
 
     assert.deepEqual(result, expectedResult);
-
   });
 
   it("generate proper external source metadata", () => {
-
     const propertyName = createTestPropertyInfo({ name: "name" });
     const propertyPath = createTestPropertyInfo({ name: "path" });
     const repositoryProperties = createTestPropertiesContentField({
@@ -303,7 +293,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "SchemaName",
         sourceClassName: "ClassName",
         ecPropertyTraversal: ["Identifier"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: "SchemaName:ClassName",
@@ -315,7 +304,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "SchemaName",
         sourceClassName: "ClassName",
         ecPropertyTraversal: ["Source", "Repository", "name"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: "BisCore:RepositoryLink",
@@ -327,7 +315,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "SchemaName",
         sourceClassName: "ClassName",
         ecPropertyTraversal: ["Source", "Repository", "path"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: "BisCore:RepositoryLink",
@@ -337,7 +324,6 @@ describe("Group properties utilities", () => {
     ];
 
     assert.deepEqual(result, expectedResult);
-
   });
 
   it("handle simple structs correctly", () => {
@@ -346,14 +332,16 @@ describe("Group properties utilities", () => {
     const structContentFieldDescription: StructTypeDescription = {
       valueFormat: PropertyValueFormat.Struct,
       typeName: "StructType",
-      members: [{
-        name: "prop1",
-        label: "prop one",
-        type: {
-          typeName: "string",
-          valueFormat: PropertyValueFormat.Primitive,
+      members: [
+        {
+          name: "prop1",
+          label: "prop one",
+          type: {
+            typeName: "string",
+            valueFormat: PropertyValueFormat.Primitive,
+          },
         },
-      }],
+      ],
     };
     const simpleStructField = createTestPropertiesContentField({ properties: [{ property: structPropertyClass }], type: structContentFieldDescription });
 
@@ -365,7 +353,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["PropertyName", "prop1"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "Struct:Class",
         parentPropertyClassName: undefined,
@@ -375,8 +362,7 @@ describe("Group properties utilities", () => {
     ];
 
     assert.deepEqual(result, expectedResult);
-  }
-  );
+  });
 
   it("handle simple nested structs correctly", () => {
     const structPropertyClass = createTestPropertyInfo({ classInfo: { id: "0", label: "", name: "Struct:Class" } });
@@ -384,30 +370,34 @@ describe("Group properties utilities", () => {
     const structContentFieldDescription: StructTypeDescription = {
       valueFormat: PropertyValueFormat.Struct,
       typeName: "StructType",
-      members: [{
-        name: "prop1",
-        label: "prop one",
-        type: {
-          typeName: "string",
-          valueFormat: PropertyValueFormat.Primitive,
+      members: [
+        {
+          name: "prop1",
+          label: "prop one",
+          type: {
+            typeName: "string",
+            valueFormat: PropertyValueFormat.Primitive,
+          },
         },
-      },
-      {
-        name: "struct1",
-        label: "struct1",
-        type: {
-          typeName: "string",
-          valueFormat: PropertyValueFormat.Struct,
-          members: [{
-            name: "prop2",
-            label: "prop 2",
-            type: {
-              typeName: "string",
-              valueFormat: PropertyValueFormat.Primitive,
-            },
-          }],
+        {
+          name: "struct1",
+          label: "struct1",
+          type: {
+            typeName: "string",
+            valueFormat: PropertyValueFormat.Struct,
+            members: [
+              {
+                name: "prop2",
+                label: "prop 2",
+                type: {
+                  typeName: "string",
+                  valueFormat: PropertyValueFormat.Primitive,
+                },
+              },
+            ],
+          },
         },
-      }],
+      ],
     };
 
     const simpleStructField = createTestPropertiesContentField({ properties: [{ property: structPropertyClass }], type: structContentFieldDescription });
@@ -420,7 +410,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["PropertyName", "prop1"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "Struct:Class",
         parentPropertyClassName: undefined,
@@ -432,7 +421,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["PropertyName", "struct1", "prop2"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "Struct:Class",
         parentPropertyClassName: undefined,
@@ -442,8 +430,7 @@ describe("Group properties utilities", () => {
     ];
 
     assert.deepEqual(result, expectedResult);
-  }
-  );
+  });
 
   it("handle primitive navigation (Model)", () => {
     const modelClassInfo = createTestECClassInfo({ name: "BisCore:Element", label: "Element" });
@@ -455,7 +442,6 @@ describe("Group properties utilities", () => {
       // Target class does not matter
       targetClassInfo: createTestECClassInfo(),
       isTargetPolymorphic: true,
-
     };
 
     const modelPropertyInfo = createTestPropertyInfo({ name: "Model", classInfo: modelClassInfo, type: "long", navigationPropertyInfo });
@@ -470,7 +456,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["Model"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "BisCore:ModelContainsElements",
         actualECClassName: "BisCore:Element",
         parentPropertyClassName: undefined,
@@ -480,8 +465,7 @@ describe("Group properties utilities", () => {
     ];
 
     assert.deepEqual(result, expectedResult);
-  }
-  );
+  });
 
   it("convert PropertyMetaData non primitive navigation into ECProperty", () => {
     const propertyMetaData: PropertyMetaData = {
@@ -489,7 +473,6 @@ describe("Group properties utilities", () => {
       sourceSchema: "Schema",
       sourceClassName: "Class",
       ecPropertyTraversal: ["PropertyName", "SecondProperty"],
-      propertyType: DataType.String,
       primitiveNavigationClass: "",
       actualECClassName: "SchemaName:ClassName",
       parentPropertyClassName: undefined,
@@ -499,11 +482,10 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "Schema",
         ecClassName: "Class",
-        ecPropertyType: DataType.String,
         ecPropertyName: "PropertyName.SecondProperty",
       },
     ];
@@ -516,10 +498,7 @@ describe("Group properties utilities", () => {
       displayLabel: "Model",
       sourceSchema: "*",
       sourceClassName: "*",
-      ecPropertyTraversal: [
-        "Model",
-      ],
-      propertyType: DataType.String,
+      ecPropertyTraversal: ["Model"],
       primitiveNavigationClass: "BisCore:ModelContainsElements",
       actualECClassName: "BisCore:Element",
       key: "undefined|BisCore:Element|Model",
@@ -529,17 +508,15 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.CodeValue",
       },
     ];
@@ -552,10 +529,7 @@ describe("Group properties utilities", () => {
       displayLabel: "Category",
       sourceSchema: "*",
       sourceClassName: "*",
-      ecPropertyTraversal: [
-        "Category",
-      ],
-      propertyType: DataType.String,
+      ecPropertyTraversal: ["Category"],
       primitiveNavigationClass: "BisCore:GeometricElement3dIsInCategory",
       actualECClassName: "BisCore:GeometricElement3d",
       key: "undefined|BisCore:GeometricElement3d|Category",
@@ -565,17 +539,15 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Category.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Category.CodeValue",
       },
     ];
@@ -588,10 +560,7 @@ describe("Group properties utilities", () => {
       displayLabel: "Physical Material",
       sourceSchema: "*",
       sourceClassName: "*",
-      ecPropertyTraversal: [
-        "PhysicalMaterial",
-      ],
-      propertyType: DataType.String,
+      ecPropertyTraversal: ["PhysicalMaterial"],
       primitiveNavigationClass: "BisCore:PhysicalElementIsOfPhysicalMaterial",
       actualECClassName: "BisCore:PhysicalElement",
       key: "undefined|BisCore:PhysicalElement|PhysicalMaterial",
@@ -601,17 +570,15 @@ describe("Group properties utilities", () => {
 
     const result = convertToECProperties(propertyMetaData);
 
-    const expectedResult: ECProperty[] = [
+    const expectedResult: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "PhysicalMaterial.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "PhysicalMaterial.CodeValue",
       },
     ];
@@ -620,14 +587,12 @@ describe("Group properties utilities", () => {
   });
 
   it("find properties correctly", () => {
-
     const propertiesMetaData: PropertyMetaData[] = [
       {
         displayLabel: "Properties Field",
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propString"],
-        propertyType: DataType.String,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -639,7 +604,6 @@ describe("Group properties utilities", () => {
         sourceSchema: "*",
         sourceClassName: "*",
         ecPropertyTraversal: ["propInt"],
-        propertyType: DataType.Integer,
         primitiveNavigationClass: "",
         actualECClassName: "SchemaName:ClassName",
         parentPropertyClassName: undefined,
@@ -648,17 +612,15 @@ describe("Group properties utilities", () => {
       },
     ];
 
-    const ecProperties: ECProperty[] = [
+    const ecProperties: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "propString",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.Integer,
         ecPropertyName: "propInt",
       },
     ];
@@ -666,74 +628,64 @@ describe("Group properties utilities", () => {
     const result = findProperties(ecProperties, propertiesMetaData);
 
     assert.deepEqual(result, propertiesMetaData);
-
   });
 
   it("can find properties generated from a single property", () => {
+    const propertiesMetaData: PropertyMetaData[] = [
+      {
+        displayLabel: "Model",
+        sourceSchema: "*",
+        sourceClassName: "*",
+        ecPropertyTraversal: ["Model"],
+        primitiveNavigationClass: "BisCore:ModelContainsElements",
+        actualECClassName: "BisCore:Element",
+        key: "undefined|BisCore:Element|Model",
+        categoryLabel: "Selected Item",
+        parentPropertyClassName: undefined,
+      },
+    ];
 
-    const propertiesMetaData: PropertyMetaData[] = [{
-      displayLabel: "Model",
-      sourceSchema: "*",
-      sourceClassName: "*",
-      ecPropertyTraversal: [
-        "Model",
-      ],
-      propertyType: DataType.String,
-      primitiveNavigationClass: "BisCore:ModelContainsElements",
-      actualECClassName: "BisCore:Element",
-      key: "undefined|BisCore:Element|Model",
-      categoryLabel: "Selected Item",
-      parentPropertyClassName: undefined,
-    }];
-
-    const ecProperties: ECProperty[] = [
+    const ecProperties: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.UserLabel",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.CodeValue",
       },
     ];
 
     const result = findProperties(ecProperties, propertiesMetaData);
     assert.deepEqual(result, propertiesMetaData);
-
   });
 
   it("cannot find properties generated from a single property in the wrong order", () => {
+    const propertiesMetaData: PropertyMetaData[] = [
+      {
+        displayLabel: "Model",
+        sourceSchema: "*",
+        sourceClassName: "*",
+        ecPropertyTraversal: ["Model"],
+        primitiveNavigationClass: "BisCore:ModelContainsElements",
+        actualECClassName: "BisCore:Element",
+        key: "undefined|BisCore:Element|Model",
+        categoryLabel: "Selected Item",
+        parentPropertyClassName: undefined,
+      },
+    ];
 
-    const propertiesMetaData: PropertyMetaData[] = [{
-      displayLabel: "Model",
-      sourceSchema: "*",
-      sourceClassName: "*",
-      ecPropertyTraversal: [
-        "Model",
-      ],
-      propertyType: DataType.String,
-      primitiveNavigationClass: "BisCore:ModelContainsElements",
-      actualECClassName: "BisCore:Element",
-      key: "undefined|BisCore:Element|Model",
-      categoryLabel: "Selected Item",
-      parentPropertyClassName: undefined,
-    }];
-
-    const ecProperties: ECProperty[] = [
+    const ecProperties: ECPropertyReference[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.CodeValue",
       },
       {
         ecSchemaName: "*",
         ecClassName: "*",
-        ecPropertyType: DataType.String,
         ecPropertyName: "Model.ModeledElement.UserLabel",
       },
     ];
@@ -741,5 +693,4 @@ describe("Group properties utilities", () => {
     const result = findProperties(ecProperties, propertiesMetaData);
     expect(result).to.be.of.length(0);
   });
-
 });

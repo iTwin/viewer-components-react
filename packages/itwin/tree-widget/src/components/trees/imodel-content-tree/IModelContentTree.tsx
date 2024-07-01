@@ -3,121 +3,77 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useCallback } from "react";
-import { SelectionMode, TreeEventHandler } from "@itwin/components-react";
-import { PresentationTree, PresentationTreeNodeRenderer, usePresentationTreeState } from "@itwin/presentation-components";
-import { ReportingTreeEventHandler } from "../common/ReportingTreeEventHandler";
-import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
+import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
+import { BaseTree } from "../common/components/BaseTree";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
-import { usePerformanceReporting } from "../common/UsePerformanceReporting";
-import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
+import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
+import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
 
-import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
-import type { Ruleset } from "@itwin/presentation-common";
-import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
-/**
- * Presentation rules used by IModelContentTree
- * @internal
- */
-export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); // eslint-disable-line @typescript-eslint/no-var-requires
+import type { ReactElement } from "react";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
-/**
- * Props for [[IModelContentTree]].
- * @public
- */
-export interface IModelContentTreeProps extends BaseTreeProps {
-  /**
-   * Props for configuring hierarchy level.
-   * @beta
-   */
-  hierarchyLevelConfig?: HierarchyLevelConfig;
-  /**
-   * Reports performance of a feature.
-   * @param featureId ID of the feature.
-   * @param elapsedTime Elapsed time of the feature.
-   * @beta
-   */
-  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-  /**
-   * Callback that is invoked when a tracked feature is used.
-   * @param featureId ID of the feature.
-   * @beta
-   */
+interface IModelContentTreeOwnProps {
+  hierarchyLevelConfig?: {
+    sizeLimit?: number;
+  };
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
 
-/**
- * A tree that shows all iModel content starting from the root Subject, then the hierarchy of child
- * Subjects, their Models and Elements contained in those Models.
- * @public
- */
-export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, width, height, selectionMode, hierarchyLevelConfig, onFeatureUsed } = props;
+type BaseTreeTreeProps = Parameters<typeof BaseTree>[0];
+type GetHierarchyDefinitionsProviderCallback = BaseTreeTreeProps["getHierarchyDefinition"];
+type IModelContentTreeProps = IModelContentTreeOwnProps &
+  Pick<BaseTreeTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-  const { reportUsage } = useFeatureReporting({ treeIdentifier: IModelContentTreeComponent.id, onFeatureUsed });
-  const { onNodeLoaded } = usePerformanceReporting({
-    treeIdentifier: IModelContentTreeComponent.id,
-    onPerformanceMeasured: props.onPerformanceMeasured,
-  });
-
-  const eventHandlerFactory = useCallback(
-    (handlerProps: PresentationTreeEventHandlerProps) => {
-      const nodeLoader = handlerProps.nodeLoader;
-      const eventHandler = new TreeEventHandler({ modelSource: nodeLoader.modelSource, nodeLoader });
-      return new ReportingTreeEventHandler({
-        nodeLoader,
-        eventHandler,
-        reportUsage,
-      });
-    },
-    [reportUsage],
+/** @internal */
+export function IModelContentTree({ onPerformanceMeasured, onFeatureUsed, ...props }: IModelContentTreeProps) {
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: IModelContentTreeComponent.id });
+  return (
+    <BaseTree
+      {...props}
+      treeName={IModelContentTreeComponent.id}
+      getHierarchyDefinition={getDefinitionsProvider}
+      getIcon={getIcon}
+      selectionMode={props.selectionMode ?? "extended"}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${IModelContentTreeComponent.id}-${action}`, duration);
+      }}
+      reportUsage={reportUsage}
+    />
   );
+}
 
-  const state = usePresentationTreeState({
-    imodel: iModel,
-    ruleset: RULESET_IMODEL_CONTENT,
-    pagingSize: 20,
-    appendChildrenCountForGroupingNodes: true,
-    customizeTreeNodeItem,
-    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
-    enableHierarchyAutoUpdate: true,
-    onNodeLoaded,
-    eventHandlerFactory,
+function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+  return new IModelContentTreeDefinition({
+    imodelAccess: props.imodelAccess,
+    idsCache: new IModelContentTreeIdsCache(props.imodelAccess),
   });
+}
 
-  const treeRendererProps = {
-    contextMenuItems: props.contextMenuItems,
-    nodeLabelRenderer: props.nodeLabelRenderer,
-    density: props.density,
-  };
-
-  if (!state) {
-    return null;
+function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
+  if (node.extendedData?.imageId === undefined) {
+    return undefined;
   }
 
-  return (
-    <div className="tree-widget-tree-container">
-      <PresentationTree
-        width={width}
-        height={height}
-        state={state}
-        selectionMode={selectionMode ?? SelectionMode.None}
-        treeRenderer={(treeProps) =>
-          hierarchyLevelConfig?.isFilteringEnabled ? (
-            <FilterableTreeRenderer
-              {...treeProps}
-              {...treeRendererProps}
-              nodeLoader={state.nodeLoader}
-              nodeRenderer={(nodeRendererProps) => <PresentationTreeNodeRenderer {...nodeRendererProps} />}
-            />
-          ) : (
-            <TreeRenderer {...treeProps} {...treeRendererProps} />
-          )
-        }
-      />
-    </div>
-  );
-};
+  switch (node.extendedData.imageId) {
+    case "icon-layers":
+      return <SvgLayers />;
+    case "icon-item":
+      return <SvgItem />;
+    case "icon-ec-class":
+      return <SvgItem />;
+    case "icon-imodel-hollow-2":
+      return <SvgImodelHollow />;
+    case "icon-folder":
+      return <SvgFolder />;
+    case "icon-model":
+      return <SvgModel />;
+    case "icon-hierarchy-tree":
+      return <SvgHierarchyTree />;
+    case "icon-group":
+      return <SvgGroup />;
+  }
 
-const customizeTreeNodeItem = combineTreeNodeItemCustomizations([addCustomTreeNodeItemLabelRenderer]);
+  return undefined;
+}

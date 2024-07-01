@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { Mapping } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useState } from "react";
 import type { BeEvent } from "@itwin/core-bentley";
@@ -56,7 +56,7 @@ export const MappingListItem = ({
   // Check whether the job is still running when users refresh the mapping list
   // or modify any mappings
   useEffect(() => {
-    if(mappingIdJobInfo.get(mapping.id)){
+    if (mappingIdJobInfo.get(mapping.id)) {
       setIsJobStarted(true);
     }
   }, [mappingIdJobInfo, mapping.id]);
@@ -104,19 +104,18 @@ export const MappingListItem = ({
       active={selected}
       key={mapping.id}
       onClick={onClickTile}
-      title={mapping.mappingName}>
+      title={mapping.mappingName}
+    >
       <ListItem.Content>
         {onClickMappingTitle ? <Anchor onClick={() => onClickMappingTitle(mapping)}>{mapping.mappingName}</Anchor> : mapping.mappingName}
-        <ListItem.Description>
-          {mapping.description}
-        </ListItem.Description>
+        <ListItem.Description>{mapping.description}</ListItem.Description>
       </ListItem.Content>
       <ExtractionStatus
         state={extractionState}
         clearExtractionState={() => {
           setExtractionState(ExtractionStates.None);
         }}
-      ></ExtractionStatus >
+      ></ExtractionStatus>
       <MappingViewActionGroup
         mapping={mapping}
         onToggleExtraction={onToggleExtraction}

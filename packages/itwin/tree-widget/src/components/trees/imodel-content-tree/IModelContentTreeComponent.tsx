@@ -3,42 +3,47 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "../VisibilityTreeBase.scss";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { IModelContentTree } from "./IModelContentTree";
 
-import type { IModelContentTreeProps } from "./IModelContentTree";
+import type { ComponentPropsWithoutRef } from "react";
+import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
+
+type IModelContentTreeProps = ComponentPropsWithoutRef<typeof IModelContentTree>;
+interface IModelContentTreeComponentProps
+  extends Pick<IModelContentTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured" | "onFeatureUsed"> {
+  selectionStorage: SelectionStorage;
+}
 
 /**
- * Props for [[IModelContentTreeComponent]].
- * @public
- */
-export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
-
-/**
- * A component that renders [[IModelContentTree]]
- * @public
+ * A component that renders `IModelContentTree`.
+ * @beta
  */
 export const IModelContentTreeComponent = (props: IModelContentTreeComponentProps) => {
-  const iModel = useActiveIModelConnection();
+  const imodel = useActiveIModelConnection();
 
-  if (!iModel) {
+  if (!imodel) {
     return null;
   }
 
-  return <AutoSizer>{({ width, height }) => <IModelContentTree {...props} iModel={iModel} width={width} height={height} />}</AutoSizer>;
+  return (
+    <UnifiedSelectionProvider storage={props.selectionStorage}>
+      <AutoSizer>{({ width, height }) => <IModelContentTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
+    </UnifiedSelectionProvider>
+  );
 };
 
 /**
- * Id of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
- * @public
+ * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @beta
  */
-IModelContentTreeComponent.id = "imodel-content-tree";
+IModelContentTreeComponent.id = "imodel-content-tree-v2";
 
 /**
- * Label of the component. May be used when a creating a [[TreeDefinition]] for [[SelectableTree]].
- * @public
+ * Label of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
+ * @beta
  */
-IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContent");
+IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContentTree.label");

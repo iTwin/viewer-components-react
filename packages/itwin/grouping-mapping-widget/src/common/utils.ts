@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { QueryRowFormat } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
@@ -19,10 +19,7 @@ export function debounce<F extends (...args: any[]) => void>(f: F, delay: number
   };
 }
 
-export const fetchIdsFromQuery = async (
-  query: string,
-  iModelConnection: IModelConnection
-) => {
+export const fetchIdsFromQuery = async (query: string, iModelConnection: IModelConnection) => {
   if (query === "") {
     return [];
   }
@@ -79,11 +76,7 @@ export const handleError = (errorStatus: number) => {
   toaster.negative(fullErrorMessage);
 };
 
-export const handleInputChange = <T,>(
-  e: React.ChangeEvent<HTMLInputElement>,
-  values: T,
-  setValues: (newValues: T) => void,
-) => {
+export const handleInputChange = <T>(e: React.ChangeEvent<HTMLInputElement>, values: T, setValues: (newValues: T) => void) => {
   const { name, value } = e.target;
 
   setValues({

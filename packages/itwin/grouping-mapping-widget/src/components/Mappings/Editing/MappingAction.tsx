@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Text, ToggleSwitch } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import ActionPanel from "../../SharedComponents/ActionPanel";
@@ -17,6 +17,10 @@ const defaultDisplayStrings = {
   mappingDetails: "Mapping Details",
 };
 
+/**
+ * Props for the {@link MappingAction} component.
+ * @public
+ */
 export interface MappingActionProps {
   mapping?: Mapping;
   onSaveSuccess: () => void;
@@ -24,6 +28,10 @@ export interface MappingActionProps {
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
+/**
+ * Component to create or update a mapping.
+ * @public
+ */
 export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -35,25 +43,18 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
   const [validator, showValidationMessage] = useValidator();
   const queryClient = useQueryClient();
 
-  const displayStrings = React.useMemo(
-    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
-    [userDisplayStrings]
-  );
+  const displayStrings = React.useMemo(() => ({ ...defaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
 
-  const { mutate: saveMutation, isLoading } = useMutation(
-    {
-      mutationFn: async (newMapping: MappingCreate) => {
-        const accessToken = await getAccessToken();
-        return mapping
-          ? mappingClient.updateMapping(accessToken, iModelId, mapping.id, newMapping)
-          : mappingClient.createMapping(accessToken, iModelId, newMapping);
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey: ["mappings"] });
-        onSaveSuccess();
-      },
-    }
-  );
+  const { mutate: saveMutation, isLoading } = useMutation({
+    mutationFn: async (newMapping: MappingCreate) => {
+      const accessToken = await getAccessToken();
+      return mapping ? mappingClient.updateMapping(accessToken, mapping.id, newMapping) : mappingClient.createMapping(accessToken, newMapping);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["mappings"] });
+      onSaveSuccess();
+    },
+  });
 
   const onSave = async () => {
     if (!validator.allValid()) {
@@ -61,6 +62,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
       return;
     }
     saveMutation({
+      iModelId,
       mappingName: values.name,
       description: values.description,
       extractionEnabled: values.extractionEnabled,
@@ -69,15 +71,15 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
 
   return (
     <>
-      <div className='gmw-details-form-container'>
-        <Fieldset legend={displayStrings.mappingDetails} className='gmw-details-form'>
-          <Text variant='small' as='small' className='gmw-field-legend'>
+      <div className="gmw-details-form-container">
+        <Fieldset legend={displayStrings.mappingDetails} className="gmw-details-form">
+          <Text variant="small" as="small" className="gmw-field-legend">
             Asterisk * indicates mandatory fields.
           </Text>
           <LabeledInput
-            id='name'
-            name='name'
-            label='Name'
+            id="name"
+            name="name"
+            label="Name"
             value={values.name}
             required
             onChange={(event) => {
@@ -85,11 +87,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
               validator.showMessageFor("name");
             }}
             message={validator.message("name", values.name, NAME_REQUIREMENTS)}
-            status={
-              validator.message("name", values.name, NAME_REQUIREMENTS)
-                ? "negative"
-                : undefined
-            }
+            status={validator.message("name", values.name, NAME_REQUIREMENTS) ? "negative" : undefined}
             onBlur={() => {
               validator.showMessageFor("name");
             }}
@@ -99,18 +97,18 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
             }}
           />
           <LabeledInput
-            id='description'
-            name='description'
-            label='Description'
+            id="description"
+            name="description"
+            label="Description"
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
             }}
           />
           <ToggleSwitch
-            id='extractionEnabled'
-            name='extractionEnabled'
-            label='Extract data from iModel'
+            id="extractionEnabled"
+            name="extractionEnabled"
+            label="Extract data from iModel"
             labelPosition="right"
             checked={values.extractionEnabled}
             onChange={(event) => {
@@ -119,12 +117,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
           />
         </Fieldset>
       </div>
-      <ActionPanel
-        onSave={onSave}
-        onCancel={onClickCancel}
-        isSavingDisabled={!values.name}
-        isLoading={isLoading}
-      />
+      <ActionPanel onSave={onSave} onCancel={onClickCancel} isSavingDisabled={!values.name} isLoading={isLoading} />
     </>
   );
 };

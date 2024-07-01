@@ -1,18 +1,25 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { FeatureOverrideType } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import type { OverlappedElementGroupPairs, OverlappedInfo } from "../context/GroupHilitedElementsContext";
-import { clearEmphasizedOverriddenElements, clearHiddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements } from "../../common/viewerUtils";
+import {
+  clearEmphasizedOverriddenElements,
+  clearHiddenElements,
+  emphasizeElements,
+  getHiliteIds,
+  hideElements,
+  overrideElements,
+} from "../../common/viewerUtils";
 
-const GOLDEN_ANGLE_MULTIPLIER = 1.5;  // Multiplier to spread colors more uniformly.
-const BASE_HUE_OFFSET = 60;           // Initial hue offset to avoid certain colors e.g 0 offset would begin with red.
-const HUE_ADJUSTMENT_STEP = 15;       // Step to adjust the hue to avoid the red spectrum.
-const RED_HUE_LOWER_BOUND = 330;      // Lower bound of the red hue spectrum to avoid.
-const RED_HUE_UPPER_BOUND = 30;       // Upper bound of the red hue spectrum to avoid.
+const GOLDEN_ANGLE_MULTIPLIER = 1.5; // Multiplier to spread colors more uniformly.
+const BASE_HUE_OFFSET = 60; // Initial hue offset to avoid certain colors e.g 0 offset would begin with red.
+const HUE_ADJUSTMENT_STEP = 15; // Step to adjust the hue to avoid the red spectrum.
+const RED_HUE_LOWER_BOUND = 330; // Lower bound of the red hue spectrum to avoid.
+const RED_HUE_UPPER_BOUND = 30; // Upper bound of the red hue spectrum to avoid.
 const GOLDENANGLE = 180 * (3 - Math.sqrt(5));
 
 const generateHSL = (hue: number, saturation: number = 100, lightness: number = 50) => {
@@ -57,7 +64,7 @@ export type GroupsElementIds = {
   elementIds: string[];
 }[];
 
-export const hideGroupIds = (hiddenGroupIds: Set<string>, groupsWithGroupedOverlaps: OverlappedElementGroupPairs[]  ) => {
+export const hideGroupIds = (hiddenGroupIds: Set<string>, groupsWithGroupedOverlaps: OverlappedElementGroupPairs[]) => {
   hiddenGroupIds.forEach((groupId) => {
     hideGroupConsideringOverlaps(groupsWithGroupedOverlaps, groupId, hiddenGroupIds);
   });
@@ -78,10 +85,10 @@ export const visualizeGroupColors = async (
         group,
         hiddenGroupsIds,
         doEmphasizeElements,
-        getGroupColor(index),  // color for single group
+        getGroupColor(index), // color for single group
         false, // Shouldn't matter as replacement only accounts for same colored overrides.
         setNumberOfVisualizedGroups,
-      )
+      ),
     );
 
   const overlappedGroupPromises = groupsWithGroupedOverlaps
@@ -91,10 +98,10 @@ export const visualizeGroupColors = async (
         group,
         hiddenGroupsIds,
         doEmphasizeElements,
-        generateHSL(0),  // color for group of overlapped elements
+        generateHSL(0), // color for group of overlapped elements
         false,
         setNumberOfVisualizedGroups,
-      )
+      ),
     );
 
   clearHiddenElements();
@@ -105,14 +112,10 @@ export const visualizeGroupColors = async (
   return allIds;
 };
 
-export const getHiliteIdsAndKeysetFromGroup = async (
-  iModelConnection: IModelConnection,
-  group: Group,
-) => {
+export const getHiliteIdsAndKeysetFromGroup = async (iModelConnection: IModelConnection, group: GroupMinimal) => {
   const query = group.query;
   const result = await getHiliteIds(query, iModelConnection);
-  return {query, result};
-
+  return { query, result };
 };
 
 const getOverlappedElementsInfo = (overlappedElements: OverlappedElementGroupPairs[]) => {
@@ -146,9 +149,7 @@ const mergeElementsByGroup = (elems: Map<string, Set<string>>) => {
   return mergedList;
 };
 
-export const generateOverlappedGroups = (
-  groupsElementIds: GroupsElementIds,
-) => {
+export const generateOverlappedGroups = (groupsElementIds: GroupsElementIds) => {
   const elems: Map<string, Set<string>> = new Map();
   const groupElementCount: Map<string, number> = new Map();
 
@@ -172,13 +173,17 @@ export const generateOverlappedGroups = (
   const mergedList = mergeElementsByGroup(elems);
   const overlappedGroupsInformation: OverlappedElementGroupPairs[] = Array.from(mergedList.values()).filter((value) => value.groupIds.size > 1);
 
-  return { groupsWithGroupedOverlaps: [...allGroups, ...overlappedGroupsInformation], overlappedElementsInfo: getOverlappedElementsInfo(overlappedGroupsInformation), numberOfElementsInGroups: groupElementCount };
+  return {
+    groupsWithGroupedOverlaps: [...allGroups, ...overlappedGroupsInformation],
+    overlappedElementsInfo: getOverlappedElementsInfo(overlappedGroupsInformation),
+    numberOfElementsInGroups: groupElementCount,
+  };
 };
 
 export const hideGroupConsideringOverlaps = (
   overlappedElementGroupPairs: OverlappedElementGroupPairs[],
   groupIdToHide: string,
-  hiddenGroupsIds: Set<string>
+  hiddenGroupsIds: Set<string>,
 ) => {
   const elementsToPotentiallyHide = new Set<string>();
 
@@ -193,10 +198,7 @@ export const hideGroupConsideringOverlaps = (
         }
       } else {
         // If there are overlaps, only hide if all overlapping groups are hidden
-        const allOtherGroupsHidden = Array.from(entry.groupIds).every(
-          (groupId) =>
-            groupId === groupIdToHide || hiddenGroupsIds.has(groupId)
-        );
+        const allOtherGroupsHidden = Array.from(entry.groupIds).every((groupId) => groupId === groupIdToHide || hiddenGroupsIds.has(groupId));
         if (allOtherGroupsHidden) {
           for (const elem of entry.elementIds) {
             elementsToPotentiallyHide.add(elem);

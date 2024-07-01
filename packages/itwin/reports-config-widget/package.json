@@ -1,6 +1,6 @@
 {
   "name": "@itwin/reports-config-widget-react",
-  "version": "0.5.0",
+  "version": "0.7.0",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -33,6 +33,7 @@
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "cover": "npm test -- --coverage",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",
+    "extract-api": "betools extract-api --entry=reports-config-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
@@ -44,7 +45,10 @@
     "plugins": [
       "@itwin"
     ],
-    "extends": "plugin:@itwin/ui",
+    "extends": [
+      "plugin:@itwin/ui",
+      "prettier"
+    ],
     "rules": {
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error",
@@ -58,7 +62,7 @@
     "@itwin/imodels-access-common": "^4.1.4",
     "@itwin/imodels-access-frontend": "^4.1.4",
     "@itwin/imodels-client-management": "^4.2.3",
-    "@itwin/insights-client": "^0.4.0",
+    "@itwin/insights-client": "^0.10.1",
     "@itwin/itwinui-icons-color-react": "^2.1.0",
     "@itwin/itwinui-icons-react": "^2.4.0",
     "@itwin/itwinui-react": "^2.11.0",
@@ -81,8 +85,8 @@
     "@itwin/core-quantity": "^4.0.0",
     "@itwin/core-react": "^4.0.0",
     "@itwin/core-telemetry": "^4.0.0",
-    "@itwin/eslint-plugin": "^3.7.8",
     "@itwin/ecschema-metadata": "^4.0.0",
+    "@itwin/eslint-plugin": "^3.7.8",
     "@itwin/imodel-components-react": "^4.0.0",
     "@itwin/presentation-common": "^4.0.0",
     "@itwin/presentation-frontend": "^4.0.0",
@@ -104,6 +108,7 @@
     "chai": "^4.2.0",
     "cpx2": "^3.0.0",
     "eslint": "^7.32.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.2.0",

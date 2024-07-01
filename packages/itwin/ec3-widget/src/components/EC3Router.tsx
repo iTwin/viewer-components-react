@@ -1,23 +1,15 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import type { Route } from "./EC3Widget";
 import { RouteStep } from "./EC3Widget";
 import { TemplateMenu } from "./TemplateMenu";
 import { Templates } from "./Templates";
-export interface EC3RouterProps {
-  currentRoute: Route;
-  navigateTo: (getNextRoute: (prev: Route | undefined) => Route) => void;
-  goBack: () => void;
-}
+import { EC3Widget } from "../EC3Widget";
+import type { EC3RouterProps } from "./EC3RouterProps";
 
-export const EC3Router = ({
-  currentRoute,
-  navigateTo,
-  goBack,
-}: EC3RouterProps) => {
+export const EC3Router = ({ currentRoute, navigateTo, goBack, onExportResult }: EC3RouterProps) => {
   const { template } = currentRoute.routingFields;
   switch (currentRoute.step) {
     case RouteStep.Templates:
@@ -26,9 +18,10 @@ export const EC3Router = ({
           onClickCreate={() =>
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
-              title: "Create Template",
+              title: EC3Widget.translate("createTemplate"),
               routingFields: {},
-            }))}
+            }))
+          }
           onClickTemplateTitle={(t) =>
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
@@ -36,12 +29,11 @@ export const EC3Router = ({
               routingFields: { template: t },
             }))
           }
+          onExportResult={onExportResult}
         />
       );
     case RouteStep.TemplateMenu:
-      return (
-        <TemplateMenu template={template} onClickCancel={goBack} onSaveSuccess={goBack} />
-      );
+      return <TemplateMenu template={template} onClickCancel={goBack} onSaveSuccess={goBack} />;
     default:
       return null;
   }

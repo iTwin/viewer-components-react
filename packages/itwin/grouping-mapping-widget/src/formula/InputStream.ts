@@ -1,12 +1,12 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 export class InputStream {
   private _nextIndex = 0;
   private _current = "";
 
-  constructor(private readonly _stream: string) { }
+  constructor(private readonly _stream: string) {}
 
   public get next(): string {
     this._current = this.isEOF ? "" : this._stream[this._nextIndex++];
@@ -14,8 +14,7 @@ export class InputStream {
   }
 
   public get undo(): string {
-    if (this._nextIndex === 0)
-      return this.current;
+    if (this._nextIndex === 0) return this.current;
 
     this._nextIndex--;
     this._current = this._nextIndex === 0 ? "" : this._stream[this._nextIndex - 1];

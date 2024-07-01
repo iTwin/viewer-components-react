@@ -118,7 +118,7 @@ export class AreaMeasurement extends Measurement {
   }
 
   constructor(props?: AreaMeasurementProps) {
-    super();
+    super(props);
 
     this._polygon = new Polygon([], false);
     this._polygon.textMarker.setMouseButtonHandler(
@@ -176,6 +176,9 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
+    if (this.drawingMetadata?.origin)
+      this._dynamicEdge.drawingMetadata = { origin: this.drawingMetadata.origin, worldScale: this.worldScale };
+    this._dynamicEdge.sheetViewId = this.sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
     this._dynamicEdge.lockStyle = this.lockStyle;
@@ -298,10 +301,16 @@ export class AreaMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
+  public override onDrawingMetadataChanged(): void {
+    this.polygon.worldScale = this.worldScale;
+    this._polygon.recomputeFromPoints();
+  }
+
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.polygonPoints.length === 0) return;
+    if (this.polygonPoints.length === 0)
+      return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
     const snapId = !this.isDynamic ? this.getSnapId() : undefined;
@@ -401,11 +410,11 @@ export class AreaMeasurement extends Measurement {
       );
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(
-      this._polygon.perimeter,
+      this.worldScale * this._polygon.perimeter,
       lengthSpec
     );
     const fArea = IModelApp.quantityFormatter.formatQuantity(
-      this._polygon.area,
+      this.worldScale * this.worldScale * this._polygon.area,
       areaSpec
     );
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(
@@ -433,18 +442,26 @@ export class AreaMeasurement extends Measurement {
           areaSpec !== undefined
             ? { value: this._polygon.area, formatSpec: areaSpec }
             : undefined,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString(
-          "MeasureTools:tools.MeasureArea.popupAreaXY"
-        ),
-        name: "AreaMeasurement_AreaXY",
-        value: fAreaXY,
-        aggregatableValue:
-          areaSpec !== undefined
-            ? { value: this._polygon.areaXY, formatSpec: areaSpec }
-            : undefined,
-      },
+      }
+    );
+
+    if (this.drawingMetadata?.worldScale === undefined) {
+      data.properties.push(
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureArea.popupAreaXY"
+          ),
+          name: "AreaMeasurement_AreaXY",
+          value: fAreaXY,
+          aggregatableValue:
+            areaSpec !== undefined
+              ? { value: this._polygon.areaXY, formatSpec: areaSpec }
+              : undefined,
+        }
+      );
+    }
+
+    data.properties.push(
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureArea.popupPerimeter"

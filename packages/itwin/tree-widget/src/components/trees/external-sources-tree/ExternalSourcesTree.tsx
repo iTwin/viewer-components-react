@@ -3,128 +3,65 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "../VisibilityTreeBase.scss";
-import { useCallback } from "react";
-import { SelectionMode } from "@itwin/components-react";
-import { PresentationTree, PresentationTreeNodeRenderer, UnifiedSelectionTreeEventHandler, usePresentationTreeState } from "@itwin/presentation-components";
-import { ReportingTreeEventHandler } from "../common/ReportingTreeEventHandler";
-import { FilterableTreeRenderer, TreeRenderer } from "../common/TreeRenderer";
+import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
+import { BaseTree } from "../common/components/BaseTree";
 import { useFeatureReporting } from "../common/UseFeatureReporting";
-import { usePerformanceReporting } from "../common/UsePerformanceReporting";
-import { addCustomTreeNodeItemLabelRenderer, combineTreeNodeItemCustomizations } from "../common/Utils";
-import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent";
+import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 
-import type { Ruleset } from "@itwin/presentation-common";
-import type { PresentationTreeEventHandlerProps } from "@itwin/presentation-components";
-import type { BaseTreeProps, HierarchyLevelConfig } from "../common/Types";
-/**
- * Presentation rules used by ControlledCategoriesTree
- * @internal
- */
-export const RULESET_EXTERNAL_SOURCES = RULESET_EXTERNAL_SOURCES_IMPORT as Ruleset;
+import type { ReactElement } from "react";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
-const PAGING_SIZE = 20;
-
-/**
- * Props for the [[ExternalSourcesTree]] component
- * @alpha
- */
-export interface ExternalSourcesTreeProps extends BaseTreeProps {
-  /**
-   * Props for configuring hierarchy level.
-   * @beta
-   */
-  hierarchyLevelConfig?: HierarchyLevelConfig;
-  /**
-   * Reports performance of a feature.
-   * @param featureId ID of the feature.
-   * @param elapsedTime Elapsed time of the feature.
-   * @beta
-   */
-  onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
-  /**
-   * Callback that is invoked when a tracked feature is used.
-   * @param featureId ID of the feature.
-   * @beta
-   */
+interface ExternalSourcesTreeOwnProps {
+  hierarchyLevelConfig?: {
+    sizeLimit?: number;
+  };
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
 
-/**
- * Tree which displays a hierarchy of ExternalSources and their elements.
- * @alpha
- */
-export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
-  const { hierarchyLevelConfig, contextMenuItems, nodeLabelRenderer, density, onFeatureUsed } = props;
+type BaseTreeProps = Parameters<typeof BaseTree>[0];
+type GetHierarchyDefinitionsProviderCallback = BaseTreeProps["getHierarchyDefinition"];
+type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps &
+  Pick<BaseTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
 
-  const { reportUsage } = useFeatureReporting({ treeIdentifier: ExternalSourcesTreeComponent.id, onFeatureUsed });
-  const { onNodeLoaded } = usePerformanceReporting({
-    treeIdentifier: ExternalSourcesTreeComponent.id,
-    onPerformanceMeasured: props.onPerformanceMeasured,
-  });
-
-  const eventHandlerFactory = useCallback(
-    (handlerProps: PresentationTreeEventHandlerProps) => {
-      const eventHandler = new UnifiedSelectionTreeEventHandler({ nodeLoader: handlerProps.nodeLoader });
-      return new ReportingTreeEventHandler({
-        nodeLoader: handlerProps.nodeLoader,
-        eventHandler,
-        reportUsage,
-      });
-    },
-    [reportUsage],
-  );
-
-  const state = usePresentationTreeState({
-    imodel: props.iModel,
-    ruleset: RULESET_EXTERNAL_SOURCES,
-    pagingSize: PAGING_SIZE,
-    eventHandlerFactory,
-    customizeTreeNodeItem,
-    hierarchyLevelSizeLimit: hierarchyLevelConfig?.sizeLimit,
-    enableHierarchyAutoUpdate: true,
-    onNodeLoaded,
-  });
-
-  const treeRendererProps = {
-    contextMenuItems,
-    nodeLabelRenderer,
-    density,
-  };
-
-  if (!state) {
-    return null;
-  }
-
+/** @internal */
+export function ExternalSourcesTree({ onPerformanceMeasured, onFeatureUsed, ...props }: ExternalSourcesTreeProps) {
+  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: ExternalSourcesTreeComponent.id });
   return (
-    <div className="tree-widget-tree-container">
-      <PresentationTree
-        width={props.width}
-        height={props.height}
-        state={state}
-        selectionMode={props.selectionMode ?? SelectionMode.Extended}
-        iconsEnabled={true}
-        treeRenderer={(treeProps) =>
-          hierarchyLevelConfig?.isFilteringEnabled ? (
-            <FilterableTreeRenderer
-              {...treeProps}
-              {...treeRendererProps}
-              nodeLoader={state.nodeLoader}
-              nodeRenderer={(nodeRendererProps) => <PresentationTreeNodeRenderer {...nodeRendererProps} />}
-            />
-          ) : (
-            <TreeRenderer {...treeProps} {...treeRendererProps} />
-          )
-        }
-      />
-    </div>
+    <BaseTree
+      {...props}
+      treeName={ExternalSourcesTreeComponent.id}
+      getHierarchyDefinition={getDefinitionsProvider}
+      getIcon={getIcon}
+      selectionMode={props.selectionMode ?? "none"}
+      onPerformanceMeasured={(action, duration) => {
+        onPerformanceMeasured?.(`${ExternalSourcesTreeComponent.id}-${action}`, duration);
+      }}
+      reportUsage={reportUsage}
+    />
   );
 }
 
-const customizeTreeNodeItem = combineTreeNodeItemCustomizations([
-  addCustomTreeNodeItemLabelRenderer,
-  (item, node) => {
-    item.icon = node.extendedData?.imageId;
-  },
-]);
+function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+  return new ExternalSourcesTreeDefinition(props);
+}
+
+function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
+  if (node.extendedData?.imageId === undefined) {
+    return undefined;
+  }
+
+  switch (node.extendedData.imageId) {
+    case "icon-item":
+      return <SvgItem />;
+    case "icon-ec-class":
+      return <SvgItem />;
+    case "icon-document":
+      return <SvgDocument />;
+    case "icon-ec-schema":
+      return <SvgDetails />;
+  }
+
+  return undefined;
+}

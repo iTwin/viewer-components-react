@@ -9,7 +9,7 @@ WORKDIR /workspaces/viewer-components-react/
 
 # Install pnpm
 RUN corepack enable
-RUN corepack prepare pnpm@8.11.0 --activate
+RUN corepack prepare pnpm@9.1.2 --activate
 
 # Copy the local files to the container (see `test-viewer.Dockerfile.dockerignore` for skipped files)
 COPY . .

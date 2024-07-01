@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import { BeEvent } from "@itwin/core-bentley";
-import { BaseMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
-import { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { BeEvent } from "@itwin/core-bentley";
+import type { BaseMapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
+import type { HitDetail, MapLayerImageryProvider, MapTileTreeScaleRangeVisibility } from "@itwin/core-frontend";
 
 export interface StyleMapLayerSettings {
   /** Name */

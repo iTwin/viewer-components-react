@@ -1,11 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { QueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import type { ExtractionStatus, IExtractionClient } from "@itwin/insights-client";
-import { ExtractorState } from "@itwin/insights-client";
+import { ExtractionState } from "@itwin/insights-client";
 import type { Mapping } from "@itwin/insights-client";
 import { STATUS_CHECK_INTERVAL } from "../../Constants";
 import { ExtractionStates } from "../Extraction/ExtractionStatus";
@@ -23,43 +23,35 @@ export interface MappingQueryResult {
   finalExtractionStateValue: ExtractionStates;
 }
 
-export const fetchMappingStatus = async (
-  mappingId: string,
-  jobId: string,
-  getAccessToken: GetAccessTokenFn,
-  extractionClient: IExtractionClient,
-) => {
+export const fetchMappingStatus = async (mappingId: string, jobId: string, getAccessToken: GetAccessTokenFn, extractionClient: IExtractionClient) => {
   const accessToken = await getAccessToken();
 
-  const getFinalExtractionStatus = ((extractionStatusResponse: ExtractionStatus) => {
-    switch(extractionStatusResponse.state) {
+  const getFinalExtractionStatus = (extractionStatusResponse: ExtractionStatus) => {
+    switch (extractionStatusResponse.state) {
       case undefined:
-        return { mappingId, finalExtractionStateValue: ExtractionStates.Starting};
-      case ExtractorState.Running:
-        return { mappingId, finalExtractionStateValue: ExtractionStates.Running};
-      case ExtractorState.Failed:
-        return { mappingId, finalExtractionStateValue: ExtractionStates.Failed};
-      case ExtractorState.Queued:
-        return { mappingId, finalExtractionStateValue: ExtractionStates.Queued};
-      case ExtractorState.Succeeded:
-        return { mappingId, finalExtractionStateValue: ExtractionStates.Succeeded};
+        return { mappingId, finalExtractionStateValue: ExtractionStates.Starting };
+      case ExtractionState.Running:
+        return { mappingId, finalExtractionStateValue: ExtractionStates.Running };
+      case ExtractionState.Failed:
+        return { mappingId, finalExtractionStateValue: ExtractionStates.Failed };
+      case ExtractionState.Queued:
+        return { mappingId, finalExtractionStateValue: ExtractionStates.Queued };
+      case ExtractionState.Succeeded:
+      case ExtractionState.PartiallySucceeded:
+        return { mappingId, finalExtractionStateValue: ExtractionStates.Succeeded };
       default:
-        return { mappingId, finalExtractionStateValue: ExtractionStates.None};
+        return { mappingId, finalExtractionStateValue: ExtractionStates.None };
     }
-  });
+  };
   const extractionStatusResponse = await extractionClient.getExtractionStatus(accessToken, jobId);
   return getFinalExtractionStatus(extractionStatusResponse);
 };
 
 export const resetMappingExtractionStatus = async (queryClient: QueryClient) => {
-  await queryClient.invalidateQueries({queryKey: ["extractionState"]});
+  await queryClient.invalidateQueries({ queryKey: ["extractionState"] });
 };
 
-export const useFetchMappingExtractionStatus = ({
-  getAccessToken,
-  mapping,
-  enabled,
-}: MappingExtractionStatusProps) => {
+export const useFetchMappingExtractionStatus = ({ getAccessToken, mapping, enabled }: MappingExtractionStatusProps) => {
   const extractionClient = useExtractionClient();
   const { mappingIdJobInfo } = useExtractionStateJobContext();
   const jobId = mappingIdJobInfo.get(mapping.id);

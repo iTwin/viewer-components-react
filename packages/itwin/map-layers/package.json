@@ -1,6 +1,6 @@
 {
   "name": "@itwin/map-layers",
-  "version": "5.4.3",
+  "version": "5.4.4",
   "description": "Extension that adds a Map Layers Widget",
   "main": "lib/cjs/map-layers.js",
   "module": "lib/esm/map-layers.js",
@@ -17,6 +17,7 @@
     "cover": "nyc npm -s test",
     "docs": "",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lintfix": "eslint --fix -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "pseudolocalize": "betools pseudolocalize --englishDir=./src/public/locales/en --out=./src/public/locales/en-PSEUDO",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
     "rebuild": "npm run -s clean && npm run -s build"
@@ -64,8 +65,8 @@
     "@testing-library/dom": "^8.12.0",
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^7.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.3.1",
-    "@typescript-eslint/parser": "^5.10.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
     "@types/chai": "4.3.5",
     "@types/jsdom-global": "^3.0.4",
     "@types/enzyme": "3.9.3",
@@ -84,14 +85,10 @@
     "enzyme": "3.10.0",
     "enzyme-to-json": "^3.3.4",
     "eslint": "^8.41.0",
-    "eslint-plugin-deprecation": "^2.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jam3": "^0.2.3",
-    "eslint-plugin-jsx-a11y": "^6.7.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "ignore-styles": "^5.0.1",
     "jsdom": "^22.1.0",
     "jsdom-global": "^3.0.2",
@@ -129,18 +126,9 @@
     "check-coverage": false
   },
   "eslintConfig": {
-    "plugins": [
-      "react-hooks",
-      "@itwin"
-    ],
     "extends": [
-      "plugin:react-hooks/recommended",
-      "plugin:@itwin/ui"
-    ],
-    "rules": {
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "error"
-    }
+      ".eslintrc.js"
+    ]
   },
   "mocha": {
     "require": [

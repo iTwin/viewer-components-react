@@ -1,30 +1,23 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { useCallback, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../../common/utils";
-import {
-  InformationPanel,
-  InformationPanelBody,
-  InformationPanelHeader,
-  Table,
-  Text,
-  toaster,
-} from "@itwin/itwinui-react";
+import { InformationPanel, InformationPanelBody, InformationPanelHeader, Table, Text, toaster } from "@itwin/itwinui-react";
 import "./OverlappedElementsInformationPanel.scss";
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import type { OverlappedInfo } from "../context/GroupHilitedElementsContext";
 import type { CellProps, Column } from "react-table";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 import { clearEmphasizedOverriddenElements, clearHiddenElements, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 
 export interface OverlappedElementsInformationPanelProps {
-  group?: Group;
+  group?: GroupMinimal;
   onClose: () => void;
   overlappedElementsInfo: Map<string, OverlappedInfo[]>;
-  groups: Group[];
+  groups: GroupMinimal[];
 }
 
 export interface OverlappedElementsDisplayProps {
@@ -34,19 +27,13 @@ export interface OverlappedElementsDisplayProps {
 }
 type OverlappedTyped = CreateTypeFromInterface<OverlappedElementsDisplayProps>;
 
-export const OverlappedElementsInformationPanel = ({
-  group,
-  onClose,
-  overlappedElementsInfo,
-  groups,
-}: OverlappedElementsInformationPanelProps) => {
-  const [isOverlappedInfoLoading, setIsOverlappedInfoLoading] =
-    useState<boolean>(false);
+export const OverlappedElementsInformationPanel = ({ group, onClose, overlappedElementsInfo, groups }: OverlappedElementsInformationPanelProps) => {
+  const [isOverlappedInfoLoading, setIsOverlappedInfoLoading] = useState<boolean>(false);
   const { setIsOverlappedColored } = useGroupHilitedElementsContext();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const columns = useMemo(
-    (): Column<OverlappedTyped>[] =>[
+    (): Column<OverlappedTyped>[] => [
       {
         id: "number",
         Header: "Overlapped elements",
@@ -67,7 +54,7 @@ export const OverlappedElementsInformationPanel = ({
         },
       },
     ],
-    []
+    [],
   );
 
   const key = group ? group.id : "";
@@ -102,28 +89,23 @@ export const OverlappedElementsInformationPanel = ({
     onClose();
   };
 
-  const onSelect = useCallback(
-    async (
-      selectedData: CreateTypeFromInterface<OverlappedElementsDisplayProps>[] | undefined
-    ) => {
-      try {
-        setIsLoading(true);
-        clearEmphasizedOverriddenElements();
-        clearHiddenElements();
-        if (selectedData && selectedData.length !== 0) {
-          visualizeElements(selectedData[0].elementsIds, "red");
-          await zoomToElements(selectedData[0].elementsIds);
-        }
-      } catch (error) {
-        toaster.negative("There was an error visualizing overlapped elements.");
-        /* eslint-disable no-console */
-        console.error(error);
-      } finally {
-        setIsLoading(false);
+  const onSelect = useCallback(async (selectedData: CreateTypeFromInterface<OverlappedElementsDisplayProps>[] | undefined) => {
+    try {
+      setIsLoading(true);
+      clearEmphasizedOverriddenElements();
+      clearHiddenElements();
+      if (selectedData && selectedData.length !== 0) {
+        visualizeElements(selectedData[0].elementsIds, "red");
+        await zoomToElements(selectedData[0].elementsIds);
       }
-    },
-    []
-  );
+    } catch (error) {
+      toaster.negative("There was an error visualizing overlapped elements.");
+      /* eslint-disable no-console */
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return (
     <InformationPanel isOpen={!!group} className="gmw-overlap-information">

@@ -144,7 +144,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   constructor(props?: LocationMeasurementProps) {
-    super();
+    super(props);
 
     this._location = Point3d.createZero();
     this._isDynamic = false;
@@ -232,7 +232,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
+    const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
@@ -287,7 +287,7 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
+    const adjustedLocation = this.adjustPointWithSheetToWorldTransform(this.adjustPointForGlobalOrigin(this._location));
     const fCoordinates = await FormatterUtils.formatCoordinates(adjustedLocation);
 
     let title = MeasureTools.localization.getLocalizedString(
@@ -306,7 +306,7 @@ export class LocationMeasurement extends Measurement {
       value: fCoordinates,
     });
 
-    if (this._geoLocation)
+    if (this._geoLocation && this.drawingMetadata?.sheetToWorldTransform !== undefined)
       data.properties.push({
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.latLong"
@@ -326,22 +326,23 @@ export class LocationMeasurement extends Measurement {
         value: await FormatterUtils.formatLength(adjustedLocation.z),
       });
     }
+    if (this.drawingMetadata?.sheetToWorldTransform === undefined) {
+      let slopeValue: string;
+      if (undefined !== this._slope)
+        slopeValue = FormatterUtils.formatSlope(100.0 * this._slope, true);
+      else
+        slopeValue = MeasureTools.localization.getLocalizedString(
+          "MeasureTools:tools.MeasureLocation.slopeUnavailable"
+        );
 
-    let slopeValue: string;
-    if (undefined !== this._slope)
-      slopeValue = FormatterUtils.formatSlope(100.0 * this._slope, true);
-    else
-      slopeValue = MeasureTools.localization.getLocalizedString(
-        "MeasureTools:tools.MeasureLocation.slopeUnavailable"
-      );
-
-    data.properties.push({
-      label: MeasureTools.localization.getLocalizedString(
-        "MeasureTools:tools.MeasureLocation.slope"
-      ),
-      name: "LocationMeasurement_Slope",
-      value: slopeValue,
-    });
+      data.properties.push({
+        label: MeasureTools.localization.getLocalizedString(
+          "MeasureTools:tools.MeasureLocation.slope"
+        ),
+        name: "LocationMeasurement_Slope",
+        value: slopeValue,
+      });
+    }
 
     if (undefined !== this._station) {
       data.properties.push({

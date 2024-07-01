@@ -93,8 +93,8 @@ You can define your context custom UI as following example in the GroupingMappin
 
 ```tsx
 const customCB = (groupId: string, mappingId: string, iModelId: string) => {
-  toaster.informational(`Called callback for group ${groupId}`)
-}
+  toaster.informational(`Called callback for group ${groupId}`);
+};
 
 new GroupingMappingProvider({
   customUIs: [

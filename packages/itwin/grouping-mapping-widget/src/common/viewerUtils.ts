@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection, ViewChangeOptions } from "@itwin/core-frontend";
 import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
 import type { FeatureAppearance } from "@itwin/core-common";
@@ -10,10 +10,7 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import { KeySet } from "@itwin/presentation-common";
 import { HiliteSetProvider } from "@itwin/presentation-frontend";
 
-export const isolateElementsByKeys = async (
-  keySet: KeySet,
-  replace = false,
-) => {
+export const isolateElementsByKeys = async (keySet: KeySet, replace = false) => {
   if (!IModelApp.viewManager.selectedView) {
     return [];
   }
@@ -32,11 +29,7 @@ export const isolateElementsByKeys = async (
   return [];
 };
 
-export const isolateElementsByQuery = async (
-  query: string,
-  iModelConnection: IModelConnection,
-  replace = false,
-) => {
+export const isolateElementsByQuery = async (query: string, iModelConnection: IModelConnection, replace = false) => {
   if (!IModelApp.viewManager.selectedView) {
     return [];
   }
@@ -121,12 +114,7 @@ export const overrideElementsByQuery = async (
   return [];
 };
 
-export const overrideElements = (
-  hilitedIds: string[],
-  color: string,
-  overrideType = FeatureOverrideType.ColorOnly,
-  replace = true
-) => {
+export const overrideElements = (hilitedIds: string[], color: string, overrideType = FeatureOverrideType.ColorOnly, replace = true) => {
   if (!IModelApp.viewManager.selectedView) {
     return;
   }
@@ -134,13 +122,7 @@ export const overrideElements = (
   const vp = IModelApp.viewManager.selectedView;
   const emph = EmphasizeElements.getOrCreate(vp);
 
-  emph.overrideElements(
-    hilitedIds,
-    vp,
-    ColorDef.fromString(color),
-    overrideType,
-    replace,
-  );
+  emph.overrideElements(hilitedIds, vp, ColorDef.fromString(color), overrideType, replace);
 };
 
 export const clearOverriddenElements = () => {
@@ -152,11 +134,7 @@ export const clearOverriddenElements = () => {
   emph.clearOverriddenElements(vp);
 };
 
-export const emphasizeElements = (
-  hilitedIds: string[],
-  defaultAppearance: FeatureAppearance | undefined = undefined,
-  replace = false,
-) => {
+export const emphasizeElements = (hilitedIds: string[], defaultAppearance: FeatureAppearance | undefined = undefined, replace = false) => {
   if (!IModelApp.viewManager.selectedView) {
     return;
   }
@@ -193,11 +171,7 @@ export const emphasisElementsByQuery = async (
   return [];
 };
 
-export const emphasizeElementsByKeys = async (
-  keySet: KeySet,
-  defaultAppearance: FeatureAppearance | undefined = undefined,
-  replace = false,
-) => {
+export const emphasizeElementsByKeys = async (keySet: KeySet, defaultAppearance: FeatureAppearance | undefined = undefined, replace = false) => {
   if (!IModelApp.viewManager.selectedView) {
     return [];
   }
@@ -216,13 +190,7 @@ export const emphasizeElementsByKeys = async (
   return [];
 };
 
-export const visualizeElementsByQuery = async (
-  query: string,
-  color: string,
-  iModelConnection: IModelConnection,
-  replace = false,
-  wantEmphasis = true,
-) => {
+export const visualizeElementsByQuery = async (query: string, color: string, iModelConnection: IModelConnection, replace = false, wantEmphasis = true) => {
   if (!IModelApp.viewManager.selectedView) {
     return [];
   }
@@ -242,12 +210,7 @@ export const visualizeElementsByQuery = async (
   return [];
 };
 
-export const visualizeElementsByKeys = async (
-  keySet: KeySet,
-  color: string,
-  replace = false,
-  wantEmphasis = true,
-) => {
+export const visualizeElementsByKeys = async (keySet: KeySet, color: string, replace = false, wantEmphasis = true) => {
   if (!IModelApp.viewManager.selectedView) {
     return [];
   }
@@ -266,12 +229,7 @@ export const visualizeElementsByKeys = async (
   return [];
 };
 
-export const visualizeElements = (
-  elementIds: string[],
-  color: string,
-  replace = false,
-  wantEmphasis = true,
-) => {
+export const visualizeElements = (elementIds: string[], color: string, replace = false, wantEmphasis = true) => {
   if (!IModelApp.viewManager.selectedView) {
     return;
   }
@@ -279,13 +237,7 @@ export const visualizeElements = (
   const vp = IModelApp.viewManager.selectedView;
   const emph = EmphasizeElements.getOrCreate(vp);
 
-  emph.overrideElements(
-    elementIds,
-    vp,
-    ColorDef.fromString(color),
-    FeatureOverrideType.ColorAndAlpha,
-    true,
-  );
+  emph.overrideElements(elementIds, vp, ColorDef.fromString(color), FeatureOverrideType.ColorAndAlpha, true);
   if (!wantEmphasis) {
     return;
   }
@@ -304,13 +256,7 @@ export const transparentOverriddenElements = () => {
   if (ids) {
     const toOverride = new Set<string>();
     Array.from(ids).forEach((a) => a.forEach((id) => toOverride.add(id)));
-    emph.overrideElements(
-      toOverride,
-      vp,
-      ColorDef.red.withAlpha(50),
-      FeatureOverrideType.AlphaOnly,
-      true,
-    );
+    emph.overrideElements(toOverride, vp, ColorDef.red.withAlpha(50), FeatureOverrideType.AlphaOnly, true);
   }
 };
 
@@ -327,12 +273,9 @@ export const zoomToElements = async (elementIds: string[]) => {
   await vp.zoomToElements(elementIds, { ...viewChangeOpts });
 };
 
-export const getHiliteIds = async (
-  query: string,
-  iModelConnection: IModelConnection,
-) => {
+export const getHiliteIds = async (query: string, iModelConnection: IModelConnection) => {
   if (!IModelApp.viewManager.selectedView) {
-    return ({ keySet: new KeySet(), ids: [] });
+    return { keySet: new KeySet(), ids: [] };
   }
 
   const vp = IModelApp.viewManager.selectedView;
@@ -345,13 +288,10 @@ export const getHiliteIds = async (
   if (set.elements) {
     return { keySet, ids: [...set.elements] };
   }
-  return ({ keySet: new KeySet(), ids: [] });
+  return { keySet: new KeySet(), ids: [] };
 };
 
-export const manufactureKeys = async (
-  query: string,
-  iModelConnection: IModelConnection,
-): Promise<KeySet> => {
+export const manufactureKeys = async (query: string, iModelConnection: IModelConnection): Promise<KeySet> => {
   if (query === "") {
     return new KeySet();
   }

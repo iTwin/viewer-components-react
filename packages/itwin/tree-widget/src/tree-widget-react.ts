@@ -3,8 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-export * from "./TreeWidget";
-export * from "./components/SelectableTree";
+export { TreeWidget } from "./TreeWidget";
+export { createTreeWidget, TreeWidgetComponent } from "./components/TreeWidgetUiItemsProvider";
+export { SelectableTree, TreeDefinition } from "./components/SelectableTree";
 export * from "./components/trees";
-export * from "./components/TreeWidgetUiItemsProvider";
-export * from "./components/utils/UseTreeTransientState";

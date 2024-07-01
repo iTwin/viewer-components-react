@@ -1,11 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import type { GroupingCustomUI } from "../../customUI/GroupingMappingCustomUI";
 import { EmptyMessage } from "../../SharedComponents/EmptyMessage";
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 
 export interface QueryBuilderCustomUIProps {
   queryGenerationType: string;
@@ -13,17 +13,10 @@ export interface QueryBuilderCustomUIProps {
   isUpdating: boolean;
   resetView: () => Promise<void>;
   setQuery: (query: string) => void;
-  group?: Group;
+  group?: GroupMinimal;
 }
 
-export const QueryBuilderCustomUI = ({
-  queryGenerationType,
-  groupUIs,
-  isUpdating,
-  resetView,
-  setQuery,
-  group,
-}: QueryBuilderCustomUIProps) => {
+export const QueryBuilderCustomUI = ({ queryGenerationType, groupUIs, isUpdating, resetView, setQuery, group }: QueryBuilderCustomUIProps) => {
   if (queryGenerationType && queryGenerationType.length > 0) {
     const selectedCustomUI = groupUIs.find((e) => e.name === queryGenerationType);
     if (selectedCustomUI) {

@@ -1,96 +1,93 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  SvgDelete,
-  SvgEdit,
-  SvgMore,
-} from "@itwin/itwinui-icons-react";
-import {
-  DropdownMenu,
-  IconButton,
-  MenuItem,
-} from "@itwin/itwinui-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { SvgDelete, SvgEdit, SvgFunction, SvgLabel, SvgMeasure, SvgMore } from "@itwin/itwinui-icons-react";
+import { DropdownMenu, Flex, Icon, IconButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
-import type { GroupProperty } from "@itwin/insights-client";
-import { useMappingClient } from "../../context/MappingClientContext";
+import type { Property } from "@itwin/insights-client";
 import { PropertyNameCell } from "../PropertyNameCell";
 import { PropertyTable } from "../PropertyTable";
 import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePropertiesClient } from "../../context/PropertiesClientContext";
 
 export interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
   onClickAdd?: () => void;
-  onClickModify?: (value: GroupProperty) => void;
+  onClickModify?: (value: Property) => void;
   isLoading: boolean;
-  groupProperties: GroupProperty[];
+  groupProperties: Property[];
   refresh: () => Promise<void>;
 }
 
-export const GroupPropertyTable = ({
-  mappingId,
-  groupId,
-  onClickAdd,
-  onClickModify,
-  isLoading,
-  groupProperties,
-  refresh,
-}: GroupPropertyTableProps) => {
-  const mappingClient = useMappingClient();
+export const GroupPropertyTable = ({ mappingId, groupId, onClickAdd, onClickModify, isLoading, groupProperties, refresh }: GroupPropertyTableProps) => {
+  const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const queryClient = useQueryClient();
 
   const columnsFactory = useCallback(
-    (handleShowDeleteModal: (value: GroupProperty) => void): Column<GroupProperty>[] => [
+    (handleShowDeleteModal: (value: Property) => void): Column<Property>[] => [
       {
         id: "propertyName",
-        Header: "Property",
         accessor: "propertyName",
-        Cell: (value: CellProps<GroupProperty>) => (
-          <PropertyNameCell
-            property={value.row.original}
-            onClickModify={onClickModify}
-          />
+        Cell: (value: CellProps<Property>) => <PropertyNameCell property={value.row.original} onClickModify={onClickModify} />,
+      },
+      {
+        id: "propertyTypeIcons",
+        Cell: (value: CellProps<Property>) => (
+          <Flex flexDirection={"row"} gap="xs">
+            <Icon fill={value.row.original.ecProperties ? "informational" : "default"}>
+              <SvgLabel />
+            </Icon>
+            <Icon fill={value.row.original.calculatedPropertyType ? "informational" : "default"}>
+              <SvgMeasure />
+            </Icon>
+            <Icon fill={value.row.original.formula ? "informational" : "default"}>
+              <SvgFunction />
+            </Icon>
+          </Flex>
         ),
       },
       {
         id: "dropdown",
-        Header: "",
         width: 80,
-        Cell: (value: CellProps<GroupProperty>) => {
+        Cell: (value: CellProps<Property>) => {
           return (
             <DropdownMenu
-              menuItems={(close: () => void) => [
-                onClickModify ? [
+              menuItems={(close: () => void) =>
+                [
+                  onClickModify
+                    ? [
+                        <MenuItem
+                          key={0}
+                          onClick={() => {
+                            onClickModify(value.row.original);
+                            close();
+                          }}
+                          icon={<SvgEdit />}
+                        >
+                          Modify
+                        </MenuItem>,
+                      ]
+                    : [],
                   <MenuItem
-                    key={0}
+                    key={1}
                     onClick={() => {
-                      onClickModify(value.row.original);
+                      handleShowDeleteModal(value.row.original);
                       close();
                     }}
-                    icon={<SvgEdit />}
+                    icon={<SvgDelete />}
                   >
-                    Modify
+                    Remove
                   </MenuItem>,
-                ] : [],
-                <MenuItem
-                  key={1}
-                  onClick={() => {
-                    handleShowDeleteModal(value.row.original);
-                    close();
-                  }}
-                  icon={<SvgDelete />}
-                >
-                  Remove
-                </MenuItem>,
-              ].flatMap((p) => p)}
+                ].flatMap((p) => p)
+              }
             >
-              <IconButton styleType='borderless' title='Property Options'>
+              <IconButton styleType="borderless" title="Property Options">
                 <SvgMore />
               </IconButton>
             </DropdownMenu>
@@ -98,21 +95,17 @@ export const GroupPropertyTable = ({
         },
       },
     ],
-    [onClickModify]
+    [onClickModify],
   );
 
   const { mutateAsync: deleteProperty } = useMutation({
     mutationFn: async (propertyId: string) => {
       const accessToken = await getAccessToken();
-      await mappingClient.deleteGroupProperty(
-        accessToken,
-        iModelId,
-        mappingId,
-        groupId,
-        propertyId,
-      );
+      await propertiesClient.deleteProperty(accessToken, mappingId, groupId, propertyId);
     },
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["groupProperties", iModelId, mappingId, groupId] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mappingId, groupId] });
+    },
   });
 
   return (

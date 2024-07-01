@@ -2,53 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-.ec3w-template-details-container {
-  overflow-x: auto;
-  height: 100%;
-
-  .ec3w-template-details {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: var(--iui-size-s);
-    margin-bottom: var(--iui-size-s);
-  }
-}
-
-.ec3w-report-select-container {
+.ec3w-template-creation-stepper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--iui-size-xs);
-
-  .ec3w-report-select-combo-box {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-  }
-}
-
-.ec3w-labels-container {
   flex-direction: column;
-  flex-grow: 1;
   min-height: 0;
-
-  .ec3w-labels-list {
-    display: flex;
-    flex-direction: column;
-    overflow-y: overlay;
-    gap: 7.5px;
-    margin-top: 7.5px;
-  }
-}
-
-.ec3w-empty-selection {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: var(--iui-size-s);
-  padding: var(--iui-size-s) var(--iui-size-m);
-  height: 100%;
+  flex-grow: 1;
 }

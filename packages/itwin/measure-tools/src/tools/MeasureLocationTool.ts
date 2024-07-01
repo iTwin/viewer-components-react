@@ -34,6 +34,9 @@ import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel
 import { MeasureTools } from "../MeasureTools";
 import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin/appui-abstract";
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
+import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
+import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
+import { DrawingDataCache } from "../api/DrawingTypeDataCache";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
@@ -43,6 +46,8 @@ MeasureLocationToolModel
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
+  private _enableSheetMeasurements: boolean;
+  private _drawingTypeCache?: DrawingDataCache;
 
   private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
@@ -67,15 +72,24 @@ MeasureLocationToolModel
     return MeasureToolsFeatures.Tools_MeasureLocation;
   }
 
-  constructor() {
+  constructor(enableSheetMeasurements = false) {
     super();
+    this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public async onRestartTool(): Promise<void> {
-    const tool = new MeasureLocationTool();
+    const tool = new MeasureLocationTool(this._enableSheetMeasurements);
     if (await tool.run()) return;
 
     return this.exitTool();
+  }
+
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
+    if (this._enableSheetMeasurements) {
+      this._drawingTypeCache = new DrawingDataCache();
+      await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
+    }
   }
 
   public override async onDataButtonDown(
@@ -87,6 +101,22 @@ MeasureLocationToolModel
     this.toolModel.addLocation(props, false);
     this.updateToolAssistance();
     return EventHandled.Yes;
+  }
+
+  private async sheetMeasurementsDataButtonDown(ev: BeButtonEvent): Promise<DrawingMetadata | undefined> {
+    if (!ev.viewport) return undefined;
+
+    if (this._enableSheetMeasurements) {
+      if (ev.viewport.view.id !== undefined) {
+        const drawingInfo = await SheetMeasurementsHelper.getDrawingId(this.iModel, ev.viewport.view.id, ev.point);
+
+        if (drawingInfo?.drawingId !== undefined && drawingInfo.origin !== undefined && drawingInfo.worldScale !== undefined) {
+          const data: DrawingMetadata = { origin: drawingInfo.origin, drawingId: drawingInfo.drawingId, worldScale: drawingInfo.worldScale, extents: drawingInfo.extents, sheetToWorldTransform: drawingInfo.sheetToWorldTransform};
+          return data;
+        }
+      }
+    }
+    return undefined;
   }
 
   public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
@@ -102,6 +132,8 @@ MeasureLocationToolModel
     const props: AddLocationProps = {
       location: ev.point.clone(),
       viewType: MeasurementViewTarget.classifyViewport(ev.viewport!),
+      viewId: ev.viewport?.view.id,
+      drawingMetadata: (await this.sheetMeasurementsDataButtonDown(ev)) as DrawingMetadataProps,
     };
 
     await this.queryGeoLocation(props);
@@ -120,6 +152,27 @@ MeasureLocationToolModel
 
   protected createToolModel(): MeasureLocationToolModel {
     return new MeasureLocationToolModel();
+  }
+
+  public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+    if (!this._enableSheetMeasurements)
+      return true;
+
+    if (true !== ev.viewport?.view.isSheetView()) {
+      return true;
+    }
+
+    if (this._drawingTypeCache) {
+      for (const drawing of this._drawingTypeCache.drawingtypes) {
+        if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
+          if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
   }
 
   protected async requestSnap(

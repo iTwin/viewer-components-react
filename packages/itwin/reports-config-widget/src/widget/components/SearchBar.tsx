@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton, LabeledInput } from "@itwin/itwinui-react";
 import React, { useState } from "react";
@@ -14,16 +14,13 @@ interface SearchBarProps {
   disabled?: boolean;
 }
 
-export const SearchBar = ({
-  searchValue,
-  setSearchValue,
-  disabled,
-}: SearchBarProps) => {
+export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarProps) => {
   const [searchBarOpen, setSearchBarOpened] = useState<boolean>(false);
   const [searchBarClosing, setSearchBarClosing] = useState<boolean>(false);
 
   return searchBarOpen || searchValue ? (
-    <div className="rcw-search-button"
+    <div
+      className="rcw-search-button"
       style={{
         animation: searchBarClosing ? "rcw-shrink .5s" : "rcw-expand .5s",
       }}
@@ -37,9 +34,7 @@ export const SearchBar = ({
     >
       <LabeledInput
         aria-label="search-textbox"
-        placeholder={ReportsConfigWidget.localization.getLocalizedString(
-          "ReportsConfigWidget:Search"
-        )}
+        placeholder={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Search")}
         svgIcon={
           <IconButton
             onClick={() => setSearchBarClosing(true)}
@@ -60,7 +55,8 @@ export const SearchBar = ({
       styleType="borderless"
       data-testid="rcw-search-button"
       title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:SearchReport")}
-      onClick={() => setSearchBarOpened(true)}>
+      onClick={() => setSearchBarOpened(true)}
+    >
       <SvgSearch />
     </IconButton>
   );

@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+export * from "./api/DrawingTypeDataCache";
 export * from "./api/FeatureTracking";
 export * from "./api/FormatterUtils";
 export * from "./api/GraphicStyle";
@@ -19,6 +20,7 @@ export * from "./api/MeasurementUIEvents";
 export * from "./api/MeasurementViewTarget";
 export * from "./api/MeasureToolsLoggerCategory";
 export * from "./api/Polygon";
+export * from "./api/SheetMeasurementHelper";
 export * from "./api/TextMarker";
 export * from "./api/ViewHelper";
 

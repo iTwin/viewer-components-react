@@ -1,25 +1,21 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type { IMappingsClient } from "@itwin/insights-client";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { IGroupsClient } from "@itwin/insights-client";
+import { PreferReturn } from "@itwin/insights-client";
 import { useQuery } from "@tanstack/react-query";
 import type { GetAccessTokenFn } from "../../context/GroupingApiConfigContext";
 
-export const fetchGroups = async (
-  iModelId: string,
-  mappingId: string,
-  getAccessToken: GetAccessTokenFn,
-  mappingsClient: IMappingsClient
-)=> {
+export const fetchGroups = async (mappingId: string, getAccessToken: GetAccessTokenFn, groupsClient: IGroupsClient) => {
   const accessToken = await getAccessToken();
-  const groups = await mappingsClient.getGroups(accessToken, iModelId, mappingId);
-  return groups;
+  const groupsList = await groupsClient.getGroups(accessToken, mappingId, PreferReturn.Minimal);
+  return groupsList.groups;
 };
 
-export const useFetchGroups = (iModelId: string, mappingId: string, getAccessToken: GetAccessTokenFn, mappingsClient: IMappingsClient) => {
+export const useFetchGroups = (mappingId: string, getAccessToken: GetAccessTokenFn, groupsClient: IGroupsClient) => {
   return useQuery({
     queryKey: ["groups", mappingId],
-    queryFn:  async () => fetchGroups(iModelId, mappingId, getAccessToken, mappingsClient),
+    queryFn: async () => fetchGroups(mappingId, getAccessToken, groupsClient),
   });
 };

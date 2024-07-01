@@ -16,6 +16,8 @@ export class Polygon {
   public drawMarker: boolean;
   public drawFillArea: boolean;
 
+  private _worldScale: number | undefined;
+
   private _points: Point3d[];
   private _perimeter: number;
   private _area: number;
@@ -66,10 +68,19 @@ export class Polygon {
     this._textMarker.applyStyle(this._styleSet.getTextStyle(WellKnownTextStyleType.AreaMeasurement));
   }
 
-  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet) {
+  public set worldScale(scale: number | undefined) {
+    this._worldScale = scale;
+  }
+
+  public get worldScale(): number {
+    return this._worldScale ?? 1.0;
+  }
+
+  constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, worldScale?: number) {
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
     this.drawFillArea = true;
+    this._worldScale = worldScale;
     this._points = (copyPoints) ? this.copyPoints(points) : points;
     this._perimeter = this.calculatePerimeter(this.points);
     this._area = Math.abs(PolygonOps.area(this.points));
@@ -113,7 +124,7 @@ export class Polygon {
       const lines: string[] = [];
       const areaFormatter = IModelApp.quantityFormatter.findFormatterSpecByQuantityType(QuantityType.Area);
       if (undefined !== areaFormatter)
-        lines.push(IModelApp.quantityFormatter.formatQuantity(this.area, areaFormatter));
+        lines.push(IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.area, areaFormatter));
 
       this._textMarker.textLines = lines;
     }

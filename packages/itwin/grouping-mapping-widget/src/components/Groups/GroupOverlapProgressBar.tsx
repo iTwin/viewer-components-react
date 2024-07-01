@@ -1,14 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import type { Group } from "@itwin/insights-client";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import type { GroupMinimal } from "@itwin/insights-client";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import React from "react";
 import type { OverlappedInfo } from "../context/GroupHilitedElementsContext";
 
 interface OverlapProgressProps {
-  group: Group;
+  group: GroupMinimal;
   groupElementsInfo: Map<string, number>;
   overlappedElementsInfo: Map<string, OverlappedInfo[]>;
 }

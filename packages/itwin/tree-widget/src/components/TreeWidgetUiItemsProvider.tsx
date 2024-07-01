@@ -4,33 +4,32 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetUiItemsProvider.scss";
+import { useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, useTransientState } from "@itwin/appui-react";
 import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { SvgError } from "@itwin/itwinui-illustrations-react";
 import { Button, NonIdealState } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
 import { SelectableTree } from "./SelectableTree";
-import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
-import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
-import { useTreeTransientState } from "./utils/UseTreeTransientState";
 
-import type { UiItemsProvider, Widget } from "@itwin/appui-react";
+import type { Widget } from "@itwin/appui-react";
 import type { SelectableTreeProps, TreeDefinition } from "./SelectableTree";
 import type { FallbackProps } from "react-error-boundary";
+import type { Ref } from "react";
+
 /**
- * Parameters for creating a [[TreeWidgetUiItemsProvider]].
- * @public
+ * Props for `createWidget`.
  */
-export interface TreeWidgetOptions {
-  /** The stage panel to place the widget in. Defaults to `StagePanelLocation.Right`. */
-  defaultPanelLocation?: StagePanelLocation;
-  /** The stage panel section to place the widget in. Defaults to `StagePanelSection.Start`. */
-  defaultPanelSection?: StagePanelSection;
-  /** Widget priority in the stage panel. */
-  defaultTreeWidgetPriority?: number;
-  /** Trees to show in the widget. Defaults to [[ModelsTreeComponent]] and [[CategoriesTreeComponent]]. */
-  trees?: TreeDefinition[];
+interface TreeWidgetProps {
+  /**
+   * Trees to show in the widget.
+   * @see ModelsTreeComponent
+   * @see CategoriesTreeComponent
+   * @see ExternalSourcesTreeComponent
+   * @see IModelContentTreeComponent
+   */
+  trees: TreeDefinition[];
   /** Modifies the density of the tree widget. `enlarged` widget contains larger content */
   density?: "enlarged" | "default";
   /** Callback that is invoked when performance of tracked feature is measured. */
@@ -40,58 +39,29 @@ export interface TreeWidgetOptions {
 }
 
 /**
- * Id of the tree widget created by [[TreeWidgetUiItemsProvider]].
+ * Creates a tree widget definition that should be returned from `UiItemsProvider.getWidgets()`.
  * @public
  */
-export const TreeWidgetId = "tree-widget-react:trees";
-
-/**
- * A [[UiItemsProvider]] implementation that provides a [[SelectableTree]] into a stage panel.
- * @public
- */
-export class TreeWidgetUiItemsProvider implements UiItemsProvider {
-  public readonly id = "TreeWidgetUiItemsProvider";
-
-  constructor(private _treeWidgetOptions?: TreeWidgetOptions) {}
-
-  public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
-    const preferredLocation = this._treeWidgetOptions?.defaultPanelLocation ?? StagePanelLocation.Right;
-    const preferredPanelSection = this._treeWidgetOptions?.defaultPanelSection ?? StagePanelSection.Start;
-
-    if (location !== preferredLocation || section !== preferredPanelSection || stageUsage !== StageUsage.General) {
-      return [];
-    }
-
-    const trees: TreeDefinition[] = this._treeWidgetOptions?.trees ?? [
-      {
-        id: ModelsTreeComponent.id,
-        getLabel: ModelsTreeComponent.getLabel,
-        render: (props) => <ModelsTreeComponent {...props} />,
+export function createTreeWidget(props: TreeWidgetProps): Widget {
+  return {
+    id: "tree-widget-react:trees",
+    label: TreeWidget.translate("widget.label"),
+    icon: <SvgHierarchyTree />,
+    layouts: {
+      standard: {
+        section: StagePanelSection.Start,
+        location: StagePanelLocation.Right,
       },
-      {
-        id: CategoriesTreeComponent.id,
-        getLabel: CategoriesTreeComponent.getLabel,
-        render: (props) => <CategoriesTreeComponent {...props} />,
-      },
-    ];
-
-    return [
-      {
-        id: TreeWidgetId,
-        label: TreeWidget.translate("treeview"),
-        content: (
-          <TreeWidgetComponent
-            trees={trees}
-            density={this._treeWidgetOptions?.density}
-            onPerformanceMeasured={this._treeWidgetOptions?.onPerformanceMeasured}
-            onFeatureUsed={this._treeWidgetOptions?.onFeatureUsed}
-          />
-        ),
-        icon: <SvgHierarchyTree />,
-        priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
-      },
-    ];
-  }
+    },
+    content: (
+      <TreeWidgetComponent
+        trees={props.trees}
+        density={props.density}
+        onPerformanceMeasured={props.onPerformanceMeasured}
+        onFeatureUsed={props.onFeatureUsed}
+      />
+    ),
+  };
 }
 
 /**
@@ -99,8 +69,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
  * @public
  */
 export function TreeWidgetComponent(props: SelectableTreeProps) {
-  const ref = useTreeTransientState<HTMLDivElement>();
-
+  const ref = useTreeWidgetTransientState();
   return (
     <div ref={ref} className="tree-widget">
       <ErrorBoundary FallbackComponent={ErrorState}>
@@ -114,13 +83,50 @@ function ErrorState({ resetErrorBoundary }: FallbackProps) {
   return (
     <NonIdealState
       svg={<SvgError />}
-      heading={TreeWidget.translate("error")}
-      description={TreeWidget.translate("generic-error-description")}
+      heading={TreeWidget.translate("errorState.title")}
+      description={TreeWidget.translate("errorState.description")}
       actions={
         <Button styleType={"high-visibility"} onClick={resetErrorBoundary}>
-          {TreeWidget.translate("retry")}
+          {TreeWidget.translate("errorState.retryButtonLabel")}
         </Button>
       }
     />
   );
+}
+
+function useTreeWidgetTransientState() {
+  const { ref, persist, restore } = useTreeStorage();
+  useTransientState(persist, restore);
+  return ref;
+}
+
+interface UseTreeStorageResult {
+  ref: Ref<HTMLDivElement>;
+  persist: () => void;
+  restore: () => void;
+}
+
+function useTreeStorage(): UseTreeStorageResult {
+  const ref = useRef<HTMLDivElement>(null);
+  const scrollTop = useRef<number | undefined>();
+
+  const getContainer = () => {
+    return ref.current?.querySelector("#tw-tree-renderer-container");
+  };
+
+  const persist = () => {
+    const container = getContainer();
+    scrollTop.current = container?.scrollTop;
+  };
+
+  const restore = () => {
+    setTimeout(() => {
+      const container = getContainer();
+      if (container && scrollTop.current) {
+        container.scrollTop = scrollTop.current;
+      }
+    });
+  };
+
+  return { ref, persist, restore };
 }

@@ -1,12 +1,12 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import { StagePanelLocation, StagePanelSection, StageUsage, UiItemsProvider, Widget } from "@itwin/appui-react";
+import type { UiItemsProvider, Widget } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { MapLayersWidget } from "./widget/MapLayersWidget";
-import { MapLayerOptions } from "./Interfaces";
+import type { MapLayerOptions } from "./Interfaces";
 import { MapLayersUI } from "../mapLayers";
 
 export class MapLayersUiItemsProvider implements UiItemsProvider {

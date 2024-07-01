@@ -9,8 +9,19 @@ module.exports = {
   bumpDeps: false,
   access: "public",
   tag: "latest",
-  scope: ["packages/itwin/*"],
-  ignorePatterns: [".nycrc", "eslint.config.js", ".mocharc.json", ".*ignore", ".github/**", ".vscode/**", "**/test/**", "**/e2e-tests/**", "pnpm-lock.yaml"],
+  scope: ["packages/itwin/*", "!packages/itwin/tree-widget"],
+  ignorePatterns: [
+    ".nycrc",
+    "eslint.config.js",
+    ".mocharc.json",
+    ".*ignore",
+    ".github/**",
+    ".vscode/**",
+    "**/test/**",
+    "**/e2e-tests/**",
+    "pnpm-lock.yaml",
+    "playwright.config.ts",
+  ],
   changehint: "Run 'pnpm change' to generate a change file",
   changelog: {
     customRenderers: {

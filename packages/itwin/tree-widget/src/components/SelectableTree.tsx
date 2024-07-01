@@ -14,10 +14,8 @@ import { TreeSelector } from "./TreeSelector";
 import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
-/**
- * Props for rendering trees
- * @public
- */
+
+/** Props for rendering trees */
 export interface TreeRenderProps {
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
@@ -25,7 +23,7 @@ export interface TreeRenderProps {
 }
 
 /**
- * Definition of a tree component displayed in [[SelectableTree]]
+ * Definition of a tree component displayed in `SelectableTree`.
  * @public
  */
 export interface TreeDefinition {
@@ -40,12 +38,11 @@ export interface TreeDefinition {
    * If callback is `undefined` tree is shown for all iModel connections.
    */
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+  /** Icon to render before tree label in tree selector */
+  startIcon?: React.ReactNode;
 }
 
-/**
- * Props for [[SelectableTree]]
- * @public
- */
+/** Props for `SelectableTree` */
 export interface SelectableTreeProps {
   trees: TreeDefinition[];
   density?: "enlarged" | "default";
@@ -59,11 +56,9 @@ export interface SelectableTreeProps {
  */
 export function SelectableTree(props: SelectableTreeProps) {
   const imodel = useActiveIModelConnection();
-
   if (!imodel) {
     return null;
   }
-
   return <SelectableTreeContent {...props} imodel={imodel} />;
 }
 
@@ -113,6 +108,7 @@ async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelC
       id: treeDef.id,
       label: treeDef.getLabel(),
       render: treeDef.render,
+      startIcon: treeDef.startIcon,
     };
   };
 
@@ -144,7 +140,7 @@ function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProp
         {
           id: "no-trees",
           label: "",
-          render: () => <FillCentered>{TreeWidget.translate("noTrees")}</FillCentered>,
+          render: () => <FillCentered>{TreeWidget.translate("selectableTree.noTrees")}</FillCentered>,
         },
       ],
     };

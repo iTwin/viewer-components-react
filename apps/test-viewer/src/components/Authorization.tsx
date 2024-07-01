@@ -27,16 +27,16 @@ class ViewerAuthorizationClient implements WebViewerAuthorizationClient {
   private _client: WebViewerAuthorizationClient;
 
   constructor() {
-    const userAccessToken = process.env.IMJS_USER_ACCESS_TOKEN;
+    const userAccessToken = import.meta.env.IMJS_USER_ACCESS_TOKEN;
     this._client = userAccessToken
       ? new AccessTokenAuthClient(userAccessToken)
       : new BrowserAuthorizationClient({
-          scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
-          clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
-          redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
-          postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
+          scope: import.meta.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
+          clientId: import.meta.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
+          redirectUri: import.meta.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
+          postSignoutRedirectUri: import.meta.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
           responseType: "code",
-          authority: process.env.IMJS_AUTH_AUTHORITY,
+          authority: import.meta.env.IMJS_AUTH_AUTHORITY,
         });
   }
 

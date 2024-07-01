@@ -1,11 +1,11 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useEffect } from "react";
 import type { ToggleSwitchProps } from "@itwin/itwinui-react";
 import { toaster, ToggleSwitch } from "@itwin/itwinui-react";
-import type { Group } from "@itwin/insights-client";
+import type { GroupMinimal } from "@itwin/insights-client";
 import { clearAll, visualizeElements, zoomToElements } from "../../common/viewerUtils";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
@@ -17,14 +17,10 @@ import { useIsMounted } from "../../common/hooks/useIsMounted";
 
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
-  group: Group;
+  group: GroupMinimal;
 };
 
-export const GroupColorToggle = ({
-  color,
-  group,
-  ...rest
-}: GroupColorToggleProps) => {
+export const GroupColorToggle = ({ color, group, ...rest }: GroupColorToggleProps) => {
   const { iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
@@ -36,10 +32,7 @@ export const GroupColorToggle = ({
   const { mutate: mutateVisualization, isLoading: isVisualizing } = useMutation({
     mutationFn: async (hiliteIds: QueryResults) => {
       clearAll();
-      Presentation.selection.clearSelection(
-        "GroupingMappingWidget",
-        iModelConnection,
-      );
+      Presentation.selection.clearSelection("GroupingMappingWidget", iModelConnection);
       visualizeElements(hiliteIds.result.ids, color);
       await zoomToElements(hiliteIds.result.ids);
     },
@@ -65,13 +58,5 @@ export const GroupColorToggle = ({
 
   const isLoading = isFetching || isVisualizing;
 
-  return (
-    <ToggleSwitch
-      label="Color Group"
-      disabled={isLoading}
-      checked={showGroupColor}
-      onChange={handleToggleChange}
-      {...rest}
-    ></ToggleSwitch>
-  );
+  return <ToggleSwitch label="Color Group" disabled={isLoading} checked={showGroupColor} onChange={handleToggleChange} {...rest}></ToggleSwitch>;
 };

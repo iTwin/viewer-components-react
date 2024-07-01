@@ -11,17 +11,18 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import type { TreeRenderProps } from "./SelectableTree";
 
 /**
- * A definition for trees displayed in [[TreeSelector]]
+ * A definition for trees displayed in `TreeSelector`
  * @internal
  */
 export interface TreeContentDefinition {
   id: string;
   label: string;
   render: (props: TreeRenderProps) => React.ReactNode;
+  startIcon?: React.ReactNode;
 }
 
 /**
- * Props for [[TreeSelector]]
+ * Props for `TreeSelector`
  * @internal
  */
 export interface TreeSelectorProps {
@@ -43,7 +44,7 @@ export function TreeSelector(props: TreeSelectorProps) {
   const isEnlarged = props.density === "enlarged";
 
   const options = useMemo(() => {
-    return props.trees.map((c) => ({ label: c.label, value: c.id })) as SelectOption<string>[];
+    return props.trees.map((c) => ({ label: c.label, value: c.id, startIcon: c.startIcon })) as SelectOption<string>[];
   }, [props.trees]);
 
   return (

@@ -1,26 +1,16 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import type {
-  Alert,
-} from "@itwin/itwinui-react";
-import {
-  ButtonGroup,
-  IconButton,
-  InformationPanelWrapper,
-  List,
-  ProgressLinear,
-} from "@itwin/itwinui-react";
-import {
-  SvgRefresh,
-} from "@itwin/itwinui-icons-react";
+import type { Alert } from "@itwin/itwinui-react";
+import { ButtonGroup, IconButton, InformationPanelWrapper, List, ProgressLinear } from "@itwin/itwinui-react";
+import { SvgRefresh } from "@itwin/itwinui-icons-react";
 import DeleteModal from "../SharedComponents/DeleteModal";
 import "./GroupsView.scss";
 import { EmptyMessage } from "../SharedComponents/EmptyMessage";
 import { LoadingOverlay } from "../SharedComponents/LoadingOverlay";
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { GroupMinimal, Mapping } from "@itwin/insights-client";
 import { GroupListItem } from "./GroupListItem";
 import type { ContextCustomUI, GroupingCustomUI } from "../customUI/GroupingMappingCustomUI";
 import { GroupsAddButton } from "./GroupsAddButton";
@@ -28,12 +18,10 @@ import { OverlappedElementsInformationPanel } from "./OverlappedElementsInformat
 import type { OverlappedInfo } from "../context/GroupHilitedElementsContext";
 
 export interface ActionButtonRendererProps {
-  group: Group;
+  group: GroupMinimal;
 }
 
-export type ActionButtonRenderer = (
-  props: ActionButtonRendererProps
-) => React.ReactNode;
+export type ActionButtonRenderer = (props: ActionButtonRendererProps) => React.ReactNode;
 
 export interface ProgressConfig {
   hilitedGroupsProgress?: {
@@ -44,34 +32,38 @@ export interface ProgressConfig {
   maxDynamicProgress?: number;
 }
 
+/**
+ * Props for the {@link GroupsView} component.
+ * @internal
+ */
 export interface GroupsViewProps {
   mapping: Mapping;
-  groups: Group[];
+  groups: GroupMinimal[];
   isLoading: boolean;
   onRefresh: () => Promise<void>;
   groupUIs: GroupingCustomUI[];
   actionButtonRenderers?: ActionButtonRenderer[];
   contextUIs: ContextCustomUI[];
   onClickAddGroup?: (queryGenerationType: string) => void;
-  onClickGroupTitle?: (group: Group) => void;
-  onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
-  onClickRenderContextCustomUI?: (
-    contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>,
-    group: Group,
-    displayLabel: string,
-  ) => void;
+  onClickGroupTitle?: (group: GroupMinimal) => void;
+  onClickGroupModify?: (group: GroupMinimal, queryGenerationType: string) => void;
+  onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: GroupMinimal, displayLabel: string) => void;
   disableActions?: boolean;
-  selectedGroupForDeletion?: Group;
-  setSelectedGroupForDeletion: (group: Group) => void;
-  onDeleteGroup: (group: Group) => Promise<void>;
+  selectedGroupForDeletion?: GroupMinimal;
+  setSelectedGroupForDeletion: (group: GroupMinimal) => void;
+  onDeleteGroup: (group: GroupMinimal) => Promise<void>;
   onCloseDeleteModal: () => void;
   alert?: React.ReactElement<typeof Alert>;
-  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: Group | undefined) => void;
-  activeOverlapInfoPanelGroup?: Group | undefined;
+  setActiveOverlapInfoPanelGroup?: (activeOverlapInfoPanelGroup: GroupMinimal | undefined) => void;
+  activeOverlapInfoPanelGroup?: GroupMinimal | undefined;
   overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
   progressConfig?: ProgressConfig;
 }
 
+/**
+ * Component to list groups.
+ * @internal
+ */
 export const GroupsView = ({
   mapping,
   groups,
@@ -107,32 +99,22 @@ export const GroupsView = ({
   return (
     <InformationPanelWrapper className="gmw-groups-container">
       <div className="gmw-toolbar">
-        {onClickAddGroup && groupUIs.length > 0 && (
-          <GroupsAddButton
-            disabled={disableActions}
-            groupUIs={groupUIs}
-            onClickAddGroup={onClickAddGroup}
-          />
-        )}
+        {onClickAddGroup && groupUIs.length > 0 && <GroupsAddButton disabled={disableActions} groupUIs={groupUIs} onClickAddGroup={onClickAddGroup} />}
         <ButtonGroup className="gmw-toolbar-buttons">
-          <IconButton
-            title="Refresh"
-            onClick={onRefresh}
-            disabled={isLoading || disableActions}
-            styleType="borderless"
-          >
+          <IconButton title="Refresh" onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
             <SvgRefresh />
           </IconButton>
         </ButtonGroup>
       </div>
       {alert}
-      <div className='gmw-groups-border' />
-      {!!hilitedGroupsProgress &&
+      <div className="gmw-groups-border" />
+      {!!hilitedGroupsProgress && (
         <div className="gmw-group-progress-bar">
           <ProgressLinear
-            value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups * maxDynamicProgress)}
+            value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups) * maxDynamicProgress}
           />
-        </div>}
+        </div>
+      )}
       {isLoading ? (
         <LoadingOverlay />
       ) : groups.length === 0 ? (
@@ -157,13 +139,14 @@ export const GroupsView = ({
           ))}
         </List>
       )}
-      {overlappedElementsInfo && setActiveOverlapInfoPanelGroup &&
+      {overlappedElementsInfo && setActiveOverlapInfoPanelGroup && (
         <OverlappedElementsInformationPanel
           group={activeOverlapInfoPanelGroup}
           onClose={() => setActiveOverlapInfoPanelGroup(undefined)}
           overlappedElementsInfo={overlappedElementsInfo}
           groups={groups}
-        />}
+        />
+      )}
       {selectedGroupForDeletion && (
         <DeleteModal
           entityName={selectedGroupForDeletion.groupName}
