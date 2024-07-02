@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix for localization",
-  "packageName": "@itwin/ec3-widget-react",
-  "email": "pari.deshpande@bentley.com",
-  "dependentChangeType": "patch"
-}

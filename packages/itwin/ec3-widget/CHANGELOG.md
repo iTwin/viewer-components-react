@@ -1,8 +1,16 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Fri, 28 Jun 2024 13:10:54 GMT and should not be manually modified.
+This log was last generated on Tue, 02 Jul 2024 14:49:30 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.8.1
+
+Tue, 02 Jul 2024 14:49:30 GMT
+
+### Patches
+
+- Fix for localization ([#978](https://github.com/iTwin/viewer-components-react/pull/978))
 
 ## 0.8.0
 
