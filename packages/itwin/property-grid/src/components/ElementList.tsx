@@ -77,6 +77,7 @@ export function ElementList({ imodel, instanceKeys, onBack, onSelect, className 
         {data?.map((dataItem, index) => (
           <MenuItem
             key={index}
+            className="property-grid-react-element-list-item"
             role="listitem"
             onClick={() => {
               onSelect(dataItem.instanceKey);
