@@ -142,7 +142,6 @@ test.describe("Models tree", () => {
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
         await treeWidget.getByTitle("More").click();
-        await page.locator(".tree-header-button-dropdown-container").waitFor();
       }
 
       // enable instances focus and select a node
@@ -165,7 +164,6 @@ test.describe("Models tree", () => {
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
         await treeWidget.getByTitle("More").click();
-        await page.locator(".tree-header-button-dropdown-container").waitFor();
       }
 
       // enable instances focus and select a node
@@ -177,7 +175,7 @@ test.describe("Models tree", () => {
 
       await page.mouse.move(0, 0);
       await page.mouse.down();
-      await page.mouse.move(viewport!.width - 50, viewport!.height - 50);
+      await page.mouse.move(viewport!.width - 50, viewport!.height - 50, { steps: 10 });
       await page.mouse.up();
 
       // wait for error message to be displayed
@@ -190,7 +188,6 @@ test.describe("Models tree", () => {
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
         await treeWidget.getByTitle("More").click();
-        await page.locator(".tree-header-button-dropdown-container").waitFor();
       }
 
       // ensure instance focus is turned off and hierarchy is visible
@@ -201,7 +198,7 @@ test.describe("Models tree", () => {
     test("header buttons overflow", async ({ page }) => {
       await treeWidget.getByTitle("Search for something").click();
       await treeWidget.getByTitle("More").click();
-      await page.locator(".tree-header-button-dropdown-container").waitFor();
+      await page.getByTitle("Enable instance focus mode").waitFor();
       await takeScreenshot(page, treeWidget);
     });
 
