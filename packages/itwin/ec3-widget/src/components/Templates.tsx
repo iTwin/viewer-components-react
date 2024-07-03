@@ -98,15 +98,15 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
         ) : templates.length === 0 ? (
           <>
             <EmptyMessage message={EC3Widget.translate("noTemplateMsg")} />
-            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="Add New Template">
-              Add New Template
+            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title={EC3Widget.translate("addNewTemplate")}>
+              {EC3Widget.translate("addNewTemplate")}
             </Button>
           </>
         ) : (
           <div className="ec3w-templates-list">
             <div className="ec3w-toolbar" data-testid="ec3-templates">
               <div className="ec3w-toolbar-left">
-                <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
+                <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title={EC3Widget.translate("newTemplate")}>
                   New
                 </Button>
                 <Button data-testid="ec3-export-button" styleType="default" onClick={onExport} disabled={!selectedTemplate}>
@@ -149,7 +149,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
                       </MenuItem>,
                     ]}
                   >
-                    <IconButton styleType="borderless" title="Template Options">
+                    <IconButton styleType="borderless" title={EC3Widget.translate("templateOptions")}>
                       <SvgMore
                         style={{
                           width: "16px",
