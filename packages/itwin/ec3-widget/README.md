@@ -23,6 +23,16 @@ Add the EC3Provider to UI providers using your Client Id and Redirect URI in App
 
 ```tsx
 import { EC3Provider } from "@itwin/ec3-widget-react";
+...
+
+const overridenStrings = new Map()
+  .set("defaultStringKey","customLocalizedString");
+
+await EC3Widget.initialize({
+  localization: IModelApp.localization,
+  // this is an optional parameter to override the default strings
+  localizationOverrides: overridenStrings
+  });
 
 <Viewer
   ...
