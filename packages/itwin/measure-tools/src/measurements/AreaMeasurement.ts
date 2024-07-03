@@ -44,7 +44,7 @@ export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
 }
 
-/** Serializer for a [[AreaeMeasurement]]. */
+/** Serializer for a [[AreaMeasurement]]. */
 export class AreaMeasurementSerializer extends MeasurementSerializer {
   public static readonly areaMeasurementName = "areaMeasurement";
 

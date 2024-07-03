@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Remove the usage of the IModelApp.telemetry for reporting telemetry.",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "aruniverse@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
