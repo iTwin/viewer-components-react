@@ -164,7 +164,7 @@ test.describe("property grid", () => {
       await takeScreenshot(page, propertyWidget);
     });
 
-    test.only("single element selected - search", async ({ page }) => {
+    test("single element selected - search", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
       await propertyWidget.getByTitle("Description").waitFor();
 
@@ -177,7 +177,7 @@ test.describe("property grid", () => {
       await takeScreenshot(page, propertyWidget);
     });
 
-    test.only("single element selected - search - no matches", async ({ page }) => {
+    test("single element selected - search - no matches", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
       await propertyWidget.getByTitle("Description").waitFor();
 
