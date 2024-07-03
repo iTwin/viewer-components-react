@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Added template id in export callback",
+  "packageName": "@itwin/ec3-widget-react",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}
