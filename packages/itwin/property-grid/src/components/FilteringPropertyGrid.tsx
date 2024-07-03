@@ -8,6 +8,9 @@ import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
   FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
+import { FillCentered } from "@itwin/core-react";
+import { Text } from "@itwin/itwinui-react";
+import { PropertyGridManager } from "../PropertyGridManager";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
@@ -37,10 +40,20 @@ export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithD
  */
 export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps) {
   const [filteringDataProvider, setFilteringDataProvider] = useState<AutoExpandingPropertyFilterDataProvider>();
+  const [filterMatchCount, setFilterMatchCount] = useState<number | undefined>(undefined);
   useEffect(() => {
+    const updateMatchCount = async () => {
+      setFilterMatchCount(undefined);
+      const matchCount = (await filteringProvider.getData()).matchesCount;
+      setFilterMatchCount(matchCount);
+    };
+
     const filteringProvider = new FilteringPropertyDataProvider(dataProvider, filterer);
     const provider = new AutoExpandingPropertyFilterDataProvider(filteringProvider, autoExpandChildCategories);
+
     setFilteringDataProvider(provider);
+    void updateMatchCount();
+
     return () => {
       provider.dispose();
     };
@@ -53,6 +66,14 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   // in order to allow resize values column fully we need to override default width reserved for action buttons.
   // istanbul ignore next
   const actionButtonWidth = props.actionButtonWidth !== undefined ? props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
+
+  if (filterMatchCount === 0) {
+    return (
+      <FillCentered style={{ flexDirection: "column" }}>
+        <Text>{PropertyGridManager.translate("filtering.no-matching-properties", { filter: props.highlight?.highlightedText ?? "" })}</Text>
+      </FillCentered>
+    );
+  }
 
   return (
     <>
