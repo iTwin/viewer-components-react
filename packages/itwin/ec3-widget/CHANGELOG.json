@@ -2,6 +2,29 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Wed, 03 Jul 2024 19:31:08 GMT",
+      "version": "0.9.0",
+      "tag": "@itwin/ec3-widget-react_v0.9.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "tejas.sutar@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "c0d8032e6090a6d0da06286dc61c599c02787d1d",
+            "comment": "Added template id in export callback"
+          }
+        ],
+        "patch": [
+          {
+            "author": "tejas.sutar@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "c0d8032e6090a6d0da06286dc61c599c02787d1d",
+            "comment": "Added missing localization strings"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Jul 2024 14:49:30 GMT",
       "version": "0.8.1",
       "tag": "@itwin/ec3-widget-react_v0.8.1",

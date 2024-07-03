@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 03 Jul 2024 19:31:08 GMT",
+      "version": "0.18.0",
+      "tag": "@itwin/measure-tools-react_v0.18.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "caa244bee5585fb6ac6ddd6cdb89e8445c2b7f5f",
+            "comment": "Remove the usage of the IModelApp.telemetry for reporting telemetry."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Jul 2024 14:49:30 GMT",
       "version": "0.17.0",
       "tag": "@itwin/measure-tools-react_v0.17.0",
