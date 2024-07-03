@@ -34,8 +34,8 @@
     "addNewTemplate": "Add New Template",
     "newTemplate": "New Template",
     "templateOptions": "Template Options",
-    "New": "New",
-    "Export": "Export",
-    "Delete": "Delete"
+    "new": "New",
+    "export": "Export",
+    "delete": "Delete"
   }
 }
