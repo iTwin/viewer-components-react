@@ -33,6 +33,9 @@
     "noTemplateMsg": "It looks like you haven't added any templates yet. Click the button below to create your first template.",
     "addNewTemplate": "Add New Template",
     "newTemplate": "New Template",
-    "templateOptions": "Template Options"
+    "templateOptions": "Template Options",
+    "New": "New",
+    "Export": "Export",
+    "Delete": "Delete"
   }
 }

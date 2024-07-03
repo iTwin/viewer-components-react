@@ -107,10 +107,10 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
             <div className="ec3w-toolbar" data-testid="ec3-templates">
               <div className="ec3w-toolbar-left">
                 <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title={EC3Widget.translate("newTemplate")}>
-                  New
+                  {EC3Widget.translate("New")}
                 </Button>
                 <Button data-testid="ec3-export-button" styleType="default" onClick={onExport} disabled={!selectedTemplate}>
-                  Export
+                  {EC3Widget.translate("Export")}
                 </Button>
               </div>
               <div className="ec3w-search-bar-container">
@@ -145,7 +145,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
                         }}
                         icon={<SvgDelete />}
                       >
-                        Delete
+                        {EC3Widget.translate("Delete")}
                       </MenuItem>,
                     ]}
                   >
