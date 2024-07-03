@@ -173,7 +173,7 @@ test.describe("Models tree", () => {
       const viewport = await page.getByTestId("viewport-component").boundingBox();
       expect(viewport).not.toBeNull();
 
-      await page.mouse.move(0, 0);
+      await page.mouse.move(0, 0, { steps: 10 });
       await page.mouse.down();
       await page.mouse.move(viewport!.width - 50, viewport!.height - 50, { steps: 10 });
       await page.mouse.up();

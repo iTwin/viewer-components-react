@@ -20,21 +20,21 @@ export const expandStagePanel = async (page: Page, side: PanelSide, px: number) 
   const handlePos = await widgetPanel.locator(".nz-grip-container").locator(".nz-handle").boundingBox();
   assert(handlePos);
 
-  await page.mouse.move(handlePos.x, handlePos.y);
+  await page.mouse.move(handlePos.x, handlePos.y, { steps: 10 });
   await page.mouse.down();
 
   switch (side) {
     case "left":
-      await page.mouse.move(handlePos.x + px, handlePos.y);
+      await page.mouse.move(handlePos.x + px, handlePos.y, { steps: 10 });
       break;
     case "right":
-      await page.mouse.move(handlePos.x - px, handlePos.y);
+      await page.mouse.move(handlePos.x - px, handlePos.y, { steps: 10 });
       break;
     case "top":
-      await page.mouse.move(handlePos.x, handlePos.y - px);
+      await page.mouse.move(handlePos.x, handlePos.y - px, { steps: 10 });
       break;
     case "bottom":
-      await page.mouse.move(handlePos.x, handlePos.y + px);
+      await page.mouse.move(handlePos.x, handlePos.y + px, { steps: 10 });
       break;
   }
   await page.mouse.up();
@@ -53,9 +53,9 @@ export async function initTreeWidgetTest({ page, baseURL }: { page: Page; baseUR
 
 // make sure to open the filter dialog before calling this.
 export async function selectPropertyInDialog(page: Page, propertyText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
+  const filterDialog = page.getByRole("dialog");
 
-  await filterBuilder.getByPlaceholder("Choose property").click();
+  await filterDialog.getByPlaceholder("Choose property").click();
 
   // ensure that options are loaded
   await page.getByRole("menuitem", { name: "Model", exact: true }).waitFor();
@@ -64,24 +64,24 @@ export async function selectPropertyInDialog(page: Page, propertyText: string) {
 
 // make sure to open the filter dialog before calling this.
 export async function selectOperatorInDialog(page: Page, operatorText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
+  const filterDialog = page.getByRole("dialog");
 
-  await filterBuilder.getByText("Contains").click();
+  await filterDialog.getByText("Contains").click();
   await page.getByRole("option", { name: operatorText, exact: true }).click();
 
-  await filterBuilder.getByText("Contains").waitFor({ state: "hidden" });
-  await filterBuilder.getByText(operatorText).waitFor();
+  await filterDialog.getByText("Contains").waitFor({ state: "hidden" });
+  await filterDialog.getByText(operatorText).waitFor();
 }
 
 // make sure to open the filter dialog before calling this.
 export async function selectValueInDialog(page: Page, valueText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
+  const filterDialog = page.getByRole("dialog");
 
   // search for one character less to not have to differentiate between entered value and option in dropdown
-  await page.locator(".presentation-async-select-values-container input").fill(valueText.slice(0, -1));
-  await page.getByText(valueText, { exact: true }).click();
+  await page.locator(".presentation-async-select-values-container input").fill(valueText);
+  await page.getByRole("list").getByText(valueText).click();
 
-  await filterBuilder.getByText(`option ${valueText}, selected.`).waitFor();
+  await filterDialog.getByText(`option ${valueText}, selected.`).waitFor();
 }
 
 export async function selectTree(widget: Locator, treeLabel: string) {

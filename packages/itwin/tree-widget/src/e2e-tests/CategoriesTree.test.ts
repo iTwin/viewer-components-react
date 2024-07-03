@@ -108,13 +108,13 @@ test.describe("Categories tree", () => {
 
       // shrink panel
       await expandStagePanel(page, "right", -100);
+      // scroll to the right side
+      await scrollTree(page, 10000, 0);
 
       // re-focus on checkbox after resizing the panel
       await node.click();
       await page.keyboard.press("Tab");
 
-      // scroll to the right side
-      await scrollTree(page, 10000, 0);
       await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
 
       // expand panel
