@@ -47,7 +47,7 @@ export async function initTreeWidgetTest({ page, baseURL }: { page: Page; baseUR
   await page.goto(baseURL, { waitUntil: "networkidle" });
   await page.evaluate(async () => document.fonts.ready);
   // expand panel size to ~300px
-  await expandStagePanel(page, "right", 100);
+  await expandStagePanel(page, "right", 110);
   const widget = locateWidget(page, "tree");
   await widget.waitFor();
   return widget;
