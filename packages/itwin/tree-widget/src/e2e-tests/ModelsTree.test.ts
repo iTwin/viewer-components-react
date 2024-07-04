@@ -206,6 +206,7 @@ test.describe("Models tree", () => {
       // select node to show selected outline
       const node = locateNode(treeWidget, "ProcessPhysicalModel");
       await node.click();
+      const treeContainer = page.locator("#tw-tree-renderer-container");
 
       // wait for node to become selected
       await expect(node).toHaveAttribute("aria-selected", "true");
@@ -217,7 +218,7 @@ test.describe("Models tree", () => {
       const checkbox = node.getByTitle("Visible: All categories visible");
       await expect(checkbox).toBeFocused();
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // shrink panel
       await expandStagePanel(page, "right", -100);
@@ -228,7 +229,7 @@ test.describe("Models tree", () => {
 
       // scroll to the right side
       await scrollTree(page, 10000, 0);
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // expand panel
       await expandStagePanel(page, "right", 100);
@@ -245,7 +246,7 @@ test.describe("Models tree", () => {
       const expander = node.getByLabel("Expand");
       await expect(expander).toBeFocused();
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // navigate back to focus on the already selected node
       await page.keyboard.press("ArrowUp");
@@ -254,7 +255,7 @@ test.describe("Models tree", () => {
       await expect(node).toBeFocused();
       await expect(node).toHaveAttribute("aria-selected", "true");
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // click on a different node to avoid showing filtering buttons due to hover
       const bayTownNode = locateNode(treeWidget, "BayTown");
@@ -274,7 +275,7 @@ test.describe("Models tree", () => {
       const applyFilterButton = node.getByTitle("Apply filter");
       await expect(applyFilterButton).toBeFocused();
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // open filtering dialog
       await page.keyboard.press("Enter");
@@ -289,7 +290,7 @@ test.describe("Models tree", () => {
 
       // navigate to clear filter button
       await page.keyboard.press("Shift+Tab");
-      await takeScreenshot(page, node, { resetScroll: true, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // click the clear filter button
       await page.keyboard.press("Enter");

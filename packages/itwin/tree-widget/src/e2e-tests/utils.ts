@@ -144,11 +144,15 @@ async function getBoundedBoundingBox(component: Locator, boundingComponent?: Loc
   if (boundingComponent) {
     const bounds = await boundingComponent.boundingBox();
     assert(bounds);
+    const left = Math.max(box.x, bounds.x);
+    const top = Math.max(box.y, bounds.y);
+    const right = Math.min(box.x + box.width, bounds.x + bounds.width);
+    const bottom = Math.min(box.y + box.height, bounds.y + bounds.height);
     return {
-      x: Math.max(box.x, bounds.x),
-      y: Math.max(box.y, bounds.y),
-      width: box.width - Math.max(0, box.x + box.width - (bounds.x + bounds.width)),
-      height: box.height - Math.max(0, box.y + box.height - (bounds.y + bounds.height)),
+      x: left,
+      y: top,
+      width: right - left,
+      height: bottom - top,
     };
   }
 

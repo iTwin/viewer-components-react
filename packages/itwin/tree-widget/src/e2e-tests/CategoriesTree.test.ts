@@ -96,6 +96,7 @@ test.describe("Categories tree", () => {
       // click to focus on node
       const node = locateNode(treeWidget, "Equipment", 1);
       await node.click();
+      const treeContainer = page.locator("#tw-tree-renderer-container");
 
       // focus on checkbox using keyboard
       await page.keyboard.press("Tab");
@@ -104,7 +105,7 @@ test.describe("Categories tree", () => {
       const checkbox = node.locator(".tw-tree-node-checkbox");
       await expect(checkbox).toBeFocused();
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // shrink panel
       await expandStagePanel(page, "right", -100);
@@ -112,10 +113,11 @@ test.describe("Categories tree", () => {
       await scrollTree(page, 10000, 0);
 
       // re-focus on checkbox after resizing the panel
-      await node.click();
+      const nodeBox = await node.boundingBox();
+      await node.click({ position: nodeBox ? { x: nodeBox.width * 0.6, y: nodeBox.height * 0.5 } : undefined });
       await page.keyboard.press("Tab");
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // expand panel
       await expandStagePanel(page, "right", 100);
@@ -132,7 +134,7 @@ test.describe("Categories tree", () => {
       const expander = node.getByLabel("Expand");
       await expect(expander).toBeFocused();
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // navigate back to focus on the already selected node
       await page.keyboard.press("ArrowUp");
@@ -140,7 +142,7 @@ test.describe("Categories tree", () => {
 
       await expect(node).toBeFocused();
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // click on a different node to avoid showing filtering buttons due to hover
       const hexNode = locateNode(treeWidget, "E-HEX");
@@ -157,7 +159,7 @@ test.describe("Categories tree", () => {
       const applyFilterButton = node.getByTitle("Apply filter");
       await expect(applyFilterButton).toBeFocused();
 
-      await takeScreenshot(page, node, { expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // open filtering dialog
       await page.keyboard.press("Enter");
@@ -172,7 +174,7 @@ test.describe("Categories tree", () => {
 
       // navigate to clear filter button
       await page.keyboard.press("Shift+Tab");
-      await takeScreenshot(page, node, { resetScroll: true, expandBy: { top: 10, bottom: 10 } });
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
 
       // click the clear filter button
       await page.keyboard.press("Enter");
