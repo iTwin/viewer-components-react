@@ -20,7 +20,8 @@ interface ExternalSourcesTreeOwnProps {
 
 type TreeProps = Parameters<typeof Tree>[0];
 type GetHierarchyDefinitionsProviderCallback = TreeProps["getHierarchyDefinition"];
-type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps & Pick<TreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps &
+  Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {

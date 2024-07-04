@@ -21,7 +21,8 @@ interface IModelContentTreeOwnProps {
 
 type TreeProps = Parameters<typeof Tree>[0];
 type GetHierarchyDefinitionsProviderCallback = TreeProps["getHierarchyDefinition"];
-type IModelContentTreeProps = IModelContentTreeOwnProps & Pick<TreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+type IModelContentTreeProps = IModelContentTreeOwnProps &
+  Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
 export function IModelContentTree(props: IModelContentTreeProps) {

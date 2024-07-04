@@ -26,7 +26,7 @@ export type VisibilityTreeRendererProps = TreeRendererProps &
 
 interface VisibilityTreeOwnProps {
   /** Callback for creating visibility handler used to control visibility of instances represented by tree nodes. */
-  visibilityHandlerFactory: (imodelAccess: ECClassHierarchyInspector) => HierarchyVisibilityHandler;
+  visibilityHandlerFactory: (props: { imodelAccess: ECClassHierarchyInspector }) => HierarchyVisibilityHandler;
   /** Tree renderer that should be used to render tree data. */
   treeRenderer: (treeProps: VisibilityTreeRendererProps) => React.ReactNode;
 }
@@ -41,7 +41,7 @@ export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...prop
   const { imodel, getSchemaContext } = props;
   const imodelAccess = useMemo(() => createIModelAccess({ imodel, getSchemaContext }), [imodel, getSchemaContext]);
   const { getCheckboxState, onCheckboxClicked, triggerRefresh } = useHierarchyVisibility({
-    visibilityHandlerFactory: useCallback(() => visibilityHandlerFactory(imodelAccess), [visibilityHandlerFactory, imodelAccess]),
+    visibilityHandlerFactory: useCallback(() => visibilityHandlerFactory({ imodelAccess }), [visibilityHandlerFactory, imodelAccess]),
   });
 
   return (

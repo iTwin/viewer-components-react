@@ -4,18 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ExternalSourcesTree } from "./ExternalSourcesTree";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 
 type ExternalSourcesTreeProps = ComponentPropsWithoutRef<typeof ExternalSourcesTree>;
-interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
-  selectionStorage: SelectionStorage;
+interface ExternalSourcesTreeComponentProps
+  extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -24,7 +22,7 @@ interface ExternalSourcesTreeComponentProps extends Pick<ExternalSourcesTreeProp
  * A component that renders `ExternalSourcesTree`.
  * @beta
  */
-export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, selectionStorage, ...props }: ExternalSourcesTreeComponentProps) => {
+export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
@@ -32,15 +30,9 @@ export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasu
   }
 
   return (
-    <UnifiedSelectionProvider storage={selectionStorage}>
-      <TelemetryContextProvider
-        componentIdentifier={ExternalSourcesTreeComponent.id}
-        onFeatureUsed={onFeatureUsed}
-        onPerformanceMeasured={onPerformanceMeasured}
-      >
-        <AutoSizer>{({ width, height }) => <ExternalSourcesTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
-      </TelemetryContextProvider>
-    </UnifiedSelectionProvider>
+    <TelemetryContextProvider componentIdentifier={ExternalSourcesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+      <AutoSizer>{({ width, height }) => <ExternalSourcesTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
+    </TelemetryContextProvider>
   );
 };
 

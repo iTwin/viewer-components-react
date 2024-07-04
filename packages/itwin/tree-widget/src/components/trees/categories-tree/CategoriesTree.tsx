@@ -38,7 +38,8 @@ type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
-type CategoriesTreeProps = CategoriesTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+type CategoriesTreeProps = CategoriesTreeOwnProps &
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
 export function CategoriesTree({
@@ -47,6 +48,7 @@ export function CategoriesTree({
   categories,
   allViewports,
   getSchemaContext,
+  selectionStorage,
   height,
   width,
   activeView,
@@ -103,6 +105,7 @@ export function CategoriesTree({
       width={width}
       imodel={imodel}
       treeName={CategoriesTreeComponent.id}
+      selectionStorage={selectionStorage}
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
       getHierarchyDefinition={getDefinitionsProvider}

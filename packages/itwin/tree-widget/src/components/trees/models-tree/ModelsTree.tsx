@@ -24,7 +24,7 @@ import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTree
 import type { Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
-import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
@@ -45,12 +45,14 @@ type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
 type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
-type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+type ModelsTreeProps = ModelsTreeOwnProps &
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
 /** @internal */
 export function ModelsTree({
   imodel,
   getSchemaContext,
+  selectionStorage,
   height,
   width,
   activeView,
@@ -144,6 +146,7 @@ export function ModelsTree({
       width={width}
       imodel={imodel}
       treeName={ModelsTreeComponent.id}
+      selectionStorage={selectionStorage}
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
       getHierarchyDefinition={getHierarchyDefinition}
@@ -208,9 +211,12 @@ function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   return undefined;
 }
 
-function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: () => ModelsTreeIdsCache, overrides?: ModelsTreeVisibilityHandlerOverrides) {
-  return (imodelAccess: ECClassHierarchyInspector) =>
-    createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides });
+function createVisibilityHandlerFactory(
+  activeView: Viewport,
+  idsCacheGetter: () => ModelsTreeIdsCache,
+  overrides?: ModelsTreeVisibilityHandlerOverrides,
+): VisibilityTreeProps["visibilityHandlerFactory"] {
+  return ({ imodelAccess }) => createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides });
 }
 
 function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {

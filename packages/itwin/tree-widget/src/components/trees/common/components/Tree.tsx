@@ -6,7 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { UnifiedSelectionProvider, useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
@@ -21,7 +21,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type { useTree } from "@itwin/presentation-hierarchies-react";
+import type { SelectionStorage, useTree } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting";
 import type { TreeRenderer } from "./TreeRenderer";
 
@@ -45,6 +45,8 @@ interface TreeOwnProps {
   getSchemaContext: (imodel: IModelConnection) => SchemaContext;
   /** Unique tree component name that will be used as unified selection change event source when selecting node. */
   treeName: string;
+  /** Unified selection storage that should be used by tree to handle tree selection changes. */
+  selectionStorage: SelectionStorage;
   /** Tree renderer that should be used to render tree data. */
   treeRenderer: (treeProps: TreeRendererProps) => ReactNode;
   /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
@@ -71,7 +73,7 @@ type TreeProps = TreeOwnProps & Pick<UseTreeProps, "getFilteredPaths" | "getHier
  * Default tree component that manages tree state and renders using supplied `treeRenderer`.
  * @Beta
  */
-export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAccess: providedIModelAccess, ...props }: TreeProps) {
+export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps) {
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
 
   const imodelAccess = useMemo(() => {
@@ -80,7 +82,9 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAccess: 
 
   return (
     <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
-      <TreeImpl {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
+      <UnifiedSelectionProvider storage={selectionStorage}>
+        <TreeImpl {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
+      </UnifiedSelectionProvider>
     </SchemaMetadataContextProvider>
   );
 }
@@ -101,7 +105,7 @@ function TreeImpl({
   treeRenderer,
   density,
   highlight,
-}: MarkRequired<Omit<TreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
+}: MarkRequired<Omit<TreeProps, "getSchemaContext" | "selectionStorage">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
   const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
   const {

@@ -8,7 +8,6 @@ import classNames from "classnames";
 import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { AutoSizer } from "../../utils/AutoSizer";
@@ -20,11 +19,12 @@ import { useCategories } from "./UseCategories";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { CategoriesTreeHeaderButtonProps } from "./CategoriesTreeButtons";
+
 type CategoriesTreeProps = ComponentPropsWithoutRef<typeof CategoriesTree>;
 
-interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+interface CategoriesTreeComponentProps
+  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -36,7 +36,6 @@ interface CategoriesTreeComponentProps extends Pick<CategoriesTreeProps, "getSch
    * ```
    */
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
-  selectionStorage: SelectionStorage;
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -90,7 +89,6 @@ function CategoriesTreeComponentImpl({
   iModel,
   viewport,
   headerButtons,
-  selectionStorage,
   onPerformanceMeasured,
   onFeatureUsed,
   ...treeProps
@@ -101,24 +99,22 @@ function CategoriesTreeComponentImpl({
   return (
     <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
-        <UnifiedSelectionProvider storage={selectionStorage}>
-          <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
-            {headerButtons
-              ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories, onFeatureUsed })}</Fragment>)
-              : [
-                  <ShowAllButton viewport={viewport} categories={categories} key="show-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                  <HideAllButton viewport={viewport} categories={categories} key="hide-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                  <InvertAllButton viewport={viewport} categories={categories} key="invert-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                ]}
-          </TreeHeader>
-          <div className="tw-tree-content">
-            <AutoSizer>
-              {({ width, height }) => (
-                <CategoriesTree {...treeProps} imodel={iModel} categories={categories} activeView={viewport} width={width} height={height} filter={filter} />
-              )}
-            </AutoSizer>
-          </div>
-        </UnifiedSelectionProvider>
+        <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
+          {headerButtons
+            ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, categories, onFeatureUsed })}</Fragment>)
+            : [
+                <ShowAllButton viewport={viewport} categories={categories} key="show-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                <HideAllButton viewport={viewport} categories={categories} key="hide-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                <InvertAllButton viewport={viewport} categories={categories} key="invert-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+              ]}
+        </TreeHeader>
+        <div className="tw-tree-content">
+          <AutoSizer>
+            {({ width, height }) => (
+              <CategoriesTree {...treeProps} imodel={iModel} categories={categories} activeView={viewport} width={width} height={height} filter={filter} />
+            )}
+          </AutoSizer>
+        </div>
       </div>
     </TelemetryContextProvider>
   );

@@ -4,18 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { IModelContentTree } from "./IModelContentTree";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 
 type IModelContentTreeProps = ComponentPropsWithoutRef<typeof IModelContentTree>;
-interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
-  selectionStorage: SelectionStorage;
+interface IModelContentTreeComponentProps
+  extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
@@ -24,7 +22,7 @@ interface IModelContentTreeComponentProps extends Pick<IModelContentTreeProps, "
  * A component that renders `IModelContentTree`.
  * @beta
  */
-export const IModelContentTreeComponent = ({ selectionStorage, onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps) => {
+export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
@@ -32,11 +30,9 @@ export const IModelContentTreeComponent = ({ selectionStorage, onFeatureUsed, on
   }
 
   return (
-    <UnifiedSelectionProvider storage={selectionStorage}>
-      <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-        <AutoSizer>{({ width, height }) => <IModelContentTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
-      </TelemetryContextProvider>
-    </UnifiedSelectionProvider>
+    <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+      <AutoSizer>{({ width, height }) => <IModelContentTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
+    </TelemetryContextProvider>
   );
 };
 
