@@ -7,7 +7,6 @@
 /// <reference types="react" />
 
 import type { BeEvent } from '@itwin/core-bentley';
-import { Checkbox } from '@itwin/itwinui-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
@@ -20,6 +19,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
+import type { PropsWithChildren } from 'react';
 import type { default as React_2 } from 'react';
 import type { ReactNode } from 'react';
 import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
@@ -49,7 +49,7 @@ export function createTreeWidget(props: TreeWidgetProps): Widget;
 
 // @beta
 export const ExternalSourcesTreeComponent: {
-    (props: ExternalSourcesTreeComponentProps): JSX.Element | null;
+    ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps): JSX.Element | null;
     id: string;
     getLabel(): string;
 };
@@ -63,7 +63,7 @@ export interface HierarchyVisibilityHandler extends IDisposable {
 
 // @beta
 export const IModelContentTreeComponent: {
-    (props: IModelContentTreeComponentProps): JSX.Element | null;
+    ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps): JSX.Element | null;
     id: string;
     getLabel(): string;
 };
@@ -76,6 +76,7 @@ export const ModelsTreeComponent: {
     InvertButton: typeof InvertButton;
     View2DButton: typeof View2DButton;
     View3DButton: typeof View3DButton;
+    ToggleInstancesFocusButton: typeof ToggleInstancesFocusButton;
     id: string;
     getLabel(): string;
 };
@@ -116,17 +117,14 @@ export interface ModelsTreeVisibilityHandlerOverrides {
     }) => Promise<VisibilityStatus>>;
 }
 
-// @beta
-export type ReportUsageCallback<TFeatures extends string> = (props: {
-    featureId?: TFeatures;
-    reportInteraction: boolean;
-}) => void;
-
 // @public
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 
+// @beta (undocumented)
+export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
+
 // @beta
-export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAccess: providedIModelAccess, ...props }: TreeProps_3): JSX.Element;
+export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps_3): JSX.Element;
 
 // @public
 export interface TreeDefinition {
@@ -138,13 +136,10 @@ export interface TreeDefinition {
 }
 
 // @beta
-export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, ...props }: TreeRendererProps_2): JSX.Element;
+export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps_2): JSX.Element;
 
 // @beta
 export type TreeRendererProps = Required<Pick<ComponentPropsWithoutRef<typeof TreeRenderer>, "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel">>;
-
-// @beta
-export type TreeUsageTrackedFeatures = "hierarchy-level-filtering" | "hierarchy-level-size-limit-hit";
 
 // @public
 export class TreeWidget {
@@ -159,9 +154,6 @@ export class TreeWidget {
 export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
 
 // @beta
-export function useFeatureReporting<TFeatures extends string>(props: UseFeatureReportingProps): UseFeatureReportingResult<TFeatures>;
-
-// @beta
 export interface VisibilityStatus {
     isDisabled?: boolean;
     state: "visible" | "partial" | "hidden";
@@ -169,16 +161,13 @@ export interface VisibilityStatus {
 }
 
 // @beta
-export function VisibilityTree({ visibilityHandlerFactory, onPerformanceMeasured, treeRenderer, ...props }: VisibilityTreeProps_2): JSX.Element;
+export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps_2): JSX.Element;
 
 // @beta
-export function VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: TreeRendererProps_3 & Pick<ReturnType<typeof useHierarchyVisibility>, "getCheckboxState" | "onCheckboxClicked">): JSX.Element;
+export function VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: TreeRendererProps_3 & TreeCheckboxProps): JSX.Element;
 
 // @beta
 export type VisibilityTreeRendererProps = TreeRendererProps & Pick<ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>, "getCheckboxState" | "onCheckboxClicked">;
-
-// @beta
-export type VisibilityTreeUsageTrackedFeatures = TreeUsageTrackedFeatures | "visibility-change";
 
 // (No @packageDocumentation comment for this package)
 
