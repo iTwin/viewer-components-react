@@ -106,7 +106,6 @@ function BaseTreeRenderer({
   const {
     rootNodes,
     isLoading,
-    reloadTree,
     selectNodes,
     setFormatter: _setFormatter,
     expandNode,
@@ -122,6 +121,7 @@ function BaseTreeRenderer({
     onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
 
+  const reloadTree = treeProps.reloadTree;
   useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
   const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });

@@ -10,7 +10,7 @@ import * as moq from "typemoq";
 import type { EC3ConfigurationsClient, EC3Job, EC3JobsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { mockITwinId, renderWithContext, simulateClick } from "./test-utils";
+import { mockITwinId, renderWithContext, simulateClick, TestUtils } from "./test-utils";
 import type { EC3Token } from "../components/EC3/EC3Token";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
@@ -48,6 +48,7 @@ describe("Templates", () => {
   const getAccessTokenFn = async () => accessToken;
 
   beforeAll(async () => {
+    await TestUtils.initialize();
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     ec3ConfigurationsClient.setup(async (x) => x.getConfigurations(accessToken, iTwinId)).returns(async () => mockedConfigurations);
     ec3ConfigurationsClient.setup(async (x) => x.getConfiguration(accessToken, "0")).returns(async () => mockedConfigurations[0]);
@@ -115,7 +116,7 @@ describe("Templates", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    const button = screen.getByText("New");
+    const button = screen.getByText("EC3Widget.new");
     await simulateClick(button);
     expect(onClickCreate).toBeCalled();
   });

@@ -60,7 +60,7 @@ export const ExportModal = (props: ExportProps) => {
         } else {
           setJobStatus({ status: currentJobStatus.status });
         }
-        props?.onExportResult?.(currentJobStatus);
+        props?.onExportResult?.(currentJobStatus, props.templateId);
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },

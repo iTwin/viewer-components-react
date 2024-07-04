@@ -35,5 +35,6 @@ function getLocalizedStrings(): UseHierarchiesLocalizationResult {
     resultLimitExceededWithFiltering: TreeWidget.translate("presentation-hierarchies.resultLimitExceededWithFiltering"),
     increaseHierarchyLimit: TreeWidget.translate("presentation-hierarchies.increaseHierarchyLimit"),
     increaseHierarchyLimitWithFiltering: TreeWidget.translate("presentation-hierarchies.increaseHierarchyLimitWithFiltering"),
+    retry: TreeWidget.translate("presentation-hierarchies.retry"),
   };
 }

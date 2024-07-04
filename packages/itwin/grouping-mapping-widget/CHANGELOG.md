@@ -1,8 +1,20 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 11 Jun 2024 15:52:38 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Jun 2024 13:10:54 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.27.0
+
+Fri, 28 Jun 2024 13:10:54 GMT
+
+### Minor changes
+
+- Refactor of grouping and mapping properties UI, removed calculated property and custom calculation exports in favor of a single group property that contains all group property related logic, refactor includes a flat-list with icons representing the property type instead of three separate ones for properties list. ([#864](https://github.com/iTwin/viewer-components-react/pull/864))
+
+### Patches
+
+- Show only 1 spinner when toggling extraction ([#935](https://github.com/iTwin/viewer-components-react/pull/935))
 
 ## 0.26.1
 

@@ -100,7 +100,7 @@ export type EC3ConfigPropsWithCallbacks = EC3ConfigCommonProps & {
   /**
    * The callback function for export status.
    */
-  onExportResult?: (status: EC3JobStatus) => void;
+  onExportResult?: (status: EC3JobStatus, templateId: string | undefined) => void;
 };
 
 /**

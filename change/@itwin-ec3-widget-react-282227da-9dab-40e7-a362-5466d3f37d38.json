@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added localization support.",
-  "packageName": "@itwin/ec3-widget-react",
-  "email": "pari.deshpande@bentley.com",
-  "dependentChangeType": "patch"
-}

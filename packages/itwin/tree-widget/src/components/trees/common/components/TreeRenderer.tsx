@@ -7,11 +7,11 @@ import "./TreeRenderer.scss";
 import { useCallback } from "react";
 import { Tree } from "@itwin/itwinui-react";
 import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
+import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { TreeNodeRenderer } from "./TreeNodeRenderer";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { PresentationHierarchyNode, PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
-
 interface TreeRendererOwnProps {
   rootNodes: PresentationTreeNode[];
   isNodeSelected: (nodeId: string) => boolean;
@@ -20,10 +20,18 @@ interface TreeRendererOwnProps {
 
 type TreeRendererProps = Pick<
   TreeNodeRendererProps,
-  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps"
+  | "expandNode"
+  | "onNodeClick"
+  | "onNodeKeyDown"
+  | "onFilterClick"
+  | "getIcon"
+  | "getLabel"
+  | "getSublabel"
+  | "getHierarchyLevelDetails"
+  | "checkboxProps"
+  | "reloadTree"
 > &
   Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
-  Pick<LocalizationContextProviderProps, "localizedStrings"> &
   TreeRendererOwnProps;
 
 /** @internal */
@@ -40,9 +48,10 @@ export function TreeRenderer({
   getSublabel,
   getHierarchyLevelDetails,
   checkboxProps,
-  localizedStrings,
+  reloadTree,
   ...props
 }: TreeRendererProps) {
+  const localizedStrings = useHierarchiesLocalization();
   const nodeRenderer = useCallback<TreeProps<RenderedTreeNode>["nodeRenderer"]>(
     (nodeProps) => {
       return (
@@ -64,11 +73,24 @@ export function TreeRenderer({
           onFilterClick={onFilterClick}
           getHierarchyLevelDetails={getHierarchyLevelDetails}
           checkboxProps={checkboxProps}
+          reloadTree={reloadTree}
           className={getSublabel ? "with-description" : "without-description"}
         />
       );
     },
-    [expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, getHierarchyLevelDetails, getIcon, getLabel, getSublabel, onFilterClick, checkboxProps],
+    [
+      expandNode,
+      onNodeClick,
+      onNodeKeyDown,
+      onNodeDoubleClick,
+      getHierarchyLevelDetails,
+      getIcon,
+      getLabel,
+      getSublabel,
+      onFilterClick,
+      checkboxProps,
+      reloadTree,
+    ],
   );
 
   const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
@@ -89,4 +111,3 @@ export function TreeRenderer({
 
 type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;
-type LocalizationContextProviderProps = ComponentPropsWithoutRef<typeof LocalizationContextProvider>;
