@@ -2,6 +2,57 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Wed, 03 Jul 2024 19:31:08 GMT",
+      "version": "0.18.0",
+      "tag": "@itwin/measure-tools-react_v0.18.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "aruniverse@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "caa244bee5585fb6ac6ddd6cdb89e8445c2b7f5f",
+            "comment": "Remove the usage of the IModelApp.telemetry for reporting telemetry."
+          }
+        ]
+      }
+    },
+    {
+      "date": "Tue, 02 Jul 2024 14:49:30 GMT",
+      "version": "0.17.0",
+      "tag": "@itwin/measure-tools-react_v0.17.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "125395992+Maxime-Brassard@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "3a16c4317883afeaa611455cf85fc638b0326015",
+            "comment": "Measurement in sheets"
+          }
+        ]
+      }
+    },
+    {
+      "date": "Fri, 28 Jun 2024 13:10:54 GMT",
+      "version": "0.16.2",
+      "tag": "@itwin/measure-tools-react_v0.16.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "125395992+Maxime-Brassard@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "c11edacd2c65d1be98fe5d7d2942e8fd7fafde84",
+            "comment": "fixed bad rise"
+          },
+          {
+            "author": "88331924+saaaaaally@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "12db52d51c4d546f3c09892ce8a19c36abb56080",
+            "comment": "Handle blank imodel connection in SheetMeasurementHelper"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 13 Jun 2024 15:17:40 GMT",
       "version": "0.16.1",
       "tag": "@itwin/measure-tools-react_v0.16.1",

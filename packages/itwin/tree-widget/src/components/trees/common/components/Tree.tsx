@@ -112,7 +112,6 @@ function TreeImpl({
   const {
     rootNodes,
     isLoading,
-    reloadTree,
     selectNodes,
     setFormatter: _setFormatter,
     expandNode,
@@ -133,6 +132,7 @@ function TreeImpl({
     onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
   });
 
+  const reloadTree = treeProps.reloadTree;
   useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
   const reportingSelectNodes = useReportingAction({ action: selectNodes });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });

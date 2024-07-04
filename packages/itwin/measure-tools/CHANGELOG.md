@@ -1,8 +1,33 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Thu, 13 Jun 2024 15:17:40 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Jul 2024 19:31:08 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.18.0
+
+Wed, 03 Jul 2024 19:31:08 GMT
+
+### Minor changes
+
+- Remove the usage of the IModelApp.telemetry for reporting telemetry. ([#552](https://github.com/iTwin/viewer-components-react/pull/552))
+
+## 0.17.0
+
+Tue, 02 Jul 2024 14:49:30 GMT
+
+### Minor changes
+
+- Measurement in sheets ([#837](https://github.com/iTwin/viewer-components-react/pull/837))
+
+## 0.16.2
+
+Fri, 28 Jun 2024 13:10:54 GMT
+
+### Patches
+
+- fixed bad rise ([#944](https://github.com/iTwin/viewer-components-react/pull/944))
+- Handle blank imodel connection in SheetMeasurementHelper ([#946](https://github.com/iTwin/viewer-components-react/pull/946))
 
 ## 0.16.1
 

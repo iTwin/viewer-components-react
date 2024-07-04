@@ -12,6 +12,7 @@ import { TreeNodeRenderer } from "./TreeNodeRenderer";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { PresentationHierarchyNode, PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
+
 interface TreeRendererOwnProps {
   /** Tree nodes to render. */
   rootNodes: PresentationTreeNode[];
@@ -23,7 +24,16 @@ interface TreeRendererOwnProps {
 
 type TreeRendererProps = Pick<
   TreeNodeRendererProps,
-  "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "getIcon" | "getLabel" | "getSublabel" | "getHierarchyLevelDetails" | "checkboxProps"
+  | "expandNode"
+  | "onNodeClick"
+  | "onNodeKeyDown"
+  | "onFilterClick"
+  | "getIcon"
+  | "getLabel"
+  | "getSublabel"
+  | "getHierarchyLevelDetails"
+  | "checkboxProps"
+  | "reloadTree"
 > &
   Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
   TreeRendererOwnProps;
@@ -45,6 +55,7 @@ export function TreeRenderer({
   getSublabel,
   getHierarchyLevelDetails,
   checkboxProps,
+  reloadTree,
   ...props
 }: TreeRendererProps) {
   const localizedStrings = useHierarchiesLocalization();
@@ -69,11 +80,24 @@ export function TreeRenderer({
           onFilterClick={onFilterClick}
           getHierarchyLevelDetails={getHierarchyLevelDetails}
           checkboxProps={checkboxProps}
+          reloadTree={reloadTree}
           className={getSublabel ? "with-description" : "without-description"}
         />
       );
     },
-    [expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, getHierarchyLevelDetails, getIcon, getLabel, getSublabel, onFilterClick, checkboxProps],
+    [
+      expandNode,
+      onNodeClick,
+      onNodeKeyDown,
+      onNodeDoubleClick,
+      getHierarchyLevelDetails,
+      getIcon,
+      getLabel,
+      getSublabel,
+      onFilterClick,
+      checkboxProps,
+      reloadTree,
+    ],
   );
 
   const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);

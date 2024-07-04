@@ -2,6 +2,29 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Fri, 28 Jun 2024 13:10:54 GMT",
+      "version": "0.27.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.27.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "hansraj.koravenciah@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "d5ef22d42fe777ddce8effdf3090eb0ec344cbeb",
+            "comment": "Show only 1 spinner when toggling extraction"
+          }
+        ],
+        "minor": [
+          {
+            "author": "141143406+julioalvahash@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "c4f6e993cabd49d85c6b3f32363cd71e22b4d555",
+            "comment": "Refactor of grouping and mapping properties UI, removed calculated property and custom calculation exports in favor of a single group property that contains all group property related logic, refactor includes a flat-list with icons representing the property type instead of three separate ones for properties list."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 11 Jun 2024 15:52:38 GMT",
       "version": "0.26.1",
       "tag": "@itwin/grouping-mapping-widget_v0.26.1",

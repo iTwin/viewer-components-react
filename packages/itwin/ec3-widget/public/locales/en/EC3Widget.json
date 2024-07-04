@@ -2,7 +2,7 @@
   "EC3Widget": {
     "stepOneTitle": "Create a template",
     "stepTwoTitle": "Add assembly(s)",
-    "stepThreeTitle": "Send Report to EC3",
+    "stepThreeTitle": "Send Template to EC3",
     "templateName": "Name",
     "templateDescription": "Description",
     "reportSelection": "Select Report",
@@ -30,6 +30,12 @@
     "saveButton": "Save",
     "requiredFieldNotice": "Asterisk * indicates mandatory fields.",
     "createTemplate": "Create Template",
-    "noTemplateMsg": "It looks like you haven't added any templates yet. Click the button below to create your first template."
+    "noTemplateMsg": "It looks like you haven't added any templates yet. Click the button below to create your first template.",
+    "addNewTemplate": "Add New Template",
+    "newTemplate": "New Template",
+    "templateOptions": "Template Options",
+    "new": "New",
+    "export": "Export",
+    "delete": "Delete"
   }
 }

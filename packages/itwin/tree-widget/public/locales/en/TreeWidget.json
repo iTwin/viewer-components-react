@@ -144,6 +144,7 @@
     "resultLimitExceeded": "There are more items than allowed limit of {{limit}}.",
     "resultLimitExceededWithFiltering": "Please provide <link>additional filtering</link> - there are more items than allowed limit of {{limit}}.",
     "increaseHierarchyLimit": "<link>Increase the hierarchy level size limit to {{limit}}.</link>",
-    "increaseHierarchyLimitWithFiltering": "Or, <link>increase the hierarchy level size limit to {{limit}}.</link>"
+    "increaseHierarchyLimitWithFiltering": "Or, <link>increase the hierarchy level size limit to {{limit}}.</link>",
+    "retry": "Retry"
   }
 }
