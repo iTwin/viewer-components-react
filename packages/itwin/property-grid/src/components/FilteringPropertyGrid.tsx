@@ -51,7 +51,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
     };
   }, [filterer, dataProvider, autoExpandChildCategories]);
 
-  const { value, inProgress } = useDebouncedAsyncValue(
+  const { value: filterMatchesCount, inProgress: isFiltering } = useDebouncedAsyncValue(
     useCallback(async () => {
       const filteredData = (await filteringDataProvider?.getData()) as FilteredPropertyData;
       return filteredData?.matchesCount;
@@ -66,7 +66,7 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   // istanbul ignore next
   const actionButtonWidth = props.actionButtonWidth !== undefined ? props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
 
-  if (!inProgress && value === 0) {
+  if (!isFiltering && filterMatchesCount === 0) {
     return (
       <FillCentered style={{ flexDirection: "column" }}>
         <Text>
