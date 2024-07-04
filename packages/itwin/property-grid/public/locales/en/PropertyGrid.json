@@ -21,7 +21,8 @@
     "no-elements-selected": "Select element(s) to view properties"
   },
   "filtering": {
-    "no-matching-properties": "There are no properties matching filter \"{{filter}}\""
+    "no-matching-properties": "There are no properties matching filter \"{{filter}}\"",
+    "no-non-null-values": "There are no properties containing non-null values"
   },
   "context-menu": {
     "favorite": "Favorite",
