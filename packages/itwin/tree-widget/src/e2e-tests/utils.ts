@@ -20,21 +20,23 @@ export const expandStagePanel = async (page: Page, side: PanelSide, px: number) 
   const handlePos = await widgetPanel.locator(".nz-grip-container").locator(".nz-handle").boundingBox();
   assert(handlePos);
 
-  await page.mouse.move(handlePos.x, handlePos.y);
+  const handleX = handlePos.x + handlePos.width * 0.5;
+  const handleY = handlePos.y + handlePos.height * 0.5;
+  await page.mouse.move(handleX, handleY, { steps: 10 });
   await page.mouse.down();
 
   switch (side) {
     case "left":
-      await page.mouse.move(handlePos.x + px, handlePos.y);
+      await page.mouse.move(handleX + px, handleY, { steps: 25 });
       break;
     case "right":
-      await page.mouse.move(handlePos.x - px, handlePos.y);
+      await page.mouse.move(handleX - px, handleY, { steps: 25 });
       break;
     case "top":
-      await page.mouse.move(handlePos.x, handlePos.y - px);
+      await page.mouse.move(handleX, handleY - px, { steps: 25 });
       break;
     case "bottom":
-      await page.mouse.move(handlePos.x, handlePos.y + px);
+      await page.mouse.move(handleX, handleY + px, { steps: 25 });
       break;
   }
   await page.mouse.up();
@@ -45,7 +47,7 @@ export async function initTreeWidgetTest({ page, baseURL }: { page: Page; baseUR
   await page.goto(baseURL, { waitUntil: "networkidle" });
   await page.evaluate(async () => document.fonts.ready);
   // expand panel size to ~300px
-  await expandStagePanel(page, "right", 100);
+  await expandStagePanel(page, "right", 110);
   const widget = locateWidget(page, "tree");
   await widget.waitFor();
   return widget;
@@ -53,9 +55,9 @@ export async function initTreeWidgetTest({ page, baseURL }: { page: Page; baseUR
 
 // make sure to open the filter dialog before calling this.
 export async function selectPropertyInDialog(page: Page, propertyText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
+  const filterDialog = page.getByRole("dialog");
 
-  await filterBuilder.getByPlaceholder("Choose property").click();
+  await filterDialog.getByPlaceholder("Choose property").click();
 
   // ensure that options are loaded
   await page.getByRole("menuitem", { name: "Model", exact: true }).waitFor();
@@ -64,24 +66,24 @@ export async function selectPropertyInDialog(page: Page, propertyText: string) {
 
 // make sure to open the filter dialog before calling this.
 export async function selectOperatorInDialog(page: Page, operatorText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
+  const filterDialog = page.getByRole("dialog");
 
-  await filterBuilder.getByText("Contains").click();
+  await filterDialog.getByText("Contains").click();
   await page.getByRole("option", { name: operatorText, exact: true }).click();
 
-  await filterBuilder.getByText("Contains").waitFor({ state: "hidden" });
-  await filterBuilder.getByText(operatorText).waitFor();
+  await filterDialog.getByText("Contains").waitFor({ state: "hidden" });
+  await filterDialog.getByText(operatorText).waitFor();
 }
 
 // make sure to open the filter dialog before calling this.
 export async function selectValueInDialog(page: Page, valueText: string) {
-  const filterBuilder = page.locator(".presentation-property-filter-builder");
+  const filterDialog = page.getByRole("dialog");
 
   // search for one character less to not have to differentiate between entered value and option in dropdown
-  await page.locator(".presentation-async-select-values-container input").fill(valueText.slice(0, -1));
-  await page.getByText(valueText, { exact: true }).click();
+  await page.locator(".presentation-async-select-values-container input").fill(valueText);
+  await page.getByRole("list").getByText(valueText).click();
 
-  await filterBuilder.getByText(`option ${valueText}, selected.`).waitFor();
+  await filterDialog.getByText(`option ${valueText}, selected.`).waitFor();
 }
 
 export async function selectTree(widget: Locator, treeLabel: string) {
@@ -144,11 +146,15 @@ async function getBoundedBoundingBox(component: Locator, boundingComponent?: Loc
   if (boundingComponent) {
     const bounds = await boundingComponent.boundingBox();
     assert(bounds);
+    const left = Math.max(box.x, bounds.x);
+    const top = Math.max(box.y, bounds.y);
+    const right = Math.min(box.x + box.width, bounds.x + bounds.width);
+    const bottom = Math.min(box.y + box.height, bounds.y + bounds.height);
     return {
-      x: Math.max(box.x, bounds.x),
-      y: Math.max(box.y, bounds.y),
-      width: box.width - Math.max(0, box.x + box.width - (bounds.x + bounds.width)),
-      height: box.height - Math.max(0, box.y + box.height - (bounds.y + bounds.height)),
+      x: left,
+      y: top,
+      width: right - left,
+      height: bottom - top,
     };
   }
 
