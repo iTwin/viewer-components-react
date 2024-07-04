@@ -144,6 +144,7 @@ Available header buttons:
 - `ModelsTreeComponent.InvertButton` inverts display of all models.
 - `ModelsTreeComponent.View2DButton` toggles plan projection models' display.
 - `ModelsTreeComponent.View3DButton` toggles non-plan projection models' display.
+- `ModelsTreeComponent.ToggleInstancesFocusButton` enables/disables instances focusing mode.
 
 #### Focus mode
 
@@ -240,6 +241,115 @@ function MyWidget() {
       selectionStorage={getUnifiedSelectionStorage()}
     />
   );
+}
+```
+
+### Custom trees
+
+The package delivers a set of building blocks for creating trees that look and feel similar to the tree components provided by this package.
+
+#### Custom basic tree
+
+A "basic" tree is a tree that renders the hierarchy without visibility control - see [iModel content tree](#imodel-content-tree) for an example. Core components:
+- `Tree` - component that manages tree state, selection and filtering.
+- `TreeRenderer` - default renderer for tree data.
+
+Example:
+```tsx
+import { ComponentPropsWithoutRef } from "react";
+import { IModelConnection } from "@itwin/core-frontend";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { SelectionStorage } from "@itwin/unified-selection";
+import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
+
+
+function getUnifiedSelectionStorage(): SelectionStorage {
+  // see "Creating unified selection storage" section for example implementation
+}
+
+function getSchemaContext(imodel: IModelConnection): SchemaContext {
+  // see "Creating schema context" section for example implementation
+}
+
+type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
+const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
+  // create hierarchy definition to defined what should be shown in the tree
+  // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
+}
+
+function MyTree({width, height, imodel}: MyTreeProps) {
+  return <Tree
+    width={width}
+    height={height}
+    treeName="MyTree"
+    imodel={imodel}
+    selectionStorage={getUnifiedSelectionStorage()}
+    getSchemaContext={getSchemaContext}
+    getHierarchyDefinition={getHierarchyDefinition}
+    treeRenderer={(props) => <TreeRenderer {...props} />}
+  />;
+}
+```
+
+#### Custom visibility tree
+
+A visibility tree is a tree that renders the hierarchy and allows controlling visibility control through the use of "eye" checkboxes - see [Models](#models-tree) and [Categories](#categories-tree) trees. Core components:
+- `VisibilityTree` - same as `Tree` component but additionally manages visibility of instances represented by tree nodes.
+- `VisibilityTreeRenderer` - same as `TreeRenderer` but additionally renders checkboxes for visibility control.
+
+Example:
+
+```tsx
+import { ComponentPropsWithoutRef } from "react";
+import { BeEvent } from "@itwin/core-bentley";
+import { IModelConnection } from "@itwin/core-frontend";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { SelectionStorage } from "@itwin/unified-selection";
+import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+
+
+function getUnifiedSelectionStorage(): SelectionStorage {
+  // see "Creating unified selection storage" section for example implementation
+}
+
+function getSchemaContext(imodel: IModelConnection): SchemaContext {
+  // see "Creating schema context" section for example implementation
+}
+
+type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
+const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
+  // create hierarchy definition to defined what should be shown in the tree
+  // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
+}
+
+const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] = ({ imodelAccess }) => {
+  return {
+    // event that can be used to notify tree when visibility of instances represented by tree nodes changes from outside.
+    onVisibilityChange: new BeEvent(),
+    async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
+      // determine visibility status of the instance represented by tree node.
+    },
+    async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
+      // change visibility of the instance represented by tree node.
+    },
+    dispose() {
+      // do some clean up if necessary when before new visibility handler in created or components is unmounted.
+    },
+  };
+}
+
+function MyVisibilityTree({width, height, imodel}: MyVisibilityTreeProps) {
+  return <VisibilityTree
+    width={width}
+    height={height}
+    treeName="MyVisibilityTree"
+    imodel={imodel}
+    selectionStorage={getUnifiedSelectionStorage()}
+    getSchemaContext={getSchemaContext}
+    getHierarchyDefinition={getHierarchyDefinition}
+    visibilityHandlerFactory={visibilityFactory}
+    treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
+  />;
 }
 ```
 
@@ -415,107 +525,5 @@ function MyWidget() {
 
 function MyTree() {
   // see "Custom trees" section for example implementation
-}
-```
-
-## Custom trees
-
-Some components are available for building custom trees that look and feel similar to the trees provided by this package:
-- `Tree` - base tree component that manages tree state, selection and filtering.
-- `TreeRenderer` - default renderer for tree data.
-- `VisibilityTree` - same as `Tree` component but additionally it can manage visibility of instances represented by tree nodes.
-- `VisibilityTreeRenderer` - same as `TreeRenderer` but additionally it renders checkboxes for visibility control.
-
-Example of simple custom tree:
-
-```tsx
-import { ComponentPropsWithoutRef } from "react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SelectionStorage } from "@itwin/unified-selection";
-import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
-
-
-function getUnifiedSelectionStorage(): SelectionStorage {
-  // see "Creating unified selection storage" section for example implementation
-}
-
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // see "Creating schema context" section for example implementation
-}
-
-type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
-const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-  // create hierarchy definition to defined what should be shown in the tree
-  // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
-}
-
-function MyTree({width, height, imodel}: MyTreeProps) {
-  return <Tree
-    width={width}
-    height={height}
-    treeName="MyTree"
-    imodel={imodel}
-    selectionStorage={getUnifiedSelectionStorage()}
-    getSchemaContext={getSchemaContext}
-    getHierarchyDefinition={getHierarchyDefinition}
-    treeRenderer={(props) => <TreeRenderer {...props} />}
-  />;
-}
-```
-
-Example of custom visibility tree:
-
-```tsx
-import { ComponentPropsWithoutRef } from "react";
-import { BeEvent } from "@itwin/core-bentley";
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SelectionStorage } from "@itwin/unified-selection";
-import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
-
-
-function getUnifiedSelectionStorage(): SelectionStorage {
-  // see "Creating unified selection storage" section for example implementation
-}
-
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // see "Creating schema context" section for example implementation
-}
-
-type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
-const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-  // create hierarchy definition to defined what should be shown in the tree
-  // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
-}
-
-const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] = ({ imodelAccess }) => {
-  return {
-    // event that can be used to notify tree when visibility of instances represented by tree nodes changes from outside.
-    onVisibilityChange: new BeEvent(),
-    async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
-      // determine visibility status of the instance represented by tree node.
-    },
-    async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
-      // change visibility of the instance represented by tree node.
-    },
-    dispose() {
-      // do some clean up if necessary when before new visibility handler in created or components is unmounted.
-    },
-  };
-}
-
-function MyVisibilityTree({width, height, imodel}: MyVisibilityTreeProps) {
-  return <VisibilityTree
-    width={width}
-    height={height}
-    treeName="MyVisibilityTree"
-    imodel={imodel}
-    selectionStorage={getUnifiedSelectionStorage()}
-    getSchemaContext={getSchemaContext}
-    getHierarchyDefinition={getHierarchyDefinition}
-    visibilityHandlerFactory={visibilityFactory}
-    treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
-  />;
 }
 ```
