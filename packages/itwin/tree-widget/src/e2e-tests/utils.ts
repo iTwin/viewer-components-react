@@ -20,21 +20,23 @@ export const expandStagePanel = async (page: Page, side: PanelSide, px: number) 
   const handlePos = await widgetPanel.locator(".nz-grip-container").locator(".nz-handle").boundingBox();
   assert(handlePos);
 
-  await page.mouse.move(handlePos.x, handlePos.y, { steps: 10 });
+  const handleX = handlePos.x + handlePos.width * 0.5;
+  const handleY = handlePos.y + handlePos.height * 0.5;
+  await page.mouse.move(handleX, handleY, { steps: 10 });
   await page.mouse.down();
 
   switch (side) {
     case "left":
-      await page.mouse.move(handlePos.x + px, handlePos.y, { steps: 10 });
+      await page.mouse.move(handleX + px, handleY, { steps: 25 });
       break;
     case "right":
-      await page.mouse.move(handlePos.x - px, handlePos.y, { steps: 10 });
+      await page.mouse.move(handleX - px, handleY, { steps: 25 });
       break;
     case "top":
-      await page.mouse.move(handlePos.x, handlePos.y - px, { steps: 10 });
+      await page.mouse.move(handleX, handleY - px, { steps: 25 });
       break;
     case "bottom":
-      await page.mouse.move(handlePos.x, handlePos.y + px, { steps: 10 });
+      await page.mouse.move(handleX, handleY + px, { steps: 25 });
       break;
   }
   await page.mouse.up();
