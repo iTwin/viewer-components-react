@@ -31,6 +31,7 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
 
+/** @beta */
 interface ModelsTreeOwnProps {
   activeView: Viewport;
   hierarchyLevelConfig?: {
@@ -41,14 +42,14 @@ interface ModelsTreeOwnProps {
   filter?: string;
 }
 
+/** @beta */
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
-type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
-type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
+/** @beta */
 type ModelsTreeProps = ModelsTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
-/** @internal */
+/** @beta */
 export function ModelsTree({
   imodel,
   getSchemaContext,
@@ -77,7 +78,7 @@ export function ModelsTree({
   const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
   const { loadInstanceKeys: loadFocusedInstancesKeys } = useFocusedInstancesContext();
 
-  const getHierarchyDefinition = useCallback<GetHierarchyDefinitionCallback>(
+  const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
     [getModelsTreeIdsCache, hierarchyConfiguration],
   );
@@ -94,7 +95,7 @@ export function ModelsTree({
     [onFeatureUsed],
   );
 
-  const getFocusedFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+  const getFocusedFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
     if (!loadFocusedInstancesKeys) {
       return undefined;
@@ -116,7 +117,7 @@ export function ModelsTree({
     };
   }, [loadFocusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
 
-  const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+  const getSearchFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
     if (!filter) {
       return undefined;

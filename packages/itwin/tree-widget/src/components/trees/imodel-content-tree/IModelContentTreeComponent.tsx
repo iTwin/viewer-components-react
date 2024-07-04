@@ -11,9 +11,12 @@ import { IModelContentTree } from "./IModelContentTree";
 
 import type { ComponentPropsWithoutRef } from "react";
 
-type IModelContentTreeProps = ComponentPropsWithoutRef<typeof IModelContentTree>;
+/** @beta */
 interface IModelContentTreeComponentProps
-  extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<
+    ComponentPropsWithoutRef<typeof IModelContentTree>,
+    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"
+  > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }

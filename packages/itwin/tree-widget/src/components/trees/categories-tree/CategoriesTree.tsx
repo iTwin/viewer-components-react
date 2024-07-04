@@ -23,6 +23,7 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
+/** @beta */
 interface CategoriesTreeOwnProps {
   filter: string;
   activeView: Viewport;
@@ -34,14 +35,14 @@ interface CategoriesTreeOwnProps {
   };
 }
 
+/** @beta */
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
-type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
-type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
+/** @beta */
 type CategoriesTreeProps = CategoriesTreeOwnProps &
   Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
-/** @internal */
+/** @beta */
 export function CategoriesTree({
   imodel,
   viewManager,
@@ -75,14 +76,14 @@ export function CategoriesTree({
   }, [activeView, allViewports, categories, imodel, viewManager]);
   const { onFeatureUsed } = useTelemetryContext();
 
-  const getDefinitionsProvider = useCallback(
-    (props: Parameters<GetHierarchyDefinitionCallback>[0]) => {
+  const getDefinitionsProvider = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
+    (props) => {
       return new CategoriesTreeDefinition({ ...props, viewType: activeView.view.is2d() ? "2d" : "3d" });
     },
     [activeView],
   );
 
-  const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+  const getSearchFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
     if (!filter) {
       return undefined;

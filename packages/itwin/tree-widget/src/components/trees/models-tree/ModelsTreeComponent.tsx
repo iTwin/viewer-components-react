@@ -7,27 +7,25 @@ import "../Tree.scss";
 import classNames from "classnames";
 import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { SvgCursorClick } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { AutoSizer } from "../../utils/AutoSizer";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
 import { useFiltering } from "../common/UseFiltering";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ModelsTree } from "./ModelsTree";
-import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "./ModelsTreeButtons";
+import {
+  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useAvailableModels, View2DButton, View3DButton,
+} from "./ModelsTreeButtons";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 
-type ModelsTreeProps = ComponentPropsWithoutRef<typeof ModelsTree>;
-
+/** @public */
 interface ModelsTreeComponentProps
   extends Pick<
-    ModelsTreeProps,
+    ComponentPropsWithoutRef<typeof ModelsTree>,
     "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig" | "visibilityHandlerOverrides"
   > {
   /**
@@ -148,26 +146,5 @@ function ModelsTreeComponentImpl({
         </FocusedInstancesContextProvider>
       </div>
     </TelemetryContextProvider>
-  );
-}
-
-function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "default" | "enlarged"; onFeatureUsed?: (feature: string) => void }) {
-  const { enabled, toggle } = useFocusedInstancesContext();
-  const title = enabled
-    ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
-    : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
-  return (
-    <IconButton
-      styleType="borderless"
-      size={density === "enlarged" ? "large" : "small"}
-      title={title}
-      onClick={() => {
-        onFeatureUsed?.("models-tree-instancesfocus");
-        toggle();
-      }}
-      isActive={enabled}
-    >
-      <SvgCursorClick />
-    </IconButton>
   );
 }

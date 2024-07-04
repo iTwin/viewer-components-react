@@ -25,34 +25,41 @@ import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 
+/** @beta */
 interface GetCategoryStatusProps {
   categoryId: Id64String;
   modelId: Id64String;
 }
 
+/** @beta */
 interface ChangeCategoryStateProps extends GetCategoryStatusProps {
   on: boolean;
 }
 
+/** @beta */
 interface GetElementStateProps {
   elementId: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
 }
 
+/** @beta */
 interface GetFilteredNodeVisibilityProps {
   parentKeys: HierarchyNodeKey[];
   filterPaths: HierarchyNodeIdentifiersPath[];
 }
 
+/** @beta */
 interface ChangeFilteredNodeVisibilityProps extends GetFilteredNodeVisibilityProps {
   on: boolean;
 }
 
+/** @beta */
 interface ChangeElementStateProps extends GetElementStateProps {
   on: boolean;
 }
 
+/** @beta */
 interface ChangeModelStateProps {
   ids: Id64Arg;
   on: boolean;
@@ -93,6 +100,7 @@ interface FilterTargets {
 
 /**
  * Properties for a method of `ModelsTreeVisibilityHandler` that can be overridden.
+ * @beta
  */
 type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
   ? TProps & {
@@ -108,6 +116,7 @@ type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infe
 
 /**
  * Function type for an overridden method of `ModelsTreeVisibilityHandler`.
+ * @beta
  */
 type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverridableMethodProps<TFunc>) => TResult : never;
 
@@ -144,7 +153,7 @@ export interface ModelsTreeVisibilityHandlerProps {
 /**
  * Hierarchy based visibility handler.
  * When determining visibility for nodes, it should take into account the visibility of their children.
- * @internal
+ * @beta
  */
 export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
 

@@ -21,10 +21,12 @@ import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { CategoriesTreeHeaderButtonProps } from "./CategoriesTreeButtons";
 
-type CategoriesTreeProps = ComponentPropsWithoutRef<typeof CategoriesTree>;
-
+/** @public */
 interface CategoriesTreeComponentProps
-  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<
+    ComponentPropsWithoutRef<typeof CategoriesTree>,
+    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"
+  > {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts

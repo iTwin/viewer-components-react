@@ -13,18 +13,21 @@ import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache"
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
+/** @beta */
 interface IModelContentTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
 }
 
+/** @beta */
 type TreeProps = Parameters<typeof Tree>[0];
-type GetHierarchyDefinitionsProviderCallback = TreeProps["getHierarchyDefinition"];
+
+/** @beta */
 type IModelContentTreeProps = IModelContentTreeOwnProps &
   Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
-/** @internal */
+/** @beta */
 export function IModelContentTree(props: IModelContentTreeProps) {
   return (
     <Tree
@@ -37,12 +40,12 @@ export function IModelContentTree(props: IModelContentTreeProps) {
   );
 }
 
-function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
   return new IModelContentTreeDefinition({
-    imodelAccess: props.imodelAccess,
-    idsCache: new IModelContentTreeIdsCache(props.imodelAccess),
+    imodelAccess,
+    idsCache: new IModelContentTreeIdsCache(imodelAccess),
   });
-}
+};
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   if (node.extendedData?.imageId === undefined) {

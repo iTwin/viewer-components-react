@@ -27,7 +27,6 @@ interface UseHierarchyLevelFilteringProps {
   defaultHierarchyLevelSizeLimit: number;
 }
 
-/** @internal */
 export function useHierarchyLevelFiltering({ imodel, defaultHierarchyLevelSizeLimit }: UseHierarchyLevelFilteringProps) {
   const [filteringOptions, setFilteringOptions] = useState<HierarchyLevelDetails>();
   const { onFeatureUsed } = useTelemetryContext();

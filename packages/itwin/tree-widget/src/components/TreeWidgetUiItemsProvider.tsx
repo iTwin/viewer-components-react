@@ -20,6 +20,7 @@ import type { Ref } from "react";
 
 /**
  * Props for `createWidget`.
+ * @public
  */
 interface TreeWidgetProps {
   /**

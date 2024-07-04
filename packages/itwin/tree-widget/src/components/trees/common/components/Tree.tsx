@@ -36,6 +36,7 @@ export type TreeRendererProps = Required<
   >
 >;
 
+/** @beta */
 interface TreeOwnProps {
   height: number;
   width: number;
@@ -63,10 +64,16 @@ interface TreeOwnProps {
   highlight?: HighlightInfo;
 }
 
+/** @beta */
 type UseTreeProps = Parameters<typeof useTree>[0];
+
+/** @beta */
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
+
+/** @beta */
 type IModelAccess = UseTreeProps["imodelAccess"];
 
+/** @beta */
 type TreeProps = TreeOwnProps & Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> & Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
 
 /**
@@ -89,7 +96,6 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStora
   );
 }
 
-/** @internal */
 function TreeImpl({
   imodel,
   imodelAccess,

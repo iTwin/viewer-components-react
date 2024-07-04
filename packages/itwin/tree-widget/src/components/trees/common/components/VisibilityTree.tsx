@@ -15,6 +15,7 @@ import type { ECClassHierarchyInspector } from "@itwin/presentation-shared";
 import type { HierarchyVisibilityHandler } from "../UseHierarchyVisibility";
 import type { ComponentPropsWithoutRef } from "react";
 
+/** @beta */
 type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
 
 /**
@@ -24,6 +25,7 @@ type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
 export type VisibilityTreeRendererProps = TreeRendererProps &
   Pick<ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>, "getCheckboxState" | "onCheckboxClicked">;
 
+/** @beta */
 interface VisibilityTreeOwnProps {
   /** Callback for creating visibility handler used to control visibility of instances represented by tree nodes. */
   visibilityHandlerFactory: (props: { imodelAccess: ECClassHierarchyInspector }) => HierarchyVisibilityHandler;
@@ -31,6 +33,7 @@ interface VisibilityTreeOwnProps {
   treeRenderer: (treeProps: VisibilityTreeRendererProps) => React.ReactNode;
 }
 
+/** @beta */
 type VisibilityTreeProps = VisibilityTreeOwnProps & Omit<TreeProps, "treeRenderer" | "imodelAccess">;
 
 /**

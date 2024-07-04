@@ -17,6 +17,7 @@ interface TelemetryContext {
 
 const telemetryContext = createContext<TelemetryContext | undefined>(undefined);
 
+/** @beta */
 export interface TelemetryContextProviderProps {
   /** Callback that is invoked when performance of tracked feature is measured. */
   onPerformanceMeasured?: (featureId: string, duration: number) => void;

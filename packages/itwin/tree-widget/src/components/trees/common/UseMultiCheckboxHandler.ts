@@ -18,7 +18,6 @@ interface UseMultiCheckboxHandlerResult {
   onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
 }
 
-/** @internal */
 export function useMultiCheckboxHandler({ rootNodes, isNodeSelected, onClick }: UseMultiCheckboxHandlerProps): UseMultiCheckboxHandlerResult {
   const onCheckboxClicked = useCallback(
     (clickedNode: PresentationHierarchyNode, checked: boolean) => {

@@ -37,7 +37,10 @@ import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
-/** Defines hierarchy configuration supported by `ModelsTree`. */
+/**
+ * Defines hierarchy configuration supported by `ModelsTree`.
+ * @beta
+ */
 export interface ModelsTreeHierarchyConfiguration {
   /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";

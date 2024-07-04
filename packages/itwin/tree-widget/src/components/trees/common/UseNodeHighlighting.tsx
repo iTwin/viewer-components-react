@@ -9,6 +9,7 @@ import { useLatest } from "./Utils";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 
+/** @beta */
 export interface HighlightInfo {
   text: string;
 }
@@ -47,7 +48,6 @@ interface UseNodeHighlightingResult {
   getLabel: (node: PresentationHierarchyNode) => React.ReactElement;
 }
 
-/** @internal */
 export function useNodeHighlighting({ rootNodes, highlight }: UseNodeHighlightingProps): UseNodeHighlightingResult {
   const state = useRef<HighlightState>({ nodeInfoMap: new Map(), totalMatches: 0 });
   const [activeNodeId, setActiveNodeId] = useState<string | undefined>();

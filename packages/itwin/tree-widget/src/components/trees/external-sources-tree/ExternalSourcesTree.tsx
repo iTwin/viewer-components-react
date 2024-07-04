@@ -12,18 +12,21 @@ import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
+/** @beta */
 interface ExternalSourcesTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
 }
 
+/** @beta */
 type TreeProps = Parameters<typeof Tree>[0];
-type GetHierarchyDefinitionsProviderCallback = TreeProps["getHierarchyDefinition"];
+
+/** @beta */
 type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps &
   Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
-/** @internal */
+/** @beta */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   return (
     <Tree
@@ -36,9 +39,9 @@ export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   );
 }
 
-function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
   return new ExternalSourcesTreeDefinition(props);
-}
+};
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   if (node.extendedData?.imageId === undefined) {

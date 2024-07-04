@@ -11,9 +11,12 @@ import { ExternalSourcesTree } from "./ExternalSourcesTree";
 
 import type { ComponentPropsWithoutRef } from "react";
 
-type ExternalSourcesTreeProps = ComponentPropsWithoutRef<typeof ExternalSourcesTree>;
+/** @beta */
 interface ExternalSourcesTreeComponentProps
-  extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
+  extends Pick<
+    ComponentPropsWithoutRef<typeof ExternalSourcesTree>,
+    "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"
+  > {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }
