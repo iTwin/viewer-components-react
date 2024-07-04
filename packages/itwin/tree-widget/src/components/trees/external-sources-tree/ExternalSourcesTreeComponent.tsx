@@ -33,7 +33,11 @@ export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasu
 
   return (
     <UnifiedSelectionProvider storage={selectionStorage}>
-      <TelemetryContextProvider identifier={ExternalSourcesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+      <TelemetryContextProvider
+        componentIdentifier={ExternalSourcesTreeComponent.id}
+        onFeatureUsed={onFeatureUsed}
+        onPerformanceMeasured={onPerformanceMeasured}
+      >
         <AutoSizer>{({ width, height }) => <ExternalSourcesTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
       </TelemetryContextProvider>
     </UnifiedSelectionProvider>

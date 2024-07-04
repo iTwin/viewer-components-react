@@ -12,7 +12,7 @@ import type { ComponentPropsWithoutRef } from "react";
 type TreeNodeCheckboxProps = ComponentPropsWithoutRef<typeof TreeNodeCheckbox>;
 
 interface TreeNodeRendererOwnProps {
-  /** Props for rendering tree node checkbox. If not provided checkbox is not renderer. */
+  /** Props for rendering tree node checkbox. If not provided, checkbox is not rendered. */
   checkboxProps?: Omit<TreeNodeCheckboxProps, "node">;
 }
 

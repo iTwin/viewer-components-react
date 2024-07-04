@@ -99,7 +99,7 @@ function CategoriesTreeComponentImpl({
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
   return (
-    <TelemetryContextProvider identifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+    <TelemetryContextProvider componentIdentifier={CategoriesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
         <UnifiedSelectionProvider storage={selectionStorage}>
           <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>

@@ -23,27 +23,32 @@ export interface TelemetryContextProviderProps {
   /** Callback that is invoked when a tracked feature is used. */
   onFeatureUsed?: (featureId: string) => void;
   /** Unique identifier that is appended to feature id to help track which component used that feature. */
-  identifier: string;
+  componentIdentifier: string;
 }
 
 /** @beta */
-export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, identifier }: PropsWithChildren<TelemetryContextProviderProps>) {
+export function TelemetryContextProvider({
+  children,
+  onPerformanceMeasured,
+  onFeatureUsed,
+  componentIdentifier,
+}: PropsWithChildren<TelemetryContextProviderProps>) {
   const onPerformanceMeasuredRef = useLatest(onPerformanceMeasured);
   const onFeatureUsedRef = useLatest(onFeatureUsed);
 
   const contextValue = useMemo<TelemetryContext>(() => {
     return {
-      onPerformanceMeasured: (featureId, duration) => onPerformanceMeasuredRef.current?.(`${identifier}-${featureId}`, duration),
+      onPerformanceMeasured: (featureId, duration) => onPerformanceMeasuredRef.current?.(`${componentIdentifier}-${featureId}`, duration),
       onFeatureUsed: ({ featureId, reportInteraction }) => {
         if (reportInteraction !== false) {
-          onFeatureUsedRef.current?.(`use-${identifier}`);
+          onFeatureUsedRef.current?.(`use-${componentIdentifier}`);
         }
         if (featureId) {
-          onFeatureUsedRef.current?.(`${identifier}-${featureId}`);
+          onFeatureUsedRef.current?.(`${componentIdentifier}-${featureId}`);
         }
       },
     };
-  }, [identifier, onPerformanceMeasuredRef, onFeatureUsedRef]);
+  }, [componentIdentifier, onPerformanceMeasuredRef, onFeatureUsedRef]);
 
   return <telemetryContext.Provider value={contextValue}>{children}</telemetryContext.Provider>;
 }

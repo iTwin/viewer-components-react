@@ -17,21 +17,16 @@ import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 
-import type { HighlightInfo } from "../UseNodeHighlighting";
-import type { TreeRenderer } from "./TreeRenderer";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { useTree } from "@itwin/presentation-hierarchies-react";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
-/**
- * Tree features that are tracked for usage.
- * @beta
- */
-export type TreeUsageTrackedFeatures = "hierarchy-level-filtering" | "hierarchy-level-size-limit-hit";
+import type { HighlightInfo } from "../UseNodeHighlighting";
+import type { TreeRenderer } from "./TreeRenderer";
 
 /**
- * Properties that are passed to `treeRenderer from `Tree` component `.
+ * Properties that are passed to `treeRenderer` from `Tree` component.
  * @beta
  */
 export type TreeRendererProps = Required<

@@ -33,7 +33,7 @@ export const IModelContentTreeComponent = ({ selectionStorage, onFeatureUsed, on
 
   return (
     <UnifiedSelectionProvider storage={selectionStorage}>
-      <TelemetryContextProvider identifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+      <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
         <AutoSizer>{({ width, height }) => <IModelContentTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
       </TelemetryContextProvider>
     </UnifiedSelectionProvider>

@@ -23,7 +23,7 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
-import type { ElementsGroupInfo, HierarchyConfiguration } from "./ModelsTreeDefinition";
+import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
@@ -36,7 +36,7 @@ interface ModelsTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-  hierarchyConfig?: Partial<HierarchyConfiguration>;
+  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   filter?: string;
 }
@@ -62,7 +62,7 @@ export function ModelsTree({
   visibilityHandlerOverrides,
 }: ModelsTreeProps) {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
-  const hierarchyConfiguration = useMemo<HierarchyConfiguration>(
+  const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
       ...defaultHierarchyConfiguration,
       ...hierarchyConfig,
@@ -213,7 +213,7 @@ function createVisibilityHandlerFactory(activeView: Viewport, idsCacheGetter: ()
     createModelsTreeVisibilityHandler({ viewport: activeView, idsCache: idsCacheGetter(), imodelAccess, overrides });
 }
 
-function useCachedVisibility(activeView: Viewport, hierarchyConfig: HierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
+function useCachedVisibility(activeView: Viewport, hierarchyConfig: ModelsTreeHierarchyConfiguration, overrides?: ModelsTreeVisibilityHandlerOverrides) {
   const cacheRef = useRef<ModelsTreeIdsCache>();
   const currentIModelRef = useRef(activeView.iModel);
 

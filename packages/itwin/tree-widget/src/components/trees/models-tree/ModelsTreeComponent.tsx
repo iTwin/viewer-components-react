@@ -38,6 +38,7 @@ interface ModelsTreeComponentProps
    *   ModelsTreeComponent.InvertButton,
    *   ModelsTreeComponent.View2DButton,
    *   ModelsTreeComponent.View3DButton,
+   *   ModelsTreeComponent.ToggleInstancesFocusButton,
    * ]
    * ```
    */
@@ -95,7 +96,7 @@ ModelsTreeComponent.View2DButton = View2DButton;
 ModelsTreeComponent.View3DButton = View3DButton;
 
 /**
- * Renders a "Enable/Disable instances focus" button that enables/disabled instances focusing mode.
+ * Renders a "Enable/Disable instances focus" button that enables/disables instances focusing mode.
  * @public
  */
 ModelsTreeComponent.ToggleInstancesFocusButton = ToggleInstancesFocusButton;
@@ -125,7 +126,7 @@ function ModelsTreeComponentImpl({
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
   return (
-    <TelemetryContextProvider identifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+    <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
         <UnifiedSelectionProvider storage={selectionStorage}>
           <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
