@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
       ...(reloadConfig ? [reloadInjectedPackages(reloadConfig)] : []),
     ],
     server: {
-      port: 3000,
+      port: 8887,
       strictPort: true,
     },
     optimizeDeps: {

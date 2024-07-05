@@ -36,6 +36,7 @@ import {
 } from "@itwin/tree-widget-react";
 import { useViewerOptionsContext } from "./components/ViewerOptions";
 import { unifiedSelectionStorage } from "./SelectionStorage";
+import { PropertiesValidationProvider } from "./properties-validation-widget/GroupingMappingWidget";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -277,6 +278,13 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => Promise.resolve(),
       createUiItemsProviders: () => [new OneClickLCAProvider()],
+    },
+  ],
+  [
+    "properties-validation-widget",
+    {
+      initialize: async () => Promise.resolve(),
+      createUiItemsProviders: () => [new PropertiesValidationProvider()],
     },
   ],
 ]);

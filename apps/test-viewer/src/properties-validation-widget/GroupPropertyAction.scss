@@ -1,0 +1,59 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.gmw-group-property-action-container {
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  height: 100%;
+  gap: var(--iui-size-s);
+
+  .gmw-property-options {
+    display: inherit;
+    flex-direction: inherit;
+    gap: var(--iui-size-s);
+  }
+}
+
+.gmw-properties-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7.5px;
+  flex: 1;
+  overflow-y: overlay;
+}
+
+.gmw-properties-list-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 7.5px;
+  flex: 1;
+  overflow-y: overlay;
+  padding: var(--iui-size-s) var(--iui-size-m);
+}
+
+.gmw-property-view-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--iui-size-s);
+  min-height: calc(var(--iui-size-3x1) * 2);
+  min-width: 0;
+  .gmw-property-view-button {
+    display: flex;
+    margin-bottom: 7.5xp;
+  }
+}
+
+.gmw-empty-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--iui-size-s);
+  height: 100%;
+  padding-top: var(--iui-size-s);
+}

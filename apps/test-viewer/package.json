@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@dnd-kit/core": "^6.0.5",
+    "@dnd-kit/sortable": "7.0.1",
+    "@dnd-kit/utilities": "3.2.0",
     "@itwin/appui-abstract": "^4.6.0",
     "@itwin/appui-react": "^4.11.0",
     "@itwin/browser-authorization": "^1.1.0",
@@ -28,7 +31,8 @@
     "@itwin/imodels-access-frontend": "^4.0.0",
     "@itwin/imodels-client-management": "^4.0.0",
     "@itwin/imodel-components-react": "^4.11.0",
-    "@itwin/itwinui-react": "^3.11.1",
+    "@itwin/insights-client": "0.10.3",
+    "@itwin/itwinui-react": "^2.11.2",
     "@itwin/itwinui-icons-react": "^2.8.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
     "@itwin/map-layers-formats": "^4.6.0",
@@ -44,12 +48,17 @@
     "@itwin/web-viewer-react": "^4.2.5",
     "@itwin/webgl-compatibility": "^4.6.0",
     "@itwin/unified-selection": "^0.4.1",
+    "@tanstack/query-core": "^4.36.1",
+    "@tanstack/react-query": "^4.36.1",
+    "fast-equals": "^4.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.10",
     "react-redux": "^7.2.9",
     "react-router-dom": "^6.10.0",
-    "redux": "^4.2.1"
+    "react-split": "2.0.14",
+    "redux": "^4.2.1",
+    "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {
     "@types/node": "^18.18.10",

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./index.scss";
-import "@itwin/itwinui-react/styles.css";
+//import "@itwin/itwinui-react/styles.css";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./components/App";

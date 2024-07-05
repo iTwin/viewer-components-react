@@ -1,0 +1,21 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+.gmw-properties-validation-action-container {
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  height: 100%;
+  gap: var(--iui-size-s);
+
+  .gmw-generate-formula-button {
+    margin-top: var(--iui-size-s);
+    margin-bottom: var(--iui-size-xs);
+  }
+
+  .gmw-generate-error-message {
+    color: var(--iui-color-text-negative);
+  }
+}
