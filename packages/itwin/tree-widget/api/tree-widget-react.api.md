@@ -120,26 +120,23 @@ export interface ModelsTreeVisibilityHandlerOverrides {
 // @public
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 
+// @public
+export interface SelectableTreeDefinition {
+    getLabel: () => string;
+    id: string;
+    render: (props: SelectableTreeRenderProps) => React.ReactNode;
+    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
+    startIcon?: React.ReactNode;
+}
+
 // @beta (undocumented)
 export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
 
 // @beta
 export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps_3): JSX.Element;
 
-// @public
-export interface TreeDefinition {
-    getLabel: () => string;
-    id: string;
-    render: (props: TreeRenderProps) => React.ReactNode;
-    shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
-    startIcon?: React.ReactNode;
-}
-
 // @beta
 export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps_2): JSX.Element;
-
-// @beta
-export type TreeRendererProps = Required<Pick<ComponentPropsWithoutRef<typeof TreeRenderer>, "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel">>;
 
 // @public
 export class TreeWidget {
@@ -165,9 +162,6 @@ export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...prop
 
 // @beta
 export function VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: TreeRendererProps_3 & TreeCheckboxProps): JSX.Element;
-
-// @beta
-export type VisibilityTreeRendererProps = TreeRendererProps & Pick<ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>, "getCheckboxState" | "onCheckboxClicked">;
 
 // (No @packageDocumentation comment for this package)
 

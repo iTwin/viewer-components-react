@@ -14,7 +14,7 @@ import { TreeWidget } from "../TreeWidget";
 import { SelectableTree } from "./SelectableTree";
 
 import type { Widget } from "@itwin/appui-react";
-import type { SelectableTreeProps, TreeDefinition } from "./SelectableTree";
+import type { SelectableTreeDefinition, SelectableTreeProps } from "./SelectableTree";
 import type { FallbackProps } from "react-error-boundary";
 import type { Ref } from "react";
 
@@ -30,7 +30,7 @@ interface TreeWidgetProps {
    * @see ExternalSourcesTreeComponent
    * @see IModelContentTreeComponent
    */
-  trees: TreeDefinition[];
+  trees: SelectableTreeDefinition[];
   /** Modifies the density of the tree widget. `enlarged` widget contains larger content */
   density?: "enlarged" | "default";
   /** Callback that is invoked when performance of tracked feature is measured. */
