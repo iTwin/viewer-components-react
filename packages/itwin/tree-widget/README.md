@@ -255,6 +255,7 @@ A "basic" tree is a tree that renders the hierarchy without visibility control -
 - `TreeRenderer` - default renderer for tree data.
 
 Example:
+
 ```tsx
 import { ComponentPropsWithoutRef } from "react";
 import { IModelConnection } from "@itwin/core-frontend";
@@ -273,7 +274,7 @@ function getSchemaContext(imodel: IModelConnection): SchemaContext {
 
 type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
 const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-  // create hierarchy definition to defined what should be shown in the tree
+  // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
 }
 
@@ -318,7 +319,7 @@ function getSchemaContext(imodel: IModelConnection): SchemaContext {
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-  // create hierarchy definition to defined what should be shown in the tree
+  // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
 }
 
@@ -333,7 +334,7 @@ const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] 
       // change visibility of the instance represented by tree node.
     },
     dispose() {
-      // do some clean up if necessary when before new visibility handler in created or components is unmounted.
+      // if necessary, do some clean up before new visibility handler is created or component is unmounted.
     },
   };
 }
