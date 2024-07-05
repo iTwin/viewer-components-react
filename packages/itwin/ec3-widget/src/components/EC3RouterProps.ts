@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import type { EC3ConfigPropsWithCallbacks } from "./EC3/EC3Config";
-import type { Route } from "./EC3Widget";
+import type { Route } from "./EC3WidgetComponent";
 
 /**
  * @internal

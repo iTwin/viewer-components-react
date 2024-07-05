@@ -36,6 +36,7 @@
     "templateOptions": "Template Options",
     "new": "New",
     "export": "Export",
-    "delete": "Delete"
+    "delete": "Delete",
+    "templateMenuTitle": "EC3 Templates"
   }
 }
