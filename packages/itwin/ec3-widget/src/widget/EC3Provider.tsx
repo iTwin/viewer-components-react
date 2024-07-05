@@ -5,7 +5,7 @@
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import React from "react";
-import { EC3Widget } from "../components/EC3Widget";
+import { EC3WidgetComponent } from "../components/EC3WidgetComponent";
 import type { EC3WidgetProps } from "../components/EC3WidgetProps";
 
 /**
@@ -23,7 +23,7 @@ export class EC3Provider implements UiItemsProvider {
       const newEC3Widget: Widget = {
         id: "EC3Widget",
         label: "EC3",
-        content: <EC3Widget {...this._props} />,
+        content: <EC3WidgetComponent {...this._props} />,
       };
 
       widgets.push(newEC3Widget);

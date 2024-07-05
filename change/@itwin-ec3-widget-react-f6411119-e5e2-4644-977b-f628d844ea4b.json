@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Bug fix for report-id assignment condition and some file rename exercise for better readability and localization.",
+  "packageName": "@itwin/ec3-widget-react",
+  "email": "pari.deshpande@bentley.com",
+  "dependentChangeType": "patch"
+}

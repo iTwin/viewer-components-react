@@ -67,7 +67,7 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
       } else {
         try {
           // check if defaultReport exists (set by the consuming application), else fetch all reports and allow user to select
-          if (defaultReport) {
+          if (defaultReport && childTemplate.reportId === undefined) {
             setChildTemplate({ ...childTemplate, reportId: defaultReport.id });
           } else {
             if (!fetchedReports) {
