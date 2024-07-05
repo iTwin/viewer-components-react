@@ -1,6 +1,6 @@
 {
   "name": "@itwin/ec3-widget-react",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the EC3 Carbon Calculation.",
   "keywords": [
     "Bentley",
