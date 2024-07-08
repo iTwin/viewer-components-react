@@ -73,7 +73,7 @@
     "@itwin/core-quantity": "^4.0.0",
     "@itwin/core-react": "^4.4.0",
     "@itwin/ecschema-metadata": "^4.0.0",
-    "@itwin/eslint-plugin": "^3.7.0",
+    "@itwin/eslint-plugin": "^4.1.0",
     "@itwin/imodel-components-react": "^4.4.0",
     "@itwin/presentation-common": "^4.0.0",
     "@itwin/presentation-components": "^4.0.0",
@@ -84,11 +84,16 @@
     "@types/mocha": "^10.0.6",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "cpx2": "4.2.0",
-    "eslint": "^7.11.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "glob": "^7.1.2",
     "madge": "4.0.2",
     "mocha": "^10.2.0",
@@ -100,7 +105,7 @@
     "redux": "^4.2.1",
     "rimraf": "^3.0.2",
     "source-map-loader": "^1.0.0",
-    "typescript": "~4.6.0",
+    "typescript": "~4.7.4",
     "url-loader": "^4.1.1",
     "webpack": "5.76.0",
     "webpack-cli": "^5.0.1"
@@ -118,26 +123,5 @@
     "branches": 20,
     "functions": 20,
     "lines": 20
-  },
-  "eslintConfig": {
-    "plugins": [
-      "@itwin"
-    ],
-    "extends": "plugin:@itwin/ui",
-    "rules": {
-      "@itwin/no-internal": [
-        "warn",
-        {
-          "tag": [
-            "internal",
-            "alpha",
-            "beta"
-          ]
-        }
-      ],
-      "@typescript-eslint/unbound-method": "off",
-      "no-duplicate-imports": "off",
-      "@typescript-eslint/consistent-type-imports": "error"
-    }
   }
 }
