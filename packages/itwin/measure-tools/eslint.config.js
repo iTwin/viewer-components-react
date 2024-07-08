@@ -10,6 +10,10 @@ module.exports = [
     ...iTwinPlugin.configs.uiConfig,
     rules: {
       "@itwin/no-internal": "error",
-    },
+      "@typescript-eslint/unbound-method": "off",
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error",
+  },
+
   },
 ];
