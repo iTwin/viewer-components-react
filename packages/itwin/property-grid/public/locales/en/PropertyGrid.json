@@ -22,7 +22,7 @@
   },
   "filtering": {
     "no-matching-properties": "There are no properties matching filter \"{{filter}}\"",
-    "no-non-null-values": "There are no properties containing non-null values"
+    "no-non-null-values": "There are no properties containing non-empty values"
   },
   "context-menu": {
     "favorite": "Favorite",
