@@ -10,6 +10,7 @@ import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-fronte
 
 /**
  * Data structure that describes category.
+ * @beta
  */
 export interface CategoryInfo {
   categoryId: string;
@@ -18,7 +19,6 @@ export interface CategoryInfo {
 
 /**
  * Toggles visibility of categories to show or hide.
- * @internal
  */
 export async function toggleAllCategories(
   viewManager: ViewManager,
@@ -41,7 +41,6 @@ export async function toggleAllCategories(
 
 /**
  * Gets ids of all categories from specified imodel and viewport.
- * @internal
  */
 export async function getCategories(imodel: IModelConnection, viewport?: Viewport) {
   const categories = await loadCategoriesFromViewport(imodel, viewport);
@@ -50,7 +49,6 @@ export async function getCategories(imodel: IModelConnection, viewport?: Viewpor
 
 /**
  * Changes category display in the viewport.
- * @internal
  */
 export async function enableCategoryDisplay(
   viewManager: ViewManager,
@@ -101,7 +99,6 @@ export async function enableCategoryDisplay(
 
 /**
  * Changes subcategory display in the viewport
- * @internal
  */
 export function enableSubCategoryDisplay(viewManager: ViewManager, key: string, enabled: boolean, forAllViewports?: boolean) {
   if (!viewManager.selectedView) {
@@ -126,7 +123,6 @@ export function enableSubCategoryDisplay(viewManager: ViewManager, key: string, 
   }
 }
 
-/** @internal */
 export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?: Viewport) {
   if (!vp) {
     return EMPTY_CATEGORIES_ARRAY;

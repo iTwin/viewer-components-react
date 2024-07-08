@@ -14,7 +14,7 @@ import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesCont
 import type { Viewport } from "@itwin/core-frontend";
 import type { CommonProps } from "@itwin/core-react";
 
-/** @internal */
+/** @public */
 export interface TreeHeaderButtonProps {
   viewport: Viewport;
   density?: "default" | "enlarged";

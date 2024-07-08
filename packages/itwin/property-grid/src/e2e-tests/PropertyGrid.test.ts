@@ -163,6 +163,32 @@ test.describe("property grid", () => {
 
       await takeScreenshot(page, propertyWidget);
     });
+
+    test("single element selected - search", async ({ page }) => {
+      const propertyWidget = await selectSingleElement(page);
+      await propertyWidget.getByTitle("Description").waitFor();
+
+      await propertyWidget.getByTitle("Open search bar").click();
+      const searchBox = propertyWidget.getByRole("searchbox");
+
+      await searchBox.fill("BayTown");
+      await propertyWidget.getByTitle("Description").waitFor({ state: "hidden" });
+
+      await takeScreenshot(page, propertyWidget);
+    });
+
+    test("single element selected - search - no matches", async ({ page }) => {
+      const propertyWidget = await selectSingleElement(page);
+      await propertyWidget.getByTitle("Description").waitFor();
+
+      await propertyWidget.getByTitle("Open search bar").click();
+      const searchBox = propertyWidget.getByRole("searchbox");
+
+      await searchBox.fill("Test");
+      await propertyWidget.getByText(`There are no properties matching filter "Test"`).waitFor();
+
+      await takeScreenshot(page, propertyWidget);
+    });
   };
 
   test.describe("narrow", () => {

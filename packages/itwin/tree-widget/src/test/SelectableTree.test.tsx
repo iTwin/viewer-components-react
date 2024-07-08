@@ -13,7 +13,7 @@ import { TreeWidget } from "../TreeWidget";
 import { createResolvablePromise, render, stubCancelAnimationFrame, TestUtils, waitFor } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { TreeDefinition } from "../components/SelectableTree";
+import type { SelectableTreeDefinition } from "../components/SelectableTree";
 
 describe("<SelectableTree />", () => {
   stubCancelAnimationFrame();
@@ -42,7 +42,7 @@ describe("<SelectableTree />", () => {
 
   it("renders nothing if there is no active imodel connection", () => {
     UiFramework.setIModelConnection(undefined);
-    const trees: TreeDefinition[] = [
+    const trees: SelectableTreeDefinition[] = [
       {
         id: "tree-1",
         getLabel: () => "Tree Label 1",
@@ -54,13 +54,13 @@ describe("<SelectableTree />", () => {
   });
 
   it("renders without trees", async () => {
-    const trees: TreeDefinition[] = [];
+    const trees: SelectableTreeDefinition[] = [];
     const { queryByText } = render(<SelectableTree trees={trees} />);
     await waitFor(() => expect(queryByText(TreeWidget.translate("selectableTree.noTrees"))).to.not.be.null);
   });
 
   it("renders supplied trees", async () => {
-    const trees: TreeDefinition[] = [
+    const trees: SelectableTreeDefinition[] = [
       {
         id: "tree-1",
         getLabel: () => "Tree Label 1",
@@ -77,7 +77,7 @@ describe("<SelectableTree />", () => {
   });
 
   it("does not render tree that should not be shown", async () => {
-    const trees: TreeDefinition[] = [
+    const trees: SelectableTreeDefinition[] = [
       {
         id: "tree-1",
         getLabel: () => "Tree Label 1",

@@ -23,7 +23,7 @@ export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
   filteredCategories?: CategoryInfo[];
 }
 
-/** @internal */
+/** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
@@ -43,7 +43,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   );
 }
 
-/** @internal */
+/** @public */
 export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
@@ -63,7 +63,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   );
 }
 
-/** @internal */
+/** @public */
 export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton

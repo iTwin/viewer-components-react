@@ -5,13 +5,11 @@
 
 import { defer, EMPTY, from, map, merge, mergeAll, mergeMap } from "rxjs";
 import {
-  createClassBasedHierarchyDefinition,
-  createNodesQueryClauseFactory,
-  HierarchyNode,
-  NodeSelectClauseColumnNames,
+  createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
@@ -36,11 +34,14 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
-import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
-interface HierarchyConfiguration {
+/**
+ * Defines hierarchy configuration supported by `ModelsTree`.
+ * @beta
+ */
+export interface ModelsTreeHierarchyConfiguration {
   /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";
   /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d` */
@@ -49,7 +50,7 @@ interface HierarchyConfiguration {
   showEmptyModels: boolean;
 }
 
-export const defaultHierarchyConfiguration: HierarchyConfiguration = {
+export const defaultHierarchyConfiguration: ModelsTreeHierarchyConfiguration = {
   elementClassGrouping: "enable",
   elementClassSpecification: "BisCore.GeometricElement3d",
   showEmptyModels: false,
@@ -58,7 +59,7 @@ export const defaultHierarchyConfiguration: HierarchyConfiguration = {
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig: HierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
 export interface ElementsGroupInfo {
@@ -79,14 +80,14 @@ interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   keys: Array<InstanceKey | ElementsGroupInfo>;
-  hierarchyConfig: HierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   label: string;
-  hierarchyConfig: HierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromInstanceKeysProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
@@ -101,7 +102,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _idsCache: ModelsTreeIdsCache;
-  private _hierarchyConfig: HierarchyConfiguration;
+  private _hierarchyConfig: ModelsTreeHierarchyConfiguration;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   private _queryExecutor: LimitingECSqlQueryExecutor;
@@ -595,7 +596,7 @@ function createCategoryInstanceKeyPaths(categoryId: Id64String, idsCache: Models
 function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
-  hierarchyConfig: HierarchyConfiguration,
+  hierarchyConfig: ModelsTreeHierarchyConfiguration,
   elementInfos: Array<Id64String | ElementsGroupInfo>,
 ): Observable<HierarchyNodeIdentifiersPath> {
   return defer(() => {
