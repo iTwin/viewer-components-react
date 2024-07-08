@@ -12,12 +12,18 @@ import { TreeNodeRenderer } from "./TreeNodeRenderer";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { PresentationHierarchyNode, PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
+
+/** @beta */
 interface TreeRendererOwnProps {
+  /** Tree nodes to render. */
   rootNodes: PresentationTreeNode[];
+  /** Callback to check if specific node is selected. */
   isNodeSelected: (nodeId: string) => boolean;
+  /** Callback that is invoked when node is double clicked. */
   onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
 }
 
+/** @beta */
 type TreeRendererProps = Pick<
   TreeNodeRendererProps,
   | "expandNode"
@@ -34,7 +40,10 @@ type TreeRendererProps = Pick<
   Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
   TreeRendererOwnProps;
 
-/** @internal */
+/**
+ * Default renderer for rendering tree data.
+ * @beta
+ */
 export function TreeRenderer({
   rootNodes,
   expandNode,
@@ -109,5 +118,7 @@ export function TreeRenderer({
   );
 }
 
+/** @beta */
 type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
+/** @beta */
 type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;

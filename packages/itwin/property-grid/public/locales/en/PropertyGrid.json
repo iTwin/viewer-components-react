@@ -20,6 +20,10 @@
     "too-many-elements-selected": "Too many elements selected",
     "no-elements-selected": "Select element(s) to view properties"
   },
+  "filtering": {
+    "no-matching-properties": "There are no properties matching filter \"{{filter}}\"",
+    "no-non-null-values": "There are no properties containing non-empty values"
+  },
   "context-menu": {
     "favorite": "Favorite",
     "add-favorite": {

@@ -3,9 +3,9 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { BentleyError, BentleyStatus, type Localization } from "@itwin/core-common";
+import type { Localization, TranslationOptions } from "@itwin/core-common";
+import { BentleyError, BentleyStatus } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import type { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -53,7 +53,7 @@ export class PropertyGridManager {
 
   /** Calls i18n.translateWithNamespace with the "PropertyGridManager" namespace. Do NOT include the namespace in the key.
    */
-  public static translate(key: string, options?: LocalizationOptions): string {
+  public static translate(key: string, options?: TranslationOptions): string {
     return PropertyGridManager.i18n.getLocalizedString(`${PropertyGridManager.i18nNamespace}:${key}`, options);
   }
 }
