@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { RouteStep } from "./EC3Widget";
+import { RouteStep } from "./EC3WidgetComponent";
 import { TemplateMenu } from "./TemplateMenu";
 import { Templates } from "./Templates";
 import { EC3Widget } from "../EC3Widget";

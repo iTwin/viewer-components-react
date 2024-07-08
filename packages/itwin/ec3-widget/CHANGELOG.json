@@ -2,6 +2,21 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Fri, 05 Jul 2024 12:20:16 GMT",
+      "version": "0.9.1",
+      "tag": "@itwin/ec3-widget-react_v0.9.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "pari.deshpande@bentley.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "1c1558dade5479315f2f0e21b39c7e039d8f29ca",
+            "comment": "Bug fix for report-id assignment condition and some file rename exercise for better readability and localization."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 03 Jul 2024 19:31:08 GMT",
       "version": "0.9.0",
       "tag": "@itwin/ec3-widget-react_v0.9.0",
