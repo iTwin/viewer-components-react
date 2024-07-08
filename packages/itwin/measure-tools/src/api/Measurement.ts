@@ -299,7 +299,7 @@ export interface DrawingMetadata {
   sheetToWorldTransform?: SheetMeasurementsHelper.SheetTransformParams;
 
   /** Represents the transform from sheet points to distance along alignment (X) and vertical position related to alignment (Y) */
-  profileTransform?: Transform;
+  sheetToProfileTransform?: Transform;
 
 }
 
