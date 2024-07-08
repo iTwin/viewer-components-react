@@ -298,6 +298,9 @@ export interface DrawingMetadata {
   /** Represents the transform from sheet points to 3d points */
   sheetToWorldTransform?: SheetMeasurementsHelper.SheetTransformParams;
 
+  /** Represents the transform from sheet points to distance along alignment (X) and vertical position related to alignment (Y) */
+  profileTransform?: Transform;
+
 }
 
 /** Handler function that modifies the data sent to the widget for display. */
