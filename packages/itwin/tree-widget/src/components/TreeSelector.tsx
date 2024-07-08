@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { MenuItem, Select } from "@itwin/itwinui-react";
 
 import type { SelectOption } from "@itwin/itwinui-react";
-import type { TreeRenderProps } from "./SelectableTree";
+import type { SelectableTreeRenderProps } from "./SelectableTree";
 
 /**
  * A definition for trees displayed in `TreeSelector`
@@ -17,7 +17,7 @@ import type { TreeRenderProps } from "./SelectableTree";
 export interface TreeContentDefinition {
   id: string;
   label: string;
-  render: (props: TreeRenderProps) => React.ReactNode;
+  render: (props: SelectableTreeRenderProps) => React.ReactNode;
   startIcon?: React.ReactNode;
 }
 

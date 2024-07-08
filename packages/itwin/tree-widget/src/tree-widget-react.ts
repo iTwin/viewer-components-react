@@ -5,5 +5,5 @@
 
 export { TreeWidget } from "./TreeWidget";
 export { createTreeWidget, TreeWidgetComponent } from "./components/TreeWidgetUiItemsProvider";
-export { SelectableTree, TreeDefinition } from "./components/SelectableTree";
+export { SelectableTree, SelectableTreeDefinition } from "./components/SelectableTree";
 export * from "./components/trees";

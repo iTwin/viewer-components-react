@@ -28,7 +28,7 @@ describe("createTreeWidget", () => {
 
   it("renders supplied trees", () => {
     const widgetComponentStub = sinon.stub(selectableTreeModule, "SelectableTree").returns(null);
-    const trees: selectableTreeModule.TreeDefinition[] = [
+    const trees: selectableTreeModule.SelectableTreeDefinition[] = [
       {
         id: "tree",
         getLabel: () => "Tree Label",
@@ -56,7 +56,7 @@ describe("createTreeWidget", () => {
       throw new Error("Error");
     }
 
-    const trees: selectableTreeModule.TreeDefinition[] = [
+    const trees: selectableTreeModule.SelectableTreeDefinition[] = [
       {
         id: "tree",
         getLabel: () => "Tree Label",

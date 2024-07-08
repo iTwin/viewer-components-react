@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgFolder, SvgGroup, SvgHierarchyTree, SvgImodelHollow, SvgItem, SvgLayers, SvgModel } from "@itwin/itwinui-icons-react";
-import { BaseTree } from "../common/components/BaseTree";
-import { useFeatureReporting } from "../common/UseFeatureReporting";
+import { Tree } from "../common/components/Tree";
+import { TreeRenderer } from "../common/components/TreeRenderer";
 import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
@@ -13,43 +13,39 @@ import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache"
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
+/** @beta */
 interface IModelContentTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-  onPerformanceMeasured?: (featureId: string, duration: number) => void;
-  onFeatureUsed?: (feature: string) => void;
 }
 
-type BaseTreeTreeProps = Parameters<typeof BaseTree>[0];
-type GetHierarchyDefinitionsProviderCallback = BaseTreeTreeProps["getHierarchyDefinition"];
-type IModelContentTreeProps = IModelContentTreeOwnProps &
-  Pick<BaseTreeTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+/** @beta */
+type TreeProps = Parameters<typeof Tree>[0];
 
-/** @internal */
-export function IModelContentTree({ onPerformanceMeasured, onFeatureUsed, ...props }: IModelContentTreeProps) {
-  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: IModelContentTreeComponent.id });
+/** @beta */
+type IModelContentTreeProps = IModelContentTreeOwnProps &
+  Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
+
+/** @beta */
+export function IModelContentTree(props: IModelContentTreeProps) {
   return (
-    <BaseTree
+    <Tree
       {...props}
       treeName={IModelContentTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
-      getIcon={getIcon}
       selectionMode={props.selectionMode ?? "extended"}
-      onPerformanceMeasured={(action, duration) => {
-        onPerformanceMeasured?.(`${IModelContentTreeComponent.id}-${action}`, duration);
-      }}
-      reportUsage={reportUsage}
+      treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
     />
   );
 }
 
-function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
   return new IModelContentTreeDefinition({
-    imodelAccess: props.imodelAccess,
-    idsCache: new IModelContentTreeIdsCache(props.imodelAccess),
+    imodelAccess,
+    idsCache: new IModelContentTreeIdsCache(imodelAccess),
   });
-}
+};
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   if (node.extendedData?.imageId === undefined) {
