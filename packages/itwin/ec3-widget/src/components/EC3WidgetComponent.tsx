@@ -8,8 +8,9 @@ import { EC3Context } from "./EC3Context";
 import { EC3Header } from "./EC3Header";
 import { EC3Router } from "./EC3Router";
 import type { Configuration } from "./EC3/Template";
-import "./EC3Widget.scss";
+import "./EC3WidgetComponent.scss";
 import type { EC3WidgetProps } from "./EC3WidgetProps";
+import { EC3Widget } from "../EC3Widget";
 
 export enum RouteStep {
   Templates,
@@ -26,8 +27,10 @@ export interface Route {
   routingFields: EC3RouteFields;
 }
 
-export const EC3Widget = (props: EC3WidgetProps) => {
-  const [routingHistory, setRoutingHistory] = useState<Route[]>([{ step: RouteStep.Templates, title: "EC3 Templates", routingFields: {} }]);
+export const EC3WidgetComponent = (props: EC3WidgetProps) => {
+  const [routingHistory, setRoutingHistory] = useState<Route[]>([
+    { step: RouteStep.Templates, title: EC3Widget.translate("templateMenuTitle"), routingFields: {} },
+  ]);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const navigateTo = useCallback((getNextRoute: (prev: Route | undefined) => Route) => {

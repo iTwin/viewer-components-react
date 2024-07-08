@@ -8,17 +8,18 @@ import { TreeNodeRenderer as CoreTreeNodeRenderer } from "@itwin/presentation-hi
 import { TreeNodeCheckbox } from "./TreeNodeCheckbox";
 
 import type { ComponentPropsWithoutRef } from "react";
+import type { TreeCheckboxProps } from "./TreeNodeCheckbox";
 
-type TreeNodeCheckboxProps = ComponentPropsWithoutRef<typeof TreeNodeCheckbox>;
-
+/** @beta */
 interface TreeNodeRendererOwnProps {
-  checkboxProps?: Omit<TreeNodeCheckboxProps, "node">;
+  /** Props for rendering tree node checkbox. If not provided, checkbox is not rendered. */
+  checkboxProps?: TreeCheckboxProps;
 }
 
-type CoreTreeNodeRendererProps = ComponentPropsWithoutRef<typeof CoreTreeNodeRenderer>;
-type TreeNodeRendererProps = CoreTreeNodeRendererProps & TreeNodeRendererOwnProps;
+/** @beta */
+type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof CoreTreeNodeRenderer> & TreeNodeRendererOwnProps;
 
-/** @internal */
+/** @beta */
 export function TreeNodeRenderer({ checkboxProps, ...props }: TreeNodeRendererProps) {
   return (
     <CoreTreeNodeRenderer

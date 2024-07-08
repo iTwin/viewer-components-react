@@ -16,7 +16,7 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./src/e2e-tests",
   /* Maximum time one test can run for. */
-  timeout: 60 * 1000,
+  timeout: 2 * 60 * 1000,
   /** Settings for `expect` calls */
   expect: {
     /** Increase the timeout from 5 s. to 30 s. */

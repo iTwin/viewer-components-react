@@ -7,31 +7,26 @@
 /// <reference types="react" />
 
 import type { BeEvent } from '@itwin/core-bentley';
-import { Checkbox } from '@itwin/itwinui-react';
 import type { ComponentPropsWithoutRef } from 'react';
-import type { DefineHierarchyLevelProps } from '@itwin/presentation-hierarchies';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
-import type { ECSchemaProvider } from '@itwin/presentation-shared';
-import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
-import type { HierarchyLevelDefinition } from '@itwin/presentation-hierarchies';
+import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
-import type { HierarchyNodeIdentifiersPath } from '@itwin/presentation-hierarchies';
+import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
-import type { InstanceKey } from '@itwin/presentation-shared';
-import type { LimitingECSqlQueryExecutor } from '@itwin/presentation-hierarchies';
 import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
-import type { ProcessedHierarchyNode } from '@itwin/presentation-hierarchies';
+import type { PropsWithChildren } from 'react';
+import type { default as React_2 } from 'react';
 import type { ReactNode } from 'react';
 import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { SchemaContext } from '@itwin/ecschema-metadata';
 import type { SelectionStorage } from '@itwin/presentation-hierarchies-react';
 import type { TranslationOptions } from '@itwin/core-common';
-import { Tree } from '@itwin/itwinui-react';
+import { Tree as Tree_2 } from '@itwin/itwinui-react';
 import { TreeNodeRenderer as TreeNodeRenderer_2 } from '@itwin/presentation-hierarchies-react';
 import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
 import type { useTree } from '@itwin/presentation-hierarchies-react';
@@ -54,14 +49,21 @@ export function createTreeWidget(props: TreeWidgetProps): Widget;
 
 // @beta
 export const ExternalSourcesTreeComponent: {
-    (props: ExternalSourcesTreeComponentProps): JSX.Element | null;
+    ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps): JSX.Element | null;
     id: string;
     getLabel(): string;
 };
 
 // @beta
+export interface HierarchyVisibilityHandler extends IDisposable {
+    changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
+    getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
+    readonly onVisibilityChange: BeEvent<() => void>;
+}
+
+// @beta
 export const IModelContentTreeComponent: {
-    (props: IModelContentTreeComponentProps): JSX.Element | null;
+    ({ onFeatureUsed, onPerformanceMeasured, ...props }: IModelContentTreeComponentProps): JSX.Element | null;
     id: string;
     getLabel(): string;
 };
@@ -74,21 +76,67 @@ export const ModelsTreeComponent: {
     InvertButton: typeof InvertButton;
     View2DButton: typeof View2DButton;
     View3DButton: typeof View3DButton;
+    ToggleInstancesFocusButton: typeof ToggleInstancesFocusButton;
     id: string;
     getLabel(): string;
 };
+
+// @beta
+export interface ModelsTreeVisibilityHandlerOverrides {
+    // (undocumented)
+    changeCategoryState?: OverridableMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
+    // (undocumented)
+    changeElementGroupingNodeState?: OverridableMethod<(props: {
+        node: GroupingHierarchyNode;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    changeElementState?: OverridableMethod<(props: ChangeElementStateProps) => Promise<void>>;
+    // (undocumented)
+    changeModelState?: OverridableMethod<(props: ChangeModelStateProps) => Promise<void>>;
+    // (undocumented)
+    changeSubjectNodeState?: OverridableMethod<(props: {
+        ids: Id64Array;
+        on: boolean;
+    }) => Promise<void>>;
+    // (undocumented)
+    getCategoryDisplayStatus?: OverridableMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getElementDisplayStatus?: OverridableMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getElementGroupingNodeDisplayStatus?: OverridableMethod<(props: {
+        node: GroupingHierarchyNode;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getModelDisplayStatus?: OverridableMethod<(props: {
+        id: Id64String;
+    }) => Promise<VisibilityStatus>>;
+    // (undocumented)
+    getSubjectNodeVisibility?: OverridableMethod<(props: {
+        ids: Id64Array;
+    }) => Promise<VisibilityStatus>>;
+}
 
 // @public
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;
 
 // @public
-export interface TreeDefinition {
+export interface SelectableTreeDefinition {
     getLabel: () => string;
     id: string;
-    render: (props: TreeRenderProps) => React.ReactNode;
+    render: (props: SelectableTreeRenderProps) => React.ReactNode;
     shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
     startIcon?: React.ReactNode;
 }
+
+// @beta (undocumented)
+export function TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren<TelemetryContextProviderProps>): JSX.Element;
+
+// @beta
+export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps_3): JSX.Element;
+
+// @beta
+export function TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps_2): JSX.Element;
 
 // @public
 export class TreeWidget {
@@ -101,6 +149,19 @@ export class TreeWidget {
 
 // @public
 export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
+
+// @beta
+export interface VisibilityStatus {
+    isDisabled?: boolean;
+    state: "visible" | "partial" | "hidden";
+    tooltip?: string;
+}
+
+// @beta
+export function VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps_2): JSX.Element;
+
+// @beta
+export function VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: TreeRendererProps_3 & TreeCheckboxProps): JSX.Element;
 
 // (No @packageDocumentation comment for this package)
 

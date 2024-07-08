@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 02 Jul 2024 14:49:30 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Jul 2024 19:31:08 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.18.0
+
+Wed, 03 Jul 2024 19:31:08 GMT
+
+### Minor changes
+
+- Remove the usage of the IModelApp.telemetry for reporting telemetry. ([#552](https://github.com/iTwin/viewer-components-react/pull/552))
 
 ## 0.17.0
 

@@ -2,7 +2,7 @@
 # Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 # Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 #----------------------------------------------------------------------------------------------
-FROM mcr.microsoft.com/playwright:v1.41.2-jammy
+FROM mcr.microsoft.com/playwright:v1.45.1-jammy
 
 # Set the working directory in the container
 WORKDIR /workspaces/viewer-components-react/

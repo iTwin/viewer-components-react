@@ -4,27 +4,28 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { AutoSizer } from "../../utils/AutoSizer";
+import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ExternalSourcesTree } from "./ExternalSourcesTree";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
-type ExternalSourcesTreeProps = ComponentPropsWithoutRef<typeof ExternalSourcesTree>;
+
+/** @beta */
 interface ExternalSourcesTreeComponentProps
   extends Pick<
-    ExternalSourcesTreeProps,
-    "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured" | "onFeatureUsed"
+    ComponentPropsWithoutRef<typeof ExternalSourcesTree>,
+    "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"
   > {
-  selectionStorage: SelectionStorage;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
  * A component that renders `ExternalSourcesTree`.
  * @beta
  */
-export const ExternalSourcesTreeComponent = (props: ExternalSourcesTreeComponentProps) => {
+export const ExternalSourcesTreeComponent = ({ onFeatureUsed, onPerformanceMeasured, ...props }: ExternalSourcesTreeComponentProps) => {
   const imodel = useActiveIModelConnection();
 
   if (!imodel) {
@@ -32,9 +33,9 @@ export const ExternalSourcesTreeComponent = (props: ExternalSourcesTreeComponent
   }
 
   return (
-    <UnifiedSelectionProvider storage={props.selectionStorage}>
+    <TelemetryContextProvider componentIdentifier={ExternalSourcesTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <AutoSizer>{({ width, height }) => <ExternalSourcesTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
-    </UnifiedSelectionProvider>
+    </TelemetryContextProvider>
   );
 };
 
