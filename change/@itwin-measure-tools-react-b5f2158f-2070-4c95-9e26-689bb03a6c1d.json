@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Adds profileTransform to drawing data",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "email not defined",
+  "dependentChangeType": "patch"
+}
