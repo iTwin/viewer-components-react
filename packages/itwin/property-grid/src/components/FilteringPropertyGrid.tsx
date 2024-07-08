@@ -3,14 +3,19 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
-  FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
+  FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, useDebouncedAsyncValue,
+  VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
+import { FillCentered } from "@itwin/core-react";
+import { Text } from "@itwin/itwinui-react";
+import { PropertyGridManager } from "../PropertyGridManager";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
+  FilteredPropertyData,
   IPropertyDataFilterer,
   IPropertyDataProvider,
   PropertyCategory,
@@ -46,6 +51,13 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
     };
   }, [filterer, dataProvider, autoExpandChildCategories]);
 
+  const { value: filterMatchesCount, inProgress: isFiltering } = useDebouncedAsyncValue(
+    useCallback(async () => {
+      const filteredData = (await filteringDataProvider?.getData()) as FilteredPropertyData;
+      return filteredData?.matchesCount;
+    }, [filteringDataProvider]),
+  );
+
   if (!filteringDataProvider) {
     return null;
   }
@@ -53,6 +65,18 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
   // in order to allow resize values column fully we need to override default width reserved for action buttons.
   // istanbul ignore next
   const actionButtonWidth = props.actionButtonWidth !== undefined ? props.actionButtonWidth : props.actionButtonRenderers !== undefined ? undefined : 0;
+
+  if (!isFiltering && filterMatchesCount === 0) {
+    return (
+      <FillCentered style={{ flexDirection: "column" }}>
+        <Text>
+          {props.highlight?.highlightedText
+            ? PropertyGridManager.translate("filtering.no-matching-properties", { filter: props.highlight.highlightedText })
+            : PropertyGridManager.translate("filtering.no-non-null-values")}
+        </Text>
+      </FillCentered>
+    );
+  }
 
   return (
     <>
@@ -93,12 +117,14 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
     if (node.value.valueFormat !== PropertyValueFormat.Primitive) {
       return {
         matchesFilter: false,
+        matchesCount: 0,
       };
     }
 
     return {
       filteredTypes: [FilteredType.Value],
       matchesFilter: !!node.value.displayValue,
+      matchesCount: node.value.displayValue ? 1 : 0,
     };
   }
 }

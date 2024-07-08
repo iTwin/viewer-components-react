@@ -12,8 +12,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-common';
 import type { IPresentationPropertyDataProvider } from '@itwin/presentation-components';
 import type { IPropertyDataFilterer } from '@itwin/components-react';
-import { Localization } from '@itwin/core-common';
-import type { LocalizationOptions } from '@itwin/core-i18n';
+import type { Localization } from '@itwin/core-common';
 import type { PropertyCategory } from '@itwin/components-react';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import type { PropertyUpdatedArgs } from '@itwin/components-react';
@@ -22,6 +21,7 @@ import type { ReactNode } from 'react';
 import { Ref } from 'react';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
+import type { TranslationOptions } from '@itwin/core-common';
 import type { UiItemsProvider } from '@itwin/appui-react';
 import type { VirtualizedPropertyGridWithDataProviderProps } from '@itwin/components-react';
 import type { Widget } from '@itwin/appui-react';
@@ -158,7 +158,7 @@ export class PropertyGridManager {
     static get i18nNamespace(): string;
     static initialize(i18n?: Localization): Promise<void>;
     static terminate(): void;
-    static translate(key: string, options?: LocalizationOptions): string;
+    static translate(key: string, options?: TranslationOptions): string;
 }
 
 // @public
