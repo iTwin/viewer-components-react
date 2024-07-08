@@ -9,7 +9,8 @@ import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
-import { useFeatureReporting } from "../common/UseFeatureReporting";
+import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
+import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
@@ -22,6 +23,7 @@ import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-
 
 type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError";
 
+/** @beta */
 interface CategoriesTreeOwnProps {
   filter: string;
   activeView: Viewport;
@@ -31,23 +33,23 @@ interface CategoriesTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-  onPerformanceMeasured?: (featureId: string, duration: number) => void;
-  onFeatureUsed?: (feature: string) => void;
 }
 
+/** @beta */
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
-type GetFilteredPathsCallback = VisibilityTreeProps["getFilteredPaths"];
-type GetHierarchyDefinitionCallback = VisibilityTreeProps["getHierarchyDefinition"];
 
-type ModelsTreeProps = CategoriesTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+/** @beta */
+type CategoriesTreeProps = CategoriesTreeOwnProps &
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
 
-/** @internal */
+/** @beta */
 export function CategoriesTree({
   imodel,
   viewManager,
   categories,
   allViewports,
   getSchemaContext,
+  selectionStorage,
   height,
   width,
   activeView,
@@ -55,9 +57,7 @@ export function CategoriesTree({
   density,
   hierarchyLevelConfig,
   selectionMode,
-  onPerformanceMeasured,
-  onFeatureUsed,
-}: ModelsTreeProps) {
+}: CategoriesTreeProps) {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
@@ -74,23 +74,22 @@ export function CategoriesTree({
       dispose: () => visibilityHandler.dispose(),
     };
   }, [activeView, allViewports, categories, imodel, viewManager]);
+  const { onFeatureUsed } = useTelemetryContext();
 
-  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: CategoriesTreeComponent.id });
-
-  const getDefinitionsProvider = useCallback(
-    (props: Parameters<GetHierarchyDefinitionCallback>[0]) => {
+  const getDefinitionsProvider = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
+    (props) => {
       return new CategoriesTreeDefinition({ ...props, viewType: activeView.view.is2d() ? "2d" : "3d" });
     },
     [activeView],
   );
 
-  const getSearchFilteredPaths = useMemo<GetFilteredPathsCallback | undefined>(() => {
+  const getSearchFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
     if (!filter) {
       return undefined;
     }
     return async ({ imodelAccess }) => {
-      reportUsage?.({ featureId: "filtering", reportInteraction: true });
+      onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
         return await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
       } catch (e) {
@@ -99,7 +98,7 @@ export function CategoriesTree({
         return [];
       }
     };
-  }, [filter, activeView, reportUsage]);
+  }, [filter, activeView, onFeatureUsed]);
 
   return (
     <VisibilityTree
@@ -107,21 +106,17 @@ export function CategoriesTree({
       width={width}
       imodel={imodel}
       treeName={CategoriesTreeComponent.id}
+      selectionStorage={selectionStorage}
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
       getHierarchyDefinition={getDefinitionsProvider}
       getFilteredPaths={getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
-      getSublabel={getSublabel}
-      getIcon={getIcon}
       density={density}
       noDataMessage={getNoDataMessage(filter, filteringError)}
       selectionMode={selectionMode ?? "none"}
-      onPerformanceMeasured={(action, duration) => {
-        onPerformanceMeasured?.(`${CategoriesTreeComponent.id}-${action}`, duration);
-      }}
-      reportUsage={reportUsage}
-      searchText={filter}
+      highlight={filter === undefined ? undefined : { text: filter }}
+      treeRenderer={(treeProps) => <VisibilityTreeRenderer {...treeProps} getIcon={getIcon} getSublabel={getSublabel} />}
     />
   );
 }

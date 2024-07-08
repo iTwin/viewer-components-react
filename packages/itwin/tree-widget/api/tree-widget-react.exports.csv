@@ -3,9 +3,17 @@ Release Tag;API Item
 public;CategoriesTreeComponent:
 public;createTreeWidget(props: TreeWidgetProps): Widget
 beta;ExternalSourcesTreeComponent:
+beta;HierarchyVisibilityHandler 
 beta;IModelContentTreeComponent:
 public;ModelsTreeComponent:
+beta;ModelsTreeVisibilityHandlerOverrides
 public;SelectableTree(props: SelectableTreeProps): JSX.Element | null
-public;TreeDefinition
+public;SelectableTreeDefinition
+beta;TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren
+beta;Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps_3): JSX.Element
+beta;TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps_2): JSX.Element
 public;TreeWidget
 public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element
+beta;VisibilityStatus
+beta;VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps_2): JSX.Element
+beta;VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: TreeRendererProps_3 & TreeCheckboxProps): JSX.Element

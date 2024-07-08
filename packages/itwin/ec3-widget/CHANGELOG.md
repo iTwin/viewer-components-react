@@ -1,8 +1,28 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Tue, 02 Jul 2024 14:49:30 GMT and should not be manually modified.
+This log was last generated on Fri, 05 Jul 2024 12:20:16 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.9.1
+
+Fri, 05 Jul 2024 12:20:16 GMT
+
+### Patches
+
+- Bug fix for report-id assignment condition and some file rename exercise for better readability and localization. ([#983](https://github.com/iTwin/viewer-components-react/pull/983))
+
+## 0.9.0
+
+Wed, 03 Jul 2024 19:31:08 GMT
+
+### Minor changes
+
+- Added template id in export callback ([#981](https://github.com/iTwin/viewer-components-react/pull/981))
+
+### Patches
+
+- Added missing localization strings ([#981](https://github.com/iTwin/viewer-components-react/pull/981))
 
 ## 0.8.1
 

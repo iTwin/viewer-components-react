@@ -7,29 +7,26 @@ import "../Tree.scss";
 import classNames from "classnames";
 import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { SvgCursorClick } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
-import { UnifiedSelectionProvider } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { AutoSizer } from "../../utils/AutoSizer";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
 import { useFiltering } from "../common/UseFiltering";
+import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ModelsTree } from "./ModelsTree";
-import { HideAllButton, InvertButton, ShowAllButton, useAvailableModels, View2DButton, View3DButton } from "./ModelsTreeButtons";
+import {
+  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useAvailableModels, View2DButton, View3DButton,
+} from "./ModelsTreeButtons";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 
-type ModelsTreeProps = ComponentPropsWithoutRef<typeof ModelsTree>;
-
+/** @public */
 interface ModelsTreeComponentProps
   extends Pick<
-    ModelsTreeProps,
-    "getSchemaContext" | "density" | "hierarchyLevelConfig" | "selectionMode" | "onPerformanceMeasured" | "onFeatureUsed" | "hierarchyConfig"
+    ComponentPropsWithoutRef<typeof ModelsTree>,
+    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig" | "visibilityHandlerOverrides"
   > {
   /**
    * Renderers of header buttons. Defaults to:
@@ -40,11 +37,13 @@ interface ModelsTreeComponentProps
    *   ModelsTreeComponent.InvertButton,
    *   ModelsTreeComponent.View2DButton,
    *   ModelsTreeComponent.View3DButton,
+   *   ModelsTreeComponent.ToggleInstancesFocusButton,
    * ]
    * ```
    */
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
-  selectionStorage: SelectionStorage;
+  onPerformanceMeasured?: (featureId: string, duration: number) => void;
+  onFeatureUsed?: (feature: string) => void;
 }
 
 /**
@@ -95,6 +94,12 @@ ModelsTreeComponent.View2DButton = View2DButton;
 ModelsTreeComponent.View3DButton = View3DButton;
 
 /**
+ * Renders a "Enable/Disable instances focus" button that enables/disables instances focusing mode.
+ * @public
+ */
+ModelsTreeComponent.ToggleInstancesFocusButton = ToggleInstancesFocusButton;
+
+/**
  * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
  * @public
  */
@@ -110,28 +115,27 @@ function ModelsTreeComponentImpl({
   iModel,
   viewport,
   headerButtons,
-  selectionStorage,
+  onFeatureUsed,
+  onPerformanceMeasured,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
   const availableModels = useAvailableModels(iModel);
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
   return (
-    <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
-      <UnifiedSelectionProvider storage={selectionStorage}>
-        <FocusedInstancesContextProvider selectionStorage={selectionStorage} imodelKey={iModel.key}>
+    <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
+      <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
+        <FocusedInstancesContextProvider selectionStorage={treeProps.selectionStorage} imodelKey={iModel.key}>
           <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
             {headerButtons
-              ? headerButtons.map((btn, index) => (
-                  <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed: treeProps.onFeatureUsed })}</Fragment>
-                ))
+              ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed })}</Fragment>)
               : [
-                  <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
-                  <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={treeProps.onFeatureUsed} />,
+                  <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                  <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                  <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                  <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                  <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+                  <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onFeatureUsed} />,
                 ]}
           </TreeHeader>
           <div className="tw-tree-content">
@@ -140,28 +144,7 @@ function ModelsTreeComponentImpl({
             </AutoSizer>
           </div>
         </FocusedInstancesContextProvider>
-      </UnifiedSelectionProvider>
-    </div>
-  );
-}
-
-function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "default" | "enlarged"; onFeatureUsed?: (feature: string) => void }) {
-  const { enabled, toggle } = useFocusedInstancesContext();
-  const title = enabled
-    ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
-    : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
-  return (
-    <IconButton
-      styleType="borderless"
-      size={density === "enlarged" ? "large" : "small"}
-      title={title}
-      onClick={() => {
-        onFeatureUsed?.("models-tree-instancesfocus");
-        toggle();
-      }}
-      isActive={enabled}
-    >
-      <SvgCursorClick />
-    </IconButton>
+      </div>
+    </TelemetryContextProvider>
   );
 }

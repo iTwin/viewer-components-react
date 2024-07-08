@@ -13,7 +13,6 @@ type TreeRendererLocalizedStrings = Parameters<typeof TreeRenderer>[0]["localize
 
 type UseHierarchiesLocalizationResult = UseTreeLocalizedStrings & TreeRendererLocalizedStrings;
 
-/** @internal */
 export function useHierarchiesLocalization(): UseHierarchiesLocalizationResult {
   const stringValues = Object.values(getLocalizedStrings()!);
   const localizedStrings = useMemo(getLocalizedStrings, stringValues);

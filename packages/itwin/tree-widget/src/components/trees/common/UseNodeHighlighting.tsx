@@ -5,14 +5,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isPresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import { useLatest } from "./Utils";
 
 import type { PresentationHierarchyNode, PresentationTreeNode } from "@itwin/presentation-hierarchies-react";
 
+/** @beta */
+export interface HighlightInfo {
+  text: string;
+}
+
 interface UseNodeHighlightingProps {
   rootNodes: PresentationTreeNode[] | undefined;
-  searchText?: string;
-  activeMatchIndex?: number;
-  onHighlightChanged?: (activeMatchIndex: number, matches: number) => void;
+  // TODO: move activeMatchIndex and onHighlightChanged to HighlightInfo when it's implemented.
+  highlight?: HighlightInfo & {
+    activeMatchIndex?: number;
+    onHighlightChanged?: (activeMatchIndex: number, matches: number) => void;
+  };
 }
 
 interface HighlightedChunk {
@@ -40,23 +48,13 @@ interface UseNodeHighlightingResult {
   getLabel: (node: PresentationHierarchyNode) => React.ReactElement;
 }
 
-/** @internal */
-export function useNodeHighlighting({ rootNodes, searchText, activeMatchIndex, onHighlightChanged }: UseNodeHighlightingProps): UseNodeHighlightingResult {
+export function useNodeHighlighting({ rootNodes, highlight }: UseNodeHighlightingProps): UseNodeHighlightingResult {
   const state = useRef<HighlightState>({ nodeInfoMap: new Map(), totalMatches: 0 });
   const [activeNodeId, setActiveNodeId] = useState<string | undefined>();
-  const activeMatchIndexRef = useLatest(activeMatchIndex);
+  const activeMatchIndexRef = useLatest(highlight?.activeMatchIndex);
   const activeNodeIdRef = useLatest(activeNodeId);
-
-  const updateHighlightInfo = useCallback(
-    (index: number, matches: number) => {
-      if (matches === 0) {
-        setActiveNodeId(undefined);
-        index = 0;
-      }
-      onHighlightChanged?.(index, matches);
-    },
-    [onHighlightChanged],
-  );
+  const onHighlightChangedRef = useLatest(highlight?.onHighlightChanged);
+  const searchText = highlight?.text;
 
   useEffect(() => {
     const { state: newState, activeIndex } =
@@ -65,26 +63,29 @@ export function useNodeHighlighting({ rootNodes, searchText, activeMatchIndex, o
         : { state: { nodeInfoMap: new Map(), totalMatches: 0 }, activeIndex: 0 };
 
     state.current = newState;
-    updateHighlightInfo(activeIndex, newState.totalMatches);
-  }, [rootNodes, searchText, activeNodeIdRef, activeMatchIndexRef, updateHighlightInfo]);
+    if (newState.totalMatches === 0) {
+      setActiveNodeId(undefined);
+    }
+    onHighlightChangedRef.current?.(newState.totalMatches === 0 ? 0 : activeIndex, newState.totalMatches);
+  }, [rootNodes, searchText, activeNodeIdRef, activeMatchIndexRef, onHighlightChangedRef]);
 
   useEffect(() => {
     for (const nodeId of state.current.nodeInfoMap.keys()) {
-      if (getNodeChunkInfo(state.current, nodeId, activeMatchIndex)?.activeChunkIndex !== undefined) {
+      if (getNodeChunkInfo(state.current, nodeId, highlight?.activeMatchIndex)?.activeChunkIndex !== undefined) {
         setActiveNodeId(nodeId);
       }
     }
-  }, [activeMatchIndex]);
+  }, [highlight?.activeMatchIndex]);
 
   const getLabel = useCallback(
     (node: PresentationHierarchyNode) => {
-      const chunkInfo = getNodeChunkInfo(state.current, node.id, activeMatchIndex);
+      const chunkInfo = getNodeChunkInfo(state.current, node.id, highlight?.activeMatchIndex);
       if (searchText && chunkInfo) {
         return <>{markChunks(node.label, chunkInfo.chunks, chunkInfo.activeChunkIndex)}</>;
       }
       return <span>{node.label}</span>;
     },
-    [searchText, activeMatchIndex],
+    [searchText, highlight?.activeMatchIndex],
   );
 
   return { activeNodeId, getLabel };
@@ -199,13 +200,4 @@ function mergeChunks(chunks: HighlightedChunk[], activeChunk?: number) {
     mergedChunks.push(newChunk);
   }
   return { mergedChunks, newActiveIndex };
-}
-
-function useLatest<T>(value: T) {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref;
 }
