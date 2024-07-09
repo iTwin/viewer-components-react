@@ -8,7 +8,14 @@ import { useLatest } from "./Utils";
 
 import type { PropsWithChildren } from "react";
 
-type TrackedFeatures = "visibility-change" | "hierarchy-level-filtering" | "filtering" | "hierarchy-level-size-limit-hit" | "zoom-to-node";
+type TrackedFeatures =
+  | "visibility-change"
+  | "hierarchy-level-filtering"
+  | "filtering"
+  | "hierarchy-level-size-limit-hit"
+  | "zoom-to-node"
+  | "error-timeout"
+  | "error-unknown";
 
 interface TelemetryContext {
   onPerformanceMeasured: (featureId: string, duration: number) => void;

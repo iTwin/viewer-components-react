@@ -94,6 +94,10 @@ export function CategoriesTree({
         return await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
       } catch (e) {
         const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        if (newError !== "tooManyFilterMatches") {
+          const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
+          onFeatureUsed({ featureId: feature, reportInteraction: false });
+        }
         setFilteringError(newError);
         return [];
       }
