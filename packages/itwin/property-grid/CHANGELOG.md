@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 05 Jul 2024 12:20:16 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jul 2024 13:20:07 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.10.0
+
+Tue, 09 Jul 2024 13:20:07 GMT
+
+### Minor changes
+
+- Added an informational message when no properties match given filter. ([#982](https://github.com/iTwin/viewer-components-react/pull/982))
 
 ## 1.9.1
 

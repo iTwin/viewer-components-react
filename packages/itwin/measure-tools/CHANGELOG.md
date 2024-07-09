@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 03 Jul 2024 19:31:08 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jul 2024 13:20:07 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.19.0
+
+Tue, 09 Jul 2024 13:20:07 GMT
+
+### Minor changes
+
+- Adds profileTransform to drawing data ([#986](https://github.com/iTwin/viewer-components-react/pull/986))
 
 ## 0.18.0
 
