@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added an informational message when no properties match given filter.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
