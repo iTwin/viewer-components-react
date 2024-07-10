@@ -9,35 +9,39 @@ import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
 
 export class DrawingDataCache {
 
-  private _drawingTypeCache: SheetMeasurementsHelper.DrawingTypeData[];
+  // Goes from viewed model to drawing types
+  private _drawingTypeCache: Map<string, SheetMeasurementsHelper.DrawingTypeData[]>;
+
   private _sheetChangeListener: VoidFunction[] = [];
 
-  public get drawingtypes(): ReadonlyArray<SheetMeasurementsHelper.DrawingTypeData> {
-    return this._drawingTypeCache;
+  public getDrawingtypes(viewedModelID: string): Readonly<SheetMeasurementsHelper.DrawingTypeData[]> {
+    const result = this._drawingTypeCache.get(viewedModelID);
+    return result ?? [];
   }
 
-  public constructor() {
-    this._drawingTypeCache = [];
+  public constructor(imodel: IModelConnection) {
+    this._drawingTypeCache = new Map<string, SheetMeasurementsHelper.DrawingTypeData[]>();
+    this.updateDrawingTypeCache(imodel);
   }
 
-  public async updateDrawingTypeCache(iModel: IModelConnection) {
+  private async updateDrawingTypeCache(iModel: IModelConnection) {
     this._sheetChangeListener.forEach((func) => {
       func();
     });
     this._sheetChangeListener = [];
-    this._drawingTypeCache = [];
 
     const sheetIds = new Set<string>();
 
     for (const viewport of IModelApp.viewManager) {
       if (viewport.view.isSheetView()) {
         this._sheetChangeListener.push(viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache(iModel)));
-        sheetIds.add(viewport.view.id);
+        if (!this._drawingTypeCache.has(viewport.view.id))
+          sheetIds.add(viewport.view.id);
       }
     }
 
     for (const id of sheetIds) {
-      this._drawingTypeCache = this._drawingTypeCache.concat(await SheetMeasurementsHelper.getSheetTypes(iModel, id));
+      this._drawingTypeCache.set(id, await SheetMeasurementsHelper.getSheetTypes(iModel, id));
     }
   }
 

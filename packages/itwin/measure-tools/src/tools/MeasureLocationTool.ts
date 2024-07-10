@@ -87,8 +87,7 @@ MeasureLocationToolModel
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
     if (this._enableSheetMeasurements) {
-      this._drawingTypeCache = new DrawingDataCache();
-      await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
+      this._drawingTypeCache = new DrawingDataCache(this.iModel);
     }
   }
 
@@ -163,7 +162,7 @@ MeasureLocationToolModel
     }
 
     if (this._drawingTypeCache) {
-      for (const drawing of this._drawingTypeCache.drawingtypes) {
+      for (const drawing of this._drawingTypeCache.getDrawingtypes(ev.viewport.view.id)) {
         if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
           if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
             return false;
