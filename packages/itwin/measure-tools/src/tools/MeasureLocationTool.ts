@@ -206,10 +206,8 @@ MeasureLocationToolModel
     };
 
     const accuSnapInst = new AccuSnap();
-    // const result = await this.iModel.requestSnap(requestProps);
     const result = await accuSnapInst.doSnapRequest(hit);
     if (undefined === result) return undefined;
-    // if (result.status !== SnapStatus.Success) return undefined;
 
     const parseCurve = (json: any): CurvePrimitive | undefined => {
       const parsed =
