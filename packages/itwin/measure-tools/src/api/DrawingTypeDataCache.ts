@@ -46,8 +46,8 @@ class DrawingDataCache {
     const sheetIds = new Set<string>();
 
     for (const viewport of IModelApp.viewManager) {
+      this._sheetChangeListener.push(viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache(iModel)));
       if (viewport.view.isSheetView()) {
-        this._sheetChangeListener.push(viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache(iModel)));
         if (!this._drawingTypeCache.has(viewport.view.id))
           sheetIds.add(viewport.view.id);
       }
