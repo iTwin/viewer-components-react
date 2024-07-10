@@ -453,6 +453,8 @@ This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeCompo
 - `"choose-{tree}"` - when a tree is selected in the tree selector.
 - `"use-{tree}"` - when an interaction with a tree hierarchy happens. This includes any kind of interaction with nodes, including them being expanded/collapsed, selected, filtered, their visibility change, etc.
 - `"{tree}-visibility-change"` - when visibility is toggled using an "eye" button.
+- `"{tree}-error-timeout"` - when a request timeouts while loading hierarchy or filtering.
+- `"{tree}-error-unknown"` - when an unknown error occurs while loading hierarchy or filtering.
 - `"models-tree-showall"` - when "Show All" button is used in `ModelsTreeComponent`.
 - `"models-tree-hideall"` - when "Hide All" button is used in `ModelsTreeComponent`.
 - `"models-tree-invert"` - when "Invert" button is used in `ModelsTreeComponent`.
@@ -466,8 +468,6 @@ This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeCompo
 - `"categories-tree-showall"` - when "Show All" button is used in `CategoriesTreeComponent`.
 - `"categories-tree-hideall"` - when "Hide All" button is used in `CategoriesTreeComponent`.
 - `"categories-tree-invert"` - when "Invert" button is used in `CategoriesTreeComponent`.
-- `"error-timeout"` - when a request timeouts while loading hierarchy or filtering.
-- `"error-unknown"` - when an unknown error occurs while loading hierarchy or filtering.
 
 Where `{tree}` specifies which tree component the feature is of.
 
