@@ -111,11 +111,15 @@ export function ModelsTree({
         });
       } catch (e) {
         const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
+        if (newError !== "tooManyInstancesFocused") {
+          const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
+          onFeatureUsed({ featureId: feature, reportInteraction: false });
+        }
         setFilteringError(newError);
         return [];
       }
     };
-  }, [loadFocusedInstancesKeys, getModelsTreeIdsCache, hierarchyConfiguration]);
+  }, [loadFocusedInstancesKeys, getModelsTreeIdsCache, onFeatureUsed, hierarchyConfiguration]);
 
   const getSearchFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
@@ -133,6 +137,10 @@ export function ModelsTree({
         });
       } catch (e) {
         const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        if (newError !== "tooManyFilterMatches") {
+          const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
+          onFeatureUsed({ featureId: feature, reportInteraction: false });
+        }
         setFilteringError(newError);
         return [];
       }

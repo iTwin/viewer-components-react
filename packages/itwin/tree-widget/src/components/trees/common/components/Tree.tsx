@@ -135,6 +135,7 @@ function TreeImpl({
       onPerformanceMeasured(action, duration);
     },
     onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
+    onHierarchyLoadError: ({ type }) => onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false }),
   });
 
   const reloadTree = treeProps.reloadTree;

@@ -27,8 +27,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@itwin/presentation-hierarchies-react':
-        specifier: ^0.5.3
-        version: 0.5.3(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
+        specifier: ^0.6.0
+        version: 0.6.0(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-shared':
         specifier: ^0.3.1
         version: 0.3.1
@@ -802,7 +802,7 @@ packages:
       '@itwin/core-react': ^4.9.0
       '@itwin/ecschema-metadata': ^4.4.0
       '@itwin/imodel-components-react': ^4.9.0
-      '@itwin/itwinui-react': ^3.0.0
+      '@itwin/itwinui-react': 3.12.1
       '@itwin/presentation-common': ^4.4.0
       '@itwin/presentation-frontend': ^4.4.0
       react: ^17.0.0 || ^18.0.0
@@ -827,8 +827,8 @@ packages:
       '@itwin/ecschema-metadata': ^4.5.1
       '@itwin/presentation-common': ^4.5.1
 
-  '@itwin/presentation-hierarchies-react@0.5.3':
-    resolution: {integrity: sha512-mvoxTvpsnscYEH9STwLTs3ZKmCRk5gVdkBtKpF8/E2vWNLz4cvrv0rinHzCUh0EjfdyIslezP/0NOetwiCwuXA==}
+  '@itwin/presentation-hierarchies-react@0.6.0':
+    resolution: {integrity: sha512-WUk3BgOgyyI9jQiSMf2q7rinVjh3pRpR3A5RR/dR0gAikQwuDjR7oCCogbUTtny7mB3OlIgSUsg5GlOABuYUDg==}
     peerDependencies:
       '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
@@ -840,8 +840,14 @@ packages:
   '@itwin/presentation-hierarchies@0.2.0':
     resolution: {integrity: sha512-fr9uJti8Sn/B6Wq5l6kqJ+xXn5XAJwNrGmwMYRj2rkqlzaj9+UmM1rp4H7VyIpeAB09qYkgrKLxD22TD2Wb02A==}
 
+  '@itwin/presentation-hierarchies@0.3.0':
+    resolution: {integrity: sha512-Tsq8LE6N2Wmr9jO39yXPsDVkzkTXBdsoJ64ePibETsaxQ1C08JpW7vU4wiOV5Aq196G7wy87yBDeOb/EWyXPLQ==}
+
   '@itwin/presentation-shared@0.3.1':
     resolution: {integrity: sha512-aSbYSD6hRMukdpmRX6aco7y+SnvGoW0zbvd8L/sKL81WtbPknMWbVIj8Nl56Rbwf6vr0vjdQgTbulAwAY3EgMg==}
+
+  '@itwin/presentation-shared@0.3.2':
+    resolution: {integrity: sha512-wrb1JiHsQmK/RhdpfQmDUkgbrGz2Y3VzpmA8R3Jr9lYuaW46f6BrlpUemY+V6tE9Gl5enkOMoLPDxYymKPiERA==}
 
   '@itwin/presentation-testing@5.0.13':
     resolution: {integrity: sha512-SvDj+oKMuhlQbne43arXOylLjfbtHRFvgjXG/9HT2X7ipyUeToImyhKLlAo422FTndQWyK7bBGRo59Xv0yK9gw==}
@@ -861,6 +867,9 @@ packages:
 
   '@itwin/unified-selection@0.4.4':
     resolution: {integrity: sha512-6BqxbsmG4Sz/SdsFnTn7a7OdBt0EXQ5dPx0befpGaEQY81Ey9nW8sqjx6H+QikCSBNY4/hFIlUP+V8YqyZj72w==}
+
+  '@itwin/unified-selection@0.4.5':
+    resolution: {integrity: sha512-zqVHCEDTkaLQlFFdvBqn6VjapQTg8TaaXuNYLAIqZ0kmDCMxaGzcqvw7rJ8XaC6yboHYUe1UcFNBtSizOtSDwQ==}
 
   '@itwin/webgl-compatibility@4.5.1':
     resolution: {integrity: sha512-0PVyVYqlGZq2tfcnO+KkBeFh8c7semBI53otDChUIFHggzo2O+PCseATyDgbD+cMqT+9PXZtBwJzk1tkOfEj5Q==}
@@ -2173,6 +2182,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   global-jsdom@9.2.0:
     resolution: {integrity: sha512-mspbiuYwcl5nbl2VRvHNaF4SzSmSMCTJGXXatzHYZAf6u3rO/aLXQICbVNTVI+vN8jaq1s4QcvKYnWhVepSbFQ==}
@@ -2349,6 +2359,7 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -3321,6 +3332,7 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@5.0.5:
@@ -4820,13 +4832,13 @@ snapshots:
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
-  '@itwin/presentation-hierarchies-react@0.5.3(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
+  '@itwin/presentation-hierarchies-react@0.6.0(@itwin/itwinui-react@3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(react-dom@18.0.0(react@18.0.0))(react@18.0.0)':
     dependencies:
       '@itwin/itwinui-icons-react': 2.8.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-illustrations-react': 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      '@itwin/presentation-hierarchies': 0.2.0
-      '@itwin/presentation-shared': 0.3.1
-      '@itwin/unified-selection': 0.4.4
+      '@itwin/presentation-hierarchies': 0.3.0
+      '@itwin/presentation-shared': 0.3.2
+      '@itwin/unified-selection': 0.4.5
       classnames: 2.5.1
       immer: 10.1.1
       react: 18.0.0
@@ -4845,7 +4857,20 @@ snapshots:
       natural-compare-lite: 1.4.0
       rxjs: 7.8.1
 
+  '@itwin/presentation-hierarchies@0.3.0':
+    dependencies:
+      '@itwin/core-bentley': 4.6.0
+      '@itwin/core-common': 4.6.0(@itwin/core-bentley@4.6.0)(@itwin/core-geometry@4.6.0)
+      '@itwin/core-geometry': 4.6.0
+      '@itwin/presentation-shared': 0.3.2
+      natural-compare-lite: 1.4.0
+      rxjs: 7.8.1
+
   '@itwin/presentation-shared@0.3.1':
+    dependencies:
+      '@itwin/core-bentley': 4.6.0
+
+  '@itwin/presentation-shared@0.3.2':
     dependencies:
       '@itwin/core-bentley': 4.6.0
 
@@ -4879,6 +4904,13 @@ snapshots:
     dependencies:
       '@itwin/core-bentley': 4.6.0
       '@itwin/presentation-shared': 0.3.1
+      rxjs: 7.8.1
+      rxjs-for-await: 1.0.0(rxjs@7.8.1)
+
+  '@itwin/unified-selection@0.4.5':
+    dependencies:
+      '@itwin/core-bentley': 4.6.0
+      '@itwin/presentation-shared': 0.3.2
       rxjs: 7.8.1
       rxjs-for-await: 1.0.0(rxjs@7.8.1)
 
