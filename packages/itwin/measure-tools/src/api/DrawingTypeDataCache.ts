@@ -21,7 +21,11 @@ class DrawingDataCache {
 
   public constructor(imodel: IModelConnection) {
     this._drawingTypeCache = new Map<string, SheetMeasurementsHelper.DrawingTypeData[]>();
-    this.updateDrawingTypeCache(imodel);
+    try {
+      void this.updateDrawingTypeCache(imodel);
+    } catch (e) {
+      console.warn("DrawingTypeDataCache could not be initialized");
+    }
   }
 
   public destructor() {
