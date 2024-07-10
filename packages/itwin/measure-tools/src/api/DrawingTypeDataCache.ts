@@ -25,10 +25,11 @@ class DrawingDataCache {
   }
 
   public destructor() {
-    this.clear();
+    this.clearListeners();
+    this._drawingTypeCache.clear();
   }
 
-  private clear() {
+  private clearListeners() {
     this._sheetChangeListener.forEach((func) => {
       func();
     });
@@ -36,7 +37,7 @@ class DrawingDataCache {
   }
 
   private async updateDrawingTypeCache(iModel: IModelConnection) {
-    this.clear();
+    this.clearListeners();
 
     const sheetIds = new Set<string>();
 
