@@ -251,6 +251,7 @@ The package delivers a set of building blocks for creating trees that look and f
 #### Custom basic tree
 
 A "basic" tree is a tree that renders the hierarchy without visibility control - see [iModel content tree](#imodel-content-tree) for an example. Core components:
+
 - `Tree` - component that manages tree state, selection and filtering.
 - `TreeRenderer` - default renderer for tree data.
 
@@ -295,6 +296,7 @@ function MyTree({width, height, imodel}: MyTreeProps) {
 #### Custom visibility tree
 
 A visibility tree is a tree that renders the hierarchy and allows controlling visibility control through the use of "eye" checkboxes - see [Models](#models-tree) and [Categories](#categories-tree) trees. Core components:
+
 - `VisibilityTree` - same as `Tree` component but additionally manages visibility of instances represented by tree nodes.
 - `VisibilityTreeRenderer` - same as `TreeRenderer` but additionally renders checkboxes for visibility control.
 
@@ -464,6 +466,8 @@ This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeCompo
 - `"categories-tree-showall"` - when "Show All" button is used in `CategoriesTreeComponent`.
 - `"categories-tree-hideall"` - when "Hide All" button is used in `CategoriesTreeComponent`.
 - `"categories-tree-invert"` - when "Invert" button is used in `CategoriesTreeComponent`.
+- `"error-timeout"` - when a request timeouts while loading hierarchy or filtering.
+- `"error-unknown"` - when an unknown error occurs while loading hierarchy or filtering.
 
 Where `{tree}` specifies which tree component the feature is of.
 
