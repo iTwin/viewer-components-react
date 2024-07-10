@@ -6,8 +6,9 @@
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
+import { IDisposable } from "@itwin/core-bentley";
 
-class DrawingDataCache {
+class DrawingDataCache implements IDisposable {
 
   // Goes from viewed model to drawing types
   private _drawingTypeCache: Map<string, SheetMeasurementsHelper.DrawingTypeData[]>;
@@ -28,7 +29,7 @@ class DrawingDataCache {
     }
   }
 
-  public destructor() {
+  public dispose(): void {
     this.clearListeners();
     this._drawingTypeCache.clear();
   }
@@ -68,7 +69,7 @@ export class DrawingDataCacheSingleton {
   public static initialize(imodel: IModelConnection) {
     DrawingDataCacheSingleton._instance = new DrawingDataCache(imodel);
     DrawingDataCacheSingleton._onImodelClose = imodel.onClose.addListener(() => {
-      DrawingDataCacheSingleton._instance?.destructor();
+      DrawingDataCacheSingleton._instance?.dispose();
       DrawingDataCacheSingleton._instance = undefined;
       DrawingDataCacheSingleton._onImodelClose();
     })
