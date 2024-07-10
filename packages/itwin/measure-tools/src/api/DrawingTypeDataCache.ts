@@ -24,11 +24,19 @@ export class DrawingDataCache {
     this.updateDrawingTypeCache(imodel);
   }
 
-  private async updateDrawingTypeCache(iModel: IModelConnection) {
+  public destructor() {
+    this.clear();
+  }
+
+  private clear() {
     this._sheetChangeListener.forEach((func) => {
       func();
     });
     this._sheetChangeListener = [];
+  }
+
+  private async updateDrawingTypeCache(iModel: IModelConnection) {
+    this.clear();
 
     const sheetIds = new Set<string>();
 
