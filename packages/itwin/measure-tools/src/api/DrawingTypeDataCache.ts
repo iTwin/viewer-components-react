@@ -7,7 +7,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
 
-export class DrawingDataCache {
+class DrawingDataCache {
 
   // Goes from viewed model to drawing types
   private _drawingTypeCache: Map<string, SheetMeasurementsHelper.DrawingTypeData[]>;
@@ -51,6 +51,26 @@ export class DrawingDataCache {
     for (const id of sheetIds) {
       this._drawingTypeCache.set(id, await SheetMeasurementsHelper.getSheetTypes(iModel, id));
     }
+  }
+
+}
+
+export class DrawingDataCacheSingleton {
+
+  private static _instance: DrawingDataCache | undefined;
+  private static _onImodelClose: () => void;
+
+  public static initialize(imodel: IModelConnection) {
+    DrawingDataCacheSingleton._instance = new DrawingDataCache(imodel);
+    DrawingDataCacheSingleton._onImodelClose = imodel.onClose.addListener(() => {
+      DrawingDataCacheSingleton._instance?.destructor();
+      DrawingDataCacheSingleton._instance = undefined;
+      DrawingDataCacheSingleton._onImodelClose();
+    })
+  }
+
+  public static getDrawingtypes(viewedModelID: string): Readonly<SheetMeasurementsHelper.DrawingTypeData[]> {
+    return DrawingDataCacheSingleton._instance?.getDrawingtypes(viewedModelID) ?? [];
   }
 
 }
