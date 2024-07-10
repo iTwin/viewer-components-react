@@ -14,6 +14,7 @@ import type {
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
+  AccuSnap,
   EventHandled,
   IModelApp,
   LocateResponse,
@@ -204,8 +205,11 @@ MeasureLocationToolModel
       snapAperture: hit.viewport.pixelsFromInches(0.1),
     };
 
-    const result = await this.iModel.requestSnap(requestProps);
-    if (result.status !== SnapStatus.Success) return undefined;
+    const accuSnapInst = new AccuSnap();
+    // const result = await this.iModel.requestSnap(requestProps);
+    const result = await accuSnapInst.doSnapRequest(hit);
+    if (undefined === result) return undefined;
+    // if (result.status !== SnapStatus.Success) return undefined;
 
     const parseCurve = (json: any): CurvePrimitive | undefined => {
       const parsed =
@@ -223,7 +227,7 @@ MeasureLocationToolModel
       result.snapPoint
     );
     snap.setCurvePrimitive(
-      parseCurve(result.curve),
+      parseCurve(result.primitive),
       undefined,
       result.geomType
     );
