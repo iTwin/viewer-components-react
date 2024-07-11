@@ -70,7 +70,7 @@ class DrawingDataCache {
     return [];
   }
 
-  public async querySheetDrawingData(imodel: IModelConnection, viewedModelID: string): Promise<Readonly<SheetMeasurementsHelper.DrawingTypeData[]>> {
+  public async querySheetDrawingData(imodel: IModelConnection, viewedModelID: string): Promise<ReadonlyArray<SheetMeasurementsHelper.DrawingTypeData[]>> {
     let cache = this._drawingTypeCache.get(imodel);
     if (!cache) {
       cache = new Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>();
