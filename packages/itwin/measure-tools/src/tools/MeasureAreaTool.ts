@@ -27,7 +27,7 @@ import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
-import { DrawingDataCacheSingleton } from "../api/DrawingTypeDataCache";
+import { DrawingDataCacheSingleton } from "../measure-tools-react";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
@@ -71,9 +71,6 @@ MeasureAreaToolModel
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
-    if (this._enableSheetMeasurements) {
-      DrawingDataCacheSingleton.initialize(this.iModel);
-    }
   }
 
   public override async onReinitialize(): Promise<void> {
@@ -153,7 +150,7 @@ MeasureAreaToolModel
       return true;
     }
 
-    for (const drawing of DrawingDataCacheSingleton.getDrawingtypes(ev.viewport.view.id)) {
+    for (const drawing of DrawingDataCacheSingleton.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
       if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
         if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
           return false;

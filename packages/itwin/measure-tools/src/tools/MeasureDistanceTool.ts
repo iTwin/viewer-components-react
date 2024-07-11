@@ -63,9 +63,6 @@ MeasureDistanceToolModel
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
-    if (this._enableSheetMeasurements) {
-      DrawingDataCacheSingleton.initialize(this.iModel);
-    }
   }
 
   public async onRestartTool(): Promise<void> {
@@ -131,7 +128,7 @@ MeasureDistanceToolModel
       return true;
     }
 
-    for (const drawing of DrawingDataCacheSingleton.getDrawingtypes(ev.viewport.view.id)) {
+    for (const drawing of DrawingDataCacheSingleton.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
       if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
         if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
           return false;

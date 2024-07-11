@@ -3,60 +3,87 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
-import { IDisposable } from "@itwin/core-bentley";
+import { Id64String } from "@itwin/core-bentley";
 
-class DrawingDataCache implements IDisposable {
+class DrawingDataCache {
 
-  // Goes from viewed model to drawing types
-  private _drawingTypeCache: Map<string, SheetMeasurementsHelper.DrawingTypeData[]>;
+  private _drawingTypeCache: Map<IModelConnection, Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>>;
 
-  private _sheetChangeListener: VoidFunction[] = [];
+  private _viewportModelChangedListeners: Map<Viewport, () => void>;
 
-  public getDrawingtypes(viewedModelID: string): Readonly<SheetMeasurementsHelper.DrawingTypeData[]> {
-    const result = this._drawingTypeCache.get(viewedModelID);
-    return result ?? [];
+  public constructor() {
+    this._drawingTypeCache = new Map<IModelConnection, Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>>();
+    this._viewportModelChangedListeners = new Map<Viewport, () => void>();
+
+    this.setupEvents();
+
+    // Populate initial viewports
+    for (const vp of IModelApp.viewManager)
+      this.addViewport(vp);
   }
 
-  public constructor(imodel: IModelConnection) {
-    this._drawingTypeCache = new Map<string, SheetMeasurementsHelper.DrawingTypeData[]>();
-    try {
-      void this.updateDrawingTypeCache(imodel);
-    } catch (e) {
-      console.warn("DrawingTypeDataCache could not be initialized");
-    }
-  }
-
-  public dispose(): void {
-    this.clearListeners();
-    this._drawingTypeCache.clear();
-  }
-
-  private clearListeners() {
-    this._sheetChangeListener.forEach((func) => {
-      func();
+  private setupEvents() {
+    // If an imodel closes, clear the cache for it
+    IModelConnection.onClose.addListener((imodel) => {
+      this._drawingTypeCache.delete(imodel);
     });
-    this._sheetChangeListener = [];
+
+    // Listen for new viewports opening
+    IModelApp.viewManager.onViewOpen.addListener((vp) => {
+      this.addViewport(vp);
+    });
+
+    // Listen for viewports closing, this also is called when IModelApp shuts down
+    IModelApp.viewManager.onViewClose.addListener((vp) => {
+      this.dropViewport(vp);
+    });
   }
 
-  private async updateDrawingTypeCache(iModel: IModelConnection) {
-    this.clearListeners();
+  private addViewport(vp: Viewport) {
+    vp.onViewedModelsChanged.addListener((viewport) =>{
+      if (!viewport.view.isSheetView())
+        return;
 
-    const sheetIds = new Set<string>();
+      void this.querySheetDrawingData(viewport.iModel, viewport.view.id);
+    });
+  }
 
-    for (const viewport of IModelApp.viewManager) {
-      this._sheetChangeListener.push(viewport.onViewedModelsChanged.addListener(async () => this.updateDrawingTypeCache(iModel)));
-      if (viewport.view.isSheetView()) {
-        if (!this._drawingTypeCache.has(viewport.view.id))
-          sheetIds.add(viewport.view.id);
-      }
+  private dropViewport(vp: Viewport) {
+    const listener = this._viewportModelChangedListeners.get(vp);
+    if (listener) {
+      listener();
+      this._viewportModelChangedListeners.delete(vp);
+    }
+  }
+
+  public getSheetDrawingDataForViewport(vp: Viewport): SheetMeasurementsHelper.DrawingTypeData[] | [] {
+    if (!vp.view.isSheetView())
+      return [];
+
+    const cache = this._drawingTypeCache.get(vp.iModel);
+    if (cache)
+      return cache.get(vp.view.id) ?? [];
+
+    return [];
+  }
+
+  public async querySheetDrawingData(imodel: IModelConnection, viewedModelID: string): Promise<Readonly<SheetMeasurementsHelper.DrawingTypeData[]>> {
+    let cache = this._drawingTypeCache.get(imodel);
+    if (!cache) {
+      cache = new Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>();
+      this._drawingTypeCache.set(imodel, cache);
     }
 
-    for (const id of sheetIds) {
-      this._drawingTypeCache.set(id, await SheetMeasurementsHelper.getSheetTypes(iModel, id));
+    let sheetData = cache.get(viewedModelID);
+    if (!sheetData) {
+      sheetData = await SheetMeasurementsHelper.getSheetTypes(imodel, viewedModelID);
+      cache.set(viewedModelID, sheetData);
     }
+
+    return sheetData;
   }
 
 }
@@ -64,19 +91,16 @@ class DrawingDataCache implements IDisposable {
 export class DrawingDataCacheSingleton {
 
   private static _instance: DrawingDataCache | undefined;
-  private static _onImodelClose: () => void;
 
-  public static initialize(imodel: IModelConnection) {
-    DrawingDataCacheSingleton._instance = new DrawingDataCache(imodel);
-    DrawingDataCacheSingleton._onImodelClose = imodel.onClose.addListener(() => {
-      DrawingDataCacheSingleton._instance?.dispose();
-      DrawingDataCacheSingleton._instance = undefined;
-      DrawingDataCacheSingleton._onImodelClose();
-    })
+  private static initialize() {
+    DrawingDataCacheSingleton._instance = new DrawingDataCache();
   }
 
-  public static getDrawingtypes(viewedModelID: string): Readonly<SheetMeasurementsHelper.DrawingTypeData[]> {
-    return DrawingDataCacheSingleton._instance?.getDrawingtypes(viewedModelID) ?? [];
+  public static getInstance(): DrawingDataCache {
+    if (this._instance === undefined) {
+      DrawingDataCacheSingleton.initialize();
+    }
+    return DrawingDataCacheSingleton._instance!;
   }
 
 }
