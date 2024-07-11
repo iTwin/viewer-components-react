@@ -26,7 +26,7 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
-import { DrawingDataCacheSingleton } from "../measure-tools-react";
+import { DrawingDataCache } from "../measure-tools-react";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
@@ -128,7 +128,7 @@ MeasureDistanceToolModel
       return true;
     }
 
-    for (const drawing of DrawingDataCacheSingleton.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
       if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
         if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
           return false;

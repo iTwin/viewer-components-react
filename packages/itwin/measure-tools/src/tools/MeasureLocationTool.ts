@@ -36,7 +36,7 @@ import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
-import { DrawingDataCacheSingleton } from "../measure-tools-react";
+import { DrawingDataCache } from "../measure-tools-react";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
@@ -157,7 +157,7 @@ MeasureLocationToolModel
       return true;
     }
 
-    for (const drawing of DrawingDataCacheSingleton.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
       if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
         if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
           return false;

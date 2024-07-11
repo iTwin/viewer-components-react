@@ -8,13 +8,13 @@ import { IModelApp } from "@itwin/core-frontend";
 import { SheetMeasurementsHelper } from "./SheetMeasurementHelper";
 import { Id64String } from "@itwin/core-bentley";
 
-class DrawingDataCache {
+export class DrawingDataCache {
 
   private _drawingTypeCache: Map<IModelConnection, Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>>;
-
   private _viewportModelChangedListeners: Map<Viewport, () => void>;
+  private static _instance: DrawingDataCache | undefined;
 
-  public constructor() {
+  private constructor() {
     this._drawingTypeCache = new Map<IModelConnection, Map<Id64String, SheetMeasurementsHelper.DrawingTypeData[]>>();
     this._viewportModelChangedListeners = new Map<Viewport, () => void>();
 
@@ -23,6 +23,13 @@ class DrawingDataCache {
     // Populate initial viewports
     for (const vp of IModelApp.viewManager)
       this.addViewport(vp);
+  }
+
+  public static getInstance(): DrawingDataCache {
+    if (DrawingDataCache._instance === undefined) {
+       DrawingDataCache._instance = new DrawingDataCache();
+    }
+    return DrawingDataCache._instance;
   }
 
   private setupEvents() {
@@ -84,23 +91,6 @@ class DrawingDataCache {
     }
 
     return sheetData;
-  }
-
-}
-
-export class DrawingDataCacheSingleton {
-
-  private static _instance: DrawingDataCache | undefined;
-
-  private static initialize() {
-    DrawingDataCacheSingleton._instance = new DrawingDataCache();
-  }
-
-  public static getInstance(): DrawingDataCache {
-    if (this._instance === undefined) {
-      DrawingDataCacheSingleton.initialize();
-    }
-    return DrawingDataCacheSingleton._instance!;
   }
 
 }
