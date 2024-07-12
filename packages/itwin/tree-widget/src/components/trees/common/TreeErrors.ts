@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Error that is thrown when tree filtering exceeds a limit.
+ * Error that is thrown when too many matches are found while filtering the tree.
  * @beta
  */
 export class FilterLimitExceededError extends Error {
