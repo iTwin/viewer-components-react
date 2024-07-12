@@ -1,8 +1,10 @@
 sep=;
 Release Tag;API Item
 public;CategoriesTreeComponent:
+beta;createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise
 public;createTreeWidget(props: TreeWidgetProps): Widget
 beta;ExternalSourcesTreeComponent:
+beta;FilterLimitExceededError 
 beta;HierarchyVisibilityHandler 
 beta;IModelContentTreeComponent:
 public;ModelsTreeComponent:

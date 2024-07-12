@@ -25,6 +25,9 @@ import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 
+type HierarchyNodeFiltering = Required<HierarchyNode>["filtering"];
+type FilteredPaths = Required<HierarchyNodeFiltering>["filteredChildrenIdentifierPaths"];
+
 /** @beta */
 interface GetCategoryStatusProps {
   categoryId: Id64String;
@@ -46,7 +49,7 @@ interface GetElementStateProps {
 /** @beta */
 interface GetFilteredNodeVisibilityProps {
   parentKeys: HierarchyNodeKey[];
-  filterPaths: HierarchyNodeIdentifiersPath[];
+  filterPaths: FilteredPaths;
 }
 
 /** @beta */
@@ -521,10 +524,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     const imodelAccess = this._props.imodelAccess;
 
     // Remove all paths such that there are paths to any of the ancestors of the filter target.
-    filterPaths = reduceFilterPaths(filterPaths);
+    const paths = reduceFilterPaths(filterPaths);
 
     await Promise.all(
-      filterPaths.map(async (path) => {
+      paths.map(async (path) => {
         const target = path[path.length - 1];
         if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(target)) {
           return;
@@ -1010,7 +1013,8 @@ function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   return result;
 }
 
-function reduceFilterPaths(paths: HierarchyNodeIdentifiersPath[]) {
+function reduceFilterPaths(filteredPaths: FilteredPaths) {
+  let paths = filteredPaths.map((filteredPath) => ("path" in filteredPath ? filteredPath.path : filteredPath));
   const sorted = [...paths].sort((a, b) => a.length - b.length);
   paths = [];
   for (const path of sorted) {

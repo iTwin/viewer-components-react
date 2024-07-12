@@ -13,12 +13,13 @@ import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTree } from "../common/components/VisibilityTree";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
+import { FilterLimitExceededError } from "../common/TreeErrors";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { createInstanceKeyPaths, defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
 import type { Id64String } from "@itwin/core-bentley";
@@ -27,9 +28,12 @@ import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./Mode
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode, useTree } from "@itwin/presentation-hierarchies-react";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
+type UseTreeProps = Parameters<typeof useTree>[0];
+type IModelAccess = UseTreeProps["imodelAccess"];
+type FilteredPaths = ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>;
 
 /** @beta */
 interface ModelsTreeOwnProps {
@@ -40,6 +44,7 @@ interface ModelsTreeOwnProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   filter?: string;
+  getFilteredPaths?: (props: { imodelAccess: IModelAccess; idsCache: ModelsTreeIdsCache; hierarchyConfig: ModelsTreeHierarchyConfiguration }) => FilteredPaths;
 }
 
 /** @beta */
@@ -63,6 +68,7 @@ export function ModelsTree({
   hierarchyConfig,
   selectionMode,
   visibilityHandlerOverrides,
+  getFilteredPaths,
 }: ModelsTreeProps) {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
@@ -103,14 +109,14 @@ export function ModelsTree({
     return async ({ imodelAccess }) => {
       try {
         const targetKeys = await collectTargetKeys(loadFocusedInstancesKeys);
-        return await ModelsTreeDefinition.createInstanceKeyPaths({
+        return await createInstanceKeyPaths({
           imodelAccess,
           idsCache: getModelsTreeIdsCache(),
           keys: targetKeys,
           hierarchyConfig: hierarchyConfiguration,
         });
       } catch (e) {
-        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
+        const newError = FilterLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
         if (newError !== "tooManyInstancesFocused") {
           const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
           onFeatureUsed({ featureId: feature, reportInteraction: false });
@@ -129,14 +135,14 @@ export function ModelsTree({
     return async ({ imodelAccess }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        return await ModelsTreeDefinition.createInstanceKeyPaths({
+        return await createInstanceKeyPaths({
           imodelAccess,
           label: filter,
           idsCache: getModelsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
         });
       } catch (e) {
-        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
         if (newError !== "tooManyFilterMatches") {
           const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
           onFeatureUsed({ featureId: feature, reportInteraction: false });
@@ -147,7 +153,21 @@ export function ModelsTree({
     };
   }, [filter, getModelsTreeIdsCache, onFeatureUsed, hierarchyConfiguration]);
 
-  const getFilteredPaths = getFocusedFilteredPaths ?? getSearchFilteredPaths;
+  const getFilterPaths = useMemo<VisibilityTreeProps["getFilteredPaths"]>(() => {
+    setFilteringError(undefined);
+    if (!getFilteredPaths) {
+      return undefined;
+    }
+    return async ({ imodelAccess }) => {
+      try {
+        return await getFilteredPaths({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration });
+      } catch (e) {
+        const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
+        setFilteringError(newError);
+        return [];
+      }
+    };
+  }, [hierarchyConfiguration, getModelsTreeIdsCache, getFilteredPaths]);
 
   return (
     <VisibilityTree
@@ -159,7 +179,7 @@ export function ModelsTree({
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
       getHierarchyDefinition={getHierarchyDefinition}
-      getFilteredPaths={getFilteredPaths}
+      getFilteredPaths={getFocusedFilteredPaths ?? getFilterPaths ?? getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       density={density}
       noDataMessage={getNoDataMessage(filter, filteringError)}

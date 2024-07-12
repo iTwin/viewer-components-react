@@ -13,7 +13,7 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyNodeIdentifier } from "@itwin/presentation-hierarchies";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { ModelsTreeIdsCache } from "../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition";
+import { createInstanceKeyPaths, defaultHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTreeDefinition";
 import {
   buildIModel,
   insertPhysicalElement,
@@ -27,7 +27,7 @@ import { createIModelAccess } from "../Common";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation";
 import { createModelsTreeProvider } from "./Utils";
 
-import type { ElementsGroupInfo } from "../../../components/trees/models-tree/ModelsTreeDefinition";
+import type { ElementsGroupInfo, ModelsTreeDefinition } from "../../../components/trees/models-tree/ModelsTreeDefinition";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
@@ -1355,7 +1355,7 @@ describe("Models tree", () => {
 
         it("finds instance key paths by target instance key", async function () {
           const actualInstanceKeyPaths = (
-            await ModelsTreeDefinition.createInstanceKeyPaths({
+            await createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
               idsCache: modelsTreeIdsCache,
               keys: targetInstanceKeys,
@@ -1371,7 +1371,7 @@ describe("Models tree", () => {
           }
 
           const actualInstanceKeyPaths = (
-            await ModelsTreeDefinition.createInstanceKeyPaths({
+            await createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
               idsCache: modelsTreeIdsCache,
               label: targetInstanceLabel,
@@ -1398,7 +1398,7 @@ describe("Models tree", () => {
       });
 
       const actualInstanceKeyPaths = (
-        await ModelsTreeDefinition.createInstanceKeyPaths({
+        await createInstanceKeyPaths({
           imodelAccess: createIModelAccess(imodel),
           idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
           label: formattedECInstanceId,
@@ -1430,7 +1430,7 @@ describe("Models tree", () => {
 
       expect(
         (
-          await ModelsTreeDefinition.createInstanceKeyPaths({
+          await createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
             idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "_",
@@ -1441,7 +1441,7 @@ describe("Models tree", () => {
 
       expect(
         (
-          await ModelsTreeDefinition.createInstanceKeyPaths({
+          await createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
             idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "%",
@@ -1452,7 +1452,7 @@ describe("Models tree", () => {
 
       expect(
         (
-          await ModelsTreeDefinition.createInstanceKeyPaths({
+          await createInstanceKeyPaths({
             imodelAccess: createIModelAccess(imodel),
             idsCache: new ModelsTreeIdsCache(createIModelAccess(imodel), defaultHierarchyConfiguration),
             label: "\\",

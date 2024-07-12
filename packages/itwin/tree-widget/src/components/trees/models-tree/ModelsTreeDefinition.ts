@@ -9,6 +9,7 @@ import {
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
+import { FilterLimitExceededError } from "../common/TreeErrors";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -533,14 +534,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
-  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
-    if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
-      const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-      return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
-    }
-    return createInstanceKeyPathsFromInstanceKeys(props);
-  }
-
   private async isSupported() {
     const [schemaName, className] = this._hierarchyConfig.elementClassSpecification.split(/[\.:]/);
     if (!schemaName || !className) {
@@ -567,6 +560,19 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     }
     return false;
   }
+}
+
+/**
+ * Creates a list of `HierarchyNodeIdentifierPath` that can be used to filter the hierarchy
+ * to only display nodes that either match the provided instance keys and their children or contain a provided label.
+ * @beta
+ */
+export async function createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
+  if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
+    const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
+  }
+  return createInstanceKeyPathsFromInstanceKeys(props);
 }
 
 function createSubjectInstanceKeysPath(subjectId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
@@ -691,7 +697,7 @@ function createGeometricElementInstanceKeyPaths(
 
 async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceKeyPathsFromInstanceKeysProps): Promise<HierarchyNodeIdentifiersPath[]> {
   if (props.keys.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
-    throw new Error(`Filter matches more than ${MAX_FILTERING_INSTANCE_KEY_COUNT} items`);
+    throw new FilterLimitExceededError();
   }
   const ids = {
     models: new Array<Id64String>(),

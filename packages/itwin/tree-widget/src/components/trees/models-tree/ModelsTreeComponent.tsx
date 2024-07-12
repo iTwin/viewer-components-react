@@ -26,7 +26,14 @@ import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 interface ModelsTreeComponentProps
   extends Pick<
     ComponentPropsWithoutRef<typeof ModelsTree>,
-    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig" | "visibilityHandlerOverrides"
+    | "getSchemaContext"
+    | "selectionStorage"
+    | "density"
+    | "hierarchyLevelConfig"
+    | "selectionMode"
+    | "hierarchyConfig"
+    | "visibilityHandlerOverrides"
+    | "getFilteredPaths"
   > {
   /**
    * Renderers of header buttons. Defaults to:
@@ -122,11 +129,18 @@ function ModelsTreeComponentImpl({
   const availableModels = useAvailableModels(iModel);
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
+
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
         <FocusedInstancesContextProvider selectionStorage={treeProps.selectionStorage} imodelKey={iModel.key}>
-          <TreeHeader onFilterStart={applyFilter} onFilterClear={clearFilter} onSelectedChanged={() => {}} density={density}>
+          <TreeHeader
+            onFilterStart={applyFilter}
+            onFilterClear={clearFilter}
+            onSelectedChanged={() => {}}
+            density={density}
+            isDisabled={!!treeProps.getFilteredPaths}
+          >
             {headerButtons
               ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed })}</Fragment>)
               : [

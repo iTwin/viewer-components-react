@@ -8,17 +8,25 @@
 
 import type { BeEvent } from '@itwin/core-bentley';
 import type { ComponentPropsWithoutRef } from 'react';
+import type { DefineHierarchyLevelProps } from '@itwin/presentation-hierarchies';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
+import type { ECSchemaProvider } from '@itwin/presentation-shared';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
+import type { HierarchyDefinition } from '@itwin/presentation-hierarchies';
+import type { HierarchyLevelDefinition } from '@itwin/presentation-hierarchies';
 import type { HierarchyNode } from '@itwin/presentation-hierarchies-react';
+import type { HierarchyNodeIdentifiersPath } from '@itwin/presentation-hierarchies';
 import type { Id64Arg } from '@itwin/core-bentley';
 import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
+import type { InstanceKey } from '@itwin/presentation-shared';
+import type { LimitingECSqlQueryExecutor } from '@itwin/presentation-hierarchies';
 import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
+import type { ProcessedHierarchyNode } from '@itwin/presentation-hierarchies';
 import type { PropsWithChildren } from 'react';
 import type { default as React_2 } from 'react';
 import type { ReactNode } from 'react';
@@ -44,6 +52,9 @@ export const CategoriesTreeComponent: {
     getLabel(): string;
 };
 
+// @beta
+export function createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps): Promise<HierarchyNodeIdentifiersPath[]>;
+
 // @public
 export function createTreeWidget(props: TreeWidgetProps): Widget;
 
@@ -53,6 +64,11 @@ export const ExternalSourcesTreeComponent: {
     id: string;
     getLabel(): string;
 };
+
+// @beta
+export class FilterLimitExceededError extends Error {
+    constructor();
+}
 
 // @beta
 export interface HierarchyVisibilityHandler extends IDisposable {

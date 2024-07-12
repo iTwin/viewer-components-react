@@ -5,6 +5,7 @@
 
 import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
+import { FilterLimitExceededError } from "../common/TreeErrors";
 
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type {
@@ -211,14 +212,14 @@ async function createInstanceKeyPathsFromInstanceLabel(
     },
     { restartToken: "tree-widget/categories-tree/filter-by-label-query" },
   );
-  const paths = new Array<HierarchyNodeIdentifiersPath>();
+  const paths = new Array<HierarchyNodeIdentifiersPath | { path: HierarchyNodeIdentifiersPath; options?: { autoExpand?: boolean } }>();
   for await (const row of reader) {
-    const path = [{ className: row.CategoryClass, id: row.CategoryId }];
-    row.SubcategoryId && path.push({ className: row.SubcategoryClass, id: row.SubcategoryId });
+    const path = { path: [{ className: row.CategoryClass, id: row.CategoryId }], options: { autoExpand: false } };
+    row.SubcategoryId && path.path.push({ className: row.SubcategoryClass, id: row.SubcategoryId });
     paths.push(path);
   }
   if (paths.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
-    throw new Error(`Filter matches more than ${MAX_FILTERING_INSTANCE_KEY_COUNT} items`);
+    throw new FilterLimitExceededError();
   }
   return paths;
 }
