@@ -338,7 +338,8 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
           isExpanded={formula !== undefined}
           setIsExpanded={() => {}}
         >
-          <PropertiesValidationAction propertyName={propertyName} properties={groupProperties?.properties ?? []} setFormula={setFormula} />
+          Properties Validation
+          {/* <PropertiesValidationAction propertyName={propertyName} properties={groupProperties?.properties ?? []} setFormula={setFormula} /> */}
         </ScrollableExpandableBlock>
       </div>
       <ActionPanel

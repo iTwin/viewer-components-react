@@ -93,6 +93,9 @@ importers:
       '@itwin/insights-client':
         specifier: 0.10.3
         version: 0.10.3
+      '@itwin/itwinui-icons-color-react':
+        specifier: 2.1.0
+        version: 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@itwin/itwinui-icons-react':
         specifier: ^2.8.0
         version: 2.8.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -153,6 +156,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^4.36.1
         version: 4.36.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@types/react-table':
+        specifier: ^7.7.0
+        version: 7.7.20
       fast-equals:
         specifier: ^4.0.2
         version: 4.0.3

@@ -2,11 +2,12 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import React from "react";
-import { useGroupingMappingApiConfig, GroupAction, PropertyMenuWithVisualization, GroupsVisualization } from "@itwin/grouping-mapping-widget";
+import React, { useState } from "react";
+import { useGroupingMappingApiConfig, GroupAction, GroupsVisualization, CDMClient, useMappingsOperations } from "@itwin/grouping-mapping-widget";
 import type { Route } from "../GroupingMapping";
 import { RouteStep } from "../GroupingMapping";
-import { GroupPropertyAction } from "../GroupPropertyAction";
+import { RulesAction } from "../RulesAction";
+import { PropertyMenu, ValidationRule } from "../PropertyTable/PropertyMenu";
 
 export const GroupsRouter = ({
   currentRoute,
@@ -18,7 +19,9 @@ export const GroupsRouter = ({
   goBack: () => void;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
-  const { mapping, group, property, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
+  const { mapping, group, property, rule, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
+  const [ruleList, setRuleList] = useState<ValidationRule[]>([]);
+  const [csvTable, setCsvTable] = useState<string[][]>([[]]);
 
   switch (currentRoute.step) {
     case RouteStep.Groups:
@@ -86,46 +89,23 @@ export const GroupsRouter = ({
     case RouteStep.Properties:
       if (mapping && group) {
         return (
-          <PropertyMenuWithVisualization
+          <PropertyMenu
             mapping={mapping}
             group={group}
-            color="red"
-            onClickAddGroupProperty={() =>
-              navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: "Add Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
-            }
-            onClickModifyGroupProperty={(gp) =>
+            ruleList={ruleList}
+            setRuleList={setRuleList}
+            onClickAddRuleProperty={() =>
               navigateTo((prev) => ({
                 step: RouteStep.PropertyAction,
-                title: gp.propertyName,
-                groupingRouteFields: { ...prev?.groupingRouteFields, property: gp },
-              }))
-            }
-            onClickAddCalculatedProperty={() =>
-              navigateTo((prev) => ({
-                step: RouteStep.CalculatedPropertyAction,
-                title: "Create Calculated Property",
+                title: "Add Validation Property",
                 groupingRouteFields: { ...prev?.groupingRouteFields },
               }))
             }
-            onClickModifyCalculatedProperty={(cp) =>
+            onClickModifyRuleProperty={(rule) =>
               navigateTo((prev) => ({
-                step: RouteStep.CalculatedPropertyAction,
-                title: cp.propertyName,
-                groupingRouteFields: { ...prev?.groupingRouteFields, calculatedProperty: cp },
-              }))
-            }
-            onClickAddCustomCalculationProperty={() =>
-              navigateTo((prev) => ({
-                step: RouteStep.CustomCalculationPropertyAction,
-                title: "Create Custom Calculation",
-                groupingRouteFields: { ...prev?.groupingRouteFields },
-              }))
-            }
-            onClickModifyCustomCalculation={(cc) =>
-              navigateTo((prev) => ({
-                step: RouteStep.CustomCalculationPropertyAction,
-                title: cc.propertyName,
-                groupingRouteFields: { ...prev?.groupingRouteFields, customCalculation: cc },
+                step: RouteStep.PropertyAction,
+                title: rule.name,
+                groupingRouteFields: { ...prev?.groupingRouteFields, rule: rule },
               }))
             }
           />
@@ -134,7 +114,27 @@ export const GroupsRouter = ({
       return null;
     case RouteStep.PropertyAction: {
       if (mapping && group) {
-        return <GroupPropertyAction mappingId={mapping.id} group={group} groupProperty={property} onSaveSuccess={goBack} onClickCancel={goBack} />;
+        return (
+          <RulesAction
+            mappingId={mapping.id}
+            group={group}
+            rule={rule}
+            onSaveSuccess={(newRule: ValidationRule, oldRule: ValidationRule | undefined) => {
+              if (oldRule) {
+                const index = ruleList.findIndex(
+                  (r) => r.name === oldRule.name && r.onProperty.id === oldRule.onProperty.id && r.function === oldRule.function,
+                );
+                const newRuleList = [...ruleList];
+                newRuleList[index] = newRule;
+                setRuleList(newRuleList);
+              } else {
+                setRuleList([...ruleList, newRule]);
+              }
+              goBack();
+            }}
+            onClickCancel={goBack}
+          />
+        );
       }
       return null;
     }

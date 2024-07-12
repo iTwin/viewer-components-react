@@ -6,6 +6,14 @@ import "./PropertiesValidationAction.scss";
 export interface PropertyValidationActionProps {
   propertyName: string;
   properties: Property[];
+  selectedProperty: Property | undefined;
+  setSelectedProperty: (property: Property | undefined) => void;
+  selectedFunction: FunctionType | undefined;
+  setSelectedFunction: (functionType: FunctionType | undefined) => void;
+  minValue: number | undefined;
+  setMinValue: (minValue: number | undefined) => void;
+  maxValue: number | undefined;
+  setMaxValue: (maxValue: number | undefined) => void;
   setFormula: (formula: string | undefined) => void;
 }
 
@@ -37,11 +45,19 @@ export const functionTypes: SelectOption<FunctionType>[] = [
   { value: FunctionType.SumRange, label: "Sum Range" },
 ];
 
-export const PropertiesValidationAction = ({ propertyName, properties, setFormula }: PropertyValidationActionProps) => {
-  const [selectedProperty, setSelectedProperty] = useState<Property | undefined>(undefined);
-  const [selectedFunction, setSelectedFunction] = useState<FunctionType | undefined>(undefined);
-  const [minValue, setMinValue] = useState<number | undefined>(undefined);
-  const [maxValue, setMaxValue] = useState<number | undefined>(undefined);
+export const PropertiesValidationAction = ({
+  propertyName,
+  properties,
+  selectedProperty,
+  selectedFunction,
+  minValue,
+  maxValue,
+  setFormula,
+  setMaxValue,
+  setMinValue,
+  setSelectedFunction,
+  setSelectedProperty,
+}: PropertyValidationActionProps) => {
   const [minValueErrorMessage, setMinValueErrorMessage] = useState<string | undefined>(undefined);
   const [maxValueErrorMessage, setMaxValueErrorMessage] = useState<string | undefined>(undefined);
   const [generateErrorMessage, setGenerateErrorMessage] = useState<string | undefined>(undefined);

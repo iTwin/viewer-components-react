@@ -13,6 +13,7 @@ import { GroupingMappingContent } from "./GroupingMappingContent";
 import { GroupingMappingHeader } from "./GroupingMappingHeader";
 import { defaultGroupingUI } from "./customUI/DefaultGroupingUI";
 import { IModelApp } from "@itwin/core-frontend";
+import { ValidationRule } from "./PropertyTable/PropertyMenu";
 
 export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId">;
 
@@ -22,8 +23,6 @@ export enum RouteStep {
   GroupContextCustomUI,
   Properties,
   PropertyAction,
-  CalculatedPropertyAction,
-  CustomCalculationPropertyAction,
 }
 
 export interface Route {
@@ -35,6 +34,7 @@ export interface GroupingRouteFields {
   mapping?: Mapping;
   group?: GroupMinimal;
   property?: Property;
+  rule?: ValidationRule;
   calculatedProperty?: Property;
   customCalculation?: Property;
   // Optional prop but cannot be declared undefined.
