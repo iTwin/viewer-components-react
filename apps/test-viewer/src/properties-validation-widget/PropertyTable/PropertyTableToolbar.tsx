@@ -7,6 +7,7 @@ import { SvgAdd, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import "./PropertyTableToolbar.scss";
 import { ExtractionStates, ExtractionStatus } from "../Extraction/ExtractionStatus";
+import { ExtractionState } from "@itwin/insights-client";
 
 type IconStatus = "negative" | "positive" | "warning" | undefined;
 

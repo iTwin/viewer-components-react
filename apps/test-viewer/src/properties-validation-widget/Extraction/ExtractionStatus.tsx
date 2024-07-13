@@ -51,9 +51,9 @@ export const ExtractionStatus = ({ state, clearExtractionState }: ExtractionStat
     case ExtractionStates.Running:
       return <RunningExtractionState />;
     case ExtractionStates.Succeeded:
-      return <TerminalExtractionState status="Succeeded" animation={fadeOut} onAnimationEnd={onAnimationEnd} />;
+      return <TerminalExtractionState status="Succeeded" animation={fadeOut} onAnimationEnd={() => {}} />;
     case ExtractionStates.Failed:
-      return <TerminalExtractionState status="Failed" animation={fadeOut} onAnimationEnd={onAnimationEnd} />;
+      return <TerminalExtractionState status="Failed" animation={fadeOut} onAnimationEnd={() => {}} />;
     default:
       return null;
   }
