@@ -10,18 +10,16 @@ import { Button, Table } from "@itwin/itwinui-react";
 import type { Column } from "react-table";
 import "./PropertyTable.scss";
 import { ValidationRule } from "./PropertyMenu";
-import { CDMClient, ExtractionClient, ExtractionState, Mapping, Property } from "@itwin/insights-client";
+import { CDMClient, ExtractionClient, ExtractionState, GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig, useMappingClient, useMappingsOperations } from "@itwin/grouping-mapping-widget";
 import { ExtractionStates } from "../Extraction/ExtractionStatus";
 import { STATUS_CHECK_INTERVAL } from "../hooks/useFetchMappingExtractionStatus";
 import { LoadingSpinner } from "@itwin/core-react";
+import { usePapaParse } from "react-papaparse";
 
-export interface PropertyTableItem {
-  name: string;
-  id: string;
-}
 export interface PropertyListProps {
   groupData: Property[];
+  group: GroupMinimal;
   mapping: Mapping;
   onClickAdd?: () => void;
   refreshProperties: () => Promise<void>;
@@ -33,6 +31,7 @@ export interface PropertyListProps {
 
 export const PropertyTable = ({
   groupData,
+  group,
   mapping,
   onClickAdd,
   refreshProperties,
@@ -50,6 +49,7 @@ export const PropertyTable = ({
     ...groupingMappingApiConfig,
     mappingClient,
   });
+  const { readString, jsonToCSV, readRemoteFile } = usePapaParse();
   const extractionClient = new ExtractionClient();
   const cdmClient = new CDMClient();
 
@@ -88,6 +88,36 @@ export const PropertyTable = ({
       }
     }, STATUS_CHECK_INTERVAL);
   }, [extractionClient, mapping]);
+
+  const getExtractedData = async () => {
+    if (extractionId) {
+      const accessToken = await groupingMappingApiConfig.getAccessToken();
+      const cdm = await cdmClient.getCDM(accessToken, mapping.id, extractionId);
+      if (cdm) {
+        const location = cdm.entities.find((entity) => entity.name.includes(group.groupName))?.partitions[0].location;
+        if (location) {
+          const csvData = await cdmClient.getCDMPartition(accessToken, mapping.id, extractionId, location);
+          const csvText = await csvData.text();
+          //console.log("CSV Data: ", await csvData);
+          readString(csvText, {
+            worker: true,
+            complete: (results) => {
+              console.log(results);
+            },
+          });
+        } else {
+          console.log("No location found");
+          return;
+        }
+      } else {
+        console.log("No CDM found");
+      }
+    }
+  };
+
+  const onViewResults = async () => {
+    await getExtractedData();
+  };
 
   const handleDeleteProperty = useCallback(async () => {
     await deleteProperty(showDeleteModal?.property.id ?? "");
@@ -138,7 +168,7 @@ export const PropertyTable = ({
           "Run Extraction"
         )}
       </Button>
-      <Button styleType="high-visibility" onClick={() => {}} disabled={isLoading || extractionState !== ExtractionStates.Succeeded}>
+      <Button styleType="high-visibility" onClick={onViewResults} disabled={isLoading || extractionState !== ExtractionStates.Succeeded}>
         View Results
       </Button>
       {showDeleteModal && <DeleteModal entityName={showDeleteModal.name} onClose={handleCloseDeleteModal} onDelete={handleDeleteProperty} />}

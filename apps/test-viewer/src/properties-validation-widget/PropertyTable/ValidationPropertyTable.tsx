@@ -6,7 +6,7 @@ import { SvgDelete, SvgEdit, SvgMore } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem, Text } from "@itwin/itwinui-react";
 import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
-import type { Mapping, Property } from "@itwin/insights-client";
+import type { GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import { PropertyNameCell } from "./PropertyNameCell";
 import { PropertyTable } from "./PropertyTable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ import { ValidationRule } from "./PropertyMenu";
 export interface ValidationPropertyTableProps {
   iModelId: string;
   mapping: Mapping;
-  groupId: string;
+  group: GroupMinimal;
   onClickAdd?: () => void;
   onClickModify?: (value: ValidationRule) => void;
   isLoading: boolean;
@@ -28,7 +28,7 @@ export interface ValidationPropertyTableProps {
 
 export const ValidationPropertyTable = ({
   mapping,
-  groupId,
+  group,
   onClickAdd,
   onClickModify,
   isLoading,
@@ -112,19 +112,20 @@ export const ValidationPropertyTable = ({
   const { mutateAsync: deleteProperty } = useMutation({
     mutationFn: async (propertyId: string) => {
       const accessToken = await getAccessToken();
-      await propertiesClient.deleteProperty(accessToken, mapping.id, groupId, propertyId);
+      await propertiesClient.deleteProperty(accessToken, mapping.id, group.id, propertyId);
       return propertyId;
     },
     onSuccess: async (propertyId) => {
       const updatedRuleList = ruleList.filter((rule) => rule.property.id !== propertyId);
       setRuleList(updatedRuleList);
-      await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mapping.id, groupId] });
+      await queryClient.invalidateQueries({ queryKey: ["properties", iModelId, mapping.id, group.id] });
     },
   });
 
   return (
     <PropertyTable
       columnsFactory={columnsFactory}
+      group={group}
       groupData={groupProperties}
       mapping={mapping}
       isLoading={isLoading}

@@ -67,7 +67,7 @@ export const PropertyMenu = ({
         <ValidationPropertyTable
           iModelId={iModelId}
           mapping={mapping}
-          groupId={groupId}
+          group={group}
           onClickAdd={onClickAddRuleProperty}
           onClickModify={onClickModifyRuleProperty}
           isLoading={isLoadingGroupProperties}
