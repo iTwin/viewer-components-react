@@ -9,17 +9,20 @@ import { FilterLimitExceededError } from "../common/TreeErrors";
 
 import type { ECClassHierarchyInspector, ECSchemaProvider, IInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import type {
+  createHierarchyProvider,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
   HierarchyDefinition,
   HierarchyLevelDefinition,
-  HierarchyNodeIdentifiersPath,
   LimitingECSqlQueryExecutor,
   NodesQueryClauseFactory,
 } from "@itwin/presentation-hierarchies";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
+
+type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
+type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 
 interface CategoriesTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector;
@@ -212,14 +215,14 @@ async function createInstanceKeyPathsFromInstanceLabel(
     },
     { restartToken: "tree-widget/categories-tree/filter-by-label-query" },
   );
-  const paths = new Array<HierarchyNodeIdentifiersPath | { path: HierarchyNodeIdentifiersPath; options?: { autoExpand?: boolean } }>();
+  const paths: HierarchyFilteringPaths = [];
   for await (const row of reader) {
-    const path = { path: [{ className: row.CategoryClass, id: row.CategoryId }], options: { autoExpand: false } };
+    const path = { path: [{ className: row.CategoryClass, id: row.CategoryId }], options: { autoExpand: true } };
     row.SubcategoryId && path.path.push({ className: row.SubcategoryClass, id: row.SubcategoryId });
     paths.push(path);
   }
   if (paths.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
-    throw new FilterLimitExceededError();
+    throw new FilterLimitExceededError(MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
   return paths;
 }

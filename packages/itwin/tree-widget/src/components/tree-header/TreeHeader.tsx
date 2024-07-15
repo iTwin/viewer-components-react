@@ -38,7 +38,7 @@ export interface TreeHeaderProps extends CommonProps {
   /** Modifies the density of tree header. `enlarged` header contains larger content */
   density?: "default" | "enlarged";
   /** Should the search box be disabled */
-  isDisabled?: boolean;
+  isFilteringDisabled?: boolean;
 }
 
 /** @internal */
@@ -71,7 +71,7 @@ export function TreeHeader(props: TreeHeaderProps) {
         resultCount={resultCount}
         onSelectedResultChanged={onSelectedChanged}
         size={size}
-        isDisabled={instanceFocusEnabled || props.isDisabled}
+        isDisabled={instanceFocusEnabled || props.isFilteringDisabled}
       />
     </div>
   );

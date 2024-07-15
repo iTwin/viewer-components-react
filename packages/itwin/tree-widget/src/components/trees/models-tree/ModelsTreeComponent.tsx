@@ -139,7 +139,7 @@ function ModelsTreeComponentImpl({
             onFilterClear={clearFilter}
             onSelectedChanged={() => {}}
             density={density}
-            isDisabled={!!treeProps.getFilteredPaths}
+            isFilteringDisabled={!!treeProps.getFilteredPaths}
           >
             {headerButtons
               ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed })}</Fragment>)

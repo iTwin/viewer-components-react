@@ -8,7 +8,7 @@
  * @beta
  */
 export class FilterLimitExceededError extends Error {
-  public constructor() {
+  public constructor(public readonly limit: number) {
     super("Too many filter matches");
   }
 }
