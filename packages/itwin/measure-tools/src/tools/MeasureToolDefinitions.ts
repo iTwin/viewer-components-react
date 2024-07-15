@@ -17,6 +17,7 @@ import { MeasureRadiusTool } from "./MeasureRadiusTool";
 import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool";
 import { MeasureTools } from "../MeasureTools";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
+import { MeasureHeightTool } from "./MeasureHeightTool";
 
 export class MeasureToolDefinitions {
 
@@ -43,6 +44,19 @@ export class MeasureToolDefinitions {
       tooltip: () => MeasureDistanceTool.description,
       execute: () => {
         const tool = new MeasureDistanceTool(enableSheetMeasurements);
+        void tool.run();
+      },
+    });
+  }
+
+  public static getMeasureHeightToolCommand(enableSheetMeasurements: boolean) {
+    return new ToolItemDef({
+      toolId: MeasureHeightTool.toolId,
+      iconSpec: MeasureHeightTool.iconSpec,
+      label: () => MeasureHeightTool.flyover,
+      tooltip: () => MeasureHeightTool.description,
+      execute: () => {
+        const tool = new MeasureHeightTool(enableSheetMeasurements);
         void tool.run();
       },
     });

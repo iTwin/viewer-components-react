@@ -35,7 +35,7 @@
       "longLabel": "Measure Distance",
       "delta_x": "ΔX:",
       "delta_y": "ΔY:",
-      "distance": "Distance:",
+      "distance": "Distance",
       "startCoordinates": "Start Coordinates:",
       "endCoordinates": "End Coordinates:",
       "slope": "Slope:",
@@ -43,6 +43,12 @@
       "rise": "Rise:",
       "mainInstruction": "Enter point to measure from",
       "mainInstruction2": "Enter point to measure to"
+    },
+    "MeasureHeight": {
+      "keyin": "Height",
+      "flyover": "Height",
+      "description": "Create height measurements.",
+      "height": "Height"
     },
     "MeasureArea": {
       "keyin": "Area",
@@ -140,7 +146,7 @@
     "areaMeasurement": "Area Measurement",
     "clearMeasurement": "Clear Measurement",
     "closePolygon": "Close Polygon",
-    "distanceMeasurement": "Distance Measurement",
+    "measurement": "Measurement",
     "locationMeasurement": "Location Measurement",
     "persistMeasurements": "Persist Measurements"
   },
