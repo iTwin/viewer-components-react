@@ -158,7 +158,7 @@ Models tree allows displaying a subset of all nodes by providing a `getFilteredP
 
 ```tsx
 const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
-  return await createInstanceKeyPaths({
+  return createInstanceKeyPaths({
     // list of instance keys representing nodes that should be displayed in the hierarchy
     keys: myInstanceKeys,
     // instead of providing instance keys, a label can be provided to display all nodes that contain it

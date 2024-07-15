@@ -63,6 +63,7 @@ interface ModelsTreeDefinitionProps {
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
+/** @beta */
 export interface ElementsGroupInfo {
   parent:
     | {
