@@ -157,8 +157,6 @@ The Models tree can be used in a "focus mode" where the tree is automatically fi
 Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
 
 ```tsx
-import { createInstanceKeyPaths } from "@itwin/tree-widget-react";
-
 const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
   return await createInstanceKeyPaths({
     // list of instance keys representing nodes that should be displayed in the hierarchy
@@ -174,8 +172,6 @@ The `ModelsTree` component displays a message when too many matches are found wh
 When a filter is provided or instance focus mode is used, the hierarchy automatically expands to show the targeted nodes. This might not be desirable when displaying a subset of the hierarchy and can be disabled by adding the `autoExpand: false` option to each path returned by `getFilteredPaths`:
 
 ```tsx
-import { createInstanceKeyPaths } from "@itwin/tree-widget-react";
-
 const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
   const paths = await createInstanceKeyPaths({ keys: myInstanceKeys });
   // disable auto-expansion
