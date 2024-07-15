@@ -70,6 +70,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       if (featureFlags?.showHeightTool) {
         tools.push(MeasureToolDefinitions.getMeasureHeightToolCommand(this._props?.enableSheetMeasurement ?? true));
       }
+      if (featureFlags?.showWidthTool) {
+        tools.push(MeasureToolDefinitions.getMeasureWidthToolCommand(this._props?.enableSheetMeasurement ?? true));
+      }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
         return [

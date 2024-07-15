@@ -39,6 +39,7 @@ export * from "./tools/MeasureAngleTool";
 export * from "./tools/MeasureAreaTool";
 export * from "./tools/MeasureDistanceTool";
 export * from "./tools/MeasureHeightTool";
+export * from "./tools/MeasureWidthTool";
 export * from "./tools/MeasureLocationTool";
 export * from "./tools/MeasurePerpendicularTool";
 export * from "./tools/MeasureRadiusTool";

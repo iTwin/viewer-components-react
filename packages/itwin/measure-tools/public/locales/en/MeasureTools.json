@@ -50,6 +50,12 @@
       "description": "Create height measurements.",
       "height": "Height"
     },
+    "MeasureWidth": {
+      "keyin": "Width",
+      "flyover": "Width",
+      "description": "Create width measurements.",
+      "width": "Width"
+    },
     "MeasureArea": {
       "keyin": "Area",
       "flyover": "Area",

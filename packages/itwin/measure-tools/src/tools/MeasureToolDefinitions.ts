@@ -18,6 +18,7 @@ import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxes
 import { MeasureTools } from "../MeasureTools";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 import { MeasureHeightTool } from "./MeasureHeightTool";
+import { MeasureWidthTool } from "./MeasureWidthTool";
 
 export class MeasureToolDefinitions {
 
@@ -57,6 +58,18 @@ export class MeasureToolDefinitions {
       tooltip: () => MeasureHeightTool.description,
       execute: () => {
         const tool = new MeasureHeightTool(enableSheetMeasurements);
+        void tool.run();
+      },
+    });
+  }
+  public static getMeasureWidthToolCommand(enableSheetMeasurements: boolean) {
+    return new ToolItemDef({
+      toolId: MeasureWidthTool.toolId,
+      iconSpec: MeasureWidthTool.iconSpec,
+      label: () => MeasureWidthTool.flyover,
+      tooltip: () => MeasureWidthTool.description,
+      execute: () => {
+        const tool = new MeasureWidthTool(enableSheetMeasurements);
         void tool.run();
       },
     });
