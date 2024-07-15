@@ -154,18 +154,13 @@ The Models tree can be used in a "focus mode" where the tree is automatically fi
 
 #### Displaying a subset of the tree
 
-Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors and their children.
-
-This package provides a `createInstanceKeyPaths` function for creating paths either from instance keys or an instance label. Example implementation of `getFilteredPaths`:
+Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
 
 ```tsx
 import { createInstanceKeyPaths } from "@itwin/tree-widget-react";
 
-const getFilteredPaths = async (props) => {
+const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
   return await createInstanceKeyPaths({
-    imodelAccess: props.imodelAccess,
-    idsCache: props.idsCache,
-    hierarchyConfig: props.hierarchyConfig,
     // list of instance keys representing nodes that should be displayed in the hierarchy
     keys: myInstanceKeys,
     // instead of providing instance keys, a label can be provided to display all nodes that contain it
@@ -181,13 +176,8 @@ When a filter is provided or instance focus mode is used, the hierarchy automati
 ```tsx
 import { createInstanceKeyPaths } from "@itwin/tree-widget-react";
 
-const getFilteredPaths = async (props) => {
-  const paths = await createInstanceKeyPaths({
-    imodelAccess: props.imodelAccess,
-    idsCache: props.idsCache,
-    hierarchyConfig: props.hierarchyConfig,
-    keys: myInstanceKeys,
-  });
+const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
+  const paths = await createInstanceKeyPaths({ keys: myInstanceKeys });
   // disable auto-expansion
   return paths.map((path) => ({ path, options: { autoExpand: false } }));
 };
