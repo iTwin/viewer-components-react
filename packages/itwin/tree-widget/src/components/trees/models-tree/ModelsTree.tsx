@@ -19,7 +19,7 @@ import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { ModelsTreeComponent } from "./ModelsTreeComponent";
-import { createInstanceKeyPaths, defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
+import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
 import type { Id64String } from "@itwin/core-bentley";
@@ -28,12 +28,10 @@ import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./Mode
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import type { PresentationHierarchyNode, useTree } from "@itwin/presentation-hierarchies-react";
+import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
-type UseTreeProps = Parameters<typeof useTree>[0];
-type IModelAccess = UseTreeProps["imodelAccess"];
-type FilteredPaths = ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>;
+type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
 interface ModelsTreeOwnProps {
@@ -44,7 +42,9 @@ interface ModelsTreeOwnProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   filter?: string;
-  getFilteredPaths?: (props: { imodelAccess: IModelAccess; idsCache: ModelsTreeIdsCache; hierarchyConfig: ModelsTreeHierarchyConfiguration }) => FilteredPaths;
+  getFilteredPaths?: (props: {
+    createInstanceKeyPaths: (props: { keys: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
+  }) => Promise<HierarchyFilteringPaths>;
 }
 
 /** @beta */
@@ -109,12 +109,13 @@ export function ModelsTree({
     return async ({ imodelAccess }) => {
       try {
         const targetKeys = await collectTargetKeys(loadFocusedInstancesKeys);
-        return await createInstanceKeyPaths({
+        const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
-          idsCache: getModelsTreeIdsCache(),
           keys: targetKeys,
+          idsCache: getModelsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
         });
+        return paths.map((path) => ({ path, options: { autoExpand: true } }));
       } catch (e) {
         const newError = FilterLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
         if (newError !== "tooManyInstancesFocused") {
@@ -135,12 +136,13 @@ export function ModelsTree({
     return async ({ imodelAccess }) => {
       onFeatureUsed({ featureId: "filtering", reportInteraction: true });
       try {
-        return await createInstanceKeyPaths({
+        const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
           imodelAccess,
           label: filter,
           idsCache: getModelsTreeIdsCache(),
           hierarchyConfig: hierarchyConfiguration,
         });
+        return paths.map((path) => ({ path, options: { autoExpand: true } }));
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
         if (newError !== "tooManyFilterMatches") {
@@ -153,14 +155,17 @@ export function ModelsTree({
     };
   }, [filter, getModelsTreeIdsCache, onFeatureUsed, hierarchyConfiguration]);
 
-  const getFilterPaths = useMemo<VisibilityTreeProps["getFilteredPaths"]>(() => {
+  const getFilteredPathsFromProps = useMemo<VisibilityTreeProps["getFilteredPaths"]>(() => {
     setFilteringError(undefined);
     if (!getFilteredPaths) {
       return undefined;
     }
     return async ({ imodelAccess }) => {
       try {
-        return await getFilteredPaths({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration });
+        return await getFilteredPaths({
+          createInstanceKeyPaths: async (props) =>
+            ModelsTreeDefinition.createInstanceKeyPaths({ ...props, imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
+        });
       } catch (e) {
         const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
         setFilteringError(newError);
@@ -179,7 +184,7 @@ export function ModelsTree({
       getSchemaContext={getSchemaContext}
       visibilityHandlerFactory={visibilityHandlerFactory}
       getHierarchyDefinition={getHierarchyDefinition}
-      getFilteredPaths={getFocusedFilteredPaths ?? getFilterPaths ?? getSearchFilteredPaths}
+      getFilteredPaths={getFocusedFilteredPaths ?? getFilteredPathsFromProps ?? getSearchFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       density={density}
       noDataMessage={getNoDataMessage(filter, filteringError)}

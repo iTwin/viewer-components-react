@@ -534,6 +534,14 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     ];
   }
 
+  public static async createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
+    if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
+      const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+      return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
+    }
+    return createInstanceKeyPathsFromInstanceKeys(props);
+  }
+
   private async isSupported() {
     const [schemaName, className] = this._hierarchyConfig.elementClassSpecification.split(/[\.:]/);
     if (!schemaName || !className) {
@@ -560,19 +568,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     }
     return false;
   }
-}
-
-/**
- * Creates a list of `HierarchyNodeIdentifierPath` that can be used to filter the hierarchy
- * to only display nodes that either match the provided instance keys and their children or contain a provided label.
- * @beta
- */
-export async function createInstanceKeyPaths(props: ModelsTreeInstanceKeyPathsProps) {
-  if (ModelsTreeInstanceKeyPathsProps.isLabelProps(props)) {
-    const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
-    return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
-  }
-  return createInstanceKeyPathsFromInstanceKeys(props);
 }
 
 function createSubjectInstanceKeysPath(subjectId: Id64String, idsCache: ModelsTreeIdsCache): Observable<HierarchyNodeIdentifiersPath> {
@@ -697,7 +692,7 @@ function createGeometricElementInstanceKeyPaths(
 
 async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceKeyPathsFromInstanceKeysProps): Promise<HierarchyNodeIdentifiersPath[]> {
   if (props.keys.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
-    throw new FilterLimitExceededError();
+    throw new FilterLimitExceededError(MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
   const ids = {
     models: new Array<Id64String>(),

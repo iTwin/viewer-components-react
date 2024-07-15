@@ -17,4 +17,3 @@ export { TelemetryContextProvider } from "./common/UseTelemetryContext";
 export { FilterLimitExceededError } from "./common/TreeErrors";
 
 export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/ModelsTreeVisibilityHandler";
-export { createInstanceKeyPaths } from "./models-tree/ModelsTreeDefinition";
