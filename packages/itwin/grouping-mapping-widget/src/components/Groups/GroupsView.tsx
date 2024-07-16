@@ -113,7 +113,7 @@ export const GroupsView = ({
       {alert}
       <div className="gmw-groups-border" />
       {!!hilitedGroupsProgress && (
-        <div className="gmw-group-progress-bar">
+        <div className="gmw-group-progress-bar" title="Getting visualization ready">
           <ProgressLinear
             value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups) * maxDynamicProgress}
           />
