@@ -8,7 +8,7 @@ import React, { useCallback } from "react";
 import type { CellProps, Column } from "react-table";
 import type { GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import { PropertyNameCell } from "./PropertyNameCell";
-import { PropertyTable } from "./PropertyTable";
+import { PropertyTable, TableData } from "./PropertyTable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useGroupingMappingApiConfig, usePropertiesClient } from "@itwin/grouping-mapping-widget";
 import { ValidationRule } from "./PropertyMenu";
@@ -19,6 +19,7 @@ export interface ValidationPropertyTableProps {
   group: GroupMinimal;
   onClickAdd?: () => void;
   onClickModify?: (value: ValidationRule) => void;
+  onClickResults: (tableData: TableData) => void;
   isLoading: boolean;
   groupProperties: Property[];
   refresh: () => Promise<void>;
@@ -31,6 +32,7 @@ export const ValidationPropertyTable = ({
   group,
   onClickAdd,
   onClickModify,
+  onClickResults,
   isLoading,
   groupProperties,
   refresh,
@@ -61,7 +63,7 @@ export const ValidationPropertyTable = ({
       },
       {
         id: "ruleMax",
-        Cell: (value: CellProps<ValidationRule>) => <Text>{value.row.original.max ? `>= ${value.row.original.max}` : ""}</Text>,
+        Cell: (value: CellProps<ValidationRule>) => <Text>{value.row.original.max ? `<= ${value.row.original.max}` : ""}</Text>,
       },
       {
         id: "dropdown",
@@ -130,6 +132,7 @@ export const ValidationPropertyTable = ({
       mapping={mapping}
       isLoading={isLoading}
       onClickAdd={onClickAdd}
+      onClickResults={onClickResults}
       refreshProperties={refresh}
       deleteProperty={deleteProperty}
       ruleList={ruleList}

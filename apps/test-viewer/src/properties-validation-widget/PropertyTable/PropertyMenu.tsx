@@ -10,6 +10,7 @@ import { usePropertiesQuery } from "../hooks/usePropertiesQuery";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGroupingMappingApiConfig, usePropertiesClient } from "@itwin/grouping-mapping-widget";
 import { FunctionType } from "../PropertiesValidation/PropertiesValidationAction";
+import { TableData } from "./PropertyTable";
 
 /**
  * Props for the {@link PropertyMenu} component.
@@ -23,6 +24,7 @@ export interface PropertyMenuProps {
   ruleList: ValidationRule[];
   setRuleList: (value: ValidationRule[]) => void;
   hideGroupProps?: boolean;
+  onClickResults: (tableData: TableData) => void;
 }
 
 export interface ValidationRule {
@@ -44,6 +46,7 @@ export const PropertyMenu = ({
   group,
   onClickAddRuleProperty,
   onClickModifyRuleProperty,
+  onClickResults,
   ruleList,
   setRuleList,
   hideGroupProps = false,
@@ -75,6 +78,7 @@ export const PropertyMenu = ({
           refresh={refreshGroupProperties}
           ruleList={ruleList}
           setRuleList={setRuleList}
+          onClickResults={onClickResults}
         />
       )}
     </div>

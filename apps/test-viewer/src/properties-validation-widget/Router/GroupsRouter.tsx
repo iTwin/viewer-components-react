@@ -8,6 +8,8 @@ import type { Route } from "../GroupingMapping";
 import { RouteStep } from "../GroupingMapping";
 import { RulesAction } from "../RulesAction";
 import { PropertyMenu, ValidationRule } from "../PropertyTable/PropertyMenu";
+import { TableData } from "../PropertyTable/PropertyTable";
+import { Results } from "../Results/Results";
 
 export const GroupsRouter = ({
   currentRoute,
@@ -21,7 +23,7 @@ export const GroupsRouter = ({
   const { iModelId } = useGroupingMappingApiConfig();
   const { mapping, group, property, rule, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
   const [ruleList, setRuleList] = useState<ValidationRule[]>([]);
-  const [csvTable, setCsvTable] = useState<string[][]>([[]]);
+  const [resultsData, setResultsData] = useState<TableData>({ headers: [], data: [] });
 
   switch (currentRoute.step) {
     case RouteStep.Groups:
@@ -108,6 +110,14 @@ export const GroupsRouter = ({
                 groupingRouteFields: { ...prev?.groupingRouteFields, rule: rule },
               }))
             }
+            onClickResults={(tableData: TableData) => {
+              setResultsData(tableData);
+              navigateTo((prev) => ({
+                step: RouteStep.Results,
+                title: "Results",
+                groupingRouteFields: { ...prev?.groupingRouteFields },
+              }));
+            }}
           />
         );
       }
@@ -137,6 +147,9 @@ export const GroupsRouter = ({
         );
       }
       return null;
+    }
+    case RouteStep.Results: {
+      return <Results tableData={resultsData} />;
     }
     default:
       return null;

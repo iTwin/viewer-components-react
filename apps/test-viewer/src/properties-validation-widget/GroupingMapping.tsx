@@ -23,6 +23,7 @@ export enum RouteStep {
   GroupContextCustomUI,
   Properties,
   PropertyAction,
+  Results,
 }
 
 export interface Route {

@@ -10,7 +10,7 @@ import { Button, Table } from "@itwin/itwinui-react";
 import type { Column } from "react-table";
 import "./PropertyTable.scss";
 import { ValidationRule } from "./PropertyMenu";
-import { CDMClient, ExtractionClient, ExtractionState, GroupMinimal, Mapping, Property } from "@itwin/insights-client";
+import { CDMAttribute, CDMClient, ExtractionClient, ExtractionState, GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig, useMappingClient, useMappingsOperations } from "@itwin/grouping-mapping-widget";
 import { ExtractionStates } from "../Extraction/ExtractionStatus";
 import { STATUS_CHECK_INTERVAL } from "../hooks/useFetchMappingExtractionStatus";
@@ -22,6 +22,7 @@ export interface PropertyListProps {
   group: GroupMinimal;
   mapping: Mapping;
   onClickAdd?: () => void;
+  onClickResults: (tableData: TableData) => void;
   refreshProperties: () => Promise<void>;
   isLoading: boolean;
   deleteProperty: (propertyId: string) => Promise<string>;
@@ -29,11 +30,17 @@ export interface PropertyListProps {
   ruleList: ValidationRule[];
 }
 
+export interface TableData {
+  headers: string[];
+  data: string[][];
+}
+
 export const PropertyTable = ({
   groupData,
   group,
   mapping,
   onClickAdd,
+  onClickResults,
   refreshProperties,
   isLoading,
   deleteProperty,
@@ -49,12 +56,11 @@ export const PropertyTable = ({
     ...groupingMappingApiConfig,
     mappingClient,
   });
-  const { readString, jsonToCSV, readRemoteFile } = usePapaParse();
+  const { readString } = usePapaParse();
   const extractionClient = new ExtractionClient();
   const cdmClient = new CDMClient();
 
   const onRunExtraction = useCallback(async () => {
-    //const extractionDetails = await runExtraction([mapping]);
     const accessToken = await groupingMappingApiConfig.getAccessToken();
     const extractionDetails = await extractionClient.runExtraction(accessToken, {
       mappings: [{ id: mapping.id }],
@@ -89,22 +95,43 @@ export const PropertyTable = ({
     }, STATUS_CHECK_INTERVAL);
   }, [extractionClient, mapping]);
 
+  const filterExtractedData = (data: string[][], colHeaders: CDMAttribute[] | undefined) => {
+    if (!colHeaders) {
+      return;
+    }
+    const relevantValidationProps = ruleList.map((rule) => rule.property.propertyName);
+    const relevantDataProps = ruleList.map((rule) => rule.onProperty.propertyName);
+    const relevantColumnNames = [...new Set([...relevantValidationProps, ...relevantDataProps])];
+    const colHeadersNames = colHeaders.map((header) => header.name);
+    const relevantColumnIndexes = relevantColumnNames.map((name) => colHeadersNames.indexOf(name));
+    const filteredData = data.map((row) => relevantColumnIndexes.map((index) => row[index]));
+    const tableData = { headers: relevantColumnNames, data: filteredData };
+    return tableData;
+  };
+
   const getExtractedData = async () => {
     if (extractionId) {
       const accessToken = await groupingMappingApiConfig.getAccessToken();
       const cdm = await cdmClient.getCDM(accessToken, mapping.id, extractionId);
       if (cdm) {
+        const colHeaders = cdm.entities.find((entity) => entity.name.includes(group.groupName))?.attributes;
         const location = cdm.entities.find((entity) => entity.name.includes(group.groupName))?.partitions[0].location;
         if (location) {
+          console.log(mapping.id, extractionId, location);
           const csvData = await cdmClient.getCDMPartition(accessToken, mapping.id, extractionId, location);
           const csvText = await csvData.text();
-          //console.log("CSV Data: ", await csvData);
-          readString(csvText, {
+          readString<string[]>(csvText, {
             worker: true,
             complete: (results) => {
-              console.log(results);
+              const tableData: TableData | undefined = filterExtractedData(results.data, colHeaders);
+              if (!tableData) {
+                console.log("Table data undefined");
+                return;
+              }
+              onClickResults(tableData);
             },
           });
+          return;
         } else {
           console.log("No location found");
           return;
@@ -151,26 +178,28 @@ export const PropertyTable = ({
         isSortable
         isLoading={isLoading}
       />
-      <Button
-        styleType="high-visibility"
-        onClick={onRunExtraction}
-        disabled={
-          ruleList.length === 0 ||
-          isLoading ||
-          extractionState === ExtractionStates.Starting ||
-          extractionState === ExtractionStates.Queued ||
-          extractionState === ExtractionStates.Running
-        }
-      >
-        {extractionState === ExtractionStates.Starting || extractionState === ExtractionStates.Queued || extractionState === ExtractionStates.Running ? (
-          <LoadingSpinner />
-        ) : (
-          "Run Extraction"
-        )}
-      </Button>
-      <Button styleType="high-visibility" onClick={onViewResults} disabled={isLoading || extractionState !== ExtractionStates.Succeeded}>
-        View Results
-      </Button>
+      <div className="pvw-action-buttons">
+        <Button
+          styleType="high-visibility"
+          onClick={onRunExtraction}
+          disabled={
+            ruleList.length === 0 ||
+            isLoading ||
+            extractionState === ExtractionStates.Starting ||
+            extractionState === ExtractionStates.Queued ||
+            extractionState === ExtractionStates.Running
+          }
+        >
+          {extractionState === ExtractionStates.Starting || extractionState === ExtractionStates.Queued || extractionState === ExtractionStates.Running ? (
+            <LoadingSpinner />
+          ) : (
+            "Run Extraction"
+          )}
+        </Button>
+        <Button styleType="default" onClick={onViewResults} disabled={isLoading || extractionState !== ExtractionStates.Succeeded}>
+          View Results
+        </Button>
+      </div>
       {showDeleteModal && <DeleteModal entityName={showDeleteModal.name} onClose={handleCloseDeleteModal} onDelete={handleDeleteProperty} />}
     </div>
   );
