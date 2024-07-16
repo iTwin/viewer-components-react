@@ -202,7 +202,7 @@ MeasureAreaToolModel
           normal,
           AxisOrder.XZY
         );
-        if (undefined !== mat) hints.setMatrix(mat);
+        if (undefined !== mat) hints.setMatrix(mat.inverse()!);
       }
     }
     hints.sendHints(false);
