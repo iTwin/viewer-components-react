@@ -5,26 +5,36 @@
 
 import { useEffect, useRef, useState } from "react";
 import { defer, distinct, mergeMap, Subject, takeUntil } from "rxjs";
+import { useTelemetryContext } from "./UseTelemetryContext";
 
-import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { MutableRefObject } from "react";
-import type { TreeNodeCheckboxState } from "./components/TreeNodeCheckbox";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
+import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
+import type { TreeCheckboxProps } from "./components/TreeNodeCheckbox";
 
 /**
  * Data structure that describes instance visibility status.
- * @internal
+ * @beta
  */
 export interface VisibilityStatus {
+  /** Instance visibility state. */
   state: "visible" | "partial" | "hidden";
+  /** Specifies whether visibility changing is disabled or not. */
   isDisabled?: boolean;
+  /** Tooltip that should be displayed when hovering over the visibility checkbox. */
   tooltip?: string;
 }
 
-/** @internal */
+/**
+ * Handler that can be used to determine and change visibility of instances represented by tree nodes.
+ * @beta
+ */
 export interface HierarchyVisibilityHandler extends IDisposable {
+  /** Event used to notify tree about visibility changes from outside. */
   readonly onVisibilityChange: BeEvent<() => void>;
+  /** Returns current visibility status for tree node. */
   getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
+  /** Changes visibility of the instance represented by tree node. */
   changeVisibility(node: HierarchyNode, on: boolean): Promise<void>;
 }
 
@@ -32,23 +42,17 @@ interface UseHierarchyVisibilityProps {
   visibilityHandlerFactory: () => HierarchyVisibilityHandler;
 }
 
-interface UseHierarchyVisibilityResult {
-  onCheckboxClicked: (node: PresentationHierarchyNode, checked: boolean) => void;
-  getCheckboxState: (node: PresentationHierarchyNode) => TreeNodeCheckboxState;
-  triggerRefresh: () => void;
-}
-
-/** @internal */
-export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): UseHierarchyVisibilityResult {
-  const nodesStateMap = useRef(new Map<string, { node: PresentationHierarchyNode; state: TreeNodeCheckboxState; needsRefresh: boolean }>());
-  const [state, setState] = useState<UseHierarchyVisibilityResult>({
+export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarchyVisibilityProps): TreeCheckboxProps & { triggerRefresh: () => void } {
+  const visibilityStatusMap = useRef(new Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>());
+  const [state, setState] = useState<TreeCheckboxProps & { triggerRefresh: () => void }>({
     getCheckboxState: () => ({ state: "off", isDisabled: true }),
     onCheckboxClicked: () => {},
     triggerRefresh: () => {},
   });
+  const { onFeatureUsed } = useTelemetryContext();
 
   useEffect(() => {
-    nodesStateMap.current.clear();
+    visibilityStatusMap.current.clear();
     const handler = visibilityHandlerFactory();
 
     const visibilityChanged = new Subject<void>();
@@ -58,7 +62,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     };
 
     const resetCache = () => {
-      nodesStateMap.current.forEach((value) => {
+      visibilityStatusMap.current.forEach((value) => {
         value.needsRefresh = true;
       });
       visibilityChanged.next();
@@ -67,7 +71,7 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
     const triggerCheckboxUpdate = () => {
       setState((prev) => ({
         ...prev,
-        getCheckboxState: createStateGetter(nodesStateMap, calculateNodeStatus),
+        getCheckboxState: createStateGetter(visibilityStatusMap, calculateNodeStatus),
       }));
     };
 
@@ -78,13 +82,9 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       )
       .subscribe({
         next: ({ node, status }) => {
-          nodesStateMap.current.set(node.id, {
+          visibilityStatusMap.current.set(node.id, {
             node,
-            state: {
-              state: status.state === "visible" ? "on" : status.state === "partial" ? "partial" : "off",
-              tooltip: status.tooltip,
-              isDisabled: status.isDisabled,
-            },
+            status,
             needsRefresh: false,
           });
           triggerCheckboxUpdate();
@@ -92,19 +92,20 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       });
 
     const changeVisibility = (node: PresentationHierarchyNode, checked: boolean) => {
+      onFeatureUsed({ featureId: "visibility-change", reportInteraction: true });
       void handler.changeVisibility(node.nodeData, checked);
-      const entry = nodesStateMap.current.get(node.id);
+      const entry = visibilityStatusMap.current.get(node.id);
       if (!entry) {
         return;
       }
-      entry.state.state = checked ? "on" : "off";
-      entry.state.tooltip = undefined;
+      entry.status.state = checked ? "visible" : "hidden";
+      entry.status.tooltip = undefined;
       triggerCheckboxUpdate();
     };
 
     setState({
       onCheckboxClicked: changeVisibility,
-      getCheckboxState: createStateGetter(nodesStateMap, calculateNodeStatus),
+      getCheckboxState: createStateGetter(visibilityStatusMap, calculateNodeStatus),
       triggerRefresh: () => {
         resetCache();
         triggerCheckboxUpdate();
@@ -121,16 +122,16 @@ export function useHierarchyVisibility({ visibilityHandlerFactory }: UseHierarch
       removeListener();
       handler.dispose();
     };
-  }, [visibilityHandlerFactory]);
+  }, [visibilityHandlerFactory, onFeatureUsed]);
 
   return state;
 }
 
 function createStateGetter(
-  map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; state: TreeNodeCheckboxState; needsRefresh: boolean }>>,
+  map: MutableRefObject<Map<string, { node: PresentationHierarchyNode; status: VisibilityStatus; needsRefresh: boolean }>>,
   calculateVisibility: (node: PresentationHierarchyNode) => void,
-) {
-  return (node: PresentationHierarchyNode): TreeNodeCheckboxState => {
+): TreeCheckboxProps["getCheckboxState"] {
+  return (node) => {
     const entry = map.current.get(node.id);
     if (entry === undefined) {
       calculateVisibility(node);
@@ -140,6 +141,11 @@ function createStateGetter(
       calculateVisibility(node);
     }
 
-    return entry.state;
+    const status = entry.status;
+    return {
+      state: status.state === "visible" ? "on" : status.state === "hidden" ? "off" : "partial",
+      tooltip: status.tooltip,
+      isDisabled: status.isDisabled,
+    };
   };
 }

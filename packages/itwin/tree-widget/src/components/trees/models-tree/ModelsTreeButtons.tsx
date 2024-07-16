@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useState } from "react";
-import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { SvgCursorClick, SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
+import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler";
 
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-
 /**
  * Information about a single Model.
  * @public
@@ -67,7 +67,7 @@ async function queryModelsForHeaderActions(iModel: IModelConnection) {
   return modelProps.map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection })).filter(({ id }) => id) as ModelInfo[];
 }
 
-/** @internal */
+/** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
@@ -87,7 +87,7 @@ export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   );
 }
 
-/** @internal */
+/** @public */
 export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
@@ -107,7 +107,7 @@ export function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   );
 }
 
-/** @internal */
+/** @public */
 export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
@@ -127,7 +127,7 @@ export function InvertButton(props: ModelsTreeHeaderButtonProps) {
   );
 }
 
-/** @internal */
+/** @public */
 export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   const models2d = useMemo(() => {
     return props.models.filter((model) => model.isPlanProjection).map((model) => model.id);
@@ -157,7 +157,7 @@ export function View2DButton(props: ModelsTreeHeaderButtonProps) {
   );
 }
 
-/** @internal */
+/** @public */
 export function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const models3d = useMemo(() => {
     return props.models.filter((model) => !model.isPlanProjection).map((model) => model.id);
@@ -184,5 +184,27 @@ export function View3DButton(props: ModelsTreeHeaderButtonProps) {
     >
       {TreeWidget.translate("modelsTree.buttons.toggle3d.label")}
     </Button>
+  );
+}
+
+/** @public */
+export function ToggleInstancesFocusButton({ density, onFeatureUsed }: { density?: "default" | "enlarged"; onFeatureUsed?: (feature: string) => void }) {
+  const { enabled, toggle } = useFocusedInstancesContext();
+  const title = enabled
+    ? TreeWidget.translate("modelsTree.buttons.toggleFocusMode.disable.tooltip")
+    : TreeWidget.translate("modelsTree.buttons.toggleFocusMode.enable.tooltip");
+  return (
+    <IconButton
+      styleType="borderless"
+      size={density === "enlarged" ? "large" : "small"}
+      title={title}
+      onClick={() => {
+        onFeatureUsed?.("models-tree-instancesfocus");
+        toggle();
+      }}
+      isActive={enabled}
+    >
+      <SvgCursorClick />
+    </IconButton>
   );
 }

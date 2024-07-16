@@ -520,8 +520,8 @@ export class DistanceMeasurement extends Measurement {
     const endPoint = this.getMeasureEndPoint();
 
     const distance = this.worldScale * startPoint.distance(endPoint);
-    const run = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * Math.abs(endPoint.x - startPoint.x): startPoint.distanceXY(endPoint);
-    const rise = this.drawingMetaData?.worldScale !== undefined ? this.worldScale * (endPoint.y - startPoint.y): endPoint.z - startPoint.z;
+    const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(endPoint.x - startPoint.x): startPoint.distanceXY(endPoint);
+    const rise = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * (endPoint.y - startPoint.y): endPoint.z - startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
     const dx = Math.abs(endPoint.x - startPoint.x);
     const dy = Math.abs(endPoint.y - startPoint.y);
@@ -588,7 +588,7 @@ export class DistanceMeasurement extends Measurement {
       },
     );
 
-    if (this.drawingMetaData?.worldScale === undefined) {
+    if (this.drawingMetadata?.worldScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(

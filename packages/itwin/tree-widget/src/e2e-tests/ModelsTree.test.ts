@@ -6,9 +6,11 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
+  expandStagePanel,
   initTreeWidgetTest,
   locateInstanceFilter,
   locateNode,
+  scrollTree,
   selectOperatorInDialog,
   selectPropertyInDialog,
   selectTree,
@@ -74,18 +76,11 @@ test.describe("Models tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await physicalModelNode.getByLabel("Expand").click();
+      // wait for filtered children to appear
       await locateNode(treeWidget, "PipeSupport").waitFor();
-
-      // scroll to origin to avoid flakiness due to auto-scroll
-      await page.mouse.wheel(-10000, -10000);
-
-      // hover the node for the button to appear
-      await physicalModelNode.hover();
       await treeWidget.getByTitle("Clear active filter").waitFor();
 
-      await takeScreenshot(page, treeWidget);
+      await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
 
     test("node with active filtering - information message", async ({ page }) => {
@@ -100,18 +95,11 @@ test.describe("Models tree", () => {
 
       await page.getByRole("button", { name: "Apply" }).click();
 
-      // expand node to see filtered children
-      await physicalModelNode.getByLabel("Expand").click();
+      // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
-
-      // scroll to origin to avoid flakiness due to auto-scroll
-      await page.mouse.wheel(-10000, -10000);
-
-      // hover the node for the button to appear
-      await physicalModelNode.hover();
       await treeWidget.getByTitle("Clear active filter").waitFor();
 
-      await takeScreenshot(page, treeWidget);
+      await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
 
     test("search", async ({ page }) => {
@@ -163,7 +151,6 @@ test.describe("Models tree", () => {
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
         await treeWidget.getByTitle("More").click();
-        await page.locator(".tree-header-button-dropdown-container").waitFor();
       }
 
       // enable instances focus and select a node
@@ -186,7 +173,6 @@ test.describe("Models tree", () => {
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
         await treeWidget.getByTitle("More").click();
-        await page.locator(".tree-header-button-dropdown-container").waitFor();
       }
 
       // enable instances focus and select a node
@@ -196,9 +182,9 @@ test.describe("Models tree", () => {
       const viewport = await page.getByTestId("viewport-component").boundingBox();
       expect(viewport).not.toBeNull();
 
-      await page.mouse.move(0, 0);
+      await page.mouse.move(0, 0, { steps: 10 });
       await page.mouse.down();
-      await page.mouse.move(viewport!.width - 50, viewport!.height - 50);
+      await page.mouse.move(viewport!.width - 50, viewport!.height - 50, { steps: 10 });
       await page.mouse.up();
 
       // wait for error message to be displayed
@@ -211,7 +197,6 @@ test.describe("Models tree", () => {
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
         await treeWidget.getByTitle("More").click();
-        await page.locator(".tree-header-button-dropdown-container").waitFor();
       }
 
       // ensure instance focus is turned off and hierarchy is visible
@@ -222,8 +207,103 @@ test.describe("Models tree", () => {
     test("header buttons overflow", async ({ page }) => {
       await treeWidget.getByTitle("Search for something").click();
       await treeWidget.getByTitle("More").click();
-      await page.locator(".tree-header-button-dropdown-container").waitFor();
+      await page.getByTitle("Enable instance focus mode").waitFor();
       await takeScreenshot(page, treeWidget);
+    });
+
+    test("shows outlines when focused using keyboard", async ({ page }) => {
+      // select node to show selected outline
+      const node = locateNode(treeWidget, "ProcessPhysicalModel");
+      await node.click();
+      const treeContainer = page.locator("#tw-tree-renderer-container");
+
+      // wait for node to become selected
+      await expect(node).toHaveAttribute("aria-selected", "true");
+
+      // focus on checkbox using keyboard
+      await page.keyboard.press("Tab");
+
+      // ensure checkbox is focused
+      const checkbox = node.getByTitle("Visible: All categories visible");
+      await expect(checkbox).toBeFocused();
+
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+
+      // shrink panel
+      await expandStagePanel(page, "right", -100);
+
+      // re-focus on checkbox after resizing the panel
+      await node.click();
+      await page.keyboard.press("Tab");
+
+      // scroll to the right side
+      await scrollTree(page, 10000, 0);
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+
+      // expand panel
+      await expandStagePanel(page, "right", 100);
+
+      // scroll to origin to avoid flakiness due to auto-scroll
+      await scrollTree(page, -10000, -10000);
+
+      // re-focus on checkbox after resizing the panel
+      await node.click();
+      await page.keyboard.press("Tab");
+
+      // focus on expander
+      await page.keyboard.press("Tab");
+      const expander = node.getByLabel("Expand");
+      await expect(expander).toBeFocused();
+
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+
+      // navigate back to focus on the already selected node
+      await page.keyboard.press("ArrowUp");
+      await page.keyboard.press("ArrowDown");
+
+      await expect(node).toBeFocused();
+      await expect(node).toHaveAttribute("aria-selected", "true");
+
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+
+      // click on a different node to avoid showing filtering buttons due to hover
+      const bayTownNode = locateNode(treeWidget, "BayTown");
+      await bayTownNode.click();
+
+      // deselect the node so the outline would not be shown
+      await bayTownNode.click({ modifiers: ["Control"] });
+
+      // focus back on the node we want to filter
+      await page.keyboard.press("ArrowDown");
+
+      // Focus on apply filter button
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+
+      const applyFilterButton = node.getByTitle("Apply filter");
+      await expect(applyFilterButton).toBeFocused();
+
+      await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+
+      // open filtering dialog
+      await page.keyboard.press("Enter");
+
+      await locateInstanceFilter(page).waitFor();
+      await selectPropertyInDialog(page, "Code");
+      await selectOperatorInDialog(page, "Equal");
+      await selectValueInDialog(page, "PipeSupport");
+
+      await page.getByRole("button", { name: "Apply" }).click();
+      await expect(applyFilterButton).toBeFocused();
+
+      // navigate to clear filter button
+      await page.keyboard.press("Shift+Tab");
+      await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
+
+      // click the clear filter button
+      await page.keyboard.press("Enter");
+      await expect(applyFilterButton).toBeFocused();
     });
   });
 });

@@ -25,13 +25,13 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     this._currentState = State.SetMeasurementViewport;
   }
 
-  public get drawingMetaData(): DrawingMetadata | undefined {
-    return this._currentMeasurement?.drawingMetaData;
+  public get drawingMetadata(): DrawingMetadata | undefined {
+    return this._currentMeasurement?.drawingMetadata;
   }
 
-  public set drawingMetaData(data: DrawingMetadata | undefined) {
+  public set drawingMetadata(data: DrawingMetadata | undefined) {
     if (this._currentMeasurement)
-      this._currentMeasurement.drawingMetaData = data;
+      this._currentMeasurement.drawingMetadata = data;
   }
 
   public set sheetViewId(id: string | undefined) {

@@ -14,7 +14,6 @@ interface UseFilteringResult {
   onHighlightChanged: (index: number, matches?: number) => void;
 }
 
-/** @internal */
 export function useFiltering(): UseFilteringResult {
   const [filter, setFilter] = useState("");
   const [activeMatchIndex, setActiveMatchIndex] = useState(0);

@@ -12,6 +12,9 @@ import type { GetAccessTokenFn } from "../components/context/APIContext";
 import { ApiContext } from "../components/context/APIContext";
 import * as moq from "typemoq";
 import { EC3Config } from "../components/EC3/EC3Config";
+import { UiFramework } from "@itwin/appui-react";
+import { EC3Widget } from "../ec3-widget-react";
+import { EmptyLocalization } from "@itwin/core-common";
 
 export interface RenderParameters {
   component: React.ReactNode;
@@ -131,4 +134,24 @@ export async function simulateClick(button: HTMLElement) {
   await act(async () => {
     await userEvent.click(button);
   });
+}
+export class TestUtils {
+  private static _initialized = false;
+
+  public static async initialize() {
+    if (TestUtils._initialized) {
+      return;
+    }
+
+    await UiFramework.initialize(undefined);
+
+    await EC3Widget.initialize({ localization: new EmptyLocalization() });
+    TestUtils._initialized = true;
+  }
+
+  public static terminate() {
+    EC3Widget.terminate();
+    UiFramework.terminate();
+    TestUtils._initialized = false;
+  }
 }

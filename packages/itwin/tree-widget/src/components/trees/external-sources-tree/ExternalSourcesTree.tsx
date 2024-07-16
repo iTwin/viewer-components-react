@@ -4,48 +4,44 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { SvgDetails, SvgDocument, SvgItem } from "@itwin/itwinui-icons-react";
-import { BaseTree } from "../common/components/BaseTree";
-import { useFeatureReporting } from "../common/UseFeatureReporting";
+import { Tree } from "../common/components/Tree";
+import { TreeRenderer } from "../common/components/TreeRenderer";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
+/** @beta */
 interface ExternalSourcesTreeOwnProps {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-  onPerformanceMeasured?: (featureId: string, duration: number) => void;
-  onFeatureUsed?: (feature: string) => void;
 }
 
-type BaseTreeProps = Parameters<typeof BaseTree>[0];
-type GetHierarchyDefinitionsProviderCallback = BaseTreeProps["getHierarchyDefinition"];
-type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps &
-  Pick<BaseTreeProps, "imodel" | "getSchemaContext" | "height" | "width" | "density" | "selectionMode">;
+/** @beta */
+type TreeProps = Parameters<typeof Tree>[0];
 
-/** @internal */
-export function ExternalSourcesTree({ onPerformanceMeasured, onFeatureUsed, ...props }: ExternalSourcesTreeProps) {
-  const { reportUsage } = useFeatureReporting({ onFeatureUsed, treeIdentifier: ExternalSourcesTreeComponent.id });
+/** @beta */
+type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps &
+  Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
+
+/** @beta */
+export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
   return (
-    <BaseTree
+    <Tree
       {...props}
       treeName={ExternalSourcesTreeComponent.id}
       getHierarchyDefinition={getDefinitionsProvider}
-      getIcon={getIcon}
       selectionMode={props.selectionMode ?? "none"}
-      onPerformanceMeasured={(action, duration) => {
-        onPerformanceMeasured?.(`${ExternalSourcesTreeComponent.id}-${action}`, duration);
-      }}
-      reportUsage={reportUsage}
+      treeRenderer={(treeProps) => <TreeRenderer {...treeProps} getIcon={getIcon} />}
     />
   );
 }
 
-function getDefinitionsProvider(props: Parameters<GetHierarchyDefinitionsProviderCallback>[0]) {
+const getDefinitionsProvider: TreeProps["getHierarchyDefinition"] = (props) => {
   return new ExternalSourcesTreeDefinition(props);
-}
+};
 
 function getIcon(node: PresentationHierarchyNode): ReactElement | undefined {
   if (node.extendedData?.imageId === undefined) {

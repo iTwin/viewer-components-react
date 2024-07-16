@@ -3,9 +3,10 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { RouteStep } from "./EC3Widget";
+import { RouteStep } from "./EC3WidgetComponent";
 import { TemplateMenu } from "./TemplateMenu";
 import { Templates } from "./Templates";
+import { EC3Widget } from "../EC3Widget";
 import type { EC3RouterProps } from "./EC3RouterProps";
 
 export const EC3Router = ({ currentRoute, navigateTo, goBack, onExportResult }: EC3RouterProps) => {
@@ -17,7 +18,7 @@ export const EC3Router = ({ currentRoute, navigateTo, goBack, onExportResult }: 
           onClickCreate={() =>
             navigateTo(() => ({
               step: RouteStep.TemplateMenu,
-              title: "Create Template",
+              title: EC3Widget.translate("createTemplate"),
               routingFields: {},
             }))
           }

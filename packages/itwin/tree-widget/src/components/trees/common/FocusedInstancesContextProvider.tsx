@@ -14,7 +14,6 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import type { FocusedInstancesContext } from "./FocusedInstancesContext";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
-/** @internal */
 export function FocusedInstancesContextProvider({
   selectionStorage,
   imodelKey,

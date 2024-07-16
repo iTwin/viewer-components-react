@@ -44,7 +44,7 @@ export interface AreaMeasurementProps extends MeasurementProps {
   polygonPoints: XYZProps[];
 }
 
-/** Serializer for a [[AreaeMeasurement]]. */
+/** Serializer for a [[AreaMeasurement]]. */
 export class AreaMeasurementSerializer extends MeasurementSerializer {
   public static readonly areaMeasurementName = "areaMeasurement";
 
@@ -176,8 +176,8 @@ export class AreaMeasurement extends Measurement {
 
     const start = this.polygonPoints[length - 1];
     this._dynamicEdge = DistanceMeasurement.create(start, point);
-    if (this.drawingMetaData?.origin)
-      this._dynamicEdge.drawingMetaData = { origin: this.drawingMetaData.origin, worldScale: this.worldScale };
+    if (this.drawingMetadata?.origin)
+      this._dynamicEdge.drawingMetadata = { origin: this.drawingMetadata.origin, worldScale: this.worldScale };
     this._dynamicEdge.sheetViewId = this.sheetViewId;
     this._dynamicEdge.viewTarget.copyFrom(this.viewTarget);
     this._dynamicEdge.style = this.style;
@@ -445,7 +445,7 @@ export class AreaMeasurement extends Measurement {
       }
     );
 
-    if (this.drawingMetaData?.worldScale === undefined) {
+    if (this.drawingMetadata?.worldScale === undefined) {
       data.properties.push(
         {
           label: MeasureTools.localization.getLocalizedString(

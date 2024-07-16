@@ -6,68 +6,81 @@
 import { useCallback, useMemo } from "react";
 import { Flex, ProgressRadial, Text } from "@itwin/itwinui-react";
 import { SchemaMetadataContextProvider } from "@itwin/presentation-components";
-import { useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
+import { UnifiedSelectionProvider, useSelectionHandler, useUnifiedSelectionTree } from "@itwin/presentation-hierarchies-react";
 import { TreeWidget } from "../../../../TreeWidget";
-import { useReportingAction } from "../UseFeatureReporting";
 import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { useHierarchyLevelFiltering } from "../UseHierarchyFiltering";
 import { useIModelChangeListener } from "../UseIModelChangeListener";
 import { useNodeHighlighting } from "../UseNodeHighlighting";
+import { useReportingAction, useTelemetryContext } from "../UseTelemetryContext";
 import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
-import { TreeRenderer } from "./TreeRenderer";
 
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type { useTree } from "@itwin/presentation-hierarchies-react";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import type { UsageTrackedFeatures } from "../UseFeatureReporting";
+import type { SelectionStorage, useTree } from "@itwin/presentation-hierarchies-react";
+import type { HighlightInfo } from "../UseNodeHighlighting";
+import type { TreeRenderer } from "./TreeRenderer";
 
-type TreeRendererProps = Pick<
-  ComponentPropsWithoutRef<typeof TreeRenderer>,
-  | "rootNodes"
-  | "expandNode"
-  | "onNodeClick"
-  | "onNodeKeyDown"
-  | "onFilterClick"
-  | "isNodeSelected"
-  | "getHierarchyLevelDetails"
-  | "size"
-  | "getIcon"
-  | "getLabel"
-  | "getSublabel"
-  | "onNodeDoubleClick"
+/**
+ * Properties that are passed to `treeRenderer` from `Tree` component.
+ * @beta
+ */
+export type TreeRendererProps = Required<
+  Pick<
+    ComponentPropsWithoutRef<typeof TreeRenderer>,
+    "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel"
+  >
 >;
 
-interface BaseTreeOwnProps {
-  imodel: IModelConnection;
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
+/** @beta */
+interface TreeOwnProps {
   height: number;
   width: number;
+  /** iModel connection that should be used to pull data from. */
+  imodel: IModelConnection;
+  /** Callback for getting `SchemaContext` for specific iModel. */
+  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
+  /** Unique tree component name that will be used as unified selection change event source when selecting node. */
   treeName: string;
+  /** Unified selection storage that should be used by tree to handle tree selection changes. */
+  selectionStorage: SelectionStorage;
+  /** Tree renderer that should be used to render tree data. */
+  treeRenderer: (treeProps: TreeRendererProps) => ReactNode;
+  /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
   imodelAccess?: IModelAccess;
-  treeRenderer?: (treeProps: TreeRendererProps) => ReactNode;
+  /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
   hierarchyLevelSizeLimit?: number;
+  /** Modifies the density of tree nodes. `enlarged` tree nodes have bigger button hit boxes. */
   density?: "default" | "enlarged";
+  /** Message that should be renderer if there are no tree nodes. */
   noDataMessage?: ReactNode;
-  reportUsage?: (props: { featureId?: UsageTrackedFeatures; reportInteraction: boolean }) => void;
+  /** Callback that this invoked when tree reloads. */
+  onReload?: () => void;
+  /** Options for highlighting node labels. */
+  highlight?: HighlightInfo;
 }
 
+/** @beta */
 type UseTreeProps = Parameters<typeof useTree>[0];
+
+/** @beta */
 type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
-type UseNodeHighlightingProps = Parameters<typeof useNodeHighlighting>[0];
+
+/** @beta */
 type IModelAccess = UseTreeProps["imodelAccess"];
 
-type BaseTreeProps = BaseTreeOwnProps &
-  Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition" | "onPerformanceMeasured"> &
-  Pick<Partial<UseSelectionHandlerProps>, "selectionMode"> &
-  Pick<UseNodeHighlightingProps, "searchText"> &
-  Pick<TreeRendererProps, "getIcon" | "getSublabel" | "onNodeDoubleClick">;
+/** @beta */
+type TreeProps = TreeOwnProps & Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> & Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
 
-/** @internal */
-export function BaseTree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAccess: providedIModelAccess, ...props }: BaseTreeProps) {
+/**
+ * Default tree component that manages tree state and renders using supplied `treeRenderer`.
+ * @Beta
+ */
+export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps) {
   const defaultHierarchyLevelSizeLimit = hierarchyLevelSizeLimit ?? 1000;
 
   const imodelAccess = useMemo(() => {
@@ -76,13 +89,14 @@ export function BaseTree({ getSchemaContext, hierarchyLevelSizeLimit, imodelAcce
 
   return (
     <SchemaMetadataContextProvider imodel={props.imodel} schemaContextProvider={getSchemaContext}>
-      <BaseTreeRenderer {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
+      <UnifiedSelectionProvider storage={selectionStorage}>
+        <TreeImpl {...props} imodelAccess={imodelAccess} defaultHierarchyLevelSizeLimit={defaultHierarchyLevelSizeLimit} />
+      </UnifiedSelectionProvider>
     </SchemaMetadataContextProvider>
   );
 }
 
-/** @internal */
-function BaseTreeRenderer({
+function TreeImpl({
   imodel,
   imodelAccess,
   height,
@@ -93,20 +107,16 @@ function BaseTreeRenderer({
   defaultHierarchyLevelSizeLimit,
   getHierarchyDefinition,
   selectionMode,
-  onPerformanceMeasured,
-  reportUsage,
+  onReload,
   treeRenderer,
   density,
-  getIcon,
-  getSublabel,
-  onNodeDoubleClick,
-  searchText,
-}: MarkRequired<Omit<BaseTreeProps, "getSchemaContext">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
+  highlight,
+}: MarkRequired<Omit<TreeProps, "getSchemaContext" | "selectionStorage">, "imodelAccess"> & { defaultHierarchyLevelSizeLimit: number }) {
   const localizedStrings = useHierarchiesLocalization();
+  const { onFeatureUsed, onPerformanceMeasured } = useTelemetryContext();
   const {
     rootNodes,
     isLoading,
-    reloadTree,
     selectNodes,
     setFormatter: _setFormatter,
     expandNode,
@@ -118,21 +128,27 @@ function BaseTreeRenderer({
     imodelKey: imodel.key,
     sourceName: treeName,
     localizedStrings,
-    onPerformanceMeasured,
-    onHierarchyLimitExceeded: () => reportUsage?.({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
+    onPerformanceMeasured: (action, duration) => {
+      if (action === "reload") {
+        onReload?.();
+      }
+      onPerformanceMeasured(action, duration);
+    },
+    onHierarchyLimitExceeded: () => onFeatureUsed({ featureId: "hierarchy-level-size-limit-hit", reportInteraction: false }),
+    onHierarchyLoadError: ({ type }) => onFeatureUsed({ featureId: `error-${type}`, reportInteraction: false }),
   });
 
+  const reloadTree = treeProps.reloadTree;
   useIModelChangeListener({ imodel, action: useCallback(() => reloadTree({ dataSourceChanged: true }), [reloadTree]) });
-  const reportingSelectNodes = useReportingAction({ action: selectNodes, reportUsage });
+  const reportingSelectNodes = useReportingAction({ action: selectNodes });
   const { onNodeClick, onNodeKeyDown } = useSelectionHandler({ rootNodes, selectNodes: reportingSelectNodes, selectionMode: selectionMode ?? "single" });
   const { filteringDialog, onFilterClick } = useHierarchyLevelFiltering({
     imodel,
     defaultHierarchyLevelSizeLimit,
-    reportUsage,
   });
-  const reportingExpandNode = useReportingAction({ action: expandNode, reportUsage });
-  const reportingOnFilterClicked = useReportingAction({ action: onFilterClick, reportUsage });
-  const { getLabel } = useNodeHighlighting({ rootNodes, searchText });
+  const reportingExpandNode = useReportingAction({ action: expandNode });
+  const reportingOnFilterClicked = useReportingAction({ action: onFilterClick });
+  const { getLabel } = useNodeHighlighting({ rootNodes, highlight });
 
   if (rootNodes === undefined) {
     return (
@@ -159,17 +175,14 @@ function BaseTreeRenderer({
     onNodeKeyDown,
     expandNode: reportingExpandNode,
     onFilterClick: reportingOnFilterClicked,
-    getIcon,
     getLabel,
-    getSublabel,
-    onNodeDoubleClick,
     size: density === "enlarged" ? "default" : "small",
   };
 
   return (
     <div style={{ position: "relative", height, overflow: "hidden" }}>
       <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
-        {treeRenderer ? treeRenderer(treeRendererProps) : <TreeRenderer {...treeRendererProps} />}
+        {treeRenderer(treeRendererProps)}
         {filteringDialog}
       </div>
       <Delayed show={isLoading}>

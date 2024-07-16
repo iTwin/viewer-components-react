@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import type { Route } from "./EC3Widget";
+import type { Route } from "./EC3WidgetComponent";
 import { WidgetHeader } from "./utils";
 
 export interface EC3HeaderProps {

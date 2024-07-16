@@ -5,13 +5,11 @@
 
 import { defer, EMPTY, from, map, merge, mergeAll, mergeMap } from "rxjs";
 import {
-  createClassBasedHierarchyDefinition,
-  createNodesQueryClauseFactory,
-  HierarchyNode,
-  NodeSelectClauseColumnNames,
+  createClassBasedHierarchyDefinition, createNodesQueryClauseFactory, HierarchyNode, NodeSelectClauseColumnNames,
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
+import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
@@ -39,7 +37,11 @@ import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
-interface HierarchyConfiguration {
+/**
+ * Defines hierarchy configuration supported by `ModelsTree`.
+ * @beta
+ */
+export interface ModelsTreeHierarchyConfiguration {
   /** Should element nodes be grouped by class. Defaults to `enable`. */
   elementClassGrouping: "enable" | "enableWithCounts" | "disable";
   /** Full class name of a `GeometricElement3d` sub-class that should be used to load element nodes. Defaults to `BisCore.GeometricElement3d` */
@@ -48,7 +50,7 @@ interface HierarchyConfiguration {
   showEmptyModels: boolean;
 }
 
-export const defaultHierarchyConfiguration: HierarchyConfiguration = {
+export const defaultHierarchyConfiguration: ModelsTreeHierarchyConfiguration = {
   elementClassGrouping: "enable",
   elementClassSpecification: "BisCore.GeometricElement3d",
   showEmptyModels: false,
@@ -57,7 +59,7 @@ export const defaultHierarchyConfiguration: HierarchyConfiguration = {
 interface ModelsTreeDefinitionProps {
   imodelAccess: ECSchemaProvider & ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  hierarchyConfig: HierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
 export interface ElementsGroupInfo {
@@ -78,14 +80,14 @@ interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   keys: Array<InstanceKey | ElementsGroupInfo>;
-  hierarchyConfig: HierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
   label: string;
-  hierarchyConfig: HierarchyConfiguration;
+  hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromInstanceKeysProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
@@ -100,7 +102,7 @@ export namespace ModelsTreeInstanceKeyPathsProps {
 export class ModelsTreeDefinition implements HierarchyDefinition {
   private _impl: HierarchyDefinition;
   private _idsCache: ModelsTreeIdsCache;
-  private _hierarchyConfig: HierarchyConfiguration;
+  private _hierarchyConfig: ModelsTreeHierarchyConfiguration;
   private _selectQueryFactory: NodesQueryClauseFactory;
   private _nodeLabelSelectClauseFactory: IInstanceLabelSelectClauseFactory;
   private _queryExecutor: LimitingECSqlQueryExecutor;
@@ -359,19 +361,6 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNodeInstanceIds: modelIds,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    function createModelIdsSelector(): string {
-      // Note: `json_array` function only accepts up to 127 arguments and we may have more `modelIds` than that. As a workaround,
-      // we're creating an array of arrays
-      const slices = new Array<Id64String[]>();
-      for (let sliceStartIndex = 0; sliceStartIndex < modelIds.length; sliceStartIndex += 127) {
-        let sliceEndIndex: number | undefined = sliceStartIndex + 127;
-        if (sliceEndIndex > modelIds.length) {
-          sliceEndIndex = undefined;
-        }
-        slices.push(modelIds.slice(sliceStartIndex, sliceEndIndex));
-      }
-      return `json_array(${slices.map((sliceIds) => `json_array(${sliceIds.map((id) => `'${id}'`).join(",")})`).join(",")})`;
-    }
     const instanceFilterClauses = await this._selectQueryFactory.createFilterClauses({
       filter: instanceFilter,
       contentClass: { fullName: "BisCore.SpatialCategory", alias: "this" },
@@ -396,7 +385,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
                 extendedData: {
                   imageId: "icon-layers",
                   isCategory: true,
-                  modelIds: { selector: createModelIdsSelector() },
+                  modelIds: { selector: createIdsSelector(modelIds) },
                 },
                 supportsFiltering: true,
               })}
@@ -424,13 +413,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
     parentNode,
     instanceFilter,
   }: DefineInstanceNodeChildHierarchyLevelProps): Promise<HierarchyLevelDefinition> {
-    const modelIds: Id64String[] =
-      parentNode.extendedData && parentNode.extendedData.hasOwnProperty("modelIds") && Array.isArray(parentNode.extendedData.modelIds)
-        ? parentNode.extendedData.modelIds.reduce(
-            (arr, ids: Id64String | Id64String[]) => [...arr, ...(Array.isArray(ids) ? ids : [ids])],
-            new Array<Id64String>(),
-          )
-        : [];
+    const modelIds = parseIdsSelectorResult(parentNode.extendedData?.modelIds);
     if (modelIds.length === 0) {
       throw new Error(`Invalid category node "${parentNode.label}" - missing model information.`);
     }
@@ -613,7 +596,7 @@ function createCategoryInstanceKeyPaths(categoryId: Id64String, idsCache: Models
 function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
-  hierarchyConfig: HierarchyConfiguration,
+  hierarchyConfig: ModelsTreeHierarchyConfiguration,
   elementInfos: Array<Id64String | ElementsGroupInfo>,
 ): Observable<HierarchyNodeIdentifiersPath> {
   return defer(() => {

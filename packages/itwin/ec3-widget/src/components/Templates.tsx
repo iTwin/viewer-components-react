@@ -14,6 +14,7 @@ import React from "react";
 import { useApiContext } from "./context/APIContext";
 import { ExportModal } from "./ExportModal";
 import { DeleteModal } from "./DeleteModal";
+import { EC3Widget } from "../EC3Widget";
 import type { TemplateProps } from "./TemplateProps";
 
 /**
@@ -32,7 +33,6 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
   const configClient = useApiContext().ec3ConfigurationsClient;
   const [token, setToken] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
-
   const load = useCallback(async () => {
     setIsLoading(true);
     if (iTwinId) {
@@ -97,20 +97,20 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
           <LoadingOverlay />
         ) : templates.length === 0 ? (
           <>
-            <EmptyMessage message="It looks like you haven't added any templates yet. Click the button below to create your first template." />
-            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="Add New Template">
-              Add New Template
+            <EmptyMessage message={EC3Widget.translate("noTemplateMsg")} />
+            <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title={EC3Widget.translate("addNewTemplate")}>
+              {EC3Widget.translate("addNewTemplate")}
             </Button>
           </>
         ) : (
           <div className="ec3w-templates-list">
             <div className="ec3w-toolbar" data-testid="ec3-templates">
               <div className="ec3w-toolbar-left">
-                <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title="New Template">
-                  New
+                <Button startIcon={<SvgAdd />} onClick={onClickCreate} styleType="high-visibility" title={EC3Widget.translate("newTemplate")}>
+                  {EC3Widget.translate("new")}
                 </Button>
                 <Button data-testid="ec3-export-button" styleType="default" onClick={onExport} disabled={!selectedTemplate}>
-                  Export
+                  {EC3Widget.translate("export")}
                 </Button>
               </div>
               <div className="ec3w-search-bar-container">
@@ -145,11 +145,11 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
                         }}
                         icon={<SvgDelete />}
                       >
-                        Delete
+                        {EC3Widget.translate("delete")}
                       </MenuItem>,
                     ]}
                   >
-                    <IconButton styleType="borderless" title="Template Options">
+                    <IconButton styleType="borderless" title={EC3Widget.translate("templateOptions")}>
                       <SvgMore
                         style={{
                           width: "16px",

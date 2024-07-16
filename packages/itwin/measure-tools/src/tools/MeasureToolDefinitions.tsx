@@ -122,6 +122,9 @@ export class MeasureToolDefinitions {
     });
   }
 
+  /**
+   * @deprecated in 0.15.0 use getMeasureLocationToolCommand(enableSheetMeasurements: boolean) instead
+   */
   public static get measureLocationToolCommand() {
     return new ToolItemDef({
       toolId: MeasureLocationTool.toolId,
@@ -130,6 +133,19 @@ export class MeasureToolDefinitions {
       tooltip: () => MeasureLocationTool.description,
       execute: () => {
         void IModelApp.tools.run(MeasureLocationTool.toolId);
+      },
+    });
+  }
+
+  public static getMeasureLocationToolCommand(enableSheetMeasurements: boolean) {
+    return new ToolItemDef({
+      toolId: MeasureLocationTool.toolId,
+      iconSpec: MeasureLocationTool.iconSpec,
+      label: () => MeasureLocationTool.flyover,
+      tooltip: () => MeasureLocationTool.description,
+      execute: () => {
+        const tool = new MeasureLocationTool(enableSheetMeasurements);
+        void tool.run();
       },
     });
   }

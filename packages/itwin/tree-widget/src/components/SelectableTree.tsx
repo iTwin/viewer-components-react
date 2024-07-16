@@ -15,8 +15,11 @@ import type { PropsWithChildren } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeContentDefinition, TreeSelectorProps } from "./TreeSelector";
 
-/** Props for rendering trees */
-export interface TreeRenderProps {
+/**
+ * Props for rendering trees
+ * @public
+ */
+export interface SelectableTreeRenderProps {
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (featureId: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -26,13 +29,13 @@ export interface TreeRenderProps {
  * Definition of a tree component displayed in `SelectableTree`.
  * @public
  */
-export interface TreeDefinition {
+export interface SelectableTreeDefinition {
   /** Id of the tree */
   id: string;
   /** Callback that is used to get tree label */
   getLabel: () => string;
   /** Callback that is used to render tree component */
-  render: (props: TreeRenderProps) => React.ReactNode;
+  render: (props: SelectableTreeRenderProps) => React.ReactNode;
   /**
    * Callback that is used to determine if tree should be shown for current active iModel connection.
    * If callback is `undefined` tree is shown for all iModel connections.
@@ -42,9 +45,12 @@ export interface TreeDefinition {
   startIcon?: React.ReactNode;
 }
 
-/** Props for `SelectableTree` */
+/**
+ * Props for `SelectableTree`
+ * @public
+ */
 export interface SelectableTreeProps {
-  trees: TreeDefinition[];
+  trees: SelectableTreeDefinition[];
   density?: "enlarged" | "default";
   onPerformanceMeasured?: (feature: string, elapsedTime: number) => void;
   onFeatureUsed?: (feature: string) => void;
@@ -78,7 +84,7 @@ function SelectableTreeContent(props: SelectableTreeProps & { imodel: IModelConn
   );
 }
 
-function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection) {
+function useActiveTrees(treeDefinitions: SelectableTreeDefinition[], imodel: IModelConnection) {
   const [trees, setTrees] = useState<TreeContentDefinition[]>();
 
   useEffect(() => {
@@ -99,8 +105,8 @@ function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnect
   return trees;
 }
 
-async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection): Promise<TreeContentDefinition[]> {
-  const handleDefinition = async (treeDef: TreeDefinition) => {
+async function getActiveTrees(treeDefinitions: SelectableTreeDefinition[], imodel: IModelConnection): Promise<TreeContentDefinition[]> {
+  const handleDefinition = async (treeDef: SelectableTreeDefinition) => {
     if (treeDef.shouldShow !== undefined && !(await treeDef.shouldShow(imodel))) {
       return undefined;
     }
