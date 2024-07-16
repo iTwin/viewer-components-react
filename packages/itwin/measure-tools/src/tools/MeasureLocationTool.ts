@@ -6,7 +6,6 @@
 import { GeoServiceStatus } from "@itwin/core-bentley";
 import type { CurvePrimitive } from "@itwin/core-geometry";
 import { GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
-import type { SnapRequestProps } from "@itwin/core-common";
 import { IModelError } from "@itwin/core-common";
 import type {
   BeButtonEvent,
@@ -14,13 +13,11 @@ import type {
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
-  AccuSnap,
   EventHandled,
   IModelApp,
   LocateResponse,
   OutputMessagePriority,
   SnapDetail,
-  SnapStatus,
   ToolAssistance,
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
