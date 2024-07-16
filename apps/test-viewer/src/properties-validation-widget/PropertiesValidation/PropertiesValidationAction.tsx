@@ -119,22 +119,15 @@ export const PropertiesValidationAction = ({
     setGenerateErrorMessage(undefined);
     if (selectedProperty !== undefined && selectedFunction !== undefined && checkMin() && checkMax() && checkRange()) {
       switch (selectedFunction) {
-        // Syntax for aggregation functions: {propertyName, sourcePropertyName, type}
-        // Type is one of: Count, Sum, GroupBy
+        // Aggregations are carried out after extraction, so only the property values are fetched to be calculated later
         case FunctionType.CountRange:
-          // 1. create the Aggregation table for the group using the AggregationTableSet for the mapping
-          // 2. create the Aggregation property with these parameters: {aggCountRange, selectedProperty.propertyName, Count}
-          setFormula(`aggCountRange >= ${minValue} && aggCountRange <= ${maxValue}`);
+          setFormula(selectedProperty.propertyName);
           break;
         case FunctionType.CountAtLeast:
-          // 1. create the Aggregation table for the group using the AggregationTableSet for the mapping
-          // 2. create the Aggregation property with these parameters: {aggCountAtLeast, selectedProperty.propertyName, Count}
-          setFormula(`aggCountAtLeast >= ${minValue}`);
+          setFormula(selectedProperty.propertyName);
           break;
         case FunctionType.CountAtMost:
-          // 1. create the Aggregation table for the group using the AggregationTableSet for the mapping
-          // 2. create the Aggregation property with these parameters: {aggCountAtMost, selectedProperty.propertyName, Count}
-          setFormula(`aggCountAtMost <= ${maxValue}`);
+          setFormula(selectedProperty.propertyName);
           break;
         case FunctionType.AtLeast:
           setFormula(`${selectedProperty.propertyName} >= ${minValue}`);
@@ -146,31 +139,19 @@ export const PropertiesValidationAction = ({
           setFormula(`if(${selectedProperty.propertyName} != null), true, false)`);
           break;
         case FunctionType.PercentAvailable:
-          // 1. create property to get all values that are defined and those that are not
-          //    props_defined <- if(val != null, True, False)
-          // 2. create the Aggregation table for the group using the AggregationTableSet for the mapping
-          // 3. create the Aggregation property with these parameters: [{defined, props_defined, GroupBy}, {count_defined, props_defined, Count}]
-          // 4. get count of true from property above (trueCount) and count of false from property above (falseCount)
-          // 5. create property for the percentage (percentAvailable) : (trueCount / (trueCount + falseCount)) * 100
-          setFormula(`percentAvailable >= ${minValue}`);
+          setFormula(selectedProperty.propertyName);
           break;
         case FunctionType.Range:
           setFormula(`${selectedProperty.propertyName} >= ${minValue} && ${selectedProperty.propertyName} <= ${maxValue}`);
           break;
         case FunctionType.SumAtLeast:
-          // 1. create the Aggregation table for the group using the AggregationTableSet for the mapping
-          // 2. create the Aggregation property with these parameters: {aggSumAtLeast, selectedProperty.propertyName, Sum}
-          setFormula(`aggSumAtLeast >= ${minValue}`);
+          setFormula(selectedProperty.propertyName);
           break;
         case FunctionType.SumAtMost:
-          // 1. create the Aggregation table for the group using the AggregationTableSet for the mapping
-          // 2. create the Aggregation property with these parameters: {aggSumAtMost, selectedProperty.propertyName, Sum}
-          setFormula(`aggSumAtMost <= ${maxValue}`);
+          setFormula(selectedProperty.propertyName);
           break;
         case FunctionType.SumRange:
-          // 1. create the Aggregation table for the group using the AggregationTableSet for the mapping
-          // 2. create the Aggregation property with these parameters: {aggSumRange, selectedProperty.propertyName, Sum}
-          setFormula(`aggSumRange >= ${minValue} && aggSumRange <= ${maxValue}`);
+          setFormula(selectedProperty.propertyName);
           break;
         default:
           setGenerateErrorMessage("Invalid function type");

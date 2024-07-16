@@ -5,14 +5,10 @@
 
 import { Table } from "@itwin/itwinui-react";
 import { TableData } from "../PropertyTable/PropertyTable";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 export interface ResultsProps {
   tableData: TableData;
-}
-
-interface ResultsTable {
-  data: string;
 }
 
 export const Results = ({ tableData }: ResultsProps) => {

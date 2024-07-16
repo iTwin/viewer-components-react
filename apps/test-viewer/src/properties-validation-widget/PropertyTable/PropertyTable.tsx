@@ -16,6 +16,17 @@ import { ExtractionStates } from "../Extraction/ExtractionStatus";
 import { STATUS_CHECK_INTERVAL } from "../hooks/useFetchMappingExtractionStatus";
 import { LoadingSpinner } from "@itwin/core-react";
 import { usePapaParse } from "react-papaparse";
+import { FunctionType } from "../PropertiesValidation/PropertiesValidationAction";
+
+const aggregationFunctions = [
+  FunctionType.CountAtLeast,
+  FunctionType.CountAtMost,
+  FunctionType.CountRange,
+  FunctionType.PercentAvailable,
+  FunctionType.SumAtLeast,
+  FunctionType.SumAtMost,
+  FunctionType.SumRange,
+];
 
 export interface PropertyListProps {
   groupData: Property[];
@@ -95,6 +106,82 @@ export const PropertyTable = ({
     }, STATUS_CHECK_INTERVAL);
   }, [extractionClient, mapping]);
 
+  const evaluateAggregationFunctions = (tableData: TableData) => {
+    const aggregationRules = ruleList.filter((rule) => aggregationFunctions.includes(rule.function));
+    if (aggregationRules.length === 0) {
+      return tableData;
+    }
+    let data = tableData.data;
+    aggregationRules.forEach((rule) => {
+      const aggPropertyIndex = tableData.headers.indexOf(rule.property.propertyName);
+      const aggPropertyValues = tableData.data.map((row) => row[aggPropertyIndex]);
+      const propertyValuesFiltered = aggPropertyValues.filter((value) => value !== "");
+      const propertyValuesFilteredNum = propertyValuesFiltered.map((value) => parseFloat(value));
+      let result = false;
+      switch (rule.function) {
+        case FunctionType.CountAtLeast:
+          if (rule.min === undefined) {
+            console.log("Min value not defined for CountAtLeast function");
+            return tableData;
+          }
+          result = aggPropertyValues.length >= rule.min;
+          break;
+        case FunctionType.CountAtMost:
+          if (rule.max === undefined) {
+            console.log("Max value not defined for CountAtMost function");
+            return tableData;
+          }
+          result = aggPropertyValues.length <= rule.max;
+          break;
+        case FunctionType.CountRange:
+          if (rule.min === undefined || rule.max === undefined) {
+            console.log("Min or Max value not defined for CountRange function");
+            return tableData;
+          }
+          result = propertyValuesFiltered.length >= rule.min && propertyValuesFiltered.length <= rule.max;
+          break;
+        case FunctionType.PercentAvailable:
+          if (rule.min === undefined) {
+            console.log("Min value not defined for PercentAvailable function");
+            return tableData;
+          }
+          result = propertyValuesFiltered.length / aggPropertyValues.length >= rule.min / 100;
+          break;
+        case FunctionType.SumAtLeast:
+          if (rule.min === undefined) {
+            console.log("Min value not defined for SumAtLeast function");
+            return tableData;
+          }
+          result = propertyValuesFilteredNum.reduce((a, b) => a + b, 0) >= rule.min;
+          break;
+        case FunctionType.SumAtMost:
+          if (rule.max === undefined) {
+            console.log("Max value not defined for SumAtMost function");
+            return tableData;
+          }
+          result = propertyValuesFilteredNum.reduce((a, b) => a + b, 0) <= rule.max;
+          break;
+        case FunctionType.SumRange:
+          if (rule.min === undefined || rule.max === undefined) {
+            console.log("Min or Max value not defined for SumRange function");
+            return tableData;
+          }
+          const sumValues = propertyValuesFilteredNum.reduce((a, b) => a + b, 0);
+          result = sumValues >= rule.min && sumValues <= rule.max;
+          break;
+        default:
+          console.log("Error while evaluating aggregation functions");
+          return tableData;
+      }
+      data = data.map((row) => {
+        const dataUpToIndex = row.slice(0, aggPropertyIndex);
+        const dataAfterIndex = row.slice(aggPropertyIndex + 1);
+        return [...dataUpToIndex, result ? "true" : "false", ...dataAfterIndex];
+      });
+    });
+    return { headers: tableData.headers, data: data };
+  };
+
   const filterExtractedData = (data: string[][], colHeaders: CDMAttribute[] | undefined) => {
     if (!colHeaders) {
       return;
@@ -128,7 +215,8 @@ export const PropertyTable = ({
                 console.log("Table data undefined");
                 return;
               }
-              onClickResults(tableData);
+              const tableDataWithAggregations = evaluateAggregationFunctions(tableData);
+              onClickResults(tableDataWithAggregations);
             },
           });
           return;
