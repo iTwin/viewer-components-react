@@ -13,7 +13,6 @@ import type { DecorateContext } from "@itwin/core-frontend";
 
 export class MeasureHeightTool extends MeasureDistanceTool {
   public static override toolId = "MeasureTools.MeasureHeight";
-  public static override iconSpec = "icon-measure-height";
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.flyover");
