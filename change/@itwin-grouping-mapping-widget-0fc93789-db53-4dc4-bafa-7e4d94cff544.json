@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "Added a property hideRefreshIcon to hide all refresh buttons on grouping mapping widget",
+  "comment": "Added properties to hide refresh icons and visualization toggle button",
   "packageName": "@itwin/grouping-mapping-widget",
   "email": "tejas.sutar@bentley.com",
   "dependentChangeType": "patch"
