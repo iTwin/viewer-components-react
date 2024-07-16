@@ -15,6 +15,7 @@ interface GroupVisualizationActionsProps {
   onClickVisualizationButton: () => void;
   showAll: () => void;
   hideAll: () => void;
+  hideVisualizationToggle?: boolean;
 }
 
 export const GroupVisualizationActions = ({
@@ -23,12 +24,15 @@ export const GroupVisualizationActions = ({
   onClickVisualizationButton,
   showAll,
   hideAll,
+  hideVisualizationToggle,
 }: GroupVisualizationActionsProps) => {
   const { showGroupColor, setShowGroupColor } = useGroupHilitedElementsContext();
 
   return (
     <ButtonGroup className="gmw-visual-buttons">
-      <ToggleSwitch label="Visualization" labelPosition="left" checked={isVisualizationEnabled} onChange={onClickVisualizationButton} />
+      {!hideVisualizationToggle && (
+        <ToggleSwitch label="Visualization" labelPosition="left" checked={isVisualizationEnabled} onChange={onClickVisualizationButton} />
+      )}
       <ButtonGroup>
         <ToggleGroupVisibility isLoadingQuery={disabled} showGroupColor={showGroupColor} setShowGroupColor={setShowGroupColor} />
         <IconButton title="Show All" onClick={showAll} disabled={disabled} styleType="borderless">

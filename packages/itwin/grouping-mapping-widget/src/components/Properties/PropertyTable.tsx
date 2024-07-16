@@ -23,6 +23,7 @@ export interface PropertyTableProps<T extends PropertyTableItem> {
   onClickAdd?: () => void;
   refreshProperties: () => Promise<void>;
   deleteProperty: (propertyId: string) => Promise<void>;
+  hideRefreshIcon?: boolean;
 }
 
 export const PropertyTable = <T extends PropertyTableItem>({
@@ -33,6 +34,7 @@ export const PropertyTable = <T extends PropertyTableItem>({
   onClickAdd,
   refreshProperties,
   deleteProperty,
+  hideRefreshIcon,
 }: PropertyTableProps<T>) => {
   const [showDeleteModal, setShowDeleteModal] = useState<T | undefined>(undefined);
 
@@ -52,7 +54,13 @@ export const PropertyTable = <T extends PropertyTableItem>({
 
   return (
     <div className="gmw-property-table-container">
-      <PropertyTableToolbar propertyType={propertyType} onClickAddProperty={onClickAdd} refreshProperties={refreshProperties} isLoading={isLoading} />
+      <PropertyTableToolbar
+        propertyType={propertyType}
+        onClickAddProperty={onClickAdd}
+        refreshProperties={refreshProperties}
+        isLoading={isLoading}
+        hideRefreshIcon={hideRefreshIcon}
+      />
       <Table<CreateTypeFromInterface<T>>
         data={isLoading ? [] : data}
         density="extra-condensed"

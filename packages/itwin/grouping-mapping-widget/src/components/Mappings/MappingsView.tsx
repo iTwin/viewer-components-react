@@ -60,6 +60,7 @@ export interface MappingsViewProps {
   alert?: React.ReactElement<typeof Alert>;
   initialStateExtractionFlag?: boolean;
   setInitialExtractionStateFlag?: (initialStateExtractionFlag: boolean) => void;
+  hideRefreshIcon?: boolean;
 }
 
 /**
@@ -87,6 +88,7 @@ export const MappingsView = ({
   onClickMappingTitle,
   onClickMappingModify,
   alert,
+  hideRefreshIcon,
 }: MappingsViewProps) => {
   const displayStrings = React.useMemo(() => ({ ...mappingViewDefaultDisplayStrings, ...userDisplayStrings }), [userDisplayStrings]);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
@@ -146,9 +148,11 @@ export const MappingsView = ({
               }}
               iconMessage={extractionStatusData.iconMessage}
             />
-            <IconButton title="Refresh" onClick={refreshAll} disabled={isLoading} styleType="borderless">
-              <SvgRefresh />
-            </IconButton>
+            {!hideRefreshIcon && (
+              <IconButton title="Refresh" onClick={refreshAll} disabled={isLoading} styleType="borderless">
+                <SvgRefresh />
+              </IconButton>
+            )}
           </div>
         </div>
         {alert}

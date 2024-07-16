@@ -15,7 +15,9 @@ import { GroupingMappingContent } from "./GroupingMappingContent";
 import { GroupingMappingHeader } from "./GroupingMappingHeader";
 import { defaultGroupingUI } from "../components/customUI/DefaultGroupingUI";
 
-export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId">;
+export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId"> & {
+  hideRefreshIcon?: boolean;
+};
 
 export enum RouteStep {
   Mappings,
@@ -34,6 +36,7 @@ export interface Route {
   title: string;
   groupingRouteFields: GroupingRouteFields;
 }
+
 export interface GroupingRouteFields {
   mapping?: Mapping;
   group?: GroupMinimal;
@@ -85,7 +88,7 @@ const GroupingMapping = (props: GroupingMappingProps) => {
     <GroupingMappingContext iModelId={iModelId} {...props} customUIs={injectedCustomUI}>
       <div className="gmw-group-mapping-container">
         <GroupingMappingHeader goBack={goBack} currentRoute={currentRoute} />
-        <GroupingMappingContent routingHistory={routingHistory} navigateTo={navigateTo} goBack={goBack} />
+        <GroupingMappingContent routingHistory={routingHistory} navigateTo={navigateTo} goBack={goBack} hideRefreshIcon={props.hideRefreshIcon} />
       </div>
     </GroupingMappingContext>
   );
