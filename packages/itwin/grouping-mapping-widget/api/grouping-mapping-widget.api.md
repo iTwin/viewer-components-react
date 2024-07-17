@@ -200,7 +200,7 @@ export interface GroupPropertyActionProps {
 export const GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element;
 
 // @public
-export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, }: GroupsProps) => JSX.Element;
+export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon }: GroupsProps) => JSX.Element;
 
 // @internal (undocumented)
 export const GroupsClientContext: Context<IGroupsClient>;
@@ -220,6 +220,8 @@ export interface GroupsProps {
     // (undocumented)
     disableActions?: boolean;
     // (undocumented)
+    hideRefreshIcon?: boolean;
+    // (undocumented)
     isVisualizing?: boolean;
     // (undocumented)
     mapping: Mapping;
@@ -236,7 +238,7 @@ export interface GroupsProps {
 }
 
 // @internal
-export const GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, }: GroupsViewProps) => JSX.Element;
+export const GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, }: GroupsViewProps) => JSX.Element;
 
 // @internal
 export interface GroupsViewProps {
@@ -254,6 +256,8 @@ export interface GroupsViewProps {
     groups: GroupMinimal[];
     // (undocumented)
     groupUIs: GroupingCustomUI[];
+    // (undocumented)
+    hideRefreshIcon?: boolean;
     // (undocumented)
     isLoading: boolean;
     // (undocumented)
@@ -285,12 +289,16 @@ export interface GroupsViewProps {
 }
 
 // @public
-export const GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, ...rest }: GroupsVisualizationProps) => JSX.Element;
+export const GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, ...rest }: GroupsVisualizationProps) => JSX.Element;
 
 // @public
 export interface GroupsVisualizationProps extends GroupsProps {
     // (undocumented)
     emphasizeElements?: boolean;
+    // (undocumented)
+    hideRefreshIcon?: boolean;
+    // (undocumented)
+    hideVisualizationToggle?: boolean;
     // (undocumented)
     isNonEmphasizedSelectable?: boolean;
 }
@@ -338,6 +346,8 @@ export interface MappingsProps {
     // (undocumented)
     displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
     // (undocumented)
+    hideRefreshIcon?: boolean;
+    // (undocumented)
     onClickAddMapping?: () => void;
     // (undocumented)
     onClickMappingModify?: (mapping: Mapping) => void;
@@ -346,7 +356,7 @@ export interface MappingsProps {
 }
 
 // @internal
-export const MappingsView: ({ mappings, isLoading, extractionStatusData, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, isTogglingExtraction, onRefreshMappings, onRefreshExtractionStatus, onToggleExtraction, onDelete, showDeleteModal, setShowDeleteModal, displayStrings: userDisplayStrings, showImportModal, setShowImportModal, onClickAddMapping, onClickMappingTitle, onClickMappingModify, alert, }: MappingsViewProps) => JSX.Element;
+export const MappingsView: ({ mappings, isLoading, extractionStatusData, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, isTogglingExtraction, onRefreshMappings, onRefreshExtractionStatus, onToggleExtraction, onDelete, showDeleteModal, setShowDeleteModal, displayStrings: userDisplayStrings, showImportModal, setShowImportModal, onClickAddMapping, onClickMappingTitle, onClickMappingModify, alert, hideRefreshIcon, }: MappingsViewProps) => JSX.Element;
 
 // @internal (undocumented)
 export interface MappingsViewProps {
@@ -358,6 +368,8 @@ export interface MappingsViewProps {
     extractionMessageData: ExtractionMessageData[];
     // (undocumented)
     extractionStatusData: ExtractionStatusData;
+    // (undocumented)
+    hideRefreshIcon?: boolean;
     // (undocumented)
     initialStateExtractionFlag?: boolean;
     // (undocumented)
@@ -406,7 +418,7 @@ export interface PropertyMap {
 }
 
 // @public
-export const PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideGroupProps }: PropertyMenuProps) => JSX.Element;
+export const PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, hideGroupProps, }: PropertyMenuProps) => JSX.Element;
 
 // @public
 export interface PropertyMenuProps {
@@ -418,6 +430,8 @@ export interface PropertyMenuProps {
     hideCustomCalculationProps?: boolean;
     // (undocumented)
     hideGroupProps?: boolean;
+    // (undocumented)
+    hideRefreshIcon?: boolean;
     // (undocumented)
     mapping: Mapping;
     // (undocumented)
@@ -435,7 +449,7 @@ export interface PropertyMenuProps {
 }
 
 // @public
-export const PropertyMenuWithVisualization: ({ group, color, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element;
+export const PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element;
 
 // @public
 export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {

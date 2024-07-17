@@ -58,6 +58,7 @@ export interface GroupsViewProps {
   activeOverlapInfoPanelGroup?: GroupMinimal | undefined;
   overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
   progressConfig?: ProgressConfig;
+  hideRefreshIcon?: boolean;
 }
 
 /**
@@ -86,12 +87,13 @@ export const GroupsView = ({
   activeOverlapInfoPanelGroup,
   overlappedElementsInfo,
   progressConfig,
+  hideRefreshIcon,
 }: GroupsViewProps) => {
   /**
    * UX Progress Bar Logic:
    * - Start non-zero for immediate feedback.
    * - Restrict motion to a range (e.g., 25-90%) for perceived continuity.
-   * - Disappear when compplete.
+   * - Disappear when complete.
    * Goal: Smooth experience for unpredictable durations.
    */
   const { baseProgress = 25, maxDynamicProgress = 65, hilitedGroupsProgress } = progressConfig || {};
@@ -100,16 +102,18 @@ export const GroupsView = ({
     <InformationPanelWrapper className="gmw-groups-container">
       <div className="gmw-toolbar">
         {onClickAddGroup && groupUIs.length > 0 && <GroupsAddButton disabled={disableActions} groupUIs={groupUIs} onClickAddGroup={onClickAddGroup} />}
-        <ButtonGroup className="gmw-toolbar-buttons">
-          <IconButton title="Refresh" onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
-            <SvgRefresh />
-          </IconButton>
-        </ButtonGroup>
+        {!hideRefreshIcon && (
+          <ButtonGroup className="gmw-toolbar-buttons">
+            <IconButton title="Refresh" onClick={onRefresh} disabled={isLoading || disableActions} styleType="borderless">
+              <SvgRefresh />
+            </IconButton>
+          </ButtonGroup>
+        )}
       </div>
       {alert}
       <div className="gmw-groups-border" />
       {!!hilitedGroupsProgress && (
-        <div className="gmw-group-progress-bar">
+        <div className="gmw-group-progress-bar" title="Getting visualization ready">
           <ProgressLinear
             value={baseProgress + (hilitedGroupsProgress.currentHilitedGroups / hilitedGroupsProgress.totalNumberOfGroups) * maxDynamicProgress}
           />

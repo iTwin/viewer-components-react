@@ -17,10 +17,12 @@ export const GroupingMappingRouter = ({
   currentRoute,
   navigateTo,
   goBack,
+  hideRefreshIcon,
 }: {
   currentRoute: Route;
   navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
+  hideRefreshIcon?: boolean;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
   const { mapping, group, property, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
@@ -44,6 +46,7 @@ export const GroupingMappingRouter = ({
               title: mapping.mappingName,
             }));
           }}
+          hideRefreshIcon={hideRefreshIcon}
         />
       );
     case RouteStep.MappingsAction:
@@ -81,6 +84,7 @@ export const GroupingMappingRouter = ({
                 groupingRouteFields: { ...prev?.groupingRouteFields, group: g, groupContextCustomUI: ccUI },
               }))
             }
+            hideRefreshIcon={hideRefreshIcon}
           />
         );
       }
@@ -155,6 +159,7 @@ export const GroupingMappingRouter = ({
                 groupingRouteFields: { ...prev?.groupingRouteFields, customCalculation: cc },
               }))
             }
+            hideRefreshIcon={hideRefreshIcon}
           />
         );
       }

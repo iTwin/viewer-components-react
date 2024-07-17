@@ -22,6 +22,7 @@ export interface MappingsProps {
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
   displayStrings?: Partial<typeof mappingViewDefaultDisplayStrings>;
+  hideRefreshIcon?: boolean;
 }
 
 /**

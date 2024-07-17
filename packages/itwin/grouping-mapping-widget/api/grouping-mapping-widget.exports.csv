@@ -29,13 +29,13 @@ public;GroupingMappingProvider
 public;GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => JSX.Element
 public;GroupPropertyActionProps
 public;GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
-public;Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, }: GroupsProps) => JSX.Element
+public;Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon }: GroupsProps) => JSX.Element
 internal;GroupsClientContext: Context
 internal;GroupsOperationsProps
 public;GroupsProps
-internal;GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, }: GroupsViewProps) => JSX.Element
+internal;GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, }: GroupsViewProps) => JSX.Element
 internal;GroupsViewProps
-public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, ...rest }: GroupsVisualizationProps) => JSX.Element
+public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, ...rest }: GroupsVisualizationProps) => JSX.Element
 public;GroupsVisualizationProps 
 public;IResult
 public;ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery }: GroupingCustomUIProps) => JSX.Element
@@ -45,13 +45,13 @@ internal;MappingClientContext: Context
 public;Mappings: (props: MappingsProps) => JSX.Element
 internal;MappingsOperationsProps 
 public;MappingsProps
-internal;MappingsView: ({ mappings, isLoading, extractionStatusData, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, isTogglingExtraction, onRefreshMappings, onRefreshExtractionStatus, onToggleExtraction, onDelete, showDeleteModal, setShowDeleteModal, displayStrings: userDisplayStrings, showImportModal, setShowImportModal, onClickAddMapping, onClickMappingTitle, onClickMappingModify, alert, }: MappingsViewProps) => JSX.Element
+internal;MappingsView: ({ mappings, isLoading, extractionStatusData, showExtractionMessageModal, extractionMessageData, setShowExtractionMessageModal, isTogglingExtraction, onRefreshMappings, onRefreshExtractionStatus, onToggleExtraction, onDelete, showDeleteModal, setShowDeleteModal, displayStrings: userDisplayStrings, showImportModal, setShowImportModal, onClickAddMapping, onClickMappingTitle, onClickMappingModify, alert, hideRefreshIcon, }: MappingsViewProps) => JSX.Element
 internal;MappingsViewProps
 internal;PropertiesClientContext: Context
 public;PropertyMap
-public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideGroupProps }: PropertyMenuProps) => JSX.Element
+public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, hideGroupProps, }: PropertyMenuProps) => JSX.Element
 public;PropertyMenuProps
-public;PropertyMenuWithVisualization: ({ group, color, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
+public;PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
 public;PropertyMenuWithVisualizationProps 
 public;resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap, providedDataType?: DataType_2): IResult
 public;SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
