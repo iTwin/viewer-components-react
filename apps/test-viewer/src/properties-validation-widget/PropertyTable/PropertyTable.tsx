@@ -39,6 +39,8 @@ export interface PropertyListProps {
   deleteProperty: (propertyId: string) => Promise<string>;
   columnsFactory: (handleShowDeleteModal: (value: ValidationRule) => void) => Array<Column<ValidationRule>>;
   ruleList: ValidationRule[];
+  isTableAvailable: boolean;
+  onClickResultsAvailable: () => void;
 }
 
 export interface TableData {
@@ -57,9 +59,11 @@ export const PropertyTable = ({
   deleteProperty,
   columnsFactory,
   ruleList,
+  isTableAvailable,
+  onClickResultsAvailable,
 }: PropertyListProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState<ValidationRule | undefined>(undefined);
-  const [extractionState, setExtractionState] = useState<ExtractionStates | undefined>(ExtractionStates.None);
+  const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
   const [extractionId, setExtractionId] = useState<string | undefined>(undefined);
   const mappingClient = useMappingClient();
   const groupingMappingApiConfig = useGroupingMappingApiConfig();
@@ -78,7 +82,6 @@ export const PropertyTable = ({
       iModelId: groupingMappingApiConfig.iModelId,
     });
     setExtractionId(extractionDetails?.id || undefined);
-    console.log("Extraction Details: ", extractionDetails);
     setExtractionState(ExtractionStates.Starting);
     // check status of extraction till succeeded or failed or timeout
     const interval = setInterval(async () => {
@@ -145,7 +148,7 @@ export const PropertyTable = ({
             console.log("Min value not defined for PercentAvailable function");
             return tableData;
           }
-          result = propertyValuesFiltered.length / aggPropertyValues.length >= rule.min / 100;
+          result = (propertyValuesFiltered.length / aggPropertyValues.length) * 100 >= rule.min;
           break;
         case FunctionType.SumAtLeast:
           if (rule.min === undefined) {
@@ -232,6 +235,9 @@ export const PropertyTable = ({
   };
 
   const onViewResults = async () => {
+    if (isTableAvailable) {
+      onClickResultsAvailable();
+    }
     await getExtractedData();
   };
 
@@ -285,7 +291,11 @@ export const PropertyTable = ({
             "Run Extraction"
           )}
         </Button>
-        <Button styleType="default" onClick={onViewResults} disabled={isLoading || extractionState !== ExtractionStates.Succeeded}>
+        <Button
+          styleType="default"
+          onClick={onViewResults}
+          disabled={isLoading || !(extractionState == ExtractionStates.Succeeded || (isTableAvailable && extractionState === ExtractionStates.None))}
+        >
           View Results
         </Button>
       </div>

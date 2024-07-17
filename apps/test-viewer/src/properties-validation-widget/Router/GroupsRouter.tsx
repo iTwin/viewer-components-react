@@ -21,7 +21,7 @@ export const GroupsRouter = ({
   goBack: () => void;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
-  const { mapping, group, property, rule, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
+  const { mapping, group, rule, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
   const [ruleList, setRuleList] = useState<ValidationRule[]>([]);
   const [resultsData, setResultsData] = useState<TableData>({ headers: [], data: [] });
 
@@ -96,6 +96,7 @@ export const GroupsRouter = ({
             group={group}
             ruleList={ruleList}
             setRuleList={setRuleList}
+            isTableAvailable={resultsData.headers.length > 0}
             onClickAddRuleProperty={() =>
               navigateTo((prev) => ({
                 step: RouteStep.PropertyAction,
@@ -118,6 +119,13 @@ export const GroupsRouter = ({
                 groupingRouteFields: { ...prev?.groupingRouteFields },
               }));
             }}
+            onClickResultsAvailable={() => {
+              navigateTo((prev) => ({
+                step: RouteStep.Results,
+                title: "Results",
+                groupingRouteFields: { ...prev?.groupingRouteFields },
+              }));
+            }}
           />
         );
       }
@@ -129,6 +137,7 @@ export const GroupsRouter = ({
             mappingId={mapping.id}
             group={group}
             rule={rule}
+            ruleList={ruleList}
             onSaveSuccess={(newRule: ValidationRule, oldRule: ValidationRule | undefined) => {
               if (oldRule) {
                 const index = ruleList.findIndex(

@@ -25,6 +25,8 @@ export interface ValidationPropertyTableProps {
   refresh: () => Promise<void>;
   ruleList: ValidationRule[];
   setRuleList: (value: ValidationRule[]) => void;
+  isTableAvailable: boolean;
+  onClickResultsAvailable: () => void;
 }
 
 export const ValidationPropertyTable = ({
@@ -38,6 +40,8 @@ export const ValidationPropertyTable = ({
   refresh,
   ruleList,
   setRuleList,
+  isTableAvailable,
+  onClickResultsAvailable,
 }: ValidationPropertyTableProps) => {
   const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
@@ -136,6 +140,8 @@ export const ValidationPropertyTable = ({
       refreshProperties={refresh}
       deleteProperty={deleteProperty}
       ruleList={ruleList}
+      isTableAvailable={isTableAvailable}
+      onClickResultsAvailable={onClickResultsAvailable}
     />
   );
 };

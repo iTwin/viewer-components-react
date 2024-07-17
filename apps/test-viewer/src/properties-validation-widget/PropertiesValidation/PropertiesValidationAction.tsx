@@ -2,6 +2,7 @@ import { Property } from "@itwin/insights-client";
 import { Button, InputGroup, Label, LabeledInput, LabeledSelect, SelectOption } from "@itwin/itwinui-react";
 import { useCallback, useState } from "react";
 import "./PropertiesValidationAction.scss";
+import { ValidationRule } from "../PropertyTable/PropertyMenu";
 
 export interface PropertyValidationActionProps {
   propertyName: string;
@@ -15,6 +16,7 @@ export interface PropertyValidationActionProps {
   maxValue: number | undefined;
   setMaxValue: (maxValue: number | undefined) => void;
   setFormula: (formula: string | undefined) => void;
+  ruleList: ValidationRule[];
 }
 
 export enum FunctionType {
@@ -57,6 +59,7 @@ export const PropertiesValidationAction = ({
   setMinValue,
   setSelectedFunction,
   setSelectedProperty,
+  ruleList,
 }: PropertyValidationActionProps) => {
   const [minValueErrorMessage, setMinValueErrorMessage] = useState<string | undefined>(undefined);
   const [maxValueErrorMessage, setMaxValueErrorMessage] = useState<string | undefined>(undefined);
@@ -81,7 +84,7 @@ export const PropertiesValidationAction = ({
   ];
 
   const propertiesSelectionOptions: SelectOption<Property>[] = properties
-    .filter((p) => p.propertyName != propertyName)
+    .filter((p) => p.propertyName != propertyName && !ruleList.some((r) => r.property.propertyName === p.propertyName))
     .map((property) => ({
       value: property,
       label: property.propertyName,

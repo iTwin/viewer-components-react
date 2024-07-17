@@ -25,6 +25,8 @@ export interface PropertyMenuProps {
   setRuleList: (value: ValidationRule[]) => void;
   hideGroupProps?: boolean;
   onClickResults: (tableData: TableData) => void;
+  isTableAvailable: boolean;
+  onClickResultsAvailable: () => void;
 }
 
 export interface ValidationRule {
@@ -49,6 +51,8 @@ export const PropertyMenu = ({
   onClickResults,
   ruleList,
   setRuleList,
+  isTableAvailable,
+  onClickResultsAvailable,
   hideGroupProps = false,
 }: PropertyMenuProps) => {
   const groupId = group.id;
@@ -79,6 +83,8 @@ export const PropertyMenu = ({
           ruleList={ruleList}
           setRuleList={setRuleList}
           onClickResults={onClickResults}
+          isTableAvailable={isTableAvailable}
+          onClickResultsAvailable={onClickResultsAvailable}
         />
       )}
     </div>

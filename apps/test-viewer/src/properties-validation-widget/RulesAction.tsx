@@ -30,6 +30,7 @@ export interface RulesActionProps {
   mappingId: string;
   group: GroupMinimal;
   rule?: ValidationRule;
+  ruleList: ValidationRule[];
   onSaveSuccess: (newRule: ValidationRule, oldRule: ValidationRule | undefined) => void;
   onClickCancel?: () => void;
 }
@@ -38,7 +39,7 @@ export interface RulesActionProps {
  * Component to create or update a group.
  * @public
  */
-export const RulesAction = ({ mappingId, group, rule, onSaveSuccess, onClickCancel }: RulesActionProps) => {
+export const RulesAction = ({ mappingId, group, rule, ruleList, onSaveSuccess, onClickCancel }: RulesActionProps) => {
   const actionContainerRef = useRef<HTMLDivElement>(null);
   const propertiesValidationActionRef = useRef<HTMLDivElement>(null);
   const propertiesClient = usePropertiesClient();
@@ -200,16 +201,18 @@ export const RulesAction = ({ mappingId, group, rule, onSaveSuccess, onClickCanc
             setSelectedProperty={setSelectedProperty}
             setMaxValue={setMaxValue}
             setMinValue={setMinValue}
+            ruleList={ruleList}
           />
         </ScrollableExpandableBlock>
       </div>
+      <Text className="gmw-error-message">{formulaErrorMessage}</Text>
       <ActionPanel
         onSave={handleSaveClick}
         onCancel={onClickCancel}
         onSaveCapture={clearAll}
         onCancelCapture={clearAll}
         isLoading={isLoading}
-        isSavingDisabled={!propertyName || formulaErrorMessage !== undefined}
+        isSavingDisabled={!propertyName || formulaErrorMessage !== undefined || formula === undefined || !selectedProperty || !selectedFunction}
       />
       <SaveModal onSave={onSave} onClose={handleCloseSaveModal} showSaveModal={showSaveConfirmationModal} />
     </>
