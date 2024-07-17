@@ -19,7 +19,7 @@ import { MeasureTools } from "../MeasureTools";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 import { MeasureHeightTool } from "./MeasureHeightTool";
 import { MeasureWidthTool } from "./MeasureWidthTool";
-import React from "react";
+import * as React from "react";
 
 export class MeasureToolDefinitions {
 
