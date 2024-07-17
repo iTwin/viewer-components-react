@@ -7,7 +7,6 @@ import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
-import { AutoSizer } from "../../utils/AutoSizer";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
 import { useFiltering } from "../common/UseFiltering";
@@ -155,9 +154,7 @@ function ModelsTreeComponentImpl({
         buttons={buttons}
         density={density}
       >
-        <AutoSizer>
-          {({ width, height }) => <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
-        </AutoSizer>
+        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
       </TreeWithHeader>
     </TelemetryContextProvider>
   );

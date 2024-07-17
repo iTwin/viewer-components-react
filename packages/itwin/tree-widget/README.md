@@ -162,7 +162,7 @@ This package provides building blocks for custom models tree:
 Example:
 
 ```tsx
-function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage, height, width }: CustomModelsTreeProps) {
+function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
   const buttonProps = useModelsTreeButtonProps({ imodel, viewport });
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
 
@@ -173,8 +173,6 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        height={height}
-        width={width}
         treeRenderer={(props) => <CustomModelsTreeRenderer {...props} {...rendererProps} />}
       />
     </TreeWithHeader>
@@ -255,7 +253,7 @@ This package provides building blocks for custom categories tree:
 Example:
 
 ```tsx
-function CustomCategoiresTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage, height, width }: CustomCategoriesTreeProps) {
+function CustomCategoiresTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
   const buttonProps = useCategoriesTreeButtonProps({ imodel, viewport });
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport });
 
@@ -266,8 +264,6 @@ function CustomCategoiresTreeComponent({ imodel, viewport, getSchemaContext, sel
         getSchemaContext={getSchemaContext}
         selectionStorage={selectionStorage}
         imodel={imodel}
-        height={height}
-        width={width}
         treeRenderer={(props) => <CustomCategoriesTreeRenderer {...props} {...rendererProps} />}
       />
     </TreeWithHeader>
@@ -373,10 +369,8 @@ const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAcc
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
 }
 
-function MyTree({width, height, imodel}: MyTreeProps) {
+function MyTree({ imodel }: MyTreeProps) {
   return <Tree
-    width={width}
-    height={height}
     treeName="MyTree"
     imodel={imodel}
     selectionStorage={getUnifiedSelectionStorage()}
@@ -435,10 +429,8 @@ const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] 
   };
 }
 
-function MyVisibilityTree({width, height, imodel}: MyVisibilityTreeProps) {
+function MyVisibilityTree({ imodel }: MyVisibilityTreeProps) {
   return <VisibilityTree
-    width={width}
-    height={height}
     treeName="MyVisibilityTree"
     imodel={imodel}
     selectionStorage={getUnifiedSelectionStorage()}

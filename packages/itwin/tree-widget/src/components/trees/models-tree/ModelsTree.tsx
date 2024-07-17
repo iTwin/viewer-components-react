@@ -27,16 +27,13 @@ interface ModelsTreeOwnProps {
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 
 /** @beta */
-type ModelsTreeProps = ModelsTreeOwnProps &
-  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
+type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
 
 /** @beta */
 export function ModelsTree({
   imodel,
   getSchemaContext,
   selectionStorage,
-  height,
-  width,
   activeView,
   filter,
   density,
@@ -50,8 +47,6 @@ export function ModelsTree({
   return (
     <VisibilityTree
       {...modelsTreeProps}
-      height={height}
-      width={width}
       imodel={imodel}
       selectionStorage={selectionStorage}
       getSchemaContext={getSchemaContext}

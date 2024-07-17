@@ -25,8 +25,7 @@ interface CategoriesTreeOwnProps {
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 
 /** @beta */
-type CategoriesTreeProps = CategoriesTreeOwnProps &
-  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
+type CategoriesTreeProps = CategoriesTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
 
 /** @beta */
 export function CategoriesTree({
@@ -35,8 +34,6 @@ export function CategoriesTree({
   allViewports,
   getSchemaContext,
   selectionStorage,
-  height,
-  width,
   activeView,
   filter,
   density,
@@ -54,8 +51,6 @@ export function CategoriesTree({
   return (
     <VisibilityTree
       {...categoriesTreeProps}
-      height={height}
-      width={width}
       imodel={imodel}
       selectionStorage={selectionStorage}
       getSchemaContext={getSchemaContext}

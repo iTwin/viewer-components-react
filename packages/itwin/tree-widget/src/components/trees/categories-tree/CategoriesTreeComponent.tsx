@@ -7,7 +7,6 @@ import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
-import { AutoSizer } from "../../utils/AutoSizer";
 import { useFiltering } from "../common/UseFiltering";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { CategoriesTree } from "./CategoriesTree";
@@ -113,9 +112,7 @@ function CategoriesTreeComponentImpl({
           onFilterClear: clearFilter,
         }}
       >
-        <AutoSizer>
-          {({ width, height }) => <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
-        </AutoSizer>
+        <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
       </TreeWithHeader>
     </TelemetryContextProvider>
   );

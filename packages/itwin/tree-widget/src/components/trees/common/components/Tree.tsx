@@ -38,8 +38,6 @@ export type TreeRendererProps = Required<
 
 /** @beta */
 interface TreeOwnProps {
-  height: number;
-  width: number;
   /** iModel connection that should be used to pull data from. */
   imodel: IModelConnection;
   /** Callback for getting `SchemaContext` for specific iModel. */
@@ -99,8 +97,6 @@ export function Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStora
 function TreeImpl({
   imodel,
   imodelAccess,
-  height,
-  width,
   treeName,
   noDataMessage,
   getFilteredPaths,
@@ -152,7 +148,7 @@ function TreeImpl({
 
   if (rootNodes === undefined) {
     return (
-      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
+      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
         <Delayed show={true}>
           <ProgressRadial size="large" />
         </Delayed>
@@ -162,7 +158,7 @@ function TreeImpl({
 
   if (rootNodes.length === 0 && !isLoading) {
     return (
-      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width, height }}>
+      <Flex alignItems="center" justifyContent="center" flexDirection="column" style={{ width: "100%", height: "100%" }}>
         {noDataMessage ? noDataMessage : <Text>{TreeWidget.translate("baseTree.dataIsNotAvailable")}</Text>}
       </Flex>
     );
@@ -180,7 +176,7 @@ function TreeImpl({
   };
 
   return (
-    <div style={{ position: "relative", height, overflow: "hidden" }}>
+    <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
       <div id="tw-tree-renderer-container" style={{ overflow: "auto", height: "100%" }}>
         {treeRenderer(treeRendererProps)}
         {filteringDialog}
