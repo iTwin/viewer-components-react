@@ -23,7 +23,7 @@ export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
  * Component to display a property menu with visualization.
  * @public
  */
-export const PropertyMenuWithVisualization = ({ group, color, ...rest }: PropertyMenuWithVisualizationProps) => {
+export const PropertyMenuWithVisualization = ({ group, color, hideRefreshIcon, ...rest }: PropertyMenuWithVisualizationProps) => {
   const [isInformationPanelOpen, setIsInformationPanelOpen] = useState<boolean>(false);
 
   return (
@@ -34,7 +34,7 @@ export const PropertyMenuWithVisualization = ({ group, color, ...rest }: Propert
           <SvgProperties />
         </IconButton>
       </div>
-      <PropertyMenu group={group} {...rest} />
+      <PropertyMenu group={group} hideRefreshIcon={hideRefreshIcon} {...rest} />
       <GroupInformationPanel isOpen={isInformationPanelOpen} onClose={() => setIsInformationPanelOpen(false)} query={group.query} groupName={group.groupName} />
     </InformationPanelWrapper>
   );

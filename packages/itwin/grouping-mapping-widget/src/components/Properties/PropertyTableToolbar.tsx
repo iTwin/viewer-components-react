@@ -12,17 +12,20 @@ export interface PropertyTableToolbarProps {
   onClickAddProperty?: () => void;
   refreshProperties: () => void;
   isLoading: boolean;
+  hideRefreshIcon?: boolean;
 }
 
-export const PropertyTableToolbar = ({ propertyType, onClickAddProperty, refreshProperties, isLoading }: PropertyTableToolbarProps) => (
+export const PropertyTableToolbar = ({ propertyType, onClickAddProperty, refreshProperties, isLoading, hideRefreshIcon }: PropertyTableToolbarProps) => (
   <div className="gmw-property-table-toolbar">
     {onClickAddProperty && (
       <Button startIcon={<SvgAdd />} styleType="high-visibility" onClick={onClickAddProperty}>
         Add {propertyType} Property
       </Button>
     )}
-    <IconButton title="Refresh" className="gmw-property-table-refresh-button" onClick={refreshProperties} disabled={isLoading} styleType="borderless">
-      <SvgRefresh />
-    </IconButton>
+    {!hideRefreshIcon && (
+      <IconButton title="Refresh" className="gmw-property-table-refresh-button" onClick={refreshProperties} disabled={isLoading} styleType="borderless">
+        <SvgRefresh />
+      </IconButton>
+    )}
   </div>
 );
