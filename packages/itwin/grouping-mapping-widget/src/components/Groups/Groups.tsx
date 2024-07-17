@@ -25,6 +25,7 @@ export interface GroupsProps {
   isVisualizing?: boolean;
   progressConfig?: ProgressConfig;
   alert?: React.ReactElement<typeof Alert>;
+  hideRefreshIcon?: boolean;
 }
 
 /**
@@ -41,6 +42,7 @@ export const Groups = ({
   disableActions,
   progressConfig,
   alert,
+  hideRefreshIcon
 }: GroupsProps) => {
   const {
     groups,
@@ -100,6 +102,7 @@ export const Groups = ({
       setActiveOverlapInfoPanelGroup={setActiveOverlapInfoPanelGroup}
       activeOverlapInfoPanelGroup={activeOverlapInfoPanelGroup}
       overlappedElementsInfo={overlappedElementsInfo}
+      hideRefreshIcon={hideRefreshIcon}
     />
   );
 };
