@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Combined two visibility icons into one",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}
