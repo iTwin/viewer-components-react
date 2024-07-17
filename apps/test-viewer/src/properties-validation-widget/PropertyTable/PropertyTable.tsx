@@ -18,7 +18,7 @@ import { LoadingSpinner } from "@itwin/core-react";
 import { usePapaParse } from "react-papaparse";
 import { FunctionType } from "../PropertiesValidation/PropertiesValidationAction";
 
-const aggregationFunctions = [
+export const aggregationFunctions = [
   FunctionType.CountAtLeast,
   FunctionType.CountAtMost,
   FunctionType.CountRange,
@@ -192,7 +192,8 @@ export const PropertyTable = ({
     const colHeadersNames = colHeaders.map((header) => header.name);
     const relevantColumnIndexes = relevantColumnNames.map((name) => colHeadersNames.indexOf(name));
     const filteredData = data.map((row) => relevantColumnIndexes.map((index) => row[index]));
-    const tableData = { headers: relevantColumnNames, data: filteredData };
+    const filteredDataWithoutLastEmptyRow = filteredData.filter((row) => row.some((cell) => cell !== undefined));
+    const tableData = { headers: relevantColumnNames, data: filteredDataWithoutLastEmptyRow };
     return tableData;
   };
 

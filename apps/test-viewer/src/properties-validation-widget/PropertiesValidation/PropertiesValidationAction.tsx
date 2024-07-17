@@ -136,7 +136,7 @@ export const PropertiesValidationAction = ({
           setFormula(`${selectedProperty.propertyName} <= ${maxValue}`);
           break;
         case FunctionType.Defined:
-          setFormula(`if(${selectedProperty.propertyName} != null), true, false)`);
+          setFormula(`if((${selectedProperty.propertyName} != null), true, false)`);
           break;
         case FunctionType.PercentAvailable:
           setFormula(selectedProperty.propertyName);

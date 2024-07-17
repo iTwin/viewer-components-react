@@ -20,6 +20,7 @@ import { ScrollableExpandableBlock } from "./ScrollableExpandableBlock";
 import { useGroupingMappingApiConfig, usePropertiesClient } from "@itwin/grouping-mapping-widget";
 import { FunctionType, PropertiesValidationAction } from "./PropertiesValidation/PropertiesValidationAction";
 import { ValidationRule } from "./PropertyTable/PropertyMenu";
+import { aggregationFunctions } from "./PropertyTable/PropertyTable";
 
 /**
  * Props for the {@link GroupPropertyAction} component.
@@ -55,16 +56,11 @@ export const RulesAction = ({ mappingId, group, rule, onSaveSuccess, onClickCanc
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
   const [formula, setFormula] = useState<string | undefined>(rule?.property.formula ?? undefined);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
+  const [dataType, setDataType] = useState<DataType>(DataType.Boolean);
 
-  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const { data: groupProperties, isFetching: isLoadingGroupProperties } = usePropertiesQuery(iModelId, mappingId, group.id, getAccessToken, propertiesClient);
-  const { forceValidation } = useFormulaValidation(
-    propertyName.toLowerCase(),
-    formula,
-    groupProperties?.properties ?? [],
-    setFormulaErrorMessage,
-    DataType.Boolean,
-  );
+  const { forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, groupProperties?.properties ?? [], setFormulaErrorMessage, dataType);
 
   const reset = useCallback(() => {
     setPropertyName("");
@@ -88,12 +84,17 @@ export const RulesAction = ({ mappingId, group, rule, onSaveSuccess, onClickCanc
     }
   }, [rule]);
 
+  useEffect(() => {
+    const isAgg = aggregationFunctions.includes(selectedFunction ?? FunctionType.AtLeast);
+    setDataType(isAgg ? DataType.Double : DataType.Boolean);
+  }, [selectedFunction]);
+
   const { mutate: onSave, isLoading: isSaving } = useMutation({
     mutationFn: async () => {
       const accessToken = await getAccessToken();
       const newGroupProperty: PropertyModify = {
         propertyName,
-        dataType: DataType.Boolean,
+        dataType: dataType,
         formula,
       };
 
