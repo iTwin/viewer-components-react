@@ -249,11 +249,10 @@ This package provides building blocks for custom categories tree:
 - `useCategoriesTree` - hook for creating and managing categories tree state.
 - `useCategoriesTreeButtonProps` - hook for creating props for categories tree buttons.
 
-
 Example:
 
 ```tsx
-function CustomCategoiresTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
+function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
   const buttonProps = useCategoriesTreeButtonProps({ imodel, viewport });
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport });
 
@@ -273,7 +272,7 @@ function CustomCategoiresTreeComponent({ imodel, viewport, getSchemaContext, sel
 type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
 type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 
-function CustomModelsTreeRenderer(props: CustomCategoriesTreeRendererProps) {
+function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) {
   const getLabel = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
     (node) => {
       const originalLabel = props.getLabel(node);
