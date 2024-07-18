@@ -194,15 +194,6 @@ MeasureLocationToolModel
     const result = await IModelApp.accuSnap.doSnapRequest(hit);
     if (undefined === result) return undefined;
 
-    const parseCurve = (json: any): CurvePrimitive | undefined => {
-      const parsed =
-        undefined !== json ? IModelJson.Reader.parse(json) : undefined;
-      return parsed instanceof GeometryQuery &&
-        "curvePrimitive" === parsed.geometryCategory
-        ? parsed
-        : undefined;
-    };
-
     const snap = new SnapDetail(
       hit,
       result.snapMode,
@@ -210,7 +201,7 @@ MeasureLocationToolModel
       result.snapPoint
     );
     snap.setCurvePrimitive(
-      parseCurve(result.primitive),
+      result.primitive,
       undefined,
       result.geomType
     );
