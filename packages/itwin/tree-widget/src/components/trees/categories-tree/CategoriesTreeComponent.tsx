@@ -107,7 +107,7 @@ function CategoriesTreeComponentImpl({
       <TreeWithHeader
         buttons={buttons}
         density={density}
-        searchProps={{
+        filteringProps={{
           onFilterStart: applyFilter,
           onFilterClear: clearFilter,
         }}

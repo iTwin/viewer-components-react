@@ -46,19 +46,13 @@ interface UseModelsTreeProps {
 
 /** @beta */
 interface UseModelsTreeResult {
-  modelsTreeProps: {
-    treeName: string;
-    getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"];
-    getFilteredPaths: VisibilityTreeProps["getFilteredPaths"];
-    visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"];
-    noDataMessage: React.ReactNode;
-    highlight: VisibilityTreeProps["highlight"];
-  };
-  rendererProps: {
-    getIcon: VisibilityTreeRendererProps["getIcon"];
-    onNodeDoubleClick: VisibilityTreeRendererProps["onNodeDoubleClick"];
-  };
+  modelsTreeProps: Pick<
+    VisibilityTreeProps,
+    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage"
+  >;
+  rendererProps: Pick<Required<VisibilityTreeRendererProps>, "getIcon" | "onNodeDoubleClick">;
 }
+
 
 /**
  * Custom hook to create and manage state for the models tree.

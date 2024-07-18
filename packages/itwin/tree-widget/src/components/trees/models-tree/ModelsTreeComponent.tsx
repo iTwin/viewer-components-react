@@ -146,7 +146,7 @@ function ModelsTreeComponentImpl({
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
       <TreeWithHeader
-        searchProps={{
+        filteringProps={{
           onFilterStart: applyFilter,
           onFilterClear: clearFilter,
           isDisabled: instanceFocusEnabled,

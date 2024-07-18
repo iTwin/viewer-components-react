@@ -38,18 +38,11 @@ interface UseCategoriesTreeProps {
 
 /** @beta */
 interface UseCategoriesTreeResult {
-  categoriesTreeProps: {
-    treeName: string;
-    getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"];
-    getFilteredPaths: VisibilityTreeProps["getFilteredPaths"];
-    visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"];
-    noDataMessage: React.ReactNode;
-    highlight: VisibilityTreeProps["highlight"];
-  };
-  rendererProps: {
-    getIcon: VisibilityTreeRendererProps["getIcon"];
-    getSublabel: VisibilityTreeRendererProps["getSublabel"];
-  };
+  categoriesTreeProps: Pick<
+    VisibilityTreeProps,
+    "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage"
+  >;
+  rendererProps: Pick<Required<VisibilityTreeRendererProps>, "getIcon" | "getSublabel">;
 }
 
 /**

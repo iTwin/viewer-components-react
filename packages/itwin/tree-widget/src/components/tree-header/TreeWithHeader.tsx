@@ -8,20 +8,20 @@ import classNames from "classnames";
 import { TreeHeader } from "./TreeHeader";
 
 import type { PropsWithChildren, ReactNode } from "react";
-import type { TreeSearchProps } from "./TreeHeader";
+import type { TreeFilteringProps } from "./TreeHeader";
 
 /** @beta */
 interface TreeWithHeaderProps {
   density?: "enlarged" | "default";
-  searchProps?: TreeSearchProps;
+  filteringProps?: TreeFilteringProps;
   buttons?: ReactNode;
 }
 
 /** @beta */
-export function TreeWithHeader({ searchProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>) {
+export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>) {
   return (
     <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
-      <TreeHeader searchProps={searchProps} density={density}>
+      <TreeHeader filteringProps={filteringProps} density={density}>
         {buttons}
       </TreeHeader>
       <div className="tw-tree-content">{children}</div>

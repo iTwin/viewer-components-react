@@ -101,10 +101,6 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
-/**
- * Loads categories from viewport or uses provided list of categories.
- * @internal
- */
 function useCategories(imodel: IModelConnection, view: Viewport) {
   const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(imodel, view), [imodel, view]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;

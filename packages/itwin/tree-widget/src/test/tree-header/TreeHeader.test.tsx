@@ -13,19 +13,19 @@ import { TreeWidget } from "../../TreeWidget";
 import { render, stubCancelAnimationFrame, waitFor } from "../TestUtils";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { TreeSearchProps } from "../../components/tree-header/TreeHeader";
+import type { TreeFilteringProps } from "../../components/tree-header/TreeHeader";
 
 describe("<TreeHeader />", () => {
   stubCancelAnimationFrame();
 
-  const searchProps: TreeSearchProps = {
+  const filteringProps: TreeFilteringProps = {
     onFilterClear: () => {},
     onFilterStart: () => {},
     onSelectedChanged: () => {},
   };
 
   const defaultProps: ComponentPropsWithoutRef<typeof TreeHeader> = {
-    searchProps,
+    filteringProps,
   };
 
   before(async () => {
@@ -88,7 +88,7 @@ describe("<TreeHeader />", () => {
 
   describe("search box", () => {
     it("renders search box", async () => {
-      const { getByRole } = render(<TreeHeader {...defaultProps} searchProps={{ ...searchProps, selectedIndex: 5, resultCount: 10 }} />);
+      const { getByRole } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, selectedIndex: 5, resultCount: 10 }} />);
 
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       expect(openButton).to.not.be.null;
@@ -119,7 +119,7 @@ describe("<TreeHeader />", () => {
 
     it("invokes 'onFilterStart' when text is entered", async () => {
       const spy = sinon.spy();
-      const { getByRole } = render(<TreeHeader {...defaultProps} searchProps={{ ...searchProps, onFilterStart: spy }} />);
+      const { getByRole } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onFilterStart: spy }} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       await userEvents.click(openButton);
 
@@ -132,7 +132,7 @@ describe("<TreeHeader />", () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} searchProps={{ ...searchProps, onFilterStart: filterStartSpy, onFilterClear: filterClearSpy }} />,
+        <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onFilterStart: filterStartSpy, onFilterClear: filterClearSpy }} />,
       );
       filterClearSpy.resetHistory();
 
@@ -151,7 +151,7 @@ describe("<TreeHeader />", () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} searchProps={{ ...searchProps, onFilterStart: filterStartSpy, onFilterClear: filterClearSpy }} />,
+        <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onFilterStart: filterStartSpy, onFilterClear: filterClearSpy }} />,
       );
       filterClearSpy.resetHistory();
 
@@ -167,7 +167,7 @@ describe("<TreeHeader />", () => {
     });
 
     it("renders matches selector", async () => {
-      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} searchProps={{ ...searchProps, resultCount: 10, selectedIndex: 5 }} />);
+      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, resultCount: 10, selectedIndex: 5 }} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       await userEvents.click(openButton);
 
@@ -175,7 +175,7 @@ describe("<TreeHeader />", () => {
     });
 
     it("defaults to first match if `selectedIndex` is `undefined`", async () => {
-      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} searchProps={{ ...searchProps, resultCount: 10 }} />);
+      const { getByRole, queryByText } = render(<TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, resultCount: 10 }} />);
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       await userEvents.click(openButton);
 
@@ -184,7 +184,7 @@ describe("<TreeHeader />", () => {
     it("invokes `onSelectedChanged` when 'Next' button is clicked", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} searchProps={{ ...searchProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 5 }} />,
+        <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 5 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       await userEvents.click(openButton);
@@ -197,7 +197,7 @@ describe("<TreeHeader />", () => {
     it("does not invoke `onSelectedChanged` when 'Next' button is clicked on last index", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} searchProps={{ ...searchProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 10 }} />,
+        <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 10 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       await userEvents.click(openButton);
@@ -210,7 +210,7 @@ describe("<TreeHeader />", () => {
     it("invokes `onSelectedChanged` when 'Previous' button is clicked", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} searchProps={{ ...searchProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 5 }} />,
+        <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 5 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       await userEvents.click(openButton);
@@ -223,7 +223,7 @@ describe("<TreeHeader />", () => {
     it("does not invoke `onSelectedChanged` when 'Previous' button is clicked on first index", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} searchProps={{ ...searchProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 1 }} />,
+        <TreeHeader {...defaultProps} filteringProps={{ ...filteringProps, onSelectedChanged: spy, resultCount: 10, selectedIndex: 1 }} />,
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("header.searchBox.open") });
       await userEvents.click(openButton);

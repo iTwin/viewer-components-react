@@ -23,7 +23,7 @@ export interface TreeHeaderButtonProps {
 }
 
 /** @beta */
-export interface TreeSearchProps {
+export interface TreeFilteringProps {
   /** Filtering is cleared after everything's loaded */
   onFilterStart: (newFilter: string) => void;
   /** listens for onClick event for Clear (x) icon */
@@ -38,39 +38,39 @@ export interface TreeSearchProps {
 }
 
 interface TreeHeaderProps extends CommonProps {
-  searchProps?: TreeSearchProps;
+  filteringProps?: TreeFilteringProps;
   /** Modifies the density of tree header. `enlarged` header contains larger content */
   density?: "default" | "enlarged";
 }
 
 export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
-  const { searchProps, density, className, children } = props;
+  const { filteringProps, density, className, children } = props;
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const { enabled: instanceFocusEnabled } = useFocusedInstancesContext();
   const size = density === "enlarged" ? "large" : "small";
 
   useEffect(() => {
     // istanbul ignore if
-    if (searchProps?.isDisabled) {
+    if (filteringProps?.isDisabled) {
       setIsSearchOpen(false);
     }
-  }, [searchProps?.isDisabled]);
+  }, [filteringProps?.isDisabled]);
 
   return (
     <div className={classnames("tree-widget-tree-header", className)}>
       <HeaderButtons contracted={isSearchOpen} size={size}>
         {children}
       </HeaderButtons>
-      {searchProps ? (
+      {filteringProps ? (
         <DebouncedSearchBox
           isOpened={isSearchOpen}
           onOpen={() => setIsSearchOpen(true)}
           onClose={() => setIsSearchOpen(false)}
-          onChange={(value) => (value ? searchProps.onFilterStart(value) : searchProps.onFilterClear())}
+          onChange={(value) => (value ? filteringProps.onFilterStart(value) : filteringProps.onFilterClear())}
           delay={500}
-          selectedResultIndex={searchProps.selectedIndex}
-          resultCount={searchProps.resultCount}
-          onSelectedResultChanged={(index) => searchProps.onSelectedChanged?.(index)}
+          selectedResultIndex={filteringProps.selectedIndex}
+          resultCount={filteringProps.resultCount}
+          onSelectedResultChanged={(index) => filteringProps.onSelectedChanged?.(index)}
           size={size}
           isDisabled={instanceFocusEnabled}
         />
