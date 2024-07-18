@@ -8,8 +8,8 @@ import { StartingExtractionState } from "./ExtractionStates/StartingExtractionSt
 import { QueuedExtractionState } from "./ExtractionStates/QueuedExtractionState";
 import { TerminalExtractionState } from "./ExtractionStates/TerminalExtractionState";
 import { RunningExtractionState } from "./ExtractionStates/RunningExtractionState";
+import { STATUS_CHECK_INTERVAL } from "../PropertyTable/PropertyTable";
 import "./ExtractionStatus.scss";
-import { STATUS_CHECK_INTERVAL } from "../hooks/useFetchMappingExtractionStatus";
 
 export enum ExtractionStates {
   None,

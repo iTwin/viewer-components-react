@@ -12,9 +12,7 @@ import "./PropertyTable.scss";
 import { ValidationRule } from "./PropertyMenu";
 import { CDMAttribute, CDMClient, ExtractionClient, ExtractionState, GroupMinimal, Mapping, Property } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig, useMappingClient, useMappingsOperations } from "@itwin/grouping-mapping-widget";
-import { ExtractionStates } from "../Extraction/ExtractionStatus";
-import { STATUS_CHECK_INTERVAL } from "../hooks/useFetchMappingExtractionStatus";
-import { LoadingSpinner } from "@itwin/core-react";
+import { ExtractionStates, ExtractionStatus } from "../Extraction/ExtractionStatus";
 import { usePapaParse } from "react-papaparse";
 import { FunctionType } from "../PropertiesValidation/PropertiesValidationAction";
 
@@ -47,6 +45,8 @@ export interface TableData {
   headers: string[];
   data: string[][];
 }
+
+export const STATUS_CHECK_INTERVAL = 5000;
 
 export const PropertyTable = ({
   groupData,
@@ -189,14 +189,16 @@ export const PropertyTable = ({
     if (!colHeaders) {
       return;
     }
+    const instanceIdCol = "ECInstanceId";
     const relevantValidationProps = ruleList.map((rule) => rule.property.propertyName);
     const relevantDataProps = ruleList.map((rule) => rule.onProperty.propertyName);
-    const relevantColumnNames = [...new Set([...relevantValidationProps, ...relevantDataProps])];
+    const relevantColumnNames = [...new Set([...relevantValidationProps, ...relevantDataProps, instanceIdCol])];
     const colHeadersNames = colHeaders.map((header) => header.name);
     const relevantColumnIndexes = relevantColumnNames.map((name) => colHeadersNames.indexOf(name));
     const filteredData = data.map((row) => relevantColumnIndexes.map((index) => row[index]));
-    const filteredDataWithoutLastEmptyRow = filteredData.filter((row) => row.some((cell) => cell !== undefined));
-    const tableData = { headers: relevantColumnNames, data: filteredDataWithoutLastEmptyRow };
+    const filteredDataWithoutLastEmptyRow = filteredData.filter((row) => row[row.length - 1] !== "");
+    const reversedDataTable = filteredDataWithoutLastEmptyRow.map((row) => row.reverse());
+    const tableData = { headers: relevantColumnNames.reverse(), data: reversedDataTable.reverse() };
     return tableData;
   };
 
@@ -235,7 +237,7 @@ export const PropertyTable = ({
   };
 
   const onViewResults = async () => {
-    if (isTableAvailable) {
+    if (isTableAvailable && extractionState === ExtractionStates.None) {
       onClickResultsAvailable();
     }
     await getExtractedData();
@@ -271,9 +273,16 @@ export const PropertyTable = ({
         columns={memoizedColumns}
         emptyTableContent={`No Validation Properties`}
         isSortable
+        isResizable={true}
         isLoading={isLoading}
       />
       <div className="pvw-action-buttons">
+        <ExtractionStatus
+          state={extractionState}
+          clearExtractionState={() => {
+            setExtractionState(ExtractionStates.None);
+          }}
+        ></ExtractionStatus>
         <Button
           styleType="high-visibility"
           onClick={onRunExtraction}
@@ -285,11 +294,7 @@ export const PropertyTable = ({
             extractionState === ExtractionStates.Running
           }
         >
-          {extractionState === ExtractionStates.Starting || extractionState === ExtractionStates.Queued || extractionState === ExtractionStates.Running ? (
-            <LoadingSpinner />
-          ) : (
-            "Run Extraction"
-          )}
+          Run Validations
         </Button>
         <Button
           styleType="default"

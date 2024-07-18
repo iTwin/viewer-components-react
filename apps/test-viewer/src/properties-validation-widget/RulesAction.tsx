@@ -8,7 +8,7 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "./hooks/useValidator";
 import { DataType } from "@itwin/insights-client";
 import type { GroupMinimal, Property, PropertyModify } from "@itwin/insights-client";
-import "./GroupPropertyAction.scss";
+import "./RuleAction.scss";
 import { clearAll } from "./viewerUtils";
 import { SaveModal } from "./SaveModal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +23,7 @@ import { ValidationRule } from "./PropertyTable/PropertyMenu";
 import { aggregationFunctions } from "./PropertyTable/PropertyTable";
 
 /**
- * Props for the {@link GroupPropertyAction} component.
+ * Props for the {@link RuleAction} component.
  * @public
  */
 export interface RulesActionProps {
@@ -143,7 +143,7 @@ export const RulesAction = ({ mappingId, group, rule, ruleList, onSaveSuccess, o
   return (
     <>
       <div className="gmw-group-property-action-container" ref={actionContainerRef}>
-        <Fieldset disabled={isLoading} className="gmw-property-options" legend="Property Details">
+        <Fieldset disabled={isLoading} className="gmw-property-options" legend="Rule Details">
           <Text variant="small" as="small" className="gmw-field-legend">
             Asterisk * indicates mandatory fields.
           </Text>
@@ -177,33 +177,20 @@ export const RulesAction = ({ mappingId, group, rule, ruleList, onSaveSuccess, o
             selection is made and saved.
           </Alert>
         )}
-        <ScrollableExpandableBlock
-          parentRef={actionContainerRef}
-          ref={propertiesValidationActionRef}
-          title={"Properties Validation"}
-          endIcon={
-            <Icon fill={formula ? "informational" : "default"}>
-              <SvgFunction />
-            </Icon>
-          }
-          isExpanded
-          setIsExpanded={() => {}}
-        >
-          <PropertiesValidationAction
-            propertyName={propertyName}
-            properties={groupProperties?.properties ?? []}
-            minValue={minValue}
-            maxValue={maxValue}
-            setFormula={setFormula}
-            selectedFunction={selectedFunction}
-            selectedProperty={selectedProperty}
-            setSelectedFunction={setSelectedFunction}
-            setSelectedProperty={setSelectedProperty}
-            setMaxValue={setMaxValue}
-            setMinValue={setMinValue}
-            ruleList={ruleList}
-          />
-        </ScrollableExpandableBlock>
+        <PropertiesValidationAction
+          propertyName={propertyName}
+          properties={groupProperties?.properties ?? []}
+          minValue={minValue}
+          maxValue={maxValue}
+          setFormula={setFormula}
+          selectedFunction={selectedFunction}
+          selectedProperty={selectedProperty}
+          setSelectedFunction={setSelectedFunction}
+          setSelectedProperty={setSelectedProperty}
+          setMaxValue={setMaxValue}
+          setMinValue={setMinValue}
+          ruleList={ruleList}
+        />
       </div>
       <Text className="gmw-error-message">{formulaErrorMessage}</Text>
       <ActionPanel

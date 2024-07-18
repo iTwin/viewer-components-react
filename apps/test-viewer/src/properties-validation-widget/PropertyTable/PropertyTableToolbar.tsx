@@ -6,10 +6,7 @@ import React from "react";
 import { SvgAdd, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import "./PropertyTableToolbar.scss";
-import { ExtractionStates, ExtractionStatus } from "../Extraction/ExtractionStatus";
-import { ExtractionState } from "@itwin/insights-client";
-
-type IconStatus = "negative" | "positive" | "warning" | undefined;
+import { ExtractionStates } from "../Extraction/ExtractionStatus";
 
 export interface PropertyTableToolbarProps {
   onClickAddProperty?: () => void;
@@ -20,26 +17,13 @@ export interface PropertyTableToolbarProps {
   setExtractionState: (state: ExtractionStates) => void;
 }
 
-export const PropertyTableToolbar = ({
-  onClickAddProperty,
-  refreshProperties,
-  isLoading,
-  refreshExtractionStatus,
-  extractionState,
-  setExtractionState,
-}: PropertyTableToolbarProps) => (
+export const PropertyTableToolbar = ({ onClickAddProperty, refreshProperties, isLoading, refreshExtractionStatus }: PropertyTableToolbarProps) => (
   <div className="gmw-property-table-toolbar">
     {onClickAddProperty && (
       <Button startIcon={<SvgAdd />} styleType="high-visibility" onClick={onClickAddProperty}>
-        Add Validation Property
+        Add Validation Rule
       </Button>
     )}
-    <ExtractionStatus
-      state={extractionState}
-      clearExtractionState={() => {
-        setExtractionState(ExtractionStates.None);
-      }}
-    ></ExtractionStatus>
     <IconButton
       title="Refresh"
       className="gmw-property-table-refresh-button"

@@ -100,7 +100,7 @@ export const GroupsRouter = ({
             onClickAddRuleProperty={() =>
               navigateTo((prev) => ({
                 step: RouteStep.PropertyAction,
-                title: "Add Validation Property",
+                title: "Add Validation Rule",
                 groupingRouteFields: { ...prev?.groupingRouteFields },
               }))
             }

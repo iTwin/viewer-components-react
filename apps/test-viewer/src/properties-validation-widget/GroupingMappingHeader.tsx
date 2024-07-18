@@ -9,10 +9,6 @@ import { WidgetHeader } from "./WidgetHeader/WidgetHeader";
 
 export const GroupingMappingHeader = ({ goBack, currentRoute }: { goBack: () => void; currentRoute: Route }) => {
   const shouldDisableReturnFn =
-    currentRoute.step === RouteStep.Groups ||
-    currentRoute.step === RouteStep.GroupAction ||
-    currentRoute.step === RouteStep.PropertyAction ||
-    currentRoute.step === RouteStep.CalculatedPropertyAction ||
-    currentRoute.step === RouteStep.CustomCalculationPropertyAction;
+    currentRoute.step === RouteStep.Groups || currentRoute.step === RouteStep.GroupAction || currentRoute.step === RouteStep.PropertyAction;
   return <WidgetHeader returnFn={shouldDisableReturnFn ? undefined : goBack} title={currentRoute.title} />;
 };

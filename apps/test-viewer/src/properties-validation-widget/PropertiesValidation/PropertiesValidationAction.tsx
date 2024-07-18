@@ -1,5 +1,5 @@
 import { Property } from "@itwin/insights-client";
-import { Button, InputGroup, Label, LabeledInput, LabeledSelect, SelectOption } from "@itwin/itwinui-react";
+import { Button, Fieldset, InputGroup, Label, LabeledInput, LabeledSelect, SelectOption } from "@itwin/itwinui-react";
 import { useCallback, useState } from "react";
 import "./PropertiesValidationAction.scss";
 import { ValidationRule } from "../PropertyTable/PropertyMenu";
@@ -164,74 +164,80 @@ export const PropertiesValidationAction = ({
   };
 
   return (
-    <InputGroup className="gmw-properties-validation-action-container">
-      <LabeledSelect<Property>
-        label="Property"
-        options={propertiesSelectionOptions}
-        value={selectedProperty}
-        placeholder={"Choose property"}
-        onChange={(p) => setSelectedProperty(p)}
-      />
-      <LabeledSelect<FunctionType>
-        label="Function"
-        options={functionTypes}
-        value={selectedFunction}
-        placeholder={"Choose validation function"}
-        onChange={(f) => setSelectedFunction(f)}
-      />
-      {(selectedFunction === FunctionType.AtLeast ||
-        selectedFunction === FunctionType.CountAtLeast ||
-        selectedFunction === FunctionType.CountRange ||
-        selectedFunction === FunctionType.SumAtLeast ||
-        selectedFunction === FunctionType.SumRange ||
-        selectedFunction === FunctionType.PercentAvailable ||
-        selectedFunction === FunctionType.Range) && (
-        <LabeledInput
-          type="number"
-          placeholder="Enter value"
-          step={0.01}
-          label={"Min"}
-          value={minValue}
-          status={minValueErrorMessage ? "negative" : undefined}
-          message={minValueErrorMessage}
-          onChange={(e) => {
-            const stringToFloat = parseFloat(e.target.value);
-            if (!isNaN(stringToFloat)) {
-              setMinValue(stringToFloat);
-            }
-          }}
+    <div>
+      <Fieldset legend="Validation Details" className="gmw-properties-validation-action-container">
+        <LabeledSelect<Property>
+          label="Property"
+          options={propertiesSelectionOptions}
+          value={selectedProperty}
+          placeholder={"Choose property"}
+          onChange={(p) => setSelectedProperty(p)}
+          required
         />
-      )}
-      {(selectedFunction === FunctionType.AtMost ||
-        selectedFunction === FunctionType.CountAtMost ||
-        selectedFunction === FunctionType.CountRange ||
-        selectedFunction === FunctionType.SumAtMost ||
-        selectedFunction === FunctionType.SumRange ||
-        selectedFunction === FunctionType.Range) && (
-        <LabeledInput
-          type="number"
-          placeholder="Enter value"
-          step={0.01}
-          label={"Max"}
-          value={maxValue}
-          status={maxValueErrorMessage ? "negative" : undefined}
-          message={maxValueErrorMessage}
-          onChange={(e) => {
-            const stringToFloat = parseFloat(e.target.value);
-            if (!isNaN(stringToFloat)) {
-              setMaxValue(stringToFloat);
-            }
-          }}
+        <LabeledSelect<FunctionType>
+          label="Function"
+          options={functionTypes}
+          value={selectedFunction}
+          placeholder={"Choose validation function"}
+          onChange={(f) => setSelectedFunction(f)}
+          required
         />
-      )}
-      <Button
-        className={"gmw-generate-formula-button"}
-        onClick={() => GenerateFormula()}
-        disabled={selectedProperty === undefined || selectedFunction === undefined}
-      >
-        Generate
-      </Button>
-      <Label className="gmw-generate-error-message">{generateErrorMessage}</Label>
-    </InputGroup>
+        {(selectedFunction === FunctionType.AtLeast ||
+          selectedFunction === FunctionType.CountAtLeast ||
+          selectedFunction === FunctionType.CountRange ||
+          selectedFunction === FunctionType.SumAtLeast ||
+          selectedFunction === FunctionType.SumRange ||
+          selectedFunction === FunctionType.PercentAvailable ||
+          selectedFunction === FunctionType.Range) && (
+          <LabeledInput
+            type="number"
+            placeholder="Enter value"
+            step={0.01}
+            label={"Min"}
+            value={minValue}
+            status={minValueErrorMessage ? "negative" : undefined}
+            message={minValueErrorMessage}
+            required
+            onChange={(e) => {
+              const stringToFloat = parseFloat(e.target.value);
+              if (!isNaN(stringToFloat)) {
+                setMinValue(stringToFloat);
+              }
+            }}
+          />
+        )}
+        {(selectedFunction === FunctionType.AtMost ||
+          selectedFunction === FunctionType.CountAtMost ||
+          selectedFunction === FunctionType.CountRange ||
+          selectedFunction === FunctionType.SumAtMost ||
+          selectedFunction === FunctionType.SumRange ||
+          selectedFunction === FunctionType.Range) && (
+          <LabeledInput
+            type="number"
+            placeholder="Enter value"
+            step={0.01}
+            label={"Max"}
+            value={maxValue}
+            status={maxValueErrorMessage ? "negative" : undefined}
+            message={maxValueErrorMessage}
+            required
+            onChange={(e) => {
+              const stringToFloat = parseFloat(e.target.value);
+              if (!isNaN(stringToFloat)) {
+                setMaxValue(stringToFloat);
+              }
+            }}
+          />
+        )}
+        <Button
+          className={"gmw-generate-formula-button"}
+          onClick={() => GenerateFormula()}
+          disabled={selectedProperty === undefined || selectedFunction === undefined}
+        >
+          Generate
+        </Button>
+      </Fieldset>
+      {generateErrorMessage && <Label className="gmw-generate-error-message">{generateErrorMessage}</Label>}
+    </div>
   );
 };

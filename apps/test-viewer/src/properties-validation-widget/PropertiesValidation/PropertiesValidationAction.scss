@@ -10,9 +10,15 @@
   height: 100%;
   gap: var(--iui-size-s);
 
+  .gmw-validation-options {
+    display: inherit;
+    flex-direction: inherit;
+    gap: var(--iui-size-s);
+  }
+
   .gmw-generate-formula-button {
-    margin-top: var(--iui-size-s);
-    margin-bottom: var(--iui-size-xs);
+    display: flex;
+    width: fit-content;
   }
 
   .gmw-generate-error-message {
