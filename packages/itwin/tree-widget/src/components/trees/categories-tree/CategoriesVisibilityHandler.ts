@@ -8,31 +8,21 @@ import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../common/CategoriesVisibilityUtils";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
-import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility";
 
 interface CategoriesVisibilityHandlerProps {
-  viewManager: ViewManager;
-  imodel: IModelConnection;
   categories: CategoryInfo[];
   viewport: Viewport;
-  allViewports?: boolean;
 }
 
 /** @internal */
 export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
-  private _viewManager: ViewManager;
-  private _imodel: IModelConnection;
   private _pendingVisibilityChange: any | undefined;
   private _viewport: Viewport;
-  private _useAllViewports: boolean;
 
   constructor(props: CategoriesVisibilityHandlerProps) {
-    this._viewManager = props.viewManager;
-    this._imodel = props.imodel;
     this._viewport = props.viewport;
-    // istanbul ignore next
-    this._useAllViewports = props.allViewports ?? false;
     this._viewport.onDisplayStyleChanged.addListener(this.onDisplayStyleChanged);
     this._viewport.onViewedCategoriesChanged.addListener(this.onViewedCategoriesChanged);
   }
@@ -118,10 +108,10 @@ export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   }
 
   public async enableCategory(ids: string[], enabled: boolean, enableAllSubCategories = true) {
-    await enableCategoryDisplay(this._viewManager, this._imodel, ids, enabled, this._useAllViewports, enableAllSubCategories);
+    await enableCategoryDisplay(this._viewport, ids, enabled, enableAllSubCategories);
   }
 
   public enableSubCategory(key: string, enabled: boolean) {
-    enableSubCategoryDisplay(this._viewManager, key, enabled, this._useAllViewports);
+    enableSubCategoryDisplay(this._viewport, key, enabled);
   }
 }

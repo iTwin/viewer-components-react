@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo, useState } from "react";
-import { IModelApp } from "@itwin/core-frontend";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
@@ -45,9 +44,7 @@ type CategoriesTreeProps = CategoriesTreeOwnProps &
 /** @beta */
 export function CategoriesTree({
   imodel,
-  viewManager,
   categories,
-  allViewports,
   getSchemaContext,
   selectionStorage,
   height,
@@ -61,11 +58,8 @@ export function CategoriesTree({
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
-      imodel,
       viewport: activeView,
-      viewManager: viewManager ?? IModelApp.viewManager,
       categories,
-      allViewports,
     });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
@@ -73,7 +67,7 @@ export function CategoriesTree({
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView, allViewports, categories, imodel, viewManager]);
+  }, [activeView, categories]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getDefinitionsProvider = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(

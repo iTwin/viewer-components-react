@@ -7,7 +7,6 @@ import "../Tree.scss";
 import classNames from "classnames";
 import { Fragment } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { IModelApp } from "@itwin/core-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { AutoSizer } from "../../utils/AutoSizer";
@@ -95,7 +94,7 @@ function CategoriesTreeComponentImpl({
   onFeatureUsed,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const categories = useCategories(IModelApp.viewManager, iModel, viewport);
+  const categories = useCategories(viewport);
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
   return (
