@@ -70,8 +70,8 @@ importers:
         specifier: ^4.7.0
         version: 4.7.0(@itwin/core-bentley@4.7.0)(@itwin/core-quantity@4.7.0(@itwin/core-bentley@4.7.0))
       '@itwin/eslint-plugin':
-        specifier: ^4.1.0
-        version: 4.1.0(eslint@8.56.0)(typescript@4.7.4)
+        specifier: ^4.1.1
+        version: 4.1.1(eslint@8.56.0)(typescript@4.7.4)
       '@itwin/imodel-components-react':
         specifier: ^4.4.0
         version: 4.4.0(n7goiyhgstq6kdvcemfrazfdru)
@@ -507,8 +507,8 @@ packages:
       '@itwin/core-bentley': ^4.7.0
       '@itwin/core-quantity': ^4.7.0
 
-  '@itwin/eslint-plugin@4.1.0':
-    resolution: {integrity: sha512-PBl0PXdbGJrgAvYnx59S4d7Ak58luspofyvpnraWMIgC8km6104aF2P9NSa2JAuGjGih3d3YJf5e9tXlmur0fw==}
+  '@itwin/eslint-plugin@4.1.1':
+    resolution: {integrity: sha512-AGE6TIpMeJAVBBRJxDuSWzD/+K7yu1PbVB7yxDQurvg2j1pafb808B7lM2KOzyUvT4+C2HKmAtiQaxeFjwWNjg==}
     engines: {node: ^18.18.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -4188,7 +4188,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.25.13(typescript@5.3.3)
-      typedoc-plugin-merge-modules: 5.1.0(typedoc@0.25.13(typescript@4.7.4))
+      typedoc-plugin-merge-modules: 5.1.0(typedoc@0.25.13(typescript@5.3.3))
       typescript: 5.3.3
       wtfnode: 0.9.1
       yargs: 17.7.2
@@ -4326,7 +4326,7 @@ snapshots:
       '@itwin/core-quantity': 4.7.0(@itwin/core-bentley@4.7.0)
       almost-equal: 1.1.0
 
-  '@itwin/eslint-plugin@4.1.0(eslint@8.56.0)(typescript@4.7.4)':
+  '@itwin/eslint-plugin@4.1.1(eslint@8.56.0)(typescript@4.7.4)':
     dependencies:
       '@typescript-eslint/eslint-plugin': 7.0.2(@typescript-eslint/parser@7.0.2(eslint@8.56.0)(typescript@4.7.4))(eslint@8.56.0)(typescript@4.7.4)
       '@typescript-eslint/parser': 7.0.2(eslint@8.56.0)(typescript@4.7.4)
@@ -7881,7 +7881,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedoc-plugin-merge-modules@5.1.0(typedoc@0.25.13(typescript@4.7.4)):
+  typedoc-plugin-merge-modules@5.1.0(typedoc@0.25.13(typescript@5.3.3)):
     dependencies:
       typedoc: 0.25.13(typescript@5.3.3)
 
