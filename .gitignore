@@ -37,3 +37,6 @@ package-lock.json
 
 # api extractor temp files
 /packages/**/api/temp
+
+# no internal tool csv output
+/**/no-internal-summary.csv
