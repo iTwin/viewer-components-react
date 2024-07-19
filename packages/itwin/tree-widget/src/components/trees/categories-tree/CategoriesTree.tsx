@@ -26,9 +26,6 @@ type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError
 interface CategoriesTreeOwnProps {
   filter: string;
   activeView: Viewport;
-  categories: CategoryInfo[];
-  viewManager?: ViewManager;
-  allViewports?: boolean;
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
@@ -44,7 +41,6 @@ type CategoriesTreeProps = CategoriesTreeOwnProps &
 /** @beta */
 export function CategoriesTree({
   imodel,
-  categories,
   getSchemaContext,
   selectionStorage,
   height,
@@ -59,7 +55,6 @@ export function CategoriesTree({
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
       viewport: activeView,
-      categories,
     });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
@@ -67,7 +62,7 @@ export function CategoriesTree({
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView, categories]);
+  }, [activeView]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getDefinitionsProvider = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(

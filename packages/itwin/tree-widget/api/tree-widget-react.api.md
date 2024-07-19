@@ -30,7 +30,6 @@ import { Tree as Tree_2 } from '@itwin/itwinui-react';
 import { TreeNodeRenderer as TreeNodeRenderer_2 } from '@itwin/presentation-hierarchies-react';
 import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
 import type { useTree } from '@itwin/presentation-hierarchies-react';
-import type { ViewManager } from '@itwin/core-frontend';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 

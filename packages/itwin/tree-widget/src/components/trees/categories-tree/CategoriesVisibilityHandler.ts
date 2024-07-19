@@ -12,7 +12,6 @@ import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility";
 
 interface CategoriesVisibilityHandlerProps {
-  categories: CategoryInfo[];
   viewport: Viewport;
 }
 

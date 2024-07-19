@@ -111,9 +111,7 @@ function CategoriesTreeComponentImpl({
         </TreeHeader>
         <div className="tw-tree-content">
           <AutoSizer>
-            {({ width, height }) => (
-              <CategoriesTree {...treeProps} imodel={iModel} categories={categories} activeView={viewport} width={width} height={height} filter={filter} />
-            )}
+            {({ width, height }) => <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
           </AutoSizer>
         </div>
       </div>
