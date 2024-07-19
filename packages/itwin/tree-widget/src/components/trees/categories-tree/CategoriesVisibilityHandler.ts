@@ -7,14 +7,12 @@ import { BeEvent } from "@itwin/core-bentley";
 import { HierarchyNode } from "@itwin/presentation-hierarchies";
 import { enableCategoryDisplay, enableSubCategoryDisplay } from "../common/CategoriesVisibilityUtils";
 
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
 import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../common/UseHierarchyVisibility";
 
 interface CategoriesVisibilityHandlerProps {
   viewManager: ViewManager;
   imodel: IModelConnection;
-  categories: CategoryInfo[];
   viewport: Viewport;
   allViewports?: boolean;
 }
