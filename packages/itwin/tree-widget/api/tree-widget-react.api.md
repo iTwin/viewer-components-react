@@ -151,7 +151,7 @@ export class TreeWidget {
 export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
 
 // @beta (undocumented)
-export function TreeWithHeader({ searchProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX.Element;
+export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX.Element;
 
 // @beta
 export function useCategoriesTree({ imodel, filter, activeView, viewManager, allViewports }: UseCategoriesTreeProps): UseCategoriesTreeResult;

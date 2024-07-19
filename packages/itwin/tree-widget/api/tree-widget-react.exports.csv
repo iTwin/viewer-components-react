@@ -14,7 +14,7 @@ beta;Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelA
 beta;TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps_2): JSX.Element
 public;TreeWidget
 public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element
-beta;TreeWithHeader({ searchProps, buttons, density, children }: PropsWithChildren
+beta;TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren
 beta;useCategoriesTree({ imodel, filter, activeView, viewManager, allViewports }: UseCategoriesTreeProps): UseCategoriesTreeResult
 public;useCategoriesTreeButtonProps({ imodel, viewport, }:
 beta;useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult
