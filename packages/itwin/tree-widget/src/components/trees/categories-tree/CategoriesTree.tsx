@@ -14,9 +14,8 @@ import { CategoriesTreeComponent } from "./CategoriesTreeComponent";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
-import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
 import type { ComponentPropsWithoutRef } from "react";
-import type { ViewManager, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
