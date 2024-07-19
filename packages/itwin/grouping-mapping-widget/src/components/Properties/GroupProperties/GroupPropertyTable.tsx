@@ -22,9 +22,19 @@ export interface GroupPropertyTableProps {
   isLoading: boolean;
   groupProperties: Property[];
   refresh: () => Promise<void>;
+  hideRefreshIcon?: boolean;
 }
 
-export const GroupPropertyTable = ({ mappingId, groupId, onClickAdd, onClickModify, isLoading, groupProperties, refresh }: GroupPropertyTableProps) => {
+export const GroupPropertyTable = ({
+  mappingId,
+  groupId,
+  onClickAdd,
+  onClickModify,
+  isLoading,
+  groupProperties,
+  refresh,
+  hideRefreshIcon,
+}: GroupPropertyTableProps) => {
   const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const queryClient = useQueryClient();
@@ -117,6 +127,7 @@ export const GroupPropertyTable = ({ mappingId, groupId, onClickAdd, onClickModi
       onClickAdd={onClickAdd}
       refreshProperties={refresh}
       deleteProperty={deleteProperty}
+      hideRefreshIcon={hideRefreshIcon}
     />
   );
 };
