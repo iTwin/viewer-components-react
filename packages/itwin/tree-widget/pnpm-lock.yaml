@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@bentley/icons-generic':
-        specifier: ^1.0.34
-        version: 1.0.34
       '@itwin/itwinui-icons-react':
         specifier: ^2.8.0
         version: 2.8.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
@@ -18,7 +15,7 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-react':
-        specifier: ^3.11.1
+        specifier: ^3.0.0
         version: 3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-core-interop':
         specifier: ^0.2.3
@@ -38,9 +35,6 @@ importers:
       classnames:
         specifier: ^2.3.1
         version: 2.3.1
-      i18next:
-        specifier: ^10.2.2
-        version: 10.2.2
       react-error-boundary:
         specifier: ^4.0.10
         version: 4.0.10(react@18.0.0)
@@ -153,9 +147,6 @@ importers:
       '@types/deep-equal':
         specifier: ^1.0.1
         version: 1.0.1
-      '@types/i18next':
-        specifier: ^8.4.2
-        version: 8.4.2
       '@types/jsdom':
         specifier: ^21.1.6
         version: 21.1.6
@@ -261,9 +252,6 @@ importers:
       rimraf:
         specifier: ^3.0.2
         version: 3.0.2
-      sanitize-filename:
-        specifier: ^1.6.3
-        version: 1.6.3
       sinon:
         specifier: ^17.0.1
         version: 17.0.1
@@ -802,7 +790,7 @@ packages:
       '@itwin/core-react': ^4.9.0
       '@itwin/ecschema-metadata': ^4.4.0
       '@itwin/imodel-components-react': ^4.9.0
-      '@itwin/itwinui-react': 3.12.1
+      '@itwin/itwinui-react': ^3.0.0
       '@itwin/presentation-common': ^4.4.0
       '@itwin/presentation-frontend': ^4.4.0
       react: ^17.0.0 || ^18.0.0
@@ -1044,9 +1032,6 @@ packages:
 
   '@types/hoist-non-react-statics@3.3.5':
     resolution: {integrity: sha512-SbcrWzkKBw2cdwRTwQAswfpB9g9LJWfjtUeW/jvNwbhC8cpmmNYVePa+ncbUe0rGTQ7G3Ff6mYUN2VMfLVr+Sg==}
-
-  '@types/i18next@8.4.2':
-    resolution: {integrity: sha512-YVBE5OAwMdcCQcz3HmNpPpsfhWdARLe5fIi5A4vVJTm03Zp4Y1ySFJ5TQg8H5/r7GmvZUuOM6Qpuvc6jKdAnFQ==}
 
   '@types/jsdom@21.1.6':
     resolution: {integrity: sha512-/7kkMsC+/kMs7gAYmmBR9P0vGTnOoLhQhyhQJSlXGI5bzTHp6xdo0TtKWQAsz6pmSAeVqKSbqeyP6hytqr9FDw==}
@@ -2313,9 +2298,6 @@ packages:
 
   i18next-http-backend@1.4.5:
     resolution: {integrity: sha512-tLuHWuLWl6CmS07o+UB6EcQCaUjrZ1yhdseIN7sfq0u7phsMePJ8pqlGhIAdRDPF/q7ooyo5MID5DRFBCH+x5w==}
-
-  i18next@10.2.2:
-    resolution: {integrity: sha512-sWazkOEWjPxfcFEATDaZsHNkIbcCTFzee+qNoJyBWl1jHz0Haabhfk+/j2KVrZcDp2v7tZ9FDSUj3kh6G/IF0Q==}
 
   i18next@21.10.0:
     resolution: {integrity: sha512-YeuIBmFsGjUfO3qBmMOc0rQaun4mIpGKET5WDwvu8lU7gvwpcariZLNtL0Fzj+zazcHUrlXHiptcFhBMFaxzfg==}
@@ -5143,8 +5125,6 @@ snapshots:
       '@types/react': 18.0.34
       hoist-non-react-statics: 3.3.2
 
-  '@types/i18next@8.4.2': {}
-
   '@types/jsdom@21.1.6':
     dependencies:
       '@types/node': 18.18.10
@@ -6684,8 +6664,6 @@ snapshots:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
-
-  i18next@10.2.2: {}
 
   i18next@21.10.0:
     dependencies:
