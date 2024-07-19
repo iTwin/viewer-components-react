@@ -53,7 +53,6 @@ interface UseModelsTreeResult {
   rendererProps: Pick<Required<VisibilityTreeRendererProps>, "getIcon" | "onNodeDoubleClick">;
 }
 
-
 /**
  * Custom hook to create and manage state for the models tree.
  * @beta
