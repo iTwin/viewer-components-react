@@ -23,7 +23,7 @@ interface CategoriesVisibilityHandlerProps {
 export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
   private _viewManager: ViewManager;
   private _imodel: IModelConnection;
-  private _pendingVisibilityChange: any | undefined;
+  private _pendingVisibilityChange: any;
   private _viewport: Viewport;
   private _useAllViewports: boolean;
 
