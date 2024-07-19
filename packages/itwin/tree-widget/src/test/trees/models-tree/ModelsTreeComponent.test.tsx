@@ -20,7 +20,8 @@ import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 import type { ComponentPropsWithoutRef } from "react";
 import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../components/trees/models-tree/ModelsTreeButtons";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
+
+type TreeHeaderProps = ComponentPropsWithoutRef<typeof treeHeader.TreeHeader>;
 
 describe("<ModelsTreeComponent />", () => {
   before(async () => {

@@ -32,8 +32,25 @@ export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
   models: ModelInfo[];
 }
 
-/** @internal */
-export function useAvailableModels(imodel: IModelConnection) {
+/**
+ * Custom hook that creates props required to render `ModelsTreeComponent` header button.
+ * @public
+ */
+export function useModelsTreeButtonProps({
+  imodel,
+  viewport,
+}: {
+  imodel: IModelConnection;
+  viewport: Viewport;
+}): Pick<ModelsTreeHeaderButtonProps, "models" | "viewport"> {
+  const models = useAvailableModels(imodel);
+  return {
+    models,
+    viewport,
+  };
+}
+
+function useAvailableModels(imodel: IModelConnection): ModelInfo[] {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
 
   useEffect(() => {

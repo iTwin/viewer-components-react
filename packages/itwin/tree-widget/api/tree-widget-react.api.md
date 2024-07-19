@@ -150,6 +150,27 @@ export class TreeWidget {
 // @public
 export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
 
+// @beta (undocumented)
+export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX.Element;
+
+// @beta
+export function useCategoriesTree({ imodel, filter, activeView, viewManager, allViewports }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+
+// @public
+export function useCategoriesTreeButtonProps({ imodel, viewport, }: {
+    imodel: IModelConnection;
+    viewport: Viewport;
+}): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
+
+// @beta
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult;
+
+// @public
+export function useModelsTreeButtonProps({ imodel, viewport, }: {
+    imodel: IModelConnection;
+    viewport: Viewport;
+}): Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
+
 // @beta
 export interface VisibilityStatus {
     isDisabled?: boolean;

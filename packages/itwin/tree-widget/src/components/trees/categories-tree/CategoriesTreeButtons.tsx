@@ -3,13 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+import { useMemo } from "react";
+import { useAsyncValue } from "@itwin/components-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
-import { hideAllCategories, invertAllCategories, showAllCategories } from "../common/CategoriesVisibilityUtils";
+import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, showAllCategories } from "../common/CategoriesVisibilityUtils";
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -19,8 +22,24 @@ import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
   /** A list of categories available in the iModel */
   categories: CategoryInfo[];
-  /** In case the tree is filtered, a list of filtered categories. */
-  filteredCategories?: CategoryInfo[];
+}
+
+/**
+ * Custom hook that creates props required to render `CategoriesTreeComponent` header button.
+ * @public
+ */
+export function useCategoriesTreeButtonProps({
+  imodel,
+  viewport,
+}: {
+  imodel: IModelConnection;
+  viewport: Viewport;
+}): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport"> {
+  const categories = useCategories(imodel, viewport);
+  return {
+    viewport,
+    categories,
+  };
 }
 
 /** @public */
@@ -33,7 +52,7 @@ export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-showall`);
         void showAllCategories(
-          (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+          props.categories.map((category) => category.categoryId),
           props.viewport,
         );
       }}
@@ -53,7 +72,7 @@ export function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-hideall`);
         void hideAllCategories(
-          (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+          props.categories.map((category) => category.categoryId),
           props.viewport,
         );
       }}
@@ -72,10 +91,17 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       styleType="borderless"
       onClick={() => {
         props.onFeatureUsed?.(`categories-tree-invert`);
-        void invertAllCategories(props.filteredCategories ?? props.categories, props.viewport);
+        void invertAllCategories(props.categories, props.viewport);
       }}
     >
       <SvgVisibilityHalf />
     </IconButton>
   );
+}
+
+const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
+
+function useCategories(imodel: IModelConnection, view: Viewport) {
+  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(imodel, view), [imodel, view]);
+  return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
