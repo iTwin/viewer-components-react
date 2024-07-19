@@ -5,7 +5,7 @@
 
 import { Anchor, Table, Text } from "@itwin/itwinui-react";
 import { TableData } from "../PropertyTable/PropertyTable";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { clearAll, getHiliteIdsWithElementIds, visualizeElements, zoomToElements } from "../viewerUtils";
 import "./Results.scss";
 export interface ResultsProps {
@@ -13,6 +13,28 @@ export interface ResultsProps {
 }
 
 export const Results = ({ tableData }: ResultsProps) => {
+  useEffect(() => {
+    const ECInstanceIdIndex = tableData.headers.indexOf("ECInstanceId");
+    clearAll();
+
+    const heatmapRowsByResult = async () => {
+      const trueRows = tableData.data.filter((row) => row.some((value) => value === "true" && !row.some((value) => value === "false")));
+      const falseRows = tableData.data.filter((row) => row.some((value) => value === "false" && !row.some((value) => value === "true")));
+      const mixedRows = tableData.data.filter((row) => row.some((value) => value === "true" && row.some((value) => value === "false")));
+      const trueECInstanceIds = trueRows.map((row) => row[ECInstanceIdIndex]);
+      const falseECInstanceIds = falseRows.map((row) => row[ECInstanceIdIndex]);
+      const mixedECInstanceIds = mixedRows.map((row) => row[ECInstanceIdIndex]);
+      const trueHiliteSet = await getHiliteIdsWithElementIds(trueECInstanceIds);
+      const falseHiliteSet = await getHiliteIdsWithElementIds(falseECInstanceIds);
+      const mixedHiliteSet = await getHiliteIdsWithElementIds(mixedECInstanceIds);
+      visualizeElements(trueHiliteSet, "green");
+      visualizeElements(falseHiliteSet, "red");
+      visualizeElements(mixedHiliteSet, "yellow");
+    };
+
+    heatmapRowsByResult();
+  }, []);
+
   const columns = useMemo(
     () =>
       tableData.headers.map((header) => ({
@@ -23,12 +45,6 @@ export const Results = ({ tableData }: ResultsProps) => {
           props.column.Header === "ECInstanceId" ? (
             <Anchor
               onClick={async () => {
-                const ECInstanceIdIndex = tableData.headers.indexOf("ECInstanceId");
-                const ECInstanceIds = tableData.data.map((row) => row[ECInstanceIdIndex]);
-                clearAll();
-                console.log(props);
-                const hiliteSet = await getHiliteIdsWithElementIds(ECInstanceIds);
-                visualizeElements(hiliteSet, "red");
                 const hiliteSetForElement = await getHiliteIdsWithElementIds([props.value]);
                 await zoomToElements(hiliteSetForElement);
               }}
