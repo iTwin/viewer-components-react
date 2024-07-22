@@ -1,8 +1,17 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 28 Jun 2024 13:10:54 GMT and should not be manually modified.
+This log was last generated on Mon, 22 Jul 2024 11:53:05 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.28.0
+
+Mon, 22 Jul 2024 11:53:05 GMT
+
+### Minor changes
+
+- Added properties to hide refresh icons and visualization toggle button ([#995](https://github.com/iTwin/viewer-components-react/pull/995))
+- Combined two visibility icons into one for groups visualization ([#1000](https://github.com/iTwin/viewer-components-react/pull/1000))
 
 ## 0.27.0
 

@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added properties to hide refresh icons and visualization toggle button",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "tejas.sutar@bentley.com",
-  "dependentChangeType": "patch"
-}

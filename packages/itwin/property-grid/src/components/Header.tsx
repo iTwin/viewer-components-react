@@ -10,15 +10,14 @@ import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, SearchBox } from "@itwin/itwinui-react";
 import { PropertyGridManager } from "../PropertyGridManager";
 
-import type { PropsWithChildren } from "react";
-import type React from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 /** @internal */
 export interface HeaderProps {
   className?: string;
   onBackButtonClick?: () => void;
-  title?: React.ReactNode;
-  headerTools?: React.ReactNode;
+  title?: ReactNode;
+  headerTools?: ReactNode;
   onSearchStringChange?: (searchInput: string) => void;
 }
 
