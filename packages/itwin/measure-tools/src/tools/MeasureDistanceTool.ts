@@ -26,7 +26,7 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
-import { DrawingDataCache } from "../measure-tools-react";
+import { DrawingDataCache } from "../api/DrawingTypeDataCache";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
 DistanceMeasurement,
