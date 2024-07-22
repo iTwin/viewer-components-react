@@ -16,7 +16,7 @@ interface CategoriesVisibilityHandlerProps {
 
 /** @internal */
 export class CategoriesVisibilityHandler implements HierarchyVisibilityHandler {
-  private _pendingVisibilityChange: any | undefined;
+  private _pendingVisibilityChange: any;
   private _viewport: Viewport;
 
   constructor(props: CategoriesVisibilityHandlerProps) {
