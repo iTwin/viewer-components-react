@@ -28,12 +28,7 @@ export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
  * Custom hook that creates props required to render `CategoriesTreeComponent` header button.
  * @public
  */
-export function useCategoriesTreeButtonProps({
-  viewport,
-}: {
-  imodel: IModelConnection;
-  viewport: Viewport;
-}): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport"> {
+export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport"> {
   const categories = useCategories(viewport);
   return {
     viewport,

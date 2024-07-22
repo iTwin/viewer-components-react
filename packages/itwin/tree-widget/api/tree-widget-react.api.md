@@ -153,11 +153,10 @@ export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
 export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX.Element;
 
 // @beta
-export function useCategoriesTree({ imodel, filter, activeView, viewManager, allViewports }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps): UseCategoriesTreeResult;
 
 // @public
-export function useCategoriesTreeButtonProps({ imodel, viewport, }: {
-    imodel: IModelConnection;
+export function useCategoriesTreeButtonProps({ viewport }: {
     viewport: Viewport;
 }): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
 
