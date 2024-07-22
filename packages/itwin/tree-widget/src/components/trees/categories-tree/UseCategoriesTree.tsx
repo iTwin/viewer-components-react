@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useMemo, useState } from "react";
-import { IModelApp } from "@itwin/core-frontend";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
@@ -14,7 +13,7 @@ import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
 import type { VisibilityTree } from "../common/components/VisibilityTree";
 import type { ComponentPropsWithoutRef } from "react";
-import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
@@ -29,11 +28,8 @@ type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 
 /** @beta */
 interface UseCategoriesTreeProps {
-  imodel: IModelConnection;
   filter: string;
   activeView: Viewport;
-  viewManager?: ViewManager;
-  allViewports?: boolean;
 }
 
 /** @beta */
@@ -49,14 +45,11 @@ interface UseCategoriesTreeResult {
  * Custom hook to create and manage state for the categories tree.
  * @beta
  */
-export function useCategoriesTree({ imodel, filter, activeView, viewManager, allViewports }: UseCategoriesTreeProps): UseCategoriesTreeResult {
+export function useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps): UseCategoriesTreeResult {
   const [filteringError, setFilteringError] = useState<CategoriesTreeFilteringError | undefined>();
   const visibilityHandlerFactory = useCallback(() => {
     const visibilityHandler = new CategoriesVisibilityHandler({
-      imodel,
       viewport: activeView,
-      viewManager: viewManager ?? IModelApp.viewManager,
-      allViewports,
     });
     return {
       getVisibilityStatus: async (node: HierarchyNode) => visibilityHandler.getVisibilityStatus(node),
@@ -64,7 +57,7 @@ export function useCategoriesTree({ imodel, filter, activeView, viewManager, all
       onVisibilityChange: visibilityHandler.onVisibilityChange,
       dispose: () => visibilityHandler.dispose(),
     };
-  }, [activeView, allViewports, imodel, viewManager]);
+  }, [activeView]);
   const { onFeatureUsed } = useTelemetryContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(

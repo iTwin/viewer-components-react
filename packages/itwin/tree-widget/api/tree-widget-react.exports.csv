@@ -15,8 +15,8 @@ beta;TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDou
 public;TreeWidget
 public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element
 beta;TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren
-beta;useCategoriesTree({ imodel, filter, activeView, viewManager, allViewports }: UseCategoriesTreeProps): UseCategoriesTreeResult
-public;useCategoriesTreeButtonProps({ imodel, viewport, }:
+beta;useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps): UseCategoriesTreeResult
+public;useCategoriesTreeButtonProps({ viewport }:
 beta;useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult
 public;useModelsTreeButtonProps({ imodel, viewport, }:
 beta;VisibilityStatus

@@ -90,7 +90,7 @@ function CategoriesTreeComponentImpl({
   onFeatureUsed,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const buttonProps = useCategoriesTreeButtonProps({ imodel: iModel, viewport });
+  const buttonProps = useCategoriesTreeButtonProps({ viewport });
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
 

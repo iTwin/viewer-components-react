@@ -12,7 +12,7 @@ import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, sho
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
@@ -28,14 +28,8 @@ export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
  * Custom hook that creates props required to render `CategoriesTreeComponent` header button.
  * @public
  */
-export function useCategoriesTreeButtonProps({
-  imodel,
-  viewport,
-}: {
-  imodel: IModelConnection;
-  viewport: Viewport;
-}): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport"> {
-  const categories = useCategories(imodel, viewport);
+export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport"> {
+  const categories = useCategories(viewport);
   return {
     viewport,
     categories,
@@ -101,7 +95,7 @@ export function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
-function useCategories(imodel: IModelConnection, view: Viewport) {
-  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(imodel, view), [imodel, view]);
+export function useCategories(viewport: Viewport) {
+  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(viewport), [viewport]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
