@@ -11,6 +11,7 @@ import { IconButton } from "@itwin/itwinui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useInstanceSelection } from "../hooks/UseInstanceSelection";
 import { NullValueSettingContext } from "../hooks/UseNullValuesSetting";
+import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { ElementList as ElementListComponent } from "./ElementList";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid";
@@ -22,7 +23,6 @@ import type { PropertyGridProps } from "./PropertyGrid";
 import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { UsageTrackedFeatures } from "../hooks/UseTelemetryContext";
-import { useTelemetryContext } from "../hooks/UseTelemetryContext";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -119,8 +119,8 @@ export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props
               key={component.key}
               className={classnames({
                 "property-grid-react-animated-tab": true,
-                "property-grid-react-animated-tab-animate-right": idx > content,
-                "property-grid-react-animated-tab-animate-left": idx < content,
+                "property-grid-react-animated-tab-animate-right": idx > content.valueOf(),
+                "property-grid-react-animated-tab-animate-left": idx < content.valueOf(),
               })}
             >
               {component}

@@ -6,7 +6,8 @@
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { PropertyGridManager, SingleElementPropertyGrid } from "../../property-grid-react";
+import { SingleElementPropertyGrid } from "../../components/SingleElementPropertyGrid";
+import { PropertyGridManager } from "../../PropertyGridManager";
 import { createPropertyRecord, render, stubFavoriteProperties, stubPresentation, waitFor } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";

@@ -11,12 +11,10 @@ import { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 import userEvents from "@testing-library/user-event";
 import * as webUtilities from "../../api/WebUtilities";
 import {
-  AddFavoritePropertyContextMenuItem,
-  CopyPropertyTextContextMenuItem,
-  PropertyGridContextMenuItem,
-  RemoveFavoritePropertyContextMenuItem,
+  AddFavoritePropertyContextMenuItem, CopyPropertyTextContextMenuItem, PropertyGridContextMenuItem, RemoveFavoritePropertyContextMenuItem,
   useContextMenu,
 } from "../../hooks/UseContextMenu";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { createFunctionStub, createPropertyRecord, render, stubFavoriteProperties, waitFor } from "../TestUtils";
 
@@ -24,7 +22,6 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { MouseEvent } from "react";
 import type { ContextMenuItemProps, UseContentMenuProps } from "../../hooks/UseContextMenu";
-import { TelemetryContextProvider } from "../../property-grid-react";
 
 describe("useContextMenu", () => {
   const imodel = {} as IModelConnection;

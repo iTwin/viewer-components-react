@@ -20,7 +20,6 @@ import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
-import type { default as React_2 } from 'react';
 import type { ReactNode } from 'react';
 import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { SchemaContext } from '@itwin/ecschema-metadata';

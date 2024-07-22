@@ -56,7 +56,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
 
     const preferredLocation = defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = defaultPanelSection ?? StagePanelSection.End;
-    if (stageUsage !== StageUsage.General || location !== preferredLocation || section !== preferredPanelSection) {
+    if (stageUsage !== StageUsage.General.valueOf() || location !== preferredLocation || section !== preferredPanelSection) {
       return [];
     }
 

@@ -7,7 +7,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { Logger } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { IModelAppUserPreferencesStorage } from "../../property-grid-react";
+import { IModelAppUserPreferencesStorage } from "../../api/PreferencesStorage";
 import { createFunctionStub } from "../TestUtils";
 
 import type { PreferenceArg, UserPreferencesAccess } from "@itwin/core-frontend";
