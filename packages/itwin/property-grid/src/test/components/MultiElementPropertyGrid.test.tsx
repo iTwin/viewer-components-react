@@ -9,22 +9,17 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { KeySet } from "@itwin/presentation-common";
 import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import userEvents from "@testing-library/user-event";
-import { AncestorsNavigationControls, MultiElementPropertyGrid, PropertyGridManager } from "../../property-grid-react";
+import { AncestorsNavigationControls, MultiElementPropertyGrid } from "../../components/MultiElementPropertyGrid";
 import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
+import { PropertyGridManager } from "../../PropertyGridManager";
 import {
-  act,
-  createPropertyRecord,
-  getByRole as getByRoleRTL,
-  render,
-  stubFavoriteProperties,
-  stubPresentation,
-  stubSelectionManager,
-  waitFor,
+  act, createPropertyRecord, getByRole as getByRoleRTL, render, stubFavoriteProperties, stubPresentation, stubSelectionManager, waitFor,
 } from "../TestUtils";
 
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
+
 describe("<MultiElementPropertGrid />", () => {
   const imodel = {} as IModelConnection;
 

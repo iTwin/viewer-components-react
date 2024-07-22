@@ -6,7 +6,6 @@
 import { expect } from "chai";
 import { Children } from "react";
 import sinon from "sinon";
-import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
@@ -16,13 +15,14 @@ import * as categoryTree from "../../../components/trees/categories-tree/Categor
 import { CategoriesTreeComponent } from "../../../components/trees/categories-tree/CategoriesTreeComponent";
 import * as categoriesVisibilityUtilsModule from "../../../components/trees/common/CategoriesVisibilityUtils";
 import { TreeWidget } from "../../../TreeWidget";
-import { mockPresentationManager, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
+import { mockPresentationManager, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { ComponentPropsWithoutRef } from "react";
 import type { CategoryInfo } from "../../../components/trees/common/CategoriesVisibilityUtils";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
+
+type TreeHeaderProps = ComponentPropsWithoutRef<typeof treeHeader.TreeHeader>;
 
 describe("<CategoriesTreeComponent />", () => {
   before(async () => {
@@ -40,19 +40,12 @@ describe("<CategoriesTreeComponent />", () => {
     selectionStorage: {} as any,
   };
 
-  const imodelMock = moq.Mock.ofType<IModelConnection>();
-  const viewsMock = moq.Mock.ofType<IModelConnection.Views>();
-  let vpMock = moq.Mock.ofType<Viewport>();
-
   beforeEach(async () => {
-    vpMock = mockViewport();
     const { presentationManager } = mockPresentationManager();
     sinon.stub(Presentation, "presentation").get(() => presentationManager.object);
-    imodelMock.setup((x) => x.views).returns(() => viewsMock.object);
   });
 
   afterEach(() => {
-    imodelMock.reset();
     sinon.restore();
   });
 
@@ -63,21 +56,6 @@ describe("<CategoriesTreeComponent />", () => {
     },
   ];
 
-  const filteredCategories: CategoryInfo[] = [
-    {
-      categoryId: "FilteredCategoryId",
-      subCategoryIds: ["FilteredSubCategoryId1", "FilteredSubCategoryId2"],
-    },
-  ];
-
-  const viewport = {
-    onDisplayStyleChanged: new BeEvent<(vp: Viewport) => void>(),
-    onViewedCategoriesChanged: new BeEvent<(vp: Viewport) => void>(),
-    view: {
-      is3d: () => false,
-    },
-  } as unknown as Viewport;
-
   const iModel = {
     createQueryReader: () => ({
       toArray: async () => [],
@@ -85,7 +63,17 @@ describe("<CategoriesTreeComponent />", () => {
     categories: {
       getCategoryInfo: async () => new Map<Id64String, IModelConnection.Categories.CategoryInfo>(),
     },
+    views: {},
   } as unknown as IModelConnection;
+
+  const viewport = {
+    onDisplayStyleChanged: new BeEvent<(vp: Viewport) => void>(),
+    onViewedCategoriesChanged: new BeEvent<(vp: Viewport) => void>(),
+    view: {
+      is3d: () => false,
+    },
+    iModel,
+  } as unknown as Viewport;
 
   it("returns null if iModel is undefined", () => {
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => ({}) as Viewport);
@@ -149,26 +137,16 @@ describe("<CategoriesTreeComponent />", () => {
     describe("<ShowAllButton />", () => {
       it("click on ShowAllButton calls expected function", async () => {
         const showAllSpy = sinon.stub(categoriesVisibilityUtilsModule, "showAllCategories");
-        const { user, getByRole } = render(<CategoriesTreeComponent.ShowAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.ShowAllButton categories={categories} viewport={viewport} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(showAllSpy).to.be.calledWith(["CategoryId"], vpMock.object);
-      });
-
-      it("calls expected function with filteredCategories when filteredCategories are not undefined", async () => {
-        const showAllSpy = sinon.stub(categoriesVisibilityUtilsModule, "showAllCategories");
-        const { user, getByRole } = render(
-          <CategoriesTreeComponent.ShowAllButton categories={categories} filteredCategories={filteredCategories} viewport={vpMock.object} />,
-        );
-        const button = await waitFor(() => getByRole("button"));
-        await user.click(button);
-        expect(showAllSpy).to.be.calledWith(["FilteredCategoryId"], vpMock.object);
+        expect(showAllSpy).to.be.calledWith(["CategoryId"], viewport);
       });
 
       it("report on click", async () => {
         const onFeatureUsedSpy = sinon.spy();
         const { user, getByRole } = render(
-          <CategoriesTreeComponent.ShowAllButton categories={categories} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+          <CategoriesTreeComponent.ShowAllButton categories={categories} viewport={viewport} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
@@ -179,26 +157,16 @@ describe("<CategoriesTreeComponent />", () => {
     describe("<HideAllButton />", () => {
       it("click on HideAllButton calls expected function", async () => {
         const hideAllSpy = sinon.stub(categoriesVisibilityUtilsModule, "hideAllCategories");
-        const { user, getByRole } = render(<CategoriesTreeComponent.HideAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.HideAllButton categories={categories} viewport={viewport} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(hideAllSpy).to.be.calledWith(["CategoryId"], vpMock.object);
-      });
-
-      it("calls expected function with filteredCategories when filteredCategories are not undefined", async () => {
-        const hideAllSpy = sinon.stub(categoriesVisibilityUtilsModule, "hideAllCategories");
-        const { user, getByRole } = render(
-          <CategoriesTreeComponent.HideAllButton categories={categories} filteredCategories={filteredCategories} viewport={vpMock.object} />,
-        );
-        const button = await waitFor(() => getByRole("button"));
-        await user.click(button);
-        expect(hideAllSpy).to.be.calledWith(["FilteredCategoryId"], vpMock.object);
+        expect(hideAllSpy).to.be.calledWith(["CategoryId"], viewport);
       });
 
       it("reports on click", async () => {
         const onFeatureUsedSpy = sinon.spy();
         const { user, getByRole } = render(
-          <CategoriesTreeComponent.HideAllButton categories={categories} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+          <CategoriesTreeComponent.HideAllButton categories={categories} viewport={viewport} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
@@ -209,26 +177,16 @@ describe("<CategoriesTreeComponent />", () => {
     describe("<InvertAllButton />", () => {
       it("click on InvertAllButton calls expected function", async () => {
         const invertAllSpy = sinon.stub(categoriesVisibilityUtilsModule, "invertAllCategories");
-        const { user, getByRole } = render(<CategoriesTreeComponent.InvertAllButton categories={categories} viewport={vpMock.object} density="enlarged" />);
+        const { user, getByRole } = render(<CategoriesTreeComponent.InvertAllButton categories={categories} viewport={viewport} density="enlarged" />);
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);
-        expect(invertAllSpy).to.be.calledWith(categories, vpMock.object);
-      });
-
-      it("calls expected function with filteredCategories when filteredCategories are not undefined", async () => {
-        const invertAllSpy = sinon.stub(categoriesVisibilityUtilsModule, "invertAllCategories");
-        const { user, getByRole } = render(
-          <CategoriesTreeComponent.InvertAllButton categories={categories} filteredCategories={filteredCategories} viewport={vpMock.object} />,
-        );
-        const button = await waitFor(() => getByRole("button"));
-        await user.click(button);
-        expect(invertAllSpy).to.be.calledWith(filteredCategories, vpMock.object);
+        expect(invertAllSpy).to.be.calledWith(categories, viewport);
       });
 
       it("reports on click", async () => {
         const onFeatureUsedSpy = sinon.spy();
         const { user, getByRole } = render(
-          <CategoriesTreeComponent.InvertAllButton categories={categories} viewport={vpMock.object} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
+          <CategoriesTreeComponent.InvertAllButton categories={categories} viewport={viewport} density="enlarged" onFeatureUsed={onFeatureUsedSpy} />,
         );
         const button = await waitFor(() => getByRole("button"));
         await user.click(button);

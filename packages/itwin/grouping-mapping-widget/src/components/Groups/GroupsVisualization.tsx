@@ -31,6 +31,8 @@ import { useGroupsClient } from "../context/GroupsClientContext";
 export interface GroupsVisualizationProps extends GroupsProps {
   isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
+  hideVisualizationToggle?: boolean;
+  hideRefreshIcon?: boolean;
 }
 
 /**
@@ -43,6 +45,8 @@ export const GroupsVisualization = ({
   onClickGroupModify,
   onClickAddGroup,
   mapping,
+  hideVisualizationToggle,
+  hideRefreshIcon,
   ...rest
 }: GroupsVisualizationProps) => {
   const { iModelConnection } = useGroupingMappingApiConfig();
@@ -174,6 +178,12 @@ export const GroupsVisualization = ({
     }
   }, [isVisualizationsEnabled, setHiddenGroupsIds, setIsVisualizationsEnabled, setShowGroupColor]);
 
+  useEffect(() => {
+    if (hideVisualizationToggle) {
+      setIsVisualizationsEnabled(true);
+    }
+  }, [hideVisualizationToggle, setIsVisualizationsEnabled]);
+
   const hideAllGroups = useCallback(() => {
     if (!groups) return;
     hideElements(getHiliteIdsFromGroupsWrapper(groups));
@@ -301,6 +311,7 @@ export const GroupsVisualization = ({
         onClickVisualizationButton={() => setIsVisualizationsEnabled((b) => !b)}
         showAll={showAll}
         hideAll={hideAll}
+        hideVisualizationToggle={hideVisualizationToggle}
       />
       <Groups
         onClickGroupModify={onModify}
@@ -310,6 +321,7 @@ export const GroupsVisualization = ({
         {...rest}
         progressConfig={progressConfig}
         alert={overlappedAlert}
+        hideRefreshIcon={hideRefreshIcon}
       />
     </div>
   );

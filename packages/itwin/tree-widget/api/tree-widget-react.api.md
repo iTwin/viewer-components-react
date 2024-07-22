@@ -20,7 +20,6 @@ import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { PropsWithChildren } from 'react';
-import type { default as React_2 } from 'react';
 import type { ReactNode } from 'react';
 import type { RenderedTreeNode } from '@itwin/presentation-hierarchies-react';
 import type { SchemaContext } from '@itwin/ecschema-metadata';
@@ -30,7 +29,6 @@ import { Tree as Tree_2 } from '@itwin/itwinui-react';
 import { TreeNodeRenderer as TreeNodeRenderer_2 } from '@itwin/presentation-hierarchies-react';
 import { useSelectionHandler } from '@itwin/presentation-hierarchies-react';
 import type { useTree } from '@itwin/presentation-hierarchies-react';
-import type { ViewManager } from '@itwin/core-frontend';
 import type { Viewport } from '@itwin/core-frontend';
 import type { Widget } from '@itwin/appui-react';
 
@@ -149,6 +147,26 @@ export class TreeWidget {
 
 // @public
 export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
+
+// @beta (undocumented)
+export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX.Element;
+
+// @beta
+export function useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+
+// @public
+export function useCategoriesTreeButtonProps({ viewport }: {
+    viewport: Viewport;
+}): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
+
+// @beta
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult;
+
+// @public
+export function useModelsTreeButtonProps({ imodel, viewport, }: {
+    imodel: IModelConnection;
+    viewport: Viewport;
+}): Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
 
 // @beta
 export interface VisibilityStatus {

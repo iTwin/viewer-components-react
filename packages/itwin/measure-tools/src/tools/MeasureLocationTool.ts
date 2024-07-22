@@ -6,7 +6,6 @@
 import { GeoServiceStatus } from "@itwin/core-bentley";
 import type { CurvePrimitive } from "@itwin/core-geometry";
 import { GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
-import type { SnapRequestProps } from "@itwin/core-common";
 import { IModelError } from "@itwin/core-common";
 import type {
   BeButtonEvent,
@@ -19,7 +18,6 @@ import {
   LocateResponse,
   OutputMessagePriority,
   SnapDetail,
-  SnapStatus,
   ToolAssistance,
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
@@ -186,28 +184,8 @@ MeasureLocationToolModel
     // Already a snap
     if (hit instanceof SnapDetail) return hit;
 
-    // Pretty much copied off AccuSnap.ts
-    const requestProps: SnapRequestProps = {
-      id: hit.sourceId,
-      testPoint: hit.testPoint,
-      closePoint: hit.hitPoint,
-      worldToView: hit.viewport.worldToViewMap.transform0.toJSON(),
-      viewFlags: hit.viewport.viewFlags,
-      snapModes: IModelApp.accuSnap.getActiveSnapModes(),
-      snapAperture: hit.viewport.pixelsFromInches(0.1),
-    };
-
-    const result = await this.iModel.requestSnap(requestProps);
-    if (result.status !== SnapStatus.Success) return undefined;
-
-    const parseCurve = (json: any): CurvePrimitive | undefined => {
-      const parsed =
-        undefined !== json ? IModelJson.Reader.parse(json) : undefined;
-      return parsed instanceof GeometryQuery &&
-        "curvePrimitive" === parsed.geometryCategory
-        ? parsed
-        : undefined;
-    };
+    const result = await IModelApp.accuSnap.doSnapRequest(hit);
+    if (undefined === result) return undefined;
 
     const snap = new SnapDetail(
       hit,
@@ -216,7 +194,7 @@ MeasureLocationToolModel
       result.snapPoint
     );
     snap.setCurvePrimitive(
-      parseCurve(result.curve),
+      result.primitive,
       undefined,
       result.geomType
     );

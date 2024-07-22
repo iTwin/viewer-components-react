@@ -23,8 +23,7 @@ interface ExternalSourcesTreeOwnProps {
 type TreeProps = Parameters<typeof Tree>[0];
 
 /** @beta */
-type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps &
-  Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "height" | "width" | "density" | "selectionMode">;
+type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps & Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
 
 /** @beta */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {
