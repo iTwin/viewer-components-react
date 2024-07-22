@@ -27,7 +27,7 @@ import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
-import { DrawingDataCache } from "../measure-tools-react";
+import { DrawingDataCache } from "../api/DrawingTypeDataCache";
 
 export class MeasureAreaTool extends MeasurementToolBase<
 AreaMeasurement,
