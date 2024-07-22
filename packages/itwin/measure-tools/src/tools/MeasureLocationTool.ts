@@ -34,7 +34,7 @@ import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin
 import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata, DrawingMetadataProps } from "../api/Measurement";
-import { DrawingDataCache } from "../measure-tools-react";
+import { DrawingDataCache } from "../api/DrawingTypeDataCache";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
