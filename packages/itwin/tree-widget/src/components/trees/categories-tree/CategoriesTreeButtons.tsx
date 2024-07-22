@@ -12,7 +12,7 @@ import { hideAllCategories, invertAllCategories, loadCategoriesFromViewport, sho
 
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 
 /**
  * Props that get passed to `CategoriesTreeComponent` header button renderer.
