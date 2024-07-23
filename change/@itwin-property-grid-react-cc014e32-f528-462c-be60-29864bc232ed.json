@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add missing peer dependencies",
+  "packageName": "@itwin/property-grid-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
