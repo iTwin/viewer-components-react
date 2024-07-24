@@ -72,15 +72,19 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._listeners.push(this._props.viewport.onViewedModelsChanged.addListener(this.onViewChanged));
     this._listeners.push(this._props.viewport.onAlwaysDrawnChanged.addListener(this.onElementAlwaysDrawnChanged));
     this._listeners.push(this._props.viewport.onNeverDrawnChanged.addListener(this.onElementNeverDrawnChanged));
+
+    const clearCaches = () => {
+      this._elementIdsCache.clear();
+      this._subjectModelIdsCache.clear();
+    };
+
     this._listeners.push(
       // eslint-disable-next-line @itwin/no-internal
-      Presentation.presentation.onIModelHierarchyChanged.addListener(
-        /* istanbul ignore next */ () => {
-          this._elementIdsCache.clear();
-          this._subjectModelIdsCache.clear();
-        },
-      ),
+      Presentation.presentation.onIModelHierarchyChanged.addListener(clearCaches),
     );
+    if (this._props.viewport.iModel.isBriefcaseConnection()) {
+      this._listeners.push(this._props.viewport.iModel.txns.onChangesApplied.addListener(clearCaches));
+    }
   }
 
   public dispose() {

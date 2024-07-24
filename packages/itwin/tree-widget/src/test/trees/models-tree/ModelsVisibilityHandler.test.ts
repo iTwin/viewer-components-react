@@ -21,9 +21,9 @@ import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
+import type { BriefcaseConnection, BriefcaseTxns, Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
-import type { IModelConnection, Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
@@ -42,12 +42,18 @@ describe("ModelsVisibilityHandler", () => {
     await IModelApp.shutdown();
   });
 
-  const imodelMock = moq.Mock.ofType<IModelConnection>();
+  const imodelMock = moq.Mock.ofType<BriefcaseConnection>();
+  const txnsMock = moq.Mock.ofType<BriefcaseTxns>();
   const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
   const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
+  const onChangesAppliedEvent = new BeEvent<() => void>();
 
   beforeEach(() => {
     presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
+    // eslint-disable-next-line @itwin/no-internal
+    imodelMock.setup((x) => x.isBriefcaseConnection()).returns(() => true);
+    imodelMock.setup((x) => x.txns).returns(() => txnsMock.object);
+    txnsMock.setup((x) => x.onChangesApplied).returns(() => onChangesAppliedEvent);
     sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
   });
 
@@ -70,7 +76,7 @@ describe("ModelsVisibilityHandler", () => {
   };
 
   interface SubjectModelIdsMockProps {
-    imodelMock: moq.IMock<IModelConnection>;
+    imodelMock: moq.IMock<BriefcaseConnection>;
     subjectsHierarchy: Map<Id64String, Id64String[]>;
     subjectModels: Map<Id64String, Array<{ id: Id64String; content?: string }>>;
   }
@@ -136,6 +142,12 @@ describe("ModelsVisibilityHandler", () => {
     it("should subscribe for 'onIModelHierarchyChanged' event", () => {
       using(createHandler({ viewport: mockViewport().object }), (_) => {
         expect(changeEvent.numberOfListeners).to.eq(1);
+      });
+    });
+
+    it("should subscribe for briefcase `onChangesApplied` event", () => {
+      using(createHandler({ viewport: mockViewport({ imodel: imodelMock.object }).object }), (_) => {
+        expect(onChangesAppliedEvent.numberOfListeners).to.eq(1);
       });
     });
   });

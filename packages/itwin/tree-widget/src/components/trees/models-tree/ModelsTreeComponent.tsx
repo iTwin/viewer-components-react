@@ -9,6 +9,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
+import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
@@ -124,13 +125,20 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
   const contentClassName = classNames("tree-widget-tree-content", props.density === "enlarged" && "enlarge");
 
   useEffect(() => {
-    queryModelsForHeaderActions(iModel)
-      .then((modelInfos: ModelInfo[]) => {
-        setAvailableModels(modelInfos);
-      })
-      .catch((_e) => {
-        setAvailableModels([]);
-      });
+    const queryModels = () => {
+      queryModelsForHeaderActions(iModel)
+        .then((modelInfos: ModelInfo[]) => {
+          setAvailableModels(modelInfos);
+        })
+        .catch((_e) => {
+          setAvailableModels([]);
+        });
+    };
+    queryModels();
+    // eslint-disable-next-line @itwin/no-internal
+    const listeners = [Presentation.presentation.onIModelHierarchyChanged.addListener(queryModels)];
+    iModel.isBriefcaseConnection() && listeners.push(iModel.txns.onChangesApplied.addListener(queryModels));
+    return listeners.forEach((remove) => remove());
   }, [iModel]);
 
   const filterInfo = useMemo(
