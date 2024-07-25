@@ -67,7 +67,7 @@ export class DrawingDataCache {
     }
   }
 
-  public getSheetDrawingDataForViewport(vp: Viewport): Readonly<SheetMeasurementsHelper.DrawingTypeData[] | []> {
+  public getSheetDrawingDataForViewport(vp: Viewport): ReadonlyArray<SheetMeasurementsHelper.DrawingTypeData> {
     if (!vp.view.isSheetView())
       return [];
 
