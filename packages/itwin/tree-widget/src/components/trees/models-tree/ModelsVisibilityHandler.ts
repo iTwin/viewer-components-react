@@ -73,6 +73,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._listeners.push(this._props.viewport.onAlwaysDrawnChanged.addListener(this.onElementAlwaysDrawnChanged));
     this._listeners.push(this._props.viewport.onNeverDrawnChanged.addListener(this.onElementNeverDrawnChanged));
 
+    /* istanbul ignore next */
     const clearCaches = () => {
       this._elementIdsCache.clear();
       this._subjectModelIdsCache.clear();

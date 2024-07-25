@@ -15,7 +15,7 @@ import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
 import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { ModelsTreeComponent, TreeWidget } from "../../../tree-widget-react";
-import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
+import { act, createResolvablePromise, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
 import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget-react";
@@ -148,6 +148,113 @@ describe("<ModelsTreeComponent />", () => {
       } as unknown as IModelConnection);
       render(<ModelsTreeComponent headerButtons={[spy]} />);
       await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 0)));
+    });
+
+    it("updates available models when hierarchy changes", async () => {
+      const queryProps = sinon.stub();
+      const hierarchyModels = [
+        {
+          id: "testIdFromQueryModels1",
+          modeledElement: {
+            id: "id-1",
+          },
+          classFullName: "className",
+        },
+        {
+          id: "testIdFromQueryModels2",
+          modeledElement: {
+            id: "id-2",
+          },
+          classFullName: "className",
+        },
+      ];
+
+      const iModel = {
+        models: { queryProps },
+        isBriefcaseConnection: () => true,
+        txns: txnsMock.object,
+      } as unknown as IModelConnection;
+      const spy = sinon.stub().returns(<></>);
+      sinon.stub(modelsTree, "ModelsTree").returns(<></>);
+      sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
+      sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
+
+      queryProps.callsFake(async () => [hierarchyModels[0]]);
+      render(<ModelsTreeComponent headerButtons={[spy]} density="enlarged" />);
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels1"),
+        ),
+      );
+
+      queryProps.callsFake(async () => [hierarchyModels[1]]);
+      onIModelHierarchyChangedEvent.raiseEvent({} as unknown as IModelHierarchyChangeEventArgs);
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels2"),
+        ),
+      );
+
+      queryProps.callsFake(async () => hierarchyModels);
+      onChangesAppliedEvent.raiseEvent();
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match(
+            (props: ModelsTreeHeaderButtonProps) =>
+              props.models.length === 2 && props.models[0].id === "testIdFromQueryModels1" && props.models[1].id === "testIdFromQueryModels2",
+          ),
+        ),
+      );
+    });
+
+    it("uses latest available models when hierarchy changes", async () => {
+      const queryProps = sinon.stub();
+      const hierarchyModels = [
+        {
+          id: "testIdFromQueryModels1",
+          modeledElement: {
+            id: "id-1",
+          },
+          classFullName: "className",
+        },
+        {
+          id: "testIdFromQueryModels2",
+          modeledElement: {
+            id: "id-2",
+          },
+          classFullName: "className",
+        },
+      ];
+
+      const iModel = {
+        models: { queryProps },
+        isBriefcaseConnection: () => true,
+        txns: txnsMock.object,
+      } as unknown as IModelConnection;
+      const spy = sinon.stub().returns(<></>);
+      sinon.stub(modelsTree, "ModelsTree").returns(<></>);
+      sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
+      sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
+
+      const { promise: promise1, resolve: resolve1 } = createResolvablePromise<ModelInfo[]>();
+      queryProps.callsFake(async () => promise1);
+
+      render(<ModelsTreeComponent headerButtons={[spy]} density="enlarged" />);
+
+      const { promise: promise2, resolve: resolve2 } = createResolvablePromise<ModelInfo[]>();
+      queryProps.callsFake(async () => promise2);
+      onChangesAppliedEvent.raiseEvent();
+      resolve2([hierarchyModels[1]]);
+      resolve1([hierarchyModels[0]]);
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels2"),
+        ),
+      );
     });
   });
 
