@@ -45,11 +45,12 @@ describe("ModelsVisibilityHandler", () => {
   const imodelMock = moq.Mock.ofType<BriefcaseConnection>();
   const txnsMock = moq.Mock.ofType<BriefcaseTxns>();
   const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
-  const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
+  const onIModelHierarchyChangedEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
   const onChangesAppliedEvent = new BeEvent<() => void>();
 
   beforeEach(() => {
-    presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
+    // eslint-disable-next-line @itwin/no-internal
+    presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => onIModelHierarchyChangedEvent);
     // eslint-disable-next-line @itwin/no-internal
     imodelMock.setup((x) => x.isBriefcaseConnection()).returns(() => true);
     imodelMock.setup((x) => x.txns).returns(() => txnsMock.object);
@@ -60,6 +61,7 @@ describe("ModelsVisibilityHandler", () => {
   afterEach(() => {
     presentationManagerMock.reset();
     imodelMock.reset();
+    txnsMock.reset();
     sinon.restore();
   });
 
@@ -69,7 +71,7 @@ describe("ModelsVisibilityHandler", () => {
     }
     const props: ModelsVisibilityHandlerProps = {
       rulesetId: "test",
-      viewport: partialProps.viewport || mockViewport().object,
+      viewport: partialProps.viewport || mockViewport({ imodel: imodelMock.object }).object,
       hierarchyAutoUpdateEnabled: partialProps.hierarchyAutoUpdateEnabled,
     };
     return new ModelsVisibilityHandler(props);
@@ -141,7 +143,7 @@ describe("ModelsVisibilityHandler", () => {
 
     it("should subscribe for 'onIModelHierarchyChanged' event", () => {
       using(createHandler({ viewport: mockViewport().object }), (_) => {
-        expect(changeEvent.numberOfListeners).to.eq(1);
+        expect(onIModelHierarchyChangedEvent.numberOfListeners).to.eq(1);
       });
     });
 
@@ -201,7 +203,12 @@ describe("ModelsVisibilityHandler", () => {
 
     it("should unsubscribe from 'onIModelHierarchyChanged' event", () => {
       using(createHandler({ viewport: mockViewport().object }), (_) => {});
-      expect(changeEvent.numberOfListeners).to.eq(0);
+      expect(onIModelHierarchyChangedEvent.numberOfListeners).to.eq(0);
+    });
+
+    it("should unsubscribe from briefcase 'onChangesApplied' event", () => {
+      using(createHandler({ viewport: mockViewport({ imodel: imodelMock.object }).object }), (_) => {});
+      expect(onChangesAppliedEvent.numberOfListeners).to.eq(0);
     });
   });
 
