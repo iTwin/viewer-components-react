@@ -86,7 +86,7 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
     return Presentation.selection.selectionChange.addListener((args) => {
       const selection = Presentation.selection.getSelection(args.imodel);
       // hide grid widget if there are no nodes or valid instances selected.
-      const hasSelectedElements = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
+      const hasSelectedElements = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && (props.showGridOnlyTransient || !Id64.isTransient(key.id)));
 
       if (!hasSelectedElements) {
         widgetDef.setWidgetState(WidgetState.Hidden);

@@ -32,6 +32,11 @@ export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGri
    * Callback that is invoked when a tracked feature is used.
    */
   onFeatureUsed?: (featureId: UsageTrackedFeatures) => void;
+
+  /**
+   * Show grid although only transient elements are selected
+   */
+  showGridOnlyTransient? : boolean;
 }
 
 /**
