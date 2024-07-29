@@ -97,7 +97,7 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
         widgetDef.setWidgetState(WidgetState.Open);
       }
     });
-  }, [widgetDef]);
+  }, [props.showGridOnlyTransient, widgetDef]);
 
   return (
     <div ref={ref} className="property-grid-widget">
