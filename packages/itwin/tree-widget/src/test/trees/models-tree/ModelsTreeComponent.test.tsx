@@ -10,15 +10,18 @@ import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import * as treeHeader from "../../../components/tree-header/TreeHeader";
 import * as modelsTree from "../../../components/trees/models-tree/ModelsTree";
 import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { ModelsTreeComponent, TreeWidget } from "../../../tree-widget-react";
-import { act, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
+import { act, createResolvablePromise, mockViewport, render, TestUtils, waitFor } from "../../TestUtils";
 
+import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
 import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget-react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { BriefcaseConnection, BriefcaseTxns, IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
+
 describe("<ModelsTreeComponent />", () => {
   before(async () => {
     await NoRenderApp.startup();
@@ -31,11 +34,29 @@ describe("<ModelsTreeComponent />", () => {
   });
 
   let vpMock = moq.Mock.ofType<Viewport>();
+  const imodelMock = moq.Mock.ofType<BriefcaseConnection>();
+  const txnsMock = moq.Mock.ofType<BriefcaseTxns>();
+  const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
+  const onIModelHierarchyChangedEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
+  const onChangesAppliedEvent = new BeEvent<() => void>();
+
+  beforeEach(() => {
+    // eslint-disable-next-line @itwin/no-internal
+    presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => onIModelHierarchyChangedEvent);
+    // eslint-disable-next-line @itwin/no-internal
+    imodelMock.setup((x) => x.isBriefcaseConnection()).returns(() => true);
+    imodelMock.setup((x) => x.txns).returns(() => txnsMock.object);
+    txnsMock.setup((x) => x.onChangesApplied).returns(() => onChangesAppliedEvent);
+    sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
+  });
 
   afterEach(() => {
+    presentationManagerMock.reset();
+    imodelMock.reset();
+    txnsMock.reset();
     sinon.restore();
     vpMock.reset();
-    vpMock = mockViewport();
+    vpMock = mockViewport({ imodel: imodelMock.object });
   });
 
   const models: ModelInfo[] = [{ id: "testModelId1" }, { id: "testModelId2" }];
@@ -46,7 +67,6 @@ describe("<ModelsTreeComponent />", () => {
     onViewedModelsChanged: new BeEvent<(vp: Viewport) => void>(),
     onAlwaysDrawnChanged: new BeEvent<() => void>(),
     onNeverDrawnChanged: new BeEvent<() => void>(),
-    onIModelHierarchyChanged: new BeEvent<() => void>(),
   } as unknown as Viewport;
 
   it("returns null if iModel is undefined", async () => {
@@ -60,7 +80,7 @@ describe("<ModelsTreeComponent />", () => {
   });
 
   it("returns null if viewport is undefined", async () => {
-    sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
+    sinon.stub(UiFramework, "getIModelConnection").returns({ isBriefcaseConnection: () => false } as IModelConnection);
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree");
     const result = render(<ModelsTreeComponent />);
     await waitFor(() => {
@@ -72,7 +92,7 @@ describe("<ModelsTreeComponent />", () => {
   it("renders `ModelsTree` when iModel and viewport are defined", async () => {
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree").returns(<></>);
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-    sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
+    sinon.stub(UiFramework, "getIModelConnection").returns({ isBriefcaseConnection: () => false } as IModelConnection);
     const result = render(<ModelsTreeComponent />);
     await waitFor(() => {
       expect(result.container.children).to.not.be.empty;
@@ -100,6 +120,7 @@ describe("<ModelsTreeComponent />", () => {
             },
           ],
         },
+        isBriefcaseConnection: () => false,
       } as unknown as IModelConnection;
       const spy = sinon.stub().returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
@@ -123,9 +144,117 @@ describe("<ModelsTreeComponent />", () => {
             throw new Error();
           },
         },
+        isBriefcaseConnection: () => false,
       } as unknown as IModelConnection);
       render(<ModelsTreeComponent headerButtons={[spy]} />);
       await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 0)));
+    });
+
+    it("updates available models when hierarchy changes", async () => {
+      const queryProps = sinon.stub();
+      const hierarchyModels = [
+        {
+          id: "testIdFromQueryModels1",
+          modeledElement: {
+            id: "id-1",
+          },
+          classFullName: "className",
+        },
+        {
+          id: "testIdFromQueryModels2",
+          modeledElement: {
+            id: "id-2",
+          },
+          classFullName: "className",
+        },
+      ];
+
+      const iModel = {
+        models: { queryProps },
+        isBriefcaseConnection: () => true,
+        txns: txnsMock.object,
+      } as unknown as IModelConnection;
+      const spy = sinon.stub().returns(<></>);
+      sinon.stub(modelsTree, "ModelsTree").returns(<></>);
+      sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
+      sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
+
+      queryProps.callsFake(async () => [hierarchyModels[0]]);
+      render(<ModelsTreeComponent headerButtons={[spy]} density="enlarged" />);
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels1"),
+        ),
+      );
+
+      queryProps.callsFake(async () => [hierarchyModels[1]]);
+      onIModelHierarchyChangedEvent.raiseEvent({} as unknown as IModelHierarchyChangeEventArgs);
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels2"),
+        ),
+      );
+
+      queryProps.callsFake(async () => hierarchyModels);
+      onChangesAppliedEvent.raiseEvent();
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match(
+            (props: ModelsTreeHeaderButtonProps) =>
+              props.models.length === 2 && props.models[0].id === "testIdFromQueryModels1" && props.models[1].id === "testIdFromQueryModels2",
+          ),
+        ),
+      );
+    });
+
+    it("uses latest available models when hierarchy changes", async () => {
+      const queryProps = sinon.stub();
+      const hierarchyModels = [
+        {
+          id: "testIdFromQueryModels1",
+          modeledElement: {
+            id: "id-1",
+          },
+          classFullName: "className",
+        },
+        {
+          id: "testIdFromQueryModels2",
+          modeledElement: {
+            id: "id-2",
+          },
+          classFullName: "className",
+        },
+      ];
+
+      const iModel = {
+        models: { queryProps },
+        isBriefcaseConnection: () => true,
+        txns: txnsMock.object,
+      } as unknown as IModelConnection;
+      const spy = sinon.stub().returns(<></>);
+      sinon.stub(modelsTree, "ModelsTree").returns(<></>);
+      sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
+      sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
+
+      const { promise: promise1, resolve: resolve1 } = createResolvablePromise<ModelInfo[]>();
+      queryProps.callsFake(async () => promise1);
+
+      render(<ModelsTreeComponent headerButtons={[spy]} density="enlarged" />);
+
+      const { promise: promise2, resolve: resolve2 } = createResolvablePromise<ModelInfo[]>();
+      queryProps.callsFake(async () => promise2);
+      onChangesAppliedEvent.raiseEvent();
+      resolve2([hierarchyModels[1]]);
+      resolve1([hierarchyModels[0]]);
+
+      await waitFor(() =>
+        expect(spy).to.be.calledWith(
+          sinon.match((props: ModelsTreeHeaderButtonProps) => props.models.length === 1 && props.models[0].id === "testIdFromQueryModels2"),
+        ),
+      );
     });
   });
 
@@ -134,7 +263,7 @@ describe("<ModelsTreeComponent />", () => {
       const treewHeaderSpy = sinon.stub(treeHeader, "TreeHeader").returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-      sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
+      sinon.stub(UiFramework, "getIModelConnection").returns({ isBriefcaseConnection: () => false } as IModelConnection);
       render(<ModelsTreeComponent />);
       await waitFor(() => {
         expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 5));
@@ -146,7 +275,7 @@ describe("<ModelsTreeComponent />", () => {
       const spy = sinon.stub().returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-      sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
+      sinon.stub(UiFramework, "getIModelConnection").returns({ isBriefcaseConnection: () => false } as IModelConnection);
       render(<ModelsTreeComponent headerButtons={[spy]} />);
       await waitFor(() => {
         expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 1));

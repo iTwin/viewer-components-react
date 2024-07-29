@@ -6,9 +6,11 @@
 import "../VisibilityTreeBase.scss";
 import classNames from "classnames";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { from } from "rxjs";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
+import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
@@ -17,9 +19,11 @@ import { ModelsTree } from "./ModelsTree";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
 import { queryModelsForHeaderActions } from "./Utils";
 
+import type { Subscription } from "rxjs";
 import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { ModelsTreeProps } from "./ModelsTree";
+
 /**
  * Information about a single Model.
  * @public
@@ -124,13 +128,23 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
   const contentClassName = classNames("tree-widget-tree-content", props.density === "enlarged" && "enlarge");
 
   useEffect(() => {
-    queryModelsForHeaderActions(iModel)
-      .then((modelInfos: ModelInfo[]) => {
-        setAvailableModels(modelInfos);
-      })
-      .catch((_e) => {
-        setAvailableModels([]);
+    let subscription: Subscription | undefined;
+    const queryModels = () => {
+      subscription?.unsubscribe();
+      subscription = from(queryModelsForHeaderActions(iModel)).subscribe({
+        next: (modelInfos) => setAvailableModels(modelInfos),
+        error: () => setAvailableModels([]),
       });
+    };
+    queryModels();
+    // eslint-disable-next-line @itwin/no-internal
+    const listeners = [Presentation.presentation.onIModelHierarchyChanged.addListener(queryModels)];
+    iModel.isBriefcaseConnection() && listeners.push(iModel.txns.onChangesApplied.addListener(queryModels));
+
+    return () => {
+      listeners.forEach((remove) => remove());
+      subscription?.unsubscribe();
+    };
   }, [iModel]);
 
   const filterInfo = useMemo(

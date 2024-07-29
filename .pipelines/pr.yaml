@@ -1,12 +1,14 @@
 trigger:
   - master
   - gh-readonly-queue/master
+  - tree-widget-2.x
 
 pr:
   drafts: false
   branches:
     include:
       - master
+      - tree-widget-2.x
 
 jobs:
   - job: Build
