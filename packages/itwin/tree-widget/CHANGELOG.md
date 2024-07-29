@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 10 Jun 2024 12:47:48 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Jul 2024 14:42:02 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.3.3
+
+Mon, 29 Jul 2024 14:42:02 GMT
+
+### Patches
+
+- Updated `ModelsVisibilityHandler` to clear element and subject caches when briefcase is updated. ([#1008](https://github.com/iTwin/viewer-components-react/pull/1008))
 
 ## 2.3.2
 

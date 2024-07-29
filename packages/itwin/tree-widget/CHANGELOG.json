@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Mon, 29 Jul 2024 14:42:02 GMT",
+      "version": "2.3.3",
+      "tag": "@itwin/tree-widget-react_v2.3.3",
+      "comments": {
+        "patch": [
+          {
+            "author": "33428304+jasdom@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "ed7af1e615d816e1f2281a418026b912cc2c9658",
+            "comment": "Updated `ModelsVisibilityHandler` to clear element and subject caches when briefcase is updated."
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 10 Jun 2024 12:47:48 GMT",
       "version": "2.3.2",
       "tag": "@itwin/tree-widget-react_v2.3.2",
