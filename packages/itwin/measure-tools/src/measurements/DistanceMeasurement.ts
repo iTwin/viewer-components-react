@@ -15,7 +15,6 @@ import {
   Vector3d,
 } from "@itwin/core-geometry";
 import type { GeometryStreamProps } from "@itwin/core-common";
-import { ColorDef, LinePixels } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
@@ -96,8 +95,6 @@ export class DistanceMeasurement extends Measurement {
   private _startPoint: Point3d;
   private _endPoint: Point3d;
   private _showAxes: boolean;
-  private _measureLine?: Point3d[];
-  private _secondaryLine?: Point3d[];
 
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
@@ -105,7 +102,6 @@ export class DistanceMeasurement extends Measurement {
   private _runRiseAxes: DistanceMeasurement[]; // No serialize.
   private _textStyleOverride?: WellKnownTextStyleType; // No serialize.
   private _graphicStyleOverride?: WellKnownGraphicStyleType; // No serialize.
-  private _toolName: string;
 
   public get startPointRef(): Point3d {
     return this._startPoint;
@@ -133,30 +129,6 @@ export class DistanceMeasurement extends Measurement {
     this._showAxes = v;
   }
 
-  public get toolName(): string {
-    return this._toolName;
-  }
-
-  public set toolName(t: string) {
-    this._toolName = t;
-  }
-
-  public get measureLine(): Point3d[] {
-    return this._measureLine ?? [];
-  }
-
-  public set measureLine(l: Point3d[]) {
-    this._measureLine = l;
-  }
-
-  public get secondaryLine(): Point3d[] {
-    return this._secondaryLine ?? [];
-  }
-
-  public set secondaryLine(l: Point3d[]) {
-    this._secondaryLine = l;
-  }
-
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private get isAxis(): boolean {
     return (
@@ -173,7 +145,6 @@ export class DistanceMeasurement extends Measurement {
     this._isDynamic = false;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
-    this._toolName = MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.distance");
 
     if (props) this.readFromJSON(props);
 
@@ -256,24 +227,18 @@ export class DistanceMeasurement extends Measurement {
   public override async getDecorationToolTip(
     _pickContext: MeasurementPickContext
   ): Promise<HTMLElement | string> {
-    return `${this._toolName} ${MeasureTools.localization.getLocalizedString("MeasureTools:Measurements.measurement")}`;
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:Measurements.distanceMeasurement"
+    );
   }
 
-  private getSnapId(): string | undefined {
+  protected getSnapId(): string | undefined {
     if (!this.transientId)
       this.transientId = MeasurementSelectionSet.nextTransientId;
 
     if (this.isDynamic) return undefined;
 
     return this.transientId;
-  }
-
-  private getMeasureStartPoint(): Point3d {
-    return this._measureLine ? this.measureLine[0] : this._startPoint;
-  }
-
-  private getMeasureEndPoint(): Point3d {
-    return this._measureLine ? this.measureLine[1] : this._endPoint;
   }
 
   protected override onTransientIdChanged(_prevId: Id64String) {
@@ -286,7 +251,7 @@ export class DistanceMeasurement extends Measurement {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
-    const points = [this.getMeasureStartPoint(), this.getMeasureEndPoint()];
+    const points = [this._startPoint, this._endPoint];
 
     const style = styleTheme.getGraphicStyle(
       this._graphicStyleOverride ||
@@ -301,13 +266,6 @@ export class DistanceMeasurement extends Measurement {
     style.addStyledPointString(xBuilder, points, true);
     context.addDecorationFromBuilder(xBuilder);
 
-    if (this._secondaryLine && this._secondaryLine.length > 0) {
-      const secondaryLine = context.createGraphicBuilder(GraphicType.WorldOverlay, undefined, this.getSnapId());
-      secondaryLine.setSymbology(ColorDef.white, ColorDef.black, 1, LinePixels.Code5);
-      secondaryLine.addLineString(this._secondaryLine);
-      context.addDecorationFromBuilder(secondaryLine);
-    }
-
     if (!this._textMarker || this._startPoint.isAlmostEqual(this._endPoint))
       return;
 
@@ -318,7 +276,7 @@ export class DistanceMeasurement extends Measurement {
     this._textMarker.worldLocation = textLocation;
 
     // Determine which side to place the text marker relative to its anchor point
-    const vPoints = [this.getMeasureStartPoint().clone(), this.getMeasureEndPoint().clone()];
+    const vPoints = [this._startPoint.clone(), this._endPoint.clone()];
     context.viewport.worldToViewArray(vPoints);
     const v0 = Vector3d.createStartEnd(vPoints[1], vPoints[0]);
     v0.z = 0.0;
@@ -342,21 +300,21 @@ export class DistanceMeasurement extends Measurement {
   private calculateWorldTextLocation(context: DecorateContext): Point3d | undefined {
     const clipFront = context.viewport.view.is3d() && context.viewport.view.isCameraOn;
     const clipPlanes = context.viewport.getWorldFrustum().getRangePlanes(clipFront, false, 0.0);
-    const startIn = clipPlanes.isPointOnOrInside(this.getMeasureStartPoint(), Geometry.smallMetricDistance);
-    const endIn = clipPlanes.isPointOnOrInside(this.getMeasureEndPoint(), Geometry.smallMetricDistance);
+    const startIn = clipPlanes.isPointOnOrInside(this._startPoint, Geometry.smallMetricDistance);
+    const endIn = clipPlanes.isPointOnOrInside(this._endPoint, Geometry.smallMetricDistance);
 
     if (startIn && endIn)
-      return Point3d.createAdd2Scaled(this.getMeasureStartPoint(), 0.5, this.getMeasureEndPoint(), 0.5);
+      return Point3d.createAdd2Scaled(this._startPoint, 0.5, this._endPoint, 0.5);
 
     const range = Range1d.createNull();
-    let ray = Ray3d.createStartEnd(this.getMeasureStartPoint().clone(), this.getMeasureEndPoint());
+    let ray = Ray3d.createStartEnd(this._startPoint.clone(), this._endPoint);
 
     // Either start/end or BOTH are outside the clip planes. If nothing intersects, don't bother displaying anything.
     if (!clipPlanes.hasIntersectionWithRay(ray, range))
       return undefined;
 
-    let clampedStartPoint = this.getMeasureStartPoint();
-    let clampedEndPoint = this.getMeasureEndPoint();
+    let clampedStartPoint = this._startPoint;
+    let clampedEndPoint = this._endPoint;
 
     if (!endIn) {
       if (range.high < 0)
@@ -366,7 +324,7 @@ export class DistanceMeasurement extends Measurement {
     }
 
     if (!startIn) {
-      ray = Ray3d.createStartEnd(this.getMeasureEndPoint().clone(), this.getMeasureStartPoint());
+      ray = Ray3d.createStartEnd(this._endPoint.clone(), this._startPoint);
       if (!clipPlanes.hasIntersectionWithRay(ray, range) || range.high < 0)
         return undefined;
 
@@ -382,15 +340,15 @@ export class DistanceMeasurement extends Measurement {
     if (this.isAxis) return;
 
     // Run point
-    const runPoint = this.getMeasureEndPoint().clone();
-    runPoint.z = this.getMeasureStartPoint().z;
+    const runPoint = this._endPoint.clone();
+    runPoint.z = this._startPoint.z;
 
     // It"s irrelevant to draw the axes because we"re in 2D already.
-    if (runPoint.isAlmostEqual(this.getMeasureEndPoint())) return;
+    if (runPoint.isAlmostEqual(this._endPoint)) return;
 
     const lines: LineSegment3d[] = [
-      LineSegment3d.create(this.getMeasureEndPoint(), runPoint),
-      LineSegment3d.create(runPoint, this.getMeasureStartPoint()),
+      LineSegment3d.create(this._endPoint, runPoint),
+      LineSegment3d.create(runPoint, this._startPoint),
     ];
     const graphicStyles: WellKnownGraphicStyleType[] = [
       WellKnownGraphicStyleType.Rise,
@@ -475,16 +433,16 @@ export class DistanceMeasurement extends Measurement {
       await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.LengthEngineering
       );
-    const distance = this.getMeasureStartPoint().distance(this.getMeasureEndPoint());
+    const distance = this._startPoint.distance(this._endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance * this.worldScale,
       lengthSpec
     );
 
     const midPoint = Point3d.createAdd2Scaled(
-      this.getMeasureStartPoint(),
+      this._startPoint,
       0.5,
-      this.getMeasureEndPoint(),
+      this._endPoint,
       0.5
     );
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -516,18 +474,15 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const startPoint = this.getMeasureStartPoint();
-    const endPoint = this.getMeasureEndPoint();
-
-    const distance = this.worldScale * startPoint.distance(endPoint);
-    const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(endPoint.x - startPoint.x): startPoint.distanceXY(endPoint);
-    const rise = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * (endPoint.y - startPoint.y): endPoint.z - startPoint.z;
+    const distance = this.worldScale * this._startPoint.distance(this._endPoint);
+    const run = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * Math.abs(this._endPoint.x - this._startPoint.x): this._startPoint.distanceXY(this._endPoint);
+    const rise = this.drawingMetadata?.worldScale !== undefined ? this.worldScale * (this._endPoint.y - this._startPoint.y): this._endPoint.z - this._startPoint.z;
     const slope = 0.0 < run ? (100 * rise) / run : 0.0;
-    const dx = Math.abs(endPoint.x - startPoint.x);
-    const dy = Math.abs(endPoint.y - startPoint.y);
+    const dx = Math.abs(this._endPoint.x - this._startPoint.x);
+    const dy = Math.abs(this._endPoint.y - this._startPoint.y);
 
-    const adjustedStart = this.adjustPointForGlobalOrigin(startPoint);
-    const adjustedEnd = this.adjustPointForGlobalOrigin(endPoint);
+    const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
+    const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
 
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance,
@@ -545,7 +500,9 @@ export class DistanceMeasurement extends Measurement {
     const fDeltaY = IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec);
     const fRise = IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec);
 
-    let title = `${this._toolName} ${MeasureTools.localization.getLocalizedString("MeasureTools:Measurements.measurement")}`;
+    let title = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:Measurements.distanceMeasurement"
+    );
     title += ` [${fDistance}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
@@ -553,8 +510,10 @@ export class DistanceMeasurement extends Measurement {
 
     data.properties.push(
       {
-        label: `${this._toolName}:`,
-        name: `DistanceMeasurement_${this._toolName}:`,
+        label: MeasureTools.localization.getLocalizedString(
+          "MeasureTools:tools.MeasureDistance.distance"
+        ),
+        name: "DistanceMeasurement_Distance",
         value: fDistance,
         aggregatableValue:
           lengthSpec !== undefined

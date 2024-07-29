@@ -3,16 +3,16 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { MeasureDistanceTool } from "./MeasureDistanceTool";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 import { Point3d } from "@itwin/core-geometry";
-import { GraphicType } from "@itwin/core-frontend";
-import { ColorDef, LinePixels } from "@itwin/core-common";
-import type { DecorateContext } from "@itwin/core-frontend";
+import { BeButtonEvent, DecorateContext, EventHandled } from "@itwin/core-frontend";
+import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
+import { MeasurePerpendicularDistanceTool } from "./MeasurePerpendicularDistanceTool";
 
-export class MeasureWidthTool extends MeasureDistanceTool {
+export class MeasureWidthTool extends MeasurePerpendicularDistanceTool {
   public static override toolId = "MeasureTools.MeasureWidth";
+  private _mouseStartPoint: Point3d | undefined;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.flyover");
@@ -24,45 +24,28 @@ export class MeasureWidthTool extends MeasureDistanceTool {
     return MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.keyin");
   }
 
+  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+    super.onDataButtonDown(ev);
+    this._mouseStartPoint = ev.point.clone();
+    return EventHandled.Yes;
+  }
+
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
-    if (this.toolModel.dynamicMeasurement)
-      this.toolModel.dynamicMeasurement.toolName = MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.width");
+    if (!this.isCompatibleViewport(context.viewport, false) || !this.toolModel.dynamicMeasurement) return;
 
-    this.createDecorations(context);
-  }
+    this.toolModel.dynamicMeasurement.toolName = MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.width");
 
-  protected createDecorations(context: DecorateContext): void {
-    if (!this.isCompatibleViewport(context.viewport, false)) {
-      return;
-    }
+    if (this.toolModel.currentState === MeasureDistanceToolModel.State.SetEndPoint && this._mouseStartPoint) {
+      const hypotenusePoints: Point3d[] = [this._mouseStartPoint, this.toolModel.dynamicMeasurement.endPointRef];
+      this.createHypotenuseDecoration(context, hypotenusePoints);
+      const heightPoints = this.getHeightPoints(hypotenusePoints);
+      const viewType = MeasurementViewTarget.classifyViewport(context.viewport);
 
-    if (this.toolModel.currentState === MeasureDistanceToolModel.State.SetEndPoint && this.toolModel.dynamicMeasurement) {
-      const blueHighlight = context.viewport.hilite.color;
-      const hypotenusePoints: Point3d[] = [this.toolModel.dynamicMeasurement.startPointRef, this.toolModel.dynamicMeasurement.endPointRef];
-
-      const hypotenuseLine = context.createGraphicBuilder(GraphicType.WorldDecoration);
-      hypotenuseLine.setSymbology(blueHighlight, ColorDef.black, 3);
-      hypotenuseLine.addLineString(hypotenusePoints);
-      context.addDecorationFromBuilder(hypotenuseLine);
-
-      const hypotenuseDashLine = context.createGraphicBuilder(GraphicType.WorldOverlay);
-      hypotenuseDashLine.setSymbology(blueHighlight, ColorDef.black, 1, LinePixels.Code2);
-      hypotenuseDashLine.addLineString(hypotenusePoints);
-      context.addDecorationFromBuilder(hypotenuseDashLine);
-
-      const heightPoints: Point3d[] = [];
-      heightPoints.push(hypotenusePoints[0].clone());
-      if (hypotenusePoints[0].z > hypotenusePoints[1].z)
-        heightPoints.push(new Point3d(hypotenusePoints[0].x, hypotenusePoints[0].y, hypotenusePoints[1].z));
-      else
-        heightPoints.push(new Point3d(hypotenusePoints[1].x, hypotenusePoints[1].y, hypotenusePoints[0].z));
-      heightPoints.push(hypotenusePoints[1].clone());
-
-      if (heightPoints.length === 3)
-        this.toolModel.dynamicMeasurement.measureLine = [heightPoints[1], heightPoints[2]];
-      this.toolModel.dynamicMeasurement.secondaryLine = heightPoints;
+      this.toolModel.dynamicMeasurement.secondaryLine = [heightPoints[0], heightPoints[1]];
+      this.toolModel.setStartPoint(viewType, heightPoints[1]);
+      this.toolModel.setEndPoint(viewType, heightPoints[2], true);
     }
   }
 }

@@ -35,7 +35,7 @@
       "longLabel": "Measure Distance",
       "delta_x": "ΔX:",
       "delta_y": "ΔY:",
-      "distance": "Distance",
+      "distance": "Distance:",
       "startCoordinates": "Start Coordinates:",
       "endCoordinates": "End Coordinates:",
       "slope": "Slope:",
@@ -152,9 +152,10 @@
     "areaMeasurement": "Area Measurement",
     "clearMeasurement": "Clear Measurement",
     "closePolygon": "Close Polygon",
-    "measurement": "Measurement",
+    "distanceMeasurement": "Distance Measurement",
     "locationMeasurement": "Location Measurement",
-    "persistMeasurements": "Persist Measurements"
+    "persistMeasurements": "Persist Measurements",
+    "measurement": "Measurement"
   },
   "MeasurementGroupButton": {
     "label": "Measurement",
