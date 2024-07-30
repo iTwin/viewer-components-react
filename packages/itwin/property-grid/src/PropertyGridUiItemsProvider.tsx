@@ -97,15 +97,12 @@ function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
     return Presentation.selection.selectionChange.addListener((args) => {
       const selection = Presentation.selection.getSelection(args.imodel);
 
-      let showWidget = false;
-      if (props.shouldShow) {
-        showWidget = props.shouldShow(selection);
-      } else {
-        // Default behavior:  hide grid widget if there are no nodes or valid instances selected.
-        showWidget = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && (!Id64.isTransient(key.id)));
-      }
+      const predicate = shouldShow
+        ? shouldShow
+        : // Default behavior:  hide grid widget if there are no nodes or valid instances selected.
+          (keys: Readonly<KeySet>) => keys.nodeKeysCount !== 0 || keys.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
 
-      if (!showWidget) {
+      if (!predicate(selection)) {
         widgetDef.setWidgetState(WidgetState.Hidden);
         return;
       }
