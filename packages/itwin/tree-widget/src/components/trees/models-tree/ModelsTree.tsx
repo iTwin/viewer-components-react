@@ -7,27 +7,15 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 import { useModelsTree } from "./UseModelsTree";
 
+import type { InstanceKey } from "@itwin/presentation-common";
 import type { ComponentPropsWithoutRef } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
-import { FilterLimitExceededError } from "../common/TreeErrors";
-import { useIModelChangeListener } from "../common/UseIModelChangeListener";
-import { useTelemetryContext } from "../common/UseTelemetryContext";
-import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
-import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
-import { ModelsTreeComponent } from "./ModelsTreeComponent";
-import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
-
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
-import type { Id64String } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
-import type { InstanceKey } from "@itwin/presentation-shared";
-import type { ComponentPropsWithoutRef, ReactElement } from "react";
-import type { Viewport } from "@itwin/core-frontend";
-import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
-type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
+/** @beta */
+type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
+
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
@@ -43,9 +31,6 @@ interface ModelsTreeOwnProps {
     createInstanceKeyPaths: (props: { keys: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
   }) => Promise<HierarchyFilteringPaths>;
 }
-
-/** @beta */
-type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 
 /** @beta */
 type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
@@ -64,7 +49,7 @@ export function ModelsTree({
   visibilityHandlerOverrides,
   getFilteredPaths,
 }: ModelsTreeProps) {
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides });
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths });
 
   return (
     <VisibilityTree
@@ -72,9 +57,6 @@ export function ModelsTree({
       imodel={imodel}
       selectionStorage={selectionStorage}
       getSchemaContext={getSchemaContext}
-      visibilityHandlerFactory={visibilityHandlerFactory}
-      getHierarchyDefinition={getHierarchyDefinition}
-      getFilteredPaths={getFilteredPaths}
       hierarchyLevelSizeLimit={hierarchyLevelConfig?.sizeLimit}
       density={density}
       selectionMode={selectionMode}

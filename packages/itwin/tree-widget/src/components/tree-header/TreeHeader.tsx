@@ -34,6 +34,7 @@ export interface TreeFilteringProps {
   selectedIndex?: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged?: (index: number) => void;
+  /** Should the search box be disabled */
   isDisabled?: boolean;
 }
 
@@ -41,8 +42,6 @@ interface TreeHeaderProps extends CommonProps {
   filteringProps?: TreeFilteringProps;
   /** Modifies the density of tree header. `enlarged` header contains larger content */
   density?: "default" | "enlarged";
-  /** Should the search box be disabled */
-  isFilteringDisabled?: boolean;
 }
 
 export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
@@ -74,7 +73,7 @@ export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
           resultCount={filteringProps.resultCount}
           onSelectedResultChanged={(index) => filteringProps.onSelectedChanged?.(index)}
           size={size}
-          isDisabled={instanceFocusEnabled || props.isFilteringDisabled}
+          isDisabled={instanceFocusEnabled || props.filteringProps?.isDisabled}
         />
       ) : null}
     </div>
