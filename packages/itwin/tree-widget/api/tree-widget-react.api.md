@@ -168,7 +168,7 @@ export function useCategoriesTreeButtonProps({ viewport }: {
 }): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport, }: {

@@ -7,7 +7,7 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 import { useModelsTree } from "./UseModelsTree";
 
-import type { InstanceKey } from "@itwin/presentation-common";
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
