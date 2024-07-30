@@ -77,7 +77,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
 
 /**
  * Props for creating `PropertyGridWidget`.
- * @beta
+ * @public
  */
 export interface PropertyGridWidgetProps extends PropertyGridComponentProps {
   /** Predicate indicating if the widget should be shown for the current selection set. */

@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Visibility of PropertyGridWidget can now be controlled using a custom predicate.",
+  "packageName": "@itwin/property-grid-react",
+  "email": "mdastous-bentley@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
