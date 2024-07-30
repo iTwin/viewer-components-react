@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 09 Jul 2024 13:20:07 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jul 2024 13:05:22 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.11.0
+
+Tue, 23 Jul 2024 13:05:22 GMT
+
+### Minor changes
+
+- Add missing peer dependencies ([#1007](https://github.com/iTwin/viewer-components-react/pull/1007))
 
 ## 1.10.0
 

@@ -13,10 +13,12 @@ export const GroupingMappingContent = ({
   routingHistory,
   navigateTo,
   goBack,
+  hideRefreshIcon,
 }: {
   routingHistory: Route[];
   navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
+  hideRefreshIcon?: boolean;
 }) => {
   const { setShowGroupColor, setHiddenGroupsIds } = useGroupHilitedElementsContext();
   const { setShowGroupColor: setPropertiesShowGroup } = usePropertiesGroupColorContext();
@@ -34,5 +36,5 @@ export const GroupingMappingContent = ({
     }
   }, [routingHistory, setHiddenGroupsIds, setPropertiesShowGroup, setShowGroupColor]);
 
-  return <GroupingMappingRouter currentRoute={currentRoute} navigateTo={navigateTo} goBack={goBack} />;
+  return <GroupingMappingRouter currentRoute={currentRoute} navigateTo={navigateTo} goBack={goBack} hideRefreshIcon={hideRefreshIcon} />;
 };

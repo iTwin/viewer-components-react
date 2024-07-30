@@ -4,15 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import sinon from "sinon";
 import userEvents from "@testing-library/user-event";
 import { useNullValueSetting } from "../../hooks/UseNullValuesSetting";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
 import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext";
 import { createFunctionStub, render, waitFor } from "../TestUtils";
 
 import type { ReactNode } from "react";
 import type { PreferencesContextProviderProps } from "../../PropertyGridPreferencesContext";
-import { type PreferencesStorage, TelemetryContextProvider } from "../../property-grid-react";
-import sinon from "sinon";
+import type { PreferencesStorage } from "../../api/PreferencesStorage";
 
 function renderWithContext(element: ReactNode, contextProps: Partial<PreferencesContextProviderProps>) {
   return render(<PreferencesContextProvider {...contextProps}>{element}</PreferencesContextProvider>);

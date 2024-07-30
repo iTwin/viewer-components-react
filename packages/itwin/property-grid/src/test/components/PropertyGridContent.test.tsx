@@ -7,9 +7,11 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
+import { KeySet } from "@itwin/presentation-common";
 import { PropertyGridContent } from "../../components/PropertyGridContent";
 import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
+import { TelemetryContextProvider } from "../../hooks/UseTelemetryContext";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { createPropertyRecord, render, stubSelectionManager, waitFor } from "../TestUtils";
 
@@ -18,8 +20,6 @@ import type { PrimitiveValue } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { PropertyGridContentProps } from "../../components/PropertyGridContent";
-import { TelemetryContextProvider } from "../../property-grid-react";
-import { KeySet } from "@itwin/presentation-common";
 
 describe("<PropertyGridContent />", () => {
   before(() => {

@@ -5,7 +5,7 @@
 
 import { concat, concatAll, defer, distinct, EMPTY, firstValueFrom, forkJoin, from, map, merge, mergeMap, of, reduce } from "rxjs";
 import { assert } from "@itwin/core-bentley";
-import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
@@ -1055,7 +1055,7 @@ export async function showAllModels(models: string[], viewport: Viewport) {
   await viewport.addViewedModels(models);
   viewport.clearNeverDrawn();
   viewport.clearAlwaysDrawn();
-  await toggleAllCategories(IModelApp.viewManager, viewport.iModel, true, viewport, false);
+  await toggleAllCategories(viewport, true);
 }
 
 /**

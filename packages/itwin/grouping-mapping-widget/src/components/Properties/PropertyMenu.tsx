@@ -27,6 +27,7 @@ export interface PropertyMenuProps {
   hideGroupProps?: boolean;
   hideCalculatedProps?: boolean;
   hideCustomCalculationProps?: boolean;
+  hideRefreshIcon?: boolean;
 }
 
 /**
@@ -38,7 +39,8 @@ export const PropertyMenu = ({
   group,
   onClickAddGroupProperty,
   onClickModifyGroupProperty,
-  hideGroupProps = false
+  hideRefreshIcon,
+  hideGroupProps = false,
 }: PropertyMenuProps) => {
   const groupId = group.id;
   const mappingId = mapping.id;
@@ -65,6 +67,7 @@ export const PropertyMenu = ({
           isLoading={isLoadingGroupProperties}
           groupProperties={groupProperties ? groupProperties.properties : []}
           refresh={refreshGroupProperties}
+          hideRefreshIcon={hideRefreshIcon}
         />
       )}
     </div>

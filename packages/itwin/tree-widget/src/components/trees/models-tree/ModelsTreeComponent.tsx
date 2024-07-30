@@ -3,22 +3,20 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import "../Tree.scss";
-import classNames from "classnames";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
-import { TreeHeader } from "../../tree-header/TreeHeader";
-import { AutoSizer } from "../../utils/AutoSizer";
+import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
+import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
 import { useFiltering } from "../common/UseFiltering";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ModelsTree } from "./ModelsTree";
 import {
-  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useAvailableModels, View2DButton, View3DButton,
+  HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useModelsTreeButtonProps, View2DButton, View3DButton,
 } from "./ModelsTreeButtons";
 
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 
@@ -67,7 +65,11 @@ export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
     return null;
   }
 
-  return <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />;
+  return (
+    <FocusedInstancesContextProvider selectionStorage={props.selectionStorage} imodelKey={iModel.key}>
+      <ModelsTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+    </FocusedInstancesContextProvider>
+  );
 };
 
 /**
@@ -126,39 +128,41 @@ function ModelsTreeComponentImpl({
   onPerformanceMeasured,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const availableModels = useAvailableModels(iModel);
+  const buttonProps = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { filter, applyFilter, clearFilter } = useFiltering();
+  const { enabled: instanceFocusEnabled } = useFocusedInstancesContext();
   const density = treeProps.density;
+
+  const buttons: ReactNode = headerButtons
+    ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ ...buttonProps, onFeatureUsed })}</Fragment>)
+    : [
+        <ShowAllButton {...buttonProps} key="show-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+        <HideAllButton {...buttonProps} key="hide-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+        <InvertButton {...buttonProps} key="invert-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+        <View2DButton {...buttonProps} key="view-2d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+        <View3DButton {...buttonProps} key="view-3d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+        <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onFeatureUsed} />,
+      ];
+
+  useEffect(() => {
+    if (instanceFocusEnabled) {
+      clearFilter();
+    }
+  }, [instanceFocusEnabled, clearFilter]);
 
   return (
     <TelemetryContextProvider componentIdentifier={ModelsTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <div className={classNames("tw-tree-with-header", density === "enlarged" && "enlarge")}>
-        <FocusedInstancesContextProvider selectionStorage={treeProps.selectionStorage} imodelKey={iModel.key}>
-          <TreeHeader
-            onFilterStart={applyFilter}
-            onFilterClear={clearFilter}
-            onSelectedChanged={() => {}}
-            density={density}
-            isFilteringDisabled={!!treeProps.getFilteredPaths}
-          >
-            {headerButtons
-              ? headerButtons.map((btn, index) => <Fragment key={index}>{btn({ viewport, models: availableModels, onFeatureUsed })}</Fragment>)
-              : [
-                  <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                  <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                  <InvertButton viewport={viewport} models={availableModels} key="invert-all-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                  <View2DButton viewport={viewport} models={availableModels} key="view-2d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                  <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                  <ToggleInstancesFocusButton key="toggle-instances-focus-btn" density={density} onFeatureUsed={onFeatureUsed} />,
-                ]}
-          </TreeHeader>
-          <div className="tw-tree-content">
-            <AutoSizer>
-              {({ width, height }) => <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} width={width} height={height} filter={filter} />}
-            </AutoSizer>
-          </div>
-        </FocusedInstancesContextProvider>
-      </div>
+      <TreeWithHeader
+        filteringProps={{
+          onFilterStart: applyFilter,
+          onFilterClear: clearFilter,
+          isDisabled: instanceFocusEnabled || !!treeProps.getFilteredPaths,
+        }}
+        buttons={buttons}
+        density={density}
+      >
+        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
+      </TreeWithHeader>
     </TelemetryContextProvider>
   );
 }

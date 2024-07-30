@@ -11,6 +11,7 @@ import { ButtonGroup, Divider, DropdownMenu, IconButton, SearchBox } from "@itwi
 import { TreeWidget } from "../../TreeWidget";
 import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesContext";
 
+import type { PropsWithChildren } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { CommonProps } from "@itwin/core-react";
 
@@ -21,8 +22,8 @@ export interface TreeHeaderButtonProps {
   onFeatureUsed?: (feature: string) => void;
 }
 
-/** @internal */
-export interface TreeHeaderProps extends CommonProps {
+/** @beta */
+export interface TreeFilteringProps {
   /** Filtering is cleared after everything's loaded */
   onFilterStart: (newFilter: string) => void;
   /** listens for onClick event for Clear (x) icon */
@@ -32,47 +33,50 @@ export interface TreeHeaderProps extends CommonProps {
   /** Current selected result index */
   selectedIndex?: number;
   /** Callback to currently selected result/entry change */
-  onSelectedChanged: (index: number) => void;
-  /** Header buttons */
-  children?: React.ReactNode;
+  onSelectedChanged?: (index: number) => void;
+  isDisabled?: boolean;
+}
+
+interface TreeHeaderProps extends CommonProps {
+  filteringProps?: TreeFilteringProps;
   /** Modifies the density of tree header. `enlarged` header contains larger content */
   density?: "default" | "enlarged";
   /** Should the search box be disabled */
   isFilteringDisabled?: boolean;
 }
 
-/** @internal */
-export function TreeHeader(props: TreeHeaderProps) {
-  const { onFilterStart, onFilterClear, resultCount, selectedIndex, onSelectedChanged, children, density, className } = props;
+export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
+  const { filteringProps, density, className, children } = props;
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const { enabled: instanceFocusEnabled } = useFocusedInstancesContext();
   const size = density === "enlarged" ? "large" : "small";
 
   useEffect(() => {
     // istanbul ignore if
-    if (instanceFocusEnabled) {
-      onFilterClear();
+    if (filteringProps?.isDisabled) {
       setIsSearchOpen(false);
     }
-  }, [instanceFocusEnabled, onFilterClear]);
+  }, [filteringProps?.isDisabled]);
 
   return (
     <div className={classnames("tree-widget-tree-header", className)}>
       <HeaderButtons contracted={isSearchOpen} size={size}>
         {children}
       </HeaderButtons>
-      <DebouncedSearchBox
-        isOpened={isSearchOpen}
-        onOpen={() => setIsSearchOpen(true)}
-        onClose={() => setIsSearchOpen(false)}
-        onChange={(value) => (value ? onFilterStart(value) : onFilterClear())}
-        delay={500}
-        selectedResultIndex={selectedIndex}
-        resultCount={resultCount}
-        onSelectedResultChanged={onSelectedChanged}
-        size={size}
-        isDisabled={instanceFocusEnabled || props.isFilteringDisabled}
-      />
+      {filteringProps ? (
+        <DebouncedSearchBox
+          isOpened={isSearchOpen}
+          onOpen={() => setIsSearchOpen(true)}
+          onClose={() => setIsSearchOpen(false)}
+          onChange={(value) => (value ? filteringProps.onFilterStart(value) : filteringProps.onFilterClear())}
+          delay={500}
+          selectedResultIndex={filteringProps.selectedIndex}
+          resultCount={filteringProps.resultCount}
+          onSelectedResultChanged={(index) => filteringProps.onSelectedChanged?.(index)}
+          size={size}
+          isDisabled={instanceFocusEnabled || props.isFilteringDisabled}
+        />
+      ) : null}
     </div>
   );
 }
@@ -158,11 +162,10 @@ function DebouncedSearchBox({
 
 interface HeaderButtonsProps {
   contracted: boolean;
-  children?: React.ReactNode;
   size: "large" | "small";
 }
 
-function HeaderButtons(props: HeaderButtonsProps) {
+function HeaderButtons(props: PropsWithChildren<HeaderButtonsProps>) {
   const className = classnames("button-container", props.contracted && "contracted");
 
   return (

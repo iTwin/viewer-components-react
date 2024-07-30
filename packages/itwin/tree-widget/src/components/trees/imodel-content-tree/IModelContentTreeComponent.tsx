@@ -5,7 +5,6 @@
 
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
-import { AutoSizer } from "../../utils/AutoSizer";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { IModelContentTree } from "./IModelContentTree";
 
@@ -34,7 +33,7 @@ export const IModelContentTreeComponent = ({ onFeatureUsed, onPerformanceMeasure
 
   return (
     <TelemetryContextProvider componentIdentifier={IModelContentTreeComponent.id} onFeatureUsed={onFeatureUsed} onPerformanceMeasured={onPerformanceMeasured}>
-      <AutoSizer>{({ width, height }) => <IModelContentTree {...props} imodel={imodel} width={width} height={height} />}</AutoSizer>
+      <IModelContentTree {...props} imodel={imodel} />
     </TelemetryContextProvider>
   );
 };

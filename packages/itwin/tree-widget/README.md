@@ -152,6 +152,48 @@ The Models tree can be used in a "focus mode" where the tree is automatically fi
 
 ![Models tree focus mode demo](./media/models-tree-focus-mode.gif)
 
+#### Custom models tree
+
+This package provides building blocks for custom models tree:
+
+- `useModelsTree` - hook for creating and managing models tree state.
+- `useModelsTreeButtonProps` - hook for creating props for models tree buttons.
+
+Example:
+
+```tsx
+function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
+  const buttonProps = useModelsTreeButtonProps({ imodel, viewport });
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
+
+  return (
+    <TreeWithHeader buttons={[<ModelsTreeComponent.ShowAllButton {...buttonProps} />, <ModelsTreeComponent.HideAllButton {...buttonProps} />]}>
+      <VisibilityTree
+        {...modelsTreeProps}
+        getSchemaContext={getSchemaContext}
+        selectionStorage={selectionStorage}
+        imodel={imodel}
+        treeRenderer={(props) => <CustomModelsTreeRenderer {...props} {...rendererProps} />}
+      />
+    </TreeWithHeader>
+  );
+}
+
+type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
+type CustomModelsTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
+
+function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
+  const getLabel = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+    (node) => {
+      const originalLabel = props.getLabel(node);
+      return <>Custom node - {originalLabel}</>;
+    },
+    [props.getLabel],
+  );
+  return <VisibilityTreeRenderer {...props} getLabel={getLabel} getSublabel={getSublabel} />;
+}
+```
+
 #### Displaying a subset of the tree
 
 Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
@@ -226,6 +268,53 @@ Available header buttons:
 - `ModelsTreeComponent.ShowAllButton` makes all categories and their subcategories displayed.
 - `ModelsTreeComponent.HideAllButton` makes all categories hidden.
 - `ModelsTreeComponent.InvertButton` inverts display of all categories.
+
+#### Custom categories tree
+
+This package provides building blocks for custom categories tree:
+
+- `useCategoriesTree` - hook for creating and managing categories tree state.
+- `useCategoriesTreeButtonProps` - hook for creating props for categories tree buttons.
+
+Example:
+
+```tsx
+function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
+  const buttonProps = useCategoriesTreeButtonProps({ imodel, viewport });
+  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport });
+
+  return (
+    <TreeWithHeader buttons={[<CategoriesTreeComponent.ShowAllButton {...buttonProps} />, <CategoriesTreeComponent.HideAllButton {...buttonProps} />]}>
+      <VisibilityTree
+        {...categoriesTreeProps}
+        getSchemaContext={getSchemaContext}
+        selectionStorage={selectionStorage}
+        imodel={imodel}
+        treeRenderer={(props) => <CustomCategoriesTreeRenderer {...props} {...rendererProps} />}
+      />
+    </TreeWithHeader>
+  );
+}
+
+type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
+type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
+
+function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) {
+  const getLabel = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+    (node) => {
+      const originalLabel = props.getLabel(node);
+      return <>Custom node - {originalLabel}</>;
+    },
+    [props.getLabel],
+  );
+
+  const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
+    return <>Custom sub label</>;
+  }, []);
+
+  return <VisibilityTreeRenderer {...props} getLabel={getLabel} getSublabel={getSublabel} />;
+}
+```
 
 ### iModel content tree
 
@@ -306,10 +395,8 @@ const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAcc
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
 }
 
-function MyTree({width, height, imodel}: MyTreeProps) {
+function MyTree({ imodel }: MyTreeProps) {
   return <Tree
-    width={width}
-    height={height}
     treeName="MyTree"
     imodel={imodel}
     selectionStorage={getUnifiedSelectionStorage()}
@@ -368,10 +455,8 @@ const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] 
   };
 }
 
-function MyVisibilityTree({width, height, imodel}: MyVisibilityTreeProps) {
+function MyVisibilityTree({ imodel }: MyVisibilityTreeProps) {
   return <VisibilityTree
-    width={width}
-    height={height}
     treeName="MyVisibilityTree"
     imodel={imodel}
     selectionStorage={getUnifiedSelectionStorage()}

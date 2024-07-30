@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "Remove categories visibility handling in all viewports",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "24278440+saskliutas@users.noreply.github.com",
+  "dependentChangeType": "none"
+}
