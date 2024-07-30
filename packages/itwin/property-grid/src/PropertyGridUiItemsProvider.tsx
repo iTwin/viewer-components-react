@@ -85,7 +85,7 @@ export interface PropertyGridWidgetProps extends PropertyGridComponentProps {
 }
 
 /** Component that renders `PropertyGridComponent` an hides/shows widget based on `UnifiedSelection`. */
-function PropertyGridWidget(props: PropertyGridWidgetProps) {
+function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
   const ref = usePropertyGridTransientState<HTMLDivElement>();
   const widgetDef = useSpecificWidgetDef(PropertyGridWidgetId);
 
