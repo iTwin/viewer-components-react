@@ -111,7 +111,7 @@ function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
         widgetDef.setWidgetState(WidgetState.Open);
       }
     });
-  }, [props, widgetDef]);
+  }, [props, shouldShow, widgetDef]);
 
   return (
     <div ref={ref} className="property-grid-widget">
