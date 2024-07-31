@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { SvgLayers } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
+import { FilterLimitExceededError } from "../common/TreeErrors";
 import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
@@ -77,7 +78,7 @@ export function useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps
       try {
         return await CategoriesTreeDefinition.createInstanceKeyPaths({ imodelAccess, label: filter, viewType: activeView.view.is2d() ? "2d" : "3d" });
       } catch (e) {
-        const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+        const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
         if (newError !== "tooManyFilterMatches") {
           const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
           onFeatureUsed({ featureId: feature, reportInteraction: false });

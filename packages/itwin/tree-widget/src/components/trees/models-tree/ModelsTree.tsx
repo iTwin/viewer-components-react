@@ -7,10 +7,16 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 import { useModelsTree } from "./UseModelsTree";
 
+import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
-import type { ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
+import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
+
+/** @beta */
+type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
+
+type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
 interface ModelsTreeOwnProps {
@@ -21,10 +27,10 @@ interface ModelsTreeOwnProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   filter?: string;
+  getFilteredPaths?: (props: {
+    createInstanceKeyPaths: (props: { keys: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
+  }) => Promise<HierarchyFilteringPaths>;
 }
-
-/** @beta */
-type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 
 /** @beta */
 type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
@@ -41,8 +47,9 @@ export function ModelsTree({
   hierarchyConfig,
   selectionMode,
   visibilityHandlerOverrides,
+  getFilteredPaths,
 }: ModelsTreeProps) {
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides });
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths });
 
   return (
     <VisibilityTree

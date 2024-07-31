@@ -11,6 +11,7 @@ import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
+import { FilterLimitExceededError } from "../common/TreeErrors";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
 import { useTelemetryContext } from "../common/UseTelemetryContext";
 import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
@@ -29,6 +30,7 @@ import type { VisibilityTree } from "../common/components/VisibilityTree";
 import type { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
+type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
 type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
@@ -42,6 +44,9 @@ interface UseModelsTreeProps {
   activeView: Viewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
+  getFilteredPaths?: (props: {
+    createInstanceKeyPaths: (props: { keys: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
+  }) => Promise<HierarchyFilteringPaths>;
 }
 
 /** @beta */
@@ -57,7 +62,7 @@ interface UseModelsTreeResult {
  * Custom hook to create and manage state for the models tree.
  * @beta
  */
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult {
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps): UseModelsTreeResult {
   const [filteringError, setFilteringError] = useState<ModelsTreeFilteringError | undefined>(undefined);
   const hierarchyConfiguration = useMemo<ModelsTreeHierarchyConfiguration>(
     () => ({
@@ -89,22 +94,46 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
     [onFeatureUsed],
   );
 
-  const getFilteredPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
+  const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
     if (loadFocusedInstancesKeys) {
       return async ({ imodelAccess }) => {
         try {
           const targetKeys = await collectTargetKeys(loadFocusedInstancesKeys);
-          return await ModelsTreeDefinition.createInstanceKeyPaths({
+          const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
             idsCache: getModelsTreeIdsCache(),
             keys: targetKeys,
             hierarchyConfig: hierarchyConfiguration,
           });
+          return paths.map((path) => ({ path, options: { autoExpand: true } }));
         } catch (e) {
-          const newError =
-            e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
+          const newError = e instanceof FilterLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
           if (newError !== "tooManyInstancesFocused") {
+            const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
+            onFeatureUsed({ featureId: feature, reportInteraction: false });
+          }
+          setFilteringError(newError);
+          return [];
+        }
+      };
+    }
+
+    if (getFilteredPaths) {
+      return async ({ imodelAccess }) => {
+        try {
+          return await getFilteredPaths({
+            createInstanceKeyPaths: async (props) =>
+              ModelsTreeDefinition.createInstanceKeyPaths({
+                ...props,
+                imodelAccess,
+                idsCache: getModelsTreeIdsCache(),
+                hierarchyConfig: hierarchyConfiguration,
+              }),
+          });
+        } catch (e) {
+          const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
+          if (newError !== "tooManyFilterMatches") {
             const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
             onFeatureUsed({ featureId: feature, reportInteraction: false });
           }
@@ -118,14 +147,15 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
       return async ({ imodelAccess }) => {
         onFeatureUsed({ featureId: "filtering", reportInteraction: true });
         try {
-          return await ModelsTreeDefinition.createInstanceKeyPaths({
+          const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
             label: filter,
             idsCache: getModelsTreeIdsCache(),
             hierarchyConfig: hierarchyConfiguration,
           });
+          return paths.map((path) => ({ path, options: { autoExpand: true } }));
         } catch (e) {
-          const newError = e instanceof Error && e.message.match(/Filter matches more than \d+ items/) ? "tooManyFilterMatches" : "unknownFilterError";
+          const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
           if (newError !== "tooManyFilterMatches") {
             const feature = e instanceof Error && e.message.includes("query too long to execute or server is too busy") ? "error-timeout" : "error-unknown";
             onFeatureUsed({ featureId: feature, reportInteraction: false });
@@ -136,14 +166,14 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
       };
     }
     return undefined;
-  }, [filter, loadFocusedInstancesKeys, getModelsTreeIdsCache, onFeatureUsed, hierarchyConfiguration]);
+  }, [filter, loadFocusedInstancesKeys, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration]);
 
   return {
     modelsTreeProps: {
       treeName: "models-tree-v2",
       visibilityHandlerFactory,
       getHierarchyDefinition,
-      getFilteredPaths,
+      getFilteredPaths: getPaths,
       noDataMessage: getNoDataMessage(filter, filteringError),
       highlight: filter ? { text: filter } : undefined,
     },

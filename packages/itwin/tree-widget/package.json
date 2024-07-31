@@ -62,11 +62,11 @@
   "dependencies": {
     "@itwin/itwinui-icons-react": "^2.8.0",
     "@itwin/itwinui-illustrations-react": "^2.1.0",
-    "@itwin/presentation-core-interop": "^0.2.3",
-    "@itwin/presentation-hierarchies": "^0.2.0",
-    "@itwin/presentation-hierarchies-react": "^0.6.0",
-    "@itwin/presentation-shared": "^0.3.1",
-    "@itwin/unified-selection": "^0.4.4",
+    "@itwin/presentation-core-interop": "^0.2.5",
+    "@itwin/presentation-hierarchies": "^0.4.0",
+    "@itwin/presentation-hierarchies-react": "^0.7.0",
+    "@itwin/presentation-shared": "^0.4.0",
+    "@itwin/unified-selection": "^0.4.6",
     "classnames": "^2.3.1",
     "react-error-boundary": "^4.0.10",
     "rxjs": "^7.8.1"

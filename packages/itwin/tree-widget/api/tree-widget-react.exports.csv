@@ -3,6 +3,7 @@ Release Tag;API Item
 public;CategoriesTreeComponent:
 public;createTreeWidget(props: TreeWidgetProps): Widget
 beta;ExternalSourcesTreeComponent:
+beta;FilterLimitExceededError 
 beta;HierarchyVisibilityHandler 
 beta;IModelContentTreeComponent:
 public;ModelsTreeComponent:
@@ -17,7 +18,7 @@ public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element
 beta;TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren
 beta;useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps): UseCategoriesTreeResult
 public;useCategoriesTreeButtonProps({ viewport }:
-beta;useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult
+beta;useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps): UseModelsTreeResult
 public;useModelsTreeButtonProps({ imodel, viewport, }:
 beta;VisibilityStatus
 beta;VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps_2): JSX.Element
