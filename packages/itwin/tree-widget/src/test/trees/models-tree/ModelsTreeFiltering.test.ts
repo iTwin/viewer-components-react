@@ -31,16 +31,19 @@ import type { ElementsGroupInfo } from "../../../components/trees/models-tree/Mo
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
+import type { createHierarchyProvider, GroupingHierarchyNode, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
+type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
+type HierarchyFilteringPath = HierarchyFilteringPaths[number];
 
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
-  getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyNodeIdentifiersPath[];
+  getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths;
   getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
   getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
   getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
@@ -52,7 +55,7 @@ namespace TreeFilteringTestCaseDefinition {
   export function create<TIModelSetupResult extends {}>(
     name: string,
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
-    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyNodeIdentifiersPath[],
+    getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths,
     getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>,
     getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
@@ -1000,7 +1003,13 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.testElement1],
           [x.rootSubject, x.model, x.category, x.testElement2],
         ],
-        (x) => [{ parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] }, classes: [x.testElement1.className] }],
+        (x) => [
+          {
+            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
+            className: x.testElement1.className,
+            groupingNode: {} as GroupingHierarchyNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1066,7 +1075,13 @@ describe("Models tree", () => {
           [x.rootSubject, x.model2, x.category, x.physicalElement21],
           [x.rootSubject, x.model2, x.category, x.physicalElement22],
         ],
-        (x) => [{ parent: { type: "category", ids: [x.category.id], modelIds: [x.model2.id] }, classes: [x.physicalElement12.className] }],
+        (x) => [
+          {
+            parent: { type: "category", ids: [x.category.id], modelIds: [x.model2.id] },
+            className: x.physicalElement12.className,
+            groupingNode: {} as GroupingHierarchyNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1148,7 +1163,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement1],
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement2],
         ],
-        (x) => [{ parent: { type: "element", ids: [x.rootElement.id] }, classes: [x.testElement1.className] }],
+        (x) => [{ parent: { type: "element", ids: [x.rootElement.id] }, className: x.testElement1.className, groupingNode: {} as GroupingHierarchyNode }],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1244,7 +1259,7 @@ describe("Models tree", () => {
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement1],
           [x.rootSubject, x.model, x.category, x.rootElement, x.testElement2],
         ],
-        (x) => [{ parent: { type: "element", ids: [x.rootElement.id] }, classes: [x.testElement1.className, x.physicalElement1.className] }],
+        (x) => [{ parent: { type: "element", ids: [x.rootElement.id] }, className: x.testElement1.className, groupingNode: {} as GroupingHierarchyNode }],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1314,7 +1329,7 @@ describe("Models tree", () => {
     TEST_CASE_DEFS.forEach((testCase: TreeFilteringTestCaseDefinition<any>) => {
       describe(testCase.name, () => {
         let imodel: IModelConnection;
-        let instanceKeyPaths!: HierarchyNodeIdentifiersPath[];
+        let instanceKeyPaths!: HierarchyFilteringPaths;
         let targetInstanceKeys!: Array<InstanceKey | ElementsGroupInfo>;
         let targetInstanceLabel: string | undefined;
         let expectedHierarchy!: ExpectedHierarchyDef[];
@@ -1468,13 +1483,15 @@ describe("Models tree", () => {
       return modelKey;
     }
 
-    function instanceKeyPathSorter(lhs: HierarchyNodeIdentifiersPath, rhs: HierarchyNodeIdentifiersPath) {
-      if (lhs.length !== rhs.length) {
-        return lhs.length - rhs.length;
+    function instanceKeyPathSorter(lhs: HierarchyFilteringPath, rhs: HierarchyFilteringPath) {
+      const lhsPath = "path" in lhs ? lhs.path : lhs;
+      const rhsPath = "path" in rhs ? rhs.path : rhs;
+      if (lhsPath.length !== rhsPath.length) {
+        return lhsPath.length - rhsPath.length;
       }
-      for (let i = 0; i < lhs.length; ++i) {
-        const lhsId = lhs[i];
-        const rhsId = rhs[i];
+      for (let i = 0; i < lhsPath.length; ++i) {
+        const lhsId = lhsPath[i];
+        const rhsId = rhsPath[i];
         if (HierarchyNodeIdentifier.isInstanceNodeIdentifier(lhsId) && HierarchyNodeIdentifier.isInstanceNodeIdentifier(rhsId)) {
           const classNameCmp = lhsId.className.localeCompare(rhsId.className);
           if (0 !== classNameCmp) {

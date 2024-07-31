@@ -106,7 +106,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
             keys: targetKeys,
             hierarchyConfig: hierarchyConfiguration,
           });
-          return paths.map((path) => ({ path, options: { autoExpand: true } }));
+          return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));
         } catch (e) {
           const newError = e instanceof FilterLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
           if (newError !== "tooManyInstancesFocused") {
@@ -153,7 +153,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
             idsCache: getModelsTreeIdsCache(),
             hierarchyConfig: hierarchyConfiguration,
           });
-          return paths.map((path) => ({ path, options: { autoExpand: true } }));
+          return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));
         } catch (e) {
           const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
           if (newError !== "tooManyFilterMatches") {
@@ -287,7 +287,13 @@ function SvgClassGrouping() {
 
 async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
   const targetKeys: Array<InstanceKey | ElementsGroupInfo> = [];
-  const groupingNodeInfos: Array<{ parentKey: InstancesNodeKey; parentType: "element" | "category"; classes: string[]; modelIds: Id64String[] }> = [];
+  const groupingNodeInfos: Array<{
+    parentKey: InstancesNodeKey;
+    parentType: "element" | "category";
+    className: string;
+    groupingNode: GroupingHierarchyNode;
+    modelIds: Id64String[];
+  }> = [];
   for await (const key of loadFocusedInstancesKeys()) {
     if ("id" in key) {
       targetKeys.push(key);
@@ -306,20 +312,16 @@ async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIt
     const parentKey = key.nonGroupingAncestor.key;
     const type = key.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
     const modelIds = ((key.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
-    const groupInfo = groupingNodeInfos.find((group) => HierarchyNodeKey.equals(group.parentKey, parentKey));
-    if (groupInfo) {
-      groupInfo.classes.push(key.key.className);
-    } else {
-      groupingNodeInfos.push({ classes: [key.key.className], parentType: type, parentKey, modelIds });
-    }
+    groupingNodeInfos.push({ groupingNode: key, className: key.key.className, parentType: type, parentKey, modelIds });
   }
   targetKeys.push(
-    ...groupingNodeInfos.map(({ parentKey, parentType, classes, modelIds }) => ({
+    ...groupingNodeInfos.map(({ parentKey, parentType, className, groupingNode, modelIds }) => ({
       parent:
         parentType === "element"
           ? { type: "element" as const, ids: parentKey.instanceKeys.map((key) => key.id) }
           : { type: "category" as const, ids: parentKey.instanceKeys.map((key) => key.id), modelIds },
-      classes,
+      className,
+      groupingNode,
     })),
   );
   return targetKeys;

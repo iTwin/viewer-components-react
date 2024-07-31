@@ -15,9 +15,11 @@ import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 import type { Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type {
+  createHierarchyProvider,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
+  GroupingHierarchyNode,
   HierarchyDefinition,
   HierarchyLevelDefinition,
   HierarchyNodeIdentifiersPath,
@@ -75,7 +77,8 @@ export interface ElementsGroupInfo {
         modelIds: Id64String[];
         type: "category";
       };
-  classes: string[];
+  className: string;
+  groupingNode: GroupingHierarchyNode;
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
@@ -93,6 +96,9 @@ interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
 }
 
 export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromInstanceKeysProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
+type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
+type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
+type HierarchyFilteringPath = HierarchyFilteringPaths[number];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace ModelsTreeInstanceKeyPathsProps {
@@ -600,39 +606,52 @@ function createGeometricElementInstanceKeyPaths(
   idsCache: ModelsTreeIdsCache,
   hierarchyConfig: ModelsTreeHierarchyConfiguration,
   elementInfos: Array<Id64String | ElementsGroupInfo>,
-): Observable<HierarchyNodeIdentifiersPath> {
+): Observable<HierarchyFilteringPath> {
+  const elementIds = elementInfos.filter((info): info is Id64String => typeof info === "string");
+  const groupInfos = elementInfos.filter((info): info is ElementsGroupInfo => typeof info !== "string");
+
   return defer(() => {
-    const elementIds = elementInfos.filter((info): info is Id64String => typeof info === "string");
-    const groupInfos = elementInfos.filter((info): info is ElementsGroupInfo => typeof info !== "string");
+    const createParentClause = (parent: ElementsGroupInfo["parent"]) =>
+      parent.type === "element"
+        ? `e.Parent.Id IN (${parent.ids.map(() => "?").join(",")})`
+        : `e.Category.Id IN (${parent.ids.map(() => "?").join(",")}) AND e.Model.Id IN (${parent.modelIds.map(() => "?").join(",")})`;
 
-    const elementsClause = elementIds.length > 0 ? `e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})` : undefined;
-
-    const createParentElementClause = (parent: { ids: Id64String[] }) => `e.Parent.Id IN (${parent.ids.map(() => "?").join(",")})`;
-    const createParentCategoryClause = ({ ids, modelIds }: { ids: Id64String[]; modelIds: Id64String[] }) =>
-      `e.Category.Id IN (${ids.map(() => "?").join(",")}) AND e.Model.Id IN (${modelIds.map(() => "?").join(",")})`;
-
-    const classClause = groupInfos.map(
-      ({ parent, classes }) =>
-        `(${parent.type === "element" ? createParentElementClause(parent) : createParentCategoryClause(parent)} AND e.ECClassId IS (${classes.join(",")}))`,
+    const elementsSelectClause =
+      elementIds.length > 0
+        ? `
+          SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, -1
+          FROM ${hierarchyConfig.elementClassSpecification} e
+          WHERE e.ECInstanceId IN (${elementIds.map(() => "?").join(",")})
+          `
+        : undefined;
+    const groupSelectClauses = groupInfos.map(
+      ({ parent, className }, index) =>
+        `SELECT * FROM (
+          SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, ${index}
+          FROM ${hierarchyConfig.elementClassSpecification} e
+          WHERE ${createParentClause(parent)} AND e.ECClassId IS (${className})
+        )`,
     );
 
-    const whereClause = [...(elementsClause ? [elementsClause] : []), ...(classClause ?? [])].join(" OR ");
-
     const ctes = [
-      `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, Path) AS (
+      `InstanceElementsWithClassGroupingNodes(ECInstanceId, ECClassId, ParentId, ModelId, CategoryId, GroupingNodeIndex) AS (
+        ${[...(elementsSelectClause ? [elementsSelectClause] : []), ...groupSelectClauses].join(" UNION ALL ")}
+      )`,
+      `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, GroupingNodeIndex, Depth, Path) AS (
         SELECT
           e.ECInstanceId,
-          e.Parent.Id,
-          e.Model.Id,
+          e.ParentId,
+          e.ModelId,
+          e.GroupingNodeIndex,
+          0,
           json_array(
             ${createECInstanceKeySelectClause({ alias: "e" })},
-            IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "c" })}, NULL),
-            IIF(e.Parent.Id IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
+            IIF(e.ParentId IS NULL, ${createECInstanceKeySelectClause({ alias: "c" })}, NULL),
+            IIF(e.ParentId IS NULL, ${createECInstanceKeySelectClause({ alias: "m" })}, NULL)
           )
-        FROM ${hierarchyConfig.elementClassSpecification} e
-        JOIN bis.GeometricModel3d m ON m.ECInstanceId = e.Model.Id
-        JOIN bis.SpatialCategory c ON c.ECInstanceId = e.Category.Id
-        WHERE ${whereClause}
+        FROM InstanceElementsWithClassGroupingNodes e
+        JOIN bis.GeometricModel3d m ON m.ECInstanceId = e.ModelId
+        JOIN bis.SpatialCategory c ON c.ECInstanceId = e.CategoryId
 
         UNION ALL
 
@@ -640,6 +659,8 @@ function createGeometricElementInstanceKeyPaths(
           pe.ECInstanceId,
           pe.Parent.Id,
           pe.Model.Id,
+          ce.GroupingNodeIndex,
+          ce.Depth + 1,
           json_insert(
             ce.Path,
             '$[#]', ${createECInstanceKeySelectClause({ alias: "pe" })},
@@ -653,9 +674,26 @@ function createGeometricElementInstanceKeyPaths(
       )`,
     ];
     const ecsql = `
-      SELECT mce.ModelId, mce.Path
+      SELECT mce.ModelId, mce.Path, mce.GroupingNodeIndex
       FROM ModelsCategoriesElementsHierarchy mce
-      WHERE mce.ParentId IS NULL
+      WHERE mce.ParentId IS NULL AND mce.GroupingNodeIndex = -1
+
+      UNION ALL
+
+      SELECT
+        ClosestGroupingNodeGroupedInstance.ModelId,
+        ClosestGroupingNodeGroupedInstance.Path,
+        ClosestGroupingNodeGroupedInstance.GroupingNodeIndex
+      FROM (
+        SELECT
+          mce.ModelId as ModelId,
+          mce.Path as Path,
+          mce.GroupingNodeIndex as GroupingNodeIndex,
+          ROW_NUMBER() OVER (PARTITION BY mce.GroupingNodeIndex ORDER BY mce.Depth) as RowNumber
+        FROM ModelsCategoriesElementsHierarchy mce
+        WHERE mce.ParentId IS NULL AND mce.GroupingNodeIndex <> -1
+      ) as ClosestGroupingNodeGroupedInstance
+      WHERE ClosestGroupingNodeGroupedInstance.RowNumber = 1
     `;
     const createIdBinding = (id: Id64String) => ({ type: "id" as const, value: id });
     const createCategoryElementsBindings = ({ ids, modelIds }: { ids: Id64String[]; modelIds: Id64String[] }) => [
@@ -679,19 +717,21 @@ function createGeometricElementInstanceKeyPaths(
     map((row) => ({
       modelId: row[0],
       elementHierarchyPath: flatten<InstanceKey | undefined>(JSON.parse(row[1])).reverse(),
+      options: row[2] === -1 ? undefined : { autoExpand: groupInfos[row[2]].groupingNode },
     })),
-    mergeMap(({ modelId, elementHierarchyPath }) =>
+    mergeMap(({ modelId, elementHierarchyPath, options }) =>
       createModelInstanceKeyPaths(modelId, idsCache).pipe(
         map((modelPath) => {
           modelPath.pop(); // model is already included in the element hierarchy path
-          return [...modelPath, ...elementHierarchyPath.filter((x): x is InstanceKey => !!x)];
+          const path = [...modelPath, ...elementHierarchyPath.filter((x): x is InstanceKey => !!x)];
+          return options ? { path, options } : path;
         }),
       ),
     ),
   );
 }
 
-async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceKeyPathsFromInstanceKeysProps): Promise<HierarchyNodeIdentifiersPath[]> {
+async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceKeyPathsFromInstanceKeysProps): Promise<HierarchyFilteringPaths> {
   if (props.keys.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
     throw new FilterLimitExceededError(MAX_FILTERING_INSTANCE_KEY_COUNT);
   }

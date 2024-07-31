@@ -12,13 +12,15 @@ import { createIModelAccess } from "../Common";
 
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
+type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
+type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 
 interface CreateModelsTreeProviderProps {
   imodel: IModelConnection;
-  filteredNodePaths?: HierarchyNodeIdentifiersPath[];
+  filteredNodePaths?: HierarchyFilteringPaths;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
 }
 
@@ -33,7 +35,7 @@ export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyC
       idsCache,
       hierarchyConfig: config,
     }),
-    ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths.map((path) => ({ path, options: { autoExpand: true } })) } } : undefined),
+    ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths } } : undefined),
   });
 }
 

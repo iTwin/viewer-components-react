@@ -198,7 +198,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
   }
 
   private getVisibilityStatusObs(node: HierarchyNode): Observable<VisibilityStatus> {
-    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.filterTarget) {
       return this.getFilteredNodeVisibility({
         parentKeys: [...node.parentKeys, node.key],
         filterPaths: node.filtering.filteredChildrenIdentifierPaths,
@@ -454,7 +454,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
   /** Changes visibility of the items represented by the tree node. */
   private changeVisibilityObs(node: HierarchyNode, on: boolean): Observable<void> {
-    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.isFilterTarget) {
+    if (node.filtering?.filteredChildrenIdentifierPaths?.length && !node.filtering.filterTarget) {
       return this.changeFilteredNodeVisibility({
         parentKeys: [...node.parentKeys, node.key],
         filterPaths: node.filtering.filteredChildrenIdentifierPaths,
