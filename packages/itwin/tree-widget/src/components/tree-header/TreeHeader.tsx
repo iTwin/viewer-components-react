@@ -34,6 +34,7 @@ export interface TreeFilteringProps {
   selectedIndex?: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged?: (index: number) => void;
+  /** Should the search box be disabled */
   isDisabled?: boolean;
 }
 
@@ -72,7 +73,7 @@ export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
           resultCount={filteringProps.resultCount}
           onSelectedResultChanged={(index) => filteringProps.onSelectedChanged?.(index)}
           size={size}
-          isDisabled={instanceFocusEnabled}
+          isDisabled={instanceFocusEnabled || props.filteringProps?.isDisabled}
         />
       ) : null}
     </div>

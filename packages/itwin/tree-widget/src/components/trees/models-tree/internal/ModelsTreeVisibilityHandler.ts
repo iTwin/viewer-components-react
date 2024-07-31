@@ -17,13 +17,16 @@ import { createVisibilityChangeEventListener } from "./VisibilityChangeEventList
 import type { Observable, OperatorFunction } from "rxjs";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
+import type { createHierarchyProvider, GroupingHierarchyNode, HierarchyNodeIdentifiersPath } from "@itwin/presentation-hierarchies";
 import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawnElementInfo";
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
 import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
+
+type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
+type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 
 /** @beta */
 interface GetCategoryStatusProps {
@@ -46,7 +49,7 @@ interface GetElementStateProps {
 /** @beta */
 interface GetFilteredNodeVisibilityProps {
   parentKeys: HierarchyNodeKey[];
-  filterPaths: HierarchyNodeIdentifiersPath[];
+  filterPaths: HierarchyFilteringPaths;
 }
 
 /** @beta */
@@ -521,10 +524,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     const imodelAccess = this._props.imodelAccess;
 
     // Remove all paths such that there are paths to any of the ancestors of the filter target.
-    filterPaths = reduceFilterPaths(filterPaths);
+    const paths = reduceFilterPaths(filterPaths);
 
     await Promise.all(
-      filterPaths.map(async (path) => {
+      paths.map(async (path) => {
         const target = path[path.length - 1];
         if (!HierarchyNodeIdentifier.isInstanceNodeIdentifier(target)) {
           return;
@@ -1010,7 +1013,8 @@ function setIntersection<T>(lhs: Set<T>, rhs: Set<T>): Set<T> {
   return result;
 }
 
-function reduceFilterPaths(paths: HierarchyNodeIdentifiersPath[]) {
+function reduceFilterPaths(filteringPaths: HierarchyFilteringPaths) {
+  let paths = filteringPaths.map((filteringPath) => ("path" in filteringPath ? filteringPath.path : filteringPath));
   const sorted = [...paths].sort((a, b) => a.length - b.length);
   paths = [];
   for (const path of sorted) {

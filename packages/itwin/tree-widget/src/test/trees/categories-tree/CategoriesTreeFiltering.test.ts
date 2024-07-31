@@ -72,7 +72,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "3d",
         }),
-      ).to.deep.eq([[keys.category1]]);
+      ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -80,7 +80,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "3d",
         }),
-      ).to.deep.eq([[keys.category2]]);
+      ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
     });
 
     it("finds 3d subcategories by label containing special SQLite characters", async function () {
@@ -108,7 +108,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "3d",
         }),
-      ).to.deep.eq([[keys.category, keys.subCategory1]]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -116,7 +116,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "3d",
         }),
-      ).to.deep.eq([[keys.category, keys.subCategory2]]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
 
     it("finds 2d categories by label containing special SQLite characters", async function () {
@@ -143,7 +143,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "2d",
         }),
-      ).to.deep.eq([[keys.category1]]);
+      ).to.deep.eq([{ path: [keys.category1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -151,7 +151,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "2d",
         }),
-      ).to.deep.eq([[keys.category2]]);
+      ).to.deep.eq([{ path: [keys.category2], options: { autoExpand: true } }]);
     });
 
     it("finds 2d subcategories by label containing special SQLite characters", async function () {
@@ -179,7 +179,7 @@ describe("Categories tree", () => {
           label: "_",
           viewType: "2d",
         }),
-      ).to.deep.eq([[keys.category, keys.subCategory1]]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory1], options: { autoExpand: true } }]);
 
       expect(
         await CategoriesTreeDefinition.createInstanceKeyPaths({
@@ -187,7 +187,7 @@ describe("Categories tree", () => {
           label: "%",
           viewType: "2d",
         }),
-      ).to.deep.eq([[keys.category, keys.subCategory2]]);
+      ).to.deep.eq([{ path: [keys.category, keys.subCategory2], options: { autoExpand: true } }]);
     });
   });
 });
