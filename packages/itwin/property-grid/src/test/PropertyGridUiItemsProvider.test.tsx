@@ -14,6 +14,7 @@ import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridUiItemsProvider, PropertyGridWidgetId } from "../PropertyGridUiItemsProvider";
 import { render, stubSelectionManager, waitFor } from "./TestUtils";
 
+import type { PropertyGridUiItemsProviderProps} from "../PropertyGridUiItemsProvider";
 import type { WidgetDef } from "@itwin/appui-react";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
@@ -106,8 +107,8 @@ describe("PropertyGridUiItemsProvider", () => {
       widgetDef.setWidgetState.reset();
     });
 
-    function renderWidget() {
-      const provider = new PropertyGridUiItemsProvider();
+    function renderWidget(props?: PropertyGridUiItemsProviderProps) {
+      const provider = new PropertyGridUiItemsProvider(props);
       const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
       render(<>{widget.content}</>);
     }
@@ -175,6 +176,42 @@ describe("PropertyGridUiItemsProvider", () => {
       selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
 
       await waitFor(() => expect(widgetDef.setWidgetState).to.not.be.called);
+    });
+
+    it("opens widget if `UnifiedSelection` changes to non-empty and ", async () => {
+      renderWidget({propertyGridProps: {shouldShow: () => true}});
+
+      selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
+      selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
+
+      await waitFor(() => {
+        expect(widgetDef.setWidgetState).to.be.called;
+        expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Open);
+      });
+    });
+
+    it("opens widget if `UnifiedSelection` changes to non-empty AND shouldShow return true ", async () => {
+      renderWidget({propertyGridProps: {shouldShow: () => true}});
+
+      selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
+      selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
+
+      await waitFor(() => {
+        expect(widgetDef.setWidgetState).to.be.called;
+        expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Open);
+      });
+    });
+
+    it("hides widget if `UnifiedSelection` changes to non-empty AND shouldShow return false ", async () => {
+      renderWidget({propertyGridProps: {shouldShow: () => false}});
+
+      selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
+      selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
+
+      await waitFor(() => {
+        expect(widgetDef.setWidgetState).to.be.called;
+        expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Hidden);
+      });
     });
   });
 });
