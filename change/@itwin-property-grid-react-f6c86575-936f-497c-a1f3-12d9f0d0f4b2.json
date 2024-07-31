@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "Visibility of PropertyGridWidget can now be controlled using a custom predicate.",
+  "comment": "Visibility of the widget, when creating it using `PropertyGridUiItemsProvider`, can now be controlled using a `propertyGridProps.shouldShow` predicate, which is invoked on every unified selection change. The default behavior stays the same - show the widget when a node or a non-transient element is selected.",
   "packageName": "@itwin/property-grid-react",
   "email": "mdastous-bentley@users.noreply.github.com",
   "dependentChangeType": "patch"
