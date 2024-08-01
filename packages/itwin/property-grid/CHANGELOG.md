@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 23 Jul 2024 13:05:22 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Aug 2024 16:01:52 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.12.0
+
+Thu, 01 Aug 2024 16:01:52 GMT
+
+### Minor changes
+
+- Visibility of the widget, when creating it using `PropertyGridUiItemsProvider`, can now be controlled using a `propertyGridProps.shouldShow` predicate, which is invoked on every unified selection change. The default behavior stays the same - show the widget when a node or a non-transient element is selected.  ([#1009](https://github.com/iTwin/viewer-components-react/pull/1009))
 
 ## 1.11.0
 
