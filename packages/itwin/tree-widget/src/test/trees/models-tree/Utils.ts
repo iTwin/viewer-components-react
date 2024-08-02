@@ -33,7 +33,7 @@ export function createModelsTreeProvider({ imodel, filteredNodePaths, hierarchyC
       idsCache,
       hierarchyConfig: config,
     }),
-    ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths } } : undefined),
+    ...(filteredNodePaths ? { filtering: { paths: filteredNodePaths.map((path) => ({ path, options: { autoExpand: true } })) } } : undefined),
   });
 }
 

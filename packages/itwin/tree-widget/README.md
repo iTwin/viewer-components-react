@@ -194,6 +194,33 @@ function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
 }
 ```
 
+#### Displaying a subset of the tree
+
+Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
+
+```tsx
+const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
+  return createInstanceKeyPaths({
+    // list of instance keys representing nodes that should be displayed in the hierarchy
+    keys: myInstanceKeys,
+    // instead of providing instance keys, a label can be provided to display all nodes that contain it
+    // label: "MyLabel"
+  });
+};
+```
+
+The `ModelsTree` component displays a message when too many matches are found while filtering the tree; for this reason, it is recommended to throw `FilterLimitExceededError` that is provided by this package when the displayed subset is too large. Typically, this error is thrown when there are more than 100 matches. The error is cleared when a new reference for `getFilteredPaths` is provided.
+
+When a filter is provided or instance focus mode is used, the hierarchy automatically expands to show the targeted nodes. This might not be desirable when displaying a subset of the hierarchy and can be disabled by adding the `autoExpand: false` option to each path returned by `getFilteredPaths`:
+
+```tsx
+const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
+  const paths = await createInstanceKeyPaths({ keys: myInstanceKeys });
+  // disable auto-expansion
+  return paths.map((path) => ({ path, options: { autoExpand: false } }));
+};
+```
+
 ### Categories tree
 
 The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of two levels - the category (spatial or drawing) and its sub-categories. There's also a header that renders categories search box and various visibility control buttons.

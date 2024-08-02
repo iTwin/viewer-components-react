@@ -17,6 +17,7 @@ import { usePropertyGridTransientState } from "./hooks/UsePropertyGridTransientS
 import { PropertyGridComponent } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
 
+import type { KeySet } from "@itwin/presentation-common";
 import type { FallbackProps } from "react-error-boundary";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent";
@@ -39,7 +40,8 @@ export interface PropertyGridUiItemsProviderProps {
   /** Widget priority in the stage panel. */
   defaultPanelWidgetPriority?: number;
   /** Props for configuring `PropertyGridComponent` shown in the widget. */
-  propertyGridProps?: PropertyGridComponentProps;
+  propertyGridProps?: PropertyGridWidgetProps;
+
 }
 
 /**
@@ -73,8 +75,17 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
   }
 }
 
+/**
+ * Props for creating `PropertyGridWidget`.
+ * @public
+ */
+export interface PropertyGridWidgetProps extends PropertyGridComponentProps {
+  /** Predicate indicating if the widget should be shown for the current selection set. */
+  shouldShow?: (selection: Readonly<KeySet>) => boolean
+}
+
 /** Component that renders `PropertyGridComponent` an hides/shows widget based on `UnifiedSelection`. */
-function PropertyGridWidget(props: PropertyGridComponentProps) {
+function PropertyGridWidget({ shouldShow, ...props }: PropertyGridWidgetProps) {
   const ref = usePropertyGridTransientState<HTMLDivElement>();
   const widgetDef = useSpecificWidgetDef(PropertyGridWidgetId);
 
@@ -85,10 +96,13 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
 
     return Presentation.selection.selectionChange.addListener((args) => {
       const selection = Presentation.selection.getSelection(args.imodel);
-      // hide grid widget if there are no nodes or valid instances selected.
-      const hasSelectedElements = selection.nodeKeysCount !== 0 || selection.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
 
-      if (!hasSelectedElements) {
+      const predicate = shouldShow
+        ? shouldShow
+        : // Default behavior:  hide grid widget if there are no nodes or valid instances selected.
+          (keys: Readonly<KeySet>) => keys.nodeKeysCount !== 0 || keys.some((key) => Key.isInstanceKey(key) && !Id64.isTransient(key.id));
+
+      if (!predicate(selection)) {
         widgetDef.setWidgetState(WidgetState.Hidden);
         return;
       }
@@ -97,7 +111,7 @@ function PropertyGridWidget(props: PropertyGridComponentProps) {
         widgetDef.setWidgetState(WidgetState.Open);
       }
     });
-  }, [widgetDef]);
+  }, [shouldShow, widgetDef]);
 
   return (
     <div ref={ref} className="property-grid-widget">

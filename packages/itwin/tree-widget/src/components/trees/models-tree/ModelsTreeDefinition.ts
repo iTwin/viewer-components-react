@@ -9,6 +9,7 @@ import {
 } from "@itwin/presentation-hierarchies";
 import { createBisInstanceLabelSelectClauseFactory, ECSql } from "@itwin/presentation-shared";
 import { collect } from "../common/Rxjs";
+import { FilterLimitExceededError } from "../common/TreeErrors";
 import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 
 import type { Id64String } from "@itwin/core-bentley";
@@ -62,6 +63,7 @@ interface ModelsTreeDefinitionProps {
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
+/** @beta */
 export interface ElementsGroupInfo {
   parent:
     | {
@@ -691,7 +693,7 @@ function createGeometricElementInstanceKeyPaths(
 
 async function createInstanceKeyPathsFromInstanceKeys(props: ModelsTreeInstanceKeyPathsFromInstanceKeysProps): Promise<HierarchyNodeIdentifiersPath[]> {
   if (props.keys.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
-    throw new Error(`Filter matches more than ${MAX_FILTERING_INSTANCE_KEY_COUNT} items`);
+    throw new FilterLimitExceededError(MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
   const ids = {
     models: new Array<Id64String>(),

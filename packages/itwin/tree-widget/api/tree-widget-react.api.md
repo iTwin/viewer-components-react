@@ -16,6 +16,7 @@ import type { Id64Array } from '@itwin/core-bentley';
 import type { Id64String } from '@itwin/core-bentley';
 import type { IDisposable } from '@itwin/core-bentley';
 import type { IModelConnection } from '@itwin/core-frontend';
+import type { InstanceKey } from '@itwin/presentation-shared';
 import type { Localization } from '@itwin/core-common';
 import type { PresentationHierarchyNode } from '@itwin/presentation-hierarchies-react';
 import type { PresentationTreeNode } from '@itwin/presentation-hierarchies-react';
@@ -51,6 +52,13 @@ export const ExternalSourcesTreeComponent: {
     id: string;
     getLabel(): string;
 };
+
+// @beta
+export class FilterLimitExceededError extends Error {
+    constructor(limit: number);
+    // (undocumented)
+    readonly limit: number;
+}
 
 // @beta
 export interface HierarchyVisibilityHandler extends IDisposable {
@@ -160,7 +168,7 @@ export function useCategoriesTreeButtonProps({ viewport }: {
 }): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport, }: {

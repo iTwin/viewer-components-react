@@ -12,6 +12,7 @@ import type { IModelConnection } from '@itwin/core-frontend';
 import type { InstanceKey } from '@itwin/presentation-common';
 import type { IPresentationPropertyDataProvider } from '@itwin/presentation-components';
 import type { IPropertyDataFilterer } from '@itwin/components-react';
+import type { KeySet } from '@itwin/presentation-common';
 import type { Localization } from '@itwin/core-common';
 import type { PropertyCategory } from '@itwin/components-react';
 import type { PropertyRecord } from '@itwin/appui-abstract';
@@ -193,11 +194,16 @@ export interface PropertyGridUiItemsProviderProps {
     defaultPanelLocation?: StagePanelLocation;
     defaultPanelSection?: StagePanelSection;
     defaultPanelWidgetPriority?: number;
-    propertyGridProps?: PropertyGridComponentProps;
+    propertyGridProps?: PropertyGridWidgetProps;
 }
 
 // @public
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
+
+// @public
+export interface PropertyGridWidgetProps extends PropertyGridComponentProps {
+    shouldShow?: (selection: Readonly<KeySet>) => boolean;
+}
 
 // @public
 export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;

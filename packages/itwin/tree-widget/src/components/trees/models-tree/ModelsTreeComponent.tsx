@@ -24,7 +24,14 @@ import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 interface ModelsTreeComponentProps
   extends Pick<
     ComponentPropsWithoutRef<typeof ModelsTree>,
-    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig" | "visibilityHandlerOverrides"
+    | "getSchemaContext"
+    | "selectionStorage"
+    | "density"
+    | "hierarchyLevelConfig"
+    | "selectionMode"
+    | "hierarchyConfig"
+    | "visibilityHandlerOverrides"
+    | "getFilteredPaths"
   > {
   /**
    * Renderers of header buttons. Defaults to:
@@ -149,7 +156,7 @@ function ModelsTreeComponentImpl({
         filteringProps={{
           onFilterStart: applyFilter,
           onFilterClear: clearFilter,
-          isDisabled: instanceFocusEnabled,
+          isDisabled: instanceFocusEnabled || !!treeProps.getFilteredPaths,
         }}
         buttons={buttons}
         density={density}
