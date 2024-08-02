@@ -5,10 +5,11 @@
 
 import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
-import { Point3d } from "@itwin/core-geometry";
-import { BeButtonEvent, DecorateContext, EventHandled } from "@itwin/core-frontend";
+import type { Point3d } from "@itwin/core-geometry";
+import { type BeButtonEvent, type DecorateContext, EventHandled } from "@itwin/core-frontend";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import { MeasurePerpendicularDistanceTool } from "./MeasurePerpendicularDistanceTool";
+import { PerpendicularMeasurementType } from "../measurements/PerpendicularDistanceMeasurement";
 
 export class MeasureWidthTool extends MeasurePerpendicularDistanceTool {
   public static override toolId = "MeasureTools.MeasureWidth";
@@ -35,7 +36,7 @@ export class MeasureWidthTool extends MeasurePerpendicularDistanceTool {
 
     if (!this.isCompatibleViewport(context.viewport, false) || !this.toolModel.dynamicMeasurement) return;
 
-    this.toolModel.dynamicMeasurement.toolName = MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.width");
+    this.toolModel.dynamicMeasurement.measurementType = PerpendicularMeasurementType.Width;
 
     if (this.toolModel.currentState === MeasureDistanceToolModel.State.SetEndPoint && this._mouseStartPoint) {
       const hypotenusePoints: Point3d[] = [this._mouseStartPoint, this.toolModel.dynamicMeasurement.endPointRef];

@@ -3,18 +3,66 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@itwin/core-geometry";
+import type { Point3d, XYZProps } from "@itwin/core-geometry";
 import { ColorDef, LinePixels } from "@itwin/core-common";
 import type { DecorateContext } from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
-import type { MeasurementWidgetData } from "../api/Measurement";
+import { Measurement, type MeasurementEqualityOptions, MeasurementSerializer, type MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import { MeasureTools } from "../MeasureTools";
 import { DistanceMeasurement } from "./DistanceMeasurement";
+import type { MeasurementProps } from "../api/MeasurementProps";
+import { MeasurementPreferences, MeasurementPreferencesProperty } from "../api/MeasurementPreferences";
+import { MeasurementManager } from "../api/MeasurementManager";
+
+export enum PerpendicularMeasurementType {
+  Width = "width",
+  Height = "height",
+}
+
+/**
+ * Props for serializing a [[PerpendicularDistanceMeasurement]].
+ */
+export interface PerpendicularDistanceMeasurementProps extends MeasurementProps {
+  startPoint: XYZProps;
+  endPoint: XYZProps;
+  showAxes?: boolean;
+  measurementType: PerpendicularMeasurementType;
+}
+
+/** Serializer for a [[PerpendicularDistanceMeasurement]]. */
+export class PerpendicularDistanceMeasurementSerializer extends MeasurementSerializer {
+  public static readonly perpendicularDistanceMeasurementName = "perpendicularDistanceMeasurement";
+
+  public get measurementName(): string {
+    return PerpendicularDistanceMeasurementSerializer.perpendicularDistanceMeasurementName;
+  }
+
+  public isValidType(measurement: Measurement): boolean {
+    return measurement instanceof PerpendicularDistanceMeasurement;
+  }
+
+  public override isValidJSON(json: any): boolean {
+    if (!super.isValidJSON(json) || !json.hasOwnProperty("startPoint") || !json.hasOwnProperty("endPoint") || !json.hasOwnProperty("measurementType")) {
+      return false;
+    }
+
+    return true;
+  }
+
+  protected parseSingle(data: MeasurementProps): Measurement | undefined {
+    if (!this.isValidJSON(data)) return undefined;
+
+    const props = data as PerpendicularDistanceMeasurementProps;
+    return PerpendicularDistanceMeasurement.fromJSON(props);
+  }
+}
 
 export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
-  private _toolName?: string;
+  public static override readonly serializer = Measurement.registerSerializer(new PerpendicularDistanceMeasurementSerializer());
+
+  private _measurementType?: PerpendicularMeasurementType;
   private _secondaryLine?: Point3d[];
 
   public get secondaryLine(): Point3d[] {
@@ -23,11 +71,11 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
   public set secondaryLine(l: Point3d[]) {
     this._secondaryLine = l;
   }
-  public get toolName(): string {
-    return this._toolName ?? "";
+  public get measurementType(): PerpendicularMeasurementType {
+    return this._measurementType ?? PerpendicularMeasurementType.Height;
   }
-  public set toolName(t: string) {
-    this._toolName = t;
+  public set measurementType(t: PerpendicularMeasurementType) {
+    this._measurementType = t;
   }
 
   public static override create(start: Point3d, end: Point3d, viewType?: string) {
@@ -52,7 +100,6 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const toolName = this._toolName ?? "";
     const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(QuantityType.LengthEngineering);
 
     const distance = this.worldScale * this.startPointRef.distance(this.endPointRef);
@@ -80,15 +127,19 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
     const fDeltaY = IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec);
     const fRise = IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec);
 
-    let title = `${toolName} ${MeasureTools.localization.getLocalizedString("MeasureTools:Measurements.measurement")}`;
-    title += ` [${fDistance}]`;
-
+    const title =
+      this._measurementType === PerpendicularMeasurementType.Height
+        ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.toolTitle").replace("{0}", fDistance)
+        : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.toolTitle").replace("{0}", fDistance);
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push(
       {
-        label: `${toolName}:`,
+        label:
+          this._measurementType === PerpendicularMeasurementType.Height
+            ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.height")
+            : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.width"),
         name: "DistanceMeasurement_Distance",
         value: fDistance,
         aggregatableValue: lengthSpec !== undefined ? { value: distance, formatSpec: lengthSpec } : undefined,
@@ -138,4 +189,97 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
 
     return data;
   }
+
+  /**
+   * Tests equality with another measurement.
+   * @param other Measurement to test equality for.
+   * @param opts Options for equality testing.
+   * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
+   */
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+    if (!super.equals(other, opts)) return false;
+
+    // Compare data (ignore isDynamic)
+    const tol = opts ? opts.tolerance : undefined;
+    const otherDist = other as PerpendicularDistanceMeasurement;
+    if (
+      otherDist === undefined ||
+      !this.startPointRef.isAlmostEqual(otherDist.startPointRef, tol) ||
+      !this.endPointRef.isAlmostEqual(otherDist.endPointRef, tol) ||
+      this.showAxes !== otherDist.showAxes
+    )
+      return false;
+
+    return true;
+  }
+
+  /**
+   * Copies data from the other measurement into this instance.
+   * @param other Measurement to copy property values from.
+   */
+  protected override copyFrom(other: Measurement) {
+    super.copyFrom(other);
+
+    if (other instanceof PerpendicularDistanceMeasurement) {
+      this.isDynamic = other.isDynamic;
+      this.showAxes = other.showAxes;
+      this.startPointRef.setFrom(other.startPointRef);
+      this.endPointRef.setFrom(other.endPointRef);
+      this.buildRunRiseAxes();
+      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    }
+  }
+
+  /**
+   * Deserializes properties (if they exist) from the JSON object.
+   * @param json JSON object to read data from.
+   */
+  protected override readFromJSON(json: MeasurementProps) {
+    super.readFromJSON(json);
+
+    const jsonDist = json as PerpendicularDistanceMeasurementProps;
+    if (jsonDist.startPoint !== undefined) this.startPointRef.setFromJSON(jsonDist.startPoint);
+
+    if (jsonDist.endPoint !== undefined) this.endPointRef.setFromJSON(jsonDist.endPoint);
+
+    if (jsonDist.measurementType !== undefined) this.measurementType = jsonDist.measurementType;
+
+    this.showAxes = jsonDist.showAxes !== undefined ? jsonDist.showAxes : MeasurementPreferences.current.displayMeasurementAxes;
+
+    this.buildRunRiseAxes();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
+
+  /**
+   * Serializes properties to a JSON object.
+   * @param json JSON object to append data to.
+   */
+  protected override writeToJSON(json: MeasurementProps) {
+    super.writeToJSON(json);
+
+    const jsonDist = json as PerpendicularDistanceMeasurementProps;
+    jsonDist.startPoint = this.startPointRef.toJSON();
+    jsonDist.endPoint = this.endPointRef.toJSON();
+    jsonDist.showAxes = this.showAxes;
+    jsonDist.measurementType = this.measurementType;
+  }
+
+  public static override fromJSON(data: PerpendicularDistanceMeasurementProps): PerpendicularDistanceMeasurement {
+    return new PerpendicularDistanceMeasurement(data);
+  }
 }
+
+// Ensure all distance measurements respond to when show axes is turned on/off in preferences
+function onDisplayMeasurementAxesHandler(propChanged: MeasurementPreferencesProperty) {
+  if (propChanged !== MeasurementPreferencesProperty.displayMeasurementAxes) return;
+
+  const showAxes = MeasurementPreferences.current.displayMeasurementAxes;
+
+  MeasurementManager.instance.forAllMeasurements((measurement: Measurement) => {
+    if (measurement instanceof PerpendicularDistanceMeasurement) measurement.showAxes = showAxes;
+
+    return true;
+  });
+}
+
+MeasurementPreferences.current.onPreferenceChanged.addListener(onDisplayMeasurementAxesHandler);

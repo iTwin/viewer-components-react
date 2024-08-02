@@ -13,16 +13,16 @@ import {
   ToolAssistance,
   ToolAssistanceImage,
   ToolAssistanceInputMethod,
-  ToolAssistanceInstruction,
-  ToolAssistanceSection,
+  type ToolAssistanceInstruction,
+  type ToolAssistanceSection,
 } from "@itwin/core-frontend";
-import { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
+import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
 import type { PerpendicularDistanceMeasurement } from "../measurements/PerpendicularDistanceMeasurement";
 import { MeasurementToolBase } from "../api/MeasurementTool";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import { type Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { DrawingDataCache } from "../api/DrawingTypeDataCache";
 import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
-import { DrawingMetadata } from "../api/Measurement";
+import type { DrawingMetadata } from "../api/Measurement";
 import { MeasurePerpendicularDistanceToolModel } from "../toolmodels/MeasurePerpendicularDistanceToolModel";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import { Point3d } from "@itwin/core-geometry";
