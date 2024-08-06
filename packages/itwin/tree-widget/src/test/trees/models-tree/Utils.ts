@@ -13,6 +13,7 @@ import { createIModelAccess } from "../Common";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { GroupingHierarchyNode, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
@@ -152,14 +153,16 @@ export function createClassGroupingHierarchyNode(props: {
   modelId: Id64String | undefined;
   categoryId: Id64String | undefined;
   elements: Id64Array;
-}): GroupingHierarchyNode {
+  className?: string;
+}): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
+  const className = props.className ?? "Bis:Element";
   return {
     key: {
       type: "class-grouping",
-      className: "",
+      className,
     },
     children: !!props?.elements?.length,
-    groupedInstanceKeys: props?.elements ? props.elements.map((id) => ({ className: "Bis:Element", id })) : [],
+    groupedInstanceKeys: props?.elements ? props.elements.map((id) => ({ className, id })) : [],
     label: "",
     parentKeys: [],
     extendedData: props,
