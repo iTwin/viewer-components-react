@@ -18,14 +18,13 @@ import { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibilityHandler";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
-import type { Id64String } from "@itwin/core-bentley";
-import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
+import type { ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
+import type { ClassGroupingHierarchyNode } from "../common/FocusedInstancesContext";
 import type { VisibilityTree } from "../common/components/VisibilityTree";
 import type { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 
@@ -45,7 +44,9 @@ interface UseModelsTreeProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   getFilteredPaths?: (props: {
-    createInstanceKeyPaths: (props: { keys: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
+    createInstanceKeyPaths: (
+      props: { keysOrGroupingNodes: Array<InstanceKey | ClassGroupingHierarchyNode> } | { label: string },
+    ) => Promise<HierarchyFilteringPaths>;
   }) => Promise<HierarchyFilteringPaths>;
 }
 
@@ -75,7 +76,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
   const { onFeatureUsed } = useTelemetryContext();
 
   const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
-  const { loadInstanceKeys: loadFocusedInstancesKeys } = useFocusedInstancesContext();
+  const { loadFocusedItems } = useFocusedInstancesContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
@@ -96,14 +97,14 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
-    if (loadFocusedInstancesKeys) {
+    if (loadFocusedItems) {
       return async ({ imodelAccess }) => {
         try {
-          const targetKeys = await collectTargetKeys(loadFocusedInstancesKeys);
+          const targetKeys = await collectTargetKeys(loadFocusedItems);
           const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
             idsCache: getModelsTreeIdsCache(),
-            keys: targetKeys,
+            keysOrGroupingNodes: targetKeys,
             hierarchyConfig: hierarchyConfiguration,
           });
           return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));
@@ -166,7 +167,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
       };
     }
     return undefined;
-  }, [filter, loadFocusedInstancesKeys, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration]);
+  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration]);
 
   return {
     modelsTreeProps: {
@@ -285,46 +286,21 @@ function SvgClassGrouping() {
   );
 }
 
-async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
-  const targetKeys: Array<InstanceKey | ElementsGroupInfo> = [];
-  const groupingNodeInfos: Array<{
-    parentKey: InstancesNodeKey;
-    parentType: "element" | "category";
-    className: string;
-    groupingNode: GroupingHierarchyNode;
-    modelIds: Id64String[];
-  }> = [];
-  for await (const key of loadFocusedInstancesKeys()) {
-    if ("id" in key) {
-      targetKeys.push(key);
+async function collectTargetKeys(loadFocusedItems: () => AsyncIterableIterator<InstanceKey | ClassGroupingHierarchyNode>) {
+  const targetKeysOrGroupingNodes: Array<InstanceKey | ClassGroupingHierarchyNode> = [];
+  for await (const keyOrGroupingNode of loadFocusedItems()) {
+    if ("id" in keyOrGroupingNode) {
+      targetKeysOrGroupingNodes.push(keyOrGroupingNode);
       continue;
     }
 
-    if (!HierarchyNodeKey.isClassGrouping(key.key)) {
-      targetKeys.push(...key.groupedInstanceKeys);
+    if (!keyOrGroupingNode.nonGroupingAncestor || !HierarchyNodeKey.isInstances(keyOrGroupingNode.nonGroupingAncestor.key)) {
       continue;
     }
 
-    if (!key.nonGroupingAncestor || !HierarchyNodeKey.isInstances(key.nonGroupingAncestor.key)) {
-      continue;
-    }
-
-    const parentKey = key.nonGroupingAncestor.key;
-    const type = key.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
-    const modelIds = ((key.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
-    groupingNodeInfos.push({ groupingNode: key, className: key.key.className, parentType: type, parentKey, modelIds });
+    targetKeysOrGroupingNodes.push(keyOrGroupingNode);
   }
-  targetKeys.push(
-    ...groupingNodeInfos.map(({ parentKey, parentType, className, groupingNode, modelIds }) => ({
-      parent:
-        parentType === "element"
-          ? { type: "element" as const, ids: parentKey.instanceKeys.map((key) => key.id) }
-          : { type: "category" as const, ids: parentKey.instanceKeys.map((key) => key.id), modelIds },
-      className,
-      groupingNode,
-    })),
-  );
-  return targetKeys;
+  return targetKeysOrGroupingNodes;
 }
 
 function createLocalizedMessage(message: string, onClick?: () => void) {

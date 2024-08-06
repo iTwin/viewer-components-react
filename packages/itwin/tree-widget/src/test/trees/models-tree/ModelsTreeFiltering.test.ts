@@ -27,13 +27,13 @@ import { createIModelAccess } from "../Common";
 import { NodeValidators, validateHierarchy } from "../HierarchyValidation";
 import { createClassGroupingHierarchyNode, createModelsTreeProvider } from "./Utils";
 
-import type { ElementsGroupInfo } from "../../../components/trees/models-tree/ModelsTreeDefinition";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { createHierarchyProvider, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { ExpectedHierarchyDef } from "../HierarchyValidation";
+import type { ClassGroupingHierarchyNode } from "../../../components/trees/common/FocusedInstancesContext";
 
 type ModelsTreeHierarchyConfiguration = ConstructorParameters<typeof ModelsTreeDefinition>[0]["hierarchyConfig"];
 type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
@@ -45,7 +45,7 @@ interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   only?: boolean;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
   getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths;
-  getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
+  getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ClassGroupingHierarchyNode>;
   getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
   getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
   getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>;
@@ -57,7 +57,7 @@ namespace TreeFilteringTestCaseDefinition {
     name: string,
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
     getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths,
-    getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>,
+    getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ClassGroupingHierarchyNode>,
     getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
     getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>,
@@ -1013,21 +1013,15 @@ describe("Models tree", () => {
             categoryId: category.id,
             elements: [testElement1.id, testElement2.id],
           });
-          return { rootSubject, model, category, testElement1, testElement2, groupingNode };
+          return { rootSubject, model, category, groupingNode };
         },
         (x) => [
           {
-            path: [x.rootSubject, x.model, x.category, x.testElement1],
+            path: [x.rootSubject, x.model, x.category, x.groupingNode.groupedInstanceKeys[0]],
             options: { autoExpand: x.groupingNode },
           },
         ],
-        (x) => [
-          {
-            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
-            className: x.testElement1.className,
-            groupingNode: x.groupingNode,
-          },
-        ],
+        (x) => [x.groupingNode],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1082,21 +1076,15 @@ describe("Models tree", () => {
             categoryId: category.id,
             elements: [physicalElement21.id, physicalElement22.id],
           });
-          return { rootSubject, model1, model2, category, physicalElement21, groupingNode };
+          return { rootSubject, model1, model2, category, groupingNode };
         },
         (x) => [
           {
-            path: [x.rootSubject, x.model2, x.category, x.physicalElement21],
+            path: [x.rootSubject, x.model2, x.category, x.groupingNode.groupedInstanceKeys[0]],
             options: { autoExpand: x.groupingNode },
           },
         ],
-        (x) => [
-          {
-            parent: { type: "category", ids: [x.category.id], modelIds: [x.model2.id] },
-            className: x.physicalElement21.className,
-            groupingNode: x.groupingNode,
-          },
-        ],
+        (x) => [x.groupingNode],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1175,11 +1163,7 @@ describe("Models tree", () => {
             options: { autoExpand: x.testElementGroupingNode },
           },
         ],
-        (x) => [{
-          parent: { type: "element", ids: [x.rootElement.id] },
-          className: x.testElementGroupingNode.key.className,
-          groupingNode: x.testElementGroupingNode,
-        }],
+        (x) => [x.testElementGroupingNode],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1280,18 +1264,7 @@ describe("Models tree", () => {
             options: { autoExpand: x.testElementGroupingNode },
           },
         ],
-        (x) => [
-          {
-            parent: { type: "element", ids: [x.rootElement.id] },
-            className: x.physicalElementClassGroupingNode.key.className,
-            groupingNode: x.physicalElementClassGroupingNode,
-          },
-          {
-            parent: { type: "element", ids: [x.rootElement.id] },
-            className: x.testElementGroupingNode.key.className,
-            groupingNode: x.testElementGroupingNode,
-          }
-        ],
+        (x) => [x.physicalElementClassGroupingNode, x.testElementGroupingNode],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1334,13 +1307,236 @@ describe("Models tree", () => {
           }),
         ],
       ),
+      TreeFilteringTestCaseDefinition.create(
+        "deeply nested grouping nodes",
+        async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category-x" });
+          const parentElement = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
+          const middleElement = insertPhysicalElement({
+            builder,
+            userLabel: `middle element`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: parentElement.id,
+          });
+          const childElement = insertPhysicalElement({
+            builder,
+            userLabel: `element 1`,
+            modelId: model.id,
+            categoryId: category.id,
+            parentId: middleElement.id,
+          });
+          const [parentGroupingNode, middleGroupingNode, childGroupingNode] = [parentElement, middleElement, childElement].map((el) =>
+            createClassGroupingHierarchyNode({
+              className: el.className,
+              modelId: model.id,
+              categoryId: category.id,
+              elements: [el.id],
+            }),
+          );
+          return { rootSubject, model, category, parentElement, middleElement, childElement, parentGroupingNode, middleGroupingNode, childGroupingNode };
+        },
+        (x) => [
+          {
+            path: [x.rootSubject, x.model, x.category, x.parentElement],
+            options: { autoExpand: x.parentGroupingNode },
+          },
+          {
+            path: [x.rootSubject, x.model, x.category, x.parentElement, x.middleElement],
+            options: { autoExpand: x.middleGroupingNode },
+          },
+          {
+            path: [x.rootSubject, x.model, x.category, x.parentElement, x.middleElement, x.childElement],
+            options: { autoExpand: x.childGroupingNode },
+          },
+        ],
+        (x) => [x.parentGroupingNode, x.middleGroupingNode, x.childGroupingNode],
+        undefined,
+        (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.rootSubject],
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.model],
+                label: "model-x",
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [x.category],
+                    label: "category-x",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        label: "Physical Object",
+                        autoExpand: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.parentElement],
+                            label: /^parent element/,
+                            children: [
+                              NodeValidators.createForClassGroupingNode({
+                                label: "Physical Object",
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [x.middleElement],
+                                    label: /^middle element/,
+                                    children: [
+                                      NodeValidators.createForClassGroupingNode({
+                                        label: "Physical Object",
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      ),
+      TreeFilteringTestCaseDefinition.create(
+        "grouping node and element",
+        async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
+          const category = insertSpatialCategory({ builder, codeValue: "category-x" });
+          const element = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
+          const groupingNode = createClassGroupingHierarchyNode({
+            className: element.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [element.id],
+          });
+          return { rootSubject, model, category, element, groupingNode };
+        },
+        (x) => [
+          [x.rootSubject, x.model, x.category, x.element],
+          {
+            path: [x.rootSubject, x.model, x.category, x.element],
+            options: { autoExpand: x.groupingNode },
+          },
+        ],
+        (x) => [x.element, x.groupingNode],
+        undefined,
+        (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.rootSubject],
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.model],
+                label: "model-x",
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [x.category],
+                    label: "category-x",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        label: "Physical Object",
+                        autoExpand: true,
+                        children: [
+                          NodeValidators.createForInstanceNode({
+                            instanceKeys: [x.element],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      ),
+      TreeFilteringTestCaseDefinition.create(
+        "grouping nodes under different categories",
+        async (builder) => {
+          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
+          const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
+          const category1 = insertSpatialCategory({ builder, codeValue: "category-1" });
+          const category2 = insertSpatialCategory({ builder, codeValue: "category-2" });
+          const element1 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category1.id });
+          const element2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category2.id });
+          const groupingNode1 = createClassGroupingHierarchyNode({
+            className: element1.className,
+            modelId: model.id,
+            categoryId: category1.id,
+            elements: [element1.id],
+          });
+          const groupingNode2 = createClassGroupingHierarchyNode({
+            className: element2.className,
+            modelId: model.id,
+            categoryId: category2.id,
+            elements: [element2.id],
+          });
+          return { rootSubject, model, category1, category2, element1, element2, groupingNode1, groupingNode2 };
+        },
+        (x) => [
+          {
+            path: [x.rootSubject, x.model, x.category1, x.element1],
+            options: { autoExpand: x.groupingNode1 },
+          },
+          {
+            path: [x.rootSubject, x.model, x.category2, x.element2],
+            options: { autoExpand: x.groupingNode2 },
+          },
+        ],
+        (x) => [x.groupingNode1, x.groupingNode2],
+        undefined,
+        (x) => [
+          NodeValidators.createForInstanceNode({
+            instanceKeys: [x.rootSubject],
+            autoExpand: true,
+            children: [
+              NodeValidators.createForInstanceNode({
+                instanceKeys: [x.model],
+                label: "model-x",
+                autoExpand: true,
+                children: [
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [x.category1],
+                    label: "category-1",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        label: "Physical Object",
+                      }),
+                    ],
+                  }),
+                  NodeValidators.createForInstanceNode({
+                    instanceKeys: [x.category2],
+                    label: "category-2",
+                    autoExpand: true,
+                    children: [
+                      NodeValidators.createForClassGroupingNode({
+                        label: "Physical Object",
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      ),
     ];
 
     TEST_CASE_DEFS.forEach((testCase: TreeFilteringTestCaseDefinition<any>) => {
       (testCase.only ? describe.only : describe)(testCase.name, () => {
         let imodel: IModelConnection;
         let instanceKeyPaths!: HierarchyFilteringPaths;
-        let targetInstanceKeys!: Array<InstanceKey | ElementsGroupInfo>;
+        let targetInstanceKeys!: Array<InstanceKey | ClassGroupingHierarchyNode>;
         let targetInstanceLabel: string | undefined;
         let expectedHierarchy!: ExpectedHierarchyDef[];
 
@@ -1383,7 +1579,7 @@ describe("Models tree", () => {
             await ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
               idsCache: modelsTreeIdsCache,
-              keys: targetInstanceKeys,
+              keysOrGroupingNodes: targetInstanceKeys,
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);
