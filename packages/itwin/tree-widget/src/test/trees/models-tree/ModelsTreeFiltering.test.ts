@@ -42,6 +42,7 @@ type HierarchyFilteringPath = HierarchyFilteringPaths[number];
 
 interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   name: string;
+  only?: boolean;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
   getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths;
   getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
@@ -71,6 +72,15 @@ namespace TreeFilteringTestCaseDefinition {
       getHierarchyConfig,
     };
   }
+
+  export const only: typeof create = function<TIModelSetupResult extends {}>(
+    ...args: Parameters<typeof create<TIModelSetupResult>>
+  ): TreeFilteringTestCaseDefinition<TIModelSetupResult> {
+    return {
+      ...create(...args),
+      only: true,
+    };
+  };
 }
 
 describe("Models tree", () => {
@@ -1327,7 +1337,7 @@ describe("Models tree", () => {
     ];
 
     TEST_CASE_DEFS.forEach((testCase: TreeFilteringTestCaseDefinition<any>) => {
-      describe(testCase.name, () => {
+      (testCase.only ? describe.only : describe)(testCase.name, () => {
         let imodel: IModelConnection;
         let instanceKeyPaths!: HierarchyFilteringPaths;
         let targetInstanceKeys!: Array<InstanceKey | ElementsGroupInfo>;
