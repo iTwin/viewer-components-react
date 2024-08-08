@@ -149,22 +149,29 @@ export function createElementHierarchyNode(props: {
     },
   };
 }
-export function createClassGroupingHierarchyNode(props: {
+export function createClassGroupingHierarchyNode({
+  elements,
+  className,
+  hierarchyDepth,
+  ...props
+}: {
   modelId: Id64String | undefined;
   categoryId: Id64String | undefined;
   elements: Id64Array;
   className?: string;
+  hierarchyDepth?: number;
 }): GroupingHierarchyNode & { key: ClassGroupingNodeKey } {
-  const className = props.className ?? "Bis:Element";
+  className ??= "Bis:Element";
   return {
     key: {
       type: "class-grouping",
       className,
     },
-    children: !!props?.elements?.length,
-    groupedInstanceKeys: props?.elements ? props.elements.map((id) => ({ className, id })) : [],
+    children: !!elements?.length,
+    groupedInstanceKeys: elements ? elements.map((id) => ({ className, id })) : [],
     label: "",
     parentKeys: [],
+    hierarchyDepth,
     extendedData: props,
   };
 }

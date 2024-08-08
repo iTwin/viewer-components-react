@@ -8,6 +8,7 @@ import { InstanceKey } from "@itwin/presentation-shared";
 import { collect } from "./Common";
 
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+
 export interface HierarchyDef<TNode> {
   node: TNode;
   children?: Array<HierarchyDef<TNode>> | boolean;
@@ -125,6 +126,7 @@ export namespace NodeValidators {
     label?: string;
     autoExpand?: boolean;
     children?: TChildren;
+    groupedInstanceKeys?: InstanceKey[];
   }) {
     return {
       node: (node: HierarchyNode) => {
@@ -136,6 +138,15 @@ export namespace NodeValidators {
         }
         if (props.className && node.key.className !== props.className) {
           throw new Error(`[${node.label}] Expected node to represent class "${props.className}", got "${node.key.className}"`);
+        }
+        if (
+          props.groupedInstanceKeys &&
+          (node.groupedInstanceKeys.length !== props.groupedInstanceKeys.length ||
+            !node.groupedInstanceKeys.every((nk) => props.groupedInstanceKeys!.some((ek) => InstanceKey.equals(nk, ek))))
+        ) {
+          throw new Error(
+            `[${node.label}] Expected node to have grouped instance keys "${JSON.stringify(props.groupedInstanceKeys)}", got "${JSON.stringify(node.groupedInstanceKeys)}"`,
+          );
         }
         validateBaseNodeAttributes(node, {
           label: props.label,
