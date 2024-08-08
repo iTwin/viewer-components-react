@@ -15,7 +15,7 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/itwinui-react':
-        specifier: ^3.0.0
+        specifier: ^3.11.0
         version: 3.11.1(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       '@itwin/presentation-core-interop':
         specifier: ^0.2.5
@@ -793,7 +793,7 @@ packages:
       '@itwin/core-react': ^4.9.0
       '@itwin/ecschema-metadata': ^4.4.0
       '@itwin/imodel-components-react': ^4.9.0
-      '@itwin/itwinui-react': 3.12.1
+      '@itwin/itwinui-react': ^3.0.0
       '@itwin/presentation-common': ^4.4.0
       '@itwin/presentation-frontend': ^4.4.0
       react: ^17.0.0 || ^18.0.0
@@ -821,7 +821,7 @@ packages:
   '@itwin/presentation-hierarchies-react@0.7.0':
     resolution: {integrity: sha512-vGA45lxIJZGTvXztQ0+mR1xKXuhb12X4kXwHf9SBZSjjIY7zuvLzEl5bU34tLoDXSjFjuCT3eG6P7bWhrrE7Hg==}
     peerDependencies:
-      '@itwin/itwinui-react': 3.12.1
+      '@itwin/itwinui-react': ^3.0.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -4715,7 +4715,7 @@ snapshots:
       rimraf: 3.0.2
       tree-kill: 1.2.2
       typedoc: 0.23.28(typescript@5.0.4)
-      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@5.0.2))
+      typedoc-plugin-merge-modules: 4.1.0(typedoc@0.23.28(typescript@5.0.4))
       typescript: 5.0.4
       wtfnode: 0.9.1
       yargs: 17.7.2
@@ -8825,7 +8825,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@5.0.2)):
+  typedoc-plugin-merge-modules@4.1.0(typedoc@0.23.28(typescript@5.0.4)):
     dependencies:
       typedoc: 0.23.28(typescript@5.0.4)
 
