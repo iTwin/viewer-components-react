@@ -697,7 +697,10 @@ function createGeometricElementInstanceKeyPaths(
           return {
             path,
             options: {
-              autoExpand: { key: groupingNode.key, hierarchyDepth: groupingNode.hierarchyDepth },
+              autoExpand: {
+                key: groupingNode.key,
+                parentKeysCount: groupingNode.parentKeys.length,
+              },
             },
           };
         }),

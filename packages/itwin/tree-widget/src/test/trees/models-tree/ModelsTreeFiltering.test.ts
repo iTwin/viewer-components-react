@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { expect } from "chai";
+import { assert, expect } from "chai";
 import { join } from "node:path";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
@@ -107,6 +107,46 @@ describe("Models tree", () => {
     after(async function () {
       await terminatePresentationTesting();
     });
+
+    function createFilteredGroupingNodeTestInfo(props: {
+      groupedElements: InstanceKey[],
+      pathUntilGroupingNode: InstanceKey[],
+      modelId: Id64String,
+      categoryId: Id64String,
+      parentType: "category" | "element",
+    }) {
+      assert(props.groupedElements.every((key) => key.className === props.groupedElements[0].className), "Grouped elements have different class names.");
+      const groupingNode = createClassGroupingHierarchyNode({
+        className: props.groupedElements[0].className,
+        modelId: props.modelId,
+        categoryId: props.categoryId,
+        elements: props.groupedElements.map((x) => x.id),
+        parentKeys: props.pathUntilGroupingNode.map((key) => ({ type: "instances", instanceKeys: [key] })),
+      });
+      const filterPaths: HierarchyFilteringPaths = props.groupedElements.map((key) => ({
+        path: [...props.pathUntilGroupingNode, key],
+        options: { autoExpand: { key: groupingNode.key, parentKeysCount: props.pathUntilGroupingNode.length } },
+      }));
+      const filterTargetItem = {
+        parent: props.parentType === "category"
+          ? {
+            type: "category" as const,
+            ids: [props.categoryId],
+            modelIds: [props.modelId],
+            }
+          : {
+            type: "element" as const,
+            ids: [props.pathUntilGroupingNode[props.pathUntilGroupingNode.length - 1].id],
+          },
+        groupingNode,
+      }
+      return {
+        groupingNode,
+        filterPaths,
+        filterTargetItem,
+        groupedElements: props.groupedElements,
+      };
+    }
 
     const TEST_CASE_DEFS = [
       TreeFilteringTestCaseDefinition.create(
@@ -1007,26 +1047,21 @@ describe("Models tree", () => {
             modelId: model.id,
             categoryId: category.id,
           });
-          const groupingNode = createClassGroupingHierarchyNode({
-            className: testSchema.items.SubModelablePhysicalObject.fullName,
-            modelId: model.id,
-            categoryId: category.id,
-            elements: [testElement1.id, testElement2.id],
-            hierarchyDepth: 1,
-          });
-          return { rootSubject, model, category, groupingNode };
+          return {
+            rootSubject,
+            model,
+            category,
+            ...createFilteredGroupingNodeTestInfo({
+              groupedElements: [testElement1, testElement2],
+              modelId: model.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model, category],
+              parentType: "category",
+            }),
+          };
         },
-        (x) =>
-          x.groupingNode.groupedInstanceKeys.map((key) => ({
-            path: [x.rootSubject, x.model, x.category, key],
-            options: { autoExpand: x.groupingNode },
-          })),
-        (x) => [
-          {
-            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
-            groupingNode: x.groupingNode,
-          },
-        ],
+        (x) => x.filterPaths,
+        (x) => [x.filterTargetItem],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1077,26 +1112,21 @@ describe("Models tree", () => {
             modelId: model2.id,
             categoryId: category.id,
           });
-          const groupingNode = createClassGroupingHierarchyNode({
-            className: physicalElement21.className,
-            modelId: model2.id,
-            categoryId: category.id,
-            elements: [physicalElement21.id, physicalElement22.id],
-            hierarchyDepth: 1,
-          });
-          return { rootSubject, model1, model2, category, groupingNode };
+          return {
+            rootSubject,
+            model2,
+            category,
+            ...createFilteredGroupingNodeTestInfo({
+              groupedElements: [physicalElement21, physicalElement22],
+              modelId: model2.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model2, category],
+              parentType: "category",
+            }),
+          };
         },
-        (x) =>
-          x.groupingNode.groupedInstanceKeys.map((key) => ({
-            path: [x.rootSubject, x.model2, x.category, key],
-            options: { autoExpand: x.groupingNode },
-          })),
-        (x) => [
-          {
-            parent: { type: "category", ids: [x.category.id], modelIds: [x.model2.id] },
-            groupingNode: x.groupingNode,
-          },
-        ],
+        (x) => x.filterPaths,
+        (x) => [x.filterTargetItem],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1163,26 +1193,22 @@ describe("Models tree", () => {
             categoryId: category.id,
             parentId: rootElement.id,
           });
-          const testElementGroupingNode = createClassGroupingHierarchyNode({
-            className: testElement1.className,
-            modelId: model.id,
-            categoryId: category.id,
-            elements: [testElement1.id, testElement2.id],
-            hierarchyDepth: 2,
-          });
-          return { rootSubject, model, category, rootElement, testElementGroupingNode };
+          return {
+            rootSubject,
+            model,
+            category,
+            rootElement,
+            ...createFilteredGroupingNodeTestInfo({
+              groupedElements: [testElement1, testElement2],
+              modelId: model.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model, category, rootElement],
+              parentType: "element",
+            }),
+          };
         },
-        (x) =>
-          x.testElementGroupingNode.groupedInstanceKeys.map((key) => ({
-            path: [x.rootSubject, x.model, x.category, x.rootElement, key],
-            options: { autoExpand: x.testElementGroupingNode },
-          })),
-        (x) => [
-          {
-            parent: { type: "element", ids: [x.rootElement.id] },
-            groupingNode: x.testElementGroupingNode,
-          },
-        ],
+        (x) => x.filterPaths,
+        (x) => [x.filterTargetItem],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1211,7 +1237,7 @@ describe("Models tree", () => {
                               NodeValidators.createForClassGroupingNode({
                                 label: "Test Physical Object",
                                 autoExpand: false,
-                                groupedInstanceKeys: x.testElementGroupingNode.groupedInstanceKeys,
+                                groupedInstanceKeys: x.groupedElements,
                               }),
                             ],
                           }),
@@ -1246,13 +1272,6 @@ describe("Models tree", () => {
             categoryId: category.id,
             parentId: rootElement.id,
           });
-          const physicalElementClassGroupingNode = createClassGroupingHierarchyNode({
-            className: physicalElement1.className,
-            modelId: model.id,
-            categoryId: category.id,
-            elements: [physicalElement1.id, physicalElement2.id],
-            hierarchyDepth: 2,
-          });
           const testElement1 = insertPhysicalElement({
             builder,
             classFullName: testSchema.items.SubModelablePhysicalObject.fullName,
@@ -1269,31 +1288,34 @@ describe("Models tree", () => {
             categoryId: category.id,
             parentId: rootElement.id,
           });
-          const testElementGroupingNode = createClassGroupingHierarchyNode({
-            className: testElement1.className,
-            modelId: model.id,
-            categoryId: category.id,
-            elements: [testElement1.id, testElement2.id],
-            hierarchyDepth: 2,
-          });
-          return { rootSubject, model, category, rootElement, physicalElementClassGroupingNode, testElementGroupingNode };
+          return {
+            rootSubject,
+            model,
+            category,
+            rootElement,
+            physicalElementGroup: createFilteredGroupingNodeTestInfo({
+              groupedElements: [physicalElement1, physicalElement2],
+              modelId: model.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model, category, rootElement],
+              parentType: "element",
+            }),
+            testElementGroup: createFilteredGroupingNodeTestInfo({
+              groupedElements: [testElement1, testElement2],
+              modelId: model.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model, category, rootElement],
+              parentType: "element",
+            }),
+          };
         },
-        (x) =>
-          [x.physicalElementClassGroupingNode, x.testElementGroupingNode].flatMap((groupingNode) =>
-            groupingNode.groupedInstanceKeys.map((key) => ({
-              path: [x.rootSubject, x.model, x.category, x.rootElement, key],
-              options: { autoExpand: groupingNode },
-            })),
-          ),
         (x) => [
-          {
-            parent: { type: "element", ids: [x.rootElement.id] },
-            groupingNode: x.physicalElementClassGroupingNode,
-          },
-          {
-            parent: { type: "element", ids: [x.rootElement.id] },
-            groupingNode: x.testElementGroupingNode,
-          },
+          ...x.physicalElementGroup.filterPaths,
+          ...x.testElementGroup.filterPaths,
+        ],
+        (x) => [
+          x.physicalElementGroup.filterTargetItem,
+          x.testElementGroup.filterTargetItem,
         ],
         undefined,
         (x) => [
@@ -1322,12 +1344,12 @@ describe("Models tree", () => {
                               NodeValidators.createForClassGroupingNode({
                                 label: "Physical Object",
                                 autoExpand: false,
-                                groupedInstanceKeys: x.physicalElementClassGroupingNode.groupedInstanceKeys,
+                                groupedInstanceKeys: x.physicalElementGroup.groupedElements,
                               }),
                               NodeValidators.createForClassGroupingNode({
                                 label: "Test Physical Object",
                                 autoExpand: false,
-                                groupedInstanceKeys: x.testElementGroupingNode.groupedInstanceKeys,
+                                groupedInstanceKeys: x.testElementGroup.groupedElements,
                               }),
                             ],
                           }),
@@ -1362,44 +1384,45 @@ describe("Models tree", () => {
             categoryId: category.id,
             parentId: middleElement.id,
           });
-          const [parentGroupingNode, middleGroupingNode, childGroupingNode] = [parentElement, middleElement, childElement].map((el, idx) =>
-            createClassGroupingHierarchyNode({
-              className: el.className,
+          return {
+            rootSubject,
+            model,
+            category,
+            parentElement,
+            middleElement,
+            childElement,
+            parentGroup: createFilteredGroupingNodeTestInfo({
+              groupedElements: [parentElement],
               modelId: model.id,
               categoryId: category.id,
-              elements: [el.id],
-              hierarchyDepth: idx + 1,
+              pathUntilGroupingNode: [rootSubject, model, category],
+              parentType: "category",
             }),
-          );
-          return { rootSubject, model, category, parentElement, middleElement, childElement, parentGroupingNode, middleGroupingNode, childGroupingNode };
+            middleChildGroup: createFilteredGroupingNodeTestInfo({
+              groupedElements: [middleElement],
+              modelId: model.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model, category, parentElement],
+              parentType: "element",
+            }),
+            lastChildGroup: createFilteredGroupingNodeTestInfo({
+              groupedElements: [childElement],
+              modelId: model.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model, category, parentElement, middleElement],
+              parentType: "element",
+            }),
+          };
         },
         (x) => [
-          {
-            path: [x.rootSubject, x.model, x.category, x.parentElement],
-            options: { autoExpand: x.parentGroupingNode },
-          },
-          {
-            path: [x.rootSubject, x.model, x.category, x.parentElement, x.middleElement],
-            options: { autoExpand: x.middleGroupingNode },
-          },
-          {
-            path: [x.rootSubject, x.model, x.category, x.parentElement, x.middleElement, x.childElement],
-            options: { autoExpand: x.childGroupingNode },
-          },
+          ...x.parentGroup.filterPaths,
+          ...x.middleChildGroup.filterPaths,
+          ...x.lastChildGroup.filterPaths,
         ],
         (x) => [
-          {
-            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
-            groupingNode: x.parentGroupingNode,
-          },
-          {
-            parent: { type: "element", ids: [x.parentElement.id] },
-            groupingNode: x.middleGroupingNode,
-          },
-          {
-            parent: { type: "element", ids: [x.middleElement.id] },
-            groupingNode: x.childGroupingNode,
-          },
+          x.parentGroup.filterTargetItem,
+          x.middleChildGroup.filterTargetItem,
+          x.lastChildGroup.filterTargetItem,
         ],
         undefined,
         (x) => [
@@ -1438,7 +1461,7 @@ describe("Models tree", () => {
                                       NodeValidators.createForClassGroupingNode({
                                         label: "Physical Object",
                                         autoExpand: false,
-                                        groupedInstanceKeys: x.childGroupingNode.groupedInstanceKeys,
+                                        groupedInstanceKeys: x.lastChildGroup.groupedElements,
                                       }),
                                     ],
                                   }),
@@ -1463,28 +1486,27 @@ describe("Models tree", () => {
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category-x" });
           const element = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
-          const groupingNode = createClassGroupingHierarchyNode({
-            className: element.className,
-            modelId: model.id,
-            categoryId: category.id,
-            elements: [element.id],
-            hierarchyDepth: 1,
-          });
-          return { rootSubject, model, category, element, groupingNode };
+          return {
+            rootSubject,
+            model,
+            category,
+            element,
+            group: createFilteredGroupingNodeTestInfo({
+              groupedElements: [element],
+              modelId: model.id,
+              categoryId: category.id,
+              pathUntilGroupingNode: [rootSubject, model, category],
+              parentType: "category",
+            }),
+          };
         },
         (x) => [
           [x.rootSubject, x.model, x.category, x.element],
-          {
-            path: [x.rootSubject, x.model, x.category, x.element],
-            options: { autoExpand: x.groupingNode },
-          },
+          ...x.group.filterPaths,
         ],
         (x) => [
           x.element,
-          {
-            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
-            groupingNode: x.groupingNode,
-          },
+          x.group.filterTargetItem,
         ],
         undefined,
         (x) => [
@@ -1528,41 +1550,34 @@ describe("Models tree", () => {
           const category2 = insertSpatialCategory({ builder, codeValue: "category-2" });
           const element1 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category1.id });
           const element2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category2.id });
-          const groupingNode1 = createClassGroupingHierarchyNode({
-            className: element1.className,
-            modelId: model.id,
-            categoryId: category1.id,
-            elements: [element1.id],
-            hierarchyDepth: 1,
-          });
-          const groupingNode2 = createClassGroupingHierarchyNode({
-            className: element2.className,
-            modelId: model.id,
-            categoryId: category2.id,
-            elements: [element2.id],
-            hierarchyDepth: 1,
-          });
-          return { rootSubject, model, category1, category2, element1, element2, groupingNode1, groupingNode2 };
+          return {
+            rootSubject,
+            model,
+            category1,
+            category2,
+            group1: createFilteredGroupingNodeTestInfo({
+              groupedElements: [element1],
+              modelId: model.id,
+              categoryId: category1.id,
+              pathUntilGroupingNode: [rootSubject, model, category1],
+              parentType: "category",
+            }),
+            group2: createFilteredGroupingNodeTestInfo({
+              groupedElements: [element2],
+              modelId: model.id,
+              categoryId: category2.id,
+              pathUntilGroupingNode: [rootSubject, model, category2],
+              parentType: "category",
+            }),
+          };
         },
         (x) => [
-          {
-            path: [x.rootSubject, x.model, x.category1, x.element1],
-            options: { autoExpand: x.groupingNode1 },
-          },
-          {
-            path: [x.rootSubject, x.model, x.category2, x.element2],
-            options: { autoExpand: x.groupingNode2 },
-          },
+          ...x.group1.filterPaths,
+          ...x.group2.filterPaths,
         ],
         (x) => [
-          {
-            parent: { type: "category", ids: [x.category1.id], modelIds: [x.model.id] },
-            groupingNode: x.groupingNode1,
-          },
-          {
-            parent: { type: "category", ids: [x.category2.id], modelIds: [x.model.id] },
-            groupingNode: x.groupingNode2,
-          },
+          x.group1.filterTargetItem,
+          x.group2.filterTargetItem,
         ],
         undefined,
         (x) => [
@@ -1583,7 +1598,7 @@ describe("Models tree", () => {
                       NodeValidators.createForClassGroupingNode({
                         label: "Physical Object",
                         autoExpand: false,
-                        groupedInstanceKeys: x.groupingNode1.groupedInstanceKeys,
+                        groupedInstanceKeys: x.group1.groupedElements,
                       }),
                     ],
                   }),
@@ -1595,7 +1610,7 @@ describe("Models tree", () => {
                       NodeValidators.createForClassGroupingNode({
                         label: "Physical Object",
                         autoExpand: false,
-                        groupedInstanceKeys: x.groupingNode2.groupedInstanceKeys,
+                        groupedInstanceKeys: x.group2.groupedElements,
                       }),
                     ],
                   }),
@@ -1626,15 +1641,6 @@ describe("Models tree", () => {
               const imodelSetupResult = await testCase.setupIModel(...args);
               instanceKeyPaths = testCase
                 .getTargetInstancePaths(imodelSetupResult)
-                .map((path) => {
-                  if (Array.isArray(path) || typeof path.options.autoExpand !== "object") {
-                    return path;
-                  }
-                  // Trim extra props from the grouping nodes so that `deep.eq` assertions could work properly
-                  const node = path.options.autoExpand;
-                  path.options.autoExpand = { key: node.key, hierarchyDepth: node.hierarchyDepth };
-                  return path;
-                })
                 .sort(instanceKeyPathSorter);
               focusedItems = testCase.getFocusedItems(imodelSetupResult);
               targetInstanceLabel = testCase.getTargetInstanceLabel?.(imodelSetupResult);
