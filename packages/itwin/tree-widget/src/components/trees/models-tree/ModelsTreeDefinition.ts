@@ -607,10 +607,10 @@ function createGeometricElementInstanceKeyPaths(
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor,
   idsCache: ModelsTreeIdsCache,
   hierarchyConfig: ModelsTreeHierarchyConfiguration,
-  focusedItems: Array<Id64String | ElementsGroupInfo>,
+  targetItems: Array<Id64String | ElementsGroupInfo>,
 ): Observable<HierarchyFilteringPath> {
-  const elementIds = focusedItems.filter((info): info is Id64String => typeof info === "string");
-  const groupInfos = focusedItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
+  const elementIds = targetItems.filter((info): info is Id64String => typeof info === "string");
+  const groupInfos = targetItems.filter((info): info is ElementsGroupInfo => typeof info !== "string");
 
   return defer(() => {
     const bindings = new Array<ECSqlBinding>();
@@ -619,7 +619,7 @@ function createGeometricElementInstanceKeyPaths(
       return `${selector} IN (${idSet.map(() => "?").join(",")})`;
     };
 
-    const focusedElementsInfoQuery =
+    const targetElementsInfoQuery =
       elementIds.length > 0
         ? `
           SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, -1
@@ -628,7 +628,7 @@ function createGeometricElementInstanceKeyPaths(
           `
         : undefined;
 
-    const focusedGroupingNodesElementInfoQueries = groupInfos.map(
+    const targetGroupingNodesElementInfoQueries = groupInfos.map(
       ({ parent, groupingNode }, index) => `
         SELECT e.ECInstanceId, e.ECClassId, e.Parent.Id, e.Model.Id, e.Category.Id, ${index}
         FROM ${hierarchyConfig.elementClassSpecification} e
@@ -640,7 +640,7 @@ function createGeometricElementInstanceKeyPaths(
 
     const ctes = [
       `InstanceElementsWithClassGroupingNodes(ECInstanceId, ECClassId, ParentId, ModelId, CategoryId, GroupingNodeIndex) AS (
-        ${[...(focusedElementsInfoQuery ? [focusedElementsInfoQuery] : []), ...focusedGroupingNodesElementInfoQueries].join("\n\nUNION ALL\n\n")}
+        ${[...(targetElementsInfoQuery ? [targetElementsInfoQuery] : []), ...targetGroupingNodesElementInfoQueries].join("\n\nUNION ALL\n\n")}
       )`,
       `ModelsCategoriesElementsHierarchy(ECInstanceId, ParentId, ModelId, GroupingNodeIndex, Path) AS (
         SELECT
