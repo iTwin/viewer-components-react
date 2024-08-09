@@ -45,7 +45,7 @@ interface TreeFilteringTestCaseDefinition<TIModelSetupResult extends {}> {
   only?: boolean;
   setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1];
   getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths;
-  getFocusedItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
+  getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>;
   getTargetInstanceLabel?: (setupResult: TIModelSetupResult) => string;
   getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[];
   getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>;
@@ -57,7 +57,7 @@ namespace TreeFilteringTestCaseDefinition {
     name: string,
     setupIModel: Parameters<typeof buildIModel<TIModelSetupResult>>[1],
     getTargetInstancePaths: (setupResult: TIModelSetupResult) => HierarchyFilteringPaths,
-    getTargetInstanceKeys: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>,
+    getTargetItems: (setupResult: TIModelSetupResult) => Array<InstanceKey | ElementsGroupInfo>,
     getTargetInstanceLabel: ((setupResult: TIModelSetupResult) => string) | undefined,
     getExpectedHierarchy: (setupResult: TIModelSetupResult) => ExpectedHierarchyDef[],
     getHierarchyConfig?: (setupResult: TIModelSetupResult) => Partial<ModelsTreeHierarchyConfiguration>,
@@ -66,7 +66,7 @@ namespace TreeFilteringTestCaseDefinition {
       name,
       setupIModel,
       getTargetInstancePaths,
-      getFocusedItems: getTargetInstanceKeys,
+      getTargetItems,
       getTargetInstanceLabel,
       getExpectedHierarchy,
       getHierarchyConfig,
@@ -109,13 +109,16 @@ describe("Models tree", () => {
     });
 
     function createFilteredGroupingNodeTestInfo(props: {
-      groupedElements: InstanceKey[],
-      pathUntilGroupingNode: InstanceKey[],
-      modelId: Id64String,
-      categoryId: Id64String,
-      parentType: "category" | "element",
+      groupedElements: InstanceKey[];
+      pathUntilGroupingNode: InstanceKey[];
+      modelId: Id64String;
+      categoryId: Id64String;
+      parentType: "category" | "element";
     }) {
-      assert(props.groupedElements.every((key) => key.className === props.groupedElements[0].className), "Grouped elements have different class names.");
+      assert(
+        props.groupedElements.every((key) => key.className === props.groupedElements[0].className),
+        "Grouped elements have different class names.",
+      );
       const groupingNode = createClassGroupingHierarchyNode({
         className: props.groupedElements[0].className,
         modelId: props.modelId,
@@ -128,18 +131,19 @@ describe("Models tree", () => {
         options: { autoExpand: { key: groupingNode.key, parentKeysCount: props.pathUntilGroupingNode.length } },
       }));
       const filterTargetItem = {
-        parent: props.parentType === "category"
-          ? {
-            type: "category" as const,
-            ids: [props.categoryId],
-            modelIds: [props.modelId],
-            }
-          : {
-            type: "element" as const,
-            ids: [props.pathUntilGroupingNode[props.pathUntilGroupingNode.length - 1].id],
-          },
+        parent:
+          props.parentType === "category"
+            ? {
+                type: "category" as const,
+                ids: [props.categoryId],
+                modelIds: [props.modelId],
+              }
+            : {
+                type: "element" as const,
+                ids: [props.pathUntilGroupingNode[props.pathUntilGroupingNode.length - 1].id],
+              },
         groupingNode,
-      }
+      };
       return {
         groupingNode,
         filterPaths,
@@ -1309,14 +1313,8 @@ describe("Models tree", () => {
             }),
           };
         },
-        (x) => [
-          ...x.physicalElementGroup.filterPaths,
-          ...x.testElementGroup.filterPaths,
-        ],
-        (x) => [
-          x.physicalElementGroup.filterTargetItem,
-          x.testElementGroup.filterTargetItem,
-        ],
+        (x) => [...x.physicalElementGroup.filterPaths, ...x.testElementGroup.filterPaths],
+        (x) => [x.physicalElementGroup.filterTargetItem, x.testElementGroup.filterTargetItem],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1414,16 +1412,8 @@ describe("Models tree", () => {
             }),
           };
         },
-        (x) => [
-          ...x.parentGroup.filterPaths,
-          ...x.middleChildGroup.filterPaths,
-          ...x.lastChildGroup.filterPaths,
-        ],
-        (x) => [
-          x.parentGroup.filterTargetItem,
-          x.middleChildGroup.filterTargetItem,
-          x.lastChildGroup.filterTargetItem,
-        ],
+        (x) => [...x.parentGroup.filterPaths, ...x.middleChildGroup.filterPaths, ...x.lastChildGroup.filterPaths],
+        (x) => [x.parentGroup.filterTargetItem, x.middleChildGroup.filterTargetItem, x.lastChildGroup.filterTargetItem],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1500,14 +1490,8 @@ describe("Models tree", () => {
             }),
           };
         },
-        (x) => [
-          [x.rootSubject, x.model, x.category, x.element],
-          ...x.group.filterPaths,
-        ],
-        (x) => [
-          x.element,
-          x.group.filterTargetItem,
-        ],
+        (x) => [[x.rootSubject, x.model, x.category, x.element], ...x.group.filterPaths],
+        (x) => [x.element, x.group.filterTargetItem],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1571,14 +1555,8 @@ describe("Models tree", () => {
             }),
           };
         },
-        (x) => [
-          ...x.group1.filterPaths,
-          ...x.group2.filterPaths,
-        ],
-        (x) => [
-          x.group1.filterTargetItem,
-          x.group2.filterTargetItem,
-        ],
+        (x) => [...x.group1.filterPaths, ...x.group2.filterPaths],
+        (x) => [x.group1.filterTargetItem, x.group2.filterTargetItem],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1626,7 +1604,7 @@ describe("Models tree", () => {
       (testCase.only ? describe.only : describe)(testCase.name, () => {
         let imodel: IModelConnection;
         let instanceKeyPaths!: HierarchyFilteringPaths;
-        let focusedItems!: Array<InstanceKey | ElementsGroupInfo>;
+        let targetItems!: Array<InstanceKey | ElementsGroupInfo>;
         let targetInstanceLabel: string | undefined;
         let expectedHierarchy!: ExpectedHierarchyDef[];
 
@@ -1639,10 +1617,8 @@ describe("Models tree", () => {
           imodel = (
             await buildIModel(this, async (...args) => {
               const imodelSetupResult = await testCase.setupIModel(...args);
-              instanceKeyPaths = testCase
-                .getTargetInstancePaths(imodelSetupResult)
-                .sort(instanceKeyPathSorter);
-              focusedItems = testCase.getFocusedItems(imodelSetupResult);
+              instanceKeyPaths = testCase.getTargetInstancePaths(imodelSetupResult).sort(instanceKeyPathSorter);
+              targetItems = testCase.getTargetItems(imodelSetupResult);
               targetInstanceLabel = testCase.getTargetInstanceLabel?.(imodelSetupResult);
               expectedHierarchy = testCase.getExpectedHierarchy(imodelSetupResult);
               hierarchyConfig = { ...defaultHierarchyConfiguration, ...testCase.getHierarchyConfig?.(imodelSetupResult) };
@@ -1671,7 +1647,7 @@ describe("Models tree", () => {
             await ModelsTreeDefinition.createInstanceKeyPaths({
               imodelAccess: createIModelAccess(imodel),
               idsCache: modelsTreeIdsCache,
-              focusedItems,
+              targetItems,
               hierarchyConfig,
             })
           ).sort(instanceKeyPathSorter);

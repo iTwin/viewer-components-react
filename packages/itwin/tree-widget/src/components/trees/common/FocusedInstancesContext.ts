@@ -7,12 +7,9 @@ import { createContext, useContext } from "react";
 
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
-import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
-
-export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
 
 export interface FocusedInstancesContext {
-  loadFocusedItems?: () => AsyncIterableIterator<InstanceKey | ClassGroupingHierarchyNode>;
+  loadFocusedItems?: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>;
   enabled: boolean;
   toggle: () => void;
 }

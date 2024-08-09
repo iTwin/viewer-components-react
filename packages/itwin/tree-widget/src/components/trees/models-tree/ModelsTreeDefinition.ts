@@ -19,6 +19,7 @@ import type {
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
   DefineRootHierarchyLevelProps,
+  GroupingHierarchyNode,
   HierarchyDefinition,
   HierarchyLevelDefinition,
   HierarchyNodeIdentifiersPath,
@@ -36,7 +37,9 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
-import type { ClassGroupingHierarchyNode } from "../common/FocusedInstancesContext";
+import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
+
+export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
@@ -80,10 +83,10 @@ export interface ElementsGroupInfo {
   groupingNode: ClassGroupingHierarchyNode;
 }
 
-interface ModelsTreeInstanceKeyPathsFromInstanceKeysProps {
+interface ModelsTreeInstanceKeyPathsFromTargetItemsProps {
   imodelAccess: ECClassHierarchyInspector & LimitingECSqlQueryExecutor;
   idsCache: ModelsTreeIdsCache;
-  focusedItems: Array<InstanceKey | ElementsGroupInfo>;
+  targetItems: Array<InstanceKey | ElementsGroupInfo>;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
@@ -94,7 +97,7 @@ interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
 }
 
-export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromInstanceKeysProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
+export type ModelsTreeInstanceKeyPathsProps = ModelsTreeInstanceKeyPathsFromTargetItemsProps | ModelsTreeInstanceKeyPathsFromInstanceLabelProps;
 type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
 type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 type HierarchyFilteringPath = HierarchyFilteringPaths[number];
@@ -545,7 +548,7 @@ export class ModelsTreeDefinition implements HierarchyDefinition {
       const labelsFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
       return createInstanceKeyPathsFromInstanceLabel({ ...props, labelsFactory });
     }
-    return createInstanceKeyPathsFromFilteredItems(props);
+    return createInstanceKeyPathsFromTargetItems(props);
   }
 
   private async isSupported() {
@@ -709,13 +712,13 @@ function createGeometricElementInstanceKeyPaths(
   );
 }
 
-async function createInstanceKeyPathsFromFilteredItems({
-  focusedItems,
+async function createInstanceKeyPathsFromTargetItems({
+  targetItems,
   imodelAccess,
   hierarchyConfig,
   idsCache,
-}: ModelsTreeInstanceKeyPathsFromInstanceKeysProps): Promise<HierarchyFilteringPath[]> {
-  if (focusedItems.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
+}: ModelsTreeInstanceKeyPathsFromTargetItemsProps): Promise<HierarchyFilteringPath[]> {
+  if (targetItems.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
     throw new FilterLimitExceededError(MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
   const ids = {
@@ -725,7 +728,7 @@ async function createInstanceKeyPathsFromFilteredItems({
     elements: new Array<Id64String | ElementsGroupInfo>(),
   };
   await Promise.all(
-    focusedItems.map(async (key) => {
+    targetItems.map(async (key) => {
       if ("parent" in key) {
         ids.elements.push(key);
       } else if (await imodelAccess.classDerivesFrom(key.className, "BisCore.Subject")) {
@@ -796,7 +799,7 @@ async function createInstanceKeyPathsFromInstanceLabel(
     targetKeys.push({ className: row[0], id: row[1] });
   }
 
-  return createInstanceKeyPathsFromFilteredItems({ ...props, focusedItems: targetKeys });
+  return createInstanceKeyPathsFromTargetItems({ ...props, targetItems: targetKeys });
 }
 
 function createECInstanceKeySelectClause(props: { alias: string }) {

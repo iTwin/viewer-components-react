@@ -11,7 +11,8 @@ import { focusedInstancesContext } from "./FocusedInstancesContext";
 import type { SelectionStorage } from "@itwin/presentation-hierarchies-react";
 import type { PropsWithChildren } from "react";
 import type { InstanceKey } from "@itwin/presentation-common";
-import type { ClassGroupingHierarchyNode, FocusedInstancesContext } from "./FocusedInstancesContext";
+import type { FocusedInstancesContext } from "./FocusedInstancesContext";
+import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 export function FocusedInstancesContextProvider({
   selectionStorage,
@@ -39,7 +40,7 @@ export function FocusedInstancesContextProvider({
         return;
       }
 
-      const selected: Array<InstanceKey | ClassGroupingHierarchyNode | (() => AsyncIterableIterator<InstanceKey>)> = [];
+      const selected: Array<InstanceKey | GroupingHierarchyNode | (() => AsyncIterableIterator<InstanceKey>)> = [];
       Selectables.forEach(selection, (selectable) => {
         if (Selectable.isInstanceKey(selectable)) {
           selected.push(selectable);
@@ -54,7 +55,7 @@ export function FocusedInstancesContextProvider({
         selected.push(selectable.loadInstanceKeys);
       });
 
-      const loadFocusedItems: () => AsyncIterableIterator<InstanceKey | ClassGroupingHierarchyNode> = async function* () {
+      const loadFocusedItems: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode> = async function* () {
         for (const item of selected) {
           if (typeof item === "function") {
             yield* item();

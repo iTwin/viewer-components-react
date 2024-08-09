@@ -10,7 +10,6 @@ import { Anchor, Icon, Text } from "@itwin/itwinui-react";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { HierarchyNode, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { TreeWidget } from "../../../TreeWidget";
-import type { ClassGroupingHierarchyNode } from "../common/FocusedInstancesContext";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FilterLimitExceededError } from "../common/TreeErrors";
 import { useIModelChangeListener } from "../common/UseIModelChangeListener";
@@ -20,12 +19,12 @@ import { createModelsTreeVisibilityHandler } from "./internal/ModelsTreeVisibili
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTreeDefinition";
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { InstancesNodeKey } from "@itwin/presentation-hierarchies";
+import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
+import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
 import type { VisibilityTree } from "../common/components/VisibilityTree";
 import type { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
@@ -46,7 +45,7 @@ interface UseModelsTreeProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   getFilteredPaths?: (props: {
-    createInstanceKeyPaths: (props: { focusedItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
   }) => Promise<HierarchyFilteringPaths>;
 }
 
@@ -104,7 +103,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
           const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
             idsCache: getModelsTreeIdsCache(),
-            focusedItems,
+            targetItems: focusedItems,
             hierarchyConfig: hierarchyConfiguration,
           });
           return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));
@@ -286,7 +285,7 @@ function SvgClassGrouping() {
   );
 }
 
-async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator<InstanceKey | ClassGroupingHierarchyNode>) {
+async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
   const focusedItems: Array<InstanceKey | ElementsGroupInfo> = [];
   const groupingNodeInfos: Array<{
     parentKey: InstancesNodeKey;
@@ -301,18 +300,18 @@ async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator
     }
 
     if (!HierarchyNodeKey.isClassGrouping(key.key)) {
-      focusedItems.push(...key.groupedInstanceKeys);
       continue;
     }
 
-    if (!key.nonGroupingAncestor || !HierarchyNodeKey.isInstances(key.nonGroupingAncestor.key)) {
+    const groupingNode = key as ClassGroupingHierarchyNode;
+    if (!groupingNode.nonGroupingAncestor || !HierarchyNodeKey.isInstances(groupingNode.nonGroupingAncestor.key)) {
       continue;
     }
 
-    const parentKey = key.nonGroupingAncestor.key;
-    const type = key.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
-    const modelIds = ((key.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
-    groupingNodeInfos.push({ groupingNode: key, parentType: type, parentKey, modelIds });
+    const parentKey = groupingNode.nonGroupingAncestor.key;
+    const type = groupingNode.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
+    const modelIds = ((groupingNode.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
+    groupingNodeInfos.push({ groupingNode, parentType: type, parentKey, modelIds });
   }
   focusedItems.push(
     ...groupingNodeInfos.map(({ parentKey, parentType, groupingNode, modelIds }) => ({
