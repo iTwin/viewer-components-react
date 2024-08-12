@@ -37,9 +37,8 @@ import type {
   InstanceKey,
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
-import type { ClassGroupingNodeKey } from "@itwin/presentation-hierarchies/lib/cjs/hierarchies/HierarchyNodeKey";
 
-export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
+export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: { type: "class-grouping"; className: string } };
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 

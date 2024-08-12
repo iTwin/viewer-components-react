@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { join } from "node:path";
 import { Id64 } from "@itwin/core-bentley";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
@@ -107,50 +107,6 @@ describe("Models tree", () => {
     after(async function () {
       await terminatePresentationTesting();
     });
-
-    function createFilteredGroupingNodeTestInfo(props: {
-      groupedElements: InstanceKey[];
-      pathUntilGroupingNode: InstanceKey[];
-      modelId: Id64String;
-      categoryId: Id64String;
-      parentType: "category" | "element";
-    }) {
-      assert(
-        props.groupedElements.every((key) => key.className === props.groupedElements[0].className),
-        "Grouped elements have different class names.",
-      );
-      const groupingNode = createClassGroupingHierarchyNode({
-        className: props.groupedElements[0].className,
-        modelId: props.modelId,
-        categoryId: props.categoryId,
-        elements: props.groupedElements.map((x) => x.id),
-        parentKeys: props.pathUntilGroupingNode.map((key) => ({ type: "instances", instanceKeys: [key] })),
-      });
-      const filterPaths: HierarchyFilteringPaths = props.groupedElements.map((key) => ({
-        path: [...props.pathUntilGroupingNode, key],
-        options: { autoExpand: { key: groupingNode.key, parentKeysCount: props.pathUntilGroupingNode.length } },
-      }));
-      const filterTargetItem = {
-        parent:
-          props.parentType === "category"
-            ? {
-                type: "category" as const,
-                ids: [props.categoryId],
-                modelIds: [props.modelId],
-              }
-            : {
-                type: "element" as const,
-                ids: [props.pathUntilGroupingNode[props.pathUntilGroupingNode.length - 1].id],
-              },
-        groupingNode,
-      };
-      return {
-        groupingNode,
-        filterPaths,
-        filterTargetItem,
-        groupedElements: props.groupedElements,
-      };
-    }
 
     const TEST_CASE_DEFS = [
       TreeFilteringTestCaseDefinition.create(
@@ -1051,21 +1007,27 @@ describe("Models tree", () => {
             modelId: model.id,
             categoryId: category.id,
           });
-          return {
-            rootSubject,
-            model,
-            category,
-            ...createFilteredGroupingNodeTestInfo({
-              groupedElements: [testElement1, testElement2],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category],
-              parentType: "category",
-            }),
-          };
+          const pathUntilTargetElement = [rootSubject, model, category];
+          const groupingNode = createClassGroupingHierarchyNode({
+            className: testElement1.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [testElement1.id, testElement2.id],
+            parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          return { rootSubject, model, category, pathUntilTargetElement, groupingNode };
         },
-        (x) => x.filterPaths,
-        (x) => [x.filterTargetItem],
+        (x) =>
+          x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
+            path: [...x.pathUntilTargetElement, elementKey],
+            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.groupingNode.parentKeys.length } },
+          })),
+        (x) => [
+          {
+            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
+            groupingNode: x.groupingNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1085,7 +1047,7 @@ describe("Models tree", () => {
                       NodeValidators.createForClassGroupingNode({
                         label: "Test Physical Object",
                         autoExpand: false,
-                        groupedInstanceKeys: x.groupingNode.groupedInstanceKeys,
+                        children: x.groupingNode.groupedInstanceKeys.map((key) => NodeValidators.createForInstanceNode({ instanceKeys: [key] })),
                       }),
                     ],
                   }),
@@ -1116,21 +1078,27 @@ describe("Models tree", () => {
             modelId: model2.id,
             categoryId: category.id,
           });
-          return {
-            rootSubject,
-            model2,
-            category,
-            ...createFilteredGroupingNodeTestInfo({
-              groupedElements: [physicalElement21, physicalElement22],
-              modelId: model2.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model2, category],
-              parentType: "category",
-            }),
-          };
+          const pathUntilTargetElement = [rootSubject, model2, category];
+          const groupingNode = createClassGroupingHierarchyNode({
+            className: physicalElement21.className,
+            modelId: model2.id,
+            categoryId: category.id,
+            elements: [physicalElement21.id, physicalElement22.id],
+            parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          return { rootSubject, model2, category, pathUntilTargetElement, groupingNode };
         },
-        (x) => x.filterPaths,
-        (x) => [x.filterTargetItem],
+        (x) =>
+          x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
+            path: [...x.pathUntilTargetElement, elementKey],
+            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+          })),
+        (x) => [
+          {
+            parent: { type: "category", ids: [x.category.id], modelIds: [x.model2.id] },
+            groupingNode: x.groupingNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1150,7 +1118,7 @@ describe("Models tree", () => {
                       NodeValidators.createForClassGroupingNode({
                         label: "Physical Object",
                         autoExpand: false,
-                        groupedInstanceKeys: x.groupingNode.groupedInstanceKeys,
+                        children: x.groupingNode.groupedInstanceKeys.map((key) => NodeValidators.createForInstanceNode({ instanceKeys: [key] })),
                       }),
                     ],
                   }),
@@ -1197,22 +1165,27 @@ describe("Models tree", () => {
             categoryId: category.id,
             parentId: rootElement.id,
           });
-          return {
-            rootSubject,
-            model,
-            category,
-            rootElement,
-            ...createFilteredGroupingNodeTestInfo({
-              groupedElements: [testElement1, testElement2],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category, rootElement],
-              parentType: "element",
-            }),
-          };
+          const pathUntilTargetElement = [rootSubject, model, category, rootElement];
+          const groupingNode = createClassGroupingHierarchyNode({
+            className: testElement1.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [testElement1.id, testElement2.id],
+            parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          return { rootSubject, model, category, rootElement, testElement1, testElement2, pathUntilTargetElement, groupingNode };
         },
-        (x) => x.filterPaths,
-        (x) => [x.filterTargetItem],
+        (x) =>
+          x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
+            path: [...x.pathUntilTargetElement, elementKey],
+            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+          })),
+        (x) => [
+          {
+            parent: { type: "element", ids: [x.rootElement.id] },
+            groupingNode: x.groupingNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1241,7 +1214,16 @@ describe("Models tree", () => {
                               NodeValidators.createForClassGroupingNode({
                                 label: "Test Physical Object",
                                 autoExpand: false,
-                                groupedInstanceKeys: x.groupedElements,
+                                children: [
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [x.testElement1],
+                                    label: /^test element 1/,
+                                  }),
+                                  NodeValidators.createForInstanceNode({
+                                    instanceKeys: [x.testElement2],
+                                    label: /^test element 2/,
+                                  }),
+                                ],
                               }),
                             ],
                           }),
@@ -1292,29 +1274,53 @@ describe("Models tree", () => {
             categoryId: category.id,
             parentId: rootElement.id,
           });
+          const pathUntilTargetElement = [rootSubject, model, category, rootElement];
+          const physicalElementGroupingNode = createClassGroupingHierarchyNode({
+            className: physicalElement1.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [physicalElement1.id, physicalElement2.id],
+            parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          const testElementGroupingNode = createClassGroupingHierarchyNode({
+            className: testElement1.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [testElement1.id, testElement2.id],
+            parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
           return {
             rootSubject,
             model,
             category,
             rootElement,
-            physicalElementGroup: createFilteredGroupingNodeTestInfo({
-              groupedElements: [physicalElement1, physicalElement2],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category, rootElement],
-              parentType: "element",
-            }),
-            testElementGroup: createFilteredGroupingNodeTestInfo({
-              groupedElements: [testElement1, testElement2],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category, rootElement],
-              parentType: "element",
-            }),
+            testElement1,
+            testElement2,
+            pathUntilTargetElement,
+            physicalElementGroupingNode,
+            testElementGroupingNode,
           };
         },
-        (x) => [...x.physicalElementGroup.filterPaths, ...x.testElementGroup.filterPaths],
-        (x) => [x.physicalElementGroup.filterTargetItem, x.testElementGroup.filterTargetItem],
+        (x) => [
+          ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
+            path: [...x.pathUntilTargetElement, elementKey],
+            options: { autoExpand: { key: x.physicalElementGroupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+          })),
+          ...x.testElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
+            path: [...x.pathUntilTargetElement, elementKey],
+            options: { autoExpand: { key: x.testElementGroupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+          })),
+        ],
+        (x) => [
+          {
+            parent: { type: "element", ids: [x.rootElement.id] },
+            groupingNode: x.physicalElementGroupingNode,
+          },
+          {
+            parent: { type: "element", ids: [x.rootElement.id] },
+            groupingNode: x.testElementGroupingNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1342,12 +1348,16 @@ describe("Models tree", () => {
                               NodeValidators.createForClassGroupingNode({
                                 label: "Physical Object",
                                 autoExpand: false,
-                                groupedInstanceKeys: x.physicalElementGroup.groupedElements,
+                                children: x.physicalElementGroupingNode.groupedInstanceKeys.map((key) =>
+                                  NodeValidators.createForInstanceNode({ instanceKeys: [key] }),
+                                ),
                               }),
                               NodeValidators.createForClassGroupingNode({
                                 label: "Test Physical Object",
                                 autoExpand: false,
-                                groupedInstanceKeys: x.testElementGroup.groupedElements,
+                                children: x.testElementGroupingNode.groupedInstanceKeys.map((key) =>
+                                  NodeValidators.createForInstanceNode({ instanceKeys: [key] }),
+                                ),
                               }),
                             ],
                           }),
@@ -1382,6 +1392,28 @@ describe("Models tree", () => {
             categoryId: category.id,
             parentId: middleElement.id,
           });
+          const pathUntilParentElement = [rootSubject, model, category];
+          const parentElementGroupingNode = createClassGroupingHierarchyNode({
+            className: parentElement.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [parentElement.id],
+            parentKeys: pathUntilParentElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          const middleElementGroupingNode = createClassGroupingHierarchyNode({
+            className: middleElement.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [middleElement.id],
+            parentKeys: [...pathUntilParentElement, parentElement].map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          const childElementGroupingNode = createClassGroupingHierarchyNode({
+            className: childElement.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [childElement.id],
+            parentKeys: [...pathUntilParentElement, middleElement].map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
           return {
             rootSubject,
             model,
@@ -1389,31 +1421,40 @@ describe("Models tree", () => {
             parentElement,
             middleElement,
             childElement,
-            parentGroup: createFilteredGroupingNodeTestInfo({
-              groupedElements: [parentElement],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category],
-              parentType: "category",
-            }),
-            middleChildGroup: createFilteredGroupingNodeTestInfo({
-              groupedElements: [middleElement],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category, parentElement],
-              parentType: "element",
-            }),
-            lastChildGroup: createFilteredGroupingNodeTestInfo({
-              groupedElements: [childElement],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category, parentElement, middleElement],
-              parentType: "element",
-            }),
+            pathUntilParentElement,
+            parentElementGroupingNode,
+            middleElementGroupingNode,
+            childElementGroupingNode,
           };
         },
-        (x) => [...x.parentGroup.filterPaths, ...x.middleChildGroup.filterPaths, ...x.lastChildGroup.filterPaths],
-        (x) => [x.parentGroup.filterTargetItem, x.middleChildGroup.filterTargetItem, x.lastChildGroup.filterTargetItem],
+        (x) => [
+          {
+            path: [...x.pathUntilParentElement, x.parentElement],
+            options: { autoExpand: { key: x.parentElementGroupingNode.key, parentKeysCount: x.parentElementGroupingNode.parentKeys.length } },
+          },
+          {
+            path: [...x.pathUntilParentElement, x.parentElement, x.middleElement],
+            options: { autoExpand: { key: x.middleElementGroupingNode.key, parentKeysCount: x.middleElementGroupingNode.parentKeys.length } },
+          },
+          {
+            path: [...x.pathUntilParentElement, x.parentElement, x.middleElement, x.childElement],
+            options: { autoExpand: { key: x.childElementGroupingNode.key, parentKeysCount: x.childElementGroupingNode.parentKeys.length } },
+          },
+        ],
+        (x) => [
+          {
+            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
+            groupingNode: x.parentElementGroupingNode,
+          },
+          {
+            parent: { type: "element", ids: [x.parentElement.id] },
+            groupingNode: x.middleElementGroupingNode,
+          },
+          {
+            parent: { type: "element", ids: [x.middleElement.id] },
+            groupingNode: x.childElementGroupingNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1451,7 +1492,9 @@ describe("Models tree", () => {
                                       NodeValidators.createForClassGroupingNode({
                                         label: "Physical Object",
                                         autoExpand: false,
-                                        groupedInstanceKeys: x.lastChildGroup.groupedElements,
+                                        children: x.childElementGroupingNode.groupedInstanceKeys.map((key) =>
+                                          NodeValidators.createForInstanceNode({ instanceKeys: [key] }),
+                                        ),
                                       }),
                                     ],
                                   }),
@@ -1476,22 +1519,30 @@ describe("Models tree", () => {
           const model = insertPhysicalModelWithPartition({ builder, codeValue: `model-x`, partitionParentId: rootSubject.id });
           const category = insertSpatialCategory({ builder, codeValue: "category-x" });
           const element = insertPhysicalElement({ builder, userLabel: `parent element`, modelId: model.id, categoryId: category.id });
-          return {
-            rootSubject,
-            model,
-            category,
-            element,
-            group: createFilteredGroupingNodeTestInfo({
-              groupedElements: [element],
-              modelId: model.id,
-              categoryId: category.id,
-              pathUntilGroupingNode: [rootSubject, model, category],
-              parentType: "category",
-            }),
-          };
+          const pathUntilTargetElement = [rootSubject, model, category];
+          const groupingNode = createClassGroupingHierarchyNode({
+            className: element.className,
+            modelId: model.id,
+            categoryId: category.id,
+            elements: [element.id],
+            parentKeys: pathUntilTargetElement.map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          return { rootSubject, model, category, element, pathUntilTargetElement, groupingNode };
         },
-        (x) => [[x.rootSubject, x.model, x.category, x.element], ...x.group.filterPaths],
-        (x) => [x.element, x.group.filterTargetItem],
+        (x) => [
+          [...x.pathUntilTargetElement, x.element],
+          {
+            path: [...x.pathUntilTargetElement, x.element],
+            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.groupingNode.parentKeys.length } },
+          },
+        ],
+        (x) => [
+          x.element,
+          {
+            parent: { type: "category", ids: [x.category.id], modelIds: [x.model.id] },
+            groupingNode: x.groupingNode,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1534,29 +1585,51 @@ describe("Models tree", () => {
           const category2 = insertSpatialCategory({ builder, codeValue: "category-2" });
           const element1 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category1.id });
           const element2 = insertPhysicalElement({ builder, modelId: model.id, categoryId: category2.id });
+          const groupingNode1 = createClassGroupingHierarchyNode({
+            className: element1.className,
+            modelId: model.id,
+            categoryId: category1.id,
+            elements: [element1.id],
+            parentKeys: [rootSubject, model, category1].map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
+          const groupingNode2 = createClassGroupingHierarchyNode({
+            className: element2.className,
+            modelId: model.id,
+            categoryId: category2.id,
+            elements: [element2.id],
+            parentKeys: [rootSubject, model, category2].map((key) => ({ type: "instances", instanceKeys: [key] })),
+          });
           return {
             rootSubject,
             model,
             category1,
             category2,
-            group1: createFilteredGroupingNodeTestInfo({
-              groupedElements: [element1],
-              modelId: model.id,
-              categoryId: category1.id,
-              pathUntilGroupingNode: [rootSubject, model, category1],
-              parentType: "category",
-            }),
-            group2: createFilteredGroupingNodeTestInfo({
-              groupedElements: [element2],
-              modelId: model.id,
-              categoryId: category2.id,
-              pathUntilGroupingNode: [rootSubject, model, category2],
-              parentType: "category",
-            }),
+            element1,
+            element2,
+            groupingNode1,
+            groupingNode2,
           };
         },
-        (x) => [...x.group1.filterPaths, ...x.group2.filterPaths],
-        (x) => [x.group1.filterTargetItem, x.group2.filterTargetItem],
+        (x) => [
+          {
+            path: [x.rootSubject, x.model, x.category1, x.element1],
+            options: { autoExpand: { key: x.groupingNode1.key, parentKeysCount: x.groupingNode1.parentKeys.length } },
+          },
+          {
+            path: [x.rootSubject, x.model, x.category2, x.element2],
+            options: { autoExpand: { key: x.groupingNode2.key, parentKeysCount: x.groupingNode2.parentKeys.length } },
+          },
+        ],
+        (x) => [
+          {
+            parent: { type: "category", ids: [x.category1.id], modelIds: [x.model.id] },
+            groupingNode: x.groupingNode1,
+          },
+          {
+            parent: { type: "category", ids: [x.category2.id], modelIds: [x.model.id] },
+            groupingNode: x.groupingNode2,
+          },
+        ],
         undefined,
         (x) => [
           NodeValidators.createForInstanceNode({
@@ -1576,7 +1649,7 @@ describe("Models tree", () => {
                       NodeValidators.createForClassGroupingNode({
                         label: "Physical Object",
                         autoExpand: false,
-                        groupedInstanceKeys: x.group1.groupedElements,
+                        children: x.groupingNode1.groupedInstanceKeys.map((key) => NodeValidators.createForInstanceNode({ instanceKeys: [key] })),
                       }),
                     ],
                   }),
@@ -1588,7 +1661,7 @@ describe("Models tree", () => {
                       NodeValidators.createForClassGroupingNode({
                         label: "Physical Object",
                         autoExpand: false,
-                        groupedInstanceKeys: x.group2.groupedElements,
+                        children: x.groupingNode2.groupedInstanceKeys.map((key) => NodeValidators.createForInstanceNode({ instanceKeys: [key] })),
                       }),
                     ],
                   }),
