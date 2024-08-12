@@ -47,7 +47,7 @@ export function FocusedInstancesContextProvider({
           return;
         }
 
-        if (isHierarchyNode(selectable.data) && HierarchyNode.isClassGroupingNode(selectable.data)) {
+        if (isHierarchyNode(selectable.data) && HierarchyNode.isGroupingNode(selectable.data)) {
           selected.push(selectable.data);
           return;
         }
