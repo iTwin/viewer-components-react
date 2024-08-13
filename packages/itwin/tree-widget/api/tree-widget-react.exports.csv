@@ -1,25 +1,25 @@
 sep=;
-Release Tag;API Item
-public;CategoriesTreeComponent:
-public;createTreeWidget(props: TreeWidgetProps): Widget
-beta;ExternalSourcesTreeComponent:
-beta;FilterLimitExceededError 
-beta;HierarchyVisibilityHandler 
-beta;IModelContentTreeComponent:
-public;ModelsTreeComponent:
-beta;ModelsTreeVisibilityHandlerOverrides
-public;SelectableTree(props: SelectableTreeProps): JSX.Element | null
-public;SelectableTreeDefinition
-beta;TelemetryContextProvider({ children, onPerformanceMeasured, onFeatureUsed, componentIdentifier, }: PropsWithChildren
-beta;Tree({ getSchemaContext, hierarchyLevelSizeLimit, selectionStorage, imodelAccess: providedIModelAccess, ...props }: TreeProps_3): JSX.Element
-beta;TreeRenderer({ rootNodes, expandNode, onNodeClick, onNodeKeyDown, onNodeDoubleClick, isNodeSelected, onFilterClick, getIcon, getLabel, getSublabel, getHierarchyLevelDetails, checkboxProps, reloadTree, ...props }: TreeRendererProps_2): JSX.Element
-public;TreeWidget
-public;TreeWidgetComponent(props: SelectableTreeProps): JSX.Element
-beta;TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren
-beta;useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps): UseCategoriesTreeResult
-public;useCategoriesTreeButtonProps({ viewport }:
-beta;useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps): UseModelsTreeResult
-public;useModelsTreeButtonProps({ imodel, viewport, }:
-beta;VisibilityStatus
-beta;VisibilityTree({ visibilityHandlerFactory, treeRenderer, ...props }: VisibilityTreeProps_2): JSX.Element
-beta;VisibilityTreeRenderer({ getCheckboxState, onCheckboxClicked: onClick, ...props }: TreeRendererProps_3 & TreeCheckboxProps): JSX.Element
+Release Tag;API Item Type;API Item Name
+public;const;CategoriesTreeComponent
+public;function;createTreeWidget
+beta;const;ExternalSourcesTreeComponent
+beta;class;FilterLimitExceededError
+beta;interface;HierarchyVisibilityHandler
+beta;const;IModelContentTreeComponent
+public;const;ModelsTreeComponent
+beta;interface;ModelsTreeVisibilityHandlerOverrides
+public;function;SelectableTree
+public;interface;SelectableTreeDefinition
+beta;function;TelemetryContextProvider
+beta;function;Tree
+beta;function;TreeRenderer
+public;class;TreeWidget
+public;function;TreeWidgetComponent
+beta;function;TreeWithHeader
+beta;function;useCategoriesTree
+public;function;useCategoriesTreeButtonProps
+beta;function;useModelsTree
+public;function;useModelsTreeButtonProps
+beta;interface;VisibilityStatus
+beta;function;VisibilityTree
+beta;function;VisibilityTreeRenderer

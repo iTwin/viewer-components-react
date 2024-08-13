@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Fragment } from "react";
-import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
+import { useActiveViewport } from "../common/UseActiveViewport";
 import { useFiltering } from "../common/UseFiltering";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { CategoriesTree } from "./CategoriesTree";
