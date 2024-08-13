@@ -6,8 +6,7 @@
 import "./SelectableTree.scss";
 import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { FillCentered } from "@itwin/core-react";
-import { ProgressLinear } from "@itwin/itwinui-react";
+import { Flex, ProgressLinear } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
 import { TreeSelector } from "./TreeSelector";
 
@@ -146,7 +145,11 @@ function getTreeSelectorProps(trees?: TreeContentDefinition[]): TreeSelectorProp
         {
           id: "no-trees",
           label: "",
-          render: () => <FillCentered>{TreeWidget.translate("selectableTree.noTrees")}</FillCentered>,
+          render: () => (
+            <Flex justifyContent="center" alignItems="center" className="tree-widget-no-trees-container">
+              {TreeWidget.translate("selectableTree.noTrees")}
+            </Flex>
+          ),
         },
       ],
     };

@@ -13,7 +13,6 @@ import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesCont
 
 import type { PropsWithChildren } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import type { CommonProps } from "@itwin/core-react";
 
 /** @public */
 export interface TreeHeaderButtonProps {
@@ -38,10 +37,11 @@ export interface TreeFilteringProps {
   isDisabled?: boolean;
 }
 
-interface TreeHeaderProps extends CommonProps {
+interface TreeHeaderProps {
   filteringProps?: TreeFilteringProps;
   /** Modifies the density of tree header. `enlarged` header contains larger content */
   density?: "default" | "enlarged";
+  className?: string;
 }
 
 export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
