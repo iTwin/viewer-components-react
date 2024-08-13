@@ -22,6 +22,9 @@ describe("<SelectableTree />", () => {
     sinon.stub(IModelApp, "viewManager").get(() => ({
       onSelectedViewportChanged: new BeEvent(),
     }));
+    sinon.stub(IModelApp, "toolAdmin").get(() => ({
+      activeToolChanged: new BeEvent(),
+    }));
     await TestUtils.initialize();
   });
 
