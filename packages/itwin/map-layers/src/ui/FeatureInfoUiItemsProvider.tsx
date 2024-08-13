@@ -4,23 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
+import { BadgeType, ConditionalBooleanValue } from "@itwin/appui-abstract";
 import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
+  SyncUiEventId,
   ToolbarHelper,
   ToolbarOrientation,
   ToolbarUsage,
   ToolItemDef,
   WidgetState,
 } from "@itwin/appui-react";
-import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
-import type { MapFeatureInfoOptions } from "./Interfaces";
-import { MapLayersUI } from "../mapLayers";
 import { IModelApp } from "@itwin/core-frontend";
-import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
-import { BadgeType } from "@itwin/appui-abstract";
+import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
+import { MapLayersUI } from "../mapLayers";
+import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
+
+import type { MapFeatureInfoOptions } from "./Interfaces";
 
 export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({
@@ -32,6 +34,26 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
       await IModelApp.tools.run(MapFeatureInfoTool.toolId);
     },
     badgeType: BadgeType.TechnicalPreview,
+    isHidden: new ConditionalBooleanValue(() => {
+      // Hide the MapFeatureInfoTool if the Map Layers toggle is off or no ArcGISFeature layers are active
+      const vp = IModelApp.viewManager.selectedView;
+      if (!vp || !vp.viewFlags.backgroundMap) {
+        return true;
+      }
+      const backgroundLayers = vp.displayStyle.settings.mapImagery.backgroundLayers.map((value) => value.toJSON());
+      for (const layer of backgroundLayers) {
+        if (layer.formatId === "ArcGISFeature") {
+          return false;
+        }
+      }
+      const overlayLayers = vp.displayStyle.settings.mapImagery.overlayLayers.map((value) => value.toJSON());
+      for (const layer of overlayLayers) {
+        if (layer.formatId === "ArcGISFeature") {
+          return false;
+        }
+      }
+      return true;
+    }, [SyncUiEventId.ViewStateChanged]),
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider {
