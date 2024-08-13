@@ -29,7 +29,7 @@ export class TestUtils {
       return;
     }
 
-    await UiFramework.initialize(undefined);
+    await UiFramework.initialize();
     await TreeWidget.initialize(new EmptyLocalization());
     TestUtils._initialized = true;
   }
