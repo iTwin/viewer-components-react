@@ -33,6 +33,8 @@ export interface GroupsVisualizationProps extends GroupsProps {
   emphasizeElements?: boolean;
   hideVisualizationToggle?: boolean;
   hideRefreshIcon?: boolean;
+  deleteConfirmationMessage?: (group: GroupMinimal) => JSX.Element;
+  groupDeleteCallback?: (group: GroupMinimal) => void;
 }
 
 /**
@@ -47,6 +49,8 @@ export const GroupsVisualization = ({
   mapping,
   hideVisualizationToggle,
   hideRefreshIcon,
+  deleteConfirmationMessage,
+  groupDeleteCallback,
   ...rest
 }: GroupsVisualizationProps) => {
   const { iModelConnection } = useGroupingMappingApiConfig();
@@ -322,6 +326,8 @@ export const GroupsVisualization = ({
         progressConfig={progressConfig}
         alert={overlappedAlert}
         hideRefreshIcon={hideRefreshIcon}
+        deleteConfirmationMessage={deleteConfirmationMessage}
+        groupDeleteCallback={groupDeleteCallback}
       />
     </div>
   );

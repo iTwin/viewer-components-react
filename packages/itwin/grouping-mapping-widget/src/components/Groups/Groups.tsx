@@ -26,6 +26,8 @@ export interface GroupsProps {
   progressConfig?: ProgressConfig;
   alert?: React.ReactElement<typeof Alert>;
   hideRefreshIcon?: boolean;
+  deleteConfirmationMessage?: (group: GroupMinimal) => JSX.Element;
+  groupDeleteCallback?: (group: GroupMinimal) => void;
 }
 
 /**
@@ -42,7 +44,9 @@ export const Groups = ({
   disableActions,
   progressConfig,
   alert,
-  hideRefreshIcon
+  hideRefreshIcon,
+  deleteConfirmationMessage,
+  groupDeleteCallback
 }: GroupsProps) => {
   const {
     groups,
@@ -103,6 +107,8 @@ export const Groups = ({
       activeOverlapInfoPanelGroup={activeOverlapInfoPanelGroup}
       overlappedElementsInfo={overlappedElementsInfo}
       hideRefreshIcon={hideRefreshIcon}
+      deleteConfirmationMessage={deleteConfirmationMessage}
+      groupDeleteCallback={groupDeleteCallback}
     />
   );
 };
