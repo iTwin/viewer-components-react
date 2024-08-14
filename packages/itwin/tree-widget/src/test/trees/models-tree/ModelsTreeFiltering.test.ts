@@ -1020,7 +1020,7 @@ describe("Models tree", () => {
         (x) =>
           x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
             path: [...x.pathUntilTargetElement, elementKey],
-            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.groupingNode.parentKeys.length } },
+            options: { autoExpand: { key: x.groupingNode.key, depth: x.groupingNode.parentKeys.length } },
           })),
         (x) => [
           {
@@ -1091,7 +1091,7 @@ describe("Models tree", () => {
         (x) =>
           x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
             path: [...x.pathUntilTargetElement, elementKey],
-            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+            options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
           })),
         (x) => [
           {
@@ -1178,7 +1178,7 @@ describe("Models tree", () => {
         (x) =>
           x.groupingNode.groupedInstanceKeys.map((elementKey) => ({
             path: [...x.pathUntilTargetElement, elementKey],
-            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+            options: { autoExpand: { key: x.groupingNode.key, depth: x.pathUntilTargetElement.length } },
           })),
         (x) => [
           {
@@ -1304,11 +1304,11 @@ describe("Models tree", () => {
         (x) => [
           ...x.physicalElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
             path: [...x.pathUntilTargetElement, elementKey],
-            options: { autoExpand: { key: x.physicalElementGroupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+            options: { autoExpand: { key: x.physicalElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
           })),
           ...x.testElementGroupingNode.groupedInstanceKeys.map((elementKey) => ({
             path: [...x.pathUntilTargetElement, elementKey],
-            options: { autoExpand: { key: x.testElementGroupingNode.key, parentKeysCount: x.pathUntilTargetElement.length } },
+            options: { autoExpand: { key: x.testElementGroupingNode.key, depth: x.pathUntilTargetElement.length } },
           })),
         ],
         (x) => [
@@ -1430,15 +1430,15 @@ describe("Models tree", () => {
         (x) => [
           {
             path: [...x.pathUntilParentElement, x.parentElement],
-            options: { autoExpand: { key: x.parentElementGroupingNode.key, parentKeysCount: x.parentElementGroupingNode.parentKeys.length } },
+            options: { autoExpand: { key: x.parentElementGroupingNode.key, depth: x.parentElementGroupingNode.parentKeys.length } },
           },
           {
             path: [...x.pathUntilParentElement, x.parentElement, x.middleElement],
-            options: { autoExpand: { key: x.middleElementGroupingNode.key, parentKeysCount: x.middleElementGroupingNode.parentKeys.length } },
+            options: { autoExpand: { key: x.middleElementGroupingNode.key, depth: x.middleElementGroupingNode.parentKeys.length } },
           },
           {
             path: [...x.pathUntilParentElement, x.parentElement, x.middleElement, x.childElement],
-            options: { autoExpand: { key: x.childElementGroupingNode.key, parentKeysCount: x.childElementGroupingNode.parentKeys.length } },
+            options: { autoExpand: { key: x.childElementGroupingNode.key, depth: x.childElementGroupingNode.parentKeys.length } },
           },
         ],
         (x) => [
@@ -1533,7 +1533,7 @@ describe("Models tree", () => {
           [...x.pathUntilTargetElement, x.element],
           {
             path: [...x.pathUntilTargetElement, x.element],
-            options: { autoExpand: { key: x.groupingNode.key, parentKeysCount: x.groupingNode.parentKeys.length } },
+            options: { autoExpand: { key: x.groupingNode.key, depth: x.groupingNode.parentKeys.length } },
           },
         ],
         (x) => [
@@ -1613,11 +1613,11 @@ describe("Models tree", () => {
         (x) => [
           {
             path: [x.rootSubject, x.model, x.category1, x.element1],
-            options: { autoExpand: { key: x.groupingNode1.key, parentKeysCount: x.groupingNode1.parentKeys.length } },
+            options: { autoExpand: { key: x.groupingNode1.key, depth: x.groupingNode1.parentKeys.length } },
           },
           {
             path: [x.rootSubject, x.model, x.category2, x.element2],
-            options: { autoExpand: { key: x.groupingNode2.key, parentKeysCount: x.groupingNode2.parentKeys.length } },
+            options: { autoExpand: { key: x.groupingNode2.key, depth: x.groupingNode2.parentKeys.length } },
           },
         ],
         (x) => [

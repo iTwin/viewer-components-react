@@ -15,6 +15,7 @@ import { createIdsSelector, parseIdsSelectorResult } from "../common/Utils";
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Observable } from "rxjs";
 import type {
+  ClassGroupingNodeKey,
   createHierarchyProvider,
   DefineHierarchyLevelProps,
   DefineInstanceNodeChildHierarchyLevelProps,
@@ -38,7 +39,7 @@ import type {
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
-export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: { type: "class-grouping"; className: string } };
+export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;
 
@@ -701,7 +702,7 @@ function createGeometricElementInstanceKeyPaths(
             options: {
               autoExpand: {
                 key: groupingNode.key,
-                parentKeysCount: groupingNode.parentKeys.length,
+                depth: groupingNode.parentKeys.length,
               },
             },
           };
