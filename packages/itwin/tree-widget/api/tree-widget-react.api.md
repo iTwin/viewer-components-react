@@ -7,6 +7,7 @@
 /// <reference types="react" />
 
 import type { BeEvent } from '@itwin/core-bentley';
+import type { ClassGroupingNodeKey } from '@itwin/presentation-hierarchies';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { ECClassHierarchyInspector } from '@itwin/presentation-shared';
 import type { GroupingHierarchyNode } from '@itwin/presentation-hierarchies';
@@ -168,7 +169,7 @@ export function useCategoriesTreeButtonProps({ viewport }: {
 }): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps_2): UseModelsTreeResult;
 
 // @public
 export function useModelsTreeButtonProps({ imodel, viewport, }: {
