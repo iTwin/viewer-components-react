@@ -27,6 +27,7 @@ import { MapLayerActionButtons } from "./MapLayerActionButtons";
 import { MapLayerDroppable } from "./MapLayerDroppable";
 import { MapLayerSettingsPopupButton } from "./MapLayerSettingsPopupButton";
 import { MapManagerLayersHeader } from "./MapManagerMapLayersHeader";
+import { MapLayersSyncUiEventId } from "../../MapLayersActionIds";
 
 /** @internal */
 export interface SourceMapContextProps {
@@ -202,6 +203,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       ) {
         loadMapLayerSettingsFromViewport(activeViewport);
       }
+      IModelApp.toolAdmin.dispatchUiSyncEvent(MapLayersSyncUiEventId.MapImageryChanged);
     };
     return activeViewport?.displayStyle.settings.onMapImageryChanged.addListener(handleMapImageryChanged);
   }, [activeViewport, backgroundMapLayers, loadMapLayerSettingsFromViewport, overlayMapLayers]);
@@ -336,7 +338,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   React.useEffect(() => {
     const handleDisplayStyleChange = (vp: Viewport) => {
       loadMapLayerSettingsFromViewport(vp);
-      IModelApp.toolAdmin.dispatchUiSyncEvent("MapFeatureInfoTool.toolSyncUiEventId");
     };
     return activeViewport?.onDisplayStyleChanged.addListener(handleDisplayStyleChange);
   }, [activeViewport, loadMapLayerSettingsFromViewport]);
