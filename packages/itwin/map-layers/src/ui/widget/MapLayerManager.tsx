@@ -336,6 +336,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
   React.useEffect(() => {
     const handleDisplayStyleChange = (vp: Viewport) => {
       loadMapLayerSettingsFromViewport(vp);
+      IModelApp.toolAdmin.dispatchUiSyncEvent("MapFeatureInfoTool.toolSyncUiEventId");
     };
     return activeViewport?.onDisplayStyleChanged.addListener(handleDisplayStyleChange);
   }, [activeViewport, loadMapLayerSettingsFromViewport]);

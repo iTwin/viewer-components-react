@@ -3,13 +3,12 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 import { BadgeType, ConditionalBooleanValue } from "@itwin/appui-abstract";
+import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-  SyncUiEventId,
   ToolbarHelper,
   ToolbarOrientation,
   ToolbarUsage,
@@ -19,9 +18,9 @@ import {
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
+
 import { MapLayersUI } from "../mapLayers";
 import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
-
 import type { MapFeatureInfoOptions } from "./Interfaces";
 
 export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
@@ -53,7 +52,7 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
         }
       }
       return true;
-    }, [SyncUiEventId.ViewStateChanged]),
+    }, ["MapFeatureInfoTool.toolSyncUiEventId"]),
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider {
