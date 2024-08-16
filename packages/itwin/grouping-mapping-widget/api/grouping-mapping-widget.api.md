@@ -200,7 +200,7 @@ export interface GroupPropertyActionProps {
 export const GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element;
 
 // @public
-export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback }: GroupsProps) => JSX.Element;
+export const Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsProps) => JSX.Element;
 
 // @internal (undocumented)
 export const GroupsClientContext: Context<IGroupsClient>;
@@ -242,7 +242,7 @@ export interface GroupsProps {
 }
 
 // @internal
-export const GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback }: GroupsViewProps) => JSX.Element;
+export const GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsViewProps) => JSX.Element;
 
 // @internal
 export interface GroupsViewProps {

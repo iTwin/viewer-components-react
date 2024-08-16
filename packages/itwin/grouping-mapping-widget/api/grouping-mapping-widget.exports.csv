@@ -29,13 +29,13 @@ public;GroupingMappingProvider
 public;GroupPropertyAction: ({ mappingId, group, groupProperty, onSaveSuccess, onClickCancel }: GroupPropertyActionProps) => JSX.Element
 public;GroupPropertyActionProps
 public;GroupQueryBuilderCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
-public;Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon, deleteConfirmationMessage, groupDeleteCallback }: GroupsProps) => JSX.Element
+public;Groups: ({ mapping, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, progressConfig, alert, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsProps) => JSX.Element
 internal;GroupsClientContext: Context
 internal;GroupsOperationsProps
 public;GroupsProps
-internal;GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, deleteConfirmationMessage, groupDeleteCallback }: GroupsViewProps) => JSX.Element
+internal;GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsViewProps) => JSX.Element
 internal;GroupsViewProps
-public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, deleteConfirmationMessage, groupDeleteCallback, ...rest }: GroupsVisualizationProps) => JSX.Element
+public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, ...rest }: GroupsVisualizationProps) => JSX.Element
 public;GroupsVisualizationProps 
 public;IResult
 public;ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery }: GroupingCustomUIProps) => JSX.Element
