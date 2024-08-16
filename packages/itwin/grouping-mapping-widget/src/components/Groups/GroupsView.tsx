@@ -59,7 +59,7 @@ export interface GroupsViewProps {
   overlappedElementsInfo?: Map<string, OverlappedInfo[]>;
   progressConfig?: ProgressConfig;
   hideRefreshIcon?: boolean;
-  deleteConfirmationMessage?: (group: GroupMinimal) => JSX.Element;
+  deleteConfirmationContentFactory?: (group: GroupMinimal) => JSX.Element;
   groupDeleteCallback?: (group: GroupMinimal) => void;
 }
 
@@ -90,8 +90,8 @@ export const GroupsView = ({
   overlappedElementsInfo,
   progressConfig,
   hideRefreshIcon,
-  deleteConfirmationMessage,
-  groupDeleteCallback
+  deleteConfirmationContentFactory,
+  groupDeleteCallback,
 }: GroupsViewProps) => {
   /**
    * UX Progress Bar Logic:
@@ -163,7 +163,7 @@ export const GroupsView = ({
             await onDeleteGroup(selectedGroupForDeletion);
             groupDeleteCallback?.(selectedGroupForDeletion);
           }}
-          confirmationMessage={deleteConfirmationMessage?.(selectedGroupForDeletion)}
+          confirmationMessage={deleteConfirmationContentFactory?.(selectedGroupForDeletion)}
         />
       )}
     </InformationPanelWrapper>
