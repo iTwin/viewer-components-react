@@ -9,7 +9,7 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 import type { GroupingHierarchyNode } from "@itwin/presentation-hierarchies";
 
 export interface FocusedInstancesContext {
-  loadInstanceKeys?: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>;
+  loadFocusedItems?: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>;
   enabled: boolean;
   toggle: () => void;
 }
