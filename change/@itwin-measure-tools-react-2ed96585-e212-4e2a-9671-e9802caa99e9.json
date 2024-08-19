@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "The measure tools ui-provider can accept an array of strings for StageUsages, rather than hardcode \"General\". It still defaults to \"General\", so it's backwards compatible.",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "adrian.clinansmith@bentley.com",
+  "dependentChangeType": "patch"
+}
