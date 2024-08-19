@@ -14,7 +14,7 @@ import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
-import type { RecursiveRequire } from "../utils/types";
+import type { RecursiveRequired } from "../utils/types";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
 import { IModelApp } from "@itwin/core-frontend";
 
@@ -36,7 +36,7 @@ export interface MeasureToolsUiProviderOptions {
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: RecursiveRequire<MeasureToolsUiProviderOptions>;
+  private _props: RecursiveRequired<MeasureToolsUiProviderOptions>;
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {

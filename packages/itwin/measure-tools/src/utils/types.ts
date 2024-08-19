@@ -1,2 +1,2 @@
 /** A utility type which makes all keys required, including nested keys.  */
-export type RecursiveRequire<T> = { [K in keyof T]-?: RecursiveRequire<T[K]> };
+export type RecursiveRequired<T> = { [K in keyof T]-?: RecursiveRequired<T[K]> };
