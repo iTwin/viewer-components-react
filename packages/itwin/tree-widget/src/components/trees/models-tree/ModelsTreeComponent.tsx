@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Fragment, useEffect } from "react";
-import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
+import { useActiveViewport } from "../common/UseActiveViewport";
 import { useFiltering } from "../common/UseFiltering";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ModelsTree } from "./ModelsTree";
@@ -24,7 +25,14 @@ import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
 interface ModelsTreeComponentProps
   extends Pick<
     ComponentPropsWithoutRef<typeof ModelsTree>,
-    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode" | "hierarchyConfig" | "visibilityHandlerOverrides"
+    | "getSchemaContext"
+    | "selectionStorage"
+    | "density"
+    | "hierarchyLevelConfig"
+    | "selectionMode"
+    | "hierarchyConfig"
+    | "visibilityHandlerOverrides"
+    | "getFilteredPaths"
   > {
   /**
    * Renderers of header buttons. Defaults to:
@@ -149,7 +157,7 @@ function ModelsTreeComponentImpl({
         filteringProps={{
           onFilterStart: applyFilter,
           onFilterClear: clearFilter,
-          isDisabled: instanceFocusEnabled,
+          isDisabled: instanceFocusEnabled || !!treeProps.getFilteredPaths,
         }}
         buttons={buttons}
         density={density}

@@ -20,5 +20,6 @@ export { TreeRenderer } from "./common/components/TreeRenderer";
 export { VisibilityTreeRenderer } from "./common/components/VisibilityTreeRenderer";
 export { HierarchyVisibilityHandler, VisibilityStatus } from "./common/UseHierarchyVisibility";
 export { TelemetryContextProvider } from "./common/UseTelemetryContext";
+export { FilterLimitExceededError } from "./common/TreeErrors";
 
 export { ModelsTreeVisibilityHandlerOverrides } from "./models-tree/internal/ModelsTreeVisibilityHandler";

@@ -31,6 +31,7 @@ public;PropertyGridSettingsMenuItemProps
 public;PropertyGridUiItemsProvider 
 public;PropertyGridUiItemsProviderProps
 public;PropertyGridWidgetId = "vcr:PropertyGridComponent"
+public;PropertyGridWidgetProps 
 public;RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
 public;SettingsMenuItemProps
 public;SettingsMenuProps

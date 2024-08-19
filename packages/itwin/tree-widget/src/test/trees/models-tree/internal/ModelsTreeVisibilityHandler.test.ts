@@ -6,7 +6,7 @@
 import { assert, expect } from "chai";
 import path from "path";
 import sinon from "sinon";
-import { using } from "@itwin/core-bentley";
+import { CompressedId64Set, using } from "@itwin/core-bentley";
 import { Code, ColorDef, IModel, IModelReadRpcInterface, RenderMode, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp, OffScreenViewport, PerModelCategoryVisibility, SpatialViewState, ViewRect } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -43,7 +43,7 @@ import {
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { GeometricElement3dProps } from "@itwin/core-common";
+import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
 import type {
@@ -1339,19 +1339,26 @@ describe("HierarchyBasedVisibilityHandler", () => {
             const viewport = createFakeSinonViewport({
               alwaysDrawn: new Set([...alwaysDrawnElements, otherAlwaysDrawnElement]),
               neverDrawn: new Set([...neverDrawnElements, otherNeverDrawnElement]),
-              queryHandler: sinon
-                .stub()
-                .onFirstCall()
-                .returns([
-                  ...alwaysDrawnElements.map((elementId) => ({ elementId, modelId, categoryId })),
-                  { elementId: otherAlwaysDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
-                ])
-                .onSecondCall()
-                .returns([
-                  ...neverDrawnElements.map((elementId) => ({ elementId, modelId, categoryId })),
-                  { elementId: otherNeverDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
-                ]),
+              queryHandler: sinon.fake(async (_query: string, binder?: QueryBinder) => {
+                const ids = CompressedId64Set.decompressSet((binder?.serialize() as any)[1].value);
+                if (ids.size === 2 && alwaysDrawnElements.every((id) => ids.has(id))) {
+                  return [
+                    ...alwaysDrawnElements.map((elementId) => ({ elementId, modelId, categoryId })),
+                    { elementId: otherAlwaysDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                  ];
+                }
+
+                if (ids.size === 2 && neverDrawnElements.every((id) => ids.has(id))) {
+                  return [
+                    ...neverDrawnElements.map((elementId) => ({ elementId, modelId, categoryId })),
+                    { elementId: otherNeverDrawnElement, modelId: otherModelId, categoryId: otherCategoryId },
+                  ];
+                }
+
+                throw new Error("Unexpected query or bindings");
+              }),
             });
+
             const idsCache = createFakeIdsCache({
               modelCategories: new Map([
                 [modelId, [categoryId]],

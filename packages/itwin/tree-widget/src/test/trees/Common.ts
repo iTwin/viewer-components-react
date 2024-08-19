@@ -13,11 +13,12 @@ import { createLimitingECSqlQueryExecutor } from "@itwin/presentation-hierarchie
 import { createCachingECClassHierarchyInspector } from "@itwin/presentation-shared";
 
 import type { IModelConnection, Viewport, ViewState } from "@itwin/core-frontend";
+import type { QueryBinder, QueryOptions } from "@itwin/core-common";
 
-export function createIModelMock(queryHandler?: (query: string) => any[] | Promise<any[]>) {
+export function createIModelMock(queryHandler?: (query: string, params?: QueryBinder, config?: QueryOptions) => any[] | Promise<any[]>) {
   return {
-    createQueryReader: sinon.fake(async function* (query: string): AsyncIterableIterator<any> {
-      const result = (await queryHandler?.(query)) ?? [];
+    createQueryReader: sinon.fake(async function* (query: string, params?: QueryBinder, config?: QueryOptions): AsyncIterableIterator<any> {
+      const result = (await queryHandler?.(query, params, config)) ?? [];
       for (const item of result) {
         yield { ...item, toRow: () => item, toArray: () => Object.values(item) };
       }
@@ -29,7 +30,7 @@ export function createFakeSinonViewport(
   props?: Partial<Omit<Viewport, "view" | "perModelCategoryVisibility">> & {
     view?: Partial<ViewState>;
     perModelCategoryVisibility?: Partial<PerModelCategoryVisibility.Overrides>;
-    queryHandler?: (query: string) => any[] | Promise<any[]>;
+    queryHandler?: Parameters<typeof createIModelMock>[0];
   },
 ): Viewport {
   let alwaysDrawn = props?.alwaysDrawn;

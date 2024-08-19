@@ -8,26 +8,23 @@ import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRende
 import { useModelsTree } from "./UseModelsTree";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { Viewport } from "@itwin/core-frontend";
-import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
-import type { ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
-
-/** @beta */
-interface ModelsTreeOwnProps {
-  activeView: Viewport;
-  hierarchyLevelConfig?: {
-    sizeLimit?: number;
-  };
-  hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
-  visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
-  filter?: string;
-}
 
 /** @beta */
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 
 /** @beta */
-type ModelsTreeProps = ModelsTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
+interface ModelsTreeOwnProps {
+  hierarchyLevelConfig?: {
+    sizeLimit?: number;
+  };
+}
+
+type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
+
+/** @beta */
+type ModelsTreeProps = ModelsTreeOwnProps &
+  UseModelsTreeProps &
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
 
 /** @beta */
 export function ModelsTree({
@@ -41,8 +38,9 @@ export function ModelsTree({
   hierarchyConfig,
   selectionMode,
   visibilityHandlerOverrides,
+  getFilteredPaths,
 }: ModelsTreeProps) {
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides });
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths });
 
   return (
     <VisibilityTree

@@ -13,7 +13,6 @@ import { useFocusedInstancesContext } from "../trees/common/FocusedInstancesCont
 
 import type { PropsWithChildren } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import type { CommonProps } from "@itwin/core-react";
 
 /** @public */
 export interface TreeHeaderButtonProps {
@@ -34,13 +33,15 @@ export interface TreeFilteringProps {
   selectedIndex?: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged?: (index: number) => void;
+  /** Should the search box be disabled */
   isDisabled?: boolean;
 }
 
-interface TreeHeaderProps extends CommonProps {
+interface TreeHeaderProps {
   filteringProps?: TreeFilteringProps;
   /** Modifies the density of tree header. `enlarged` header contains larger content */
   density?: "default" | "enlarged";
+  className?: string;
 }
 
 export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
@@ -72,7 +73,7 @@ export function TreeHeader(props: PropsWithChildren<TreeHeaderProps>) {
           resultCount={filteringProps.resultCount}
           onSelectedResultChanged={(index) => filteringProps.onSelectedChanged?.(index)}
           size={size}
-          isDisabled={instanceFocusEnabled}
+          isDisabled={instanceFocusEnabled || props.filteringProps?.isDisabled}
         />
       ) : null}
     </div>
