@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added group deletion callback and deletion confirmation message properties",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "tejas.sutar@bentley.com",
-  "dependentChangeType": "patch"
-}
