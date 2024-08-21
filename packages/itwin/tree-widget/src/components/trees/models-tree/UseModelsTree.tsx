@@ -24,7 +24,7 @@ import type { InstanceKey } from "@itwin/presentation-shared";
 import type { ComponentPropsWithoutRef, ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
+import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
 import type { VisibilityTree } from "../common/components/VisibilityTree";
 import type { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
@@ -45,7 +45,7 @@ interface UseModelsTreeProps {
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;
   visibilityHandlerOverrides?: ModelsTreeVisibilityHandlerOverrides;
   getFilteredPaths?: (props: {
-    createInstanceKeyPaths: (props: { keys: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
+    createInstanceKeyPaths: (props: { targetItems: Array<InstanceKey | ElementsGroupInfo> } | { label: string }) => Promise<HierarchyFilteringPaths>;
   }) => Promise<HierarchyFilteringPaths>;
 }
 
@@ -75,7 +75,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
   const { onFeatureUsed } = useTelemetryContext();
 
   const { getModelsTreeIdsCache, visibilityHandlerFactory } = useCachedVisibility(activeView, hierarchyConfiguration, visibilityHandlerOverrides);
-  const { loadInstanceKeys: loadFocusedInstancesKeys } = useFocusedInstancesContext();
+  const { loadFocusedItems } = useFocusedInstancesContext();
 
   const getHierarchyDefinition = useCallback<VisibilityTreeProps["getHierarchyDefinition"]>(
     ({ imodelAccess }) => new ModelsTreeDefinition({ imodelAccess, idsCache: getModelsTreeIdsCache(), hierarchyConfig: hierarchyConfiguration }),
@@ -96,17 +96,17 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
 
   const getPaths = useMemo<VisibilityTreeProps["getFilteredPaths"] | undefined>(() => {
     setFilteringError(undefined);
-    if (loadFocusedInstancesKeys) {
+    if (loadFocusedItems) {
       return async ({ imodelAccess }) => {
         try {
-          const targetKeys = await collectTargetKeys(loadFocusedInstancesKeys);
+          const focusedItems = await collectFocusedItems(loadFocusedItems);
           const paths = await ModelsTreeDefinition.createInstanceKeyPaths({
             imodelAccess,
             idsCache: getModelsTreeIdsCache(),
-            keys: targetKeys,
+            targetItems: focusedItems,
             hierarchyConfig: hierarchyConfiguration,
           });
-          return paths.map((path) => ({ path, options: { autoExpand: true } }));
+          return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));
         } catch (e) {
           const newError = e instanceof FilterLimitExceededError ? "tooManyInstancesFocused" : "unknownInstanceFocusError";
           if (newError !== "tooManyInstancesFocused") {
@@ -153,7 +153,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
             idsCache: getModelsTreeIdsCache(),
             hierarchyConfig: hierarchyConfiguration,
           });
-          return paths.map((path) => ({ path, options: { autoExpand: true } }));
+          return paths.map((path) => ("path" in path ? path : { path, options: { autoExpand: true } }));
         } catch (e) {
           const newError = e instanceof FilterLimitExceededError ? "tooManyFilterMatches" : "unknownFilterError";
           if (newError !== "tooManyFilterMatches") {
@@ -166,7 +166,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
       };
     }
     return undefined;
-  }, [filter, loadFocusedInstancesKeys, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration]);
+  }, [filter, loadFocusedItems, getModelsTreeIdsCache, onFeatureUsed, getFilteredPaths, hierarchyConfiguration]);
 
   return {
     modelsTreeProps: {
@@ -285,44 +285,44 @@ function SvgClassGrouping() {
   );
 }
 
-async function collectTargetKeys(loadFocusedInstancesKeys: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
-  const targetKeys: Array<InstanceKey | ElementsGroupInfo> = [];
-  const groupingNodeInfos: Array<{ parentKey: InstancesNodeKey; parentType: "element" | "category"; classes: string[]; modelIds: Id64String[] }> = [];
-  for await (const key of loadFocusedInstancesKeys()) {
+async function collectFocusedItems(loadFocusedItems: () => AsyncIterableIterator<InstanceKey | GroupingHierarchyNode>) {
+  const focusedItems: Array<InstanceKey | ElementsGroupInfo> = [];
+  const groupingNodeInfos: Array<{
+    parentKey: InstancesNodeKey;
+    parentType: "element" | "category";
+    groupingNode: ClassGroupingHierarchyNode;
+    modelIds: Id64String[];
+  }> = [];
+  for await (const key of loadFocusedItems()) {
     if ("id" in key) {
-      targetKeys.push(key);
+      focusedItems.push(key);
       continue;
     }
 
     if (!HierarchyNodeKey.isClassGrouping(key.key)) {
-      targetKeys.push(...key.groupedInstanceKeys);
       continue;
     }
 
-    if (!key.nonGroupingAncestor || !HierarchyNodeKey.isInstances(key.nonGroupingAncestor.key)) {
+    const groupingNode = key as ClassGroupingHierarchyNode;
+    if (!groupingNode.nonGroupingAncestor || !HierarchyNodeKey.isInstances(groupingNode.nonGroupingAncestor.key)) {
       continue;
     }
 
-    const parentKey = key.nonGroupingAncestor.key;
-    const type = key.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
-    const modelIds = ((key.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
-    const groupInfo = groupingNodeInfos.find((group) => HierarchyNodeKey.equals(group.parentKey, parentKey));
-    if (groupInfo) {
-      groupInfo.classes.push(key.key.className);
-    } else {
-      groupingNodeInfos.push({ classes: [key.key.className], parentType: type, parentKey, modelIds });
-    }
+    const parentKey = groupingNode.nonGroupingAncestor.key;
+    const type = groupingNode.nonGroupingAncestor.extendedData?.isCategory ? "category" : "element";
+    const modelIds = ((groupingNode.nonGroupingAncestor.extendedData?.modelIds as Id64String[][]) ?? []).flatMap((ids) => ids);
+    groupingNodeInfos.push({ groupingNode, parentType: type, parentKey, modelIds });
   }
-  targetKeys.push(
-    ...groupingNodeInfos.map(({ parentKey, parentType, classes, modelIds }) => ({
+  focusedItems.push(
+    ...groupingNodeInfos.map(({ parentKey, parentType, groupingNode, modelIds }) => ({
       parent:
         parentType === "element"
           ? { type: "element" as const, ids: parentKey.instanceKeys.map((key) => key.id) }
           : { type: "category" as const, ids: parentKey.instanceKeys.map((key) => key.id), modelIds },
-      classes,
+      groupingNode,
     })),
   );
-  return targetKeys;
+  return focusedItems;
 }
 
 function createLocalizedMessage(message: string, onClick?: () => void) {

@@ -1,8 +1,17 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 22 Jul 2024 11:53:05 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Aug 2024 13:08:31 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.21.0
+
+Tue, 20 Aug 2024 13:08:31 GMT
+
+### Minor changes
+
+- The measure tools ui-provider can accept an array of strings for StageUsages, rather than hardcode "General". It still defaults to "General", so it's backwards compatible. ([#1020](https://github.com/iTwin/viewer-components-react/pull/1020))
+- drawingTypeCache refactor ([#992](https://github.com/iTwin/viewer-components-react/pull/992))
 
 ## 0.20.0
 

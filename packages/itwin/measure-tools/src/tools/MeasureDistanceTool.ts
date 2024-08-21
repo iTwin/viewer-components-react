@@ -35,7 +35,6 @@ MeasureDistanceToolModel
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
   private _enableSheetMeasurements: boolean;
-  private _drawingTypeCache?: DrawingDataCache;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -64,10 +63,6 @@ MeasureDistanceToolModel
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
-    if (this._enableSheetMeasurements) {
-      this._drawingTypeCache = new DrawingDataCache();
-      await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
-    }
   }
 
   public async onRestartTool(): Promise<void> {
@@ -133,12 +128,10 @@ MeasureDistanceToolModel
       return true;
     }
 
-    if (this._drawingTypeCache) {
-      for (const drawing of this._drawingTypeCache.drawingtypes) {
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
+      if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
         if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
-          if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
-            return false;
-          }
+          return false;
         }
       }
     }
