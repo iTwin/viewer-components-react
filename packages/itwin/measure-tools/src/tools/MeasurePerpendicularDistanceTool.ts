@@ -33,7 +33,6 @@ import { ColorDef, LinePixels } from "@itwin/core-common";
  */
 export class MeasurePerpendicularDistanceTool extends MeasurementToolBase<PerpendicularDistanceMeasurement, MeasurePerpendicularDistanceToolModel> {
   private _enableSheetMeasurements: boolean;
-  private _drawingTypeCache?: DrawingDataCache;
 
   protected override get feature(): Feature | undefined {
     return MeasureToolsFeatures.Tools_MeasureDistance;
@@ -42,14 +41,6 @@ export class MeasurePerpendicularDistanceTool extends MeasurementToolBase<Perpen
   constructor(enableSheetMeasurements = false) {
     super();
     this._enableSheetMeasurements = enableSheetMeasurements;
-  }
-
-  public override async onPostInstall(): Promise<void> {
-    await super.onPostInstall();
-    if (this._enableSheetMeasurements) {
-      this._drawingTypeCache = new DrawingDataCache();
-      await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
-    }
   }
 
   public async onRestartTool(): Promise<void> {
@@ -98,12 +89,10 @@ export class MeasurePerpendicularDistanceTool extends MeasurementToolBase<Perpen
 
     if (true !== ev.viewport?.view.isSheetView()) return true;
 
-    if (this._drawingTypeCache) {
-      for (const drawing of this._drawingTypeCache.drawingtypes) {
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
+      if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
         if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
-          if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
-            return false;
-          }
+          return false;
         }
       }
     }
