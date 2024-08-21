@@ -134,6 +134,13 @@
       "pickAlignment": "Pick alignment",
       "restart": "Restart",
       "clearCurrentMeasurement": "Clear current"
+    },
+    "MeasureVolume": {
+      "keyin": "Volume",
+      "flyover": "Volume",
+      "description": "Create volume measurements.",
+      "volume": "Volume:",
+      "toolTitle": "Volume Measurement [{0}]"
     }
   },
   "Measurements": {
@@ -142,7 +149,8 @@
     "closePolygon": "Close Polygon",
     "distanceMeasurement": "Distance Measurement",
     "locationMeasurement": "Location Measurement",
-    "persistMeasurements": "Persist Measurements"
+    "persistMeasurements": "Persist Measurements",
+    "volumeMeasurement": "Volume Measurement"
   },
   "MeasurementGroupButton": {
     "label": "Measurement",
