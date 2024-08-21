@@ -44,8 +44,10 @@ export class MeasureHeightTool extends MeasurePerpendicularDistanceTool {
 
   public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
     if (!ev.viewport || this.toolModel.currentState !== MeasureDistanceToolModel.State.SetEndPoint || !this.toolModel.dynamicMeasurement) return;
+
     const type = MeasurementViewTarget.classifyViewport(ev.viewport);
     const heightPoints = this.getHeightPoints([this.toolModel.dynamicMeasurement.startPointRef, ev.point]);
+    this.toolModel.dynamicMeasurement.secondaryLine = [heightPoints[1], heightPoints[2]];
     this.toolModel.setEndPoint(type, heightPoints[1], true); // Change the measure end point
     this._mouseEndPoint = ev.point.clone(); // Save the current point for decoration
     ev.viewport.invalidateDecorations();
@@ -61,9 +63,6 @@ export class MeasureHeightTool extends MeasurePerpendicularDistanceTool {
     if (this.toolModel.currentState === MeasureDistanceToolModel.State.SetEndPoint && this.toolModel.dynamicMeasurement && this._mouseEndPoint) {
       const hypotenusePoints: Point3d[] = [this.toolModel.dynamicMeasurement.startPointRef, this._mouseEndPoint];
       this.createHypotenuseDecoration(context, hypotenusePoints);
-      const heightPoints = this.getHeightPoints(hypotenusePoints);
-
-      this.toolModel.dynamicMeasurement.secondaryLine = [heightPoints[1], heightPoints[2]];
     }
   }
 }

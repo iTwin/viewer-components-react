@@ -31,6 +31,23 @@ export class MeasureWidthTool extends MeasurePerpendicularDistanceTool {
     return EventHandled.Yes;
   }
 
+  public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
+    super.onMouseMotion(ev);
+    if (
+      !ev.viewport ||
+      this.toolModel.currentState !== MeasureDistanceToolModel.State.SetEndPoint ||
+      !this.toolModel.dynamicMeasurement ||
+      !this._mouseStartPoint
+    )
+      return;
+
+    const heightPoints = this.getHeightPoints([this._mouseStartPoint, this.toolModel.dynamicMeasurement.endPointRef]);
+    const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
+    this.toolModel.dynamicMeasurement.secondaryLine = [heightPoints[0], heightPoints[1]];
+    this.toolModel.setStartPoint(viewType, heightPoints[1]);
+    this.toolModel.setEndPoint(viewType, heightPoints[2], true);
+  }
+
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
@@ -41,12 +58,6 @@ export class MeasureWidthTool extends MeasurePerpendicularDistanceTool {
     if (this.toolModel.currentState === MeasureDistanceToolModel.State.SetEndPoint && this._mouseStartPoint) {
       const hypotenusePoints: Point3d[] = [this._mouseStartPoint, this.toolModel.dynamicMeasurement.endPointRef];
       this.createHypotenuseDecoration(context, hypotenusePoints);
-      const heightPoints = this.getHeightPoints(hypotenusePoints);
-      const viewType = MeasurementViewTarget.classifyViewport(context.viewport);
-
-      this.toolModel.dynamicMeasurement.secondaryLine = [heightPoints[0], heightPoints[1]];
-      this.toolModel.setStartPoint(viewType, heightPoints[1]);
-      this.toolModel.setEndPoint(viewType, heightPoints[2], true);
     }
   }
 }
