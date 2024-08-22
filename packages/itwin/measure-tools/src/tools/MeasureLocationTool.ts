@@ -45,7 +45,6 @@ MeasureLocationToolModel
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
   private _enableSheetMeasurements: boolean;
-  private _drawingTypeCache?: DrawingDataCache;
 
   private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
@@ -84,10 +83,6 @@ MeasureLocationToolModel
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
-    if (this._enableSheetMeasurements) {
-      this._drawingTypeCache = new DrawingDataCache();
-      await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
-    }
   }
 
   public override async onDataButtonDown(
@@ -160,12 +155,10 @@ MeasureLocationToolModel
       return true;
     }
 
-    if (this._drawingTypeCache) {
-      for (const drawing of this._drawingTypeCache.drawingtypes) {
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
+      if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
         if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
-          if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
-            return false;
-          }
+          return false;
         }
       }
     }
