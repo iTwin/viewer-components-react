@@ -29,7 +29,7 @@
   "importSorter.importStringConfiguration.quoteMark": "double",
   "importSorter.importStringConfiguration.tabSize": 2,
   "importSorter.importStringConfiguration.trailingComma": "multiLine",
-  "importSorter.generalConfiguration.sortOnBeforeSave": true,
+  "importSorter.generalConfiguration.sortOnBeforeSave": false,
   "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 0,
   "importSorter.sortConfiguration.removeUnusedImports": true,
   "importSorter.sortConfiguration.customOrderingRules.rules": [

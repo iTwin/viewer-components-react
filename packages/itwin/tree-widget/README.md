@@ -41,7 +41,7 @@ In any case, **before** using any APIs or components delivered with the package,
 import { IModelApp } from "@itwin/core-frontend";
 import { TreeWidget } from "@itwin/tree-widget-react";
 
-await TreeWidget.initialize(IModelApp.localization);
+await TreeWidget.  (IModelApp.localization);
 ```
 
 In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `createTreeWidget` function that can be used to add the tree widget to UI through a `UiItemsProvider`:
