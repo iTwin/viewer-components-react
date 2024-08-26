@@ -31,6 +31,7 @@
     "requiredFieldNotice": "Asterisk * indicates mandatory fields.",
     "createTemplate": "Create Template",
     "noTemplateMsg": "It looks like you haven't added any templates yet. Click the button below to create your first template.",
+    "failedToLoadTemplates": "Could not load templates due to invalid iTwinId or missing permissions.",
     "addNewTemplate": "Add New Template",
     "newTemplate": "New Template",
     "templateOptions": "Template Options",
