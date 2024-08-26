@@ -65,12 +65,6 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
   private _measurementType?: PerpendicularMeasurementType;
   private _secondaryLine?: Point3d[];
 
-  public get secondaryLine(): Point3d[] {
-    return this._secondaryLine ?? [];
-  }
-  public set secondaryLine(l: Point3d[]) {
-    this._secondaryLine = l;
-  }
   public get measurementType(): PerpendicularMeasurementType {
     return this._measurementType ?? PerpendicularMeasurementType.Height;
   }
@@ -101,10 +95,10 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
   private updateSecondaryLine = (heightPoints: Point3d[]) => {
     switch (this._measurementType) {
       case PerpendicularMeasurementType.Width:
-        this.secondaryLine = [heightPoints[0], heightPoints[1]];
+        this._secondaryLine = [heightPoints[0], heightPoints[1]];
         break;
       case PerpendicularMeasurementType.Height:
-        this.secondaryLine = [heightPoints[1], heightPoints[2]];
+        this._secondaryLine = [heightPoints[1], heightPoints[2]];
         break;
     }
   };
