@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, DropdownMenu, IconButton, MenuItem, toaster } from "@itwin/itwinui-react";
+import { Button, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import { SvgAdd, SvgDelete, SvgMore, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { EmptyMessage, LoadingOverlay } from "./utils";
 import "./Templates.scss";
@@ -36,22 +36,18 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
   const load = useCallback(async () => {
     setIsLoading(true);
     try {
-      if (iTwinId) {
-        const accessToken = await getAccessToken();
-        const templatesResponse = await configClient.getConfigurations(accessToken, iTwinId);
-        const configurations: Configuration[] = templatesResponse.map((x) => {
-          return {
-            displayName: x.displayName,
-            description: x.description ?? "",
-            id: x.id,
-            labels: [],
-            reportId: x._links.report.href.split("/reports/")[1],
-          };
-        });
-        setTemplates(configurations);
-      } else {
-        toaster.negative("Invalid iTwinId.");
-      }
+      const accessToken = await getAccessToken();
+      const templatesResponse = await configClient.getConfigurations(accessToken, iTwinId);
+      const configurations: Configuration[] = templatesResponse.map((x) => {
+        return {
+          displayName: x.displayName,
+          description: x.description ?? "",
+          id: x.id,
+          labels: [],
+          reportId: x._links.report.href.split("/reports/")[1],
+        };
+      });
+      setTemplates(configurations);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Failed to load templates.", error);
