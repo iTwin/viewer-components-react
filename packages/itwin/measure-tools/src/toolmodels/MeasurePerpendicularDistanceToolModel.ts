@@ -81,12 +81,12 @@ export class MeasurePerpendicularDistanceToolModel extends MeasurementToolModel<
     return true;
   }
 
-  public setEndPoint(viewType: string, point: Point3d, isDynamic: boolean): boolean {
+  public setEndPoint(viewType: string, point: Point3d, isDynamic: boolean, customStartPoint?: Point3d): boolean {
     if (State.SetEndPoint !== this._currentState) return false;
 
     if (viewType !== this._currentViewportType!) return false;
 
-    this._currentMeasurement!.setEndPoint(point);
+    this._currentMeasurement!.setEndPoint(point, customStartPoint);
     this.notifyDynamicMeasurementChanged();
     if (!isDynamic) this.moveToNextState();
 

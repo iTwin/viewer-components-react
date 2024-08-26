@@ -25,32 +25,9 @@ export class MeasureHeightTool extends MeasurePerpendicularDistanceTool {
     return MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.keyin");
   }
 
-  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
-    if (!ev.viewport) return EventHandled.No;
-
-    if (this.toolModel.currentState === MeasureDistanceToolModel.State.SetMeasurementViewport) {
-      super.onDataButtonDown(ev);
-      return EventHandled.Yes;
-    } else if (this.toolModel.currentState === MeasureDistanceToolModel.State.SetEndPoint && this.toolModel.dynamicMeasurement) {
-      const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
-      const heightPoints = this.getHeightPoints([this.toolModel.dynamicMeasurement.startPointRef, ev.point]);
-      this.toolModel.setEndPoint(viewType, heightPoints[1], false); // Change the measure end point
-      await this.onReinitialize();
-    }
-
-    ev.viewport.invalidateDecorations();
-    return EventHandled.Yes;
-  }
-
   public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
-    if (!ev.viewport || this.toolModel.currentState !== MeasureDistanceToolModel.State.SetEndPoint || !this.toolModel.dynamicMeasurement) return;
-
-    const type = MeasurementViewTarget.classifyViewport(ev.viewport);
-    const heightPoints = this.getHeightPoints([this.toolModel.dynamicMeasurement.startPointRef, ev.point]);
-    this.toolModel.dynamicMeasurement.secondaryLine = [heightPoints[1], heightPoints[2]];
-    this.toolModel.setEndPoint(type, heightPoints[1], true); // Change the measure end point
     this._mouseEndPoint = ev.point.clone(); // Save the current point for decoration
-    ev.viewport.invalidateDecorations();
+    super.onMouseMotion(ev);
   }
 
   public override decorate(context: DecorateContext): void {

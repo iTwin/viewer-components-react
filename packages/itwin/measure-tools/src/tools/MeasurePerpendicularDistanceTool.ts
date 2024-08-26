@@ -25,7 +25,7 @@ import { SheetMeasurementsHelper } from "../api/SheetMeasurementHelper";
 import type { DrawingMetadata } from "../api/Measurement";
 import { MeasurePerpendicularDistanceToolModel } from "../toolmodels/MeasurePerpendicularDistanceToolModel";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import { Point3d } from "@itwin/core-geometry";
+import type { Point3d } from "@itwin/core-geometry";
 import { ColorDef, LinePixels } from "@itwin/core-common";
 
 /**
@@ -156,7 +156,7 @@ export class MeasurePerpendicularDistanceTool extends MeasurementToolBase<Perpen
     IModelApp.notifications.setToolAssistance(instructions);
   }
 
-  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onDataButtonDown(ev: BeButtonEvent, customStartPoint?: Point3d): Promise<EventHandled> {
     if (!ev.viewport) {
       return EventHandled.No;
     }
@@ -170,7 +170,7 @@ export class MeasurePerpendicularDistanceTool extends MeasurementToolBase<Perpen
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
     } else if (MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState) {
-      this.toolModel.setEndPoint(viewType, ev.point, false);
+      this.toolModel.setEndPoint(viewType, ev.point, false, customStartPoint);
       await this.onReinitialize();
     }
 
@@ -202,21 +202,5 @@ export class MeasurePerpendicularDistanceTool extends MeasurementToolBase<Perpen
     hypotenuseDashLine.setSymbology(blueHighlight, ColorDef.black, 1, LinePixels.Code2);
     hypotenuseDashLine.addLineString(hypotenusePoints);
     context.addDecorationFromBuilder(hypotenuseDashLine);
-  }
-
-  /**
-   * Returns the points for the base and perpendicular lines of a right triangle formed from the hypotenuse.
-   */
-  protected getHeightPoints(hypotenusePoints: Point3d[]): Point3d[] {
-    const heightPoints: Point3d[] = [];
-    heightPoints.push(hypotenusePoints[0].clone());
-    if (hypotenusePoints[0].z > hypotenusePoints[1].z) {
-      heightPoints.push(new Point3d(hypotenusePoints[0].x, hypotenusePoints[0].y, hypotenusePoints[1].z));
-    } else {
-      heightPoints.push(new Point3d(hypotenusePoints[1].x, hypotenusePoints[1].y, hypotenusePoints[0].z));
-    }
-    heightPoints.push(hypotenusePoints[1].clone());
-
-    return heightPoints;
   }
 }

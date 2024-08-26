@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Point3d, XYZProps } from "@itwin/core-geometry";
+import { Point3d, type XYAndZ, type XYZProps } from "@itwin/core-geometry";
 import { ColorDef, LinePixels } from "@itwin/core-common";
 import type { DecorateContext } from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
@@ -76,6 +76,53 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
   }
   public set measurementType(t: PerpendicularMeasurementType) {
     this._measurementType = t;
+  }
+
+  public override setStartPoint(point: XYAndZ) {
+    const heightPoints = this.getHeightPoints([Point3d.createFrom(point), this.endPointRef]);
+    let newStartPoint = point;
+    if (this._measurementType === PerpendicularMeasurementType.Width) {
+      newStartPoint = heightPoints[1];
+    }
+    super.setStartPoint(newStartPoint);
+    this.updateSecondaryLine(heightPoints);
+  }
+
+  public override setEndPoint(point: XYAndZ, customStartPoint?: Point3d) {
+    const heightPoints = this.getHeightPoints([customStartPoint ?? this.startPointRef, Point3d.createFrom(point)]);
+    let newEndPoint = point;
+    if (this._measurementType === PerpendicularMeasurementType.Height) {
+      newEndPoint = heightPoints[1];
+    }
+    super.setEndPoint(newEndPoint);
+    this.updateSecondaryLine(heightPoints);
+  }
+
+  private updateSecondaryLine = (heightPoints: Point3d[]) => {
+    switch (this._measurementType) {
+      case PerpendicularMeasurementType.Width:
+        this.secondaryLine = [heightPoints[0], heightPoints[1]];
+        break;
+      case PerpendicularMeasurementType.Height:
+        this.secondaryLine = [heightPoints[1], heightPoints[2]];
+        break;
+    }
+  };
+
+  /**
+   * Returns the points for the base and perpendicular lines of a right triangle formed from the hypotenuse.
+   */
+  private getHeightPoints(hypotenusePoints: Point3d[]): Point3d[] {
+    const heightPoints: Point3d[] = [];
+    heightPoints.push(hypotenusePoints[0].clone());
+    if (hypotenusePoints[0].z > hypotenusePoints[1].z) {
+      heightPoints.push(new Point3d(hypotenusePoints[0].x, hypotenusePoints[0].y, hypotenusePoints[1].z));
+    } else {
+      heightPoints.push(new Point3d(hypotenusePoints[1].x, hypotenusePoints[1].y, hypotenusePoints[0].z));
+    }
+    heightPoints.push(hypotenusePoints[1].clone());
+
+    return heightPoints;
   }
 
   public static override create(start: Point3d, end: Point3d, viewType?: string) {

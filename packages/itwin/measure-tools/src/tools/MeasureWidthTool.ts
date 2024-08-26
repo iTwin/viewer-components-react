@@ -26,7 +26,7 @@ export class MeasureWidthTool extends MeasurePerpendicularDistanceTool {
   }
 
   public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
-    super.onDataButtonDown(ev);
+    super.onDataButtonDown(ev, this._mouseStartPoint);
     this._mouseStartPoint = ev.point.clone();
     return EventHandled.Yes;
   }
@@ -41,11 +41,9 @@ export class MeasureWidthTool extends MeasurePerpendicularDistanceTool {
     )
       return;
 
-    const heightPoints = this.getHeightPoints([this._mouseStartPoint, this.toolModel.dynamicMeasurement.endPointRef]);
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
-    this.toolModel.dynamicMeasurement.secondaryLine = [heightPoints[0], heightPoints[1]];
-    this.toolModel.setStartPoint(viewType, heightPoints[1]);
-    this.toolModel.setEndPoint(viewType, heightPoints[2], true);
+    this.toolModel.setStartPoint(viewType, this._mouseStartPoint);
+    this.toolModel.setEndPoint(viewType, ev.point, true, this._mouseStartPoint);
   }
 
   public override decorate(context: DecorateContext): void {
