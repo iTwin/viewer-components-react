@@ -1,28 +1,26 @@
+import { expect } from "chai";
+import { join } from "path";
+import { useCallback } from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { render, waitFor } from "@testing-library/react";
-import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import type { InstanceKey } from "@itwin/presentation-common";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-
+import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Typical-example-imports
 import { ModelsTreeComponent, TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
-import type { SelectionStorage } from "@itwin/unified-selection";
 import { createStorage } from "@itwin/unified-selection";
+import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../utils/IModelUtils";
-import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
-import { join } from "path";
-import { expect } from "chai";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
+import type { SelectionStorage } from "@itwin/unified-selection";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
-import { useCallback } from "react";
-
 // __PUBLISH_EXTRACT_END__
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
@@ -68,7 +66,7 @@ describe("Tree-widget", () => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });
               const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
               insertPhysicalElement({ builder, userLabel: `element`, modelId: model.id, categoryId: category.id });
-              return { model, category };
+              return { model };
             })
           ).imodel;
           const testViewport = getTestViewer(imodel);
@@ -88,20 +86,14 @@ describe("Tree-widget", () => {
                   (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
                   (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
                 ]}
-                selectionMode={"extended"}
-                hierarchyConfig={{
-                  elementClassGrouping: "enable",
-                }}
               />
             );
           }
           // __PUBLISH_EXTRACT_END__
 
-          const result = render(<MyWidget />);
+          const { findByText } = render(<MyWidget />);
 
-          await waitFor(() => expect(result.getByText("tree-widget-learning-snippets-components-models-tree")).to.not.be.null);
-
-          // const result = render(MyWidget());
+          await waitFor(async () => expect(findByText("tree-widget-learning-snippets-components-models-tree-models-tree-learning-snippet")).to.not.be.null);
         });
 
         it("Custom models tree", async function () {
@@ -167,14 +159,13 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
-          const { getByText } = render(
+          const { findByText } = render(
             <CustomModelsTreeComponent imodel={testImodel} viewport={testViewport} getSchema={getSchemaContext} selectionStorage={unifiedSelectionStorage} />,
           );
 
           await waitFor(() => {
-            expect(getByText("tree-widget-learning-snippets-components-models-tree-custom-models-tree")).to.not.be.null;
-            expect(getByText("Sub label")).to.not.be.null;
+            expect(expect(findByText("tree-widget-learning-snippets-components-models-tree-custom-models-tree")).to.not.be.null);
+            expect(expect(findByText("Sub label")).to.not.be.null);
           });
         });
       });

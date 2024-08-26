@@ -1,13 +1,13 @@
-import { type IModelConnection } from "@itwin/core-frontend";
+import { expect } from "chai";
+import { join } from "path";
+import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcInterface, ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-import { expect } from "chai";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { join } from "path";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Typical-example-imports
 
@@ -48,7 +48,7 @@ describe("Tree-widget", () => {
               return { model, category };
             })
           ).imodel;
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-schema-context-example
           const schemaContextCache = new Map<string, SchemaContext>();
           function getSchemaContext(imodel: IModelConnection) {
             const key = imodel.getRpcProps().key;

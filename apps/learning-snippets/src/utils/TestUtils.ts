@@ -1,12 +1,12 @@
 /* eslint-disable @itwin/no-internal */
 import { UiFramework } from "@itwin/appui-react";
-import { EmptyLocalization } from "@itwin/core-common";
-import { TreeWidget } from "@itwin/tree-widget-react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-import { SchemaContext } from "@itwin/ecschema-metadata";
 import { BeEvent } from "@itwin/core-bentley";
+import { EmptyLocalization } from "@itwin/core-common";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
+import { TreeWidget } from "@itwin/tree-widget-react";
 
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 export class TestUtils {
   private static _initialized = false;
 
@@ -43,7 +43,8 @@ export function getTestViewer(imodel: IModelConnection) {
     onNeverDrawnChanged: new BeEvent<() => void>(),
     onIModelHierarchyChanged: new BeEvent<() => void>(),
     onDisplayStyleChanged: new BeEvent<() => void>(),
-    view: { isSpatialView: () => true, is3d: () => true, is2d: () => false, viewsCategory: () => true, viewsModel: () => false },
+    view: { isSpatialView: () => true, is3d: () => true, is2d: () => false, viewsCategory: () => true, viewsModel: () => true },
+    viewsModel: () => true,
     iModel: imodel,
   } as unknown as Viewport;
 }

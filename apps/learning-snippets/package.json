@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@itwin/tree-widget-react": "workspace:*",
+    "@itwin/presentation-hierarchies": "^0.4.0",
+    "@itwin/presentation-shared": "^0.4.0",
     "@itwin/itwinui-react": "3.12.2",
     "@itwin/unified-selection": "^0.5",
     "@itwin/appui-abstract": "^4.5.1",

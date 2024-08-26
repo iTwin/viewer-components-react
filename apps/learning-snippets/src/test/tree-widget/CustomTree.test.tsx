@@ -1,0 +1,134 @@
+import { join } from "path";
+import React from "react";
+// __PUBLISH_EXTRACT_END__
+import sinon from "sinon";
+import { UiFramework } from "@itwin/appui-react";
+import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
+import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
+import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
+import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
+import { createStorage } from "@itwin/unified-selection";
+import { render, waitFor } from "@testing-library/react";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
+import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
+
+import type { ComponentPropsWithoutRef } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
+
+describe("Tree-widget", () => {
+  describe("Learning-snippets", () => {
+    describe("Components", () => {
+      describe("Imodel content tree", () => {
+        before(async function () {
+          await initializePresentationTesting({
+            backendProps: {
+              caching: {
+                hierarchies: {
+                  mode: HierarchyCacheMode.Memory,
+                },
+              },
+            },
+            testOutputDir: join(__dirname, "output"),
+            backendHostProps: {
+              cacheDir: join(__dirname, "cache"),
+            },
+            rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
+          });
+          // eslint-disable-next-line @itwin/no-internal
+          ECSchemaRpcImpl.register();
+        });
+
+        after(async function () {
+          await terminatePresentationTesting();
+        });
+
+        beforeEach(async () => {
+          await NoRenderApp.startup();
+          await TestUtils.initialize();
+        });
+
+        afterEach(async () => {
+          TestUtils.terminate();
+          await IModelApp.shutdown();
+          sinon.restore();
+        });
+
+        it("Custom tree snippet", async function () {
+          const imodelConnection = (
+            await buildIModel(this, async (builder) => {
+              const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+              const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+              insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+              return { category };
+            })
+          ).imodel;
+          const testViewport = getTestViewer(imodelConnection);
+          const unifiedSelectionStorage = createStorage();
+          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
+          sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+
+          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example
+          type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
+          const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
+            // create a hierarchy definition that defines what should be shown in the tree
+            // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
+            const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess });
+            const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
+            return createClassBasedHierarchyDefinition({
+              classHierarchyInspector: imodelAccess,
+              hierarchy: {
+                // For root nodes, select all BisCore.GeometricModel3d instances
+                rootNodes: async () => [
+                  {
+                    fullClassName: "BisCore.GeometricModel3d",
+                    query: {
+                      ecsql: `
+                      SELECT
+                        ${await nodesQueryFactory.createSelectClause({
+                          ecClassId: { selector: "this.ECClassId" },
+                          ecInstanceId: { selector: "this.ECInstanceId" },
+                          nodeLabel: {
+                            selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                          },
+                        })}
+                      FROM BisCore.GeometricModel3d this
+                    `,
+                    },
+                  },
+                ],
+                childNodes: [],
+              },
+            });
+          };
+
+          interface MyTreeProps {
+            imodel: IModelConnection;
+          }
+
+          function MyTree({ imodel }: MyTreeProps) {
+            return (
+              <Tree
+                treeName="MyTree"
+                imodel={imodel}
+                selectionStorage={unifiedSelectionStorage}
+                getSchemaContext={getSchemaContext}
+                getHierarchyDefinition={getHierarchyDefinition}
+                treeRenderer={(props) => <TreeRenderer {...props} />}
+              />
+            );
+          }
+          // __PUBLISH_EXTRACT_END__
+
+          const result = render(<MyTree imodel={imodelConnection} />);
+          await waitFor(() => result.getByText("TestPhysicalModel"));
+        });
+      });
+    });
+  });
+});

@@ -1,31 +1,31 @@
+/* eslint-disable import/no-duplicates */
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { expect } from "chai";
+import { join } from "path";
 import sinon from "sinon";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Register-example-imports-1
 import { UiFramework, UiItemsManager } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_END__
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
-import { render, waitFor } from "@testing-library/react";
-import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
-import type { Widget } from "@itwin/appui-react";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { type InstanceKey, PresentationRpcInterface } from "@itwin/presentation-common";
-import { createStorage } from "@itwin/unified-selection";
-import { buildIModel, insertPhysicalModelWithPartition, insertSubject } from "../../utils/IModelUtils";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { join } from "path";
+import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { createStorage } from "@itwin/unified-selection";
+import { render, waitFor } from "@testing-library/react";
+import { buildIModel, insertPhysicalModelWithPartition, insertSubject } from "../../utils/IModelUtils";
+import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
+import type { InstanceKey } from "@itwin/presentation-common";
+
+import type { Widget } from "@itwin/appui-react";
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Usage", () => {
-      let createTreeWidgetFunction: (() => ReadonlyArray<Widget>) | undefined;
-
       before(async function () {
         await initializePresentationTesting({
           backendProps: {
@@ -52,10 +52,6 @@ describe("Tree-widget", () => {
       beforeEach(async () => {
         await NoRenderApp.startup();
         await TestUtils.initialize();
-
-        sinon.stub(UiItemsManager, "register").callsFake(({ id: _id, getWidgets }) => {
-          createTreeWidgetFunction = getWidgets;
-        });
       });
 
       afterEach(async () => {
@@ -81,6 +77,10 @@ describe("Tree-widget", () => {
         const unifiedSelectionStorage = createStorage();
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+        let createTreeWidgetFunction: (() => ReadonlyArray<Widget>) | undefined;
+        sinon.stub(UiItemsManager, "register").callsFake(({ id: _id, getWidgets }) => {
+          createTreeWidgetFunction = getWidgets;
+        });
 
         // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Register-example
         UiItemsManager.register({
@@ -113,7 +113,7 @@ describe("Tree-widget", () => {
         const widgets = createTreeWidgetFunction!();
         expect(widgets).to.not.be.undefined;
         const { getByText } = render(<>{widgets[0].content}</>);
-        await waitFor(() => expect(getByText("My Custom Tree")).to.not.be.null);
+        await waitFor(() => getByText("My Custom Tree"));
       });
     });
   });

@@ -1,22 +1,22 @@
+import { join } from "path";
+import React from "react";
+// __PUBLISH_EXTRACT_END__
+import sinon from "sinon";
+import { UiFramework } from "@itwin/appui-react";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import type { InstanceKey } from "@itwin/presentation-common";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
-// __PUBLISH_EXTRACT_END__
-import sinon from "sinon";
-import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { join } from "path";
-import { UiFramework } from "@itwin/appui-react";
 import { createStorage } from "@itwin/unified-selection";
-import { buildIModel, insertSubject } from "../../utils/IModelUtils";
 import { render, waitFor } from "@testing-library/react";
-import { expect } from "chai";
-import React from "react";
+import { buildIModel, insertSubject } from "../../utils/IModelUtils";
+import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
+
+import type { InstanceKey } from "@itwin/presentation-common";
 
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
@@ -73,7 +73,7 @@ describe("Tree-widget", () => {
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Imodel-content-tree-example
           function MyWidget() {
             return (
               <IModelContentTreeComponent
@@ -86,59 +86,10 @@ describe("Tree-widget", () => {
           }
           // __PUBLISH_EXTRACT_END__
 
-          const result = render(<MyWidget />);
-          await waitFor(
-            () => expect(result.getByText("tree-widget-learning-snippets-components-imodel-content-tree-imodel-content-tree-snippet")).to.not.be.null,
-          );
+          const { getByText } = render(<MyWidget />);
+          await waitFor(() => getByText("tree-widget-learning-snippets-components-imodel-content-tree-imodel-content-tree-snippet"));
         });
       });
-
-      // it.skip("Custom imodel content tree snippet", async function () {
-      //   const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-      //   const dictionaryModel: InstanceKey = { className: "BisCore.DictionaryModel", id: IModel.dictionaryId };
-
-      //   const imodelConnection = (
-      //     await buildIModel(this, async (builder) => {
-      //       const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
-      //       const subjectB = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
-      //       const subjectC = insertSubject({ builder, codeValue: "C", parentId: subjectB.id });
-      //       return { rootSubject, dictionaryModel, subjectA, subjectB, subjectC };
-      //     })
-      //   ).imodel;
-      //   const testViewport = getTestViewer(imodelConnection);
-      //   const unifiedSelectionStorage = createStorage();
-      //   sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-      //   sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
-
-      //   // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example
-      //   type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
-      //   const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-      //     // create a hierarchy definition that defines what should be shown in the tree
-      //     // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
-      //     return imodelAccess;
-      //   };
-
-      //   interface MyTreeProps {
-      //     imodel: IModelConnection;
-      //   }
-
-      //   function MyTree({ imodel }: MyTreeProps) {
-      //     return (
-      //       <Tree
-      //         treeName="MyTree"
-      //         imodel={imodel}
-      //         selectionStorage={unifiedSelectionStorage}
-      //         getSchemaContext={getSchemaContext}
-      //         getHierarchyDefinition={getHierarchyDefinition}
-      //         treeRenderer={(props) => <TreeRenderer {...props} />}
-      //       />
-      //     );
-      //   }
-      //   // __PUBLISH_EXTRACT_END__
-
-      //   const result = render(MyTree({ imodel: imodelConnection }));
-      //   await waitFor(() => expect(result.getByText("Test SpatialCategory")).to.not.be.null, { timeout: 5000 });
-      // });
     });
   });
 });

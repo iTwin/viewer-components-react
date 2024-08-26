@@ -1,24 +1,29 @@
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { Presentation } from "@itwin/presentation-frontend";
+import { expect } from "chai";
 import sinon from "sinon";
+import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
+import { createStorage } from "@itwin/unified-selection";
+import { TestUtils } from "../../utils/TestUtils";
 
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Typical-example-imports
 import type { SelectionStorage } from "@itwin/unified-selection";
-import { createStorage } from "@itwin/unified-selection";
-
-import { expect } from "chai";
-
 // __PUBLISH_EXTRACT_END__
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Components", () => {
       describe("Unified selection storage", () => {
+        beforeEach(async () => {
+          await NoRenderApp.startup();
+          await TestUtils.initialize();
+        });
+
         afterEach(async () => {
-          Presentation.terminate();
+          TestUtils.terminate();
           await IModelApp.shutdown();
+          sinon.restore();
         });
         it("Unified selection storage learning snippet", async function () {
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Selection-storage-example
           let unifiedSelectionStorage: SelectionStorage | undefined;
           function getUnifiedSelectionStorage(): SelectionStorage {
             if (!unifiedSelectionStorage) {
@@ -34,7 +39,7 @@ describe("Tree-widget", () => {
           expect(result).to.be.eq(unifiedSelectionStorage);
         });
 
-        it.skip("Presentation initialize unified selection storage learning snippet", async function () {
+        it("Presentation initialize unified selection storage learning snippet", async function () {
           const spy = sinon.spy(Presentation, "initialize");
           let unifiedSelectionStorage: SelectionStorage | undefined;
           await IModelApp.startup();
@@ -48,10 +53,11 @@ describe("Tree-widget", () => {
             return unifiedSelectionStorage;
           }
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Selection-storage-initialize-example
           await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
           // __PUBLISH_EXTRACT_END__
           expect(spy.calledOnce);
+          Presentation.terminate();
         });
       });
     });
