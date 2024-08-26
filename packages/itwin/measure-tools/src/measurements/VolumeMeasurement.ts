@@ -332,8 +332,23 @@ export class VolumeMeasurement extends Measurement {
 
     const fPerimeter = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this._polygon.perimeter, lengthSpec);
     const fArea = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this._polygon.area, areaSpec);
-    const fVolume = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * this._polygon.volume, volumeSpec);
     const fEdgeCount = (this._polygon.points.length - 1).toFixed();
+
+    let fVolume: string = "";
+    let fCut: string = "";
+    let fFill: string = "";
+    if (this._polygon.volume && this._polygon.cut && this._polygon.fill) {
+      fVolume = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * this._polygon.volume, volumeSpec);
+      fCut = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * this._polygon.cut, volumeSpec);
+      fFill = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * this._polygon.fill, volumeSpec);
+    } else {
+      const volume = await this._polygon.recomputeFromPoints();
+      if (volume) {
+        fVolume = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * volume.net, volumeSpec);
+        fCut = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * volume.cut, volumeSpec);
+        fFill = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * volume.fill, volumeSpec);
+      }
+    }
 
     const title = MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureVolume.toolTitle").replace("{0}", fVolume);
 
@@ -341,13 +356,23 @@ export class VolumeMeasurement extends Measurement {
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureVolume.volume"),
+      label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureVolume.net"),
       name: "VolumeMeasurement_Volume",
       value: fVolume,
-      aggregatableValue: volumeSpec !== undefined ? { value: this._polygon.volume, formatSpec: volumeSpec } : undefined,
+      aggregatableValue: volumeSpec && this._polygon.volume ? { value: this._polygon.volume, formatSpec: volumeSpec } : undefined,
     });
 
     data.properties.push(
+      {
+        label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureVolume.cut"),
+        name: "VolumeMeasurement_Cut",
+        value: fCut,
+      },
+      {
+        label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureVolume.fill"),
+        name: "VolumeMeasurement_Fill",
+        value: fFill,
+      },
       {
         label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupArea"),
         name: "VolumeMeasurement_Area",

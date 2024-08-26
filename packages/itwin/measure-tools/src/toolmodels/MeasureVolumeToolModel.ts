@@ -103,7 +103,6 @@ export class MeasureVolumeToolModel extends MeasurementToolModel<VolumeMeasureme
     if (1 >= polygon.points.length) return false;
 
     polygon.points.pop();
-    polygon.recomputeFromPoints();
     this.notifyDynamicMeasurementChanged();
     return true;
   }

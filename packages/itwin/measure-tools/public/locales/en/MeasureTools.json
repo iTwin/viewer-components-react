@@ -139,8 +139,10 @@
       "keyin": "Volume",
       "flyover": "Volume",
       "description": "Create volume measurements.",
-      "volume": "Volume:",
-      "toolTitle": "Volume Measurement [{0}]"
+      "net": "Net:",
+      "toolTitle": "Volume Measurement [{0}]",
+      "cut": "Cut:",
+      "fill": "Fill:"
     }
   },
   "Measurements": {

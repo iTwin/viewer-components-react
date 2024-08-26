@@ -20,6 +20,7 @@ import {
   type ViewState
 } from "@itwin/core-frontend";
 import { ColorDef, type ContextRealityModelProps, RenderMode } from "@itwin/core-common";
+import { MeasureTools } from "../MeasureTools";
 
 export class VolumeInfo {
   public get net() { return this.cut - this.fill; }
@@ -32,25 +33,38 @@ export class VolumeInfo {
 }
 
 export class VolumePolygon extends Polygon {
-  private _volume: number;
+  private _volume?: number;
+  private _cut?: number;
+  private _fill?: number;
 
-  public get volume(): number {
+  public get volume(): number | undefined {
     return this._volume;
+  }
+  public get cut(): number | undefined {
+    return this._cut;
+  }
+  public get fill(): number | undefined {
+    return this._fill;
   }
 
   constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet, worldScale?: number) {
     super(points, copyPoints, styleSet, worldScale);
-    this._volume = 0;
+    this.overrideText = [MeasureTools.localization.getLocalizedString("MeasureTools:Generic.loadingSpinnerText")];
   }
 
   public override async recomputeFromPoints(targetView?: ScreenViewport) {
     super.recomputeFromPoints();
     const volume = await this.computeVolume(targetView ?? IModelApp.viewManager.selectedView);
-    this._volume = volume?.net ?? 0;
-    const volumeFormatter = IModelApp.quantityFormatter.findFormatterSpecByQuantityType(QuantityType.Volume);
-
-    const fVolume = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * this._volume, volumeFormatter);
-    this.overrideText = [fVolume];
+    const netVolume = volume?.net;
+    if (netVolume){
+      this._volume = netVolume;
+      const volumeFormatter = IModelApp.quantityFormatter.findFormatterSpecByQuantityType(QuantityType.Volume);
+      const fVolume = IModelApp.quantityFormatter.formatQuantity(this.worldScale * this.worldScale * this.worldScale * this._volume, volumeFormatter);
+      this.overrideText = [fVolume];
+      this._cut = volume.cut;
+      this._fill = volume.fill;
+    }
+    return volume;
   }
 
   private async computeVolume(viewport?: ScreenViewport) {
