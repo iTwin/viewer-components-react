@@ -12,9 +12,10 @@ export interface DeleteModalProps {
   entityName: string;
   onClose: () => void;
   onDelete: () => Promise<void>;
+  confirmationMessage?: JSX.Element;
 }
 
-export const DeleteModal = ({ entityName, onClose, onDelete }: DeleteModalProps) => {
+export const DeleteModal = ({ entityName, onClose, onDelete, confirmationMessage }: DeleteModalProps) => {
   const [localEntityName] = useState(entityName);
 
   const deleteMutation = useMutation({
@@ -32,10 +33,14 @@ export const DeleteModal = ({ entityName, onClose, onDelete }: DeleteModalProps)
     <>
       <Modal title="Confirm" modalRootId="grouping-mapping-widget" isOpen={!!localEntityName} isDismissible={!deleteMutation.isLoading} onClose={onClose}>
         <div className="gmw-delete-modal-body-text">
-          <Text variant="leading" as="h3">
-            Are you sure you want to delete
-          </Text>
-          <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
+          {confirmationMessage ?? (
+            <>
+              <Text variant="leading" as="h3">
+                Are you sure you want to delete
+              </Text>
+              <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
+            </>
+          )}
         </div>
         <ModalButtonBar>
           {deleteMutation.isLoading && (

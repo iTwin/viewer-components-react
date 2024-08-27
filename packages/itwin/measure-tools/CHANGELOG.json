@@ -2,6 +2,27 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 20 Aug 2024 13:08:31 GMT",
+      "version": "0.21.0",
+      "tag": "@itwin/measure-tools-react_v0.21.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "adrian.clinansmith@bentley.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "5dde769047e695c11eb1e91e930de28a267ea7ab",
+            "comment": "The measure tools ui-provider can accept an array of strings for StageUsages, rather than hardcode \"General\". It still defaults to \"General\", so it's backwards compatible."
+          },
+          {
+            "author": "125395992+Maxime-Brassard@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "aea256b9bb25c705c28da1dee03b32d571045ff1",
+            "comment": "drawingTypeCache refactor"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 22 Jul 2024 11:53:05 GMT",
       "version": "0.20.0",
       "tag": "@itwin/measure-tools-react_v0.20.0",

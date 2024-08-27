@@ -14,6 +14,7 @@ import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
+import type { RecursiveRequired } from "../utils/types";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
 import { IModelApp } from "@itwin/core-frontend";
 
@@ -32,15 +33,25 @@ export interface MeasureToolsUiProviderOptions {
   enableSheetMeasurement?: boolean;
   // Callback that is invoked when a tracked feature is used.
   onFeatureUsed?: (feature: string) => void;
+  stageUsageList?: string[];
 }
 
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props?: MeasureToolsUiProviderOptions;
+  private _props: RecursiveRequired<MeasureToolsUiProviderOptions>;
 
   constructor(props?: MeasureToolsUiProviderOptions) {
-    this._props = props;
+    this._props = {
+      itemPriority: props?.itemPriority ?? 20,
+      groupPriority: props?.groupPriority ?? 10,
+      widgetPlacement: {
+        location: props?.widgetPlacement?.location ?? StagePanelLocation.Right,
+        section: props?.widgetPlacement?.section ?? StagePanelSection.Start,
+      },
+      enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
+      stageUsageList: props?.stageUsageList ?? [StageUsage.General],
+    };
   }
 
   public provideToolbarItems(
@@ -49,17 +60,17 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     toolbarUsage: ToolbarUsage,
     toolbarOrientation: ToolbarOrientation,
   ): ToolbarItem[] {
-    if (stageUsage === StageUsage.General && toolbarUsage === ToolbarUsage.ContentManipulation) {
+    if (this._props.stageUsageList.includes(stageUsage) && toolbarUsage === ToolbarUsage.ContentManipulation) {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement ?? false, this._props?.onFeatureUsed));
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement, this._props?.onFeatureUsed));
       }
       if (!featureFlags?.hideAreaTool) {
-        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props?.enableSheetMeasurement ?? false));
+        tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideLocationTool) {
-        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props?.enableSheetMeasurement ?? false));
+        tools.push(MeasureToolDefinitions.getMeasureLocationToolCommand(this._props.enableSheetMeasurement));
       }
       if (!featureFlags?.hideRadiusTool) {
         tools.push(MeasureToolDefinitions.measureRadiusToolCommand);
@@ -75,14 +86,14 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         return [
           ToolbarItemUtilities.createGroupItem(
             "measure-tools-toolbar",
-            this._props?.itemPriority ?? 20,
+            this._props.itemPriority,
             "icon-measure",
             MeasureTools.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
             ),
             ToolbarHelper.constructChildToolbarItems(tools),
             {
-              groupPriority: this._props?.groupPriority ?? 10,
+              groupPriority: this._props.groupPriority,
               isHidden: new ConditionalBooleanValue(
                 isSheetViewActive,
                 [SyncUiEventId.ViewStateChanged],
@@ -122,13 +133,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     section?: StagePanelSection | undefined,
   ): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];
-    const preferredLocation = this._props?.widgetPlacement?.location ?? StagePanelLocation.Right;
-    const preferredSection = this._props?.widgetPlacement?.section ?? StagePanelSection.Start;
-    if (
-      stageUsage === StageUsage.General &&
-      location === preferredLocation &&
-      section === preferredSection
-    ) {
+    const preferredLocation = this._props.widgetPlacement.location;
+    const preferredSection = this._props.widgetPlacement.section;
+    if (this._props.stageUsageList.includes(stageUsage) && location === preferredLocation && section === preferredSection) {
       {
         widgets.push({
           id: MeasurementPropertyWidgetId,
