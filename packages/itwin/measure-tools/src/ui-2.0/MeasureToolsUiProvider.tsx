@@ -30,6 +30,8 @@ export interface MeasureToolsUiProviderOptions {
   };
   // If we check for sheet to 3d transformation when measuring in sheets
   enableSheetMeasurement?: boolean;
+  // Callback that is invoked when a tracked feature is used.
+  onFeatureUsed?: (feature: string) => void;
 }
 
 
@@ -51,7 +53,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement ?? false));
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement ?? false, this._props?.onFeatureUsed));
       }
       if (!featureFlags?.hideAreaTool) {
         tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props?.enableSheetMeasurement ?? false));
@@ -94,7 +96,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         return [
           ToolbarHelper.createToolbarItemFromItemDef(
             100,
-            MeasureToolDefinitions.clearMeasurementsToolCommand,
+            MeasureToolDefinitions.getClearMeasurementsToolCommand(this._props?.onFeatureUsed),
             {
               isHidden: new ConditionalBooleanValue(
                 () => isSheetViewActive() || !MeasurementUIEvents.isClearMeasurementButtonVisible,
@@ -131,7 +133,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         widgets.push({
           id: MeasurementPropertyWidgetId,
           label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.measurements"),
-          content: <MeasurementPropertyWidget />,
+          content: <MeasurementPropertyWidget onFeatureUsed={this._props?.onFeatureUsed} />,
           defaultState: WidgetState.Hidden,
           icon: "icon-measure",
         });

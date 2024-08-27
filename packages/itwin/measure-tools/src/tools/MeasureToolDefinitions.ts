@@ -35,14 +35,14 @@ export class MeasureToolDefinitions {
     });
   }
 
-  public static getMeasureDistanceToolCommand(enableSheetMeasurements: boolean) {
+  public static getMeasureDistanceToolCommand(enableSheetMeasurements: boolean, onFeatureUsed?: (feature: string) => void) {
     return new ToolItemDef({
       toolId: MeasureDistanceTool.toolId,
       iconSpec: MeasureDistanceTool.iconSpec,
       label: () => MeasureDistanceTool.flyover,
       tooltip: () => MeasureDistanceTool.description,
       execute: () => {
-        const tool = new MeasureDistanceTool(enableSheetMeasurements);
+        const tool = new MeasureDistanceTool(enableSheetMeasurements, onFeatureUsed);
         void tool.run();
       },
     });
@@ -104,7 +104,7 @@ export class MeasureToolDefinitions {
     });
   }
 
-  public static get clearMeasurementsToolCommand() {
+  public static getClearMeasurementsToolCommand(onFeatureUsed?: (feature: string) => void) {
     return new ToolItemDef({
       toolId: ClearMeasurementsTool.toolId,
       iconSpec: ClearMeasurementsTool.iconSpec,
@@ -112,7 +112,8 @@ export class MeasureToolDefinitions {
       label: () => ClearMeasurementsTool.flyover,
       tooltip: () => ClearMeasurementsTool.description,
       execute: () => {
-        void IModelApp.tools.run(ClearMeasurementsTool.toolId);
+        const tool = new ClearMeasurementsTool(onFeatureUsed);
+        void tool.run();
       },
     });
   }

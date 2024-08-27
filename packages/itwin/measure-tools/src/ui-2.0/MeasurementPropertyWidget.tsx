@@ -22,6 +22,14 @@ import { SvgCopy } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import type { PrimitiveValue } from "@itwin/appui-abstract";
 
+/**
+ * Props for `MeasureTools`
+ * @public
+ */
+export interface MeasureToolsProps {
+  onFeatureUsed?: (feature: string) => void;
+}
+
 export function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
   return frontstageDef?.findWidgetDef(id);
@@ -30,7 +38,7 @@ export function useSpecificWidgetDef(id: string) {
 export const MeasurementPropertyWidgetId = "measure-tools-property-widget";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const MeasurementPropertyWidget = () => {
+export const MeasurementPropertyWidget = (props: MeasureToolsProps) => {
   const activeIModelConnection = useActiveIModelConnection();
   const [dataProvider] = React.useState(new SimplePropertyDataProvider());
   const [lastSelectedCount, setLastSelectedCount] = React.useState(MeasurementSelectionSet.global.measurements.length);
@@ -112,10 +120,11 @@ export const MeasurementPropertyWidget = () => {
 
     // addProperty will raise onDataChanged. If we have no data, raise it ourselves.
     if (!data.length) {
+      props.onFeatureUsed?.("feature-property-widget-event-no-data");
       dataProvider.onDataChanged.raiseEvent();
       return;
     }
-
+    props.onFeatureUsed?.("feature-property-widget-event-update");
     // Reverse the order. Last selected measurement should display up top.
     data = data.reverse();
     transientIds = transientIds.reverse();
@@ -130,6 +139,7 @@ export const MeasurementPropertyWidget = () => {
   };
 
   const onSelectionChanged = async (args: MeasurementSelectionSetEvent | Measurement[]) => {
+    props.onFeatureUsed?.("feature-selection-set-event-change");
     // Only collapse if we are adding/removing more than one at once
     let collapseAll: boolean;
     if (Array.isArray(args)) {

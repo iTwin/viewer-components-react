@@ -57,17 +57,23 @@ MeasureDistanceToolModel
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor(enableSheetMeasurements = false) {
-    super();
+  constructor(enableSheetMeasurements = false, onFeatureUsed?: (feature: string) => void) {
+    super(onFeatureUsed);
     this._enableSheetMeasurements = enableSheetMeasurements;
   }
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
+    this.handleFeature("feature-measure-distance-event-trigger");
     if (this._enableSheetMeasurements) {
       this._drawingTypeCache = new DrawingDataCache();
       await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
     }
+  }
+
+  public override async onCleanup(): Promise<void> {
+    await super.onCleanup();
+    this.handleFeature("feature-measure-distance-event-cancel");
   }
 
   public async onRestartTool(): Promise<void> {
@@ -94,6 +100,7 @@ MeasureDistanceToolModel
       this.toolModel.currentState
     ) {
       this.toolModel.setMeasurementViewport(viewType);
+      this.handleFeature("feature-measure-distance-event-start-point");
       this.toolModel.setStartPoint(viewType, ev.point);
       await this.sheetMeasurementsDataButtonDown(ev);
       this._sendHintsToAccuDraw(ev);
@@ -101,6 +108,7 @@ MeasureDistanceToolModel
     } else if (
       MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
     ) {
+      this.handleFeature("feature-measure-distance-event-end-point");
       this.toolModel.setEndPoint(viewType, ev.point, false);
       await this.onReinitialize();
     }

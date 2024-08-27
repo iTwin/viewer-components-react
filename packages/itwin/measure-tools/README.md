@@ -99,3 +99,72 @@ An application can further customize UI event behavior by registering override h
 
 A concrete example of this customization is an application that has measurements organized into multiple groups. One group may be "frozen" due to some application state (state that the measure-tools library may be unaware of) and should not be cleared by the clear measurements tool.
 So the application would register a custom UI event handler that would cause those measurements to be ignored when the clear measurement tool is invoked.
+
+### Usage Tracking
+
+This package allows consumers to track the usage of specific features.
+
+This can be achieved by passing `onFeatureUsed` function to `MeasureToolsUiProvider`. The function is invoked with feature message as the feature is being used. The message is under this format:
+
+`feature-{feature being used}-event-{specific event related to the feature}`
+
+List of tracked features and their respective events:
+
+**Measure Distance**:
+
+- `"feature-measure-distance-event-trigger"` - when measure distance feature starts being used
+
+- `"feature-measure-distance-event-cancel"` - when measure distance feature stops being used
+
+- `"feature-measure-distance-event-start-point"` - when start point of the distance is registered
+
+- `"feature-measure-distance-event-end-point"` - when end point of the distance is registered
+
+**Clear Measurements**:
+
+- `"feature-clear-measurements-event-trigger"` - when clear measurements is triggered and clear all measurements on the screen
+
+**Property Widget**:
+
+- `"feature-property-widget-event-no-data"` - when the property widget is empty / not showed on the widget panel
+
+- `"feature-property-widget-event-update"` - when the property widget is updated with newest measurements results
+
+**Selection Set**:
+
+- `"feature-selection-set-event-change"` - when the selection set is updated with newly selected element(s) in the model
+
+### Example for Usage Tracking
+
+In this case, we create a sample [Itwin Viewer](https://www.npmjs.com/package/@itwin/web-viewer-react) and configure `MeasureToolsUiProvider`
+
+```ts
+import { MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
+
+const App: React.FC = () => {
+  // Viewer Setup here...
+  return (
+    <div className="viewer-container">
+      <Viewer
+        iTwinId={iTwinId ?? ""}
+        iModelId={iModelId ?? ""}
+        changeSetId={changesetId}
+        authClient={authClient}
+        viewCreatorOptions={viewCreatorOptions}
+        enablePerformanceMonitors={true}
+        onIModelAppInit={onIModelAppInit}
+        uiProviders={[
+          new MeasureToolsUiItemsProvider({
+            onFeatureUsed: (feature) => {
+              console.log(`MeasureTools [${feature}] used`);
+            },
+          }),
+        ]}
+      />
+    </div>
+  );
+};
+
+export default App;
+```
+

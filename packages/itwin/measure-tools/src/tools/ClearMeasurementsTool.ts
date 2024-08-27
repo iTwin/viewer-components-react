@@ -36,8 +36,8 @@ export class ClearMeasurementsTool extends PrimitiveToolBase {
     return MeasureToolsFeatures.Tools_ClearMeasurements;
   }
 
-  constructor() {
-    super();
+  constructor(onFeatureUsed?: (feature: string) => void) {
+    super(onFeatureUsed);
   }
 
   public override requireWriteableTarget(): boolean {
@@ -53,7 +53,7 @@ export class ClearMeasurementsTool extends PrimitiveToolBase {
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
-
+    this.handleFeature("feature-clear-measurements-event-trigger");
     // NOTE: If we were laying out measurements in a tool, by virtue of how tools run, those measurements will have persisted by the time
     // we install this clear tool
 

@@ -110,8 +110,14 @@ export class SelectionHolder {
 
 /** Useful base class for tools */
 export abstract class PrimitiveToolBase extends PrimitiveTool {
+  private _onFeatureUsed?: (feature: string) => void;
+
   protected get feature(): Feature | undefined {
     return undefined;
+  }
+
+  protected get onFeatureUsed(): ((feature: string) => void) | undefined {
+    return this._onFeatureUsed;
   }
 
   public override async onPostInstall(): Promise<void> {
@@ -177,6 +183,15 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
     );
   }
 
+  protected handleFeature(feature: string) {
+    this.onFeatureUsed?.(feature);
+  }
+
+  constructor(onFeatureUsed?: (feature: string) => void) {
+    super();
+    this._onFeatureUsed = onFeatureUsed;
+  }
+
   // For most of our cases we expect to draw our decorations when suspended also
   public override decorateSuspended(context: DecorateContext): void {
     this.decorate(context);
@@ -216,8 +231,8 @@ export abstract class MeasurementToolBase<
     return true;
   }
 
-  constructor() {
-    super();
+  constructor(onFeatureUsed?: (feature: string) => void) {
+    super(onFeatureUsed);
 
     this._toolModel = this.createToolModel();
     this._toolModel.synchMeasurementsWithSelectionSet = true; // Sync by default
