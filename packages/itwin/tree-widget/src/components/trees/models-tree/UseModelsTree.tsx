@@ -129,6 +129,7 @@ export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityH
                 imodelAccess,
                 idsCache: getModelsTreeIdsCache(),
                 hierarchyConfig: hierarchyConfiguration,
+                limit: "unbounded",
               }),
           });
         } catch (e) {
