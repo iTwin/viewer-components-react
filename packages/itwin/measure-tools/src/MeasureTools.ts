@@ -14,6 +14,7 @@ import { MeasureRadiusTool } from "./tools/MeasureRadiusTool";
 import { MeasureAngleTool } from "./tools/MeasureAngleTool";
 import { MeasurePerpendicularTool } from "./tools/MeasurePerpendicularTool";
 import type { Localization } from "@itwin/core-common";
+import { MeasureVolumeTool } from "./tools/MeasureVolumeTool";
 
 export interface FeatureFlags {
   hideDistanceTool?: boolean;
@@ -23,6 +24,7 @@ export interface FeatureFlags {
   hideAngleTool?: boolean;
   hidePerpendicularTool?: boolean;
   hideToggleDisplayAxesTool?: boolean;
+  showVolumeTool?: boolean;
 }
 
 export interface StartupOptions {
@@ -84,6 +86,9 @@ export class MeasureTools {
     }
     if (!featureFlags?.hideToggleDisplayAxesTool) {
       toolsToRegister.push(ToggleDisplayMeasurementAxesTool);
+    }
+    if (featureFlags?.showVolumeTool) {
+      toolsToRegister.push(MeasureVolumeTool);
     }
     if (toolsToRegister.length > 0) {
       toolsToRegister.push(ClearMeasurementsTool);

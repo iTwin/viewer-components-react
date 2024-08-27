@@ -43,6 +43,7 @@ export * from "./tools/MeasureLocationTool";
 export * from "./tools/MeasurePerpendicularTool";
 export * from "./tools/MeasureRadiusTool";
 export * from "./tools/MeasureToolDefinitions";
+export * from "./tools/MeasureVolumeTool";
 
 export * from "./ui-2.0/MeasureToolsUiProvider";
 export * from "./ui-2.0/MeasurementPropertyWidget";

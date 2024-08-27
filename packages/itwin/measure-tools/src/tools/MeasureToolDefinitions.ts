@@ -17,6 +17,7 @@ import { MeasureRadiusTool } from "./MeasureRadiusTool";
 import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool";
 import { MeasureTools } from "../MeasureTools";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
+import { MeasureVolumeTool } from "./MeasureVolumeTool";
 
 export class MeasureToolDefinitions {
 
@@ -180,6 +181,19 @@ export class MeasureToolDefinitions {
       ),
       execute: () => {
         void IModelApp.tools.run(MeasurePerpendicularTool.toolId);
+      },
+    });
+  }
+
+  public static getMeasureVolumeToolCommand(enableSheetMeasurements: boolean) {
+    return new ToolItemDef({
+      toolId: MeasureVolumeTool.toolId,
+      iconSpec: MeasureVolumeTool.iconSpec,
+      label: () => MeasureVolumeTool.flyover,
+      tooltip: () => MeasureVolumeTool.description,
+      execute: () => {
+        const tool = new MeasureVolumeTool(enableSheetMeasurements);
+        void tool.run();
       },
     });
   }
