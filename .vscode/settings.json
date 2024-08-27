@@ -1,61 +1,61 @@
-// {
-//   "editor.insertSpaces": true,
-//   "editor.tabSize": 2,
-//   "editor.trimAutoWhitespace": true,
-//   "editor.defaultFormatter": "esbenp.prettier-vscode",
-//   "editor.formatOnSave": false,
-//   "editor.codeActionsOnSave": [
-//     "source.fixAll"
-//   ],
+{
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.trimAutoWhitespace": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": [
+    "source.fixAll"
+  ],
 
-//   "files.associations": {
-//     ".nycrc": "json",
-//   },
-//   "files.exclude": {
-//     "**/coverage": true,
-//     "**/node_modules": true,
-//     "**/lib": true,
-//     "**/build": true
-//   },
-//   "files.insertFinalNewline": true,
-//   "files.trimFinalNewlines": true,
-//   "files.trimTrailingWhitespace": true,
+  "files.associations": {
+    ".nycrc": "json",
+  },
+  "files.exclude": {
+    "**/coverage": true,
+    "**/node_modules": true,
+    "**/lib": true,
+    "**/build": true
+  },
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
 
-//   "[markdown]": {
-//     "editor.tabSize": 4,
-//   },
+  "[markdown]": {
+    "editor.tabSize": 4,
+  },
 
-//   "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 150,
-//   "importSorter.importStringConfiguration.quoteMark": "double",
-//   "importSorter.importStringConfiguration.tabSize": 2,
-//   "importSorter.importStringConfiguration.trailingComma": "multiLine",
-//   "importSorter.generalConfiguration.sortOnBeforeSave": true,
-//   "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 0,
-//   "importSorter.sortConfiguration.removeUnusedImports": true,
-//   "importSorter.sortConfiguration.customOrderingRules.rules": [
-//     {
-//       "type": "importMember",
-//       "regex": "^$",
-//       "orderLevel": 5,
-//       "disableSort": true
-//     },
-//     {
-//       "regex": "^[^.@]",
-//       "orderLevel": 10
-//     },
-//     {
-//       "regex": "^[@]",
-//       "orderLevel": 15
-//     },
-//     {
-//       "regex": "^[.]",
-//       "orderLevel": 30
-//     }
-//   ],
-//   "eslint.workingDirectories": [
-//     {
-//       "mode": "auto"
-//     }
-//   ],
-//   "editor.formatOnSaveMode": "modifications"
-// }
+  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 150,
+  "importSorter.importStringConfiguration.quoteMark": "double",
+  "importSorter.importStringConfiguration.tabSize": 2,
+  "importSorter.importStringConfiguration.trailingComma": "multiLine",
+  "importSorter.generalConfiguration.sortOnBeforeSave": true,
+  "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 0,
+  "importSorter.sortConfiguration.removeUnusedImports": true,
+  "importSorter.sortConfiguration.customOrderingRules.rules": [
+    {
+      "type": "importMember",
+      "regex": "^$",
+      "orderLevel": 5,
+      "disableSort": true
+    },
+    {
+      "regex": "^[^.@]",
+      "orderLevel": 10
+    },
+    {
+      "regex": "^[@]",
+      "orderLevel": 15
+    },
+    {
+      "regex": "^[.]",
+      "orderLevel": 30
+    }
+  ],
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "editor.formatOnSaveMode": "modifications"
+}
