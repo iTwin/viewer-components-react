@@ -39,7 +39,9 @@ export interface MeasureToolsUiProviderOptions {
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: RecursiveRequired<MeasureToolsUiProviderOptions>;
+  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'onFeatureUsed'> & {
+    onFeatureUsed?: (feature: string) => void;
+  };
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
@@ -51,6 +53,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
+      onFeatureUsed: props?.onFeatureUsed,
     };
   }
 
@@ -64,7 +67,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
       if (!featureFlags?.hideDistanceTool) {
-        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props?.enableSheetMeasurement, this._props?.onFeatureUsed));
+        tools.push(MeasureToolDefinitions.getMeasureDistanceToolCommand(this._props.enableSheetMeasurement, this._props?.onFeatureUsed));
       }
       if (!featureFlags?.hideAreaTool) {
         tools.push(MeasureToolDefinitions.getMeasureAreaToolCommand(this._props.enableSheetMeasurement));
