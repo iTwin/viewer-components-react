@@ -2,6 +2,21 @@
   "name": "@itwin/ec3-widget-react",
   "entries": [
     {
+      "date": "Tue, 27 Aug 2024 14:56:26 GMT",
+      "version": "0.9.2",
+      "tag": "@itwin/ec3-widget-react_v0.9.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/ec3-widget-react",
+            "commit": "864ee4c2099b499a635eaa6077f4f443e7a73e2c",
+            "comment": "Template component now correctly handles 404s."
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 05 Jul 2024 12:20:16 GMT",
       "version": "0.9.1",
       "tag": "@itwin/ec3-widget-react_v0.9.1",
