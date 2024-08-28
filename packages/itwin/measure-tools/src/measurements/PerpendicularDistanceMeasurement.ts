@@ -7,14 +7,10 @@ import { Point3d, type XYAndZ, type XYZProps } from "@itwin/core-geometry";
 import { ColorDef, LinePixels } from "@itwin/core-common";
 import type { DecorateContext } from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
-import { FormatterUtils } from "../api/FormatterUtils";
-import { Measurement, type MeasurementEqualityOptions, MeasurementSerializer, type MeasurementWidgetData } from "../api/Measurement";
-import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
+import { Measurement, type MeasurementEqualityOptions, type MeasurementWidgetData } from "../api/Measurement";
 import { MeasureTools } from "../MeasureTools";
-import { DistanceMeasurement } from "./DistanceMeasurement";
+import { DistanceMeasurement, type DistanceMeasurementProps, DistanceMeasurementSerializer } from "./DistanceMeasurement";
 import type { MeasurementProps } from "../api/MeasurementProps";
-import { MeasurementPreferences, MeasurementPreferencesProperty } from "../api/MeasurementPreferences";
-import { MeasurementManager } from "../api/MeasurementManager";
 
 export enum PerpendicularMeasurementType {
   Width = "width",
@@ -24,22 +20,20 @@ export enum PerpendicularMeasurementType {
 /**
  * Props for serializing a [[PerpendicularDistanceMeasurement]].
  */
-export interface PerpendicularDistanceMeasurementProps extends MeasurementProps {
-  startPoint: XYZProps;
-  endPoint: XYZProps;
-  showAxes?: boolean;
+export interface PerpendicularDistanceMeasurementProps extends DistanceMeasurementProps {
   measurementType: PerpendicularMeasurementType;
+  secondaryLine?: XYZProps[];
 }
 
 /** Serializer for a [[PerpendicularDistanceMeasurement]]. */
-export class PerpendicularDistanceMeasurementSerializer extends MeasurementSerializer {
+export class PerpendicularDistanceMeasurementSerializer extends DistanceMeasurementSerializer {
   public static readonly perpendicularDistanceMeasurementName = "perpendicularDistanceMeasurement";
 
-  public get measurementName(): string {
+  public override get measurementName(): string {
     return PerpendicularDistanceMeasurementSerializer.perpendicularDistanceMeasurementName;
   }
 
-  public isValidType(measurement: Measurement): boolean {
+  public override isValidType(measurement: Measurement): boolean {
     return measurement instanceof PerpendicularDistanceMeasurement;
   }
 
@@ -51,7 +45,7 @@ export class PerpendicularDistanceMeasurementSerializer extends MeasurementSeria
     return true;
   }
 
-  protected parseSingle(data: MeasurementProps): Measurement | undefined {
+  protected override parseSingle(data: MeasurementProps): Measurement | undefined {
     if (!this.isValidJSON(data)) return undefined;
 
     const props = data as PerpendicularDistanceMeasurementProps;
@@ -141,94 +135,25 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+    const distanceData = await super.getDataForMeasurementWidgetInternal();
+
     const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(QuantityType.LengthEngineering);
-
     const distance = this.worldScale * this.startPointRef.distance(this.endPointRef);
-    const run =
-      this.drawingMetadata?.worldScale !== undefined
-        ? this.worldScale * Math.abs(this.endPointRef.x - this.startPointRef.x)
-        : this.startPointRef.distanceXY(this.endPointRef);
-    const rise =
-      this.drawingMetadata?.worldScale !== undefined
-        ? this.worldScale * (this.endPointRef.y - this.startPointRef.y)
-        : this.endPointRef.z - this.startPointRef.z;
-    const slope = 0.0 < run ? (100 * rise) / run : 0.0;
-    const dx = Math.abs(this.endPointRef.x - this.startPointRef.x);
-    const dy = Math.abs(this.endPointRef.y - this.startPointRef.y);
-
-    const adjustedStart = this.adjustPointForGlobalOrigin(this.startPointRef);
-    const adjustedEnd = this.adjustPointForGlobalOrigin(this.endPointRef);
-
     const fDistance = IModelApp.quantityFormatter.formatQuantity(distance, lengthSpec);
-    const fStartCoords = FormatterUtils.formatCoordinatesImmediate(adjustedStart);
-    const fEndCoords = FormatterUtils.formatCoordinatesImmediate(adjustedEnd);
-    const fSlope = FormatterUtils.formatSlope(slope, true);
-    const fRun = IModelApp.quantityFormatter.formatQuantity(run, lengthSpec);
-    const fDeltaX = IModelApp.quantityFormatter.formatQuantity(dx, lengthSpec);
-    const fDeltaY = IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec);
-    const fRise = IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec);
 
     const title =
       this._measurementType === PerpendicularMeasurementType.Height
         ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.toolTitle").replace("{0}", fDistance)
         : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.toolTitle").replace("{0}", fDistance);
-    const data: MeasurementWidgetData = { title, properties: [] };
-    MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
-    data.properties.push(
-      {
-        label:
-          this._measurementType === PerpendicularMeasurementType.Height
-            ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.height")
-            : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.width"),
-        name: "DistanceMeasurement_Distance",
-        value: fDistance,
-        aggregatableValue: lengthSpec !== undefined ? { value: distance, formatSpec: lengthSpec } : undefined,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.run"),
-        name: "DistanceMeasurement_Run",
-        value: fRun,
-        aggregatableValue: lengthSpec !== undefined ? { value: run, formatSpec: lengthSpec } : undefined,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.rise"),
-        name: "DistanceMeasurement_Rise",
-        value: fRise,
-      },
-      {
-        label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.slope"),
-        name: "DistanceMeasurement_Slope",
-        value: fSlope,
-      },
-    );
+    const label =
+      this._measurementType === PerpendicularMeasurementType.Height
+        ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.height")
+        : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.width");
 
-    if (this.drawingMetadata?.worldScale === undefined) {
-      data.properties.push(
-        {
-          label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.delta_x"),
-          name: "DistanceMeasurement_Dx",
-          value: fDeltaX,
-        },
-        {
-          label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.delta_y"),
-          name: "DistanceMeasurement_Dy",
-          value: fDeltaY,
-        },
-        {
-          label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.startCoordinates"),
-          name: "DistanceMeasurement_StartPoint",
-          value: fStartCoords,
-        },
-        {
-          label: MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.endCoordinates"),
-          name: "DistanceMeasurement_EndPoint",
-          value: fEndCoords,
-        },
-      );
-    }
-
-    return data;
+    distanceData.title = title;
+    distanceData.properties[0].label = label;
+    return distanceData;
   }
 
   /**
@@ -243,14 +168,19 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
     // Compare data (ignore isDynamic)
     const tol = opts ? opts.tolerance : undefined;
     const otherDist = other as PerpendicularDistanceMeasurement;
-    if (
-      otherDist === undefined ||
-      !this.startPointRef.isAlmostEqual(otherDist.startPointRef, tol) ||
-      !this.endPointRef.isAlmostEqual(otherDist.endPointRef, tol) ||
-      this.showAxes !== otherDist.showAxes
-    )
+    if (this._measurementType !== otherDist.measurementType) {
       return false;
-
+    }
+    if (this._secondaryLine && otherDist._secondaryLine) {
+      if (this._secondaryLine.length !== otherDist._secondaryLine.length) {
+        return false;
+      }
+      for (let i = 0; i < this._secondaryLine.length; i++) {
+        if (!this._secondaryLine[i].isAlmostEqual(otherDist._secondaryLine[i], tol)) {
+          return false;
+        }
+      }
+    }
     return true;
   }
 
@@ -262,12 +192,8 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
     super.copyFrom(other);
 
     if (other instanceof PerpendicularDistanceMeasurement) {
-      this.isDynamic = other.isDynamic;
-      this.showAxes = other.showAxes;
-      this.startPointRef.setFrom(other.startPointRef);
-      this.endPointRef.setFrom(other.endPointRef);
-      this.buildRunRiseAxes();
-      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+      this.measurementType = other.measurementType;
+      this._secondaryLine = other._secondaryLine;
     }
   }
 
@@ -279,16 +205,12 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
     super.readFromJSON(json);
 
     const jsonDist = json as PerpendicularDistanceMeasurementProps;
-    if (jsonDist.startPoint !== undefined) this.startPointRef.setFromJSON(jsonDist.startPoint);
-
-    if (jsonDist.endPoint !== undefined) this.endPointRef.setFromJSON(jsonDist.endPoint);
-
-    if (jsonDist.measurementType !== undefined) this.measurementType = jsonDist.measurementType;
-
-    this.showAxes = jsonDist.showAxes !== undefined ? jsonDist.showAxes : MeasurementPreferences.current.displayMeasurementAxes;
-
-    this.buildRunRiseAxes();
-    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    if (jsonDist.measurementType !== undefined) {
+      this.measurementType = jsonDist.measurementType;
+    }
+    if (jsonDist.secondaryLine !== undefined) {
+      this._secondaryLine = jsonDist.secondaryLine.map((p) => Point3d.fromJSON(p));
+    }
   }
 
   /**
@@ -299,28 +221,11 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
     super.writeToJSON(json);
 
     const jsonDist = json as PerpendicularDistanceMeasurementProps;
-    jsonDist.startPoint = this.startPointRef.toJSON();
-    jsonDist.endPoint = this.endPointRef.toJSON();
-    jsonDist.showAxes = this.showAxes;
     jsonDist.measurementType = this.measurementType;
+    jsonDist.secondaryLine = this._secondaryLine;
   }
 
   public static override fromJSON(data: PerpendicularDistanceMeasurementProps): PerpendicularDistanceMeasurement {
     return new PerpendicularDistanceMeasurement(data);
   }
 }
-
-// Ensure all distance measurements respond to when show axes is turned on/off in preferences
-function onDisplayMeasurementAxesHandler(propChanged: MeasurementPreferencesProperty) {
-  if (propChanged !== MeasurementPreferencesProperty.displayMeasurementAxes) return;
-
-  const showAxes = MeasurementPreferences.current.displayMeasurementAxes;
-
-  MeasurementManager.instance.forAllMeasurements((measurement: Measurement) => {
-    if (measurement instanceof PerpendicularDistanceMeasurement) measurement.showAxes = showAxes;
-
-    return true;
-  });
-}
-
-MeasurementPreferences.current.onPreferenceChanged.addListener(onDisplayMeasurementAxesHandler);
