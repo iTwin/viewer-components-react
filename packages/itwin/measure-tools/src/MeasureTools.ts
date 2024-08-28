@@ -14,7 +14,7 @@ import { MeasureRadiusTool } from "./tools/MeasureRadiusTool";
 import { MeasureAngleTool } from "./tools/MeasureAngleTool";
 import { MeasurePerpendicularTool } from "./tools/MeasurePerpendicularTool";
 import type { Localization } from "@itwin/core-common";
-import { DrawingDataCache } from "./measure-tools-react";
+import { DrawingDataCache } from "./api/DrawingTypeDataCache";
 
 export interface FeatureFlags {
   hideDistanceTool?: boolean;
