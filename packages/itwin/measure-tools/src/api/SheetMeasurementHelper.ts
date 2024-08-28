@@ -4,12 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { ColorDef, QueryBinder } from "@itwin/core-common";
-import type { DecorateContext, GraphicBuilder, IModelConnection } from "@itwin/core-frontend";
+import type { BeButtonEvent, DecorateContext, GraphicBuilder, IModelConnection } from "@itwin/core-frontend";
 import { GraphicType } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { Transform } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import type { DrawingMetadata } from "./Measurement";
+import { DrawingDataCache } from "./DrawingTypeDataCache";
 
 export namespace SheetMeasurementsHelper {
 
@@ -149,5 +150,26 @@ export namespace SheetMeasurementsHelper {
     }
 
     return result;
+  }
+
+  /**
+   * Checks if the drawing pointed by the event is allowed according to the provided drawing types
+   * Will return true if no drawing detected
+   * @param ev
+   * @param allowedDrawingTypes
+   * @returns
+   */
+  export function checkIfAllowedDrawingType(ev: BeButtonEvent, allowedDrawingTypes: DrawingType[]) {
+    if (!ev.viewport?.view.isSheetView()) {
+      return true;
+    }
+    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
+      if (!allowedDrawingTypes.includes(drawing.type)) {
+        if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
