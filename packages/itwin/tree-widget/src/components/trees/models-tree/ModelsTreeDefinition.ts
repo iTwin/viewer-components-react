@@ -88,6 +88,7 @@ interface ModelsTreeInstanceKeyPathsFromTargetItemsProps {
   idsCache: ModelsTreeIdsCache;
   targetItems: Array<InstanceKey | ElementsGroupInfo>;
   hierarchyConfig: ModelsTreeHierarchyConfiguration;
+  limit?: number | "unbounded";
 }
 
 interface ModelsTreeInstanceKeyPathsFromInstanceLabelProps {
@@ -717,9 +718,10 @@ async function createInstanceKeyPathsFromTargetItems({
   imodelAccess,
   hierarchyConfig,
   idsCache,
+  limit,
 }: ModelsTreeInstanceKeyPathsFromTargetItemsProps): Promise<HierarchyFilteringPath[]> {
-  if (targetItems.length > MAX_FILTERING_INSTANCE_KEY_COUNT) {
-    throw new FilterLimitExceededError(MAX_FILTERING_INSTANCE_KEY_COUNT);
+  if (limit !== "unbounded" && targetItems.length > (limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT)) {
+    throw new FilterLimitExceededError(limit ?? MAX_FILTERING_INSTANCE_KEY_COUNT);
   }
   const ids = {
     models: new Array<Id64String>(),
