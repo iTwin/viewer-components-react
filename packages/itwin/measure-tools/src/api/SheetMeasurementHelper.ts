@@ -160,9 +160,8 @@ export namespace SheetMeasurementsHelper {
    * @returns
    */
   export function checkIfAllowedDrawingType(ev: BeButtonEvent, allowedDrawingTypes: DrawingType[]) {
-    if (!ev.viewport?.view.isSheetView()) {
-      return true;
-    }
+    if (!ev.viewport)
+      return false;
     for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
       if (!allowedDrawingTypes.includes(drawing.type)) {
         if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
