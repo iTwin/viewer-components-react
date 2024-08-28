@@ -148,20 +148,11 @@ MeasureLocationToolModel
   }
 
   public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
-    if (!this._enableSheetMeasurements)
+    if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (true !== ev.viewport?.view.isSheetView()) {
-      return true;
-    }
-
-    for (const drawing of DrawingDataCache.getInstance().getSheetDrawingDataForViewport(ev.viewport)) {
-      if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
-        if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
-          return false;
-        }
-      }
-    }
+    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev, [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan]))
+      return false;
 
     return true;
   }
