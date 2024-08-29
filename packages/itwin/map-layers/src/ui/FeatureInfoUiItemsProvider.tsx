@@ -17,6 +17,7 @@ import {
   WidgetState,
 } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
+import type { MapLayerImageryProvider, ScreenViewport } from "@itwin/core-frontend";
 import { SvgMapInfo } from "@itwin/itwinui-icons-react";
 import { MapFeatureInfoTool } from "@itwin/map-layers-formats";
 
@@ -24,6 +25,7 @@ import { MapLayersUI } from "../mapLayers";
 import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
 import type { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
+import type { MapImagerySettings } from "@itwin/core-common";
 
 export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({
@@ -37,32 +39,68 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
     badgeType: BadgeType.TechnicalPreview,
     isHidden: new ConditionalBooleanValue(() => {
       // Hide the MapFeatureInfoTool if the Map Layers toggle is off or no ArcGISFeature layers are active
-      const vp = IModelApp.viewManager.selectedView;
-      if (!vp || !vp.viewFlags.backgroundMap) {
-        return true;
+      let isHidden = true;
+      if (!FeatureInfoUiItemsProvider.mapLayerProviders) {
+        FeatureInfoUiItemsProvider.loadMapLayerProviders();
       }
-      const backgroundLayers = vp.displayStyle.settings.mapImagery.backgroundLayers.map((value) => value.toJSON());
-      for (const layer of backgroundLayers) {
-        if (layer.formatId === "ArcGISFeature") {
-          return false;
+      FeatureInfoUiItemsProvider.mapLayerProviders?.forEach((provider) => {
+        if (provider?.supportsMapFeatureInfo) {
+          isHidden = false;
+          return;
         }
-      }
-      const overlayLayers = vp.displayStyle.settings.mapImagery.overlayLayers.map((value) => value.toJSON());
-      for (const layer of overlayLayers) {
-        if (layer.formatId === "ArcGISFeature") {
-          return false;
-        }
-      }
-      return true;
-    }, [MapLayersSyncUiEventId.MapImageryChanged, SyncUiEventId.ActiveViewportChanged]),
+      });
+      return isHidden;
+    }, [MapLayersSyncUiEventId.MapImageryChanged, SyncUiEventId.ActiveViewportChanged, SyncUiEventId.ViewStateChanged]),
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider {
   // eslint-disable-line deprecation/deprecation
   public readonly id = "FeatureInfoUiItemsProvider";
   public static readonly widgetId = "map-layers:mapFeatureInfoWidget";
+  private static _mapLayerProviders: MapLayerImageryProvider[] | undefined = undefined;
 
-  public constructor(private _featureInfoOpts: MapFeatureInfoOptions) {}
+  public constructor(private _featureInfoOpts: MapFeatureInfoOptions) {
+    IModelApp.viewManager.onViewOpen.addOnce((vp: ScreenViewport) => {
+      const handleMapImageryChanged = (_args: Readonly<MapImagerySettings>) => {
+        FeatureInfoUiItemsProvider.loadMapLayerProviders();
+      };
+      const handleDisplayStyleChanged = () => {
+        FeatureInfoUiItemsProvider.loadMapLayerProviders();
+      };
+      vp.displayStyle.settings.onMapImageryChanged.addListener(handleMapImageryChanged);
+      vp.onDisplayStyleChanged.addListener(handleDisplayStyleChanged);
+    });
+  }
+
+  /** Gets a list of currently active map layer imagery providers. */
+  public static get mapLayerProviders(): MapLayerImageryProvider[] | undefined {
+    return this._mapLayerProviders;
+  }
+
+  public static loadMapLayerProviders() {
+    this._mapLayerProviders = [];
+    const vp = IModelApp.viewManager.selectedView;
+    if (vp?.viewFlags.backgroundMap) {
+      const backgroundLayers = vp.displayStyle.settings.mapImagery.backgroundLayers.map((value) => value.toJSON());
+      for (let bgLayerIndex = 0; bgLayerIndex < backgroundLayers.length; bgLayerIndex++) {
+        const bgLayerProvider = vp.getMapLayerImageryProvider({ index: bgLayerIndex, isOverlay: false });
+        if (!bgLayerProvider) {
+          this._mapLayerProviders = undefined;
+          return;
+        }
+        this._mapLayerProviders.push(bgLayerProvider);
+      }
+      const overlayLayers = vp.displayStyle.settings.mapImagery.overlayLayers.map((value) => value.toJSON());
+      for (let ovLayerIndex = 0; ovLayerIndex < overlayLayers.length; ovLayerIndex++) {
+        const ovLayerProvider = vp.getMapLayerImageryProvider({ index: ovLayerIndex, isOverlay: true });
+        if (!ovLayerProvider) {
+          this._mapLayerProviders = undefined;
+          return;
+        }
+        this._mapLayerProviders.push(ovLayerProvider);
+      }
+    }
+  }
 
   public provideToolbarItems(
     _stageId: string,
