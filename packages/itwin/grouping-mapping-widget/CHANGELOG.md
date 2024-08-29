@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 22 Jul 2024 11:53:05 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Aug 2024 13:08:31 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.29.0
+
+Tue, 20 Aug 2024 13:08:31 GMT
+
+### Minor changes
+
+- Added group deletion callback and deletion confirmation message properties ([#1017](https://github.com/iTwin/viewer-components-react/pull/1017))
 
 ## 0.28.0
 

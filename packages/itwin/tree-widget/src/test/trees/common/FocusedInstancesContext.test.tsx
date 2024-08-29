@@ -80,7 +80,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(async () => {
-      const instanceKeys = await collectKeys(result.current.loadInstanceKeys);
+      const instanceKeys = await collectKeys(result.current.loadFocusedItems);
       expect(instanceKeys).to.containSubset([{ className: "Schema:Class", id: "0x1" }]);
     });
   });
@@ -123,7 +123,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(async () => {
-      const instanceKeys = await collectKeys(result.current.loadInstanceKeys);
+      const instanceKeys = await collectKeys(result.current.loadFocusedItems);
       expect(instanceKeys).to.containSubset([node]);
     });
   });
@@ -165,7 +165,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(async () => {
-      const instanceKeys = await collectKeys(result.current.loadInstanceKeys);
+      const instanceKeys = await collectKeys(result.current.loadFocusedItems);
       expect(instanceKeys).to.containSubset([
         { id: "0x1", className: "Schema:Class" },
         { id: "0x1", className: "Schema:Class" },
@@ -195,7 +195,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.loadInstanceKeys).to.be.undefined;
+      expect(result.current.loadFocusedItems).to.be.undefined;
     });
   });
 
@@ -221,7 +221,7 @@ describe("FocusedInstancesContext", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.loadInstanceKeys).to.be.undefined;
+      expect(result.current.loadFocusedItems).to.be.undefined;
     });
   });
 });
