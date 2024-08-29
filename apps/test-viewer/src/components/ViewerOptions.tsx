@@ -52,7 +52,12 @@ export const statusBarActionsProvider: UiItemsProvider = {
 function ToggleLayoutButton() {
   const { setDensity } = useViewerActionsContext();
   return (
-    <IconButton title="Toggle expanded layout" styleType="borderless" onClick={() => setDensity((prev) => (prev === "default" ? "enlarged" : "default"))}>
+    <IconButton
+      // aria-label="Toggle expanded layout"
+      label="Toggle expanded layout"
+      styleType="borderless"
+      onClick={() => setDensity((prev) => (prev === "default" ? "enlarged" : "default"))}
+    >
       <SvgVisibilityShow />
     </IconButton>
   );

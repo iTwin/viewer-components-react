@@ -57,7 +57,7 @@ test.describe("iModel content tree", () => {
 
       // hover the node for the button to appear
       await node.hover();
-      await node.getByTitle("Apply filter").click();
+      await node.getByRole("button", { name: "Apply filter" }).click();
 
       await locateInstanceFilter(page).waitFor();
       await selectPropertyInDialog(page, "Code");
@@ -68,7 +68,7 @@ test.describe("iModel content tree", () => {
 
       // wait for filtered children to appear
       await locateNode(treeWidget, "PipeSupport").waitFor();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
+      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
 
       await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
@@ -78,7 +78,7 @@ test.describe("iModel content tree", () => {
 
       // hover the node for the button to appear
       await node.hover();
-      await node.getByTitle("Apply filter").click();
+      await node.getByRole("button", { name: "Apply filter" }).click();
 
       await locateInstanceFilter(page).waitFor();
       await selectPropertyInDialog(page, "Is Private");
@@ -87,7 +87,7 @@ test.describe("iModel content tree", () => {
 
       // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
+      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
 
       await takeScreenshot(page, treeWidget, { resetScroll: true });
     });

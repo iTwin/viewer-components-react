@@ -48,7 +48,7 @@ test.describe("Categories tree", () => {
 
       // hover the node for the button to appear
       await node.hover();
-      await node.getByTitle("Apply filter").click();
+      await node.getByRole("button", { name: "Apply filter" }).click();
 
       await locateInstanceFilter(page).waitFor();
       await selectPropertyInDialog(page, "Code");
@@ -59,7 +59,7 @@ test.describe("Categories tree", () => {
 
       // wait for filtered children to appear
       await locateNode(treeWidget, "Equipment - Insulation").waitFor();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
+      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
 
       await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
@@ -69,7 +69,7 @@ test.describe("Categories tree", () => {
 
       // hover the node for the button to appear
       await node.hover();
-      await node.getByTitle("Apply filter").click();
+      await node.getByRole("button", { name: "Apply filter" }).click();
 
       await locateInstanceFilter(page).waitFor();
       await selectPropertyInDialog(page, "Is Private");
@@ -78,14 +78,14 @@ test.describe("Categories tree", () => {
 
       // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
+      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
 
       await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
 
     test("search", async ({ page }) => {
       await locateNode(treeWidget, "Equipment").waitFor();
-      await treeWidget.getByTitle("Search for something").click();
+      await treeWidget.getByRole("button", { name: "Open" }).click();
       await treeWidget.getByPlaceholder("Search...").fill("PipeSupport");
 
       // wait for non searched for nodes to disappear
@@ -95,8 +95,8 @@ test.describe("Categories tree", () => {
 
     test("header buttons overflow", async ({ page }) => {
       await locateNode(treeWidget, "Equipment").waitFor();
-      await treeWidget.getByTitle("Search for something").click();
-      await treeWidget.getByTitle("More").click();
+      await treeWidget.getByRole("button", { name: "Open" }).click();
+      await treeWidget.getByRole("button", { name: "More" }).click();
       await page.locator(".tree-header-button-dropdown-container").waitFor();
       await takeScreenshot(page, treeWidget);
     });
@@ -164,7 +164,7 @@ test.describe("Categories tree", () => {
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
 
-      const applyFilterButton = node.getByTitle("Apply filter");
+      const applyFilterButton = node.getByRole("button", { name: "Apply filter" });
       await expect(applyFilterButton).toBeFocused();
 
       await takeScreenshot(page, node, { resetScroll: true, boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
