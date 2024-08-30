@@ -1,8 +1,16 @@
 # Change Log - @itwin/ec3-widget-react
 
-This log was last generated on Fri, 05 Jul 2024 12:20:16 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Aug 2024 14:56:26 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.9.2
+
+Tue, 27 Aug 2024 14:56:26 GMT
+
+### Patches
+
+- Template component now correctly handles 404s. ([#1022](https://github.com/iTwin/viewer-components-react/pull/1022))
 
 ## 0.9.1
 

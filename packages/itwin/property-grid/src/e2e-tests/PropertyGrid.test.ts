@@ -33,9 +33,9 @@ test.describe("property grid", () => {
 
     test("single element selected - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
-      await propertyWidget.getByTitle("Open search bar").click();
+      await propertyWidget.getByRole("button", { name: "Expand searchbox" }).click();
 
-      await propertyWidget.getByTitle("Close search bar").first().waitFor();
+      await propertyWidget.getByRole("button", { name: "Close searchbox" }).first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -59,9 +59,9 @@ test.describe("property grid", () => {
 
     test("single element with ancestry navigation - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectSingleElementWithAncestry(page);
-      await propertyWidget.getByTitle("Open search bar").click();
+      await propertyWidget.getByRole("button", { name: "Expand searchbox" }).click();
 
-      await propertyWidget.getByTitle("Close search bar").first().waitFor();
+      await propertyWidget.getByRole("button", { name: "Close searchbox" }).first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -84,21 +84,21 @@ test.describe("property grid", () => {
 
     test("multiple elements selected - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
-      await propertyWidget.getByTitle("Open search bar").click();
-      await propertyWidget.getByTitle("Close search bar").first().waitFor();
+      await propertyWidget.getByRole("button", { name: "Expand searchbox" }).click();
+      await propertyWidget.getByRole("button", { name: "Close searchbox" }).first().waitFor();
       await takeScreenshot(page, propertyWidget);
     });
 
     test("elements list", async ({ page }) => {
       const propertyWidget = await selectMultipleElements(page);
-      await propertyWidget.getByTitle("Selected Elements").click();
-      await propertyWidget.getByText("Selected Elements").waitFor();
+      await propertyWidget.getByRole("button", { name: "Selected Elements" }).click();
+      await propertyWidget.getByText("Selected Elements (2)").waitFor();
       await takeScreenshot(page, propertyWidget);
     });
 
     const selectElementFromElementList = async (page: Page) => {
       const propertyWidget = await selectMultipleElements(page);
-      await propertyWidget.getByTitle("Selected Elements").click();
+      await propertyWidget.getByRole("button", { name: "Selected Elements" }).click();
 
       const elementList = propertyWidget.getByRole("list");
       await elementList.getByRole("listitem").filter({ hasText: "BayTown" }).click();
@@ -116,20 +116,19 @@ test.describe("property grid", () => {
 
     test("single element selected from elements list - search bar expanded", async ({ page }) => {
       const propertyWidget = await selectElementFromElementList(page);
-      const expandSearchbarButtons = await propertyWidget.getByTitle("Open search bar").all();
+      const expandSearchbarButtons = await propertyWidget.getByRole("button", { name: "Expand searchbox" }).all();
 
-      // use the second one, since the first one is hidden because of animation that is used for property grid.
-      await expandSearchbarButtons[1].click();
+      await expandSearchbarButtons[0].click();
 
-      await propertyWidget.getByTitle("Close search bar").first().waitFor();
+      await propertyWidget.getByRole("button", { name: "Close searchbox" }).first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
 
     test("single element selected - settings clicked", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
-      await propertyWidget.getByTitle("Settings").click();
-      await page.getByTitle("Hide properties with empty values").waitFor();
+      await propertyWidget.getByRole("button", { name: "Settings" }).click();
+      await page.getByRole("menuitem", { name: "Hide Empty Values" }).waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -137,8 +136,8 @@ test.describe("property grid", () => {
     test("single element selected - settings clicked - empty values hidden", async ({ page }) => {
       const propertyWidget = await selectSingleElement(page);
 
-      await propertyWidget.getByTitle("Settings").click();
-      await page.getByTitle("Hide properties with empty values").click();
+      await propertyWidget.getByRole("button", { name: "Settings" }).click();
+      await page.getByRole("menuitem", { name: "Hide Empty Values" }).click();
 
       await propertyWidget.getByText("BayTown").first().waitFor();
 
@@ -149,7 +148,7 @@ test.describe("property grid", () => {
       const propertyWidget = await selectSingleElement(page);
 
       await propertyWidget.getByTitle("Description").click({ button: "right", position: { x: 5, y: 10 } });
-      await page.getByTitle("Add this property to Favorite category").waitFor();
+      await page.getByRole("menuitem", { name: "Add to Favorite" }).waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -158,8 +157,8 @@ test.describe("property grid", () => {
       const propertyWidget = await selectSingleElement(page);
 
       await propertyWidget.getByTitle("Description").click({ button: "right", position: { x: 5, y: 10 } });
-      await page.getByTitle("Add this property to Favorite category").click();
-      await propertyWidget.getByText("Favorite").first().waitFor();
+      await page.getByRole("menuitem", { name: "Add to Favorite" }).click();
+      await propertyWidget.getByRole("button", { name: "Favorite" }).first().waitFor();
 
       await takeScreenshot(page, propertyWidget);
     });
@@ -168,7 +167,7 @@ test.describe("property grid", () => {
       const propertyWidget = await selectSingleElement(page);
       await propertyWidget.getByTitle("Description").waitFor();
 
-      await propertyWidget.getByTitle("Open search bar").click();
+      await propertyWidget.getByRole("button", { name: "Expand searchbox" }).click();
       const searchBox = propertyWidget.getByRole("searchbox");
 
       await searchBox.fill("BayTown");
@@ -181,7 +180,7 @@ test.describe("property grid", () => {
       const propertyWidget = await selectSingleElement(page);
       await propertyWidget.getByTitle("Description").waitFor();
 
-      await propertyWidget.getByTitle("Open search bar").click();
+      await propertyWidget.getByRole("button", { name: "Expand searchbox" }).click();
       const searchBox = propertyWidget.getByRole("searchbox");
 
       await searchBox.fill("Test");

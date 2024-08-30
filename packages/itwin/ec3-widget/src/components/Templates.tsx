@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, DropdownMenu, IconButton, MenuItem, toaster } from "@itwin/itwinui-react";
+import { Button, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import { SvgAdd, SvgDelete, SvgMore, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { EmptyMessage, LoadingOverlay } from "./utils";
 import "./Templates.scss";
@@ -26,7 +26,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
     config: { getAccessToken, iTwinId, getEC3AccessToken },
   } = useApiContext();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [templates, setTemplates] = useState<Configuration[]>([]);
+  const [templates, setTemplates] = useState<Configuration[] | undefined>();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration | undefined>();
   const [searchValue, setSearchValue] = useState<string>("");
@@ -35,7 +35,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
   const [modalIsOpen, openModal] = useState(false);
   const load = useCallback(async () => {
     setIsLoading(true);
-    if (iTwinId) {
+    try {
       const accessToken = await getAccessToken();
       const templatesResponse = await configClient.getConfigurations(accessToken, iTwinId);
       const configurations: Configuration[] = templatesResponse.map((x) => {
@@ -48,11 +48,12 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
         };
       });
       setTemplates(configurations);
-    } else {
-      toaster.negative("Invalid iTwinId.");
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to load templates.", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   }, [iTwinId, configClient, getAccessToken]);
 
   const refresh = useCallback(async () => {
@@ -60,7 +61,7 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
   }, [load]);
 
   const filteredTemplates = useMemo(
-    () => templates.filter((x) => [x.displayName, x.description].join(" ").toLowerCase().includes(searchValue.toLowerCase())),
+    () => templates?.filter((x) => [x.displayName, x.description].join(" ").toLowerCase().includes(searchValue.toLowerCase())) ?? [],
     [templates, searchValue],
   );
 
@@ -95,6 +96,8 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
       <div className="ec3w-templates-list-container">
         {isLoading ? (
           <LoadingOverlay />
+        ) : !templates ? (
+          <EmptyMessage message={EC3Widget.translate("failedToLoadTemplates")} />
         ) : templates.length === 0 ? (
           <>
             <EmptyMessage message={EC3Widget.translate("noTemplateMsg")} />

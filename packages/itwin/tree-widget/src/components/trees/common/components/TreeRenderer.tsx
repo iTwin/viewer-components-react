@@ -113,6 +113,7 @@ export function TreeRenderer({
         nodeRenderer={nodeRenderer}
         getNode={getNode}
         enableVirtualization={true}
+        style={{ height: "100%" }}
       />
     </LocalizationContextProvider>
   );
