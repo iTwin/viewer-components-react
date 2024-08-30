@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Tue, 20 Aug 2024 13:08:31 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Aug 2024 15:15:02 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.22.0
+
+Wed, 28 Aug 2024 15:15:02 GMT
+
+### Minor changes
+
+- drawingTypeCache refactor ([#992](https://github.com/iTwin/viewer-components-react/pull/992))
 
 ## 0.21.0
 

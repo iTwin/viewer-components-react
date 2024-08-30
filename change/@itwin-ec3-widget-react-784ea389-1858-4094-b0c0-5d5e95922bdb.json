@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Template component now correctly handles 404s.",
-  "packageName": "@itwin/ec3-widget-react",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
