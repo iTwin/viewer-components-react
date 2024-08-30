@@ -99,3 +99,60 @@ An application can further customize UI event behavior by registering override h
 
 A concrete example of this customization is an application that has measurements organized into multiple groups. One group may be "frozen" due to some application state (state that the measure-tools library may be unaware of) and should not be cleared by the clear measurements tool.
 So the application would register a custom UI event handler that would cause those measurements to be ignored when the clear measurement tool is invoked.
+
+### Usage Tracking
+
+This package allows consumers to track the usage of specific features.
+
+This can be achieved by passing `onFeatureUsed` function to `MeasureToolsUiProvider`. The function is invoked with the information about the feature being used. The feature information is based off Feature interface (that can be imported from `"@itwin/measure-tools-react"`)
+
+```
+export interface Feature {
+  name: string;
+  guid: GuidString;
+  metaData?: Map<string, any>;
+}
+```
+
+As an example, for Measure Distance, we will have
+
+```
+{
+  name: "CRT_Tools_MeasureDistance",
+  guid: "10e474ee-9af8-4262-a505-77c9d896b065",
+}
+```
+
+### Example for Usage Tracking
+
+In this case, we create a sample [Itwin Viewer](https://www.npmjs.com/package/@itwin/web-viewer-react) and configure `MeasureToolsUiProvider`
+
+```ts
+import { Feature, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
+
+const App: React.FC = () => {
+  // Viewer Setup here...
+  return (
+    <div className="viewer-container">
+      <Viewer
+        iTwinId={iTwinId ?? ""}
+        iModelId={iModelId ?? ""}
+        changeSetId={changesetId}
+        authClient={authClient}
+        viewCreatorOptions={viewCreatorOptions}
+        enablePerformanceMonitors={true}
+        onIModelAppInit={onIModelAppInit}
+        uiProviders={[
+          new MeasureToolsUiItemsProvider({
+            onFeatureUsed: (feature: Feature) => {
+              console.log(`MeasureTools [${feature.name}] used`);
+            },
+          }),
+        ]}
+      />
+    </div>
+  );
+};
+
+export default App;
+```
