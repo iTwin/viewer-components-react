@@ -108,7 +108,7 @@ export function withDifferentDensities(cb: (density: "default" | "enlarged") => 
     test.describe(`Density: ${density}`, () => {
       density === "enlarged" &&
         test.beforeEach(async ({ page }) => {
-          const expandedLayoutToggleButton = page.getByTitle("Toggle expanded layout");
+          const expandedLayoutToggleButton = page.getByRole("button", { name: "Toggle expanded layout" });
           await expandedLayoutToggleButton.click();
         });
       cb(density);
