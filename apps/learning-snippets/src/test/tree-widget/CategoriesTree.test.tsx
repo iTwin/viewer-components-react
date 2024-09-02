@@ -31,9 +31,9 @@ import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
@@ -71,6 +71,7 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
+          cleanup();
         });
 
         it("Categories tree snippet", async function () {
@@ -86,6 +87,7 @@ describe("Tree-widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+          mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example
           function MyWidget() {
@@ -121,6 +123,7 @@ describe("Tree-widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+          mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-categories-tree-example
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;

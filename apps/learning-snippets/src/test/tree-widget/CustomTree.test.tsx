@@ -20,119 +20,120 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
 
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Components", () => {
-      describe("Imodel content tree", () => {
-        before(async function () {
-          await initializePresentationTesting({
-            backendProps: {
-              caching: {
-                hierarchies: {
-                  mode: HierarchyCacheMode.Memory,
-                },
+      before(async function () {
+        await initializePresentationTesting({
+          backendProps: {
+            caching: {
+              hierarchies: {
+                mode: HierarchyCacheMode.Memory,
               },
             },
-            testOutputDir: join(__dirname, "output"),
-            backendHostProps: {
-              cacheDir: join(__dirname, "cache"),
-            },
-            rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
-          });
-          // eslint-disable-next-line @itwin/no-internal
-          ECSchemaRpcImpl.register();
+          },
+          testOutputDir: join(__dirname, "output"),
+          backendHostProps: {
+            cacheDir: join(__dirname, "cache"),
+          },
+          rpcs: [SnapshotIModelRpcInterface, IModelReadRpcInterface, PresentationRpcInterface, ECSchemaRpcInterface],
         });
+        // eslint-disable-next-line @itwin/no-internal
+        ECSchemaRpcImpl.register();
+      });
 
-        after(async function () {
-          await terminatePresentationTesting();
-        });
+      after(async function () {
+        await terminatePresentationTesting();
+      });
 
-        beforeEach(async () => {
-          await NoRenderApp.startup();
-          await TestUtils.initialize();
-        });
+      beforeEach(async () => {
+        await NoRenderApp.startup();
+        await TestUtils.initialize();
+      });
 
-        afterEach(async () => {
-          TestUtils.terminate();
-          await IModelApp.shutdown();
-          sinon.restore();
-        });
+      afterEach(async () => {
+        TestUtils.terminate();
+        await IModelApp.shutdown();
+        sinon.restore();
+        cleanup();
+      });
 
-        it("Custom tree snippet", async function () {
-          const imodelConnection = (
-            await buildIModel(this, async (builder) => {
-              const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
-              const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
-              insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
-              return { category };
-            })
-          ).imodel;
-          const testViewport = getTestViewer(imodelConnection);
-          const unifiedSelectionStorage = createStorage();
-          sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
-          sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+      it("Custom tree snippet", async function () {
+        const imodelConnection = (
+          await buildIModel(this, async (builder) => {
+            const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
+            const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
+            insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
+            return { category };
+          })
+        ).imodel;
+        const testViewport = getTestViewer(imodelConnection);
+        const unifiedSelectionStorage = createStorage();
+        sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
+        sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
+        mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example
-          type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
-          const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
-            // create a hierarchy definition that defines what should be shown in the tree
-            // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
-            const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess });
-            const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
-            return createClassBasedHierarchyDefinition({
-              classHierarchyInspector: imodelAccess,
-              hierarchy: {
-                // For root nodes, select all BisCore.GeometricModel3d instances
-                rootNodes: async () => [
-                  {
-                    fullClassName: "BisCore.GeometricModel3d",
-                    query: {
-                      ecsql: `
-                      SELECT
-                        ${await nodesQueryFactory.createSelectClause({
-                          ecClassId: { selector: "this.ECClassId" },
-                          ecInstanceId: { selector: "this.ECInstanceId" },
-                          nodeLabel: {
-                            selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
-                          },
-                        })}
-                      FROM BisCore.GeometricModel3d this
-                    `,
-                    },
+        // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example
+        type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
+        const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
+          // create a hierarchy definition that defines what should be shown in the tree
+          // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
+          const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess });
+          const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
+          return createClassBasedHierarchyDefinition({
+            classHierarchyInspector: imodelAccess,
+            hierarchy: {
+              // For root nodes, select all BisCore.GeometricModel3d instances
+              rootNodes: async () => [
+                {
+                  fullClassName: "BisCore.GeometricModel3d",
+                  query: {
+                    ecsql: `
+                    SELECT
+                      ${await nodesQueryFactory.createSelectClause({
+                        ecClassId: { selector: "this.ECClassId" },
+                        ecInstanceId: { selector: "this.ECInstanceId" },
+                        nodeLabel: {
+                          selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                        },
+                      })}
+                    FROM BisCore.GeometricModel3d this
+                  `,
                   },
-                ],
-                childNodes: [],
-              },
-            });
-          };
+                },
+              ],
+              childNodes: [],
+            },
+          });
+        };
 
-          interface MyTreeProps {
-            imodel: IModelConnection;
-          }
+        interface MyTreeProps {
+          imodel: IModelConnection;
+        }
 
-          function MyTree({ imodel }: MyTreeProps) {
-            return (
-              <Tree
-                treeName="MyTree"
-                imodel={imodel}
-                selectionStorage={unifiedSelectionStorage}
-                getSchemaContext={getSchemaContext}
-                getHierarchyDefinition={getHierarchyDefinition}
-                treeRenderer={(props) => <TreeRenderer {...props} />}
-              />
-            );
-          }
-          // __PUBLISH_EXTRACT_END__
-          const result = render(<MyTree imodel={imodelConnection} />);
+        function MyTree({ imodel }: MyTreeProps) {
+          return (
+            <Tree
+              treeName="MyTree"
+              imodel={imodel}
+              selectionStorage={unifiedSelectionStorage}
+              getSchemaContext={getSchemaContext}
+              getHierarchyDefinition={getHierarchyDefinition}
+              treeRenderer={(props) => <TreeRenderer {...props} />}
+            />
+          );
+        }
+        // __PUBLISH_EXTRACT_END__
+        const result = render(<MyTree imodel={imodelConnection} />);
 
-          await waitFor(() => result.getByText("TestPhysicalModel"));
-        });
+        await waitFor(() => result.getByText("TestPhysicalModel"));
       });
     });
   });
 });
+

@@ -30,6 +30,7 @@ describe("Tree-widget", () => {
           await IModelApp.shutdown();
           sinon.restore();
         });
+        
         it("Unified selection storage learning snippet", async function () {
           // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Selection-storage-example
           let unifiedSelectionStorage: SelectionStorage | undefined;

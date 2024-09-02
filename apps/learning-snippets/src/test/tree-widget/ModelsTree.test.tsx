@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-import { expect } from "chai";
 import { join } from "path";
 import { useCallback } from "react";
 import sinon from "sinon";
@@ -22,9 +21,9 @@ import {
 } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -68,6 +67,7 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
+          cleanup();
         });
 
         it("Models tree learning snippet", async function () {
@@ -83,6 +83,7 @@ describe("Tree-widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
+          mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example
           function MyWidget() {
@@ -100,9 +101,10 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-          const { findByText } = render(<MyWidget />);
+          const { getByText } = render(<MyWidget />);
 
-          await waitFor(async () => expect(findByText("tree-widget-learning-snippets-components-models-tree-models-tree-learning-snippet")).to.not.be.null);
+          // eslint-disable-next-line no-console
+          await waitFor(async () => getByText("tree-widget-learning-snippets-components-models-tree-models-tree-learning-snippet"));
         });
 
         it("Custom models tree", async function () {
@@ -123,6 +125,7 @@ describe("Tree-widget", () => {
           const getSublabel = () => <>Sub label</>;
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
+          mockGetBoundingClientRect();
 
           // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-models-tree-example
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
@@ -168,13 +171,13 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-          const { findByText } = render(
+          const { getByText } = render(
             <CustomModelsTreeComponent imodel={testImodel} viewport={testViewport} getSchema={getSchemaContext} selectionStorage={unifiedSelectionStorage} />,
           );
 
           await waitFor(() => {
-            expect(expect(findByText("tree-widget-learning-snippets-components-models-tree-custom-models-tree")).to.not.be.null);
-            expect(expect(findByText("Sub label")).to.not.be.null);
+            getByText("tree-widget-learning-snippets-components-models-tree-custom-models-tree");
+            getByText("Sub label");
           });
         });
       });

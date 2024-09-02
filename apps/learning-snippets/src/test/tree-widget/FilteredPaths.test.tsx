@@ -13,12 +13,14 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import {
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
 import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -84,6 +86,7 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
+          cleanup();
         });
 
         it("Filtered paths snippet", async function () {
@@ -100,8 +103,9 @@ describe("Tree-widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+          mockGetBoundingClientRect();
 
-          const { findByText, queryByText } = render(
+          const { getByText, queryByText } = render(
             // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-filtered-paths-example
             <CustomModelsTreeComponent
               selectionStorage={unifiedSelectionStorage}
@@ -110,7 +114,7 @@ describe("Tree-widget", () => {
               getFilteredPaths={async ({ createInstanceKeyPaths }) => {
                 return createInstanceKeyPaths({
                   // list of instance keys representing nodes that should be displayed in the hierarchy
-                  keys: [imodel.physicalModel],
+                  targetItems: [imodel.physicalModel],
                 });
               }}
             />,
@@ -118,7 +122,7 @@ describe("Tree-widget", () => {
           );
 
           await waitFor(() => {
-            expect(findByText("TestPhysicalModel")).to.not.be.null;
+            getByText("TestPhysicalModel");
             expect(queryByText("TestPhysicalModel 2")).to.be.null;
           });
         });
@@ -137,15 +141,20 @@ describe("Tree-widget", () => {
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+          mockGetBoundingClientRect();
 
-          const { findByText, queryByText } = render(
+          const { getByText, queryByText } = render(
             // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-filtered-paths-with-options-example
             <CustomModelsTreeComponent
               selectionStorage={unifiedSelectionStorage}
               imodel={imodel.imodel}
               viewport={testViewport}
               getFilteredPaths={async ({ createInstanceKeyPaths }) => {
-                const paths = await createInstanceKeyPaths({ keys: [imodel.physicalModel] });
+                const paths = await createInstanceKeyPaths({ targetItems: [imodel.physicalModel] });
+                const finalPaths =  paths?.map((path) => ({ path: Array.isArray(path) ? path : path.path, options: { autoExpand: false } }));
+                // eslint-disable-next-line no-console
+                console.log(finalPaths);
+                return finalPaths
                 // disable auto-expansion
                 return paths?.map((path) => ({ ...path, options: { autoExpand: false } }));
               }}
@@ -154,7 +163,7 @@ describe("Tree-widget", () => {
           );
 
           await waitFor(() => {
-            expect(findByText("TestPhysicalModel")).to.not.be.null;
+            getByText("TestPhysicalModel");
             expect(queryByText("TestPhysicalModel 2")).to.be.null;
           });
         });
