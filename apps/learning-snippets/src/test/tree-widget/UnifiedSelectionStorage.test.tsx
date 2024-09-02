@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { expect } from "chai";
 import sinon from "sinon";
@@ -60,6 +64,7 @@ describe("Tree-widget", () => {
           // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Selection-storage-initialize-example
           await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
           // __PUBLISH_EXTRACT_END__
+          
           expect(spy.calledOnce);
           Presentation.terminate();
         });

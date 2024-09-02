@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { join } from "path";
 import sinon from "sinon";
@@ -10,7 +14,6 @@ import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-s
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
-
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
@@ -22,9 +25,7 @@ import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
-
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-
 import type { VisibilityStatus } from "@itwin/tree-widget-react";
 
 describe("Tree-widget", () => {
@@ -113,13 +114,11 @@ describe("Tree-widget", () => {
             });
           };
 
-          const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] = ({ imodelAccess }) => {
+          const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] = () => {
             return {
               // event that can be used to notify tree when visibility of instances represented by tree nodes changes from outside.
               onVisibilityChange: new BeEvent(),
               async getVisibilityStatus(_node: HierarchyNode): Promise<VisibilityStatus> {
-                // TODO find where to put imodelAccess
-                if (imodelAccess === undefined) return { state: "hidden" };
                 return { state: "visible" };
                 // determine visibility status of the instance represented by tree node.
               },
@@ -150,8 +149,8 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
           const result = render(<MyVisibilityTree imodel={imodelConnection} />);
+          
           await waitFor(() => result.getByText("TestPhysicalModel"));
         });
       });

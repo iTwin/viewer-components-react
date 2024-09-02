@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
@@ -14,8 +18,6 @@ import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertSubject } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
-
-import type { InstanceKey } from "@itwin/presentation-common";
 
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
@@ -56,15 +58,10 @@ describe("Tree-widget", () => {
         });
 
         it("Imodel content tree snippet", async function () {
-          const rootSubject: InstanceKey = { className: "BisCore.Subject", id: IModel.rootSubjectId };
-          const dictionaryModel: InstanceKey = { className: "BisCore.DictionaryModel", id: IModel.dictionaryId };
-
           const imodel = (
             await buildIModel(this, async (builder) => {
               const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
-              const subjectB = insertSubject({ builder, codeValue: "B", parentId: IModel.rootSubjectId });
-              const subjectC = insertSubject({ builder, codeValue: "C", parentId: subjectB.id });
-              return { rootSubject, dictionaryModel, subjectA, subjectB, subjectC };
+              return { subjectA };
             })
           ).imodel;
           const testViewport = getTestViewer(imodel);
@@ -84,8 +81,8 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
           const { getByText } = render(<MyWidget />);
+
           await waitFor(() => getByText("tree-widget-learning-snippets-components-imodel-content-tree-imodel-content-tree-snippet"));
         });
       });

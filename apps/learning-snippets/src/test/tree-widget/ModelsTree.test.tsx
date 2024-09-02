@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { expect } from "chai";
 import { join } from "path";
@@ -96,7 +100,6 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
           const { findByText } = render(<MyWidget />);
 
           await waitFor(async () => expect(findByText("tree-widget-learning-snippets-components-models-tree-models-tree-learning-snippet")).to.not.be.null);

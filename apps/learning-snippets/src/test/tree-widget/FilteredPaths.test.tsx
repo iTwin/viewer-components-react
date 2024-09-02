@@ -1,6 +1,10 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-import { expect } from "chai";
 /* eslint-disable @typescript-eslint/no-shadow */
+import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
@@ -19,18 +23,18 @@ import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtil
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
-type HierarchyProviderProps = Parameters<typeof useModelsTree>[0];
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-filtered-paths-component-example
+type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
 
 interface CustomCategoriesTreeProps {
-  getFilteredPaths: HierarchyProviderProps["getFilteredPaths"];
+  getFilteredPaths: useModelsTreeProps["getFilteredPaths"];
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
 }
 
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-filtered-paths-component-example
 function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorage, imodel }: CustomCategoriesTreeProps) {
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, filter: "", getFilteredPaths });
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
 
   return (
     <VisibilityTree
@@ -112,6 +116,7 @@ describe("Tree-widget", () => {
             />,
             // __PUBLISH_EXTRACT_END__
           );
+
           await waitFor(() => {
             expect(findByText("TestPhysicalModel")).to.not.be.null;
             expect(queryByText("TestPhysicalModel 2")).to.be.null;

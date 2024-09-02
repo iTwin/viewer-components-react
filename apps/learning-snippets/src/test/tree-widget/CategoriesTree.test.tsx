@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 /* eslint-disable @typescript-eslint/no-shadow */
 import { join } from "path";
@@ -99,8 +103,8 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
           const { getByText } = render(<MyWidget />);
+
           await waitFor(() => getByText("Test SpatialCategory"));
         });
 
@@ -168,7 +172,6 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
           const { getByText } = render(
             <CustomCategoriesTreeComponent
               imodel={imodelConnection}
@@ -177,6 +180,7 @@ describe("Tree-widget", () => {
               selectionStorage={unifiedSelectionStorage}
             />,
           );
+          
           await waitFor(() => getByText("Test SpatialCategory"));
         });
       });

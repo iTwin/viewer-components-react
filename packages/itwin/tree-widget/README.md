@@ -212,10 +212,33 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchema, selectionStora
 
 Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
 
- <!-- [[include: [Presentation.Tree-widget.Get-filtered-paths-example], tsx]] -->
+ <!-- [[include: [Presentation.Tree-widget.Get-filtered-paths-component-example, Presentation.Tree-widget.Get-filtered-paths-example], tsx]] -->
  <!-- BEGIN EXTRACTION -->
 
 ```tsx
+type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
+
+interface CustomCategoriesTreeProps {
+  getFilteredPaths: useModelsTreeProps["getFilteredPaths"];
+  viewport: Viewport;
+  selectionStorage: SelectionStorage;
+  imodel: IModelConnection;
+}
+
+function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorage, imodel }: CustomCategoriesTreeProps) {
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+
+  return (
+    <VisibilityTree
+      {...modelsTreeProps}
+      getSchemaContext={getSchemaContext}
+      selectionStorage={selectionStorage}
+      imodel={imodel}
+      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+    />
+  );
+}
+
 <CustomModelsTreeComponent
   selectionStorage={unifiedSelectionStorage}
   imodel={imodel.imodel}
@@ -235,10 +258,33 @@ The `ModelsTree` component displays a message when too many matches are found wh
 
 When a filter is provided or instance focus mode is used, the hierarchy automatically expands to show the targeted nodes. This might not be desirable when displaying a subset of the hierarchy and can be disabled by adding the `autoExpand: false` option to each path returned by `getFilteredPaths`:
 
- <!-- [[include: [Presentation.Tree-widget.Get-filtered-paths-with-options-example], tsx]] -->
+ <!-- [[include: [Presentation.Tree-widget.Get-filtered-paths-component-example, Presentation.Tree-widget.Get-filtered-paths-with-options-example], tsx]] -->
  <!-- BEGIN EXTRACTION -->
 
 ```tsx
+type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
+
+interface CustomCategoriesTreeProps {
+  getFilteredPaths: useModelsTreeProps["getFilteredPaths"];
+  viewport: Viewport;
+  selectionStorage: SelectionStorage;
+  imodel: IModelConnection;
+}
+
+function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorage, imodel }: CustomCategoriesTreeProps) {
+  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
+
+  return (
+    <VisibilityTree
+      {...modelsTreeProps}
+      getSchemaContext={getSchemaContext}
+      selectionStorage={selectionStorage}
+      imodel={imodel}
+      treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+    />
+  );
+}
+
 <CustomModelsTreeComponent
   selectionStorage={unifiedSelectionStorage}
   imodel={imodel.imodel}
@@ -522,13 +568,11 @@ const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({
   });
 };
 
-const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] = ({ imodelAccess }) => {
+const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] = () => {
   return {
     // event that can be used to notify tree when visibility of instances represented by tree nodes changes from outside.
     onVisibilityChange: new BeEvent(),
     async getVisibilityStatus(_node: HierarchyNode): Promise<VisibilityStatus> {
-      // TODO find where to put imodelAccess
-      if (imodelAccess === undefined) return { state: "hidden" };
       return { state: "visible" };
       // determine visibility status of the instance represented by tree node.
     },
@@ -627,9 +671,9 @@ Typically, we want one schema context per iModel per application - this allows s
   <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import type { IModelConnection } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 const schemaContextCache = new Map<string, SchemaContext>();
 function getSchemaContext(imodel: IModelConnection) {

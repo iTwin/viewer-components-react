@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 /* eslint-disable no-console */
 import type { Widget } from "@itwin/appui-react";
@@ -34,8 +38,6 @@ import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
-
-
 
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
@@ -164,8 +166,8 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
           render(<MyWidget />);
+
           await waitFor(() => {
             expect(consoleSpy).to.be.calledOnce;
           });
@@ -226,6 +228,7 @@ describe("Tree-widget", () => {
           }
           // __PUBLISH_EXTRACT_END__
           render(<MyWidget />);
+
           await waitFor(() => {
             expect(consoleSpy).to.be.calledOnce;
           });

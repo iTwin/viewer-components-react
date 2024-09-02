@@ -99,8 +99,9 @@ describe("Tree-widget", () => {
                     getLabel: () => ModelsTreeComponent.getLabel(),
                     render: (_props: any) => (
                       <ModelsTreeComponent
-                        // see "Models tree" section for details regarding `getSchemaContext` and `selectionStorage` props
+                        // see "Creating schema context" section for example implementation
                         getSchemaContext={getSchemaContext}
+                        // see "Creating unified selection storage" section for example implementation
                         selectionStorage={unifiedSelectionStorage}
                         selectionMode={"extended"}
                       />
@@ -111,6 +112,7 @@ describe("Tree-widget", () => {
             ] as readonly Widget[],
         });
         // __PUBLISH_EXTRACT_END__
+        
         expect(createTreeWidgetFunction).to.not.be.undefined;
         const widgets = createTreeWidgetFunction!();
         expect(widgets).to.not.be.undefined;

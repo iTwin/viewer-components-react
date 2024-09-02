@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { join } from "path";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example-imports
@@ -124,8 +128,8 @@ describe("Tree-widget", () => {
             );
           }
           // __PUBLISH_EXTRACT_END__
-
           const result = render(<MyTree imodel={imodelConnection} />);
+
           await waitFor(() => result.getByText("TestPhysicalModel"));
         });
       });

@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { expect } from "chai";
 import { join } from "path";
@@ -7,11 +11,10 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-schema-context-example-imports
-import type { IModelConnection } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
+import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 
 describe("Tree-widget", () => {
@@ -67,6 +70,7 @@ describe("Tree-widget", () => {
           }
           // __PUBLISH_EXTRACT_END__
           const result = getSchemaContext(imodelConnection);
+          
           expect(result).to.be.eq(schemaContextCache.get(imodelConnection.getRpcProps().key));
         });
       });

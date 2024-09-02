@@ -9,9 +9,7 @@ const cpx = require("cpx2");
 
 // get all packages in pnpm workspace (this include root package)
 
-//
-// TODO: `pnpm list -r --depth -1 --only-projects --json` generates an invalid json, fix this
-//
+// `pnpm list -r --depth -1 --only-projects --json` generates an invalid json
 const files =
   "[" +
   execSync("pnpm list -r --depth -1 --only-projects --json", { encoding: "utf-8" })
