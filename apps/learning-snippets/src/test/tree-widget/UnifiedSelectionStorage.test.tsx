@@ -1,13 +1,17 @@
+/* eslint-disable import/no-duplicates */
 import { expect } from "chai";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+// __PUBLISH_EXTRACT_START__  Presentation.Tree-widget.Selection-storage-initialize-example-imports
 import { Presentation } from "@itwin/presentation-frontend";
-import { createStorage } from "@itwin/unified-selection";
+// __PUBLISH_EXTRACT_END__
 import { TestUtils } from "../../utils/TestUtils";
-
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Typical-example-imports
+// __PUBLISH_EXTRACT_START__  Presentation.Tree-widget.Selection-storage-example-imports
+import { IModelConnection } from "@itwin/core-frontend";
+import { createStorage } from "@itwin/unified-selection";
 import type { SelectionStorage } from "@itwin/unified-selection";
 // __PUBLISH_EXTRACT_END__
+
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Components", () => {

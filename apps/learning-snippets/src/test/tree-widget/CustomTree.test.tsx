@@ -1,5 +1,11 @@
+/* eslint-disable import/no-duplicates */
 import { join } from "path";
-import React from "react";
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example-imports
+import type { ComponentPropsWithoutRef } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
+import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
+import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 // __PUBLISH_EXTRACT_END__
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
@@ -8,18 +14,12 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
-import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
-import type { ComponentPropsWithoutRef } from "react";
-import type { IModelConnection } from "@itwin/core-frontend";
 
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {

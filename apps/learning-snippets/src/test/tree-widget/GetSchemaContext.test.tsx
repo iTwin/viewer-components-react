@@ -1,17 +1,19 @@
+/* eslint-disable import/no-duplicates */
 import { expect } from "chai";
 import { join } from "path";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import type { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { ECSchemaRpcInterface, ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Typical-example-imports
-
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-schema-context-example-imports
+import type { IModelConnection } from "@itwin/core-frontend";
+import { SchemaContext } from "@itwin/ecschema-metadata";
+import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 // __PUBLISH_EXTRACT_END__
+
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Components", () => {

@@ -1,6 +1,4 @@
 import { join } from "path";
-import React from "react";
-// __PUBLISH_EXTRACT_END__
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { IModel, IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
@@ -9,8 +7,9 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Imodel-content-tree-example-imports
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertSubject } from "../../utils/IModelUtils";

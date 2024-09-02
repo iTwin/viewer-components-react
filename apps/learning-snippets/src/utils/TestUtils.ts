@@ -2,6 +2,7 @@
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import { TreeWidget } from "@itwin/tree-widget-react";
@@ -45,6 +46,7 @@ export function getTestViewer(imodel: IModelConnection) {
     onDisplayStyleChanged: new BeEvent<() => void>(),
     view: { isSpatialView: () => true, is3d: () => true, is2d: () => false, viewsCategory: () => true, viewsModel: () => true },
     viewsModel: () => true,
+    perModelCategoryVisibility: { getOverride: () => PerModelCategoryVisibility.Override.Show },
     iModel: imodel,
   } as unknown as Viewport;
 }

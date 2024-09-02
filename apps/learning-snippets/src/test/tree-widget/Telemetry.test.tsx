@@ -1,20 +1,20 @@
+/* eslint-disable import/no-duplicates */
 /* eslint-disable no-console */
 import type { Widget } from "@itwin/appui-react";
 import { expect } from "chai";
 import { join } from "path";
 import React from "react";
 import sinon from "sinon";
-import { UiFramework, UiItemsManager } from "@itwin/appui-react";
-import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
-import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import { UiFramework } from "@itwin/appui-react";
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-usage-example-imports
+import { UiItemsManager } from "@itwin/appui-react";
+import { CategoriesTreeComponent, createTreeWidget} from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-tree-component-example-imports
+import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-custom-tree-example-imports
 import {
-  CategoriesTreeComponent,
-  createTreeWidget,
-  ModelsTreeComponent,
   TelemetryContextProvider,
   TreeWithHeader,
   useCategoriesTree,
@@ -22,14 +22,21 @@ import {
   VisibilityTree,
   VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+
+import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
+import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Typical-example-imports
 
-// __PUBLISH_EXTRACT_END__
+
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Telemetry", () => {
@@ -95,8 +102,8 @@ describe("Tree-widget", () => {
               createTreeWidget({
                 trees: [
                   {
-                    id: ModelsTreeComponent.id,
-                    getLabel: () => ModelsTreeComponent.getLabel(),
+                    id: CategoriesTreeComponent.id,
+                    getLabel: () => CategoriesTreeComponent.getLabel(),
                     render: (_props: any) => (
                       <CategoriesTreeComponent
                         // see "Categories tree" section for details regarding `getSchemaContext` and `selectionStorage` props
@@ -144,7 +151,7 @@ describe("Tree-widget", () => {
           // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-tree-component-example
           function MyWidget() {
             return (
-              <CategoriesTreeComponent
+              <IModelContentTreeComponent
                 onPerformanceMeasured={(feature, elapsedTime) => {
                   console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
                 }}

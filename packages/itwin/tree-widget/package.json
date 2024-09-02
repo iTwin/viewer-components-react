@@ -32,7 +32,6 @@
     "copy:cjs": "cpx \"./src/**/*.{scss,json}\" ./lib/cjs",
     "copy:esm": "cpx \"./src/**/*.{scss,json}\" ./lib/esm",
     "cover": "nyc npm run test",
-    "docs": "betools extract --fileExt=ts,tsx --extractFrom=./src/test --recursive --out=./build/docs/extract",
     "extract-api": "betools extract-api --entry=tree-widget-react --apiReportFolder=./api --apiReportTempFolder=./api/temp --apiSummaryFolder=./api",
     "check-internal": "node ../../../scripts/checkInternal.js --apiSummary ./api/tree-widget-react.api.md",
     "lint": "npm run lint:eslint && npm run lint:stylelint",
@@ -46,8 +45,11 @@
     "test:e2e:local": "node ../../../scripts/run-e2e-tests.js",
     "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
     "clean": "rimraf lib",
-    "rebuild": "npm run clean && npm run build"
+    "rebuild": "npm run clean && npm run build",
+    "update-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md",
+    "check-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md --check"
   },
+
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",
     "@itwin/appui-react": "^4.10.0",

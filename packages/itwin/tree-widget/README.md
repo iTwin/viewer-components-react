@@ -46,10 +46,18 @@ await TreeWidget.  (IModelApp.localization);
 
 In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `createTreeWidget` function that can be used to add the tree widget to UI through a `UiItemsProvider`:
 
-  <!-- [[include: [Presentation.Tree-widget.Register-example, ], tsx]] -->
-```ts
+  <!-- [[include: [Presentation.Tree-widget.Register-example-imports, Presentation.Tree-widget.Register-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
+```tsx
+// import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
 import { UiItemsManager } from "@itwin/appui-react";
-import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { render } from "@testing-library/react";
+import * as selectableTreeModule from "../../components/SelectableTree";
+import { ModelsTreeComponent } from "../../components/trees/models-tree/ModelsTreeComponent";
+import { createTreeWidget } from "../../components/TreeWidgetUiItemsProvider";
+import { TestUtils } from "../TestUtils";
 
 UiItemsManager.register({
   id: "tree-widget-provider",
@@ -60,7 +68,7 @@ UiItemsManager.register({
         {
           id: ModelsTreeComponent.id,
           getLabel: () => ModelsTreeComponent.getLabel(),
-          render: (props) => (
+          render: (_props: any) => (
             <ModelsTreeComponent
               // see "Models tree" section for details regarding `getSchemaContext` and `selectionStorage` props
               getSchemaContext={getSchemaContext}
@@ -68,19 +76,15 @@ UiItemsManager.register({
               selectionMode={"extended"}
             />
           ),
-        },
-        // add a custom component
-        {
-          id: "my-tree-id",
-          startIcon: <MyTreeIcon />,
-          getLabel: () => "My Custom Tree",
-          render: () => <>This is my custom tree.</>,
-        },
+        }, // add a custom component
+        { id: "my-tree-id", startIcon: <svg />, getLabel: () => "My Custom Tree", render: () => <>This is my custom tree.</> },
       ],
     }),
   ],
 });
 ```
+
+  <!-- END EXTRACTION -->
 
 As seen in the above code snippet, `createTreeWidget` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
 
@@ -100,43 +104,29 @@ The component renders a tree that tries to replicate how a typical "Models" tree
 
 Typical usage:
 
+  <!-- [[include: [Presentation.Tree-widget.Models-tree-example-imports, Presentation.Tree-widget.Models-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SelectionStorage } from "@itwin/unified-selection";
-import { ModelsTreeComponent } from "@itwin/tree-widget-react";
-
-// The Models tree requires a unified selection storage to support selection synchronization with the
-// application. The storage should be created once per application and shared across multiple selection-enabled
-// components.
-function getUnifiedSelectionStorage(): SelectionStorage {
-  // see "Creating unified selection storage" section for example implementation
-}
-
-// Schema context is used by Models tree to access iModels metadata. Similar to selection storage, it should be
-// created once per application and shared across multiple components.
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // see "Creating schema context" section for example implementation
-}
+import { ModelsTreeComponent, TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
     <ModelsTreeComponent
+      // see "Creating schema context" section for example implementation
       getSchemaContext={getSchemaContext}
-      selectionStorage={getUnifiedSelectionStorage()}
+      // see "Creating unified selection storage" section for example implementation
+      selectionStorage={unifiedSelectionStorage}
       headerButtons={[
-        (props) => <ModelsTreeComponent.ShowAllButton {...props} />,
-        (props) => <ModelsTreeComponent.HideAllButton {...props} />,
-        (props) => <MyCustomButton />,
+        (props) => <ModelsTreeComponent.ShowAllButton {...props} key={"ShowAllButton"} />,
+        (props) => <ModelsTreeComponent.HideAllButton {...props} key={"HideAllButton"} />,
       ]}
-      selectionMode={"extended"}
-      hierarchyConfig={{
-        elementClassGrouping: "enable",
-      }}
     />
   );
 }
 ```
+
+  <!-- END EXTRACTION -->
 
 Available header buttons:
 
@@ -162,16 +152,51 @@ This package provides building blocks for custom models tree:
 
 Example:
 
+  <!-- [[include: [Presentation.Tree-widget.Custom-models-tree-example-imports, Presentation.Tree-widget.Custom-models-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
+import { TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import type { SelectionStorage } from "@itwin/unified-selection";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
+import type { ComponentPropsWithoutRef } from "react";
+
+type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
+type CustomModelsTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
+function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
+  const getLabel = props.getLabel;
+  const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+    (node: any) => {
+      const originalLabel = getLabel(node);
+      return <>Custom node - {originalLabel}</>;
+    },
+    [getLabel],
+  );
+  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
+}
+
+interface CustomModelsTreeProps {
+  imodel: IModelConnection;
+  viewport: Viewport;
+  getSchema: (imodel: IModelConnection) => SchemaContext;
+  selectionStorage: SelectionStorage;
+}
+
+function CustomModelsTreeComponent({ imodel, viewport, getSchema, selectionStorage }: CustomModelsTreeProps) {
   const buttonProps = useModelsTreeButtonProps({ imodel, viewport });
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
 
   return (
-    <TreeWithHeader buttons={[<ModelsTreeComponent.ShowAllButton {...buttonProps} />, <ModelsTreeComponent.HideAllButton {...buttonProps} />]}>
+    <TreeWithHeader
+      buttons={[
+        <ModelsTreeComponent.ShowAllButton {...buttonProps} key={"ShowAllButton"} />,
+        <ModelsTreeComponent.HideAllButton {...buttonProps} key={"HideAllButton"} />,
+      ]}
+    >
       <VisibilityTree
         {...modelsTreeProps}
-        getSchemaContext={getSchemaContext}
+        getSchemaContext={getSchema}
         selectionStorage={selectionStorage}
         imodel={imodel}
         treeRenderer={(props) => <CustomModelsTreeRenderer {...props} {...rendererProps} />}
@@ -179,48 +204,53 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
     </TreeWithHeader>
   );
 }
-
-type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
-type CustomModelsTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
-
-function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
-  const getLabel = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
-    (node) => {
-      const originalLabel = props.getLabel(node);
-      return <>Custom node - {originalLabel}</>;
-    },
-    [props.getLabel],
-  );
-  return <VisibilityTreeRenderer {...props} getLabel={getLabel} getSublabel={getSublabel} />;
-}
 ```
+
+  <!-- END EXTRACTION -->
 
 #### Displaying a subset of the tree
 
 Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
 
+ <!-- [[include: [Presentation.Tree-widget.Get-filtered-paths-example], tsx]] -->
+ <!-- BEGIN EXTRACTION -->
+
 ```tsx
-const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
-  return createInstanceKeyPaths({
-    // list of instance keys representing nodes that should be displayed in the hierarchy
-    keys: myInstanceKeys,
-    // instead of providing instance keys, a label can be provided to display all nodes that contain it
-    // label: "MyLabel"
-  });
-};
+<CustomModelsTreeComponent
+  selectionStorage={unifiedSelectionStorage}
+  imodel={imodel.imodel}
+  viewport={testViewport}
+  getFilteredPaths={async ({ createInstanceKeyPaths }) => {
+    return createInstanceKeyPaths({
+      // list of instance keys representing nodes that should be displayed in the hierarchy
+      keys: [imodel.physicalModel],
+    });
+  }}
+/>,
 ```
+
+ <!-- END EXTRACTION -->
 
 The `ModelsTree` component displays a message when too many matches are found while filtering the tree; for this reason, it is recommended to throw `FilterLimitExceededError` that is provided by this package when the displayed subset is too large. Typically, this error is thrown when there are more than 100 matches. The error is cleared when a new reference for `getFilteredPaths` is provided.
 
 When a filter is provided or instance focus mode is used, the hierarchy automatically expands to show the targeted nodes. This might not be desirable when displaying a subset of the hierarchy and can be disabled by adding the `autoExpand: false` option to each path returned by `getFilteredPaths`:
 
+ <!-- [[include: [Presentation.Tree-widget.Get-filtered-paths-with-options-example], tsx]] -->
+ <!-- BEGIN EXTRACTION -->
+
 ```tsx
-const getFilteredPaths = async ({ createInstanceKeyPaths }) => {
-  const paths = await createInstanceKeyPaths({ keys: myInstanceKeys });
-  // disable auto-expansion
-  return paths.map((path) => ({ path, options: { autoExpand: false } }));
-};
+<CustomModelsTreeComponent
+  selectionStorage={unifiedSelectionStorage}
+  imodel={imodel.imodel}
+  viewport={testViewport}
+  getFilteredPaths={async ({ createInstanceKeyPaths }) => {
+    const paths = await createInstanceKeyPaths({ keys: [imodel.physicalModel] });
+    // disable auto-expansion
+    return paths?.map((path) => ({ ...path, options: { autoExpand: false } }));
+  }}
 ```
+
+ <!-- END EXTRACTION -->
 
 ### Categories tree
 
@@ -230,39 +260,26 @@ The component, based on the active view, renders a hierarchy of either spatial (
 
 Typical usage:
 
+  <!-- [[include: [Presentation.Tree-widget.Categories-tree-example-imports, Presentation.Tree-widget.Categories-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SelectionStorage } from "@itwin/unified-selection";
-import { CategoriesTreeComponent, CategoriesTreeComponent } from "@itwin/tree-widget-react";
-
-// The Categories tree requires a unified selection storage to support selection synchronization with the
-// application. The storage should be created once per application and shared across multiple selection-enabled
-// components.
-function getUnifiedSelectionStorage(): SelectionStorage {
-  // see "Creating unified selection storage" section for example implementation
-}
-
-// Schema context is used by Categories tree to access iModels metadata. Similar to selection storage, it should be
-// created once per application and shared across multiple components.
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // see "Creating schema context" section for example implementation
-}
+import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
     <CategoriesTreeComponent
+      // see "Creating schema context" section for example implementation
       getSchemaContext={getSchemaContext}
-      selectionStorage={getUnifiedSelectionStorage()}
-      headerButtons={[
-        (props) => <CategoriesTreeComponent.ShowAllButton {...props} />,
-        (props) => <CategoriesTreeComponent.HideAllButton {...props} />,
-        (props) => <MyCustomButton />,
-      ]}
+      // see "Creating unified selection storage" section for example implementation
+      selectionStorage={unifiedSelectionStorage}
+      headerButtons={[(props) => <CategoriesTreeComponent.ShowAllButton {...props} />, (props) => <CategoriesTreeComponent.HideAllButton {...props} />]}
     />
   );
 }
 ```
+
+  <!-- END EXTRACTION -->
 
 Available header buttons:
 
@@ -279,13 +296,54 @@ This package provides building blocks for custom categories tree:
 
 Example:
 
+  <!-- [[include: [Presentation.Tree-widget.Custom-categories-tree-example-imports, Presentation.Tree-widget.Custom-categories-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
+import { TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { SelectionStorage } from "@itwin/unified-selection";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
+import type { ComponentPropsWithoutRef } from "react";
+
+type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
+type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
+
+function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) {
+  const getLabel = props.getLabel;
+  const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
+    (node) => {
+      const originalLabel = getLabel(node);
+      return <>Custom node - {originalLabel}</>;
+    },
+    [getLabel],
+  );
+
+  const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
+    return <>Custom sub label</>;
+  }, []);
+
+  return <VisibilityTreeRenderer {...props} getLabel={getLabelCallback} getSublabel={getSublabel} />;
+}
+
+interface CustomCategoriesTreeProps {
+  imodel: IModelConnection;
+  viewport: Viewport;
+  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
+  selectionStorage: SelectionStorage;
+}
+
 function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
-  const buttonProps = useCategoriesTreeButtonProps({ imodel, viewport });
-  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport });
+  const buttonProps = useCategoriesTreeButtonProps({ viewport });
+  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
 
   return (
-    <TreeWithHeader buttons={[<CategoriesTreeComponent.ShowAllButton {...buttonProps} />, <CategoriesTreeComponent.HideAllButton {...buttonProps} />]}>
+    <TreeWithHeader
+      buttons={[
+        <CategoriesTreeComponent.ShowAllButton {...buttonProps} key={"ShowAllButton"} />,
+        <CategoriesTreeComponent.HideAllButton {...buttonProps} key={"HideAllButton"} />,
+      ]}
+    >
       <VisibilityTree
         {...categoriesTreeProps}
         getSchemaContext={getSchemaContext}
@@ -296,26 +354,9 @@ function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, sel
     </TreeWithHeader>
   );
 }
-
-type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
-type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
-
-function CustomCategoriesTreeRenderer(props: CustomCategoriesTreeRendererProps) {
-  const getLabel = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
-    (node) => {
-      const originalLabel = props.getLabel(node);
-      return <>Custom node - {originalLabel}</>;
-    },
-    [props.getLabel],
-  );
-
-  const getSublabel = useCallback<Required<VisibilityTreeRendererProps>["getSublabel"]>(() => {
-    return <>Custom sub label</>;
-  }, []);
-
-  return <VisibilityTreeRenderer {...props} getLabel={getLabel} getSublabel={getSublabel} />;
-}
 ```
+
+  <!-- END EXTRACTION -->
 
 ### iModel content tree
 
@@ -332,34 +373,25 @@ In general, the component is expected to be used by advanced users to inspect co
 
 Typical usage:
 
+  <!-- [[include: [Presentation.Tree-widget.Imodel-content-tree-example-imports, Presentation.Tree-widget.Imodel-content-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SelectionStorage } from "@itwin/unified-selection";
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
-
-// The iModel content tree requires a unified selection storage to support selection synchronization with the
-// application. The storage should be created once per application and shared across multiple selection-enabled
-// components.
-function getUnifiedSelectionStorage(): SelectionStorage {
-  // see "Creating unified selection storage" section for example implementation
-}
-
-// Schema context is used by iModel content tree to access iModels metadata. Similar to selection storage, it should be
-// created once per application and shared across multiple components.
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // see "Creating schema context" section for example implementation
-}
 
 function MyWidget() {
   return (
     <IModelContentTreeComponent
+      // see "Creating schema context" section for example implementation
       getSchemaContext={getSchemaContext}
-      selectionStorage={getUnifiedSelectionStorage()}
+      // see "Creating unified selection storage" section for example implementation
+      selectionStorage={unifiedSelectionStorage}
     />
   );
 }
 ```
+
+  <!-- END EXTRACTION -->
 
 ### Custom trees
 
@@ -374,39 +406,68 @@ A "basic" tree is a tree that renders the hierarchy without visibility control -
 
 Example:
 
+  <!-- [[include: [Presentation.Tree-widget.Custom-tree-example-imports, Presentation.Tree-widget.Custom-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-import { ComponentPropsWithoutRef } from "react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SelectionStorage } from "@itwin/unified-selection";
+import type { ComponentPropsWithoutRef } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
-
-
-function getUnifiedSelectionStorage(): SelectionStorage {
-  // see "Creating unified selection storage" section for example implementation
-}
-
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // see "Creating schema context" section for example implementation
-}
+import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
+import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 
 type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
 const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
   // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
+  const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess });
+  const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
+  return createClassBasedHierarchyDefinition({
+    classHierarchyInspector: imodelAccess,
+    hierarchy: {
+      // For root nodes, select all BisCore.GeometricModel3d instances
+      rootNodes: async () => [
+        {
+          fullClassName: "BisCore.GeometricModel3d",
+          query: {
+            ecsql: `
+            SELECT
+              ${await nodesQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                },
+              })}
+            FROM BisCore.GeometricModel3d this
+          `,
+          },
+        },
+      ],
+      childNodes: [],
+    },
+  });
+};
+
+interface MyTreeProps {
+  imodel: IModelConnection;
 }
 
 function MyTree({ imodel }: MyTreeProps) {
-  return <Tree
-    treeName="MyTree"
-    imodel={imodel}
-    selectionStorage={getUnifiedSelectionStorage()}
-    getSchemaContext={getSchemaContext}
-    getHierarchyDefinition={getHierarchyDefinition}
-    treeRenderer={(props) => <TreeRenderer {...props} />}
-  />;
+  return (
+    <Tree
+      treeName="MyTree"
+      imodel={imodel}
+      selectionStorage={unifiedSelectionStorage}
+      getSchemaContext={getSchemaContext}
+      getHierarchyDefinition={getHierarchyDefinition}
+      treeRenderer={(props) => <TreeRenderer {...props} />}
+    />
+  );
 }
 ```
+
+  <!-- END EXTRACTION -->
 
 #### Custom visibility tree
 
@@ -417,57 +478,89 @@ A visibility tree is a tree that renders the hierarchy and allows controlling vi
 
 Example:
 
+  <!-- [[include: [Presentation.Tree-widget.Custom-visibility-tree-example-imports, Presentation.Tree-widget.Custom-visibility-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-import { ComponentPropsWithoutRef } from "react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModelConnection } from "@itwin/core-frontend";
-import { SchemaContext } from "@itwin/ecschema-metadata";
-import { SelectionStorage } from "@itwin/unified-selection";
 import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
-
-
-function getUnifiedSelectionStorage(): SelectionStorage {
-  // see "Creating unified selection storage" section for example implementation
-}
-
-function getSchemaContext(imodel: IModelConnection): SchemaContext {
-  // see "Creating schema context" section for example implementation
-}
+import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
+import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import type { ComponentPropsWithoutRef } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
   // create a hierarchy definition that defines what should be shown in the tree
   // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
-}
+  const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess });
+  const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
+  return createClassBasedHierarchyDefinition({
+    classHierarchyInspector: imodelAccess,
+    hierarchy: {
+      // For root nodes, select all BisCore.GeometricModel3d instances
+      rootNodes: async () => [
+        {
+          fullClassName: "BisCore.GeometricModel3d",
+          query: {
+            ecsql: `
+            SELECT
+              ${await nodesQueryFactory.createSelectClause({
+                ecClassId: { selector: "this.ECClassId" },
+                ecInstanceId: { selector: "this.ECInstanceId" },
+                nodeLabel: {
+                  selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                },
+              })}
+            FROM BisCore.GeometricModel3d this
+          `,
+          },
+        },
+      ],
+      childNodes: [],
+    },
+  });
+};
 
 const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] = ({ imodelAccess }) => {
   return {
     // event that can be used to notify tree when visibility of instances represented by tree nodes changes from outside.
     onVisibilityChange: new BeEvent(),
-    async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
+    async getVisibilityStatus(_node: HierarchyNode): Promise<VisibilityStatus> {
+      // TODO find where to put imodelAccess
+      if (imodelAccess === undefined) return { state: "hidden" };
+      return { state: "visible" };
       // determine visibility status of the instance represented by tree node.
     },
-    async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
+    async changeVisibility(_node: HierarchyNode, _on: boolean): Promise<void> {
       // change visibility of the instance represented by tree node.
     },
     dispose() {
       // if necessary, do some clean up before new visibility handler is created or component is unmounted.
     },
   };
+};
+
+interface MyVisibilityTreeProps {
+  imodel: IModelConnection;
 }
 
 function MyVisibilityTree({ imodel }: MyVisibilityTreeProps) {
-  return <VisibilityTree
-    treeName="MyVisibilityTree"
-    imodel={imodel}
-    selectionStorage={getUnifiedSelectionStorage()}
-    getSchemaContext={getSchemaContext}
-    getHierarchyDefinition={getHierarchyDefinition}
-    visibilityHandlerFactory={visibilityFactory}
-    treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
-  />;
+  return (
+    <VisibilityTree
+      treeName="MyVisibilityTree"
+      imodel={imodel}
+      selectionStorage={unifiedSelectionStorage}
+      getSchemaContext={getSchemaContext}
+      getHierarchyDefinition={getHierarchyDefinition}
+      visibilityHandlerFactory={visibilityHandlerFactory}
+      treeRenderer={(props) => <VisibilityTreeRenderer {...props} />}
+    />
+  );
 }
 ```
+
+  <!-- END EXTRACTION -->
 
 ### Hierarchy level size limiting
 
@@ -489,9 +582,13 @@ Tree components that support selection synchronization, require a unified select
 
 Typically, we want one unified selection storage per application - this makes sure that selection in all application's components is synchronized. Below is an example implementation of `getUnifiedSelectionStorage` function that creates the storage and clears it when an iModel is closed:
 
-```ts
+  <!-- [[include: [Presentation.Tree-widget.Selection-storage-example-imports, Presentation.Tree-widget.Selection-storage-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
+```tsx
 import { IModelConnection } from "@itwin/core-frontend";
-import { createStorage, SelectionStorage } from "@itwin/unified-selection";
+import { createStorage } from "@itwin/unified-selection";
+import type { SelectionStorage } from "@itwin/unified-selection";
 
 let unifiedSelectionStorage: SelectionStorage | undefined;
 function getUnifiedSelectionStorage(): SelectionStorage {
@@ -505,17 +602,20 @@ function getUnifiedSelectionStorage(): SelectionStorage {
 }
 ```
 
+  <!-- END EXTRACTION -->
+
 In case the application is also using components driven by APIs from `@itwin/presentation-frontend` package, which has its own selection manager, the single unified selection storage object should be passed to [`Presentation.initialize`](https://www.itwinjs.org/reference/presentation-frontend/core/presentation/initializestatic/) function, e.g.:
 
-```ts
+  <!-- [[include: [Presentation.Tree-widget.Selection-storage-initialize-example-imports, Presentation.Tree-widget.Selection-storage-initialize-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
+```tsx
 import { Presentation } from "@itwin/presentation-frontend";
 
-Presentation.initialize({
-  selection: {
-    selectionStorage: getUnifiedSelectionStorage(),
-  },
-});
+await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
 ```
+
+  <!-- END EXTRACTION -->
 
 ### Creating schema context
 
@@ -523,8 +623,11 @@ All tree components delivered with the package require a [`SchemaContext`](https
 
 Typically, we want one schema context per iModel per application - this allows schema information to be shared across components, saving memory and time required to access the metadata. Below is an example implementation of `getSchemaContext` function, required by tree components:
 
-```ts
-import { IModelConnection } from "@itwin/core-frontend";
+  <!-- [[include: [Presentation.Tree-widget.Get-schema-context-example-imports, Presentation.Tree-widget.Get-schema-context-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
+```tsx
+import type { IModelConnection } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 
@@ -533,6 +636,7 @@ function getSchemaContext(imodel: IModelConnection) {
   const key = imodel.getRpcProps().key;
   let schemaContext = schemaContextCache.get(key);
   if (!schemaContext) {
+    // eslint-disable-next-line @itwin/no-internal
     const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
     schemaContext = new SchemaContext();
     schemaContext.addLocater(schemaLocater);
@@ -542,6 +646,8 @@ function getSchemaContext(imodel: IModelConnection) {
   return schemaContext;
 }
 ```
+
+  <!-- END EXTRACTION -->
 
 ## Telemetry
 
@@ -586,62 +692,122 @@ Where `{tree}` specifies which tree component the feature is of.
 
 ### Example
 
-```ts
-import { UiItemsManager } from "@itwin/appui-react";
-import { TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
+  <!-- [[include: [Presentation.Tree-widget.Telemetry-usage-example-imports, Presentation.Tree-widget.Telemetry-usage-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
 
-UiItemsManager.register(
-  new TreeWidgetUiItemsProvider({
-    onPerformanceMeasured={(feature, elapsedTime) => {
-      telemetryClient.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-    }},
-    onFeatureUsed={(feature) => {
-      telemetryClient.log(`TreeWidget [${feature}] used`);
-    }},
-  })
-);
+```tsx
+import { UiItemsManager } from "@itwin/appui-react";
+import { CategoriesTreeComponent, createTreeWidget } from "@itwin/tree-widget-react";
+
+UiItemsManager.register({
+  id: "tree-widget-provider",
+  getWidgets: () => [
+    createTreeWidget({
+      trees: [
+        {
+          id: CategoriesTreeComponent.id,
+          getLabel: () => CategoriesTreeComponent.getLabel(),
+          render: (_props: any) => (
+            <CategoriesTreeComponent
+              // see "Categories tree" section for details regarding `getSchemaContext` and `selectionStorage` props
+              getSchemaContext={getSchemaContext}
+              selectionStorage={unifiedSelectionStorage}
+              selectionMode={"extended"}
+              onPerformanceMeasured={(feature, elapsedTime) => {
+                console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+              }}
+              onFeatureUsed={(feature) => {
+                console.log(`TreeWidget [${feature}] used`);
+              }}
+            />
+          ),
+        },
+      ],
+    }),
+  ],
+});
 ```
+
+  <!-- END EXTRACTION -->
 
 For individual tree components the callbacks should be supplied through props:
 
+  <!-- [[include: [Presentation.Tree-widget.Telemetry-tree-component-example-imports, Presentation.Tree-widget.Telemetry-tree-component-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-import { ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
-    <ModelsTreeComponent
-      {...otherProps}
+    <IModelContentTreeComponent
       onPerformanceMeasured={(feature, elapsedTime) => {
-        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`)
+        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
       }}
       onFeatureUsed={(feature) => {
-        console.log(`TreeWidget [${feature}] used`)
+        console.log(`TreeWidget [${feature}] used`);
       }}
+      getSchemaContext={getSchemaContext}
+      selectionStorage={unifiedSelectionStorage}
     />
   );
 }
 ```
 
+  <!-- END EXTRACTION -->
+
 For custom tree components `TelemetryContextProvider` should be used:
 
+  <!-- [[include: [Presentation.Tree-widget.Telemetry-custom-tree-example-imports, Presentation.Tree-widget.Telemetry-custom-tree-example], tsx]] -->
+  <!-- BEGIN EXTRACTION -->
+
 ```tsx
-import { TelemetryContextProvider } from "@itwin/tree-widget-react";
+import {
+  TelemetryContextProvider,
+  TreeWithHeader,
+  useCategoriesTree,
+  useCategoriesTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
 
 function MyWidget() {
-  return <TelemetryContextProvider
-    componentIdentifier="MyTree"
-    onPerformanceMeasured={(feature, elapsedTime) => {
-      console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`)
-    }}
-    onFeatureUsed={(feature) => {
-      console.log(`TreeWidget [${feature}] used`)
-    }}
-  >
-    <MyTree />
-  </TelemetryContextProvider>;
+  return (
+    <TelemetryContextProvider
+      componentIdentifier="MyTree"
+      onPerformanceMeasured={(feature, elapsedTime) => {
+        console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
+      }}
+      onFeatureUsed={(feature) => {
+        console.log(`TreeWidget [${feature}] used`);
+      }}
+    >
+      <MyTree />
+    </TelemetryContextProvider>
+  );
 }
-
 function MyTree() {
-  // see "Custom trees" section for example implementation
+  const buttonProps = useCategoriesTreeButtonProps({ viewport });
+  const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
+
+  return (
+    <TreeWithHeader
+      buttons={[
+        <CategoriesTreeComponent.ShowAllButton {...buttonProps} key={"ShowAllButton"} />,
+        <CategoriesTreeComponent.HideAllButton {...buttonProps} key={"HideAllButton"} />,
+      ]}
+    >
+      <VisibilityTree
+        {...categoriesTreeProps}
+        getSchemaContext={getSchemaContext}
+        selectionStorage={unifiedSelectionStorage}
+        imodel={imodel}
+        treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+      />
+    </TreeWithHeader>
+  );
+  // see "Custom trees" section for more example implementations
 }
 ```
+
+  <!-- END EXTRACTION -->

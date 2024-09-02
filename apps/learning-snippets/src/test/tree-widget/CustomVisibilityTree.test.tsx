@@ -1,27 +1,32 @@
+/* eslint-disable import/no-duplicates */
 import { join } from "path";
-// __PUBLISH_EXTRACT_END__
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-visibility-tree-example-imports
 import { BeEvent } from "@itwin/core-bentley";
+import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
+import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
+import type { ComponentPropsWithoutRef } from "react";
+import type { IModelConnection } from "@itwin/core-frontend";
+// __PUBLISH_EXTRACT_END__
+
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
-import { createBisInstanceLabelSelectClauseFactory } from "@itwin/presentation-shared";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
-import type { IModelConnection } from "@itwin/core-frontend";
+
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
+
 import type { VisibilityStatus } from "@itwin/tree-widget-react";
-import type { ComponentPropsWithoutRef } from "react";
+
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Components", () => {
@@ -74,7 +79,7 @@ describe("Tree-widget", () => {
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-visibility-tree-example
           type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
           const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
             // create a hierarchy definition that defines what should be shown in the tree

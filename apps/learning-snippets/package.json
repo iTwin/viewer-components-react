@@ -1,5 +1,5 @@
 {
-  "name": "presentation-learning-snippets",
+  "name": "@itwin/presentation-learning-snippets",
   "version": "0.0.0",
   "description": "Learning snippets for ReadMes",
   "private": true,
@@ -10,9 +10,7 @@
     "cover": "npm run -s test",
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "test": "mocha --config ./.mocharc.json",
-    "docs": "betools extract --fileExt=ts,tsx --extractFrom=./src --recursive --out=./build/docs/extract",
-    "update-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md,./learning",
-    "check-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md,./learning --check"
+    "docs": "betools extract --fileExt=ts,tsx --extractFrom=./src --recursive --out=./build/docs/extract"
   },
   "dependencies": {
     "@itwin/tree-widget-react": "workspace:*",

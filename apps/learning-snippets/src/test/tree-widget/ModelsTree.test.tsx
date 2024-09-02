@@ -1,3 +1,4 @@
+/* eslint-disable import/no-duplicates */
 import { expect } from "chai";
 import { join } from "path";
 import { useCallback } from "react";
@@ -8,20 +9,25 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Typical-example-imports
-import { ModelsTreeComponent, TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import {
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example-imports
+import {
+  ModelsTreeComponent, TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer,
+} from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { InstanceKey } from "@itwin/presentation-common";
 import type { SelectionStorage } from "@itwin/unified-selection";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
-// __PUBLISH_EXTRACT_END__
+import type { InstanceKey } from "@itwin/presentation-common";
+
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Components", () => {

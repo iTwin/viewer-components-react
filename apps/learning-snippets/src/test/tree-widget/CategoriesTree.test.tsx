@@ -1,30 +1,35 @@
+/* eslint-disable import/no-duplicates */
+/* eslint-disable @typescript-eslint/no-shadow */
 import { join } from "path";
 import { useCallback } from "react";
-// __PUBLISH_EXTRACT_END__
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-/* eslint-disable @typescript-eslint/no-shadow */
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
-import {
-  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-} from "@itwin/presentation-testing";
+import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
+import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-categories-tree-example-imports
 import {
-  CategoriesTreeComponent, TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer,
+  TreeWithHeader,
+  useCategoriesTree,
+  useCategoriesTreeButtonProps,
+  VisibilityTree,
+  VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { SelectionStorage } from "@itwin/unified-selection";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
+import type { ComponentPropsWithoutRef } from "react";
+// __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
 import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
-
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { SelectionStorage } from "@itwin/unified-selection";
-import type { ComponentPropsWithoutRef } from "react";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
 
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
