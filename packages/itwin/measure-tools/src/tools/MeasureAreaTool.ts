@@ -36,7 +36,6 @@ MeasureAreaToolModel
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
   private _enableSheetMeasurements: boolean;
-  private _drawingTypeCache?: DrawingDataCache;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -72,10 +71,6 @@ MeasureAreaToolModel
 
   public override async onPostInstall(): Promise<void> {
     await super.onPostInstall();
-    if (this._enableSheetMeasurements) {
-      this._drawingTypeCache = new DrawingDataCache();
-      await this._drawingTypeCache.updateDrawingTypeCache(this.iModel);
-    }
   }
 
   public override async onReinitialize(): Promise<void> {
@@ -148,22 +143,11 @@ MeasureAreaToolModel
   }
 
   public override isValidLocation(ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
-    if (!this._enableSheetMeasurements)
+    if (!this._enableSheetMeasurements || !ev.viewport?.view.isSheetView())
       return true;
 
-    if (true !== ev.viewport?.view.isSheetView()) {
-      return true;
-    }
-
-    if (this._drawingTypeCache) {
-      for (const drawing of this._drawingTypeCache.drawingtypes) {
-        if (SheetMeasurementsHelper.checkIfInDrawing(ev.point, drawing.origin, drawing.extents)) {
-          if (drawing.type !== SheetMeasurementsHelper.DrawingType.CrossSection && drawing.type !== SheetMeasurementsHelper.DrawingType.Plan) {
-            return false;
-          }
-        }
-      }
-    }
+    if (!SheetMeasurementsHelper.checkIfAllowedDrawingType(ev, [SheetMeasurementsHelper.DrawingType.CrossSection, SheetMeasurementsHelper.DrawingType.Plan]))
+      return false;
 
     if (this.toolModel.drawingMetadata?.drawingId === undefined || this.toolModel.drawingMetadata?.origin === undefined || this.toolModel.drawingMetadata?.extents === undefined)
       return true;

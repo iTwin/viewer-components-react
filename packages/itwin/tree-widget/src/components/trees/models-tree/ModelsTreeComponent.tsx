@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Fragment, useEffect } from "react";
-import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeWithHeader } from "../../tree-header/TreeWithHeader";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { FocusedInstancesContextProvider } from "../common/FocusedInstancesContextProvider";
+import { useActiveViewport } from "../common/UseActiveViewport";
 import { useFiltering } from "../common/UseFiltering";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ModelsTree } from "./ModelsTree";

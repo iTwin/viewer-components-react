@@ -10,4 +10,9 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+
+  .tree-widget-no-trees-container {
+    width: 100%;
+    height: 100%;
+  }
 }

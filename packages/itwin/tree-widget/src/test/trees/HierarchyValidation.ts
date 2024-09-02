@@ -8,6 +8,7 @@ import { InstanceKey } from "@itwin/presentation-shared";
 import { collect } from "./Common";
 
 import type { HierarchyProvider, NonGroupingHierarchyNode } from "@itwin/presentation-hierarchies";
+
 export interface HierarchyDef<TNode> {
   node: TNode;
   children?: Array<HierarchyDef<TNode>> | boolean;
