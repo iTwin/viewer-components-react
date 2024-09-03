@@ -63,7 +63,6 @@ describe("Tree-widget", () => {
         TestUtils.terminate();
         await IModelApp.shutdown();
         sinon.restore();
-        cleanup();
       });
 
       it("Custom visibility tree snippet", async function () {
@@ -153,6 +152,7 @@ describe("Tree-widget", () => {
         const result = render(<MyVisibilityTree imodel={imodelConnection} />);
         
         await waitFor(() => result.getByText("TestPhysicalModel"));
+        cleanup();
       });
     });
   });

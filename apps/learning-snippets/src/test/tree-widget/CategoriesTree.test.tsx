@@ -71,7 +71,6 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
-          cleanup();
         });
 
         it("Categories tree snippet", async function () {
@@ -108,6 +107,7 @@ describe("Tree-widget", () => {
           const { getByText } = render(<MyWidget />);
 
           await waitFor(() => getByText("Test SpatialCategory"));
+          cleanup();
         });
 
         it("Custom categories tree snippet", async function () {
@@ -185,6 +185,7 @@ describe("Tree-widget", () => {
           );
 
           await waitFor(() => getByText("Test SpatialCategory"));
+          cleanup();
         });
       });
     });

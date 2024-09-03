@@ -70,7 +70,7 @@ describe("Tree-widget", () => {
           }
           // __PUBLISH_EXTRACT_END__
           const result = getSchemaContext(imodelConnection);
-          
+
           expect(result).to.be.eq(schemaContextCache.get(imodelConnection.getRpcProps().key));
         });
       });

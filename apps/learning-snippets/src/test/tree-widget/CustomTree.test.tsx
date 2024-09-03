@@ -59,7 +59,6 @@ describe("Tree-widget", () => {
         TestUtils.terminate();
         await IModelApp.shutdown();
         sinon.restore();
-        cleanup();
       });
 
       it("Custom tree snippet", async function () {
@@ -131,6 +130,7 @@ describe("Tree-widget", () => {
         const result = render(<MyTree imodel={imodelConnection} />);
 
         await waitFor(() => result.getByText("TestPhysicalModel"));
+        cleanup();
       });
     });
   });

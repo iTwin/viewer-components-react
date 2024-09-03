@@ -55,7 +55,6 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
-          cleanup();
         });
 
         it("Imodel content tree snippet", async function () {
@@ -86,6 +85,7 @@ describe("Tree-widget", () => {
           const { getByText } = render(<MyWidget />);
 
           await waitFor(() => getByText("tree-widget-learning-snippets-components-imodel-content-tree-imodel-content-tree-snippet"));
+          cleanup();
         });
       });
     });

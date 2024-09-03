@@ -7,7 +7,6 @@
 import type { Widget } from "@itwin/appui-react";
 import { expect } from "chai";
 import { join } from "path";
-import React from "react";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-usage-example-imports
@@ -35,7 +34,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
@@ -133,6 +132,7 @@ describe("Tree-widget", () => {
           await waitFor(() => {
             expect(consoleSpy).to.be.calledOnce;
           });
+          cleanup();
         });
 
         it("Telemetry for individual tree components learning snippet", async function () {
@@ -171,6 +171,7 @@ describe("Tree-widget", () => {
           await waitFor(() => {
             expect(consoleSpy).to.be.calledOnce;
           });
+          cleanup();
         });
 
         it("Telemetry for custom components learning snippet", async function () {
@@ -232,6 +233,7 @@ describe("Tree-widget", () => {
           await waitFor(() => {
             expect(consoleSpy).to.be.calledOnce;
           });
+          cleanup();
         });
       });
     });

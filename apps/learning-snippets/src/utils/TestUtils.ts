@@ -23,7 +23,7 @@ export class TestUtils {
       return;
     }
 
-    await UiFramework.initialize(undefined);
+    await UiFramework.initialize();
     // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Tree-widget-initialize
     await TreeWidget.initialize(new EmptyLocalization());
     // __PUBLISH_EXTRACT_END__

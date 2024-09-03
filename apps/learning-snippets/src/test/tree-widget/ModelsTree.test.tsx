@@ -70,7 +70,6 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
-          cleanup();
         });
 
         it("Models tree learning snippet", async function () {
@@ -108,6 +107,7 @@ describe("Tree-widget", () => {
 
           // eslint-disable-next-line no-console
           await waitFor(async () => getByText("tree-widget-learning-snippets-components-models-tree-models-tree-learning-snippet"));
+          cleanup();
         });
 
         it("Custom models tree", async function () {
@@ -182,6 +182,7 @@ describe("Tree-widget", () => {
             getByText("tree-widget-learning-snippets-components-models-tree-custom-models-tree");
             getByText("Sub label");
           });
+          cleanup();
         });
       });
     });
