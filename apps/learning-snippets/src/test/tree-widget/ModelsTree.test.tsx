@@ -16,19 +16,22 @@ import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example-imports
+import { ModelsTreeComponent } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-models-tree-example-imports
 import {
-  ModelsTreeComponent, TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer,
+ TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
+import type { SelectionStorage } from "@itwin/unified-selection";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { SchemaContext } from "@itwin/ecschema-metadata";
+import type { ComponentPropsWithoutRef } from "react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
-import type { SelectionStorage } from "@itwin/unified-selection";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { SchemaContext } from "@itwin/ecschema-metadata";
-import type { ComponentPropsWithoutRef } from "react";
 import type { InstanceKey } from "@itwin/presentation-common";
 
 describe("Tree-widget", () => {

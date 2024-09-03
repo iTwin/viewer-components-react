@@ -108,7 +108,7 @@ Typical usage:
   <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { ModelsTreeComponent, TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
+import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 
 function MyWidget() {
   return (
@@ -291,12 +291,7 @@ function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorag
   viewport={testViewport}
   getFilteredPaths={async ({ createInstanceKeyPaths }) => {
     const paths = await createInstanceKeyPaths({ targetItems: [imodel.physicalModel] });
-    const finalPaths =  paths?.map((path) => ({ path: Array.isArray(path) ? path : path.path, options: { autoExpand: false } }));
-    // eslint-disable-next-line no-console
-    console.log(finalPaths);
-    return finalPaths
-    // disable auto-expansion
-    return paths?.map((path) => ({ ...path, options: { autoExpand: false } }));
+    return  paths?.map((path) => ({ path: Array.isArray(path) ? path : path.path, options: { autoExpand: false } }));
   }}
 ```
 
