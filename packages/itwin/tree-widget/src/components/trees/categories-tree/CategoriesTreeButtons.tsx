@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAsyncValue } from "@itwin/components-react";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
@@ -28,11 +28,18 @@ export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
  * Custom hook that creates props required to render `CategoriesTreeComponent` header button.
  * @public
  */
-export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport"> {
+export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): {
+  buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
+  onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
+} {
+  const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[] | undefined>();
   const categories = useCategories(viewport);
   return {
-    viewport,
-    categories,
+    buttonProps: {
+      viewport,
+      categories: filteredCategories ?? categories,
+    },
+    onCategoriesFiltered: setFilteredCategories,
   };
 }
 

@@ -129,7 +129,7 @@ function ModelsTreeComponentImpl({
   onPerformanceMeasured,
   ...treeProps
 }: ModelsTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const buttonProps = useModelsTreeButtonProps({ imodel: iModel, viewport });
+  const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel: iModel, viewport });
   const { filter, applyFilter, clearFilter } = useFiltering();
   const { enabled: instanceFocusEnabled } = useFocusedInstancesContext();
   const density = treeProps.density;
@@ -162,7 +162,7 @@ function ModelsTreeComponentImpl({
         buttons={buttons}
         density={density}
       >
-        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
+        <ModelsTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onModelsFiltered={onModelsFiltered} />
       </TreeWithHeader>
     </TelemetryContextProvider>
   );
