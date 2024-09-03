@@ -12,7 +12,6 @@ import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Tree-widget-initialize-imports
 import { TreeWidget } from "@itwin/tree-widget-react";
-
 // __PUBLISH_EXTRACT_END__
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";

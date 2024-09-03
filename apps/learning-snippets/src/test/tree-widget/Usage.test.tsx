@@ -18,13 +18,13 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { createStorage } from "@itwin/unified-selection";
-import { cleanup, render, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalModelWithPartition, insertSubject } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
 import type { InstanceKey } from "@itwin/presentation-common";
-
 import type { Widget } from "@itwin/appui-react";
+
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Usage", () => {
