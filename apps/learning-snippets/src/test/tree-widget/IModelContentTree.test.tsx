@@ -55,7 +55,6 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
-          cleanup();
         });
 
         it("Imodel content tree snippet", async function () {

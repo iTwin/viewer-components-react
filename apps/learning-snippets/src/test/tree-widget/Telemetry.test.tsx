@@ -80,7 +80,6 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
-          cleanup();
         });
 
         it("Telemetry learning snippet", async function () {

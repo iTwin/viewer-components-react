@@ -86,7 +86,6 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
-          cleanup();
         });
 
         it("Filtered paths snippet", async function () {
@@ -99,7 +98,7 @@ describe("Tree-widget", () => {
             insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category2.id });
             return { physicalModel, physicalModel2 };
           });
-          const testViewport = getTestViewer(imodel.imodel);
+          const testViewport = getTestViewer(imodel.imodel, true);
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
@@ -125,6 +124,7 @@ describe("Tree-widget", () => {
             getByText("TestPhysicalModel");
             expect(queryByText("TestPhysicalModel 2")).to.be.null;
           });
+          cleanup();
         });
 
         it("Custom Filtered paths snippet", async function () {
@@ -137,7 +137,7 @@ describe("Tree-widget", () => {
             insertPhysicalElement({ builder, modelId: physicalModel2.id, categoryId: category2.id });
             return { physicalModel, physicalModel2 };
           });
-          const testViewport = getTestViewer(imodel.imodel);
+          const testViewport = getTestViewer(imodel.imodel, true);
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
@@ -151,12 +151,7 @@ describe("Tree-widget", () => {
               viewport={testViewport}
               getFilteredPaths={async ({ createInstanceKeyPaths }) => {
                 const paths = await createInstanceKeyPaths({ targetItems: [imodel.physicalModel] });
-                const finalPaths =  paths?.map((path) => ({ path: Array.isArray(path) ? path : path.path, options: { autoExpand: false } }));
-                // eslint-disable-next-line no-console
-                console.log(finalPaths);
-                return finalPaths
-                // disable auto-expansion
-                return paths?.map((path) => ({ ...path, options: { autoExpand: false } }));
+                return  paths?.map((path) => ({ path: Array.isArray(path) ? path : path.path, options: { autoExpand: false } }));
               }}
               // __PUBLISH_EXTRACT_END__
             />,

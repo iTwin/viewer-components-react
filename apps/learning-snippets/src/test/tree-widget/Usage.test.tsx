@@ -60,7 +60,6 @@ describe("Tree-widget", () => {
         TestUtils.terminate();
         await IModelApp.shutdown();
         sinon.restore();
-        cleanup();
       });
 
       it("Register tree widget example", async function () {
@@ -104,7 +103,6 @@ describe("Tree-widget", () => {
                         getSchemaContext={getSchemaContext}
                         // see "Creating unified selection storage" section for example implementation
                         selectionStorage={unifiedSelectionStorage}
-                        selectionMode={"extended"}
                       />
                     ),
                   },

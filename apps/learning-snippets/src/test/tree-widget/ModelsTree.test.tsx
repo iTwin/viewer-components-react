@@ -79,7 +79,7 @@ describe("Tree-widget", () => {
               return { model };
             })
           ).imodel;
-          const testViewport = getTestViewer(imodel);
+          const testViewport = getTestViewer(imodel, true);
           const unifiedSelectionStorage = createStorage();
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
@@ -105,6 +105,7 @@ describe("Tree-widget", () => {
 
           // eslint-disable-next-line no-console
           await waitFor(async () => getByText("tree-widget-learning-snippets-components-models-tree-models-tree-learning-snippet"));
+          
         });
 
         it("Custom models tree", async function () {
@@ -120,7 +121,7 @@ describe("Tree-widget", () => {
               return { model, childSubject };
             })
           ).imodel;
-          const testViewport = getTestViewer(testImodel);
+          const testViewport = getTestViewer(testImodel, true);
           const unifiedSelectionStorage = createStorage();
           const getSublabel = () => <>Sub label</>;
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);

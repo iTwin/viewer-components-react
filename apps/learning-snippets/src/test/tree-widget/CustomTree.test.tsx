@@ -60,7 +60,6 @@ describe("Tree-widget", () => {
         TestUtils.terminate();
         await IModelApp.shutdown();
         sinon.restore();
-        cleanup();
       });
 
       it("Custom tree snippet", async function () {
