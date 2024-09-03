@@ -161,6 +161,7 @@ describe("Tree-widget", () => {
             getByText("TestPhysicalModel");
             expect(queryByText("TestPhysicalModel 2")).to.be.null;
           });
+          cleanup();
         });
       });
     });

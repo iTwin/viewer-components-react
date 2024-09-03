@@ -1,7 +1,6 @@
 {
   "require": [
     "raf/polyfill",
-    "source-map-support/register",
     "ignore-styles"
   ],
   "check-leaks": true,

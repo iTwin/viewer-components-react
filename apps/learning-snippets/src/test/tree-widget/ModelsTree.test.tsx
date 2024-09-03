@@ -28,7 +28,7 @@ import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
@@ -70,6 +70,7 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
+          cleanup();
         });
 
         it("Models tree learning snippet", async function () {

@@ -15,26 +15,24 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
-import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
-// __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-categories-tree-example-imports
 import {
+  CategoriesTreeComponent,
   TreeWithHeader,
   useCategoriesTree,
   useCategoriesTreeButtonProps,
   VisibilityTree,
   VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
+// __PUBLISH_EXTRACT_END__
+import { createStorage } from "@itwin/unified-selection";
+import { cleanup, render, waitFor } from "@testing-library/react";
+import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
+
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { ComponentPropsWithoutRef } from "react";
-// __PUBLISH_EXTRACT_END__
-import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
-import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
-
 describe("Tree-widget", () => {
   describe("Learning-snippets", () => {
     describe("Components", () => {
@@ -71,6 +69,7 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
+          cleanup();
         });
 
         it("Categories tree snippet", async function () {
@@ -182,7 +181,7 @@ describe("Tree-widget", () => {
               selectionStorage={unifiedSelectionStorage}
             />,
           );
-          
+
           await waitFor(() => getByText("Test SpatialCategory"));
         });
       });

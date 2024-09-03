@@ -15,7 +15,7 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertSubject } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
@@ -55,6 +55,7 @@ describe("Tree-widget", () => {
           TestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
+          cleanup();
         });
 
         it("Imodel content tree snippet", async function () {
