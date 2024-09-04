@@ -107,7 +107,7 @@ describe("Tree widget", () => {
           const { getByText } = render(<MyWidget />);
 
           // eslint-disable-next-line no-console
-          await waitFor(async () => getByText("tree-widget-learning-snippets-components-models-tree-models-tree-learning-snippet"));
+          await waitFor(async () => getByText("tree-widget-learning-snippets-components-models-tree-renders-modelstreecomponent-"));
           cleanup();
         });
 
@@ -180,7 +180,7 @@ describe("Tree widget", () => {
           );
 
           await waitFor(() => {
-            getByText("tree-widget-learning-snippets-components-models-tree-custom-models-tree");
+            getByText("tree-widget-learning-snippets-components-models-tree-renders-custom-models-tree");
             getByText("Sub label");
           });
           cleanup();

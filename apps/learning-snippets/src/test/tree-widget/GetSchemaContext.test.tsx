@@ -44,7 +44,7 @@ describe("Tree widget", () => {
           await terminatePresentationTesting();
         });
 
-        it("getSchemaContext", async function () {
+        it("Returns schema context", async function () {
           const imodelConnection = (
             await buildIModel(this, async (builder) => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });

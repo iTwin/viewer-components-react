@@ -84,7 +84,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_END__
           const { getByText } = render(<MyWidget />);
 
-          await waitFor(() => getByText("tree-widget-learning-snippets-components-imodel-content-tree-imodel-content-tree-snippet"));
+          await waitFor(() => getByText("tree-widget-learning-snippets-components-imodel-content-tree-renders-imodelcontenttreecomponent-"));
           cleanup();
         });
       });

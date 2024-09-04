@@ -118,11 +118,11 @@ describe("Tree widget", () => {
           return {
             // event that can be used to notify tree when visibility of instances represented by tree nodes changes from outside.
             onVisibilityChange: new BeEvent(),
-            async getVisibilityStatus(_node: HierarchyNode): Promise<VisibilityStatus> {
+            async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
               return { state: "visible" };
               // determine visibility status of the instance represented by tree node.
             },
-            async changeVisibility(_node: HierarchyNode, _on: boolean): Promise<void> {
+            async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
               // change visibility of the instance represented by tree node.
             },
             dispose() {
