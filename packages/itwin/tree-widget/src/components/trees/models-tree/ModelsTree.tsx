@@ -39,8 +39,16 @@ export function ModelsTree({
   selectionMode,
   visibilityHandlerOverrides,
   getFilteredPaths,
+  onModelsFiltered,
 }: ModelsTreeProps) {
-  const { modelsTreeProps, rendererProps } = useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths });
+  const { modelsTreeProps, rendererProps } = useModelsTree({
+    activeView,
+    filter,
+    hierarchyConfig,
+    visibilityHandlerOverrides,
+    getFilteredPaths,
+    onModelsFiltered,
+  });
 
   return (
     <VisibilityTree

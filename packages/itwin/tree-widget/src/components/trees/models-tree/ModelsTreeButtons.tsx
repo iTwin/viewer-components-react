@@ -10,9 +10,11 @@ import { TreeWidget } from "../../../TreeWidget";
 import { useFocusedInstancesContext } from "../common/FocusedInstancesContext";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./internal/ModelsTreeVisibilityHandler";
 
+import type { Id64String } from "@itwin/core-bentley";
 import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
-import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+
 /**
  * Information about a single Model.
  * @public
@@ -34,19 +36,36 @@ export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
 
 /**
  * Custom hook that creates props required to render `ModelsTreeComponent` header button.
+ *
+ * Example:
+ * ```tsx
+ * const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel, viewport });
+ * <TreeWithHeader
+ *   buttons={[
+ *     <ModelsTreeComponent.ShowAllButton {...buttonProps} />,
+ *     <ModelsTreeComponent.HideAllButton {...buttonProps} />,
+ *   ]}
+ * >
+ *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
+ * </TreeWithHeader>
+ * ```
+ *
+ *
  * @public
  */
-export function useModelsTreeButtonProps({
-  imodel,
-  viewport,
-}: {
-  imodel: IModelConnection;
-  viewport: Viewport;
-}): Pick<ModelsTreeHeaderButtonProps, "models" | "viewport"> {
+export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelConnection; viewport: Viewport }): {
+  buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
+  onModelsFiltered: (models: Id64String[] | undefined) => void;
+} {
+  const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
   const models = useAvailableModels(imodel);
+  const availableModels = useMemo(() => (!filteredModels ? models : models.filter((model) => filteredModels.includes(model.id))), [models, filteredModels]);
   return {
-    models,
-    viewport,
+    buttonProps: {
+      models: availableModels,
+      viewport,
+    },
+    onModelsFiltered: setFilteredModels,
   };
 }
 
