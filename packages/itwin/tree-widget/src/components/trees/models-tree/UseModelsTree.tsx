@@ -223,13 +223,15 @@ async function getModels(paths: HierarchyFilteringPaths, idsCache: ModelsTreeIds
         break;
       }
 
-      if (await classInspector.classDerivesFrom(currStep.className, "BisCore.GeometricModel3d")) {
-        targetModels.add(currStep.id);
+      // if paths end with subject need to get all models under that subject
+      if (i === currPath.length - 1 && currStep.className === "BisCore.Subject") {
+        targetSubjects.add(currStep.id);
         break;
       }
 
-      if (i === currPath.length - 1) {
-        targetSubjects.add(currStep.id);
+      // collect all the models from the filtered path
+      if (await classInspector.classDerivesFrom(currStep.className, "BisCore.GeometricModel3d")) {
+        targetModels.add(currStep.id);
       }
     }
   }
