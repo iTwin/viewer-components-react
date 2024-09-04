@@ -4,13 +4,14 @@
   "description": "Learning snippets for ReadMes",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "npm run link:deps && tsc",
     "build:watch": "tsc -w",
     "clean": "rimraf lib build",
     "cover": "npm run -s test",
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "test": "mocha --enable-source-maps --config ./.mocharc.json",
-    "docs": "betools extract --fileExt=ts,tsx --extractFrom=./src --recursive --out=./build/docs/extract"
+    "docs": "betools extract --fileExt=ts,tsx --extractFrom=./src --recursive --out=./build/docs/extract",
+    "link:deps": "node ./scripts/linkWorkspaceDeps.js"
   },
   "dependencies": {
     "@itwin/tree-widget-react": "workspace:*",

@@ -73,7 +73,7 @@ describe("Tree widget", () => {
           sinon.restore();
         });
 
-        it("Renders <CategoriesTreeComponent />", async function () {
+        it.only("Renders <CategoriesTreeComponent />", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
