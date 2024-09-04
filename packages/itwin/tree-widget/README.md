@@ -37,17 +37,22 @@ Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tr
 
 In any case, **before** using any APIs or components delivered with the package, it needs to be initialized:
 
-```ts
-import { IModelApp } from "@itwin/core-frontend";
+<!-- [[include: [Presentation.TreeWidget.TreeWidgetInitializeImports, Presentation.TreeWidget.TreeWidgetInitialize], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
 import { TreeWidget } from "@itwin/tree-widget-react";
+import { IModelApp } from "@itwin/core-frontend";
 
 await TreeWidget.initialize(IModelApp.localization);
 ```
 
+<!-- END EXTRACTION -->
+
 In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `createTreeWidget` function that can be used to add the tree widget to UI through a `UiItemsProvider`:
 
-  <!-- [[include: [Presentation.TreeWidget.RegisterExampleImports, Presentation.TreeWidget.RegisterExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.RegisterExampleImports, Presentation.TreeWidget.RegisterExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { UiItemsManager } from "@itwin/appui-react";
@@ -80,7 +85,7 @@ UiItemsManager.register({
 });
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 As seen in the above code snippet, `createTreeWidget` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
 
@@ -100,8 +105,8 @@ The component renders a tree that tries to replicate how a typical "Models" tree
 
 Typical usage:
 
-  <!-- [[include: [Presentation.TreeWidget.ModelsTreeExampleImports, Presentation.TreeWidget.ModelsTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.ModelsTreeExampleImports, Presentation.TreeWidget.ModelsTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { ModelsTreeComponent } from "@itwin/tree-widget-react";
@@ -122,7 +127,7 @@ function MyWidget() {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 Available header buttons:
 
@@ -148,8 +153,8 @@ This package provides building blocks for custom models tree:
 
 Example:
 
-  <!-- [[include: [Presentation.TreeWidget.CustomModelsTreeExampleImports, Presentation.TreeWidget.CustomModelsTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.CustomModelsTreeExampleImports, Presentation.TreeWidget.CustomModelsTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -202,14 +207,14 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 #### Displaying a subset of the tree
 
 Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
 
- <!-- [[include: [Presentation.TreeWidget.GetFilteredPathsComponentExample, Presentation.TreeWidget.GetFilteredPathsExample], tsx]] -->
- <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.GetFilteredPathsComponentExample, Presentation.TreeWidget.GetFilteredPathsExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
@@ -248,14 +253,14 @@ function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorag
 />,
 ```
 
- <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 The `ModelsTree` component displays a message when too many matches are found while filtering the tree; for this reason, it is recommended to throw `FilterLimitExceededError` that is provided by this package when the displayed subset is too large. Typically, this error is thrown when there are more than 100 matches. The error is cleared when a new reference for `getFilteredPaths` is provided.
 
 When a filter is provided or instance focus mode is used, the hierarchy automatically expands to show the targeted nodes. This might not be desirable when displaying a subset of the hierarchy and can be disabled by adding the `autoExpand: false` option to each path returned by `getFilteredPaths`:
 
- <!-- [[include: [Presentation.TreeWidget.GetFilteredPathsComponentExample, Presentation.TreeWidget.GetFilteredPathsWithOptionsExample], tsx]] -->
- <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.GetFilteredPathsComponentExample, Presentation.TreeWidget.GetFilteredPathsWithOptionsExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
@@ -291,7 +296,7 @@ function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorag
   }}
 ```
 
- <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 ### Categories tree
 
@@ -301,8 +306,8 @@ The component, based on the active view, renders a hierarchy of either spatial (
 
 Typical usage:
 
-  <!-- [[include: [Presentation.TreeWidget.CategoriesTreeExampleImports, Presentation.TreeWidget.CategoriesTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.CategoriesTreeExampleImports, Presentation.TreeWidget.CategoriesTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
@@ -320,7 +325,7 @@ function MyWidget() {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 Available header buttons:
 
@@ -337,8 +342,8 @@ This package provides building blocks for custom categories tree:
 
 Example:
 
-  <!-- [[include: [Presentation.TreeWidget.CustomCategoriesTreeExampleImports, Presentation.TreeWidget.CustomCategoriesTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.CustomCategoriesTreeExampleImports, Presentation.TreeWidget.CustomCategoriesTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { TreeWithHeader, useCategoriesTree, useCategoriesTreeButtonProps, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
@@ -397,7 +402,7 @@ function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, sel
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 ### iModel content tree
 
@@ -414,8 +419,8 @@ In general, the component is expected to be used by advanced users to inspect co
 
 Typical usage:
 
-  <!-- [[include: [Presentation.TreeWidget.ImodelContentTreeExampleImports, Presentation.TreeWidget.ImodelContentTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.ImodelContentTreeExampleImports, Presentation.TreeWidget.ImodelContentTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
@@ -432,7 +437,7 @@ function MyWidget() {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 ### Custom trees
 
@@ -447,8 +452,8 @@ A "basic" tree is a tree that renders the hierarchy without visibility control -
 
 Example:
 
-  <!-- [[include: [Presentation.TreeWidget.CustomTreeExampleImports, Presentation.TreeWidget.CustomTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.CustomTreeExampleImports, Presentation.TreeWidget.CustomTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import type { ComponentPropsWithoutRef } from "react";
@@ -508,7 +513,7 @@ function MyTree({ imodel }: MyTreeProps) {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 #### Custom visibility tree
 
@@ -519,8 +524,8 @@ A visibility tree is a tree that renders the hierarchy and allows controlling vi
 
 Example:
 
-  <!-- [[include: [Presentation.TreeWidget.CustomVisibilityTreeExampleImports, Presentation.TreeWidget.CustomVisibilityTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.CustomVisibilityTreeExampleImports, Presentation.TreeWidget.CustomVisibilityTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { BeEvent } from "@itwin/core-bentley";
@@ -567,11 +572,11 @@ const visibilityHandlerFactory: VisibilityTreeProps["visibilityHandlerFactory"] 
   return {
     // event that can be used to notify tree when visibility of instances represented by tree nodes changes from outside.
     onVisibilityChange: new BeEvent(),
-    async getVisibilityStatus(_node: HierarchyNode): Promise<VisibilityStatus> {
+    async getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> {
       return { state: "visible" };
       // determine visibility status of the instance represented by tree node.
     },
-    async changeVisibility(_node: HierarchyNode, _on: boolean): Promise<void> {
+    async changeVisibility(node: HierarchyNode, on: boolean): Promise<void> {
       // change visibility of the instance represented by tree node.
     },
     dispose() {
@@ -599,7 +604,7 @@ function MyVisibilityTree({ imodel }: MyVisibilityTreeProps) {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 ### Hierarchy level size limiting
 
@@ -621,8 +626,8 @@ Tree components that support selection synchronization, require a unified select
 
 Typically, we want one unified selection storage per application - this makes sure that selection in all application's components is synchronized. Below is an example implementation of `getUnifiedSelectionStorage` function that creates the storage and clears it when an iModel is closed:
 
-  <!-- [[include: [Presentation.TreeWidget.SelectionStorageExampleImports, Presentation.TreeWidget.SelectionStorageExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.SelectionStorageExampleImports, Presentation.TreeWidget.SelectionStorageExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { IModelConnection } from "@itwin/core-frontend";
@@ -641,12 +646,12 @@ function getUnifiedSelectionStorage(): SelectionStorage {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 In case the application is also using components driven by APIs from `@itwin/presentation-frontend` package, which has its own selection manager, the single unified selection storage object should be passed to [`Presentation.initialize`](https://www.itwinjs.org/reference/presentation-frontend/core/presentation/initializestatic/) function, e.g.:
 
-  <!-- [[include: [Presentation.TreeWidget.SelectionStorageInitializeExampleImports, Presentation.TreeWidget.SelectionStorageInitializeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.SelectionStorageInitializeExampleImports, Presentation.TreeWidget.SelectionStorageInitializeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { Presentation } from "@itwin/presentation-frontend";
@@ -654,7 +659,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 ### Creating schema context
 
@@ -662,8 +667,8 @@ All tree components delivered with the package require a [`SchemaContext`](https
 
 Typically, we want one schema context per iModel per application - this allows schema information to be shared across components, saving memory and time required to access the metadata. Below is an example implementation of `getSchemaContext` function, required by tree components:
 
-  <!-- [[include: [Presentation.TreeWidget.GetSchemaContextExampleImports, Presentation.TreeWidget.GetSchemaContextExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.GetSchemaContextExampleImports, Presentation.TreeWidget.GetSchemaContextExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { SchemaContext } from "@itwin/ecschema-metadata";
@@ -685,7 +690,7 @@ function getSchemaContext(imodel: IModelConnection) {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 ## Telemetry
 
@@ -730,8 +735,8 @@ Where `{tree}` specifies which tree component the feature is of.
 
 ### Example
 
-  <!-- [[include: [Presentation.TreeWidget.TelemetryUsageExampleImports, Presentation.TreeWidget.TelemetryUsageExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.TelemetryUsageExampleImports, Presentation.TreeWidget.TelemetryUsageExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { UiItemsManager } from "@itwin/appui-react";
@@ -766,12 +771,12 @@ UiItemsManager.register({
 });
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 For individual tree components the callbacks should be supplied through props:
 
-  <!-- [[include: [Presentation.TreeWidget.TelemetryTreeComponentExampleImports, Presentation.TreeWidget.TelemetryTreeComponentExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.TelemetryTreeComponentExampleImports, Presentation.TreeWidget.TelemetryTreeComponentExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
@@ -792,12 +797,12 @@ function MyWidget() {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->
 
 For custom tree components `TelemetryContextProvider` should be used:
 
-  <!-- [[include: [Presentation.TreeWidget.TelemetryCustomTreeExampleImports, Presentation.TreeWidget.TelemetryCustomTreeExample], tsx]] -->
-  <!-- BEGIN EXTRACTION -->
+<!-- [[include: [Presentation.TreeWidget.TelemetryCustomTreeExampleImports, Presentation.TreeWidget.TelemetryCustomTreeExample], tsx]] -->
+<!-- BEGIN EXTRACTION -->
 
 ```tsx
 import {
@@ -848,4 +853,4 @@ function MyTree() {
 }
 ```
 
-  <!-- END EXTRACTION -->
+<!-- END EXTRACTION -->

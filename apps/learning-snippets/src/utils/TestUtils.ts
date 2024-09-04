@@ -6,12 +6,12 @@
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { EmptyLocalization } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TreeWidgetInitializeImports
 import { TreeWidget } from "@itwin/tree-widget-react";
+import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -25,7 +25,7 @@ export class TestUtils {
 
     await UiFramework.initialize();
     // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TreeWidgetInitialize
-    await TreeWidget.initialize(new EmptyLocalization());
+    await TreeWidget.initialize(IModelApp.localization);
     // __PUBLISH_EXTRACT_END__
     TestUtils._initialized = true;
   }
