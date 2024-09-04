@@ -36,11 +36,26 @@ export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
 
 /**
  * Custom hook that creates props required to render `ModelsTreeComponent` header button.
+ *
+ * Example:
+ * ```tsx
+ * const { buttonProps, onModelsFiltered } = useModelsTreeButtonProps({ imodel, viewport });
+ * <TreeWithHeader
+ *   buttons={[
+ *     <ModelsTreeComponent.ShowAllButton {...buttonProps} />,
+ *     <ModelsTreeComponent.HideAllButton {...buttonProps} />,
+ *   ]}
+ * >
+ *   <ModelsTree {...treeProps} onModelsFiltered={onModelsFiltered} />
+ * </TreeWithHeader>
+ * ```
+ *
+ *
  * @public
  */
 export function useModelsTreeButtonProps({ imodel, viewport }: { imodel: IModelConnection; viewport: Viewport }): {
   buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
-  onModelsFiltered?: (models: Id64String[] | undefined) => void;
+  onModelsFiltered: (models: Id64String[] | undefined) => void;
 } {
   const [filteredModels, setFilteredModels] = useState<Id64String[] | undefined>();
   const models = useAvailableModels(imodel);

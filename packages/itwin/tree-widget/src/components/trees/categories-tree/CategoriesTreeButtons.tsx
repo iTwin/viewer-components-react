@@ -26,6 +26,20 @@ export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
 
 /**
  * Custom hook that creates props required to render `CategoriesTreeComponent` header button.
+ *
+ * Example:
+ * ```tsx
+ * const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
+ * <TreeWithHeader
+ *   buttons={[
+ *     <CategoriesTreeComponent.ShowAllButton {...buttonProps} />,
+ *     <CategoriesTreeComponent.HideAllButton {...buttonProps} />,
+ *   ]}
+ * >
+ *   <CategoriesTree {...treeProps} onCategoriesFiltered={onCategoriesFiltered} />
+ * </TreeWithHeader>
+ * ```
+ *
  * @public
  */
 export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport }): {
