@@ -11,7 +11,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Imodel-content-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ImodelContentTreeExampleImports
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
@@ -19,8 +19,8 @@ import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertSubject } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Imodel content tree", () => {
         before(async function () {
@@ -57,7 +57,7 @@ describe("Tree-widget", () => {
           sinon.restore();
         });
 
-        it("Imodel content tree snippet", async function () {
+        it("Renders <IModelContentTreeComponent />", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
               const subjectA = insertSubject({ builder, codeValue: "A", parentId: IModel.rootSubjectId });
@@ -70,7 +70,7 @@ describe("Tree-widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Imodel-content-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ImodelContentTreeExample
           function MyWidget() {
             return (
               <IModelContentTreeComponent

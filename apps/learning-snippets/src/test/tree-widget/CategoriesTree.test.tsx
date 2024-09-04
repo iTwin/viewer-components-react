@@ -14,10 +14,10 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CategoriesTreeExampleImports
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-categories-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomCategoriesTreeExampleImports
 import {
   TreeWithHeader,
   useCategoriesTree,
@@ -35,8 +35,8 @@ import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Categories tree", () => {
         before(async function () {
@@ -73,7 +73,7 @@ describe("Tree-widget", () => {
           sinon.restore();
         });
 
-        it("Categories tree snippet", async function () {
+        it("Renders <CategoriesTreeComponent />", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -88,7 +88,7 @@ describe("Tree-widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Categories-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CategoriesTreeExample
           function MyWidget() {
             return (
               <CategoriesTreeComponent
@@ -110,7 +110,7 @@ describe("Tree-widget", () => {
           cleanup();
         });
 
-        it("Custom categories tree snippet", async function () {
+        it("Renders custom categories tree", async function () {
           const imodelConnection = (
             await buildIModel(this, async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -125,7 +125,7 @@ describe("Tree-widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-categories-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomCategoriesTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
           type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 

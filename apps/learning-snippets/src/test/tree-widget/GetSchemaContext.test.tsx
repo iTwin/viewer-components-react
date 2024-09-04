@@ -11,14 +11,14 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-schema-context-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.GetSchemaContextExampleImports
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Components", () => {
       describe("GetSchemaContext", () => {
         before(async function () {
@@ -44,7 +44,7 @@ describe("Tree-widget", () => {
           await terminatePresentationTesting();
         });
 
-        it("getSchemaContext learning snippet", async function () {
+        it("getSchemaContext", async function () {
           const imodelConnection = (
             await buildIModel(this, async (builder) => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });
@@ -53,13 +53,12 @@ describe("Tree-widget", () => {
               return { model, category };
             })
           ).imodel;
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-schema-context-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.GetSchemaContextExample
           const schemaContextCache = new Map<string, SchemaContext>();
           function getSchemaContext(imodel: IModelConnection) {
             const key = imodel.getRpcProps().key;
             let schemaContext = schemaContextCache.get(key);
             if (!schemaContext) {
-              // eslint-disable-next-line @itwin/no-internal
               const schemaLocater = new ECSchemaRpcLocater(imodel.getRpcProps());
               schemaContext = new SchemaContext();
               schemaContext.addLocater(schemaLocater);

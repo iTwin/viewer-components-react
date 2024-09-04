@@ -6,7 +6,7 @@
 import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-visibility-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomVisibilityTreeExampleImports
 import { BeEvent } from "@itwin/core-bentley";
 import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
@@ -28,8 +28,8 @@ import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils }
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
 import type { VisibilityStatus } from "@itwin/tree-widget-react";
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Components", () => {
       before(async function () {
         await initializePresentationTesting({
@@ -65,7 +65,7 @@ describe("Tree-widget", () => {
         sinon.restore();
       });
 
-      it("Custom visibility tree snippet", async function () {
+      it("Renders custom visibility tree", async function () {
         const imodelConnection = (
           await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -80,7 +80,7 @@ describe("Tree-widget", () => {
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
         mockGetBoundingClientRect();
 
-        // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-visibility-tree-example
+        // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomVisibilityTreeExample
         type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
         const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree

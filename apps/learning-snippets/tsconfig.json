@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
+    "noUnusedParameters": false,
     "lib": ["DOM"],
     "outDir": "lib"
   },

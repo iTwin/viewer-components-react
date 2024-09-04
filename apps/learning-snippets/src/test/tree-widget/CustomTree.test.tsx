@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { join } from "path";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomTreeExampleImports
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
@@ -24,8 +24,8 @@ import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Components", () => {
       before(async function () {
         await initializePresentationTesting({
@@ -61,7 +61,7 @@ describe("Tree-widget", () => {
         sinon.restore();
       });
 
-      it("Custom tree snippet", async function () {
+      it("Renders custom tree", async function () {
         const imodelConnection = (
           await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -76,7 +76,7 @@ describe("Tree-widget", () => {
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
         mockGetBoundingClientRect();
 
-        // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-tree-example
+        // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomTreeExample
         type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
         const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree

@@ -15,10 +15,10 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ModelsTreeExampleImports
 import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-models-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomModelsTreeExampleImports
 import {
  TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
@@ -30,12 +30,12 @@ import type { ComponentPropsWithoutRef } from "react";
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory, insertSubject } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
+import { getSchemaContext as getTestSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Models tree", () => {
         before(async function () {
@@ -72,7 +72,7 @@ describe("Tree-widget", () => {
           sinon.restore();
         });
 
-        it("Models tree learning snippet", async function () {
+        it("Renders <ModelsTreeComponent />", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model", partitionParentId: IModel.rootSubjectId });
@@ -86,8 +86,9 @@ describe("Tree-widget", () => {
           sinon.stub(IModelApp.viewManager, "selectedView").get(() => testViewport);
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           mockGetBoundingClientRect();
+          const getSchemaContext = getTestSchemaContext;
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Models-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ModelsTreeExample
           function MyWidget() {
             return (
               <ModelsTreeComponent
@@ -110,7 +111,7 @@ describe("Tree-widget", () => {
           cleanup();
         });
 
-        it("Custom models tree", async function () {
+        it("Renders custom models tree", async function () {
           const testImodel = (
             await buildIModel(this, async (builder) => {
               const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
@@ -130,13 +131,13 @@ describe("Tree-widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Custom-models-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomModelsTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
           type CustomModelsTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
           function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {
             const getLabel = props.getLabel;
             const getLabelCallback = useCallback<Required<VisibilityTreeRendererProps>["getLabel"]>(
-              (node: any) => {
+              (node) => {
                 const originalLabel = getLabel(node);
                 return <>Custom node - {originalLabel}</>;
               },
@@ -148,11 +149,11 @@ describe("Tree-widget", () => {
           interface CustomModelsTreeProps {
             imodel: IModelConnection;
             viewport: Viewport;
-            getSchema: (imodel: IModelConnection) => SchemaContext;
+            getSchemaContext: (imodel: IModelConnection) => SchemaContext;
             selectionStorage: SelectionStorage;
           }
 
-          function CustomModelsTreeComponent({ imodel, viewport, getSchema, selectionStorage }: CustomModelsTreeProps) {
+          function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
             const buttonProps = useModelsTreeButtonProps({ imodel, viewport });
             const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
 
@@ -165,7 +166,7 @@ describe("Tree-widget", () => {
               >
                 <VisibilityTree
                   {...modelsTreeProps}
-                  getSchemaContext={getSchema}
+                  getSchemaContext={getSchemaContext}
                   selectionStorage={selectionStorage}
                   imodel={imodel}
                   treeRenderer={(props) => <CustomModelsTreeRenderer {...props} {...rendererProps} />}
@@ -175,7 +176,7 @@ describe("Tree-widget", () => {
           }
           // __PUBLISH_EXTRACT_END__
           const { getByText } = render(
-            <CustomModelsTreeComponent imodel={testImodel} viewport={testViewport} getSchema={getSchemaContext} selectionStorage={unifiedSelectionStorage} />,
+            <CustomModelsTreeComponent imodel={testImodel} viewport={testViewport} getSchemaContext={getTestSchemaContext} selectionStorage={unifiedSelectionStorage} />,
           );
 
           await waitFor(() => {

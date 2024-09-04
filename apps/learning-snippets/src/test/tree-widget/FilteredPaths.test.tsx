@@ -25,7 +25,7 @@ import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils }
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-filtered-paths-component-example
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.GetFilteredPathsComponentExample
 type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
 
 interface CustomCategoriesTreeProps {
@@ -50,8 +50,8 @@ function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorag
 }
 // __PUBLISH_EXTRACT_END__
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Components", () => {
       describe("Filtered paths", () => {
         before(async function () {
@@ -88,7 +88,7 @@ describe("Tree-widget", () => {
           sinon.restore();
         });
 
-        it("Filtered paths snippet", async function () {
+        it("Renders custom models tree component with filtered paths", async function () {
           const imodel = await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel 2" });
@@ -105,7 +105,7 @@ describe("Tree-widget", () => {
           mockGetBoundingClientRect();
 
           const { getByText, queryByText } = render(
-            // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-filtered-paths-example
+            // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.GetFilteredPathsExample
             <CustomModelsTreeComponent
               selectionStorage={unifiedSelectionStorage}
               imodel={imodel.imodel}
@@ -127,7 +127,7 @@ describe("Tree-widget", () => {
           cleanup();
         });
 
-        it("Custom Filtered paths snippet", async function () {
+        it("Renders custom models tree component with filtered paths with options", async function () {
           const imodel = await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const physicalModel2 = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel 2" });
@@ -144,7 +144,7 @@ describe("Tree-widget", () => {
           mockGetBoundingClientRect();
 
           const { getByText, queryByText } = render(
-            // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Get-filtered-paths-with-options-example
+            // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.GetFilteredPathsWithOptionsExample
             <CustomModelsTreeComponent
               selectionStorage={unifiedSelectionStorage}
               imodel={imodel.imodel}

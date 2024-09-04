@@ -4,19 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 /* eslint-disable no-console */
+/* eslint-disable unused-imports/no-unused-vars */
 import type { Widget } from "@itwin/appui-react";
 import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-usage-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryUsageExampleImports
 import { UiItemsManager } from "@itwin/appui-react";
 import { CategoriesTreeComponent, createTreeWidget} from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-tree-component-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryTreeComponentExampleImports
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-custom-tree-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryCustomTreeExampleImports
 import {
   TelemetryContextProvider,
   TreeWithHeader,
@@ -38,8 +39,8 @@ import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtils";
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Telemetry", () => {
       describe("Usage tracking", () => {
         let createTreeWidgetFunction: (() => ReadonlyArray<Widget>) | undefined;
@@ -81,7 +82,7 @@ describe("Tree-widget", () => {
           sinon.restore();
         });
 
-        it("Telemetry learning snippet", async function () {
+        it("Registers tree widget with telemetry", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -96,7 +97,7 @@ describe("Tree-widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           const consoleSpy = sinon.spy(console, "log");
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-usage-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryUsageExample
           UiItemsManager.register({
             id: "tree-widget-provider",
             getWidgets: () => [
@@ -105,7 +106,7 @@ describe("Tree-widget", () => {
                   {
                     id: CategoriesTreeComponent.id,
                     getLabel: () => CategoriesTreeComponent.getLabel(),
-                    render: (_props: any) => (
+                    render: (props) => (
                       <CategoriesTreeComponent
                         // see "Categories tree" section for details regarding `getSchemaContext` and `selectionStorage` props
                         getSchemaContext={getSchemaContext}
@@ -135,7 +136,7 @@ describe("Tree-widget", () => {
           cleanup();
         });
 
-        it("Telemetry for individual tree components learning snippet", async function () {
+        it("Renders <IModelContentTreeComponent /> with telemetry", async function () {
           const testImodel = (
             await buildIModel(this, async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -150,7 +151,7 @@ describe("Tree-widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
           const consoleSpy = sinon.spy(console, "log");
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-tree-component-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryTreeComponentExample
           function MyWidget() {
             return (
               <IModelContentTreeComponent
@@ -174,7 +175,7 @@ describe("Tree-widget", () => {
           cleanup();
         });
 
-        it("Telemetry for custom components learning snippet", async function () {
+        it("Renders custom categories tree with telemetry", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -189,7 +190,7 @@ describe("Tree-widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           const consoleSpy = sinon.spy(console, "log");
 
-          // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Telemetry-custom-tree-example
+          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryCustomTreeExample
           function MyWidget() {
             return (
               <TelemetryContextProvider

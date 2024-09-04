@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
+/* eslint-disable unused-imports/no-unused-vars */
 import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Register-example-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.RegisterExampleImports
 import { UiItemsManager } from "@itwin/appui-react";
 import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react"
 // __PUBLISH_EXTRACT_END__
@@ -25,8 +26,8 @@ import { getSchemaContext, getTestViewer, TestUtils } from "../../utils/TestUtil
 import type { InstanceKey } from "@itwin/presentation-common";
 import type { Widget } from "@itwin/appui-react";
 
-describe("Tree-widget", () => {
-  describe("Learning-snippets", () => {
+describe("Tree widget", () => {
+  describe("Learning snippets", () => {
     describe("Usage", () => {
       before(async function () {
         await initializePresentationTesting({
@@ -62,7 +63,7 @@ describe("Tree-widget", () => {
         sinon.restore();
       });
 
-      it("Register tree widget example", async function () {
+      it("Registers tree widget", async function () {
         const imodel = (
           await buildIModel(this, async (builder) => {
             const model = insertPhysicalModelWithPartition({ builder, codeValue: "model" });
@@ -84,7 +85,7 @@ describe("Tree-widget", () => {
           createTreeWidgetFunction = getWidgets;
         });
 
-        // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Register-example
+        // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.RegisterExample
         UiItemsManager.register({
           id: "tree-widget-provider",
           getWidgets: () =>
@@ -97,7 +98,7 @@ describe("Tree-widget", () => {
                   {
                     id: ModelsTreeComponent.id,
                     getLabel: () => ModelsTreeComponent.getLabel(),
-                    render: (_props: any) => (
+                    render: (props) => (
                       <ModelsTreeComponent
                         // see "Creating schema context" section for example implementation
                         getSchemaContext={getSchemaContext}

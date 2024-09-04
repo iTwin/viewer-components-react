@@ -10,7 +10,7 @@ import { EmptyLocalization } from "@itwin/core-common";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-// __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Tree-widget-initialize-imports
+// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TreeWidgetInitializeImports
 import { TreeWidget } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 
@@ -24,7 +24,7 @@ export class TestUtils {
     }
 
     await UiFramework.initialize();
-    // __PUBLISH_EXTRACT_START__ Presentation.Tree-widget.Tree-widget-initialize
+    // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TreeWidgetInitialize
     await TreeWidget.initialize(new EmptyLocalization());
     // __PUBLISH_EXTRACT_END__
     TestUtils._initialized = true;
