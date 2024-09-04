@@ -143,8 +143,8 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
 
     const title =
       this._measurementType === PerpendicularMeasurementType.Height
-        ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.toolTitle").replace("{0}", fDistance)
-        : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.toolTitle").replace("{0}", fDistance);
+      ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.toolTitle").replace("{{value}}", fDistance)
+      : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.toolTitle").replace("{{value}}", fDistance);
 
     const label =
       this._measurementType === PerpendicularMeasurementType.Height
@@ -152,7 +152,10 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
         : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.width");
 
     distanceData.title = title;
-    distanceData.properties[0].label = label;
+    const distanceProperty = distanceData.properties.find((p) => p.name === "DistanceMeasurement_Distance");
+    if (distanceProperty) {
+      distanceProperty.label = label;
+    }
     return distanceData;
   }
 
@@ -181,6 +184,9 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
         }
       }
     }
+    if ((this._secondaryLine && !otherDist._secondaryLine) || (!this._secondaryLine && otherDist._secondaryLine)) {
+      return false;
+    }
     return true;
   }
 
@@ -193,7 +199,7 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
 
     if (other instanceof PerpendicularDistanceMeasurement) {
       this.measurementType = other.measurementType;
-      this._secondaryLine = other._secondaryLine;
+      this._secondaryLine = other._secondaryLine ? other._secondaryLine.map((p) => p.clone()) : undefined;
     }
   }
 
@@ -222,7 +228,7 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
 
     const jsonDist = json as PerpendicularDistanceMeasurementProps;
     jsonDist.measurementType = this.measurementType;
-    jsonDist.secondaryLine = this._secondaryLine;
+    jsonDist.secondaryLine = this._secondaryLine as XYZProps[];
   }
 
   public static override fromJSON(data: PerpendicularDistanceMeasurementProps): PerpendicularDistanceMeasurement {

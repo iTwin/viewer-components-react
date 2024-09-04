@@ -49,14 +49,14 @@
       "flyover": "Height",
       "description": "Create height measurements.",
       "height": "Height:",
-      "toolTitle": "Height Measurement [{0}]"
+      "toolTitle": "Height Measurement [{{value}}]"
     },
     "MeasureWidth": {
       "keyin": "Width",
       "flyover": "Width",
       "description": "Create width measurements.",
       "width": "Width:",
-      "toolTitle": "Width Measurement [{0}]"
+      "toolTitle": "Width Measurement [{{value}}]"
     },
     "MeasureArea": {
       "keyin": "Area",
