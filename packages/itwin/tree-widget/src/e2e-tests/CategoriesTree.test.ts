@@ -6,17 +6,8 @@
 import type { Locator } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  expandStagePanel,
-  initTreeWidgetTest,
-  locateInstanceFilter,
-  locateNode,
-  scrollTree,
-  selectOperatorInDialog,
-  selectPropertyInDialog,
-  selectTree,
-  selectValueInDialog,
-  takeScreenshot,
-  withDifferentDensities,
+  expandStagePanel, initTreeWidgetTest, locateInstanceFilter, locateNode, scrollTree, selectOperatorInDialog, selectPropertyInDialog, selectTree,
+  selectValueInDialog, takeScreenshot, withDifferentDensities,
 } from "./utils";
 
 test.describe("Categories tree", () => {
@@ -187,6 +178,31 @@ test.describe("Categories tree", () => {
       // click the clear filter button
       await page.keyboard.press("Enter");
       await expect(applyFilterButton).toBeFocused();
+    });
+
+    test("hides all categories", async ({ page }) => {
+      await locateNode(treeWidget, "Equipment").waitFor();
+      await page.getByRole("button", { name: "Hide all" }).click();
+
+      await expect(locateNode(treeWidget, "Equipment").getByRole("checkbox")).not.toBeChecked();
+      await takeScreenshot(page, treeWidget);
+    });
+
+    test("hides all categories in filtered tree", async ({ page }) => {
+      await locateNode(treeWidget, "Equipment").waitFor();
+      await treeWidget.getByRole("button", { name: "Open" }).click();
+      await treeWidget.getByPlaceholder("Search...").fill("sg-1");
+
+      // wait for non searched for nodes to disappear
+      await locateNode(treeWidget, "Equipment").waitFor({ state: "hidden" });
+
+      await treeWidget.getByRole("button", { name: "More" }).click();
+      await page.getByRole("button", { name: "Hide all" }).click();
+
+      await treeWidget.getByRole("button", { name: "Close" }).click();
+
+      await locateNode(treeWidget, "Equipment").waitFor({ state: "visible" });
+      await takeScreenshot(page, treeWidget);
     });
   });
 });

@@ -161,21 +161,27 @@ export function TreeWidgetComponent(props: SelectableTreeProps): JSX.Element;
 export function TreeWithHeader({ filteringProps, buttons, density, children }: PropsWithChildren<TreeWithHeaderProps>): JSX.Element;
 
 // @beta
-export function useCategoriesTree({ filter, activeView }: UseCategoriesTreeProps): UseCategoriesTreeResult;
+export function useCategoriesTree({ filter, activeView, onCategoriesFiltered }: UseCategoriesTreeProps_2): UseCategoriesTreeResult;
 
 // @public
 export function useCategoriesTreeButtonProps({ viewport }: {
     viewport: Viewport;
-}): Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
+}): {
+    buttonProps: Pick<CategoriesTreeHeaderButtonProps, "categories" | "viewport">;
+    onCategoriesFiltered: (categories: CategoryInfo[] | undefined) => void;
+};
 
 // @beta
-export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths }: UseModelsTreeProps_2): UseModelsTreeResult;
+export function useModelsTree({ activeView, filter, hierarchyConfig, visibilityHandlerOverrides, getFilteredPaths, onModelsFiltered, }: UseModelsTreeProps_2): UseModelsTreeResult;
 
 // @public
-export function useModelsTreeButtonProps({ imodel, viewport, }: {
+export function useModelsTreeButtonProps({ imodel, viewport }: {
     imodel: IModelConnection;
     viewport: Viewport;
-}): Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
+}): {
+    buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
+    onModelsFiltered: (models: Id64String[] | undefined) => void;
+};
 
 // @beta
 export interface VisibilityStatus {
