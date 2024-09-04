@@ -180,7 +180,7 @@ export function useModelsTreeButtonProps({ imodel, viewport }: {
     viewport: Viewport;
 }): {
     buttonProps: Pick<ModelsTreeHeaderButtonProps, "models" | "viewport">;
-    onModelsFiltered?: (models: Id64String[] | undefined) => void;
+    onModelsFiltered: (models: Id64String[] | undefined) => void;
 };
 
 // @beta
