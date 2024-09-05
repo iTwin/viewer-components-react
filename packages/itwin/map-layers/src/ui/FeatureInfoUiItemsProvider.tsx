@@ -27,9 +27,9 @@ import { MapFeatureInfoWidget } from "./widget/FeatureInfoWidget";
 import type { MapFeatureInfoOptions } from "./Interfaces";
 import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
 
-const supportsMapFeatureInfo = (vp: ScreenViewport, mapLayerProps: MapLayerProps[]): boolean => {
+const supportsMapFeatureInfo = (vp: ScreenViewport, isOverlay: boolean, mapLayerProps: MapLayerProps[]): boolean => {
   for (let mapLayerIndex = 0; mapLayerIndex < mapLayerProps.length; mapLayerIndex++) {
-    const bgLayerProvider = vp.getMapLayerImageryProvider({ index: mapLayerIndex, isOverlay: false });
+    const bgLayerProvider = vp.getMapLayerImageryProvider({ index: mapLayerIndex, isOverlay });
     if (bgLayerProvider?.supportsMapFeatureInfo) {
       return true;
     }
@@ -41,11 +41,11 @@ const isMapFeatureInfoSupported = (): boolean => {
   const vp = IModelApp.viewManager.selectedView;
   if (vp?.viewFlags.backgroundMap) {
     const backgroundLayers = vp.displayStyle.settings.mapImagery.backgroundLayers.map((value) => value.toJSON());
-    if (supportsMapFeatureInfo(vp, backgroundLayers)) {
+    if (supportsMapFeatureInfo(vp, false, backgroundLayers)) {
       return true;
     }
     const overlayLayers = vp.displayStyle.settings.mapImagery.overlayLayers.map((value) => value.toJSON());
-    if (supportsMapFeatureInfo(vp, overlayLayers)) {
+    if (supportsMapFeatureInfo(vp, true, overlayLayers)) {
       return true;
     }
   }
