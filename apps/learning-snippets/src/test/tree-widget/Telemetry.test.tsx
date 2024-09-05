@@ -141,9 +141,9 @@ describe("Tree widget", () => {
               </TelemetryContextProvider>
             );
           }
+
           function MyTree() {
             const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
-
             return (
               // VisibilityTree will use provided telemetry context to report used features and their performance
               <VisibilityTree
