@@ -29,9 +29,11 @@ import { MapLayersSyncUiEventId } from "../MapLayersActionIds";
 
 const supportsMapFeatureInfo = (vp: ScreenViewport, isOverlay: boolean, mapLayerProps: MapLayerProps[]): boolean => {
   for (let mapLayerIndex = 0; mapLayerIndex < mapLayerProps.length; mapLayerIndex++) {
-    const bgLayerProvider = vp.getMapLayerImageryProvider({ index: mapLayerIndex, isOverlay });
-    if (bgLayerProvider?.supportsMapFeatureInfo) {
-      return true;
+    if (mapLayerProps[mapLayerIndex].visible && mapLayerProps[mapLayerIndex].transparency !== 1.0) {
+      const bgLayerProvider = vp.getMapLayerImageryProvider({ index: mapLayerIndex, isOverlay });
+      if (bgLayerProvider?.supportsMapFeatureInfo) {
+        return true;
+      }
     }
   }
   return false;
