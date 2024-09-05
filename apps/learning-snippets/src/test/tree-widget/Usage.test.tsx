@@ -7,7 +7,7 @@
 import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.RegisterExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExampleImports
 import { UiItemsManager } from "@itwin/appui-react";
 import { createTreeWidget, ModelsTreeComponent } from "@itwin/tree-widget-react"
 // __PUBLISH_EXTRACT_END__
@@ -85,7 +85,7 @@ describe("Tree widget", () => {
           createTreeWidgetFunction = getWidgets;
         });
 
-        // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.RegisterExample
+        // __PUBLISH_EXTRACT_START__ TreeWidget.RegisterExample
         UiItemsManager.register({
           id: "tree-widget-provider",
           getWidgets: () =>

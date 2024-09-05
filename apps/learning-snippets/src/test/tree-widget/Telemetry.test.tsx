@@ -10,19 +10,17 @@ import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryUsageExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryUsageExampleImports
 import { UiItemsManager } from "@itwin/appui-react";
 import { CategoriesTreeComponent, createTreeWidget} from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryTreeComponentExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExampleImports
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryCustomTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExampleImports
 import {
   TelemetryContextProvider,
-  TreeWithHeader,
   useCategoriesTree,
-  useCategoriesTreeButtonProps,
   VisibilityTree,
   VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
@@ -97,7 +95,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           const consoleSpy = sinon.spy(console, "log");
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryUsageExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryUsageExample
           UiItemsManager.register({
             id: "tree-widget-provider",
             getWidgets: () => [
@@ -151,7 +149,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
           const consoleSpy = sinon.spy(console, "log");
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryTreeComponentExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryTreeComponentExample
           function MyWidget() {
             return (
               <IModelContentTreeComponent
@@ -190,7 +188,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           const consoleSpy = sinon.spy(console, "log");
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TelemetryCustomTreeExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.TelemetryCustomTreeExample
           function MyWidget() {
             return (
               <TelemetryContextProvider
@@ -207,24 +205,17 @@ describe("Tree widget", () => {
             );
           }
           function MyTree() {
-            const buttonProps = useCategoriesTreeButtonProps({ viewport });
             const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
 
             return (
-              <TreeWithHeader
-                buttons={[
-                  <CategoriesTreeComponent.ShowAllButton {...buttonProps} key={"ShowAllButton"} />,
-                  <CategoriesTreeComponent.HideAllButton {...buttonProps} key={"HideAllButton"} />,
-                ]}
-              >
-                <VisibilityTree
-                  {...categoriesTreeProps}
-                  getSchemaContext={getSchemaContext}
-                  selectionStorage={unifiedSelectionStorage}
-                  imodel={imodel}
-                  treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
-                />
-              </TreeWithHeader>
+              // VisibilityTree will use provided telemetry context to report used features and their performance
+              <VisibilityTree
+                {...categoriesTreeProps}
+                getSchemaContext={getSchemaContext}
+                selectionStorage={unifiedSelectionStorage}
+                imodel={imodel}
+                treeRenderer={(props) => <VisibilityTreeRenderer {...props} {...rendererProps} />}
+              />
             );
             // see "Custom trees" section for more example implementations
           }

@@ -15,10 +15,10 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ModelsTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeExampleImports
 import { ModelsTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomModelsTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.CustomModelsTreeExampleImports
 import {
  TreeWithHeader, useModelsTree, useModelsTreeButtonProps, VisibilityTree, VisibilityTreeRenderer,
 } from "@itwin/tree-widget-react";
@@ -88,7 +88,7 @@ describe("Tree widget", () => {
           mockGetBoundingClientRect();
           const getSchemaContext = getTestSchemaContext;
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ModelsTreeExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.ModelsTreeExample
           function MyWidget() {
             return (
               <ModelsTreeComponent
@@ -131,7 +131,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(testImodel);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomModelsTreeExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.CustomModelsTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
           type CustomModelsTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
           function CustomModelsTreeRenderer(props: CustomModelsTreeRendererProps) {

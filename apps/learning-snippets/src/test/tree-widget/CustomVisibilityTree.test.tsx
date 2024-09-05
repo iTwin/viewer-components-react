@@ -6,7 +6,7 @@
 import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomVisibilityTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.CustomVisibilityTreeExampleImports
 import { BeEvent } from "@itwin/core-bentley";
 import { VisibilityTree, VisibilityTreeRenderer } from "@itwin/tree-widget-react";
 import { createClassBasedHierarchyDefinition, createNodesQueryClauseFactory } from "@itwin/presentation-hierarchies";
@@ -80,7 +80,7 @@ describe("Tree widget", () => {
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
         mockGetBoundingClientRect();
 
-        // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomVisibilityTreeExample
+        // __PUBLISH_EXTRACT_START__ TreeWidget.CustomVisibilityTreeExample
         type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
         const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree

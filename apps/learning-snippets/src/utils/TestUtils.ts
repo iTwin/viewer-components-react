@@ -9,7 +9,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TreeWidgetInitializeImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetInitializeImports
 import { TreeWidget } from "@itwin/tree-widget-react";
 import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
@@ -24,7 +24,7 @@ export class TestUtils {
     }
 
     await UiFramework.initialize();
-    // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.TreeWidgetInitialize
+    // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetInitialize
     await TreeWidget.initialize(IModelApp.localization);
     // __PUBLISH_EXTRACT_END__
     TestUtils._initialized = true;

@@ -11,7 +11,7 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ImodelContentTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.ImodelContentTreeExampleImports
 import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
 import { createStorage } from "@itwin/unified-selection";
@@ -70,7 +70,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.ImodelContentTreeExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.ImodelContentTreeExample
           function MyWidget() {
             return (
               <IModelContentTreeComponent

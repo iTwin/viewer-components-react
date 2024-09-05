@@ -6,11 +6,11 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-// __PUBLISH_EXTRACT_START__  Presentation.TreeWidget.SelectionStorageInitializeExampleImports
+// __PUBLISH_EXTRACT_START__  TreeWidget.SelectionStorageInitializeExampleImports
 import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_END__
 import { TestUtils } from "../../utils/TestUtils";
-// __PUBLISH_EXTRACT_START__  Presentation.TreeWidget.SelectionStorageExampleImports
+// __PUBLISH_EXTRACT_START__  TreeWidget.SelectionStorageExampleImports
 import { IModelConnection } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
 import type { SelectionStorage } from "@itwin/unified-selection";
@@ -32,7 +32,7 @@ describe("Tree widget", () => {
         });
         
         it("Creates unified storage", async function () {
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.SelectionStorageExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.SelectionStorageExample
           let unifiedSelectionStorage: SelectionStorage | undefined;
           function getUnifiedSelectionStorage(): SelectionStorage {
             if (!unifiedSelectionStorage) {
@@ -62,7 +62,7 @@ describe("Tree widget", () => {
             return unifiedSelectionStorage;
           }
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.SelectionStorageInitializeExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.SelectionStorageInitializeExample
           await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
           // __PUBLISH_EXTRACT_END__
           

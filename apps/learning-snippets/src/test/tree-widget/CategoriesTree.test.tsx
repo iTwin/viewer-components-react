@@ -14,10 +14,10 @@ import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CategoriesTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExampleImports
 import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomCategoriesTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExampleImports
 import {
   TreeWithHeader,
   useCategoriesTree,
@@ -73,7 +73,7 @@ describe("Tree widget", () => {
           sinon.restore();
         });
 
-        it.only("Renders <CategoriesTreeComponent />", async function () {
+        it("Renders <CategoriesTreeComponent />", async function () {
           const imodel = (
             await buildIModel(this, async (builder) => {
               const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
@@ -88,7 +88,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CategoriesTreeExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.CategoriesTreeExample
           function MyWidget() {
             return (
               <CategoriesTreeComponent
@@ -125,7 +125,7 @@ describe("Tree widget", () => {
           sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
           mockGetBoundingClientRect();
 
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomCategoriesTreeExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.CustomCategoriesTreeExample
           type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
           type CustomCategoriesTreeRendererProps = Parameters<ComponentPropsWithoutRef<typeof VisibilityTree>["treeRenderer"]>[0];
 

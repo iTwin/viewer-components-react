@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { join } from "path";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomTreeExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeExampleImports
 import type { ComponentPropsWithoutRef } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { Tree, TreeRenderer } from "@itwin/tree-widget-react";
@@ -76,7 +76,7 @@ describe("Tree widget", () => {
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
         mockGetBoundingClientRect();
 
-        // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.CustomTreeExample
+        // __PUBLISH_EXTRACT_START__ TreeWidget.CustomTreeExample
         type TreeProps = ComponentPropsWithoutRef<typeof Tree>;
         const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree

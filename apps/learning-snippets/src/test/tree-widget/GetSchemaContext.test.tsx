@@ -11,7 +11,7 @@ import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-// __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.GetSchemaContextExampleImports
+// __PUBLISH_EXTRACT_START__ TreeWidget.GetSchemaContextExampleImports
 import { SchemaContext } from "@itwin/ecschema-metadata";
 import { ECSchemaRpcLocater } from "@itwin/ecschema-rpcinterface-common";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -53,7 +53,7 @@ describe("Tree widget", () => {
               return { model, category };
             })
           ).imodel;
-          // __PUBLISH_EXTRACT_START__ Presentation.TreeWidget.GetSchemaContextExample
+          // __PUBLISH_EXTRACT_START__ TreeWidget.GetSchemaContextExample
           const schemaContextCache = new Map<string, SchemaContext>();
           function getSchemaContext(imodel: IModelConnection) {
             const key = imodel.getRpcProps().key;
