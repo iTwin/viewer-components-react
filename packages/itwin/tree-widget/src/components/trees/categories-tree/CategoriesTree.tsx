@@ -8,22 +8,23 @@ import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRende
 import { useCategoriesTree } from "./UseCategoriesTree";
 
 import type { ComponentPropsWithoutRef } from "react";
-import type { Viewport } from "@itwin/core-frontend";
 
 /** @beta */
 interface CategoriesTreeOwnProps {
-  filter: string;
-  activeView: Viewport;
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
 }
 
+type UseCategoriesTreeProps = Parameters<typeof useCategoriesTree>[0];
+
 /** @beta */
 type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
 
 /** @beta */
-type CategoriesTreeProps = CategoriesTreeOwnProps & Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
+type CategoriesTreeProps = CategoriesTreeOwnProps &
+  UseCategoriesTreeProps &
+  Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
 
 /** @beta */
 export function CategoriesTree({
@@ -35,10 +36,12 @@ export function CategoriesTree({
   density,
   hierarchyLevelConfig,
   selectionMode,
+  onCategoriesFiltered,
 }: CategoriesTreeProps) {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({
     filter,
     activeView,
+    onCategoriesFiltered,
   });
 
   return (

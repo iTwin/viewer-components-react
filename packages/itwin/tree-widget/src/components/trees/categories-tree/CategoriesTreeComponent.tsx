@@ -91,7 +91,7 @@ function CategoriesTreeComponentImpl({
   onFeatureUsed,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const buttonProps = useCategoriesTreeButtonProps({ viewport });
+  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
 
@@ -113,7 +113,7 @@ function CategoriesTreeComponentImpl({
           onFilterClear: clearFilter,
         }}
       >
-        <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
+        <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onCategoriesFiltered={onCategoriesFiltered} />
       </TreeWithHeader>
     </TelemetryContextProvider>
   );
