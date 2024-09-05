@@ -3,6 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
+/* eslint-disable unused-imports/no-unused-vars */
 import { join } from "path";
 import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";

@@ -7,12 +7,13 @@
 import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
+import { useCallback } from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { InstanceKey, PresentationRpcInterface } from "@itwin/presentation-common";
+import { PresentationRpcInterface } from "@itwin/presentation-common";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
@@ -24,7 +25,7 @@ import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils }
 
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import { useCallback } from "react";
+import type { InstanceKey } from "@itwin/presentation-common";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample
 type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
@@ -40,8 +41,8 @@ function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetI
   const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths }) => {
     return createInstanceKeyPaths({
       // list of instance keys representing nodes that should be displayed in the hierarchy
-      targetItems: targetItems,
-    })}, []);
+      targetItems,
+    })}, [targetItems]);
   
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
 
