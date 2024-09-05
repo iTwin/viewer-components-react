@@ -27,16 +27,13 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { useCallback } from "react";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample
-type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetFilteredPathsType = Exclude<useModelsTreeProps["getFilteredPaths"], undefined>;
-type CreateInstanceKeyPathsType = Parameters<GetFilteredPathsType>[0]["createInstanceKeyPaths"];
-type targetItemsType = Extract<Parameters<CreateInstanceKeyPathsType>[0], { targetItems: any }>["targetItems"];
-
+type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
+type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
 interface CustomModelsTreeProps {
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
-  targetItems: targetItemsType;
+  targetItems: InstanceKey[];
 }
 
 function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {

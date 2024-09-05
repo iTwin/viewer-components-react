@@ -217,16 +217,13 @@ Models tree allows displaying a subset of all nodes by providing a `getFilteredP
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
-type GetFilteredPathsType = Exclude<useModelsTreeProps["getFilteredPaths"], undefined>;
-type CreateInstanceKeyPathsType = Parameters<GetFilteredPathsType>[0]["createInstanceKeyPaths"];
-type targetItemsType = Extract<Parameters<CreateInstanceKeyPathsType>[0], { targetItems: any }>["targetItems"];
-
+type UseModelsTreeProps = Parameters<typeof useModelsTree>[0];
+type GetFilteredPathsType = Exclude<UseModelsTreeProps["getFilteredPaths"], undefined>;
 interface CustomModelsTreeProps {
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
-  targetItems: targetItemsType;
+  targetItems: InstanceKey[];
 }
 
 function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
@@ -739,9 +736,9 @@ function MyWidget() {
     </TelemetryContextProvider>
   );
 }
+
 function MyTree() {
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
-
   return (
     // VisibilityTree will use provided telemetry context to report used features and their performance
     <VisibilityTree
