@@ -12,7 +12,7 @@ import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
-import { PresentationRpcInterface } from "@itwin/presentation-common";
+import { InstanceKey, PresentationRpcInterface } from "@itwin/presentation-common";
 import {
   HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
@@ -24,18 +24,28 @@ import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils }
 
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { useCallback } from "react";
 
 // __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsComponentExample
 type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
+type GetFilteredPathsType = Exclude<useModelsTreeProps["getFilteredPaths"], undefined>;
+type CreateInstanceKeyPathsType = Parameters<GetFilteredPathsType>[0]["createInstanceKeyPaths"];
+type targetItemsType = Extract<Parameters<CreateInstanceKeyPathsType>[0], { targetItems: any }>["targetItems"];
 
 interface CustomModelsTreeProps {
-  getFilteredPaths: useModelsTreeProps["getFilteredPaths"];
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
+  targetItems: targetItemsType;
 }
 
-function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorage, imodel }: CustomModelsTreeProps) {
+function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
+  const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths }) => {
+    return createInstanceKeyPaths({
+      // list of instance keys representing nodes that should be displayed in the hierarchy
+      targetItems: targetItems,
+    })}, []);
+  
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
 
   return (
@@ -105,19 +115,12 @@ describe("Tree widget", () => {
           mockGetBoundingClientRect();
 
           const { getByText, queryByText } = render(
-            // __PUBLISH_EXTRACT_START__ TreeWidget.GetFilteredPathsExample
             <CustomModelsTreeComponent
               selectionStorage={unifiedSelectionStorage}
               imodel={imodel.imodel}
               viewport={testViewport}
-              getFilteredPaths={async ({ createInstanceKeyPaths }) => {
-                return createInstanceKeyPaths({
-                  // list of instance keys representing nodes that should be displayed in the hierarchy
-                  targetItems: [imodel.physicalModel],
-                });
-              }}
+              targetItems={[imodel.physicalModel]}
             />,
-            // __PUBLISH_EXTRACT_END__
           );
 
           await waitFor(() => {

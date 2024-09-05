@@ -112,7 +112,7 @@ describe("Tree widget", () => {
             ] as readonly Widget[],
         });
         // __PUBLISH_EXTRACT_END__
-        
+
         expect(createTreeWidgetFunction).to.not.be.undefined;
         const widgets = createTreeWidgetFunction!();
         expect(widgets).to.not.be.undefined;

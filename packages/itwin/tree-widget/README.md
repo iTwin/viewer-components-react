@@ -213,20 +213,30 @@ function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selecti
 
 Models tree allows displaying a subset of all nodes by providing a `getFilteredPaths` function, which receives a `createInstanceKeyPaths` function for creating hierarchy node paths from instance keys or an instance label and returns a list of hierarchy node paths targeting some nodes. When these paths are provided, the displayed hierarchy consists only of the targeted nodes, their ancestors, and their children. Example implementation of `getFilteredPaths`:
 
-<!-- [[include: [TreeWidget.GetFilteredPathsComponentExample, TreeWidget.GetFilteredPathsExample], tsx]] -->
+<!-- [[include: [TreeWidget.GetFilteredPathsComponentExample], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
 type useModelsTreeProps = Parameters<typeof useModelsTree>[0];
+type GetFilteredPathsType = Exclude<useModelsTreeProps["getFilteredPaths"], undefined>;
+type CreateInstanceKeyPathsType = Parameters<GetFilteredPathsType>[0]["createInstanceKeyPaths"];
+type targetItemsType = Extract<Parameters<CreateInstanceKeyPathsType>[0], { targetItems: any }>["targetItems"];
 
 interface CustomModelsTreeProps {
-  getFilteredPaths: useModelsTreeProps["getFilteredPaths"];
   viewport: Viewport;
   selectionStorage: SelectionStorage;
   imodel: IModelConnection;
+  targetItems: targetItemsType;
 }
 
-function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorage, imodel }: CustomModelsTreeProps) {
+function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
+  const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths }) => {
+    return createInstanceKeyPaths({
+      // list of instance keys representing nodes that should be displayed in the hierarchy
+      targetItems: targetItems,
+    });
+  }, []);
+
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
 
   return (
@@ -239,18 +249,6 @@ function CustomModelsTreeComponent({ getFilteredPaths, viewport, selectionStorag
     />
   );
 }
-
-<CustomModelsTreeComponent
-  selectionStorage={unifiedSelectionStorage}
-  imodel={imodel.imodel}
-  viewport={testViewport}
-  getFilteredPaths={async ({ createInstanceKeyPaths }) => {
-    return createInstanceKeyPaths({
-      // list of instance keys representing nodes that should be displayed in the hierarchy
-      targetItems: [imodel.physicalModel],
-    });
-  }}
-/>,
 ```
 
 <!-- END EXTRACTION -->
@@ -434,16 +432,16 @@ const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAcc
           fullClassName: "BisCore.GeometricModel3d",
           query: {
             ecsql: `
-            SELECT
-              ${await nodesQueryFactory.createSelectClause({
-                ecClassId: { selector: "this.ECClassId" },
-                ecInstanceId: { selector: "this.ECInstanceId" },
-                nodeLabel: {
-                  selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
-                },
-              })}
-            FROM BisCore.GeometricModel3d this
-          `,
+              SELECT
+                ${await nodesQueryFactory.createSelectClause({
+                  ecClassId: { selector: "this.ECClassId" },
+                  ecInstanceId: { selector: "this.ECInstanceId" },
+                  nodeLabel: {
+                    selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                  },
+                })}
+              FROM BisCore.GeometricModel3d this
+            `,
           },
         },
       ],
@@ -507,16 +505,16 @@ const getHierarchyDefinition: VisibilityTreeProps["getHierarchyDefinition"] = ({
           fullClassName: "BisCore.GeometricModel3d",
           query: {
             ecsql: `
-            SELECT
-              ${await nodesQueryFactory.createSelectClause({
-                ecClassId: { selector: "this.ECClassId" },
-                ecInstanceId: { selector: "this.ECInstanceId" },
-                nodeLabel: {
-                  selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
-                },
-              })}
-            FROM BisCore.GeometricModel3d this
-          `,
+              SELECT
+                ${await nodesQueryFactory.createSelectClause({
+                  ecClassId: { selector: "this.ECClassId" },
+                  ecInstanceId: { selector: "this.ECInstanceId" },
+                  nodeLabel: {
+                    selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                  },
+                })}
+              FROM BisCore.GeometricModel3d this
+            `,
           },
         },
       ],
@@ -655,7 +653,7 @@ function getSchemaContext(imodel: IModelConnection) {
 
 Components from this package allows consumers to track performance of specific features.
 
-This can be achieved by passing `onPerformanceMeasured` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent` or `TreeWidgetUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+This can be achieved by passing `onPerformanceMeasured` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
 
 - `"{tree}-initial-load"` - time it takes to load initial nodes after the tree is created.
 - `"{tree}-hierarchy-level-load"` - time it takes to load child nodes when a node is expanded.
@@ -667,7 +665,7 @@ Where `{tree}` specifies which tree component the feature is of.
 
 Components from this package allows consumers to track the usage of specific features.
 
-This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent` or `TreeWidgetUiItemsProvider`. The function is invoked with feature id as the component is being used. List of tracked features:
+This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeComponent`, `ModelsTreeComponent`, `IModelContentTreeComponent`. The function is invoked with feature id as the component is being used. List of tracked features:
 
 - `"choose-{tree}"` - when a tree is selected in the tree selector.
 - `"use-{tree}"` - when an interaction with a tree hierarchy happens. This includes any kind of interaction with nodes, including them being expanded/collapsed, selected, filtered, their visibility change, etc.
@@ -691,44 +689,6 @@ This can be achieved by passing `onFeatureUsed` function to `CategoriesTreeCompo
 Where `{tree}` specifies which tree component the feature is of.
 
 ### Example
-
-<!-- [[include: [TreeWidget.TelemetryUsageExampleImports, TreeWidget.TelemetryUsageExample], tsx]] -->
-<!-- BEGIN EXTRACTION -->
-
-```tsx
-import { UiItemsManager } from "@itwin/appui-react";
-import { CategoriesTreeComponent, createTreeWidget } from "@itwin/tree-widget-react";
-
-UiItemsManager.register({
-  id: "tree-widget-provider",
-  getWidgets: () => [
-    createTreeWidget({
-      trees: [
-        {
-          id: CategoriesTreeComponent.id,
-          getLabel: () => CategoriesTreeComponent.getLabel(),
-          render: (props) => (
-            <CategoriesTreeComponent
-              // see "Categories tree" section for details regarding `getSchemaContext` and `selectionStorage` props
-              getSchemaContext={getSchemaContext}
-              selectionStorage={unifiedSelectionStorage}
-              selectionMode={"extended"}
-              onPerformanceMeasured={(feature, elapsedTime) => {
-                console.log(`TreeWidget [${feature}] took ${elapsedTime} ms`);
-              }}
-              onFeatureUsed={(feature) => {
-                console.log(`TreeWidget [${feature}] used`);
-              }}
-            />
-          ),
-        },
-      ],
-    }),
-  ],
-});
-```
-
-<!-- END EXTRACTION -->
 
 For individual tree components the callbacks should be supplied through props:
 

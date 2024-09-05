@@ -30,7 +30,7 @@ describe("Tree widget", () => {
           await IModelApp.shutdown();
           sinon.restore();
         });
-        
+
         it("Creates unified storage", async function () {
           // __PUBLISH_EXTRACT_START__ TreeWidget.SelectionStorageExample
           let unifiedSelectionStorage: SelectionStorage | undefined;
@@ -65,7 +65,7 @@ describe("Tree widget", () => {
           // __PUBLISH_EXTRACT_START__ TreeWidget.SelectionStorageInitializeExample
           await Presentation.initialize({ selection: { selectionStorage: getUnifiedSelectionStorage() } });
           // __PUBLISH_EXTRACT_END__
-          
+
           expect(spy.calledOnce);
           Presentation.terminate();
         });

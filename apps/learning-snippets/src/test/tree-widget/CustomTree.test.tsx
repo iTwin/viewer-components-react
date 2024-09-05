@@ -92,16 +92,16 @@ describe("Tree widget", () => {
                   fullClassName: "BisCore.GeometricModel3d",
                   query: {
                     ecsql: `
-                    SELECT
-                      ${await nodesQueryFactory.createSelectClause({
-                        ecClassId: { selector: "this.ECClassId" },
-                        ecInstanceId: { selector: "this.ECInstanceId" },
-                        nodeLabel: {
-                          selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
-                        },
-                      })}
-                    FROM BisCore.GeometricModel3d this
-                  `,
+                      SELECT
+                        ${await nodesQueryFactory.createSelectClause({
+                          ecClassId: { selector: "this.ECClassId" },
+                          ecInstanceId: { selector: "this.ECInstanceId" },
+                          nodeLabel: {
+                            selector: await labelsQueryFactory.createSelectClause({ classAlias: "this", className: "BisCore.GeometricModel3d" }),
+                          },
+                        })}
+                      FROM BisCore.GeometricModel3d this
+                    `,
                   },
                 },
               ],
@@ -135,4 +135,3 @@ describe("Tree widget", () => {
     });
   });
 });
-
