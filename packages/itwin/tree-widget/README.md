@@ -185,7 +185,7 @@ interface CustomModelsTreeProps {
 }
 
 function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
-  const buttonProps = useModelsTreeButtonProps({ imodel, viewport });
+  const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport });
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
 
   return (
@@ -332,7 +332,7 @@ interface CustomCategoriesTreeProps {
 }
 
 function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
-  const buttonProps = useCategoriesTreeButtonProps({ viewport });
+  const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
   const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
 
   return (

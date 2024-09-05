@@ -154,7 +154,7 @@ describe("Tree widget", () => {
           }
 
           function CustomModelsTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomModelsTreeProps) {
-            const buttonProps = useModelsTreeButtonProps({ imodel, viewport });
+            const { buttonProps } = useModelsTreeButtonProps({ imodel, viewport });
             const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport });
 
             return (

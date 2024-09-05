@@ -154,7 +154,7 @@ describe("Tree widget", () => {
           }
 
           function CustomCategoriesTreeComponent({ imodel, viewport, getSchemaContext, selectionStorage }: CustomCategoriesTreeProps) {
-            const buttonProps = useCategoriesTreeButtonProps({ viewport });
+            const { buttonProps } = useCategoriesTreeButtonProps({ viewport });
             const { categoriesTreeProps, rendererProps } = useCategoriesTree({ activeView: viewport, filter: "" });
 
             return (
