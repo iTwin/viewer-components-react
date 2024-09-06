@@ -9,11 +9,13 @@ import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { HierarchyNode, HierarchyNodeIdentifier, HierarchyNodeKey } from "@itwin/presentation-hierarchies";
 import { toggleAllCategories } from "../../common/CategoriesVisibilityUtils";
 import { reduceWhile, toVoidPromise } from "../../common/Rxjs";
+import { createVisibilityHandlerResult } from "../../common/UseHierarchyVisibility";
 import { AlwaysAndNeverDrawnElementInfo } from "./AlwaysAndNeverDrawnElementInfo";
 import { ModelsTreeNode } from "./ModelsTreeNode";
 import { createVisibilityStatus } from "./Tooltip";
 import { createVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 
+import type { HierarchyVisibilityHandler, HierarchyVisibilityHandlerOverridableMethod, VisibilityStatus } from "../../common/UseHierarchyVisibility";
 import type { Observable, OperatorFunction } from "rxjs";
 import type { ModelsTreeIdsCache } from "./ModelsTreeIdsCache";
 import type { Id64Arg, Id64Array, Id64Set, Id64String } from "@itwin/core-bentley";
@@ -22,28 +24,38 @@ import type { AlwaysOrNeverDrawnElementsQueryProps } from "./AlwaysAndNeverDrawn
 import type { IVisibilityChangeEventListener } from "./VisibilityChangeEventListener";
 import type { Viewport } from "@itwin/core-frontend";
 import type { NonPartialVisibilityStatus, Visibility } from "./Tooltip";
-import type { HierarchyVisibilityHandler, VisibilityStatus } from "../../common/UseHierarchyVisibility";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
 
 type HierarchyProviderProps = Parameters<typeof createHierarchyProvider>[0];
 type HierarchyFilteringPaths = NonNullable<NonNullable<HierarchyProviderProps["filtering"]>["paths"]>;
 
 /** @beta */
-interface GetCategoryStatusProps {
+interface GetCategoryVisibilityStatusProps {
   categoryId: Id64String;
   modelId: Id64String;
 }
 
 /** @beta */
-interface ChangeCategoryStateProps extends GetCategoryStatusProps {
+interface ChangeCategoryVisibilityStateProps extends GetCategoryVisibilityStatusProps {
   on: boolean;
 }
 
 /** @beta */
-interface GetElementStateProps {
+interface GetGeometricElementVisibilityStatusProps {
   elementId: Id64String;
   modelId: Id64String;
   categoryId: Id64String;
+}
+
+/** @beta */
+interface ChangeGeometricElementDisplayStateProps extends GetGeometricElementVisibilityStatusProps {
+  on: boolean;
+}
+
+/** @beta */
+interface ChangeModelVisibilityStateProps {
+  ids: Id64Arg;
+  on: boolean;
 }
 
 /** @beta */
@@ -54,17 +66,6 @@ interface GetFilteredNodeVisibilityProps {
 
 /** @beta */
 interface ChangeFilteredNodeVisibilityProps extends GetFilteredNodeVisibilityProps {
-  on: boolean;
-}
-
-/** @beta */
-interface ChangeElementStateProps extends GetElementStateProps {
-  on: boolean;
-}
-
-/** @beta */
-interface ChangeModelStateProps {
-  ids: Id64Arg;
   on: boolean;
 }
 
@@ -102,48 +103,26 @@ interface FilterTargets {
 }
 
 /**
- * Properties for a method of `ModelsTreeVisibilityHandler` that can be overridden.
- * @beta
- */
-type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
-  ? TProps & {
-      /** A callback that produces the value from the original implementation. */
-      readonly originalImplementation: () => TResult;
-      /**
-       * Reference to the hierarchy based handler.
-       * @note Calling `getVisibility` or `changeVisibility` of this object invokes the overridden implementation as well.
-       */
-      readonly handler: ModelsTreeVisibilityHandler;
-    }
-  : never;
-
-/**
- * Function type for an overridden method of `ModelsTreeVisibilityHandler`.
- * @beta
- */
-type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverridableMethodProps<TFunc>) => TResult : never;
-
-/**
- * Functionality of `ModelsTreeVisibilityHandler` that can be overridden.
- * Each callback will be provided original implementation and reference to a `HierarchyVisibilityHandler`.
+ * Functionality of Models tree visibility handler that can be overridden.
+ * Each callback is provided original implementation and reference to a `HierarchyVisibilityHandler`.
  * @beta
  */
 export interface ModelsTreeVisibilityHandlerOverrides {
-  getSubjectNodeVisibility?: OverridableMethod<(props: { ids: Id64Array }) => Promise<VisibilityStatus>>;
-  getModelDisplayStatus?: OverridableMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
-  getCategoryDisplayStatus?: OverridableMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
-  getElementGroupingNodeDisplayStatus?: OverridableMethod<(props: { node: GroupingHierarchyNode }) => Promise<VisibilityStatus>>;
-  getElementDisplayStatus?: OverridableMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
+  getSubjectNodeVisibility?: HierarchyVisibilityHandlerOverridableMethod<(props: { ids: Id64Array }) => Promise<VisibilityStatus>>;
+  getModelDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: { id: Id64String }) => Promise<VisibilityStatus>>;
+  getCategoryDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetCategoryVisibilityStatusProps) => Promise<VisibilityStatus>>;
+  getElementGroupingNodeDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: { node: GroupingHierarchyNode }) => Promise<VisibilityStatus>>;
+  getElementDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetGeometricElementVisibilityStatusProps) => Promise<VisibilityStatus>>;
 
-  changeSubjectNodeState?: OverridableMethod<(props: { ids: Id64Array; on: boolean }) => Promise<void>>;
-  changeModelState?: OverridableMethod<(props: ChangeModelStateProps) => Promise<void>>;
-  changeCategoryState?: OverridableMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
-  changeElementGroupingNodeState?: OverridableMethod<(props: { node: GroupingHierarchyNode; on: boolean }) => Promise<void>>;
-  changeElementState?: OverridableMethod<(props: ChangeElementStateProps) => Promise<void>>;
+  changeSubjectNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: { ids: Id64Array; on: boolean }) => Promise<void>>;
+  changeModelState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeModelVisibilityStateProps) => Promise<void>>;
+  changeCategoryState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeCategoryVisibilityStateProps) => Promise<void>>;
+  changeElementGroupingNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: { node: GroupingHierarchyNode; on: boolean }) => Promise<void>>;
+  changeElementState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementDisplayStateProps) => Promise<void>>;
 }
 
 /**
- * Properties for `ModelsTreeVisibilityHandler`.
+ * Props for `createModelsTreeVisibilityHandler`.
  * @internal
  */
 export interface ModelsTreeVisibilityHandlerProps {
@@ -154,21 +133,14 @@ export interface ModelsTreeVisibilityHandlerProps {
 }
 
 /**
- * Hierarchy based visibility handler.
- * When determining visibility for nodes, it should take into account the visibility of their children.
- * @beta
- */
-export type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
-
-/**
  * Creates an instance if `ModelsTreeVisibilityHandler`.
  * @internal
  */
-export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): ModelsTreeVisibilityHandler {
+export function createModelsTreeVisibilityHandler(props: ModelsTreeVisibilityHandlerProps): HierarchyVisibilityHandler {
   return new ModelsTreeVisibilityHandlerImpl(props);
 }
 
-class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
+class ModelsTreeVisibilityHandlerImpl implements HierarchyVisibilityHandler {
   private readonly _eventListener: IVisibilityChangeEventListener;
   private readonly _alwaysAndNeverDrawnElements: AlwaysAndNeverDrawnElementInfo;
   private readonly _idsCache: ModelsTreeIdsCache;
@@ -309,9 +281,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }),
       );
     });
-
-    const ovr = this._props.overrides?.getSubjectNodeVisibility;
-    return ovr ? from(ovr(this.createOverrideProps({ ids: subjectIds }, result))) : result;
+    return createVisibilityHandlerResult(this, { ids: subjectIds }, result, this._props.overrides?.getSubjectNodeVisibility);
   }
 
   private getModelVisibilityStatus(modelId: Id64String): Observable<VisibilityStatus> {
@@ -336,9 +306,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }),
       );
     });
-
-    const ovr = this._props.overrides?.getModelDisplayStatus;
-    return ovr ? from(ovr(this.createOverrideProps({ id: modelId }, result))) : result;
+    return createVisibilityHandlerResult(this, { id: modelId }, result, this._props.overrides?.getModelDisplayStatus);
   }
 
   private getDefaultCategoryVisibilityStatus({ modelId, categoryId }: { categoryId: Id64String; modelId: Id64String }): NonPartialVisibilityStatus {
@@ -361,7 +329,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       : createVisibilityStatus("hidden", "category.hiddenThroughCategorySelector");
   }
 
-  private getCategoryDisplayStatus(props: GetCategoryStatusProps): Observable<VisibilityStatus> {
+  private getCategoryDisplayStatus(props: GetCategoryVisibilityStatusProps): Observable<VisibilityStatus> {
     const result = defer(() => {
       if (!this._props.viewport.view.viewsModel(props.modelId)) {
         return of(createVisibilityStatus("hidden", "category.hiddenThroughModel"));
@@ -378,9 +346,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         defaultStatus: () => this.getDefaultCategoryVisibilityStatus(props),
       });
     });
-
-    const ovr = this._props.overrides?.getCategoryDisplayStatus;
-    return ovr ? from(ovr(this.createOverrideProps(props, result))) : result;
+    return createVisibilityHandlerResult(this, props, result, this._props.overrides?.getCategoryDisplayStatus);
   }
 
   private getClassGroupingNodeDisplayStatus(node: GroupingHierarchyNode): Observable<VisibilityStatus> {
@@ -406,9 +372,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         },
       });
     });
-
-    const ovr = this._props.overrides?.getElementGroupingNodeDisplayStatus;
-    return ovr ? from(ovr(this.createOverrideProps({ node }, result))) : result;
+    return createVisibilityHandlerResult(this, { node }, result, this._props.overrides?.getElementGroupingNodeDisplayStatus);
   }
 
   private getElementOverriddenVisibility(elementId: string): NonPartialVisibilityStatus | undefined {
@@ -430,7 +394,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     return undefined;
   }
 
-  private getElementDisplayStatus(props: GetElementStateProps): Observable<VisibilityStatus> {
+  private getElementDisplayStatus(props: GetGeometricElementVisibilityStatusProps): Observable<VisibilityStatus> {
     const result = defer(() => {
       const viewport = this._props.viewport;
       const { elementId, modelId, categoryId } = props;
@@ -447,9 +411,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
       status = this.getDefaultCategoryVisibilityStatus({ categoryId, modelId });
       return of(createVisibilityStatus(status.state, status.state === "visible" ? undefined : "element.hiddenThroughCategory"));
     });
-
-    const ovr = this._props.overrides?.getElementDisplayStatus;
-    return ovr ? from(ovr(this.createOverrideProps(props, result))) : result;
+    return createVisibilityHandlerResult(this, props, result, this._props.overrides?.getElementDisplayStatus);
   }
 
   /** Changes visibility of the items represented by the tree node. */
@@ -624,12 +586,10 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
 
       return from(this._idsCache.getSubjectModelIds(ids)).pipe(mergeMap((modelIds) => this.changeModelState({ ids: modelIds, on })));
     });
-
-    const ovr = this._props.overrides?.changeSubjectNodeState;
-    return ovr ? from(ovr(this.createVoidOverrideProps({ ids, on }, result))) : result;
+    return createVisibilityHandlerResult(this, { ids, on }, result, this._props.overrides?.changeSubjectNodeState);
   }
 
-  private changeModelState(props: ChangeModelStateProps): Observable<void> {
+  private changeModelState(props: ChangeModelVisibilityStateProps): Observable<void> {
     const result = defer(() => {
       const viewport = this._props.viewport;
       // istanbul ignore if
@@ -658,8 +618,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         ),
       );
     });
-    const ovr = this._props.overrides?.changeModelState;
-    return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
+    return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeModelState);
   }
 
   private showModelWithoutAnyCategoriesOrElements(modelId: Id64String) {
@@ -698,7 +657,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
     }
   }
 
-  private changeCategoryState(props: ChangeCategoryStateProps): Observable<void> {
+  private changeCategoryState(props: ChangeCategoryVisibilityStateProps): Observable<void> {
     const result = defer(() => {
       const viewport = this._props.viewport;
       const { modelId, categoryId, on } = props;
@@ -710,9 +669,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }),
       );
     });
-
-    const ovr = this._props.overrides?.changeCategoryState;
-    return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
+    return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeCategoryState);
   }
 
   /**
@@ -734,16 +691,14 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }),
       );
     });
-
-    const ovr = this._props.overrides?.changeElementGroupingNodeState;
-    return ovr ? from(ovr(this.createVoidOverrideProps({ node, on }, result))) : result;
+    return createVisibilityHandlerResult(this, { node, on }, result, this._props.overrides?.changeElementGroupingNodeState);
   }
 
   /**
    * Updates visibility of an element and all its child elements by adding them to the always/never drawn list.
    * @note If element is to be enabled and model is hidden, it will be enabled.
    */
-  private changeElementState(props: ChangeElementStateProps): Observable<void> {
+  private changeElementState(props: ChangeGeometricElementDisplayStateProps): Observable<void> {
     const result = defer(() => {
       const { elementId, on, modelId, categoryId } = props;
       const viewport = this._props.viewport;
@@ -756,9 +711,7 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }),
       );
     });
-
-    const ovr = this._props.overrides?.changeElementState;
-    return ovr ? from(ovr(this.createVoidOverrideProps(props, result))) : result;
+    return createVisibilityHandlerResult(this, props, result, this._props.overrides?.changeElementState);
   }
 
   private changeElementStateNoChildrenOperator(props: { on: boolean; isDisplayedByDefault: boolean }): OperatorFunction<string, void> {
@@ -895,29 +848,6 @@ class ModelsTreeVisibilityHandlerImpl implements ModelsTreeVisibilityHandler {
         }
       }),
     );
-  }
-
-  private createVoidOverrideProps<TProps>(props: TProps, obs: Observable<void>): OverridableMethodProps<(props: TProps) => Promise<void>> {
-    return {
-      ...props,
-      originalImplementation: async () => toVoidPromise(obs),
-      handler: this,
-    };
-  }
-
-  private createOverrideProps<TProps, TObservable extends Observable<any>>(
-    props: TProps,
-    obs: TObservable,
-  ): TObservable extends Observable<infer T> ? OverridableMethodProps<(props: TProps) => Promise<T>> : never;
-  private createOverrideProps<TProps, TObservable extends Observable<unknown>>(
-    props: TProps,
-    obs: TObservable,
-  ): OverridableMethodProps<(props: TProps) => Promise<unknown>> {
-    return {
-      ...props,
-      originalImplementation: async () => firstValueFrom(obs),
-      handler: this,
-    };
   }
 
   private getGroupingNodeInfo(node: GroupingHierarchyNode) {

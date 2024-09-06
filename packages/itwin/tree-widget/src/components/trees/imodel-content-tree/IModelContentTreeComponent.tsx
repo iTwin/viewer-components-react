@@ -8,14 +8,11 @@ import { TreeWidget } from "../../../TreeWidget";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { IModelContentTree } from "./IModelContentTree";
 
-import type { ComponentPropsWithoutRef } from "react";
+import type { IModelContentTreeProps } from "./IModelContentTree";
 
 /** @beta */
 interface IModelContentTreeComponentProps
-  extends Pick<
-    ComponentPropsWithoutRef<typeof IModelContentTree>,
-    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"
-  > {
+  extends Pick<IModelContentTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }

@@ -39,6 +39,7 @@ import type {
 } from "@itwin/presentation-shared";
 import type { ModelsTreeIdsCache } from "./internal/ModelsTreeIdsCache";
 
+/** @beta */
 export type ClassGroupingHierarchyNode = GroupingHierarchyNode & { key: ClassGroupingNodeKey };
 
 const MAX_FILTERING_INSTANCE_KEY_COUNT = 100;

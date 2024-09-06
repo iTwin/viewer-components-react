@@ -9,21 +9,16 @@ import { TreeRenderer } from "../common/components/TreeRenderer";
 import { ExternalSourcesTreeComponent } from "./ExternalSourcesTreeComponent";
 import { ExternalSourcesTreeDefinition } from "./ExternalSourcesTreeDefinition";
 
+import type { TreeProps } from "../common/components/Tree";
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
-interface ExternalSourcesTreeOwnProps {
+export type ExternalSourcesTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-}
-
-/** @beta */
-type TreeProps = Parameters<typeof Tree>[0];
-
-/** @beta */
-type ExternalSourcesTreeProps = ExternalSourcesTreeOwnProps & Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
+};
 
 /** @beta */
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps) {

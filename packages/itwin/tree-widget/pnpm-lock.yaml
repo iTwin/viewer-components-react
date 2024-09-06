@@ -49,8 +49,8 @@ importers:
         specifier: ^4.16.0
         version: 4.16.0(infkli3j65rh4rjxdkq4hj547y)
       '@itwin/build-tools':
-        specifier: ^4.8.0
-        version: 4.8.0(@types/node@18.18.10)
+        specifier: ^4.9.0-dev.20
+        version: 4.9.0-dev.20(@types/node@18.18.10)
       '@itwin/components-react':
         specifier: ^4.16.0
         version: 4.16.0(@itwin/appui-abstract@4.8.0(@itwin/core-bentley@4.8.0))(@itwin/core-bentley@4.8.0)(@itwin/core-react@4.16.0(@itwin/appui-abstract@4.8.0(@itwin/core-bentley@4.8.0))(@itwin/core-bentley@4.8.0)(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0))(@types/react@18.0.34)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
@@ -594,8 +594,8 @@ packages:
       react-redux: ^7.2.2
       redux: ^4.1.0
 
-  '@itwin/build-tools@4.8.0':
-    resolution: {integrity: sha512-h/Y/mfVgBKW+XezJxlWnjcnhwQZ3Z8LQtw89pYjIhaUd6TLoy8E0v7WQCx3vGgTzM4F2AdcbO7k1Qy197ON5zQ==}
+  '@itwin/build-tools@4.9.0-dev.20':
+    resolution: {integrity: sha512-DfJTmQ7YsJ3c93hO8s4IzmZ5Ji+P2EMjVnE4vAvd0FIxZFSKp0xOGEGjb14rhmjx9xArPfvN2g8ShhvpZidqPg==}
     hasBin: true
 
   '@itwin/cloud-agnostic-core@2.2.2':
@@ -803,7 +803,7 @@ packages:
       '@itwin/core-react': ^4.9.0
       '@itwin/ecschema-metadata': ^4.4.0
       '@itwin/imodel-components-react': ^4.9.0
-      '@itwin/itwinui-react': 3.14.0
+      '@itwin/itwinui-react': ^3.0.0
       '@itwin/presentation-common': ^4.4.0
       '@itwin/presentation-frontend': ^4.4.0
       react: ^17.0.0 || ^18.0.0
@@ -4761,7 +4761,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@itwin/build-tools@4.8.0(@types/node@18.18.10)':
+  '@itwin/build-tools@4.9.0-dev.20(@types/node@18.18.10)':
     dependencies:
       '@microsoft/api-extractor': 7.47.7(@types/node@18.18.10)
       chalk: 3.0.0
