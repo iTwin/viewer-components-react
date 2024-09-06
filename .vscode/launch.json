@@ -115,6 +115,22 @@
       "outFiles": [
         "${workspaceFolder}/packages/itwin/map-layers/lib/**/*.js"
       ]
+    },
+    {
+      "name": "Tests: Learning-snippets",
+      "cwd": "${workspaceFolder}/apps/learning-snippets",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/learning-snippets/node_modules/mocha/bin/_mocha",
+      "args": [
+        "--config",
+        "./.mocharc.json",
+        "--no-timeouts",
+        "lib/test/**/*.test.js"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/apps/learning-snippets/lib/**/*.js"
+      ]
     }
   ]
 }

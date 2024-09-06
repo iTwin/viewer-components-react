@@ -40,6 +40,16 @@ module.exports = {
       outputs: [],
       inputs: ["api/**"],
     },
+    docs: {
+      dependsOn: ["build"],
+      outputs: ["build/docs/**"],
+      inputs: ["src/**"],
+    },
+    "update-extractions": {
+      cache: false,
+      dependsOn: [],
+      outputs: ["learning/**"],
+    },
     clean: {
       cache: false,
     },
