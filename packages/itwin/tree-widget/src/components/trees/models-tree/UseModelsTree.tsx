@@ -35,7 +35,7 @@ type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocuse
 type HierarchyFilteringPaths = Awaited<ReturnType<NonNullable<VisibilityTreeProps["getFilteredPaths"]>>>;
 
 /** @beta */
-interface UseModelsTreeProps {
+export interface UseModelsTreeProps {
   filter?: string;
   activeView: Viewport;
   hierarchyConfig?: Partial<ModelsTreeHierarchyConfiguration>;

@@ -62,7 +62,7 @@ interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
 type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => JSX.Element | null;
 
 // @beta (undocumented)
-type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & FunctionProps<typeof useCategoriesTree> & {
+type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };
@@ -262,7 +262,7 @@ interface ModelsTreeHierarchyConfiguration {
 }
 
 // @beta (undocumented)
-type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & FunctionProps<typeof useModelsTree> & {
+type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & UseModelsTreeProps & {
     hierarchyLevelConfig?: {
         sizeLimit?: number;
     };

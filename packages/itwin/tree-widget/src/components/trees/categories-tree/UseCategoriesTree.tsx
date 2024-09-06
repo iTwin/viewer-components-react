@@ -25,7 +25,7 @@ type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
-interface UseCategoriesTreeProps {
+export interface UseCategoriesTreeProps {
   filter: string;
   activeView: Viewport;
   onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;

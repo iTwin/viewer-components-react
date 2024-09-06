@@ -7,12 +7,12 @@ import { VisibilityTree } from "../common/components/VisibilityTree";
 import { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
 import { useCategoriesTree } from "./UseCategoriesTree";
 
+import type { UseCategoriesTreeProps } from "./UseCategoriesTree";
 import type { VisibilityTreeProps } from "../common/components/VisibilityTree";
-import type { FunctionProps } from "../common/Utils";
 
 /** @beta */
 export type CategoriesTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> &
-  FunctionProps<typeof useCategoriesTree> & {
+  UseCategoriesTreeProps & {
     hierarchyLevelConfig?: {
       sizeLimit?: number;
     };
