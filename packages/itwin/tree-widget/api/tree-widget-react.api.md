@@ -536,7 +536,7 @@ type VisibilityTreeProps = Omit<TreeProps, "treeRenderer" | "imodelAccess"> & {
     visibilityHandlerFactory: (props: {
         imodelAccess: ECClassHierarchyInspector;
     }) => HierarchyVisibilityHandler;
-    treeRenderer: (treeProps: VisibilityTreeRendererProps) => ReactNode;
+    treeRenderer: (treeProps: FunctionProps<TreeProps["treeRenderer"]> & Pick<VisibilityTreeRendererProps, "getCheckboxState" | "onCheckboxClicked">) => ReactNode;
 };
 
 // @beta
