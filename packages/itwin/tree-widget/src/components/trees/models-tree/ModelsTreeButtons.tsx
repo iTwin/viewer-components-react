@@ -104,6 +104,9 @@ async function queryModelsForHeaderActions(iModel: IModelConnection) {
 }
 
 /** @public */
+export type ModelsTreeHeaderButtonType = (props: ModelsTreeHeaderButtonProps) => JSX.Element | null;
+
+/** @public */
 export function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton

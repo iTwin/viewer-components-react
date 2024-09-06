@@ -21,22 +21,18 @@ import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "./ModelsTre
 import type { Id64String } from "@itwin/core-bentley";
 import type { GroupingHierarchyNode, InstancesNodeKey } from "@itwin/presentation-hierarchies";
 import type { ECClassHierarchyInspector, InstanceKey } from "@itwin/presentation-shared";
-import type { ComponentPropsWithoutRef, ReactElement } from "react";
+import type { ReactElement } from "react";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 import type { ClassGroupingHierarchyNode, ElementsGroupInfo, ModelsTreeHierarchyConfiguration } from "./ModelsTreeDefinition";
 import type { ModelsTreeVisibilityHandlerOverrides } from "./internal/ModelsTreeVisibilityHandler";
-import type { VisibilityTree } from "../common/components/VisibilityTree";
-import type { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree";
+import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer";
 
 type ModelsTreeFilteringError = "tooManyFilterMatches" | "tooManyInstancesFocused" | "unknownFilterError" | "unknownInstanceFocusError";
-type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
-type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
-
-/** @beta */
-type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
+type HierarchyFilteringPaths = Awaited<ReturnType<NonNullable<VisibilityTreeProps["getFilteredPaths"]>>>;
 
 /** @beta */
 interface UseModelsTreeProps {
@@ -56,7 +52,7 @@ interface UseModelsTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage"
   >;
-  rendererProps: Pick<Required<VisibilityTreeRendererProps>, "getIcon" | "onNodeDoubleClick">;
+  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "onNodeDoubleClick">>;
 }
 
 /**

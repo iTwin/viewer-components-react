@@ -17,14 +17,15 @@ import {
   HideAllButton, InvertButton, ShowAllButton, ToggleInstancesFocusButton, useModelsTreeButtonProps, View2DButton, View3DButton,
 } from "./ModelsTreeButtons";
 
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { ModelsTreeProps } from "./ModelsTree";
+import type { ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import type { ModelsTreeHeaderButtonProps } from "./ModelsTreeButtons";
+import type { ModelsTreeHeaderButtonProps, ModelsTreeHeaderButtonType } from "./ModelsTreeButtons";
 
 /** @public */
 interface ModelsTreeComponentProps
   extends Pick<
-    ComponentPropsWithoutRef<typeof ModelsTree>,
+    ModelsTreeProps,
     | "getSchemaContext"
     | "selectionStorage"
     | "density"
@@ -77,37 +78,37 @@ export const ModelsTreeComponent = (props: ModelsTreeComponentProps) => {
  * Renders a "Show all" button that enables display of all models.
  * @public
  */
-ModelsTreeComponent.ShowAllButton = ShowAllButton;
+ModelsTreeComponent.ShowAllButton = ShowAllButton as ModelsTreeHeaderButtonType;
 
 /**
  * Renders a "Hide all" button that disables display of all models.
  * @public
  */
-ModelsTreeComponent.HideAllButton = HideAllButton;
+ModelsTreeComponent.HideAllButton = HideAllButton as ModelsTreeHeaderButtonType;
 
 /**
  * Renders an "Invert all" button that inverts display of all models.
  * @public
  */
-ModelsTreeComponent.InvertButton = InvertButton;
+ModelsTreeComponent.InvertButton = InvertButton as ModelsTreeHeaderButtonType;
 
 /**
  * Renders a "View 2D" button that enables display of all plan projection models and disables all others.
  * @public
  */
-ModelsTreeComponent.View2DButton = View2DButton;
+ModelsTreeComponent.View2DButton = View2DButton as ModelsTreeHeaderButtonType;
 
 /**
  * Renders a "View 3D" button that enables display of all non-plan projection models and disables all plan projection ones.
  * @public
  */
-ModelsTreeComponent.View3DButton = View3DButton;
+ModelsTreeComponent.View3DButton = View3DButton as ModelsTreeHeaderButtonType;
 
 /**
  * Renders a "Enable/Disable instances focus" button that enables/disables instances focusing mode.
  * @public
  */
-ModelsTreeComponent.ToggleInstancesFocusButton = ToggleInstancesFocusButton;
+ModelsTreeComponent.ToggleInstancesFocusButton = ToggleInstancesFocusButton as ModelsTreeHeaderButtonType;
 
 /**
  * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.

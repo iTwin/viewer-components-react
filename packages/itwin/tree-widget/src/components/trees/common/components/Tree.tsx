@@ -17,62 +17,48 @@ import { createIModelAccess } from "../Utils";
 import { Delayed } from "./Delayed";
 import { ProgressOverlay } from "./ProgressOverlay";
 
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { FunctionProps } from "../Utils";
+import type { ReactNode } from "react";
 import type { MarkRequired } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 import type { SelectionStorage, useTree } from "@itwin/presentation-hierarchies-react";
 import type { HighlightInfo } from "../UseNodeHighlighting";
-import type { TreeRenderer } from "./TreeRenderer";
-
-/**
- * Properties that are passed to `treeRenderer` from `Tree` component.
- * @beta
- */
-export type TreeRendererProps = Required<
-  Pick<
-    ComponentPropsWithoutRef<typeof TreeRenderer>,
-    "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel"
-  >
->;
+import type { TreeRendererProps } from "./TreeRenderer";
 
 /** @beta */
-interface TreeOwnProps {
-  /** iModel connection that should be used to pull data from. */
-  imodel: IModelConnection;
-  /** Callback for getting `SchemaContext` for specific iModel. */
-  getSchemaContext: (imodel: IModelConnection) => SchemaContext;
-  /** Unique tree component name that will be used as unified selection change event source when selecting node. */
-  treeName: string;
-  /** Unified selection storage that should be used by tree to handle tree selection changes. */
-  selectionStorage: SelectionStorage;
-  /** Tree renderer that should be used to render tree data. */
-  treeRenderer: (treeProps: TreeRendererProps) => ReactNode;
-  /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
-  imodelAccess?: IModelAccess;
-  /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
-  hierarchyLevelSizeLimit?: number;
-  /** Modifies the density of tree nodes. `enlarged` tree nodes have bigger button hit boxes. */
-  density?: "default" | "enlarged";
-  /** Message that should be renderer if there are no tree nodes. */
-  noDataMessage?: ReactNode;
-  /** Callback that this invoked when tree reloads. */
-  onReload?: () => void;
-  /** Options for highlighting node labels. */
-  highlight?: HighlightInfo;
-}
-
-/** @beta */
-type UseTreeProps = Parameters<typeof useTree>[0];
-
-/** @beta */
-type UseSelectionHandlerProps = Parameters<typeof useSelectionHandler>[0];
-
-/** @beta */
-type IModelAccess = UseTreeProps["imodelAccess"];
-
-/** @beta */
-type TreeProps = TreeOwnProps & Pick<UseTreeProps, "getFilteredPaths" | "getHierarchyDefinition"> & Pick<Partial<UseSelectionHandlerProps>, "selectionMode">;
+export type TreeProps = Pick<FunctionProps<typeof useTree>, "getFilteredPaths" | "getHierarchyDefinition"> &
+  Partial<Pick<FunctionProps<typeof useSelectionHandler>, "selectionMode">> & {
+    /** iModel connection that should be used to pull data from. */
+    imodel: IModelConnection;
+    /** Callback for getting `SchemaContext` for specific iModel. */
+    getSchemaContext: (imodel: IModelConnection) => SchemaContext;
+    /** Unique tree component name that will be used as unified selection change event source when selecting node. */
+    treeName: string;
+    /** Unified selection storage that should be used by tree to handle tree selection changes. */
+    selectionStorage: SelectionStorage;
+    /** Tree renderer that should be used to render tree data. */
+    treeRenderer: (
+      treeProps: Required<
+        Pick<
+          TreeRendererProps,
+          "rootNodes" | "expandNode" | "onNodeClick" | "onNodeKeyDown" | "onFilterClick" | "isNodeSelected" | "getHierarchyLevelDetails" | "size" | "getLabel"
+        >
+      >,
+    ) => ReactNode;
+    /** Custom iModel access that is stored outside tree component. If not provided it new iModel access will be created using `imodel` prop. */
+    imodelAccess?: FunctionProps<typeof useTree>["imodelAccess"];
+    /** Size limit that should be applied on each hierarchy level. Default to `1000`. */
+    hierarchyLevelSizeLimit?: number;
+    /** Modifies the density of tree nodes. `enlarged` tree nodes have bigger button hit boxes. */
+    density?: "default" | "enlarged";
+    /** Message that should be renderer if there are no tree nodes. */
+    noDataMessage?: ReactNode;
+    /** Callback that this invoked when tree reloads. */
+    onReload?: () => void;
+    /** Options for highlighting node labels. */
+    highlight?: HighlightInfo;
+  };
 
 /**
  * Default tree component that manages tree state and renders using supplied `treeRenderer`.
@@ -164,7 +150,7 @@ function TreeImpl({
     );
   }
 
-  const treeRendererProps: TreeRendererProps = {
+  const treeRendererProps: FunctionProps<TreeProps["treeRenderer"]> = {
     ...treeProps,
     rootNodes,
     onNodeClick,
