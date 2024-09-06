@@ -39,7 +39,7 @@ export interface MeasureToolsUiProviderOptions {
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'onFeatureUsed'>
+  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'onFeatureUsed'>;
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
