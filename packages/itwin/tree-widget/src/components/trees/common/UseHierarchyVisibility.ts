@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
-import { defer, distinct, firstValueFrom, from, mergeMap, Subject, takeUntil } from "rxjs";
+import { defer, distinct, from, lastValueFrom, mergeMap, Subject, takeUntil } from "rxjs";
 import { useTelemetryContext } from "./UseTelemetryContext";
 
 import type { Observable } from "rxjs";
@@ -185,7 +185,7 @@ export function createVisibilityHandlerResult<TResult, TOverrideProps>(
     ? from(
         override({
           ...props,
-          originalImplementation: async () => firstValueFrom(obs),
+          originalImplementation: async () => lastValueFrom(obs, { defaultValue: undefined as TResult }),
           handler,
         }),
       )
