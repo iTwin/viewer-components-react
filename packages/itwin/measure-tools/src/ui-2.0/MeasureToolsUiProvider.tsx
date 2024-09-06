@@ -39,9 +39,7 @@ export interface MeasureToolsUiProviderOptions {
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'onFeatureUsed'> & {
-    onFeatureUsed?: (feature: Feature) => void;
-  };
+  private _props: Omit<RecursiveRequired<MeasureToolsUiProviderOptions>, 'onFeatureUsed'>
 
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
@@ -53,10 +51,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       },
       enableSheetMeasurement: props?.enableSheetMeasurement ?? false,
       stageUsageList: props?.stageUsageList ?? [StageUsage.General],
-      onFeatureUsed: props?.onFeatureUsed,
     };
-    if (!FeatureTracking.onFeature.numberOfListeners && this._props.onFeatureUsed)
-      FeatureTracking.onFeature.addListener(this._props.onFeatureUsed);
+    if (!FeatureTracking.onFeature.numberOfListeners && props?.onFeatureUsed)
+      FeatureTracking.onFeature.addListener(props?.onFeatureUsed);
   }
 
   public provideToolbarItems(
