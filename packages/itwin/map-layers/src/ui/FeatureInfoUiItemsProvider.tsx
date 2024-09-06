@@ -9,7 +9,6 @@ import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-  SyncUiEventId,
   ToolbarHelper,
   ToolbarOrientation,
   ToolbarUsage,
@@ -67,7 +66,7 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
     isHidden: new ConditionalBooleanValue(() => {
       // Hide the MapFeatureInfoTool if the Map Layers toggle is off or no ArcGISFeature layers are active
       return !isMapFeatureInfoSupported();
-    }, [MapLayersSyncUiEventId.MapImageryChanged, SyncUiEventId.ActiveViewportChanged, SyncUiEventId.ViewStateChanged]),
+    }, [MapLayersSyncUiEventId.MapImageryChanged]),
   });
 
 export class FeatureInfoUiItemsProvider implements UiItemsProvider {

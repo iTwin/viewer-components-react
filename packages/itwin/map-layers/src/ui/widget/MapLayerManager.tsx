@@ -404,6 +404,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       const newState = !backgroundMapVisible;
       activeViewport.viewFlags = activeViewport.viewFlags.with("backgroundMap", newState);
       setBackgroundMapVisible(newState);
+      IModelApp.toolAdmin.dispatchUiSyncEvent(MapLayersSyncUiEventId.MapImageryChanged);
     }
   }, [backgroundMapVisible, setBackgroundMapVisible, activeViewport]);
 
