@@ -77,19 +77,19 @@ interface CategoryInfo {
 }
 
 // @beta (undocumented)
-interface ChangeCategoryStateProps extends GetCategoryStatusProps {
+interface ChangeCategoryVisibilityStateProps extends GetCategoryVisibilityStatusProps {
     // (undocumented)
     on: boolean;
 }
 
 // @beta (undocumented)
-interface ChangeElementStateProps extends GetElementStateProps {
+interface ChangeGeometricElementDisplayStateProps extends GetGeometricElementVisibilityStatusProps {
     // (undocumented)
     on: boolean;
 }
 
 // @beta (undocumented)
-interface ChangeModelStateProps {
+interface ChangeModelVisibilityStateProps {
     // (undocumented)
     ids: Id64Arg;
     // (undocumented)
@@ -152,7 +152,7 @@ export class FilterLimitExceededError extends Error {
 type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
 
 // @beta (undocumented)
-interface GetCategoryStatusProps {
+interface GetCategoryVisibilityStatusProps {
     // (undocumented)
     categoryId: Id64String;
     // (undocumented)
@@ -160,7 +160,7 @@ interface GetCategoryStatusProps {
 }
 
 // @beta (undocumented)
-interface GetElementStateProps {
+interface GetGeometricElementVisibilityStatusProps {
     // (undocumented)
     categoryId: Id64String;
     // (undocumented)
@@ -178,6 +178,15 @@ export interface HierarchyVisibilityHandler extends IDisposable {
     getVisibilityStatus(node: HierarchyNode): Promise<VisibilityStatus> | VisibilityStatus;
     readonly onVisibilityChange: BeEvent<() => void>;
 }
+
+// @beta
+type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: HierarchyVisibilityHandlerOverridableMethodProps<TFunc>) => TResult : never;
+
+// @beta
+type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult ? TProps & {
+    readonly originalImplementation: () => TResult;
+    readonly handler: HierarchyVisibilityHandler;
+} : never;
 
 // @beta (undocumented)
 interface HighlightInfo {
@@ -260,52 +269,40 @@ type ModelsTreeProps = Pick<VisibilityTreeProps, "imodel" | "getSchemaContext" |
 };
 
 // @beta
-type ModelsTreeVisibilityHandler = HierarchyVisibilityHandler;
-
-// @beta
 export interface ModelsTreeVisibilityHandlerOverrides {
     // (undocumented)
-    changeCategoryState?: OverridableMethod<(props: ChangeCategoryStateProps) => Promise<void>>;
+    changeCategoryState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeCategoryVisibilityStateProps) => Promise<void>>;
     // (undocumented)
-    changeElementGroupingNodeState?: OverridableMethod<(props: {
+    changeElementGroupingNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    changeElementState?: OverridableMethod<(props: ChangeElementStateProps) => Promise<void>>;
+    changeElementState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeGeometricElementDisplayStateProps) => Promise<void>>;
     // (undocumented)
-    changeModelState?: OverridableMethod<(props: ChangeModelStateProps) => Promise<void>>;
+    changeModelState?: HierarchyVisibilityHandlerOverridableMethod<(props: ChangeModelVisibilityStateProps) => Promise<void>>;
     // (undocumented)
-    changeSubjectNodeState?: OverridableMethod<(props: {
+    changeSubjectNodeState?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         ids: Id64Array;
         on: boolean;
     }) => Promise<void>>;
     // (undocumented)
-    getCategoryDisplayStatus?: OverridableMethod<(props: GetCategoryStatusProps) => Promise<VisibilityStatus>>;
+    getCategoryDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetCategoryVisibilityStatusProps) => Promise<VisibilityStatus>>;
     // (undocumented)
-    getElementDisplayStatus?: OverridableMethod<(props: GetElementStateProps) => Promise<VisibilityStatus>>;
+    getElementDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: GetGeometricElementVisibilityStatusProps) => Promise<VisibilityStatus>>;
     // (undocumented)
-    getElementGroupingNodeDisplayStatus?: OverridableMethod<(props: {
+    getElementGroupingNodeDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         node: GroupingHierarchyNode;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
-    getModelDisplayStatus?: OverridableMethod<(props: {
+    getModelDisplayStatus?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         id: Id64String;
     }) => Promise<VisibilityStatus>>;
     // (undocumented)
-    getSubjectNodeVisibility?: OverridableMethod<(props: {
+    getSubjectNodeVisibility?: HierarchyVisibilityHandlerOverridableMethod<(props: {
         ids: Id64Array;
     }) => Promise<VisibilityStatus>>;
 }
-
-// @beta
-type OverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult ? (props: OverridableMethodProps<TFunc>) => TResult : never;
-
-// @beta
-type OverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult ? TProps & {
-    readonly originalImplementation: () => TResult;
-    readonly handler: ModelsTreeVisibilityHandler;
-} : never;
 
 // @public
 export function SelectableTree(props: SelectableTreeProps): JSX.Element | null;

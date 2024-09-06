@@ -14,7 +14,7 @@ import type { Visibility } from "../../../../components/trees/models-tree/intern
 import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import type { HierarchyProvider } from "@itwin/presentation-hierarchies";
-import type { ModelsTreeVisibilityHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
+import type { HierarchyVisibilityHandler } from "../../../../components/trees/common/UseHierarchyVisibility";
 
 interface VisibilityExpectations {
   subject(id: string): Visibility;
@@ -48,7 +48,7 @@ export namespace VisibilityExpectations {
 }
 
 export interface ValidateNodeProps {
-  handler: ModelsTreeVisibilityHandler;
+  handler: HierarchyVisibilityHandler;
   viewport: Viewport;
   visibilityExpectations: VisibilityExpectations;
 }
