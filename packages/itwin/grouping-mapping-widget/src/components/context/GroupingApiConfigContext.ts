@@ -24,6 +24,7 @@ export interface GroupingMappingApiConfig {
   getAccessToken: GetAccessTokenFn;
   iModelId: string;
   iModelConnection?: IModelConnection;
+  changeSetId?: string;
   prefix?: ClientPrefix;
 }
 
@@ -33,8 +34,6 @@ export interface GroupingMappingApiConfig {
 export const GroupingMappingApiConfigContext = createContext<GroupingMappingApiConfig>({
   getAccessToken: async () => "",
   iModelId: "",
-  prefix: undefined,
-  iModelConnection: undefined,
 });
 
 /**
