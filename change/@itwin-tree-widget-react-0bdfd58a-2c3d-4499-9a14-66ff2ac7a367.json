@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "Moved README code examples to tests, added a script to insert code to README from tests.",
+  "packageName": "@itwin/tree-widget-react",
+  "email": "43886789+MartynasStrazdas@users.noreply.github.com",
+  "dependentChangeType": "none"
+}

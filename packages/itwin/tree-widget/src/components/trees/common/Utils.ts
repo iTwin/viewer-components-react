@@ -12,6 +12,9 @@ import type { Id64Array, Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { SchemaContext } from "@itwin/ecschema-metadata";
 
+/** @beta */
+export type FunctionProps<THook extends (props: any) => any> = Parameters<THook>[0];
+
 /** @internal */
 export function createIdsSelector(ids: Id64Array): string {
   // Note: `json_array` function only accepts up to 127 arguments and we may have more `ids` than that. As a workaround,

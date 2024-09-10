@@ -10,21 +10,16 @@ import { IModelContentTreeComponent } from "./IModelContentTreeComponent";
 import { IModelContentTreeDefinition } from "./IModelContentTreeDefinition";
 import { IModelContentTreeIdsCache } from "./internal/IModelContentTreeIdsCache";
 
+import type { TreeProps } from "../common/components/Tree";
 import type { ReactElement } from "react";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
-interface IModelContentTreeOwnProps {
+export type IModelContentTreeProps = Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode"> & {
   hierarchyLevelConfig?: {
     sizeLimit?: number;
   };
-}
-
-/** @beta */
-type TreeProps = Parameters<typeof Tree>[0];
-
-/** @beta */
-type IModelContentTreeProps = IModelContentTreeOwnProps & Pick<TreeProps, "imodel" | "getSchemaContext" | "selectionStorage" | "density" | "selectionMode">;
+};
 
 /** @beta */
 export function IModelContentTree(props: IModelContentTreeProps) {

@@ -13,16 +13,14 @@ import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { CategoriesTree } from "./CategoriesTree";
 import { HideAllButton, InvertAllButton, ShowAllButton, useCategoriesTreeButtonProps } from "./CategoriesTreeButtons";
 
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { CategoriesTreeProps } from "./CategoriesTree";
+import type { ReactNode } from "react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import type { CategoriesTreeHeaderButtonProps } from "./CategoriesTreeButtons";
+import type { CategoriesTreeHeaderButtonProps, CategoriesTreeHeaderButtonType } from "./CategoriesTreeButtons";
 
 /** @public */
 interface CategoriesTreeComponentProps
-  extends Pick<
-    ComponentPropsWithoutRef<typeof CategoriesTree>,
-    "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"
-  > {
+  extends Pick<CategoriesTreeProps, "getSchemaContext" | "selectionStorage" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   /**
    * Renderers of header buttons. Defaults to:
    * ```ts
@@ -57,19 +55,19 @@ export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => 
  * Renders a "Show all" button that enables display of all categories and their subcategories.
  * @public
  */
-CategoriesTreeComponent.ShowAllButton = ShowAllButton;
+CategoriesTreeComponent.ShowAllButton = ShowAllButton as CategoriesTreeHeaderButtonType;
 
 /**
  * Renders a "Hide all" button that disables display of all categories.
  * @public
  */
-CategoriesTreeComponent.HideAllButton = HideAllButton;
+CategoriesTreeComponent.HideAllButton = HideAllButton as CategoriesTreeHeaderButtonType;
 
 /**
  * Renders an "Invert all" button that inverts display of all categories.
  * @public
  */
-CategoriesTreeComponent.InvertAllButton = InvertAllButton;
+CategoriesTreeComponent.InvertAllButton = InvertAllButton as CategoriesTreeHeaderButtonType;
 
 /**
  * Id of the component. May be used when a creating a `TreeDefinition` for `SelectableTree`.
@@ -91,7 +89,7 @@ function CategoriesTreeComponentImpl({
   onFeatureUsed,
   ...treeProps
 }: CategoriesTreeComponentProps & { iModel: IModelConnection; viewport: ScreenViewport }) {
-  const buttonProps = useCategoriesTreeButtonProps({ viewport });
+  const { buttonProps, onCategoriesFiltered } = useCategoriesTreeButtonProps({ viewport });
   const { filter, applyFilter, clearFilter } = useFiltering();
   const density = treeProps.density;
 
@@ -113,7 +111,7 @@ function CategoriesTreeComponentImpl({
           onFilterClear: clearFilter,
         }}
       >
-        <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} />
+        <CategoriesTree {...treeProps} imodel={iModel} activeView={viewport} filter={filter} onCategoriesFiltered={onCategoriesFiltered} />
       </TreeWithHeader>
     </TelemetryContextProvider>
   );
