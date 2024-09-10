@@ -38,7 +38,7 @@ export class PerpendicularDistanceMeasurementSerializer extends DistanceMeasurem
   }
 
   public override isValidJSON(json: any): boolean {
-    if (!super.isValidJSON(json) || !json.hasOwnProperty("startPoint") || !json.hasOwnProperty("endPoint") || !json.hasOwnProperty("measurementType")) {
+    if (!super.isValidJSON(json) || !json.hasOwnProperty("measurementType")) {
       return false;
     }
 
@@ -143,8 +143,8 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
 
     const title =
       this._measurementType === PerpendicularMeasurementType.Height
-      ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.toolTitle").replace("{{value}}", fDistance)
-      : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.toolTitle").replace("{{value}}", fDistance);
+        ? MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureHeight.toolTitle", { value: fDistance })
+        : MeasureTools.localization.getLocalizedString("MeasureTools:tools.MeasureWidth.toolTitle", { value: fDistance });
 
     const label =
       this._measurementType === PerpendicularMeasurementType.Height
@@ -228,7 +228,7 @@ export class PerpendicularDistanceMeasurement extends DistanceMeasurement {
 
     const jsonDist = json as PerpendicularDistanceMeasurementProps;
     jsonDist.measurementType = this.measurementType;
-    jsonDist.secondaryLine = this._secondaryLine as XYZProps[];
+    jsonDist.secondaryLine = this._secondaryLine ? this._secondaryLine.map((p) => p.toJSON()) : undefined;
   }
 
   public static override fromJSON(data: PerpendicularDistanceMeasurementProps): PerpendicularDistanceMeasurement {
