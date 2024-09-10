@@ -14,11 +14,10 @@ import { CategoriesTreeDefinition } from "./CategoriesTreeDefinition";
 import { CategoriesVisibilityHandler } from "./CategoriesVisibilityHandler";
 
 import type { HierarchyNode } from "@itwin/presentation-hierarchies";
-import type { VisibilityTree } from "../common/components/VisibilityTree";
-import type { ComponentPropsWithoutRef } from "react";
+import type { VisibilityTreeProps } from "../common/components/VisibilityTree";
 import type { Viewport } from "@itwin/core-frontend";
 import type { PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
-import type { VisibilityTreeRenderer } from "../common/components/VisibilityTreeRenderer";
+import type { VisibilityTreeRendererProps } from "../common/components/VisibilityTreeRenderer";
 import type { Id64String } from "@itwin/core-bentley";
 import type { CategoryInfo } from "../common/CategoriesVisibilityUtils";
 
@@ -26,13 +25,7 @@ type CategoriesTreeFilteringError = "tooManyFilterMatches" | "unknownFilterError
 type HierarchyFilteringPaths = Awaited<ReturnType<Required<VisibilityTreeProps>["getFilteredPaths"]>>;
 
 /** @beta */
-type VisibilityTreeRendererProps = ComponentPropsWithoutRef<typeof VisibilityTreeRenderer>;
-
-/** @beta */
-type VisibilityTreeProps = ComponentPropsWithoutRef<typeof VisibilityTree>;
-
-/** @beta */
-interface UseCategoriesTreeProps {
+export interface UseCategoriesTreeProps {
   filter: string;
   activeView: Viewport;
   onCategoriesFiltered?: (categories: CategoryInfo[] | undefined) => void;
@@ -44,7 +37,7 @@ interface UseCategoriesTreeResult {
     VisibilityTreeProps,
     "treeName" | "getHierarchyDefinition" | "getFilteredPaths" | "visibilityHandlerFactory" | "highlight" | "noDataMessage"
   >;
-  rendererProps: Pick<Required<VisibilityTreeRendererProps>, "getIcon" | "getSublabel">;
+  rendererProps: Required<Pick<VisibilityTreeRendererProps, "getIcon" | "getSublabel">>;
 }
 
 /**

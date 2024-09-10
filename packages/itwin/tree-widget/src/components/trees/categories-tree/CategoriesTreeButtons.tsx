@@ -58,6 +58,9 @@ export function useCategoriesTreeButtonProps({ viewport }: { viewport: Viewport 
 }
 
 /** @public */
+export type CategoriesTreeHeaderButtonType = (props: CategoriesTreeHeaderButtonProps) => JSX.Element | null;
+
+/** @public */
 export function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton

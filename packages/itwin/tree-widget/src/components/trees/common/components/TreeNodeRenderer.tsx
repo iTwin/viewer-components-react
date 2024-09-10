@@ -11,13 +11,10 @@ import type { ComponentPropsWithoutRef } from "react";
 import type { TreeCheckboxProps } from "./TreeNodeCheckbox";
 
 /** @beta */
-interface TreeNodeRendererOwnProps {
+export type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof CoreTreeNodeRenderer> & {
   /** Props for rendering tree node checkbox. If not provided, checkbox is not rendered. */
   checkboxProps?: TreeCheckboxProps;
-}
-
-/** @beta */
-type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof CoreTreeNodeRenderer> & TreeNodeRendererOwnProps;
+};
 
 /** @beta */
 export function TreeNodeRenderer({ checkboxProps, ...props }: TreeNodeRendererProps) {

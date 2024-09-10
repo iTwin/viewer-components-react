@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useRef, useState } from "react";
-import { defer, distinct, mergeMap, Subject, takeUntil } from "rxjs";
+import { defer, distinct, from, lastValueFrom, mergeMap, Subject, takeUntil } from "rxjs";
 import { useTelemetryContext } from "./UseTelemetryContext";
 
+import type { Observable } from "rxjs";
 import type { MutableRefObject } from "react";
 import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import type { HierarchyNode, PresentationHierarchyNode } from "@itwin/presentation-hierarchies-react";
@@ -148,4 +149,45 @@ function createStateGetter(
       isDisabled: status.isDisabled,
     };
   };
+}
+
+/**
+ * Properties for an overridden method of a `HierarchyVisibilityHandler` implementation.
+ * @beta
+ */
+export type HierarchyVisibilityHandlerOverridableMethodProps<TFunc> = TFunc extends (props: infer TProps) => infer TResult
+  ? TProps & {
+      /** A callback that produces the value from the original implementation. */
+      readonly originalImplementation: () => TResult;
+      /**
+       * Reference to the hierarchy based handler.
+       * @note Calling `getVisibility` or `changeVisibility` of this object invokes the overridden implementation as well.
+       */
+      readonly handler: HierarchyVisibilityHandler;
+    }
+  : never;
+
+/**
+ * Function type for an overridden method of `HierarchyVisibilityHandler`.
+ * @beta
+ */
+export type HierarchyVisibilityHandlerOverridableMethod<TFunc> = TFunc extends (...args: any[]) => infer TResult
+  ? (props: HierarchyVisibilityHandlerOverridableMethodProps<TFunc>) => TResult
+  : never;
+
+export function createVisibilityHandlerResult<TResult, TOverrideProps>(
+  handler: HierarchyVisibilityHandler,
+  props: TOverrideProps,
+  obs: Observable<TResult>,
+  override: HierarchyVisibilityHandlerOverridableMethod<(props: TOverrideProps) => Promise<TResult>> | undefined,
+): Observable<TResult> {
+  return override
+    ? from(
+        override({
+          ...props,
+          originalImplementation: async () => lastValueFrom(obs, { defaultValue: undefined as TResult }),
+          handler,
+        }),
+      )
+    : obs;
 }
