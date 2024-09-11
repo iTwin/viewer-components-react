@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Tue, 21 May 2024 13:26:35 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Sep 2024 19:11:54 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.5.0
+
+Wed, 11 Sep 2024 19:11:54 GMT
+
+### Minor changes
+
+- Hide map layer info tool when map layers is off or no arcgis feature layers exist ([#1016](https://github.com/iTwin/viewer-components-react/pull/1016))
 
 ## 5.4.4
 

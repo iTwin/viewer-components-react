@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Hide map layer info tool when map layers is off or no arcgis feature layers exist",
-  "packageName": "@itwin/map-layers",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}

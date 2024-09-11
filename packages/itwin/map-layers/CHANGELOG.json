@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Wed, 11 Sep 2024 19:11:54 GMT",
+      "version": "5.5.0",
+      "tag": "@itwin/map-layers_v5.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "9ac4d0f9b9b5a7f79938129b62551b0db363e31c",
+            "comment": "Hide map layer info tool when map layers is off or no arcgis feature layers exist"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 29 May 2024 18:39:36 GMT",
       "version": "5.4.4",
       "tag": "@itwin/map-layers_v5.4.4",
