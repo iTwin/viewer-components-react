@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "When running extractions, it now extracts on the currently opened changeset within the viewer.",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Guillar1@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

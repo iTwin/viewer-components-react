@@ -1,8 +1,16 @@
 # Change Log - @itwin/one-click-lca-react
 
-This log was last generated on Tue, 11 Jun 2024 15:52:38 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Sep 2024 12:18:49 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.6.1
+
+Thu, 12 Sep 2024 12:18:49 GMT
+
+### Patches
+
+- Upgraded insights-client to v0.13.0 ([#1041](https://github.com/iTwin/viewer-components-react/pull/1041))
 
 ## 0.6.0
 

@@ -2,6 +2,35 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Thu, 12 Sep 2024 12:18:49 GMT",
+      "version": "0.30.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.30.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "14ffe661e33afa8ddba694b6fc209354120024b2",
+            "comment": "Fixed Mapped Properties sending an empty array when nothing has been selected when creating a Property."
+          },
+          {
+            "author": "Mindaugas.Butkus@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "c25f5cbe072325e1e09e0dc04bee0c0471ea4481",
+            "comment": "Upgraded insights-client to v0.13.0"
+          }
+        ],
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "25f9278956154f023bb8c8f068e602d40982c1b0",
+            "comment": "When running extractions, it now extracts on the currently opened changeset within the viewer."
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 20 Aug 2024 13:08:31 GMT",
       "version": "0.29.0",
       "tag": "@itwin/grouping-mapping-widget_v0.29.0",
