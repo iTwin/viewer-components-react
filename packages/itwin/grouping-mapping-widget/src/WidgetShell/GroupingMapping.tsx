@@ -15,7 +15,7 @@ import { GroupingMappingContent } from "./GroupingMappingContent";
 import { GroupingMappingHeader } from "./GroupingMappingHeader";
 import { defaultGroupingUI } from "../components/customUI/DefaultGroupingUI";
 
-export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId"> & {
+export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId" | "changesetId"> & {
   hideRefreshIcon?: boolean;
 };
 
@@ -54,6 +54,7 @@ const GroupingMapping = (props: GroupingMappingProps) => {
   const activeIModelConnection = useActiveIModelConnection();
   const iModelConnection = props.iModelConnection ?? activeIModelConnection;
   const iModelId = iModelConnection?.iModelId ?? "";
+  const changeSetId = iModelConnection?.changeset.id ?? "";
   const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
     setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
   }, []);
@@ -85,7 +86,7 @@ const GroupingMapping = (props: GroupingMappingProps) => {
   );
 
   return (
-    <GroupingMappingContext iModelId={iModelId} {...props} customUIs={injectedCustomUI}>
+    <GroupingMappingContext iModelId={iModelId} changeSetId={changeSetId} {...props} customUIs={injectedCustomUI}>
       <div className="gmw-group-mapping-container">
         <GroupingMappingHeader goBack={goBack} currentRoute={currentRoute} />
         <GroupingMappingContent routingHistory={routingHistory} navigateTo={navigateTo} goBack={goBack} hideRefreshIcon={props.hideRefreshIcon} />
