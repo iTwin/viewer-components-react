@@ -8,14 +8,11 @@ import { TreeWidget } from "../../../TreeWidget";
 import { TelemetryContextProvider } from "../common/UseTelemetryContext";
 import { ExternalSourcesTree } from "./ExternalSourcesTree";
 
-import type { ComponentPropsWithoutRef } from "react";
+import type { ExternalSourcesTreeProps } from "./ExternalSourcesTree";
 
 /** @beta */
 interface ExternalSourcesTreeComponentProps
-  extends Pick<
-    ComponentPropsWithoutRef<typeof ExternalSourcesTree>,
-    "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"
-  > {
+  extends Pick<ExternalSourcesTreeProps, "getSchemaContext" | "selectionStorage" | "selectionMode" | "density" | "hierarchyLevelConfig" | "selectionMode"> {
   onPerformanceMeasured?: (featureId: string, duration: number) => void;
   onFeatureUsed?: (feature: string) => void;
 }

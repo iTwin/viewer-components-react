@@ -36,6 +36,9 @@ describe("TemplateMenu", () => {
       project: {
         href: "reportLink",
       },
+      odata: {
+        href: "odataLink"
+      },
     },
   }));
 
@@ -60,6 +63,7 @@ describe("TemplateMenu", () => {
           type: "Edm.String",
         },
       ],
+      annotations: [],
     },
   ];
   const configId = "1234-1234-1234-1234";

@@ -4,27 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./TreeRenderer.scss";
+
 import { useCallback } from "react";
 import { Tree } from "@itwin/itwinui-react";
 import { createRenderedTreeNodeData, LocalizationContextProvider } from "@itwin/presentation-hierarchies-react";
-import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 import { TreeNodeRenderer } from "./TreeNodeRenderer";
+import { useHierarchiesLocalization } from "../UseHierarchiesLocalization";
 
+import type { TreeNodeRendererProps } from "./TreeNodeRenderer";
 import type { ComponentPropsWithoutRef } from "react";
 import type { PresentationHierarchyNode, PresentationTreeNode, RenderedTreeNode } from "@itwin/presentation-hierarchies-react";
 
 /** @beta */
-interface TreeRendererOwnProps {
-  /** Tree nodes to render. */
-  rootNodes: PresentationTreeNode[];
-  /** Callback to check if specific node is selected. */
-  isNodeSelected: (nodeId: string) => boolean;
-  /** Callback that is invoked when node is double clicked. */
-  onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
-}
-
-/** @beta */
-type TreeRendererProps = Pick<
+export type TreeRendererProps = Pick<
   TreeNodeRendererProps,
   | "expandNode"
   | "onNodeClick"
@@ -37,8 +29,14 @@ type TreeRendererProps = Pick<
   | "checkboxProps"
   | "reloadTree"
 > &
-  Omit<TreeProps<RenderedTreeNode>, "data" | "nodeRenderer" | "getNode"> &
-  TreeRendererOwnProps;
+  Omit<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>, "data" | "nodeRenderer" | "getNode"> & {
+    /** Tree nodes to render. */
+    rootNodes: PresentationTreeNode[];
+    /** Callback to check if specific node is selected. */
+    isNodeSelected: (nodeId: string) => boolean;
+    /** Callback that is invoked when node is double clicked. */
+    onNodeDoubleClick?: (node: PresentationHierarchyNode, isSelected: boolean) => void;
+  };
 
 /**
  * Default renderer for rendering tree data.
@@ -61,7 +59,7 @@ export function TreeRenderer({
   ...props
 }: TreeRendererProps) {
   const localizedStrings = useHierarchiesLocalization();
-  const nodeRenderer = useCallback<TreeProps<RenderedTreeNode>["nodeRenderer"]>(
+  const nodeRenderer = useCallback<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>["nodeRenderer"]>(
     (nodeProps) => {
       return (
         <TreeNodeRenderer
@@ -102,7 +100,7 @@ export function TreeRenderer({
     ],
   );
 
-  const getNode = useCallback<TreeProps<RenderedTreeNode>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
+  const getNode = useCallback<ComponentPropsWithoutRef<typeof Tree<RenderedTreeNode>>["getNode"]>((node) => createRenderedTreeNodeData(node, isNodeSelected), [isNodeSelected]);
 
   return (
     <LocalizationContextProvider localizedStrings={localizedStrings}>
@@ -113,12 +111,8 @@ export function TreeRenderer({
         nodeRenderer={nodeRenderer}
         getNode={getNode}
         enableVirtualization={true}
+        style={{ height: "100%" }}
       />
     </LocalizationContextProvider>
   );
 }
-
-/** @beta */
-type TreeProps<T> = ComponentPropsWithoutRef<typeof Tree<T>>;
-/** @beta */
-type TreeNodeRendererProps = ComponentPropsWithoutRef<typeof TreeNodeRenderer>;

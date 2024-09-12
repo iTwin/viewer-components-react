@@ -19,7 +19,7 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
  */
 export const createDefaultPropertiesClient = (prefix?: ClientPrefix): IPropertiesClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
-  return new PropertiesClient(undefined, url);
+  return new PropertiesClient(url);
 };
 
 /**

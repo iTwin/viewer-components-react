@@ -5,6 +5,7 @@
 import { useExtractionClient } from "../../context/ExtractionClientContext";
 import { useMutation } from "@tanstack/react-query";
 import type { GroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
+import { useGroupingMappingApiConfig } from "../../context/GroupingApiConfigContext";
 import type { ExtractionMapping, ExtractionRequestDetails, Mapping } from "@itwin/insights-client";
 import { useState } from "react";
 import { useExtractionStateJobContext } from "../../context/ExtractionStateJobContext";
@@ -17,6 +18,7 @@ export const useRunExtraction = ({ iModelId, getAccessToken }: FetchExtractionSt
   const extractionClient = useExtractionClient();
   const [isJobStarted, setIsJobStarted] = useState<boolean>(false);
   const { mappingIdJobInfo, setMappingIdJobInfo } = useExtractionStateJobContext();
+  const { changeSetId } = useGroupingMappingApiConfig();
 
   const {
     mutateAsync: runExtraction,
@@ -33,6 +35,7 @@ export const useRunExtraction = ({ iModelId, getAccessToken }: FetchExtractionSt
         const extractionRequest: ExtractionRequestDetails = {
           mappings: mappingIds,
           iModelId,
+          changesetId: changeSetId,
         };
 
         const runExtractionResponse = await extractionClient.runExtraction(accessToken, extractionRequest);

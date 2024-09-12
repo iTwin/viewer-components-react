@@ -13,7 +13,8 @@ This package provides a viewer _widget_. Documentation on how to add a widget to
 
 ## Permissions and Scopes
 
-The SPA client used by your iTwin viewer application must have allowed scopes `insights:read` and `insights:write`, found under the Reporting & Insights category.
+The SPA client used by your iTwin viewer must have the `itwin-platform` scope.
+
 Users must have the `carbon_calculate` and `insights_view` [permissions](https://developer.bentley.com/apis/carbon-calculation/operations/create-oneclicklca-job/#authorization) assigned at either the Project or iModel level. Additional instruction on how to create roles and assign permissions can be found in the [iTwin Platform Projects API documentation](https://developer.bentley.com/apis/projects/tutorials/).
 
 ## Sample usage

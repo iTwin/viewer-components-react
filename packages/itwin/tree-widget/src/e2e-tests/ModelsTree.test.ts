@@ -67,7 +67,7 @@ test.describe("Models tree", () => {
 
       // hover the node for the button to appear
       await physicalModelNode.hover();
-      await physicalModelNode.getByTitle("Apply filter").click();
+      await physicalModelNode.getByRole("button", { name: "Apply filter" }).click();
 
       await locateInstanceFilter(page).waitFor();
       await selectPropertyInDialog(page, "Code");
@@ -78,7 +78,7 @@ test.describe("Models tree", () => {
 
       // wait for filtered children to appear
       await locateNode(treeWidget, "PipeSupport").waitFor();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
+      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
 
       await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
@@ -88,7 +88,7 @@ test.describe("Models tree", () => {
 
       // hover the node for the button to appear
       await physicalModelNode.hover();
-      await physicalModelNode.getByTitle("Apply filter").click();
+      await physicalModelNode.getByRole("button", { name: "Apply filter" }).click();
 
       await locateInstanceFilter(page).waitFor();
       await selectPropertyInDialog(page, "Is Private");
@@ -97,13 +97,13 @@ test.describe("Models tree", () => {
 
       // wait for message to appear
       await treeWidget.getByText("No child nodes match current filter").waitFor();
-      await treeWidget.getByTitle("Clear active filter").waitFor();
+      await treeWidget.getByRole("button", { name: "Clear active filter" }).waitFor();
 
       await takeScreenshot(page, treeWidget, { resetScroll: true });
     });
 
     test("search", async ({ page }) => {
-      await treeWidget.getByTitle("Search for something").click();
+      await treeWidget.getByRole("button", { name: "Open" }).click();
       await treeWidget.getByPlaceholder("Search...").fill("[4-1F5]");
 
       // wait for node to be found
@@ -118,7 +118,7 @@ test.describe("Models tree", () => {
       // wait for node at the bottom to be visible/loaded
       await locateNode(treeWidget, "Tag-Category").waitFor();
 
-      await treeWidget.getByTitle("Search for something").click();
+      await treeWidget.getByRole("button", { name: "Open" }).click();
       await treeWidget.getByPlaceholder("Search...").fill("Test");
 
       // wait for no nodes to be found matching search input
@@ -133,7 +133,7 @@ test.describe("Models tree", () => {
       // wait for node at the bottom to be visible/loaded
       await locateNode(treeWidget, "Tag-Category").waitFor();
 
-      await treeWidget.getByTitle("Search for something").click();
+      await treeWidget.getByRole("button", { name: "OPen" }).click();
       await treeWidget.getByPlaceholder("Search...").fill("x");
 
       // wait for error message to be displayed
@@ -150,11 +150,11 @@ test.describe("Models tree", () => {
 
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
-        await treeWidget.getByTitle("More").click();
+        await treeWidget.getByRole("button", { name: "More" }).click();
       }
 
       // enable instances focus and select a node
-      await page.getByTitle("Enable Instance Focus").click();
+      await page.getByRole("button", { name: "Enable Instance Focus" }).click();
       const pipeSupportNode = locateNode(treeWidget, "PipeSupport");
       await pipeSupportNode.click();
 
@@ -172,11 +172,11 @@ test.describe("Models tree", () => {
 
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
-        await treeWidget.getByTitle("More").click();
+        await treeWidget.getByRole("button", { name: "More" }).click();
       }
 
       // enable instances focus and select a node
-      await page.getByTitle("Enable instance focus mode").click();
+      await page.getByRole("button", { name: "Enable instance focus mode" }).click();
 
       // select all elements in viewport
       const viewport = await page.getByTestId("viewport-component").boundingBox();
@@ -196,18 +196,18 @@ test.describe("Models tree", () => {
 
       // when enlarged layout is used the instances focus button is not visible
       if (density === "enlarged") {
-        await treeWidget.getByTitle("More").click();
+        await treeWidget.getByRole("button", { name: "More" }).click();
       }
 
       // ensure instance focus is turned off and hierarchy is visible
-      await page.getByTitle("Enable instance focus mode").waitFor();
+      await page.getByRole("button", { name: "Enable instance focus mode" }).waitFor();
       await locateNode(treeWidget, "BayTown").waitFor();
     });
 
     test("header buttons overflow", async ({ page }) => {
-      await treeWidget.getByTitle("Search for something").click();
-      await treeWidget.getByTitle("More").click();
-      await page.getByTitle("Enable instance focus mode").waitFor();
+      await treeWidget.getByRole("button", { name: "Open" }).click();
+      await treeWidget.getByRole("button", { name: "More" }).click();
+      await page.getByRole("button", { name: "Enable instance focus mode" }).waitFor();
       await takeScreenshot(page, treeWidget);
     });
 
@@ -224,7 +224,7 @@ test.describe("Models tree", () => {
       await page.keyboard.press("Tab");
 
       // ensure checkbox is focused
-      const checkbox = node.getByTitle("Visible: All categories visible");
+      const checkbox = node.getByRole("checkbox", { name: "Visible: All categories visible" });
       await expect(checkbox).toBeFocused();
 
       await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });
@@ -281,7 +281,7 @@ test.describe("Models tree", () => {
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
 
-      const applyFilterButton = node.getByTitle("Apply filter");
+      const applyFilterButton = node.getByRole("button", { name: "Apply filter" });
       await expect(applyFilterButton).toBeFocused();
 
       await takeScreenshot(page, node, { boundingComponent: treeContainer, expandBy: { top: 10, bottom: 10 } });

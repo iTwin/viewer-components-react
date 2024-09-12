@@ -173,7 +173,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
         propertyName,
         dataType,
         quantityType,
-        ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
+        ecProperties: selectedProperties.length > 0 ? selectedProperties.map((p) => convertToECProperties(p)).flat() : undefined,
         calculatedPropertyType,
         formula,
       };

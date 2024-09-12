@@ -6,7 +6,7 @@ import { Button, ButtonGroup, ExpandableBlock, IconButton } from "@itwin/itwinui
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Configuration } from "./EC3/Template";
 import React from "react";
-import type { EC3ConfigurationLabel, ODataTable, Report } from "@itwin/insights-client";
+import type { EC3ReportConfigurationLabel, ODataTable, Report } from "@itwin/insights-client";
 import "./TemplateModificationStepTwo.scss";
 import { SvgAdd, SvgDelete, SvgEdit } from "@itwin/itwinui-icons-react";
 import { useApiContext } from "./context/APIContext";
@@ -28,7 +28,7 @@ export enum AssemblyCreationDropdownType {
 }
 
 export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoProps) => {
-  const [allAssemblies, setAllAssemblies] = useState<EC3ConfigurationLabel[] | undefined>(props.template.labels);
+  const [allAssemblies, setAllAssemblies] = useState<EC3ReportConfigurationLabel[] | undefined>(props.template.labels);
   const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [oDataTable, setoDataTable] = useState<ODataTable[]>([]);
@@ -43,7 +43,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
   }, [props.template.labels]);
 
   const onAssemblyDataChange = useCallback(
-    (updatedAssembly: EC3ConfigurationLabel, index: number, action?: "add" | "delete") => {
+    (updatedAssembly: EC3ReportConfigurationLabel, index: number, action?: "add" | "delete") => {
       if (allAssemblies) {
         const newArray = [...allAssemblies];
         if (action === "add") {
@@ -119,7 +119,7 @@ export const TemplateModificationStepTwo = (props: TemplateModificationStepTwoPr
   );
 
   const onAssemblyDelete = useCallback(
-    (assembly: EC3ConfigurationLabel, index: number) => (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    (assembly: EC3ReportConfigurationLabel, index: number) => (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e.stopPropagation();
       onAssemblyDataChange(assembly, index, "delete");
     },

@@ -15,41 +15,31 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { createECSqlQueryExecutor } from "@itwin/presentation-core-interop";
 import { createHierarchyProvider, createLimitingECSqlQueryExecutor, HierarchyNode } from "@itwin/presentation-hierarchies";
 import { InstanceKey } from "@itwin/presentation-shared";
-import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
+import {
+  HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+} from "@itwin/presentation-testing";
 import { ModelsTreeIdsCache } from "../../../../components/trees/models-tree/internal/ModelsTreeIdsCache";
 import { createModelsTreeVisibilityHandler } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
 import { createVisibilityStatus } from "../../../../components/trees/models-tree/internal/Tooltip";
 import { defaultHierarchyConfiguration, ModelsTreeDefinition } from "../../../../components/trees/models-tree/ModelsTreeDefinition";
 import {
-  buildIModel,
-  importSchema,
-  insertPhysicalElement,
-  insertPhysicalModelWithPartition,
-  insertPhysicalPartition,
-  insertPhysicalSubModel,
-  insertSpatialCategory,
-  insertSubject,
+  buildIModel, importSchema, insertPhysicalElement, insertPhysicalModelWithPartition, insertPhysicalPartition, insertPhysicalSubModel,
+  insertSpatialCategory, insertSubject,
 } from "../../../IModelUtils";
 import { TestUtils } from "../../../TestUtils";
 import { createFakeSinonViewport, createIModelAccess } from "../../Common";
 import {
-  createCategoryHierarchyNode,
-  createClassGroupingHierarchyNode,
-  createElementHierarchyNode,
-  createFakeIdsCache,
-  createModelHierarchyNode,
+  createCategoryHierarchyNode, createClassGroupingHierarchyNode, createElementHierarchyNode, createFakeIdsCache, createModelHierarchyNode,
   createSubjectHierarchyNode,
 } from "../Utils";
 import { validateHierarchyVisibility, VisibilityExpectations } from "./VisibilityValidation";
 
+import type { HierarchyVisibilityHandler } from "../../../../components/trees/common/UseHierarchyVisibility";
+import type { ModelsTreeVisibilityHandlerProps } from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { GeometricElement3dProps, QueryBinder } from "@itwin/core-common";
 import type { HierarchyNodeIdentifiersPath, HierarchyProvider } from "@itwin/presentation-hierarchies";
 import type { Id64String } from "@itwin/core-bentley";
-import type {
-  ModelsTreeVisibilityHandler,
-  ModelsTreeVisibilityHandlerProps,
-} from "../../../../components/trees/models-tree/internal/ModelsTreeVisibilityHandler";
 import type { Visibility } from "../../../../components/trees/models-tree/internal/Tooltip";
 import type { ValidateNodeProps } from "./VisibilityValidation";
 
@@ -80,7 +70,7 @@ describe("HierarchyBasedVisibilityHandler", () => {
   });
 
   describe("#unit", () => {
-    let createdHandlers = new Array<ModelsTreeVisibilityHandler>();
+    let createdHandlers = new Array<HierarchyVisibilityHandler>();
 
     after(() => {
       sinon.restore();

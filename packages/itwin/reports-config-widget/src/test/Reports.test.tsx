@@ -23,6 +23,9 @@ const reportsFactory = (): ReportCollection => ({
       project: {
         href: "",
       },
+      odata: {
+        href: "",
+      },
     },
   })),
   _links: {

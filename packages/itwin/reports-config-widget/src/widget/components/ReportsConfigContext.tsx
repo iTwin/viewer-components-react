@@ -78,13 +78,13 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     baseUrl: reportsBaseUrl(),
     iTwinId: props.iTwinId,
     reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
-    mappingsClient: props.mappingsClient ?? new MappingsClient(undefined, groupingMappingBaseUrl()),
+    mappingsClient: props.mappingsClient ?? new MappingsClient(groupingMappingBaseUrl()),
     iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
   });
 
   useEffect(() => {
     if (!props.extractionClient) {
-      setExtractionClient(props.extractionClient ?? new ExtractionClient(undefined, groupingMappingBaseUrl()));
+      setExtractionClient(props.extractionClient ?? new ExtractionClient(groupingMappingBaseUrl()));
     }
   }, [groupingMappingBaseUrl, props.extractionClient]);
 
@@ -111,7 +111,7 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
       baseUrl: props.baseUrl || REPORTS_CONFIG_BASE_URL,
       iTwinId: props.iTwinId,
       reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
-      mappingsClient: props.mappingsClient ?? new MappingsClient(undefined, groupingMappingBaseUrl()),
+      mappingsClient: props.mappingsClient ?? new MappingsClient(groupingMappingBaseUrl()),
       iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
     }));
   }, [

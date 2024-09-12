@@ -19,7 +19,7 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
  */
 export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingsClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
-  return new MappingsClient(undefined, url);
+  return new MappingsClient(url);
 };
 
 /**
