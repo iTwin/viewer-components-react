@@ -42,6 +42,7 @@ export interface GroupingMappingContextProps {
    * Used for iTwin and iModel APIs.
    * Also used for Mapping API if a custom IMappingsClient is not provided.
    */
+  changeSetId?: string;
   prefix?: ClientPrefix;
   /**
    * A custom implementation of MappingClient.
@@ -123,6 +124,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
     iModelId: props.iModelId,
     prefix: props.prefix,
+    changeSetId: props.changeSetId,
   });
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<Set<string>>(new Set());
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
@@ -146,8 +148,9 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       iModelId: props.iModelId,
       getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
       iModelConnection: props.iModelConnection ?? activeIModelConnection,
+      changeSetId: props.changeSetId,
     }));
-  }, [activeIModelConnection, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
+  }, [activeIModelConnection, props.changeSetId, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(mappingsClientProp));
