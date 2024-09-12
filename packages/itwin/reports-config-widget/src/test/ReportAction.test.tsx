@@ -46,6 +46,9 @@ describe("Reports Action", () => {
         project: {
           href: "",
         },
+        odata: {
+          href: "",
+        },
       },
     };
 

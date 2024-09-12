@@ -7,8 +7,8 @@
 /// <reference types="react" />
 
 import type { AccessToken } from '@itwin/core-bentley';
-import type { EC3ConfigurationLabel } from '@itwin/insights-client';
 import type { EC3JobStatus } from '@itwin/insights-client';
+import type { EC3ReportConfigurationLabel } from '@itwin/insights-client';
 import type { IEC3ConfigurationsClient } from '@itwin/insights-client';
 import type { IEC3JobsClient } from '@itwin/insights-client';
 import type { IOdataClient } from '@itwin/insights-client';
@@ -31,7 +31,7 @@ export interface Configuration {
     // (undocumented)
     id?: string;
     // (undocumented)
-    labels: EC3ConfigurationLabel[];
+    labels: EC3ReportConfigurationLabel[];
     // (undocumented)
     reportId?: string;
 }

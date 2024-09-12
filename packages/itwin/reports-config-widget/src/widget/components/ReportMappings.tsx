@@ -6,11 +6,10 @@ import { SvgAdd, SvgCopy, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { Button, IconButton, LabeledInput, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
-import { EmptyMessage, generateUrl, handleError, LoadingOverlay, LoadingSpinner } from "./utils";
+import { EmptyMessage, handleError, LoadingOverlay, LoadingSpinner } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
 import type { ExtractionRequestDetails, IMappingsClient, IReportsClient, Report, ReportMapping } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { AddMappingsModal } from "./AddMappingsModal";
 import type { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
@@ -93,7 +92,7 @@ export interface ReportMappingsProps {
  * @public
  */
 export const ReportMappings = ({ report, onClickClose, defaultIModelId }: ReportMappingsProps) => {
-  const { getAccessToken, reportsClient, iModelsClient, mappingsClient, baseUrl } = useReportsConfigApi();
+  const { getAccessToken, reportsClient, iModelsClient, mappingsClient } = useReportsConfigApi();
   const [showDeleteModal, setShowDeleteModal] = useState<ReportMappingAndMapping | undefined>(undefined);
   const [showAddMapping, setShowAddMapping] = useState<boolean>(false);
   const { bulkExtractor } = useBulkExtractor();
@@ -119,8 +118,6 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
     await fetchReportMappings(setReportMappings, report.id, setIsLoading, reportsClient, mappingsClient, iModelsClient, getAccessToken);
   }, [getAccessToken, iModelsClient, mappingsClient, report.id, reportsClient]);
 
-  const odataFeedUrl = `${generateUrl(REPORTING_BASE_PATH, baseUrl)}/odata/${report.id}`;
-
   const addMapping = useCallback(() => {
     setShowAddMapping(true);
   }, []);
@@ -144,12 +141,12 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
           label={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
           className="rcw-odata-url-input"
           readOnly={true}
-          value={odataFeedUrl}
+          value={report._links.odata.href}
           svgIcon={
             <IconButton
               title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Copy")}
               onClick={async (_) => {
-                await navigator.clipboard.writeText(odataFeedUrl);
+                await navigator.clipboard.writeText(report._links.odata.href);
                 toaster.positive(ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
               }}
             >
@@ -197,7 +194,7 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
                 onClickDelete={() => {
                   setShowDeleteModal(mapping);
                 }}
-                odataFeedUrl={odataFeedUrl}
+                odataFeedUrl={report._links.odata.href}
                 jobStartEvent={jobStartEvent}
               />
             ))}

@@ -1,26 +1,26 @@
 import { Label, LabeledInput, LabeledSelect, Select } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo } from "react";
 import { AssemblyCreationDropdownType } from "./TemplateModificationStepTwo";
-import type { EC3ConfigurationLabel, ODataTable } from "@itwin/insights-client";
+import type { EC3ReportConfigurationLabel, ODataTable } from "@itwin/insights-client";
 import type { Configuration } from "../ec3-widget-react";
 import { EC3Widget } from "../EC3Widget";
 import "./AssemblyItem.scss";
 
 export interface AssemblyItemProps {
-  assembly: EC3ConfigurationLabel;
+  assembly: EC3ReportConfigurationLabel;
   currentAssemblyIndex: number;
   template: Configuration;
   isLoading: boolean;
   editableAssemblyIndex?: number;
   oDataTable?: ODataTable[];
   reportTables?: string[];
-  allAssemblies: EC3ConfigurationLabel[];
-  onAssemblyDataChange: (updatedAssembly: EC3ConfigurationLabel, index: number, action?: "add" | "delete") => void;
+  allAssemblies: EC3ReportConfigurationLabel[];
+  onAssemblyDataChange: (updatedAssembly: EC3ReportConfigurationLabel, index: number, action?: "add" | "delete") => void;
   setTemplate: (template: Configuration) => void;
 }
 export const AssemblyItem = (props: AssemblyItemProps) => {
   const getMetadataColumns = useMemo(
-    () => (assembly: EC3ConfigurationLabel, optionType: AssemblyCreationDropdownType) => {
+    () => (assembly: EC3ReportConfigurationLabel, optionType: AssemblyCreationDropdownType) => {
       const oDataTableData = props.oDataTable?.find((x) => x.name === assembly.reportTable);
       if (!oDataTableData) {
         return;
@@ -53,7 +53,7 @@ export const AssemblyItem = (props: AssemblyItemProps) => {
 
   // skip reportTables that have already been used in other assemblies
   const getReportTableOptions = useCallback(
-    (assembly: EC3ConfigurationLabel) => {
+    (assembly: EC3ReportConfigurationLabel) => {
       const existingAssembly = reportTableLabels.find((x) => x.value === assembly.reportTable);
       if (existingAssembly) {
         const allAssem = reportTableLabels.filter((x) => !props.allAssemblies?.map((p) => p.reportTable).includes(x.value));

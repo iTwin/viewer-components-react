@@ -19,7 +19,7 @@ const prefixUrl = (baseUrl?: string, prefix?: string) => {
  */
 export const createDefaultGroupsClient = (prefix?: ClientPrefix): IGroupsClient => {
   const url = prefixUrl(GROUPING_AND_MAPPING_BASE_PATH, prefix);
-  return new GroupsClient(undefined, url);
+  return new GroupsClient(url);
 };
 
 /**

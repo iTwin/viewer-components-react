@@ -53,6 +53,9 @@ const mockReport: Report = {
     project: {
       href: "",
     },
+    odata: {
+      href: "mock-odata-feed-url",
+    },
   },
 };
 
@@ -297,7 +300,7 @@ describe("Report Mappings View", () => {
       name: /odatafeedurl/i,
     });
     expect(urlTextbox).toBeInTheDocument();
-    expect(screen.getByDisplayValue(`https://api.bentley.com/insights/reporting/odata/${mockReport.id}`)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(`mock-odata-feed-url`)).toBeInTheDocument();
 
     const copyButton = screen.getByRole("button", {
       name: /copy/i,

@@ -128,6 +128,8 @@ export interface GroupingCustomUIProps {
 // @public (undocumented)
 export interface GroupingMappingApiConfig {
     // (undocumented)
+    changeSetId?: string;
+    // (undocumented)
     getAccessToken: GetAccessTokenFn;
     // (undocumented)
     iModelConnection?: IModelConnection;
@@ -145,6 +147,7 @@ export const GroupingMappingContext: (props: GroupingMappingContextProps) => JSX
 
 // @public
 export interface GroupingMappingContextProps {
+    changeSetId?: string;
     // (undocumented)
     children?: React_3.ReactNode;
     customUIs?: GroupingMappingCustomUI[];
@@ -154,6 +157,7 @@ export interface GroupingMappingContextProps {
     iModelConnection?: IModelConnection;
     iModelId: string;
     mappingsClient?: IMappingsClient;
+    // (undocumented)
     prefix?: ClientPrefix;
     propertiesClient?: IPropertiesClient;
     queryClient?: QueryClient;
