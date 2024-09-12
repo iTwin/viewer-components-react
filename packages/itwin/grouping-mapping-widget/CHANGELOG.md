@@ -1,8 +1,21 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 20 Aug 2024 13:08:31 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Sep 2024 12:18:49 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.30.0
+
+Thu, 12 Sep 2024 12:18:49 GMT
+
+### Minor changes
+
+- When running extractions, it now extracts on the currently opened changeset within the viewer. ([#1039](https://github.com/iTwin/viewer-components-react/pull/1039))
+
+### Patches
+
+- Fixed Mapped Properties sending an empty array when nothing has been selected when creating a Property. ([#1040](https://github.com/iTwin/viewer-components-react/pull/1040))
+- Upgraded insights-client to v0.13.0 ([#1041](https://github.com/iTwin/viewer-components-react/pull/1041))
 
 ## 0.29.0
 

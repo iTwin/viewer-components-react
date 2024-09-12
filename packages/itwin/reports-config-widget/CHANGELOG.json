@@ -2,6 +2,21 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "date": "Thu, 12 Sep 2024 12:18:49 GMT",
+      "version": "0.7.1",
+      "tag": "@itwin/reports-config-widget-react_v0.7.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Mindaugas.Butkus@bentley.com",
+            "package": "@itwin/reports-config-widget-react",
+            "commit": "c25f5cbe072325e1e09e0dc04bee0c0471ea4481",
+            "comment": "Upgraded insights-client to v0.13.0"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 11 Jun 2024 15:52:38 GMT",
       "version": "0.7.0",
       "tag": "@itwin/reports-config-widget-react_v0.7.0",
