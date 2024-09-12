@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fixed Mapped Properties sending an empty array when nothing has been selected when creating a Property.",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "Guillar1@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
