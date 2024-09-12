@@ -119,8 +119,6 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
     await fetchReportMappings(setReportMappings, report.id, setIsLoading, reportsClient, mappingsClient, iModelsClient, getAccessToken);
   }, [getAccessToken, iModelsClient, mappingsClient, report.id, reportsClient]);
 
-  const odataFeedUrl = `${generateUrl(REPORTING_BASE_PATH, baseUrl)}/odata/${report.id}`;
-
   const addMapping = useCallback(() => {
     setShowAddMapping(true);
   }, []);
@@ -144,12 +142,12 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
           label={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
           className="rcw-odata-url-input"
           readOnly={true}
-          value={odataFeedUrl}
+          value={report._links.odata.href}
           svgIcon={
             <IconButton
               title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Copy")}
               onClick={async (_) => {
-                await navigator.clipboard.writeText(odataFeedUrl);
+                await navigator.clipboard.writeText(report._links.odata.href);
                 toaster.positive(ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
               }}
             >
@@ -197,7 +195,7 @@ export const ReportMappings = ({ report, onClickClose, defaultIModelId }: Report
                 onClickDelete={() => {
                   setShowDeleteModal(mapping);
                 }}
-                odataFeedUrl={odataFeedUrl}
+                odataFeedUrl={report._links.odata.href}
                 jobStartEvent={jobStartEvent}
               />
             ))}

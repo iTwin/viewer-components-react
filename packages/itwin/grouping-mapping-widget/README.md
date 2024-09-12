@@ -12,11 +12,7 @@ This package provides a viewer 'widget'. Documentation on how to add a widget to
 
 ## Permissions and Scopes
 
-The SPA client used by your iTwin viewer must have these additional scopes:
-
-- `insights:read`
-- `insights:modify`
-- `itwins:read`
+The SPA client used by your iTwin viewer must have the `itwin-platform` scope.
 
 In addition, users must have the `imodels_read` and `imodels_write` [permissions](https://developer.bentley.com/apis/insights/operations/create-mapping/#authorization) assigned at either the Project or iModel level. Further instruction on how to create roles and assign permissions can be found in the [iTwin Platform Projects API documentation](https://developer.bentley.com/apis/projects/tutorials/).
 
