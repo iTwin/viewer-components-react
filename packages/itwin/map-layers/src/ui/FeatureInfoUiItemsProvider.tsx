@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { BadgeType, ConditionalBooleanValue } from "@itwin/appui-abstract";
+import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 import type { ToolbarItem, UiItemsProvider } from "@itwin/appui-react";
 import {
   StagePanelLocation,
@@ -63,7 +63,6 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
     execute: async () => {
       await IModelApp.tools.run(MapFeatureInfoTool.toolId);
     },
-    badgeType: BadgeType.TechnicalPreview,
     isHidden: new ConditionalBooleanValue(() => {
       // Hide the MapFeatureInfoTool if the Map Layers toggle is off or no ArcGISFeature layers are active
       return !isMapFeatureInfoSupported();
@@ -106,7 +105,6 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider {
         icon: <SvgMapInfo />,
         content: <MapFeatureInfoWidget featureInfoOpts={this._featureInfoOpts} />,
         defaultState: WidgetState.Hidden,
-        badge: BadgeType.TechnicalPreview,
       });
     }
 
