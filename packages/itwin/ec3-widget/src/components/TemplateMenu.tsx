@@ -8,7 +8,7 @@ import { Stepper, toaster } from "@itwin/itwinui-react";
 import type { Configuration } from "./EC3/Template";
 import { useApiContext } from "./context/APIContext";
 import { TemplateModificationStepRenderer } from "./TemplateModificationStepRenderer";
-import type { Report } from "@itwin/insights-client";
+import type { EC3ReportConfigurationLabel, Report } from "@itwin/insights-client";
 import "./TemplateMenu.scss";
 import { EC3Widget } from "../EC3Widget";
 /**
@@ -54,13 +54,13 @@ export const TemplateMenu = (props: TemplateMenuProps) => {
           setFetchedReports(data);
         }
         const configuration = await configurationsClient.getConfiguration(token, props.template.id!);
-        const reportId = configuration._links.report.href.split("/reports/")[1];
+        const reportId = configuration._links.report?.href.split("/reports/")[1];
         const childConfig: Configuration = {
           displayName: configuration.displayName,
           description: configuration.description ?? "",
           reportId,
           id: configuration.id,
-          labels: configuration.labels,
+          labels: configuration.labels.filter(l => !!l.reportTable).map(l => l as EC3ReportConfigurationLabel),
         };
         setChildTemplate(childConfig);
         setIsLoading(false);

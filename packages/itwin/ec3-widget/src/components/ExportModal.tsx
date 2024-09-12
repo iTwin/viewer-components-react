@@ -5,7 +5,7 @@
 import "./ExportModal.scss";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Modal, ProgressLinear, ProgressRadial, Text } from "@itwin/itwinui-react";
-import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
+import type { EC3Job, EC3ReportJobCreate } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
 import { useApiContext } from "./context/APIContext";
 import type { EC3ConfigPropsWithCallbacks } from "./EC3/EC3Config";
@@ -72,7 +72,7 @@ export const ExportModal = (props: ExportProps) => {
       const accessToken = await getAccessToken();
       if (props.templateId && token) {
         try {
-          const jobRequest: EC3JobCreate = {
+          const jobRequest: EC3ReportJobCreate = {
             configurationId: props.templateId,
             projectName: props.projectName,
             ec3BearerToken: token,

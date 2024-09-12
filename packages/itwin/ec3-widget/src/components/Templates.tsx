@@ -38,15 +38,15 @@ export const Templates = ({ onClickCreate, onClickTemplateTitle, onExportResult 
     try {
       const accessToken = await getAccessToken();
       const templatesResponse = await configClient.getConfigurations(accessToken, iTwinId);
-      const configurations: Configuration[] = templatesResponse.map((x) => {
-        return {
+      const configurations: Configuration[] = templatesResponse
+        .filter((x) => !!x._links.report)
+        .map((x) => ({
           displayName: x.displayName,
           description: x.description ?? "",
           id: x.id,
           labels: [],
-          reportId: x._links.report.href.split("/reports/")[1],
-        };
-      });
+          reportId: x._links.report!.href.split("/reports/")[1],
+        }));
       setTemplates(configurations);
     } catch (error) {
       // eslint-disable-next-line no-console

@@ -2,7 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import type { EC3ConfigurationLabel } from "@itwin/insights-client";
+import type { EC3ReportConfigurationLabel } from "@itwin/insights-client";
 
 /**
  * Template configuration
@@ -13,5 +13,5 @@ export interface Configuration {
   description: string;
   id?: string;
   reportId?: string;
-  labels: EC3ConfigurationLabel[];
+  labels: EC3ReportConfigurationLabel[];
 }
