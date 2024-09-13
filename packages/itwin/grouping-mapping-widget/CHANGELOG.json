@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Fri, 13 Sep 2024 17:50:16 GMT",
+      "version": "0.30.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.30.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "Mindaugas.Butkus@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a6aac1e8dcd04c58d7918c788197c5a6441049d0",
+            "comment": "Fixed property configuration blocks collapsing when clearing input fields"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 12 Sep 2024 12:18:49 GMT",
       "version": "0.30.0",
       "tag": "@itwin/grouping-mapping-widget_v0.30.0",

@@ -1,8 +1,16 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Wed, 11 Sep 2024 19:11:54 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Sep 2024 17:50:16 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 5.6.0
+
+Fri, 13 Sep 2024 17:50:16 GMT
+
+### Minor changes
+
+- Remove map layers feature info tech preview badges ([#1043](https://github.com/iTwin/viewer-components-react/pull/1043))
 
 ## 5.5.0
 
