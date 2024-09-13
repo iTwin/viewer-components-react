@@ -7,10 +7,8 @@
 import "./MapUrlDialog.scss";
 import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { SvgTechnicalPreviewMini } from "@itwin/itwinui-icons-color-react";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { Icon, LabeledSelect, MenuItem } from "@itwin/itwinui-react";
-import { MapLayersUI } from "../../mapLayers";
+import { LabeledSelect, MenuItem } from "@itwin/itwinui-react";
 import type { MapTypesOptions } from "../Interfaces";
 
 // TODO:
@@ -56,7 +54,7 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
     }
 
     if (IModelApp.mapLayerFormatRegistry.isRegistered(MAP_TYPES.arcGisFeature)) {
-      formats.push({ value: MAP_TYPES.arcGisFeature, label: MAP_TYPES.arcGisFeature, id: "techPreview" });
+      formats.push({ value: MAP_TYPES.arcGisFeature, label: MAP_TYPES.arcGisFeature });
     }
 
     return formats;
@@ -80,21 +78,7 @@ export function SelectMapFormat(props: SelectMapFormatProps) {
       disabled={props.disabled}
       onChange={handleOnChange}
       size="small"
-      itemRenderer={(option) => (
-        <MenuItem
-          badge={
-            option.id?.includes("techPreview") ? (
-              <div title={MapLayersUI.translate("Labels.TechPreviewBadgeTooltip")} className="map-layer-source-select-previewBadge">
-                <Icon size="small">
-                  <SvgTechnicalPreviewMini />
-                </Icon>
-              </div>
-            ) : undefined
-          }
-        >
-          {option.label}
-        </MenuItem>
-      )}
+      itemRenderer={(option) => <MenuItem>{option.label}</MenuItem>}
     />
   );
 }
