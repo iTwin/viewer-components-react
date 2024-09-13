@@ -128,6 +128,8 @@ export interface GroupingCustomUIProps {
 // @public (undocumented)
 export interface GroupingMappingApiConfig {
     // (undocumented)
+    changeSetId?: string;
+    // (undocumented)
     getAccessToken: GetAccessTokenFn;
     // (undocumented)
     iModelConnection?: IModelConnection;
@@ -145,6 +147,7 @@ export const GroupingMappingContext: (props: GroupingMappingContextProps) => JSX
 
 // @public
 export interface GroupingMappingContextProps {
+    changeSetId?: string;
     // (undocumented)
     children?: React_3.ReactNode;
     customUIs?: GroupingMappingCustomUI[];
@@ -313,6 +316,8 @@ export interface GroupsVisualizationProps extends GroupsProps {
     hideVisualizationToggle?: boolean;
     // (undocumented)
     isNonEmphasizedSelectable?: boolean;
+    // (undocumented)
+    disableZoom?: boolean;
 }
 
 // @public (undocumented)
@@ -467,6 +472,8 @@ export const PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, ..
 export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
     // (undocumented)
     color: string;
+    // (undocumented)
+    disableZoom?: boolean;
 }
 
 // @public
