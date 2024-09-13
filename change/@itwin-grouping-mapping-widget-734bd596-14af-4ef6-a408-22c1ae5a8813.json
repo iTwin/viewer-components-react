@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed property configuration blocks collapsing when clearing input fields",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "Mindaugas.Butkus@bentley.com",
-  "dependentChangeType": "patch"
-}

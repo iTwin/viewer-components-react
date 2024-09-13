@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Remove map layers feature info tech preview badges",
-  "packageName": "@itwin/map-layers",
-  "email": "wil.maier@bentley.com",
-  "dependentChangeType": "patch"
-}
