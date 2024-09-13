@@ -74,6 +74,8 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState<boolean>(false);
   const [calculatedPropertyType, setCalculatedPropertyType] = useState<CalculatedPropertyType | undefined>(groupProperty?.calculatedPropertyType ?? undefined);
   const [isCalculatedBlockExpanded, setIsCalculatedBlockExpanded] = useState<boolean>(!!calculatedPropertyType);
+  const [isMappedBlockExpanded, setIsMappedBlockExpanded] = useState<boolean>((groupProperty?.ecProperties?.length ?? 0) > 0);
+  const [isFormulaBlockExpanded, setIsFormulaBlockExpanded] = useState<boolean>(!!groupProperty?.formula);
   const [formula, setFormula] = useState<string | undefined>(groupProperty?.formula ?? undefined);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string | undefined>(undefined);
 
@@ -279,8 +281,8 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
               <SvgLabel />
             </Icon>
           }
-          isExpanded={selectedProperties.length > 0}
-          setIsExpanded={() => {}}
+          isExpanded={isMappedBlockExpanded}
+          setIsExpanded={setIsMappedBlockExpanded}
         >
           <div className="gmw-property-view-container">
             <div className="gmw-property-view-button">
@@ -316,7 +318,7 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
               <SvgMeasure />
             </Icon>
           }
-          isExpanded={!!calculatedPropertyType}
+          isExpanded={isCalculatedBlockExpanded}
           setIsExpanded={setIsCalculatedBlockExpanded}
         >
           <CalculatedPropertyActionWithVisuals
@@ -334,8 +336,8 @@ export const GroupPropertyAction = ({ mappingId, group, groupProperty, onSaveSuc
               <SvgFunction />
             </Icon>
           }
-          isExpanded={formula !== undefined}
-          setIsExpanded={() => {}}
+          isExpanded={isFormulaBlockExpanded}
+          setIsExpanded={setIsFormulaBlockExpanded}
         >
           <CustomCalculationAction
             formula={formula}
