@@ -2,6 +2,21 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "date": "Fri, 13 Sep 2024 17:50:16 GMT",
+      "version": "5.6.0",
+      "tag": "@itwin/map-layers_v5.6.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "wil.maier@bentley.com",
+            "package": "@itwin/map-layers",
+            "commit": "5ea6f3789dc279192e0800dc096909a2f2aa316c",
+            "comment": "Remove map layers feature info tech preview badges"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 11 Sep 2024 19:11:54 GMT",
       "version": "5.5.0",
       "tag": "@itwin/map-layers_v5.5.0",
