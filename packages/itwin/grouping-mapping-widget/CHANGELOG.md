@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 12 Sep 2024 12:18:49 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Sep 2024 17:50:16 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.30.1
+
+Fri, 13 Sep 2024 17:50:16 GMT
+
+### Patches
+
+- Fixed property configuration blocks collapsing when clearing input fields ([#1045](https://github.com/iTwin/viewer-components-react/pull/1045))
 
 ## 0.30.0
 
