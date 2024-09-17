@@ -301,12 +301,14 @@ export interface GroupsViewProps {
 }
 
 // @public
-export const GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, ...rest }: GroupsVisualizationProps) => JSX.Element;
+export const GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, disableZoom, ...rest }: GroupsVisualizationProps) => JSX.Element;
 
 // @public
 export interface GroupsVisualizationProps extends GroupsProps {
     // (undocumented)
     deleteConfirmationContentFactory?: (group: GroupMinimal) => JSX.Element;
+    // (undocumented)
+    disableZoom?: boolean;
     // (undocumented)
     emphasizeElements?: boolean;
     // (undocumented)
@@ -465,12 +467,14 @@ export interface PropertyMenuProps {
 }
 
 // @public
-export const PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element;
+export const PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, disableZoom, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element;
 
 // @public
 export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
     // (undocumented)
     color: string;
+    // (undocumented)
+    disableZoom?: boolean;
 }
 
 // @public

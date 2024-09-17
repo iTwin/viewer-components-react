@@ -35,7 +35,7 @@ internal;GroupsOperationsProps
 public;GroupsProps
 internal;GroupsView: ({ mapping, groups, isLoading, onRefresh, groupUIs, actionButtonRenderers, onClickAddGroup, onClickGroupTitle, onClickGroupModify, onClickRenderContextCustomUI, disableActions, selectedGroupForDeletion, onDeleteGroup, onCloseDeleteModal, setSelectedGroupForDeletion, contextUIs, alert, setActiveOverlapInfoPanelGroup, activeOverlapInfoPanelGroup, overlappedElementsInfo, progressConfig, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, }: GroupsViewProps) => JSX.Element
 internal;GroupsViewProps
-public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, ...rest }: GroupsVisualizationProps) => JSX.Element
+public;GroupsVisualization: ({ emphasizeElements, isNonEmphasizedSelectable, onClickGroupModify, onClickAddGroup, mapping, hideVisualizationToggle, hideRefreshIcon, deleteConfirmationContentFactory, groupDeleteCallback, disableZoom, ...rest }: GroupsVisualizationProps) => JSX.Element
 public;GroupsVisualizationProps 
 public;IResult
 public;ManualGroupingCustomUI: ({ updateQuery, isUpdating, resetView, initialEditModeQuery }: GroupingCustomUIProps) => JSX.Element
@@ -51,7 +51,7 @@ internal;PropertiesClientContext: Context
 public;PropertyMap
 public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, hideGroupProps, }: PropertyMenuProps) => JSX.Element
 public;PropertyMenuProps
-public;PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
+public;PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, disableZoom, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
 public;PropertyMenuWithVisualizationProps 
 public;resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap, providedDataType?: DataType_2): IResult
 public;SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
