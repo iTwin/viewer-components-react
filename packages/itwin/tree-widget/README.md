@@ -227,12 +227,15 @@ interface CustomModelsTreeProps {
 }
 
 function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
-  const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths }) => {
-    return createInstanceKeyPaths({
-      // list of instance keys representing nodes that should be displayed in the hierarchy
-      targetItems: targetItems,
-    });
-  }, []);
+  const getFilteredPaths = useCallback<GetFilteredPathsType>(
+    async ({ createInstanceKeyPaths }) => {
+      return createInstanceKeyPaths({
+        // list of instance keys representing nodes that should be displayed in the hierarchy
+        targetItems,
+      });
+    },
+    [targetItems],
+  );
 
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
 

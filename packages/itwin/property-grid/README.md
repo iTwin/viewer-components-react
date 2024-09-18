@@ -12,88 +12,97 @@ Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tr
 
 In any case, **before** using any APIs or components delivered with the package, it needs to be initialized:
 
-```ts
-import { IModelApp } from "@itwin/core-frontend";
+<!-- [[include: [PropertyGrid.PropertyGridManagerInitializeImports, PropertyGrid.PropertyGridManagerInitialize], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
 import { PropertyGridManager } from "@itwin/property-grid-react";
-...
+import { IModelApp } from "@itwin/core-frontend";
+
 await PropertyGridManager.initialize(IModelApp.localization);
 ```
 
-In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/property-grid-react` package delivers `PropertyGridUiItemsProvider` that can be used to add the properties widget to UI:
+<!-- END EXTRACTION -->
 
-```ts
-import { UiItemsManager } from "@itwin/appui-abstract";
-import { PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
-...
-UiItemsManager.register(
-  new PropertyGridUiItemsProvider()
-);
+In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/property-grid-react` package delivers `createPropertyGrid` function that can be used to add the properties widget to UI:
+
+<!-- [[include: [PropertyGrid.RegisterPropertyGridWidgetImports, PropertyGrid.RegisterPropertyGridWidget], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { createPropertyGrid } from "@itwin/property-grid-react";
+import { UiItemsManager } from "@itwin/appui-react";
+
+UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
 ```
+
+<!-- END EXTRACTION -->
 
 The above example uses default widget parameters and results in a component similar to the one visible at the top of this README.
 
 Customization is also possible:
 
-```ts
-import { UiItemsManager } from "@itwin/appui-react";
+<!-- [[include: [PropertyGrid.RegisterCustomPropertyGridWidgetImports, PropertyGrid.RegisterCustomPropertyGridWidget], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
 import {
-  PropertyGridUiItemsProvider,
-  AncestorsNavigationControls,
   AddFavoritePropertyContextMenuItem,
-  RemoveFavoritePropertyContextMenuItem,
+  AncestorsNavigationControls,
   CopyPropertyTextContextMenuItem,
-  ShowHideNullValuesSettingsMenuItem,
   IModelAppUserPreferencesStorage,
+  RemoveFavoritePropertyContextMenuItem,
+  ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
-...
-UiItemsManager.register(
-  new PropertyGridUiItemsProvider({
-    // defaults to `StagePanelLocation.Right`
-    defaultPanelLocation: StagePanelLocation.Left,
+import type { IModelConnection } from "@itwin/core-frontend";
 
-    // defaults to `StagePanelSection.End`
-    defaultPanelSection: StagePanelSection.Start,
+UiItemsManager.register({
+  id: "property-grid-provider",
+  getWidgets: () => [
+    createPropertyGrid({
+      // defaults to whatever the default `Widget.priority` in AppUI is
+      defaultPanelWidgetPriority: 1000,
 
-    // defaults to whatever the default `Widget.priority` in AppUI is
-    defaultPanelWidgetPriority: 1000,
+      // supplies props for the `PropertyGridComponent`
+      propertyGridProps: {
+        // enable auto-expanding all property categories
+        autoExpandChildCategories: true,
 
-    // supplies props for the `PropertyGridComponent`
-    propertyGridProps: {
-      // enable auto-expanding all property categories
-      autoExpandChildCategories: true,
+        // enable ancestor navigation by supplying a component for that
+        ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
 
-      // enable ancestor navigation by supplying a component for that
-      ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
+        // the list populates the context menu shown when a property is right-clicked.
+        contextMenuItems: [
+          // allows adding properties to favorites list
+          (props) => <AddFavoritePropertyContextMenuItem {...props} />,
+          // allows removing properties from favorites list
+          (props) => <RemoveFavoritePropertyContextMenuItem {...props} />,
+          // allows copying property values
+          (props) => <CopyPropertyTextContextMenuItem {...props} />,
+        ],
 
-      // the list populates the context menu shown when a property is right-clicked.
-      contextMenuItems: [
-        // allows adding properties to favorites list
-        (props) => <AddFavoritePropertyContextMenuItem {...props} />,
-        // allows removing properties from favorites list
-        (props) => <RemoveFavoritePropertyContextMenuItem {...props} />,
-        // allows copying property values
-        (props) => <CopyPropertyTextContextMenuItem {...props} />,
-      ],
+        // the list populates the settings menu
+        settingsMenuItems: [
+          // allows hiding properties without values
+          (props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />,
+        ],
 
-      // the list populates the settings menu
-      settingsMenuItems: [
-        // allows hiding properties without values
-        (props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />,
-      ],
+        // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
+        preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
 
-      // supply an optional custom storage for user preferences, e.g. the show/hide null values used above
-      preferencesStorage: new IModelAppUserPreferencesStorage("my-favorites-namespace"),
+        // supply an optional data provider factory method to create a custom property data provider
+        createDataProvider: (imodel: IModelConnection) => new PresentationPropertyDataProvider({ imodel, ruleset: MY_CUSTOM_RULESET }),
 
-      // supply an optional data provider factory method to create a custom property data provider
-      createDataProvider: (imodel: IModelConnection) => new PresentationPropertyDataProvider({ imodel, ruleset: MY_CUSTOM_RULESET }),
-
-      // ... and a number of props of `VirtualizedPropertyGridWithDataProvider` from `@itwin/components-react` is also accepted here
-    },
-  }),
-);
+        // ... and a number of props of `VirtualizedPropertyGridWithDataProvider` from `@itwin/components-react` is also accepted here
+      },
+    }),
+  ],
+});
 ```
 
-As seen in the above code snippet, `PropertyGridUiItemsProvider` takes a number of props that allow customizing not only how the widget behaves, but also how it looks. The package delivers commonly used building blocks:
+<!-- END EXTRACTION -->
+
+As seen in the above code snippet, `createPropertyGrid` takes a number of props that allow customizing not only how the widget behaves, but also how it looks. The package delivers commonly used building blocks:
 
 - context and setting menu items
 - ancestor navigation controls
@@ -149,12 +158,18 @@ Adding a custom context menu item can be done as follows:
 
 Define a menu item component:
 
+<!-- [[include: [PropertyGrid.ExampleContextMenuItemImports, PropertyGrid.ExampleContextMenuItem], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
 ```tsx
+import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
+
 function ExampleContextMenuItem(props: ContextMenuItemProps) {
   return (
     // render using `PropertyGridContextMenuItem` to get consistent style
     <PropertyGridContextMenuItem
       id="example"
+      title="example"
       onSelect={async () => {
         console.log(`Selected property: ${props.record.property.displayLabel}`);
       }}
@@ -164,16 +179,27 @@ function ExampleContextMenuItem(props: ContextMenuItemProps) {
   );
 }
 ```
+<!-- END EXTRACTION -->
 
 Provide it to the widget:
 
-```ts
-new PropertyGridUiItemsProvider({
-  propertyGridProps: {
-    contextMenuItems: [(props) => <ExampleContextMenuItem {...props} />],
-  },
+<!-- [[include: [PropertyGrid.ExampleContextMenuItemRegisterImports, PropertyGrid.ExampleContextMenuItemRegister], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { createPropertyGrid } from "@itwin/property-grid-react";
+
+UiItemsManager.register({
+  id: "tree-widget-provider",
+  getWidgets: () => [
+    createPropertyGrid({
+      propertyGridProps: { contextMenuItems: [(props) => <ExampleContextMenuItem {...props} />] },
+    }),
+  ],
 });
 ```
+
+<!-- END EXTRACTION -->
 
 Result:
 
@@ -201,7 +227,12 @@ Adding a custom settings menu item can be done as follows:
 
 Define a menu item component:
 
+<!-- [[include: [PropertyGrid.ExampleSettingsMenuItemImports, PropertyGrid.ExampleSettingsMenuItem], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
 ```tsx
+import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
+
 function ExampleSettingsMenuItem() {
   return (
     // render using `PropertyGridSettingsMenuItem` to get consistent style
@@ -217,15 +248,27 @@ function ExampleSettingsMenuItem() {
 }
 ```
 
+<!-- END EXTRACTION -->
+
 Provide it to the widget:
 
-```ts
-new PropertyGridUiItemsProvider({
-  propertyGridProps: {
-    settingsMenuItems: [(props) => <ExampleSettingsMenuItem />],
-  },
+<!-- [[include: [PropertyGrid.ExampleSettingsMenuItemRegisterImports, PropertyGrid.ExampleSettingsMenuItemRegister], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { createPropertyGrid } from "@itwin/property-grid-react";
+
+UiItemsManager.register({
+  id: "tree-widget-provider",
+  getWidgets: () => [
+    createPropertyGrid({
+      propertyGridProps: { settingsMenuItems: [() => <ExampleSettingsMenuItem />] },
+    }),
+  ],
 });
 ```
+
+<!-- END EXTRACTION -->
 
 Result:
 
@@ -247,46 +290,22 @@ One can type into the search bar and notice how properties are automatically fil
 
 Note that when the search bar is closed, the filter is discarded and all properties are visible again.
 
-## Performance tracking
+## Telemetry
+
+### Performance tracking
 
 Components from this package allows consumers to track performance of specific features.
 
-This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
+This can be achieved by passing `onPerformanceMeasured` function to `PropertyGridComponent` or `createPropertyGrid`. The function is invoked with feature id and time elapsed as the component is being used. List of tracked features:
 
 - `"properties-load"` - time it takes to load properties data after selection changes.
 - `"elements-list-load"` - time it takes to populate elements list when multiple elements are selected.
 
-Example:
-
-```ts
-new PropertyGridUiItemsProvider({
-  propertyGridProps: {
-    onPerformanceMeasured: (feature, elapsedTime) => {
-      telemetryClient.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
-    },
-  },
-});
-```
-
-To track performance of individual components when using them directly, rather than through `PropertyGridUiItemsProvider`, the `onPerformanceMeasured` callback should be supplied through `TelemetryContextProvider`:
-
-```ts
-return (
-  <TelemetryContextProvider
-    onPerformanceMeasured={(feature, elapsedTime) => {
-      telemetryClient.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
-    }}
-  >
-    <PropertyGrid />
-  </TelemetryContextProvider>
-);
-```
-
-## Usage tracking
+### Usage tracking
 
 Components from this package allows consumers to track the usage of specific features.
 
-This can be achieved by passing `onFeatureUsed` function to `PropertyGridComponent` or `PropertyGridUiItemsProvider`. The function is invoked with feature id and as the component is being used. List of tracked features:
+This can be achieved by passing `onFeatureUsed` function to `PropertyGridComponent` or `createPropertyGrid`. The function is invoked with feature id and as the component is being used. List of tracked features:
 
 - `"single-element"` - when properties of a single element are shown.
 - `"multiple-elements"` - when merged properties of multiple elements are shown.
@@ -298,28 +317,56 @@ This can be achieved by passing `onFeatureUsed` function to `PropertyGridCompone
 - `"hide-empty-values-disabled"` - when property values are loaded with "hide empty values" setting disabled.
 - `"filter-properties"` - when properties are filtered or selection changes while a filter is applied.
 
-Example:
+### Example
 
-```ts
-new PropertyGridUiItemsProvider({
-  propertyGridProps: {
-    onFeatureUsed: (feature) => {
-      telemetryClient.log(`PropertyGrid [${feature}] used`);
-    },
-  },
+<!-- [[include: [PropertyGrid.ComponentWithTelemetryImports, PropertyGrid.ComponentWithTelemetry], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { createPropertyGrid } from "@itwin/property-grid-react";
+import { UiItemsManager } from "@itwin/appui-react";
+
+UiItemsManager.register({
+  id: "property-grid-provider",
+  getWidgets: () => [
+    createPropertyGrid({
+      propertyGridProps: {
+        onPerformanceMeasured: (feature, elapsedTime) => {
+          console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+        },
+        onFeatureUsed: (feature) => {
+          console.log(`PropertyGrid [${feature}] used`);
+        },
+      },
+    }),
+  ],
 });
 ```
 
-To track usage of individual components when using them directly, rather than through `PropertyGridUiItemsProvider`, the `onFeatureUsed` callback should be supplied through `TelemetryContextProvider`:
+<!-- END EXTRACTION -->
 
-```ts
-return (
-  <TelemetryContextProvider
-    onFeatureUsed={(feature) => {
-      telemetryClient.log(`PropertyGrid [${feature}] used`);
-    }}
-  >
-    <PropertyGrid />
-  </TelemetryContextProvider>
-);
+To track performance or usage of individual components when using them directly, rather than through `createPropertyGrid`, the `onPerformanceMeasured` or `onFeatureUsed` callback should be supplied through `TelemetryContextProvider`:
+
+<!-- [[include: [PropertyGrid.ComponentWithTelemetryWrapperImports, PropertyGrid.ComponentWithTelemetryWrapper], tsx]] -->
+<!-- BEGIN EXTRACTION -->
+
+```tsx
+import { PropertyGrid, TelemetryContextProvider } from "@itwin/property-grid-react";
+
+function ExampleContextMenuItem() {
+  return (
+    <TelemetryContextProvider
+      onFeatureUsed={(feature) => {
+        console.log(`PropertyGrid [${feature}] used`);
+      }}
+      onPerformanceMeasured={(feature, elapsedTime) => {
+        console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+      }}
+    >
+      <PropertyGrid imodel={imodelConnection} />
+    </TelemetryContextProvider>
+  );
+}
 ```
+
+<!-- END EXTRACTION -->
