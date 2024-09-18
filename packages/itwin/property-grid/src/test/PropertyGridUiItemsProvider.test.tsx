@@ -2,6 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+/* eslint-disable deprecation/deprecation */
 
 import { expect } from "chai";
 import { createRef } from "react";
@@ -14,7 +15,7 @@ import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridUiItemsProvider, PropertyGridWidgetId } from "../PropertyGridUiItemsProvider";
 import { render, stubSelectionManager, waitFor } from "./TestUtils";
 
-import type { PropertyGridUiItemsProviderProps} from "../PropertyGridUiItemsProvider";
+import type { PropertyGridUiItemsProviderProps } from "../PropertyGridUiItemsProvider";
 import type { WidgetDef } from "@itwin/appui-react";
 import type { ECClassGroupingNodeKey } from "@itwin/presentation-common";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
@@ -179,7 +180,7 @@ describe("PropertyGridUiItemsProvider", () => {
     });
 
     it("opens widget if `UnifiedSelection` changes to non-empty and ", async () => {
-      renderWidget({propertyGridProps: {shouldShow: () => true}});
+      renderWidget({ propertyGridProps: { shouldShow: () => true } });
 
       selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
       selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
@@ -191,7 +192,7 @@ describe("PropertyGridUiItemsProvider", () => {
     });
 
     it("opens widget if `UnifiedSelection` changes to non-empty AND shouldShow return true ", async () => {
-      renderWidget({propertyGridProps: {shouldShow: () => true}});
+      renderWidget({ propertyGridProps: { shouldShow: () => true } });
 
       selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
       selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);
@@ -203,7 +204,7 @@ describe("PropertyGridUiItemsProvider", () => {
     });
 
     it("hides widget if `UnifiedSelection` changes to non-empty AND shouldShow return false ", async () => {
-      renderWidget({propertyGridProps: {shouldShow: () => false}});
+      renderWidget({ propertyGridProps: { shouldShow: () => false } });
 
       selectionManager.getSelection.returns(new KeySet([{ id: "0x1", className: "TestClass" }]));
       selectionManager.selectionChange.raiseEvent({} as SelectionChangeEventArgs, {} as ISelectionProvider);

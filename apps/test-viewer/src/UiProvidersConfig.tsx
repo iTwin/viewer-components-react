@@ -188,6 +188,7 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => PropertyGridManager.initialize(),
       createUiItemsProviders: () => [
+        // eslint-disable-next-line deprecation/deprecation
         new PropertyGridUiItemsProvider({
           propertyGridProps: {
             autoExpandChildCategories: true,
