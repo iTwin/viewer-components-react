@@ -61,7 +61,8 @@ export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 
 /**
  * Props for creating `PropertyGridUiItemsProvider`.
- * @deprecated in 1.3.0 Use createPropertyGrid instead
+ * @public
+ * @deprecated in 1.13.0 Use createPropertyGrid instead
  */
 export interface PropertyGridUiItemsProviderProps {
   /** The stage panel to place the widget in. Defaults to `StagePanelLocation.Right`. */
