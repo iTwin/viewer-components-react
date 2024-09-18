@@ -17,19 +17,20 @@ import "./PropertyMenuWithVisualization.scss";
  */
 export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
   color: string;
+  disableZoom?: boolean;
 }
 
 /**
  * Component to display a property menu with visualization.
  * @public
  */
-export const PropertyMenuWithVisualization = ({ group, color, hideRefreshIcon, ...rest }: PropertyMenuWithVisualizationProps) => {
+export const PropertyMenuWithVisualization = ({ group, color, hideRefreshIcon, disableZoom, ...rest }: PropertyMenuWithVisualizationProps) => {
   const [isInformationPanelOpen, setIsInformationPanelOpen] = useState<boolean>(false);
 
   return (
     <InformationPanelWrapper className="gmw-property-menu-vis-wrapper">
       <div className="gmw-property-menu-vis-toolbar">
-        <GroupColorToggle group={group} color={color} labelPosition="left" />
+        <GroupColorToggle group={group} color={color} labelPosition="left" disableZoom={disableZoom} />
         <IconButton styleType="borderless" onClick={() => setIsInformationPanelOpen(true)} title="Group Information">
           <SvgProperties />
         </IconButton>
