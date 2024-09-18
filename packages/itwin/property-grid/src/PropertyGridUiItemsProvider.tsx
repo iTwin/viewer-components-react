@@ -34,7 +34,7 @@ import type { PropertyGridComponentProps } from "./PropertyGridComponent";
 }
 /**
  * Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
- *
+ * @public
  */
 export function createPropertyGrid({ defaultPanelWidgetPriority, propertyGridProps }: PropertyGridProps): Widget {
   return {
@@ -72,7 +72,6 @@ export interface PropertyGridUiItemsProviderProps {
   defaultPanelWidgetPriority?: number;
   /** Props for configuring `PropertyGridComponent` shown in the widget. */
   propertyGridProps?: PropertyGridWidgetProps;
-
 }
 
 /**

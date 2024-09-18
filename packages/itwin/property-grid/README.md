@@ -163,6 +163,7 @@ Define a menu item component:
 
 ```tsx
 import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
+import type { ContextMenuItemProps } from "@itwin/property-grid-react";
 
 function ExampleContextMenuItem(props: ContextMenuItemProps) {
   return (
@@ -179,6 +180,7 @@ function ExampleContextMenuItem(props: ContextMenuItemProps) {
   );
 }
 ```
+
 <!-- END EXTRACTION -->
 
 Provide it to the widget:
