@@ -19,9 +19,10 @@ import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsC
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
   group: GroupMinimal;
+  disableZoom?: boolean;
 };
 
-export const GroupColorToggle = ({ color, group, ...rest }: GroupColorToggleProps) => {
+export const GroupColorToggle = ({ color, group, disableZoom, ...rest }: GroupColorToggleProps) => {
   const { iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
@@ -36,7 +37,9 @@ export const GroupColorToggle = ({ color, group, ...rest }: GroupColorToggleProp
       clearAll();
       Presentation.selection.clearSelection("GroupingMappingWidget", iModelConnection);
       visualizeElements(hiliteIds.result.ids, color);
-      await zoomToElements(hiliteIds.result.ids);
+      if (!disableZoom) {
+        await zoomToElements(hiliteIds.result.ids);
+      }
     },
     onError: (error) => {
       toaster.negative("There was an error visualizing group.");

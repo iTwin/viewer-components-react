@@ -38,6 +38,7 @@ jobs:
   - job: Run_e2e_tests
     displayName: "Run e2e tests"
     condition: succeeded()
+    timeoutInMinutes: 120
     workspace:
       clean: all
 

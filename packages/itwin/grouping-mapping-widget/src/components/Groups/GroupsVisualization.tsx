@@ -35,6 +35,7 @@ export interface GroupsVisualizationProps extends GroupsProps {
   hideRefreshIcon?: boolean;
   deleteConfirmationContentFactory?: (group: GroupMinimal) => JSX.Element;
   groupDeleteCallback?: (group: GroupMinimal) => void;
+  disableZoom?: boolean;
 }
 
 /**
@@ -51,6 +52,7 @@ export const GroupsVisualization = ({
   hideRefreshIcon,
   deleteConfirmationContentFactory,
   groupDeleteCallback,
+  disableZoom,
   ...rest
 }: GroupsVisualizationProps) => {
   const { iModelConnection } = useGroupingMappingApiConfig();
@@ -98,7 +100,7 @@ export const GroupsVisualization = ({
   const visualizationMutation = useMutation({
     mutationFn: triggerVisualization,
     onSuccess: (allIds) => {
-      if (isMounted) {
+      if (isMounted && !disableZoom) {
         zoomToElementsMutation.mutate(allIds);
       }
     },
