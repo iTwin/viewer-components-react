@@ -28,6 +28,7 @@ export interface PropertyMenuProps {
   hideCalculatedProps?: boolean;
   hideCustomCalculationProps?: boolean;
   hideRefreshIcon?: boolean;
+  onGroupPropertyDelete?: () => void;
 }
 
 /**
@@ -40,6 +41,7 @@ export const PropertyMenu = ({
   onClickAddGroupProperty,
   onClickModifyGroupProperty,
   hideRefreshIcon,
+  onGroupPropertyDelete,
   hideGroupProps = false,
 }: PropertyMenuProps) => {
   const groupId = group.id;
@@ -68,6 +70,7 @@ export const PropertyMenu = ({
           groupProperties={groupProperties ? groupProperties.properties : []}
           refresh={refreshGroupProperties}
           hideRefreshIcon={hideRefreshIcon}
+          onGroupPropertyDelete={onGroupPropertyDelete}
         />
       )}
     </div>

@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Preserving group visualization for group properties pane",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}
