@@ -27,31 +27,28 @@ import type { PropertyGridComponentProps } from "./PropertyGridComponent";
  * @public
  */
  interface PropertyGridProps {
-  /** Widget priority in the stage panel. */
-  defaultPanelWidgetPriority?: number;
-  /** Props for configuring `PropertyGridComponent` shown in the widget. */
-  propertyGridProps?: PropertyGridWidgetProps;
-}
-/**
- * Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
- * @public
- */
-export function createPropertyGrid({ defaultPanelWidgetPriority, propertyGridProps }: PropertyGridProps): Widget {
-  return {
-    id: "vcr:PropertyGridComponent",
-    label: PropertyGridManager.translate("widget-label"),
-    icon: <SvgInfoCircular />,
-    defaultState: WidgetState.Hidden,
-    priority: defaultPanelWidgetPriority,
-    layouts: {
-      standard: {
-        section: StagePanelSection.End,
-        location: StagePanelLocation.Right,
-      },
-    },
-    content: <PropertyGridWidget {...propertyGridProps} />,
-  };
-}
+   /** Props for configuring `PropertyGridComponent` shown in the widget. */
+   propertyGridProps?: PropertyGridWidgetProps;
+ }
+ /**
+  * Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
+  * @public
+  */
+ export function createPropertyGrid({ propertyGridProps }: PropertyGridProps): Widget {
+   return {
+     id: "vcr:PropertyGridComponent",
+     label: PropertyGridManager.translate("widget-label"),
+     icon: <SvgInfoCircular />,
+     defaultState: WidgetState.Hidden,
+     layouts: {
+       standard: {
+         section: StagePanelSection.End,
+         location: StagePanelLocation.Right,
+       },
+     },
+     content: <PropertyGridWidget {...propertyGridProps} />,
+   };
+ }
 
 /**
  * Id of the property grid widget created by `createPropertyGrid`.

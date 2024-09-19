@@ -43,7 +43,6 @@ describe("Property grid", () => {
         UiItemsManager.register({ id: "property-grid-provider", getWidgets: () => [createPropertyGrid({})] });
         // __PUBLISH_EXTRACT_END__
 
-
         expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
         expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.Start)).to.be.empty;
         expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Left, StagePanelSection.Start)).to.be.empty;
@@ -56,9 +55,6 @@ describe("Property grid", () => {
           id: "property-grid-provider",
           getWidgets: () => [
             createPropertyGrid({
-              // defaults to whatever the default `Widget.priority` in AppUI is
-              defaultPanelWidgetPriority: 1000,
-
               // supplies props for the `PropertyGridComponent`
               propertyGridProps: {
                 // enable auto-expanding all property categories
