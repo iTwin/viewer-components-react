@@ -12,6 +12,7 @@ import { Mappings } from "../../components/Mappings/Mappings";
 import { MappingAction } from "../../components/Mappings/Editing/MappingAction";
 import { PropertyMenuWithVisualization } from "../../components/Properties/PropertyMenuWithVisualization";
 import { GroupsVisualization } from "../../components/Groups/GroupsVisualization";
+import { useGroupHilitedElementsContext } from "../../components/context/GroupHilitedElementsContext";
 
 export const GroupingMappingRouter = ({
   currentRoute,
@@ -26,6 +27,7 @@ export const GroupingMappingRouter = ({
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
   const { mapping, group, property, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
+  const { groupColors } = useGroupHilitedElementsContext();
 
   switch (currentRoute.step) {
     case RouteStep.Mappings:
@@ -120,7 +122,7 @@ export const GroupingMappingRouter = ({
           <PropertyMenuWithVisualization
             mapping={mapping}
             group={group}
-            color="red"
+            color={groupColors.find((gc) => gc.groupId === group.id)?.color ?? "red"}
             onClickAddGroupProperty={() =>
               navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: "Add Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
             }

@@ -14,6 +14,7 @@ import { useGroupKeySetQuery } from "../Groups/hooks/useKeySetHiliteQueries";
 import { usePropertiesGroupColorContext } from "../context/PropertiesGroupColorContext";
 import { useMutation } from "@tanstack/react-query";
 import { useIsMounted } from "../../common/hooks/useIsMounted";
+import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
 
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
@@ -26,6 +27,7 @@ export const GroupColorToggle = ({ color, group, ...rest }: GroupColorToggleProp
     throw new Error("This component requires an active iModelConnection.");
   }
   const { showGroupColor, setShowGroupColor } = usePropertiesGroupColorContext();
+  const { showGroupColor: isGroupsVisualizationOn } = useGroupHilitedElementsContext();
   const { data: hiliteIdsResult, isFetched, isFetching } = useGroupKeySetQuery(group, iModelConnection, showGroupColor);
   const isMounted = useIsMounted();
 
@@ -46,6 +48,12 @@ export const GroupColorToggle = ({ color, group, ...rest }: GroupColorToggleProp
   useEffect(() => {
     isFetched && showGroupColor && hiliteIdsResult && isMounted && mutateVisualization(hiliteIdsResult);
   }, [hiliteIdsResult, isFetched, isMounted, showGroupColor, mutateVisualization]);
+
+  useEffect(() => {
+    if (isGroupsVisualizationOn) {
+      setShowGroupColor(true);
+    }
+  }, [isGroupsVisualizationOn, setShowGroupColor]);
 
   const handleToggleChange = useCallback(() => {
     setShowGroupColor((b) => {
