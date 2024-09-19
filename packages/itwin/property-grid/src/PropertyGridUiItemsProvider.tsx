@@ -75,7 +75,7 @@ export interface PropertyGridUiItemsProviderProps {
 /**
  * A `UiItemsProvider` implementation that provides a `PropertyGridComponent` into a stage panel.
  * @public
- * @deprecated in 1.13.0 Use createPropertyGrid instead
+ * @deprecated in 1.13.0. Use `createPropertyGrid` instead.
  */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
