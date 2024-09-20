@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix missing geo location information for location measurement in widget.",
+  "packageName": "@itwin/measure-tools-react",
+  "email": "3418768+a-gagnon@users.noreply.github.com",
+  "dependentChangeType": "patch"
+}
