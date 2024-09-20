@@ -7,14 +7,14 @@
 import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
-import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework } from "@itwin/appui-react";
+import { UiFramework } from "@itwin/appui-react";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
 import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryImports
-import { createPropertyGrid } from "@itwin/property-grid-react";
+import { PropertyGridComponent } from "@itwin/property-grid-react";
 import { UiItemsManager } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryWrapperImports
@@ -74,25 +74,21 @@ describe("Property grid", () => {
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
         const consoleSpy = sinon.spy(console, "log");
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetry
-        UiItemsManager.register({
-          id: "property-grid-provider",
-          getWidgets: () => [
-            createPropertyGrid({
-              propertyGridProps: {
-                onPerformanceMeasured: (feature, elapsedTime) => {
-                  console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
-                },
-                onFeatureUsed: (feature) => {
-                  console.log(`PropertyGrid [${feature}] used`);
-                },
-              },
-            }),
-          ],
-        });
+        const MyPropertyGrid = () => {
+          return (
+            <PropertyGridComponent
+              onPerformanceMeasured={(feature, elapsedTime) => {
+                console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+              }}
+              onFeatureUsed={(feature) => {
+                console.log(`PropertyGrid [${feature}] used`);
+              }}
+            />
+          );
+        };
         // __PUBLISH_EXTRACT_END__
 
-        const [widget] = UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
-        render(<>{widget.content}</>);
+        render(<MyPropertyGrid />);
         await waitFor(() => {
           expect(consoleSpy).to.be.calledOnce;
         });

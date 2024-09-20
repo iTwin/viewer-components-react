@@ -7,7 +7,7 @@
 import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
-import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework, UiItemsManager } from "@itwin/appui-react";
+import { UiFramework, UiItemsManager } from "@itwin/appui-react";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -17,15 +17,13 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemImports
 import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
 import type { ContextMenuItemProps } from "@itwin/property-grid-react";
-// __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemRegisterImports
-import { createPropertyGrid } from "@itwin/property-grid-react";
+import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 import { queryByText, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
-
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -93,19 +91,12 @@ describe("Property grid", () => {
         // __PUBLISH_EXTRACT_END__
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemRegister
-        UiItemsManager.register({
-          id: "tree-widget-provider",
-          getWidgets: () => [
-            createPropertyGrid({
-              propertyGridProps: { contextMenuItems: [(props) => <ExampleContextMenuItem {...props} />] },
-            }),
-          ],
-        });
+        const MyPropertyGrid = () => {
+          return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]}/>
+        }
         // __PUBLISH_EXTRACT_END__
         Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
-        const [widget] = UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
-
-        const { baseElement, getAllByText } = render(<>{widget.content}</>);
+        const { baseElement, getAllByText } = render(<MyPropertyGrid />);
         await waitFor(async () => {
           await user.pointer({ keys: "[MouseRight>]", target: getAllByText("Test SpatialCategory")[1] });
           expect(queryByText(baseElement, "Click me!")).to.not.be.null;

@@ -19,8 +19,8 @@ import {
   AddFavoritePropertyContextMenuItem,
   AncestorsNavigationControls,
   CopyPropertyTextContextMenuItem,
+  createPropertyGrid,
   PropertyGridManager,
-  PropertyGridUiItemsProvider,
   RemoveFavoritePropertyContextMenuItem,
   ShowHideNullValuesSettingsMenuItem,
 } from "@itwin/property-grid-react";
@@ -188,25 +188,29 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => PropertyGridManager.initialize(),
       createUiItemsProviders: () => [
-        // eslint-disable-next-line deprecation/deprecation
-        new PropertyGridUiItemsProvider({
-          propertyGridProps: {
-            autoExpandChildCategories: true,
-            ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
-            contextMenuItems: [
-              (props) => <AddFavoritePropertyContextMenuItem {...props} />,
-              (props) => <RemoveFavoritePropertyContextMenuItem {...props} />,
-              (props) => <CopyPropertyTextContextMenuItem {...props} />,
-            ],
-            settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
-            onPerformanceMeasured: (feature, elapsedTime) => {
-              console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
-            },
-            onFeatureUsed: (feature) => {
-              console.log(`PropertyGrid [${feature}] used`);
-            },
+        {
+          id: "TreeWidgetUIProvider",
+          getWidgets: () => {
+            createPropertyGrid({
+              propertyGridProps: {
+                autoExpandChildCategories: true,
+                ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
+                contextMenuItems: [
+                  (props) => <AddFavoritePropertyContextMenuItem {...props} />,
+                  (props) => <RemoveFavoritePropertyContextMenuItem {...props} />,
+                  (props) => <CopyPropertyTextContextMenuItem {...props} />,
+                ],
+                settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
+                onPerformanceMeasured: (feature, elapsedTime) => {
+                  console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+                },
+                onFeatureUsed: (feature) => {
+                  console.log(`PropertyGrid [${feature}] used`);
+                },
+              },
+            });
           },
-        }),
+        },
       ],
     },
   ],

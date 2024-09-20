@@ -6,7 +6,7 @@
 import { join } from "path";
 /* eslint-disable no-console */
 import sinon from "sinon";
-import { StagePanelLocation, StagePanelSection, StageUsage, UiFramework, UiItemsManager } from "@itwin/appui-react";
+import { UiFramework, UiItemsManager } from "@itwin/appui-react";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -16,7 +16,7 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItemRegisterImports
-import { createPropertyGrid } from "@itwin/property-grid-react";
+import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -89,17 +89,11 @@ describe("Property grid", () => {
         // __PUBLISH_EXTRACT_END__
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItemRegister
-        UiItemsManager.register({
-          id: "tree-widget-provider",
-          getWidgets: () => [
-            createPropertyGrid({
-              propertyGridProps: { settingsMenuItems: [() => <ExampleSettingsMenuItem />] },
-            }),
-          ],
-        });
+        const MyPropertyGrid = () => {
+          return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]}/>
+        }
         // __PUBLISH_EXTRACT_END__
-        const [widget] = UiItemsManager.getWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End);
-        const { getByText } = render(<>{widget.content}</>);
+        const { getByText } = render(<MyPropertyGrid />);
         await waitFor(async () => {
           await user.click(getByText("settings.label"));
           getByText("Click me!");
