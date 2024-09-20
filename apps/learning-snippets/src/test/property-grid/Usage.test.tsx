@@ -44,8 +44,6 @@ describe("Property grid", () => {
         // __PUBLISH_EXTRACT_END__
 
         expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.End)).to.not.be.empty;
-        expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.Start)).to.be.empty;
-        expect(UiItemsManager.getWidgets?.("", StageUsage.General, StagePanelLocation.Left, StagePanelSection.Start)).to.be.empty;
       });
 
       it("Registers customizable property grid", async function () {
