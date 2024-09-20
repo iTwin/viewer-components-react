@@ -313,10 +313,12 @@ const MyPropertyGrid = () => {
   return (
     <PropertyGridComponent
       onPerformanceMeasured={(feature, elapsedTime) => {
-        onPerformanceMeasured(feature, elapsedTime);
+        // user-defined function to handle performance logging.
+        logPerformance(feature, elapsedTime);
       }}
       onFeatureUsed={(feature) => {
-        onFeatureUsed(feature);
+        // user-defined function to handle usage logging.
+        logUsage(feature);
       }}
     />
   );
@@ -337,10 +339,12 @@ function ExampleContextMenuItem() {
   return (
     <TelemetryContextProvider
       onPerformanceMeasured={(feature, elapsedTime) => {
-        onPerformanceMeasured(feature, elapsedTime);
+        // user-defined function to handle performance logging.
+        logPerformance(feature, elapsedTime);
       }}
       onFeatureUsed={(feature) => {
-        onFeatureUsed(feature);
+        // user-defined function to handle usage logging.
+        logUsage(feature);
       }}
     >
       <PropertyGrid imodel={imodelConnection} />
