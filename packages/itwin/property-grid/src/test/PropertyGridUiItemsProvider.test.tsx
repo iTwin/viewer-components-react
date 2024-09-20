@@ -12,7 +12,7 @@ import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
 import * as usePropertyGridTransientStateModule from "../hooks/UsePropertyGridTransientState";
 import * as propertyGridComponent from "../PropertyGridComponent";
 import { PropertyGridManager } from "../PropertyGridManager";
-import { PropertyGridUiItemsProvider, PropertyGridWidgetId } from "../PropertyGridUiItemsProvider";
+import { createPropertyGrid, PropertyGridUiItemsProvider, PropertyGridWidgetId } from "../PropertyGridUiItemsProvider";
 import { render, stubSelectionManager, waitFor } from "./TestUtils";
 
 import type { PropertyGridUiItemsProviderProps } from "../PropertyGridUiItemsProvider";
@@ -213,6 +213,13 @@ describe("PropertyGridUiItemsProvider", () => {
         expect(widgetDef.setWidgetState).to.be.called;
         expect(widgetDef.setWidgetState).to.be.calledWith(WidgetState.Hidden);
       });
+    });
+  });
+
+  describe("createPropertyGrid", () => {
+    it("creates a basic widget", async () => {
+      const widget = createPropertyGrid({});
+      expect(widget.content).to.not.be.undefined;
     });
   });
 });
