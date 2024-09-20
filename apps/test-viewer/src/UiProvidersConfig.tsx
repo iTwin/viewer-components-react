@@ -189,7 +189,7 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => PropertyGridManager.initialize(),
       createUiItemsProviders: () => [
         {
-          id: "TreeWidgetUIProvider",
+          id: "PropertyGridUIProvider",
           getWidgets: () => {
             createPropertyGrid({
               autoExpandChildCategories: true,

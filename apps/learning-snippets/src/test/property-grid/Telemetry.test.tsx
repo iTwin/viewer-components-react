@@ -15,7 +15,6 @@ import { PresentationRpcInterface } from "@itwin/presentation-common";
 import { HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting } from "@itwin/presentation-testing";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryImports
 import { PropertyGridComponent } from "@itwin/property-grid-react";
-import { UiItemsManager } from "@itwin/appui-react";
 // __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryWrapperImports
 import {  PropertyGrid, TelemetryContextProvider } from "@itwin/property-grid-react";
@@ -24,6 +23,7 @@ import { cleanup, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
+import { Presentation } from "@itwin/presentation-frontend";
 
 describe("Property grid", () => {
   describe("Learning snippets", () => {
@@ -58,63 +58,66 @@ describe("Property grid", () => {
       afterEach(async () => {
         await PropertyGridTestUtils.terminate();
         sinon.restore();
-        // eslint-disable-next-line @itwin/no-internal
-        UiItemsManager.clearAllProviders();
       });
 
       it("Renders component with feature usage and performance tracking", async function () {
-        const imodelConnection = (
+        const imodel = (
           await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
             return { category };
           })
-        ).imodel;
-        sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
-        const consoleSpy = sinon.spy(console, "log");
+        );
+        sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
+        const onPerformanceMeasured = sinon.spy();
+        const onFeatureUsed = sinon.spy();
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetry
         const MyPropertyGrid = () => {
           return (
             <PropertyGridComponent
               onPerformanceMeasured={(feature, elapsedTime) => {
-                console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+                onPerformanceMeasured(feature, elapsedTime)
               }}
               onFeatureUsed={(feature) => {
-                console.log(`PropertyGrid [${feature}] used`);
+                onFeatureUsed(feature);
               }}
             />
           );
         };
         // __PUBLISH_EXTRACT_END__
-
         render(<MyPropertyGrid />);
+        Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
         await waitFor(() => {
-          expect(consoleSpy).to.be.calledOnce;
+          expect(onFeatureUsed).to.be.calledTwice;
+          expect(onPerformanceMeasured).to.be.calledOnce;
         });
+        Presentation.selection.clearSelection("", imodel.imodel);
         cleanup();
       });
 
       it("Renders property grid with telemetry context", async function () {
-        const imodelConnection = (
+        const imodel = (
           await buildIModel(this, async (builder) => {
             const physicalModel = insertPhysicalModelWithPartition({ builder, codeValue: "TestPhysicalModel" });
             const category = insertSpatialCategory({ builder, codeValue: "Test SpatialCategory" });
             insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
             return { category };
           })
-        ).imodel;
+        );
+        const imodelConnection = imodel.imodel;
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
-        const consoleSpy = sinon.spy(console, "log");
+        const onPerformanceMeasured = sinon.spy();
+        const onFeatureUsed = sinon.spy();
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryWrapper
         function ExampleContextMenuItem() {
           return (
             <TelemetryContextProvider
-              onFeatureUsed={(feature) => {
-                console.log(`PropertyGrid [${feature}] used`);
-              }}
               onPerformanceMeasured={(feature, elapsedTime) => {
-                console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+                onPerformanceMeasured(feature, elapsedTime)
+              }}
+              onFeatureUsed={(feature) => {
+                onFeatureUsed(feature);
               }}
             >
               <PropertyGrid imodel={imodelConnection} />
@@ -124,15 +127,18 @@ describe("Property grid", () => {
         // __PUBLISH_EXTRACT_END__
         const user = userEvent.setup();
         const { queryByText, getByRole } = render(<ExampleContextMenuItem />);
+        Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
         await waitFor(async () => {
+          expect(onPerformanceMeasured).to.be.calledOnce;
           // trigger a feature
           const button = queryByText("search-bar.open");
           expect(button).to.not.be.undefined;
           await user.click(button!);
           await user.type(getByRole("searchbox"), "A");
           // telemetry logs
-          expect(consoleSpy).to.be.calledOnce;
+          expect(onFeatureUsed).to.be.calledOnce;
         });
+        Presentation.selection.clearSelection("", imodel.imodel);
         cleanup();
       });
     });

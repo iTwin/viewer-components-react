@@ -3,7 +3,6 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
-import { IModelHost } from "@itwin/core-backend";
 import { NoRenderApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridManagerInitializeImports
 import { PropertyGridManager } from "@itwin/property-grid-react";
@@ -18,7 +17,6 @@ export class PropertyGridTestUtils {
       return;
     }
 
-    await IModelHost.startup();
     await NoRenderApp.startup();
     // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridManagerInitialize
     await PropertyGridManager.initialize(IModelApp.localization);
@@ -29,7 +27,6 @@ export class PropertyGridTestUtils {
   public static async terminate() {
     PropertyGridManager.terminate();
     await IModelApp.shutdown();
-    await IModelHost.shutdown();
     PropertyGridTestUtils._initialized = false;
   }
 }

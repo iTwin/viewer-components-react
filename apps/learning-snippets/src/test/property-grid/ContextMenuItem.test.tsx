@@ -2,12 +2,12 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-/* eslint-disable no-console */
+/* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable import/no-duplicates */
 import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
-import { UiFramework, UiItemsManager } from "@itwin/appui-react";
+import { UiFramework } from "@itwin/appui-react";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -18,10 +18,10 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
 import type { ContextMenuItemProps } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemRegisterImports
+// __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithContextMenuItemImports
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
-import { queryByText, render, waitFor } from "@testing-library/react";
+import { cleanup, queryByText, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
 import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
@@ -29,8 +29,6 @@ import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Context menu item", () => {
-      const user = userEvent.setup();
-
       before(async function () {
         await initializePresentationTesting({
           backendProps: {
@@ -61,8 +59,6 @@ describe("Property grid", () => {
       afterEach(async () => {
         await PropertyGridTestUtils.terminate();
         sinon.restore();
-        // eslint-disable-next-line @itwin/no-internal
-        UiItemsManager.clearAllProviders();
       });
 
       it("Renders context menu item", async function () {
@@ -72,6 +68,7 @@ describe("Property grid", () => {
           insertPhysicalElement({ builder, modelId: physicalModel.id, categoryId: category.id });
           return { category };
         });
+        const user = userEvent.setup();
         sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItem
@@ -82,7 +79,7 @@ describe("Property grid", () => {
               id="example"
               title="example"
               onSelect={async () => {
-                console.log(`Selected property: ${props.record.property.displayLabel}`);
+                // access selected property using `props.record.property`
               }}
             >
               Click me!
@@ -91,7 +88,7 @@ describe("Property grid", () => {
         }
         // __PUBLISH_EXTRACT_END__
 
-        // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemRegister
+        // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithContextMenuItem
         const MyPropertyGrid = () => {
           return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]}/>
         }
@@ -102,6 +99,8 @@ describe("Property grid", () => {
           await user.pointer({ keys: "[MouseRight>]", target: getAllByText("Test SpatialCategory")[1] });
           expect(queryByText(baseElement, "Click me!")).to.not.be.null;
         });
+        Presentation.selection.clearSelection("", imodel.imodel);
+        cleanup();
       });
     });
   });

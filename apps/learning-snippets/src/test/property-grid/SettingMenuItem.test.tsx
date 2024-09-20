@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable import/no-duplicates */
 import { join } from "path";
-/* eslint-disable no-console */
 import sinon from "sinon";
-import { UiFramework, UiItemsManager } from "@itwin/appui-react";
+import { UiFramework } from "@itwin/appui-react";
 import { IModelReadRpcInterface, SnapshotIModelRpcInterface } from "@itwin/core-common";
 import { ECSchemaRpcInterface } from "@itwin/ecschema-rpcinterface-common";
 import { ECSchemaRpcImpl } from "@itwin/ecschema-rpcinterface-impl";
@@ -15,7 +14,7 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItemImports
 import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
-// __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItemRegisterImports
+// __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithSettingsMenuItemImports
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
 import { render, waitFor } from "@testing-library/react";
@@ -26,8 +25,6 @@ import { PropertyGridTestUtils } from "../../utils/PropertyGridTestUtils";
 describe("Property grid", () => {
   describe("Learning snippets", () => {
     describe("Settings menu item", () => {
-      const user = userEvent.setup();
-
       before(async function () {
         await initializePresentationTesting({
           backendProps: {
@@ -58,8 +55,6 @@ describe("Property grid", () => {
       afterEach(async () => {
         await PropertyGridTestUtils.terminate();
         sinon.restore();
-        // eslint-disable-next-line @itwin/no-internal
-        UiItemsManager.clearAllProviders();
       });
 
       it("Renders settings menu item", async function () {
@@ -71,6 +66,7 @@ describe("Property grid", () => {
             return { category };
           })
         ).imodel;
+        const user = userEvent.setup();
         sinon.stub(UiFramework, "getIModelConnection").returns(imodel);
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItem
         function ExampleSettingsMenuItem() {
@@ -78,9 +74,7 @@ describe("Property grid", () => {
             // render using `PropertyGridSettingsMenuItem` to get consistent style
             <PropertyGridSettingsMenuItem
               id="example"
-              onClick={() => {
-                console.log("Settings menu clicked!");
-              }}
+              onClick={() => {}}
             >
               Click me!
             </PropertyGridSettingsMenuItem>
@@ -88,7 +82,7 @@ describe("Property grid", () => {
         }
         // __PUBLISH_EXTRACT_END__
 
-        // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleSettingsMenuItemRegister
+        // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithSettingsMenuItem
         const MyPropertyGrid = () => {
           return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]}/>
         }

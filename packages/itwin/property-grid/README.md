@@ -169,7 +169,7 @@ function ExampleContextMenuItem(props: ContextMenuItemProps) {
       id="example"
       title="example"
       onSelect={async () => {
-        console.log(`Selected property: ${props.record.property.displayLabel}`);
+        // access selected property using `props.record.property`
       }}
     >
       Click me!
@@ -182,7 +182,7 @@ function ExampleContextMenuItem(props: ContextMenuItemProps) {
 
 Provide it to the widget:
 
-<!-- [[include: [PropertyGrid.ExampleContextMenuItemRegisterImports, PropertyGrid.ExampleContextMenuItemRegister], tsx]] -->
+<!-- [[include: [PropertyGrid.PropertyGridWithContextMenuItemImports, PropertyGrid.PropertyGridWithContextMenuItem], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
@@ -230,12 +230,7 @@ import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
 function ExampleSettingsMenuItem() {
   return (
     // render using `PropertyGridSettingsMenuItem` to get consistent style
-    <PropertyGridSettingsMenuItem
-      id="example"
-      onClick={() => {
-        console.log("Settings menu clicked!");
-      }}
-    >
+    <PropertyGridSettingsMenuItem id="example" onClick={() => {}}>
       Click me!
     </PropertyGridSettingsMenuItem>
   );
@@ -246,7 +241,7 @@ function ExampleSettingsMenuItem() {
 
 Provide it to the widget:
 
-<!-- [[include: [PropertyGrid.ExampleSettingsMenuItemRegisterImports, PropertyGrid.ExampleSettingsMenuItemRegister], tsx]] -->
+<!-- [[include: [PropertyGrid.PropertyGridWithSettingsMenuItemImports, PropertyGrid.PropertyGridWithSettingsMenuItem], tsx]] -->
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
@@ -313,16 +308,15 @@ This can be achieved by passing `onFeatureUsed` function to `PropertyGridCompone
 
 ```tsx
 import { PropertyGridComponent } from "@itwin/property-grid-react";
-import { UiItemsManager } from "@itwin/appui-react";
 
 const MyPropertyGrid = () => {
   return (
     <PropertyGridComponent
       onPerformanceMeasured={(feature, elapsedTime) => {
-        console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+        onPerformanceMeasured(feature, elapsedTime);
       }}
       onFeatureUsed={(feature) => {
-        console.log(`PropertyGrid [${feature}] used`);
+        onFeatureUsed(feature);
       }}
     />
   );
@@ -342,11 +336,11 @@ import { PropertyGrid, TelemetryContextProvider } from "@itwin/property-grid-rea
 function ExampleContextMenuItem() {
   return (
     <TelemetryContextProvider
-      onFeatureUsed={(feature) => {
-        console.log(`PropertyGrid [${feature}] used`);
-      }}
       onPerformanceMeasured={(feature, elapsedTime) => {
-        console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+        onPerformanceMeasured(feature, elapsedTime);
+      }}
+      onFeatureUsed={(feature) => {
+        onFeatureUsed(feature);
       }}
     >
       <PropertyGrid imodel={imodelConnection} />
