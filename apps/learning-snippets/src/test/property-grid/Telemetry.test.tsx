@@ -70,17 +70,19 @@ describe("Property grid", () => {
           })
         );
         sinon.stub(UiFramework, "getIModelConnection").returns(imodel.imodel);
-        const onPerformanceMeasured = sinon.spy();
-        const onFeatureUsed = sinon.spy();
+        const logPerformance = sinon.spy();
+        const logUsage = sinon.spy();
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetry
         const MyPropertyGrid = () => {
           return (
             <PropertyGridComponent
               onPerformanceMeasured={(feature, elapsedTime) => {
-                onPerformanceMeasured(feature, elapsedTime)
+                // user-defined function to handle performance logging. 
+                logPerformance(feature, elapsedTime)
               }}
               onFeatureUsed={(feature) => {
-                onFeatureUsed(feature);
+                // user-defined function to handle usage logging. 
+                logUsage(feature);
               }}
             />
           );
@@ -89,8 +91,8 @@ describe("Property grid", () => {
         render(<MyPropertyGrid />);
         Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
         await waitFor(() => {
-          expect(onFeatureUsed).to.be.calledTwice;
-          expect(onPerformanceMeasured).to.be.calledOnce;
+          expect(logUsage).to.be.calledTwice;
+          expect(logPerformance).to.be.calledOnce;
         });
         Presentation.selection.clearSelection("", imodel.imodel);
         cleanup();
@@ -107,17 +109,19 @@ describe("Property grid", () => {
         );
         const imodelConnection = imodel.imodel;
         sinon.stub(UiFramework, "getIModelConnection").returns(imodelConnection);
-        const onPerformanceMeasured = sinon.spy();
-        const onFeatureUsed = sinon.spy();
+        const logPerformance = sinon.spy();
+        const logUsage = sinon.spy();
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetryWrapper
         function ExampleContextMenuItem() {
           return (
             <TelemetryContextProvider
               onPerformanceMeasured={(feature, elapsedTime) => {
-                onPerformanceMeasured(feature, elapsedTime)
+                // user-defined function to handle performance logging. 
+                logPerformance(feature, elapsedTime)
               }}
               onFeatureUsed={(feature) => {
-                onFeatureUsed(feature);
+                // user-defined function to handle usage logging. 
+                logUsage(feature);
               }}
             >
               <PropertyGrid imodel={imodelConnection} />
@@ -129,14 +133,14 @@ describe("Property grid", () => {
         const { queryByText, getByRole } = render(<ExampleContextMenuItem />);
         Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
         await waitFor(async () => {
-          expect(onPerformanceMeasured).to.be.calledOnce;
+          expect(logPerformance).to.be.calledOnce;
           // trigger a feature
           const button = queryByText("search-bar.open");
           expect(button).to.not.be.undefined;
           await user.click(button!);
           await user.type(getByRole("searchbox"), "A");
           // telemetry logs
-          expect(onFeatureUsed).to.be.calledOnce;
+          expect(logUsage).to.be.calledOnce;
         });
         Presentation.selection.clearSelection("", imodel.imodel);
         cleanup();
