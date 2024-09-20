@@ -130,16 +130,14 @@ describe("Property grid", () => {
         }
         // __PUBLISH_EXTRACT_END__
         const user = userEvent.setup();
-        const { queryByText, getByRole } = render(<ExampleContextMenuItem />);
+        const { getByRole, getByText } = render(<ExampleContextMenuItem />);
         Presentation.selection.addToSelection("", imodel.imodel, [imodel.category]);
+        // trigger a feature
+        const button = await waitFor(() => getByText("search-bar.open"));
+        await user.click(button);
+        await user.type(getByRole("searchbox"), "A");
         await waitFor(async () => {
           expect(logPerformance).to.be.calledOnce;
-          // trigger a feature
-          const button = queryByText("search-bar.open");
-          expect(button).to.not.be.undefined;
-          await user.click(button!);
-          await user.type(getByRole("searchbox"), "A");
-          // telemetry logs
           expect(logUsage).to.be.calledOnce;
         });
         Presentation.selection.clearSelection("", imodel.imodel);
