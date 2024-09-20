@@ -6,6 +6,7 @@ public;AncestorsNavigationControlsProps
 public;ContextMenuItemProps
 public;ContextMenuProps
 public;CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element
+public;createPropertyGrid({ propertyGridProps }: PropertyGridProps_2): Widget
 public;DataProviderProps
 public;DefaultContextMenuItemProps 
 public;FavoritePropertiesContextMenuItemProps 
@@ -29,7 +30,9 @@ public;PropertyGridProps = Omit
 public;PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren
 public;PropertyGridSettingsMenuItemProps
 public;PropertyGridUiItemsProvider 
+deprecated;PropertyGridUiItemsProvider 
 public;PropertyGridUiItemsProviderProps
+deprecated;PropertyGridUiItemsProviderProps
 public;PropertyGridWidgetId = "vcr:PropertyGridComponent"
 public;PropertyGridWidgetProps 
 public;RemoveFavoritePropertyContextMenuItem({ field, imodel, scope, onSelect }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
