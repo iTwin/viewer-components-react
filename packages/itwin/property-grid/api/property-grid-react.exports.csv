@@ -6,7 +6,7 @@ public;AncestorsNavigationControlsProps
 public;ContextMenuItemProps
 public;ContextMenuProps
 public;CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element
-public;createPropertyGrid({ propertyGridProps }: PropertyGridProps_2): Widget
+public;createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget
 public;DataProviderProps
 public;DefaultContextMenuItemProps 
 public;FavoritePropertiesContextMenuItemProps 

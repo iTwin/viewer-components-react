@@ -54,9 +54,9 @@ describe("Property grid", () => {
         UiItemsManager.register({
           id: "property-grid-provider",
           getWidgets: () => [
-            createPropertyGrid({
+            createPropertyGrid(
               // supplies props for the `PropertyGridComponent`
-              propertyGridProps: {
+              {
                 // enable auto-expanding all property categories
                 autoExpandChildCategories: true,
 
@@ -87,7 +87,7 @@ describe("Property grid", () => {
 
                 // ... and a number of props of `VirtualizedPropertyGridWithDataProvider` from `@itwin/components-react` is also accepted here
               },
-            }),
+            ),
           ],
         });
         // __PUBLISH_EXTRACT_END__

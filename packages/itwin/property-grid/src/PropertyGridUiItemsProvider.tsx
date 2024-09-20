@@ -23,32 +23,24 @@ import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent";
 
 /**
- * Props for `createPropertyGrid`.
- * @public
- */
- interface PropertyGridProps {
-   /** Props for configuring `PropertyGridComponent` shown in the widget. */
-   propertyGridProps?: PropertyGridWidgetProps;
- }
- /**
-  * Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
-  * @public
-  */
- export function createPropertyGrid({ propertyGridProps }: PropertyGridProps): Widget {
-   return {
-     id: "vcr:PropertyGridComponent",
-     label: PropertyGridManager.translate("widget-label"),
-     icon: <SvgInfoCircular />,
-     defaultState: WidgetState.Hidden,
-     layouts: {
-       standard: {
-         section: StagePanelSection.End,
-         location: StagePanelLocation.Right,
-       },
-     },
-     content: <PropertyGridWidget {...propertyGridProps} />,
-   };
- }
+* Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
+* @public
+*/
+export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget {
+  return {
+    id: "vcr:PropertyGridComponent",
+    label: PropertyGridManager.translate("widget-label"),
+    icon: <SvgInfoCircular />,
+    defaultState: WidgetState.Hidden,
+    layouts: {
+      standard: {
+        section: StagePanelSection.End,
+        location: StagePanelLocation.Right,
+      },
+    },
+    content: <PropertyGridWidget {...propertyGridProps} />,
+  };
+}
 
 /**
  * Id of the property grid widget created by `createPropertyGrid`.

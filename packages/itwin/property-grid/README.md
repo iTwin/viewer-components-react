@@ -59,12 +59,9 @@ import type { IModelConnection } from "@itwin/core-frontend";
 UiItemsManager.register({
   id: "property-grid-provider",
   getWidgets: () => [
-    createPropertyGrid({
-      // defaults to whatever the default `Widget.priority` in AppUI is
-      defaultPanelWidgetPriority: 1000,
-
+    createPropertyGrid(
       // supplies props for the `PropertyGridComponent`
-      propertyGridProps: {
+      {
         // enable auto-expanding all property categories
         autoExpandChildCategories: true,
 
@@ -95,7 +92,7 @@ UiItemsManager.register({
 
         // ... and a number of props of `VirtualizedPropertyGridWithDataProvider` from `@itwin/components-react` is also accepted here
       },
-    }),
+    ),
   ],
 });
 ```
@@ -189,16 +186,11 @@ Provide it to the widget:
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { createPropertyGrid } from "@itwin/property-grid-react";
+import { PropertyGridComponent } from "@itwin/property-grid-react";
 
-UiItemsManager.register({
-  id: "tree-widget-provider",
-  getWidgets: () => [
-    createPropertyGrid({
-      propertyGridProps: { contextMenuItems: [(props) => <ExampleContextMenuItem {...props} />] },
-    }),
-  ],
-});
+const MyPropertyGrid = () => {
+  return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
+};
 ```
 
 <!-- END EXTRACTION -->
@@ -258,16 +250,11 @@ Provide it to the widget:
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { createPropertyGrid } from "@itwin/property-grid-react";
+import { PropertyGridComponent } from "@itwin/property-grid-react";
 
-UiItemsManager.register({
-  id: "tree-widget-provider",
-  getWidgets: () => [
-    createPropertyGrid({
-      propertyGridProps: { settingsMenuItems: [() => <ExampleSettingsMenuItem />] },
-    }),
-  ],
-});
+const MyPropertyGrid = () => {
+  return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]} />;
+};
 ```
 
 <!-- END EXTRACTION -->
@@ -325,24 +312,21 @@ This can be achieved by passing `onFeatureUsed` function to `PropertyGridCompone
 <!-- BEGIN EXTRACTION -->
 
 ```tsx
-import { createPropertyGrid } from "@itwin/property-grid-react";
+import { PropertyGridComponent } from "@itwin/property-grid-react";
 import { UiItemsManager } from "@itwin/appui-react";
 
-UiItemsManager.register({
-  id: "property-grid-provider",
-  getWidgets: () => [
-    createPropertyGrid({
-      propertyGridProps: {
-        onPerformanceMeasured: (feature, elapsedTime) => {
-          console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
-        },
-        onFeatureUsed: (feature) => {
-          console.log(`PropertyGrid [${feature}] used`);
-        },
-      },
-    }),
-  ],
-});
+const MyPropertyGrid = () => {
+  return (
+    <PropertyGridComponent
+      onPerformanceMeasured={(feature, elapsedTime) => {
+        console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+      }}
+      onFeatureUsed={(feature) => {
+        console.log(`PropertyGrid [${feature}] used`);
+      }}
+    />
+  );
+};
 ```
 
 <!-- END EXTRACTION -->

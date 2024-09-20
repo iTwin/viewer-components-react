@@ -58,7 +58,7 @@ export interface ContextMenuProps {
 export function CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element;
 
 // @public
-export function createPropertyGrid({ propertyGridProps }: PropertyGridProps_2): Widget;
+export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget;
 
 // @public
 export interface DataProviderProps {

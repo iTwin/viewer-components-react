@@ -17,6 +17,7 @@ import { HierarchyCacheMode, initialize as initializePresentationTesting, termin
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemImports
 import { PropertyGridContextMenuItem } from "@itwin/property-grid-react";
 import type { ContextMenuItemProps } from "@itwin/property-grid-react";
+// __PUBLISH_EXTRACT_END__
 // __PUBLISH_EXTRACT_START__ PropertyGrid.ExampleContextMenuItemRegisterImports
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 // __PUBLISH_EXTRACT_END__
