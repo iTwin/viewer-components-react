@@ -19,11 +19,6 @@ export interface OverlappedElementsMetadata {
   overlappedElementGroupPairs: OverlappedElementGroupPairs[];
 }
 
-export interface GroupVisualizationColor {
-  groupId: string;
-  color: string;
-}
-
 export interface GroupHilitedElements {
   hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
@@ -37,8 +32,8 @@ export interface GroupHilitedElements {
   setOverlappedElementsMetadata: (overlappedElementsMetaData: OverlappedElementsMetadata) => void;
   setIsOverlappedColored: (isOverlappedColored: boolean | ((isOverlappedColored: boolean) => boolean)) => void;
   setIsVisualizationsEnabled: (isVisualizationsEnabled: boolean | ((isVisualizationsEnabled: boolean) => boolean)) => void;
-  groupColors: GroupVisualizationColor[];
-  setGroupColors: (colors: GroupVisualizationColor[]) => void;
+  groupColors: Map<string, string>;
+  setGroupColors: (colors: Map<string, string>) => void;
 }
 
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
@@ -59,7 +54,7 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   setIsOverlappedColored: () => {},
   setIsVisualizationsEnabled: () => {},
   setGroupColors: () => {},
-  groupColors: [],
+  groupColors: new Map(),
 });
 
 export const useGroupHilitedElementsContext = (): GroupHilitedElements => {

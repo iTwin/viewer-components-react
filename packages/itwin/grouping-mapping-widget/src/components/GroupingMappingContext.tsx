@@ -11,7 +11,7 @@ import { createMappingClient, MappingClientContext } from "./context/MappingClie
 import type { Group, IExtractionClient, IGroupsClient, IMappingsClient, IPropertiesClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import type { GroupVisualizationColor, OverlappedElementsMetadata } from "./context/GroupHilitedElementsContext";
+import type { OverlappedElementsMetadata } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesGroupColorContext } from "./context/PropertiesGroupColorContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
@@ -129,7 +129,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<Set<string>>(new Set());
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
   const [propertiesShowGroup, setPropertiesShowGroup] = useState<boolean>(false);
-  const [groupColors, setGroupColors] = useState<GroupVisualizationColor[]>([]);
+  const [groupColors, setGroupColors] = useState<Map<string, string>>(new Map());
   const [groups, setGroups] = useState<Group[]>([]);
   const [numberOfVisualizedGroups, setNumberOfVisualizedGroups] = useState(0);
   const [isOverlappedColored, setIsOverlappedColored] = useState<boolean>(false);

@@ -122,7 +122,7 @@ export const GroupingMappingRouter = ({
           <PropertyMenuWithVisualization
             mapping={mapping}
             group={group}
-            color={showGroupColor ? groupColors.find((gc) => gc.groupId === group.id)?.color ?? "red" : "red"}
+            color={showGroupColor ? groupColors.get(group.id) ?? "red" : "red"}
             onClickAddGroupProperty={() =>
               navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: "Add Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
             }

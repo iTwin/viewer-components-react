@@ -258,7 +258,7 @@ export const GroupsVisualization = ({
 
   useEffect(() => {
     if (isGroupsFetched) {
-      setGroupColors(groups?.map((g, i) => ({ groupId: g.id, color: getGroupColor(i) })) ?? []);
+      setGroupColors(new Map(groups?.map((g, i) => [g.id, getGroupColor(i)]) ?? []));
     }
   }, [groups, isGroupsFetched, setGroupColors]);
 
@@ -266,8 +266,7 @@ export const GroupsVisualization = ({
     () =>
       isVisualizationsEnabled
         ? [
-            (props: ActionButtonRendererProps) =>
-              showGroupColor ? <GroupColorLegend backgroundColor={groupColors.find((c) => c.groupId === props.group.id)?.color ?? ""} /> : [],
+            (props: ActionButtonRendererProps) => (showGroupColor ? <GroupColorLegend backgroundColor={groupColors.get(props.group.id) ?? ""} /> : []),
             (props: ActionButtonRendererProps) => (
               <GroupsShowHideButtons
                 {...props}
