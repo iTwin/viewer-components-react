@@ -89,7 +89,7 @@ describe("Property grid", () => {
         // __PUBLISH_EXTRACT_END__
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithContextMenuItem
-        const MyPropertyGrid = () => {
+        function MyPropertyGrid() {
           return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]}/>
         }
         // __PUBLISH_EXTRACT_END__

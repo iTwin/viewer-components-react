@@ -74,7 +74,9 @@ describe("Property grid", () => {
             // render using `PropertyGridSettingsMenuItem` to get consistent style
             <PropertyGridSettingsMenuItem
               id="example"
-              onClick={() => {}}
+              onClick={() => {
+                // handle settings item clicked
+              }}
             >
               Click me!
             </PropertyGridSettingsMenuItem>
@@ -83,7 +85,7 @@ describe("Property grid", () => {
         // __PUBLISH_EXTRACT_END__
 
         // __PUBLISH_EXTRACT_START__ PropertyGrid.PropertyGridWithSettingsMenuItem
-        const MyPropertyGrid = () => {
+        function MyPropertyGrid() {
           return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]}/>
         }
         // __PUBLISH_EXTRACT_END__

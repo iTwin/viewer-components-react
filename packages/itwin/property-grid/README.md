@@ -188,9 +188,9 @@ Provide it to the widget:
 ```tsx
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 
-const MyPropertyGrid = () => {
+function MyPropertyGrid() {
   return <PropertyGridComponent contextMenuItems={[(props) => <ExampleContextMenuItem {...props} />]} />;
-};
+}
 ```
 
 <!-- END EXTRACTION -->
@@ -230,7 +230,12 @@ import { PropertyGridSettingsMenuItem } from "@itwin/property-grid-react";
 function ExampleSettingsMenuItem() {
   return (
     // render using `PropertyGridSettingsMenuItem` to get consistent style
-    <PropertyGridSettingsMenuItem id="example" onClick={() => {}}>
+    <PropertyGridSettingsMenuItem
+      id="example"
+      onClick={() => {
+        // handle settings item clicked
+      }}
+    >
       Click me!
     </PropertyGridSettingsMenuItem>
   );
@@ -247,9 +252,9 @@ Provide it to the widget:
 ```tsx
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 
-const MyPropertyGrid = () => {
+function MyPropertyGrid() {
   return <PropertyGridComponent settingsMenuItems={[() => <ExampleSettingsMenuItem />]} />;
-};
+}
 ```
 
 <!-- END EXTRACTION -->
