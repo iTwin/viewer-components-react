@@ -191,22 +191,24 @@ const configuredUiItems = new Map<string, UiItem>([
         {
           id: "PropertyGridUIProvider",
           getWidgets: () => {
-            createPropertyGrid({
-              autoExpandChildCategories: true,
-              ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
-              contextMenuItems: [
-                (props) => <AddFavoritePropertyContextMenuItem {...props} />,
-                (props) => <RemoveFavoritePropertyContextMenuItem {...props} />,
-                (props) => <CopyPropertyTextContextMenuItem {...props} />,
-              ],
-              settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
-              onPerformanceMeasured: (feature, elapsedTime) => {
-                console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
-              },
-              onFeatureUsed: (feature) => {
-                console.log(`PropertyGrid [${feature}] used`);
-              },
-            });
+            return [
+              createPropertyGrid({
+                autoExpandChildCategories: true,
+                ancestorsNavigationControls: (props) => <AncestorsNavigationControls {...props} />,
+                contextMenuItems: [
+                  (props) => <AddFavoritePropertyContextMenuItem {...props} />,
+                  (props) => <RemoveFavoritePropertyContextMenuItem {...props} />,
+                  (props) => <CopyPropertyTextContextMenuItem {...props} />,
+                ],
+                settingsMenuItems: [(props) => <ShowHideNullValuesSettingsMenuItem {...props} persist={true} />],
+                onPerformanceMeasured: (feature, elapsedTime) => {
+                  console.log(`PropertyGrid [${feature}] took ${elapsedTime} ms`);
+                },
+                onFeatureUsed: (feature) => {
+                  console.log(`PropertyGrid [${feature}] used`);
+                },
+              }),
+            ];
           },
         },
       ],
