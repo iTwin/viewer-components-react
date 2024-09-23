@@ -314,7 +314,7 @@ This can be achieved by passing `onFeatureUsed` function to `PropertyGridCompone
 ```tsx
 import { PropertyGridComponent } from "@itwin/property-grid-react";
 
-const MyPropertyGrid = () => {
+function MyPropertyGrid() {
   return (
     <PropertyGridComponent
       onPerformanceMeasured={(feature, elapsedTime) => {
@@ -327,7 +327,7 @@ const MyPropertyGrid = () => {
       }}
     />
   );
-};
+}
 ```
 
 <!-- END EXTRACTION -->

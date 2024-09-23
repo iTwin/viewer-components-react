@@ -72,7 +72,7 @@ describe("Property grid", () => {
         const logPerformance = sinon.spy();
         const logUsage = sinon.spy();
         // __PUBLISH_EXTRACT_START__ PropertyGrid.ComponentWithTelemetry
-        const MyPropertyGrid = () => {
+        function MyPropertyGrid() {
           return (
             <PropertyGridComponent
               onPerformanceMeasured={(feature, elapsedTime) => {
