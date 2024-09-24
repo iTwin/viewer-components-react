@@ -4,21 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { IconButton } from "@itwin/itwinui-react";
-import type { GroupMinimal } from "@itwin/insights-client";
-import { getGroupColor } from "./groupsHelpers";
 import "./GroupColorLegend.scss";
 
 interface GroupColorLegendProps {
-  group: GroupMinimal;
-  groups: GroupMinimal[];
+  backgroundColor: string;
 }
 
-export const GroupColorLegend = ({ group, groups }: GroupColorLegendProps) => (
+export const GroupColorLegend = ({ backgroundColor }: GroupColorLegendProps) => (
   <IconButton styleType="borderless">
     <div
       className="gmw-color-legend"
       style={{
-        backgroundColor: getGroupColor(groups.findIndex((g) => g.id === group.id)),
+        backgroundColor,
       }}
     />
   </IconButton>

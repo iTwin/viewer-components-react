@@ -6,7 +6,7 @@ import type { GroupMinimal } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { OverlappedElementGroupPairs } from "../context/GroupHilitedElementsContext";
 import { useGroupHilitedElementsContext } from "../context/GroupHilitedElementsContext";
-import { generateOverlappedGroups, hideGroupConsideringOverlaps, hideGroupIds, visualizeGroupColors } from "./groupsHelpers";
+import { generateOverlappedGroups, getGroupColor, hideGroupConsideringOverlaps, hideGroupIds, visualizeGroupColors } from "./groupsHelpers";
 import { clearEmphasizedElements, clearEmphasizedOverriddenElements, clearHiddenElements, hideElements, zoomToElements } from "../../common/viewerUtils";
 import type { GroupsProps } from "./Groups";
 import { Groups } from "./Groups";
@@ -72,6 +72,8 @@ export const GroupsVisualization = ({
     setIsVisualizationsEnabled,
     overlappedElementsMetadata,
     setOverlappedElementsMetadata,
+    groupColors,
+    setGroupColors,
   } = useGroupHilitedElementsContext();
   const { getAccessToken } = useGroupingMappingApiConfig();
   const groupsClient = useGroupsClient();
@@ -254,11 +256,17 @@ export const GroupsVisualization = ({
     [onClickAddGroup],
   );
 
+  useEffect(() => {
+    if (isGroupsFetched) {
+      setGroupColors(new Map(groups?.map((g, i) => [g.id, getGroupColor(i)]) ?? []));
+    }
+  }, [groups, isGroupsFetched, setGroupColors]);
+
   const groupActionButtonRenderers: ActionButtonRenderer[] = useMemo(
     () =>
       isVisualizationsEnabled
         ? [
-            (props: ActionButtonRendererProps) => (showGroupColor ? <GroupColorLegend {...props} groups={groups ?? []} /> : []),
+            (props: ActionButtonRendererProps) => (showGroupColor ? <GroupColorLegend backgroundColor={groupColors.get(props.group.id) ?? ""} /> : []),
             (props: ActionButtonRendererProps) => (
               <GroupsShowHideButtons
                 {...props}
@@ -269,7 +277,7 @@ export const GroupsVisualization = ({
             ),
           ].flat()
         : [],
-    [groups, hideSingleGroupWrapper, isGroupsFetched, isGroupsQueriesReady, isVisualizationsEnabled, showGroup, showGroupColor],
+    [hideSingleGroupWrapper, isGroupsFetched, isGroupsQueriesReady, isVisualizationsEnabled, showGroup, showGroupColor, groupColors],
   );
 
   const overlappedAlert = useMemo(
