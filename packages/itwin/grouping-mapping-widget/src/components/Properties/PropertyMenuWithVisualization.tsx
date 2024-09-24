@@ -18,6 +18,7 @@ import "./PropertyMenuWithVisualization.scss";
 export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
   color: string;
   disableZoom?: boolean;
+  onGroupPropertyDelete?: () => void;
 }
 
 /**

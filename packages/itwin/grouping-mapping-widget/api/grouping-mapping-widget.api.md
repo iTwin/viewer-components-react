@@ -436,7 +436,7 @@ export interface PropertyMap {
 }
 
 // @public
-export const PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, hideGroupProps, }: PropertyMenuProps) => JSX.Element;
+export const PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, onGroupPropertyDelete, hideGroupProps, }: PropertyMenuProps) => JSX.Element;
 
 // @public
 export interface PropertyMenuProps {
@@ -464,6 +464,8 @@ export interface PropertyMenuProps {
     onClickModifyCustomCalculation?: (customCalculation: Property) => void;
     // (undocumented)
     onClickModifyGroupProperty?: (groupProperty: Property) => void;
+    // (undocumented)
+    onGroupPropertyDelete?: () => void;
 }
 
 // @public
@@ -475,6 +477,8 @@ export interface PropertyMenuWithVisualizationProps extends PropertyMenuProps {
     color: string;
     // (undocumented)
     disableZoom?: boolean;
+    // (undocumented)
+    onGroupPropertyDelete?: () => void;
 }
 
 // @public

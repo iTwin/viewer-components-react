@@ -24,6 +24,7 @@ export interface PropertyTableProps<T extends PropertyTableItem> {
   refreshProperties: () => Promise<void>;
   deleteProperty: (propertyId: string) => Promise<void>;
   hideRefreshIcon?: boolean;
+  onGroupPropertyDelete?: () => void;
 }
 
 export const PropertyTable = <T extends PropertyTableItem>({
@@ -35,12 +36,14 @@ export const PropertyTable = <T extends PropertyTableItem>({
   refreshProperties,
   deleteProperty,
   hideRefreshIcon,
+  onGroupPropertyDelete,
 }: PropertyTableProps<T>) => {
   const [showDeleteModal, setShowDeleteModal] = useState<T | undefined>(undefined);
 
   const handleDeleteProperty = useCallback(async () => {
     await deleteProperty(showDeleteModal?.id ?? "");
-  }, [deleteProperty, showDeleteModal?.id]);
+    onGroupPropertyDelete?.();
+  }, [deleteProperty, showDeleteModal?.id, onGroupPropertyDelete]);
 
   const handleShowDeleteModal = useCallback((property: T) => {
     setShowDeleteModal(property);
