@@ -2,6 +2,27 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Tue, 24 Sep 2024 11:54:49 GMT",
+      "version": "0.31.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.31.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "tejas.sutar@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "cc675fab6d166ffb70efb419fb1697fda0a093fb",
+            "comment": "Added flags to disable zoom during visualization"
+          },
+          {
+            "author": "tejas.sutar@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "a45e2b7b348e1a6cd9f2eefec56e3304c7523d77",
+            "comment": "Preserving group visualization for group properties pane"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 13 Sep 2024 17:50:16 GMT",
       "version": "0.30.1",
       "tag": "@itwin/grouping-mapping-widget_v0.30.1",
