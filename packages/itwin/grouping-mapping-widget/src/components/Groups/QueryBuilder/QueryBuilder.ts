@@ -34,7 +34,7 @@ export interface QueryProperty {
   className: string;
   classProperties: ClassProperty[];
   isCategory: boolean;
-  modeledElement: string;
+  modeledElement?: string;
   isAspect: boolean;
 }
 
@@ -69,7 +69,7 @@ export class QueryBuilder {
     return classInfo?.name === "BisCore:GeometricElement3dIsInCategory";
   }
 
-  private async getPotentialModeledElement(propertyField: PropertiesField, propertyRecord: PropertyRecord): Promise<string> {
+  private async getPotentialModeledElement(propertyField: PropertiesField, propertyRecord: PropertyRecord): Promise<string | undefined> {
     const classInfo = propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
     if (propertyRecord.value?.valueFormat !== PropertyValueFormat.Primitive) return "";
     const navigationPropertyValue = propertyRecord.value.value as NavigationPropertyValue;
@@ -79,7 +79,7 @@ export class QueryBuilder {
       const modeledElement = (await this.iModelConnection.createQueryReader(modeledElementQuery).next()).value[0];
       return modeledElement.replace(":", ".");
     }
-    return '';
+    return undefined;
   }
 
   private _propertyMap: Map<string, AddedProperty> = new Map();
@@ -142,7 +142,7 @@ export class QueryBuilder {
     // get the special cases
     const isNavigation: boolean = prop.property.typename.toLowerCase() === "navigation";
     const isCategory: boolean = isNavigation && this.isCategory(propertiesField);
-    const isModel = await this.getPotentialModeledElement(propertiesField, prop);
+    const modeledElement = await this.getPotentialModeledElement(propertiesField, prop);
 
     const isAspect: boolean =
       pathToPrimaryClass?.find(
@@ -153,13 +153,13 @@ export class QueryBuilder {
       const property = propertiesField.properties[i].property;
 
       const className = property.classInfo.name.replace(":", ".");
-      const propertyName = isNavigation ? (isCategory || isModel ? `${property.name}.CodeValue` : `${property.name}.id`) : property.name;
-      const propertyValue = isNavigation ? (isCategory || isModel ? prop.value.displayValue ?? "" : (prop.value.value as InstanceKey).id) : prop.value.value;
+      const propertyName = isNavigation ? (isCategory || modeledElement ? `${property.name}.CodeValue` : `${property.name}.id`) : property.name;
+      const propertyValue = isNavigation ? (isCategory || modeledElement ? prop.value.displayValue ?? "" : (prop.value.value as InstanceKey).id) : prop.value.value;
 
       if (!isAspect && pathToPrimaryClass && pathToPrimaryClass.length > 0) {
         this.addRelatedToQuery(i, propertiesField, propertyName, propertyValue);
       } else {
-        this.addPropertyToQuery(i, className, propertyName, propertyValue, this.needsQuote(propertiesField), isCategory, isModel, isAspect);
+        this.addPropertyToQuery(i, className, propertyName, propertyValue, this.needsQuote(propertiesField), isCategory, modeledElement, isAspect);
       }
     }
     return true;
@@ -237,7 +237,7 @@ export class QueryBuilder {
     propertyValue: Primitives.Value,
     needsQuote: boolean,
     isCategory: boolean,
-    modeledElement: string,
+    modeledElement: string | undefined,
     isAspect: boolean,
   ) {
     if (this.query === undefined) {
