@@ -8,6 +8,7 @@ import type { Primitives, PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { toaster } from "@itwin/itwinui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import { QueryBinder } from "@itwin/core-common";
 
 export interface Query {
   unions: QueryUnion[];
@@ -34,7 +35,7 @@ export interface QueryProperty {
   className: string;
   classProperties: ClassProperty[];
   isCategory: boolean;
-  modeledElement?: string;
+  modeledElementClass?: string;
   isAspect: boolean;
 }
 
@@ -54,15 +55,12 @@ export class QueryBuilder {
   private static readonly MULTI_ASPECT_PRIMARY_CLASS = "BisCore:ElementOwnsMultiAspects";
   private static readonly UNIQUE_ASPECT_PRIMARY_CLASS = "BisCore:ElementOwnsUniqueAspect";
   private static readonly DEFAULT_DOUBLE_PRECISION = 4;
-
-  private dataProvider: PresentationPropertyDataProvider;
-  private iModelConnection: IModelConnection
   private query: Query | undefined;
 
-  constructor(provider: PresentationPropertyDataProvider, iModelConnection: IModelConnection) {
-    this.dataProvider = provider;
-    this.iModelConnection = iModelConnection
-  }
+  constructor(
+    private readonly dataProvider: PresentationPropertyDataProvider,
+    private readonly iModelConnection: IModelConnection,
+  ) {}
 
   private isCategory(propertyField: PropertiesField): boolean {
     const classInfo = propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
@@ -71,15 +69,17 @@ export class QueryBuilder {
 
   private async getPotentialModeledElement(propertyField: PropertiesField, propertyRecord: PropertyRecord): Promise<string | undefined> {
     const classInfo = propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
-    if (propertyRecord.value?.valueFormat !== PropertyValueFormat.Primitive) return "";
+    if (propertyRecord.value?.valueFormat !== PropertyValueFormat.Primitive) return;
     const navigationPropertyValue = propertyRecord.value.value as NavigationPropertyValue;
     if (classInfo?.name === "BisCore:ModelContainsElements") {
       // Lookup the modeled element as they share the same ECInstanceId
-      const modeledElementQuery = `SELECT ec_classname(ecclassid) FROM biscore.element WHERE ecinstanceid = ${navigationPropertyValue.id}`
-      const modeledElement = (await this.iModelConnection.createQueryReader(modeledElementQuery).next()).value[0];
+      const modeledElementQuery = `SELECT ec_classname(ecclassid) FROM biscore.element WHERE ecinstanceid = ? LIMIT 1`;
+      const queryBinder = new QueryBinder();
+      queryBinder.bindString(1, navigationPropertyValue.id);
+      const modeledElement = (await this.iModelConnection.createQueryReader(modeledElementQuery, queryBinder).next()).value[0];
       return modeledElement.replace(":", ".");
     }
-    return undefined;
+    return;
   }
 
   private _propertyMap: Map<string, AddedProperty> = new Map();
@@ -154,7 +154,11 @@ export class QueryBuilder {
 
       const className = property.classInfo.name.replace(":", ".");
       const propertyName = isNavigation ? (isCategory || modeledElement ? `${property.name}.CodeValue` : `${property.name}.id`) : property.name;
-      const propertyValue = isNavigation ? (isCategory || modeledElement ? prop.value.displayValue ?? "" : (prop.value.value as InstanceKey).id) : prop.value.value;
+      const propertyValue = isNavigation
+        ? isCategory || modeledElement
+          ? prop.value.displayValue ?? ""
+          : (prop.value.value as InstanceKey).id
+        : prop.value.value;
 
       if (!isAspect && pathToPrimaryClass && pathToPrimaryClass.length > 0) {
         this.addRelatedToQuery(i, propertiesField, propertyName, propertyValue);
@@ -237,7 +241,7 @@ export class QueryBuilder {
     propertyValue: Primitives.Value,
     needsQuote: boolean,
     isCategory: boolean,
-    modeledElement: string | undefined,
+    modeledElementClass: string | undefined,
     isAspect: boolean,
   ) {
     if (this.query === undefined) {
@@ -253,7 +257,7 @@ export class QueryBuilder {
     const queryProperty: QueryProperty = {
       className,
       isCategory,
-      modeledElement,
+      modeledElementClass,
       isAspect,
       classProperties: [queryJoin],
     };
@@ -310,10 +314,11 @@ export class QueryBuilder {
           querySegments.set("BisCore.Category", [`BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id`]);
           whereSegments.push(this.categoryWhereQuery(property.classProperties[0].value.toString()));
           continue;
-        }
-        else if (property.modeledElement) {
-          querySegments.set(property.modeledElement, [`${property.modeledElement}.UserLabel = '${property.classProperties[0].value.toString()}' OR ${property.modeledElement}.CodeValue = '${property.classProperties[0].value.toString()}'`]);
-          whereSegments.push(`${property.modeledElement}.ECInstanceId = BisCore.Element.Model.id`);
+        } else if (property.modeledElementClass) {
+          querySegments.set(property.modeledElementClass, [`${property.modeledElementClass}.ECInstanceId = BisCore.Element.Model.id`]);
+          whereSegments.push(
+            `${property.modeledElementClass}.UserLabel = '${property.classProperties[0].value.toString()}' OR ${property.modeledElementClass}.CodeValue = '${property.classProperties[0].value.toString()}'`,
+          );
           continue;
         }
 

@@ -25,7 +25,7 @@ describe("QueryBuilder", () => {
     MockFactory.stubProperty(dataProvider, "getContentDescriptor", () => () => true);
     const imodel = {
       createQueryReader: (query) => {
-        if (query.includes("SELECT ec_classname(ecclassid) FROM biscore.element WHERE ecinstanceid = fakeId")) {
+        if (query.includes("SELECT ec_classname(ecclassid) FROM biscore.element WHERE ecinstanceid = ?")) {
           return {
             next: async () => {
               return {
