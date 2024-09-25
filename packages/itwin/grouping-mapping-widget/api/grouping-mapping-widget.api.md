@@ -112,6 +112,41 @@ export interface GroupActionProps {
 }
 
 // @public
+export interface GroupHilitedElements {
+    // (undocumented)
+    currentHilitedGroups: number;
+    // (undocumented)
+    groupColors: Map<string, string>;
+    // (undocumented)
+    hiddenGroupsIds: Set<string>;
+    // (undocumented)
+    isOverlappedColored: boolean;
+    // (undocumented)
+    isVisualizationsEnabled: boolean;
+    // (undocumented)
+    overlappedElementsMetadata: OverlappedElementsMetadata;
+    // (undocumented)
+    setGroupColors: (colors: Map<string, string>) => void;
+    // (undocumented)
+    setHiddenGroupsIds: (hiddenGroupIds: Set<string>) => void;
+    // (undocumented)
+    setIsOverlappedColored: (isOverlappedColored: boolean | ((isOverlappedColored: boolean) => boolean)) => void;
+    // (undocumented)
+    setIsVisualizationsEnabled: (isVisualizationsEnabled: boolean | ((isVisualizationsEnabled: boolean) => boolean)) => void;
+    // (undocumented)
+    setNumberOfVisualizedGroups: (numberOfVisualizedGroups: number | ((numberOfVisualizedGroups: number) => number)) => void;
+    // (undocumented)
+    setOverlappedElementsMetadata: (overlappedElementsMetaData: OverlappedElementsMetadata) => void;
+    // (undocumented)
+    setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
+    // (undocumented)
+    showGroupColor: boolean;
+}
+
+// @public
+export const GroupHilitedElementsContext: React_2.Context<GroupHilitedElements>;
+
+// @public
 export interface GroupingCustomUI extends IGroupingMappingCustomUI {
     type: GroupingMappingCustomUIType.Grouping;
     uiComponent: (props: GroupingCustomUIProps) => JSX.Element;
@@ -486,6 +521,9 @@ export function resolveFormulaDataType(formulaName: string, formula: string, pro
 
 // @public
 export const SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element;
+
+// @public
+export const useGroupHilitedElementsContext: () => GroupHilitedElements;
 
 // @public
 export const useGroupingMappingApiConfig: () => GroupingMappingApiConfig;
