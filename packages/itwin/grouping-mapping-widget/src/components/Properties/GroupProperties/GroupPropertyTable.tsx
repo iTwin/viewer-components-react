@@ -23,6 +23,7 @@ export interface GroupPropertyTableProps {
   groupProperties: Property[];
   refresh: () => Promise<void>;
   hideRefreshIcon?: boolean;
+  onGroupPropertyDelete?: () => void;
 }
 
 export const GroupPropertyTable = ({
@@ -34,6 +35,7 @@ export const GroupPropertyTable = ({
   groupProperties,
   refresh,
   hideRefreshIcon,
+  onGroupPropertyDelete,
 }: GroupPropertyTableProps) => {
   const propertiesClient = usePropertiesClient();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
@@ -128,6 +130,7 @@ export const GroupPropertyTable = ({
       refreshProperties={refresh}
       deleteProperty={deleteProperty}
       hideRefreshIcon={hideRefreshIcon}
+      onGroupPropertyDelete={onGroupPropertyDelete}
     />
   );
 };

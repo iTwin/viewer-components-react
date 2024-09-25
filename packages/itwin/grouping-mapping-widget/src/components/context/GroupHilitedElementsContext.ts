@@ -18,6 +18,11 @@ export interface OverlappedElementsMetadata {
   groupElementsInfo: Map<string, number>;
   overlappedElementGroupPairs: OverlappedElementGroupPairs[];
 }
+
+/**
+ * The type for the {@link GroupHilitedElementsContext} context.
+ * @public
+ */
 export interface GroupHilitedElements {
   hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
@@ -31,8 +36,14 @@ export interface GroupHilitedElements {
   setOverlappedElementsMetadata: (overlappedElementsMetaData: OverlappedElementsMetadata) => void;
   setIsOverlappedColored: (isOverlappedColored: boolean | ((isOverlappedColored: boolean) => boolean)) => void;
   setIsVisualizationsEnabled: (isVisualizationsEnabled: boolean | ((isVisualizationsEnabled: boolean) => boolean)) => void;
+  groupColors: Map<string, string>;
+  setGroupColors: (colors: Map<string, string>) => void;
 }
 
+/**
+ * The context which provides metadata for group highlighting.
+ * @public
+ */
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
   hiddenGroupsIds: new Set(),
   showGroupColor: false,
@@ -50,8 +61,14 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   setOverlappedElementsMetadata: () => {},
   setIsOverlappedColored: () => {},
   setIsVisualizationsEnabled: () => {},
+  setGroupColors: () => {},
+  groupColors: new Map(),
 });
 
+/**
+ * The hook which provides context for group highlighting.
+ * @public
+ */
 export const useGroupHilitedElementsContext = (): GroupHilitedElements => {
   const context = React.useContext(GroupHilitedElementsContext);
   if (!context) {

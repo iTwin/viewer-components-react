@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added flags to disable zoom during visualization",
-  "packageName": "@itwin/grouping-mapping-widget",
-  "email": "tejas.sutar@bentley.com",
-  "dependentChangeType": "patch"
-}

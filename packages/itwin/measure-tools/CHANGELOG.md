@@ -1,8 +1,16 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 28 Aug 2024 15:15:02 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Sep 2024 11:54:49 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.22.1
+
+Tue, 24 Sep 2024 11:54:49 GMT
+
+### Patches
+
+- Fix missing geo location information for location measurement in widget. ([#1053](https://github.com/iTwin/viewer-components-react/pull/1053))
 
 ## 0.22.0
 

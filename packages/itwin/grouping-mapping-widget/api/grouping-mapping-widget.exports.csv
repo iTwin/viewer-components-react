@@ -17,6 +17,8 @@ public;DataType = "Double" | "String" | "Boolean" | "Integer"
 public;GetAccessTokenFn = () => Promise
 public;GroupAction: (props: GroupActionProps) => JSX.Element
 public;GroupActionProps
+public;GroupHilitedElements
+public;GroupHilitedElementsContext: React_2.Context
 public;GroupingCustomUI 
 public;GroupingCustomUIProps
 public;GroupingMappingApiConfig
@@ -49,12 +51,13 @@ internal;MappingsView: ({ mappings, isLoading, extractionStatusData, showExtract
 internal;MappingsViewProps
 internal;PropertiesClientContext: Context
 public;PropertyMap
-public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, hideGroupProps, }: PropertyMenuProps) => JSX.Element
+public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, onGroupPropertyDelete, hideGroupProps, }: PropertyMenuProps) => JSX.Element
 public;PropertyMenuProps
 public;PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, disableZoom, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
 public;PropertyMenuWithVisualizationProps 
 public;resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap, providedDataType?: DataType_2): IResult
 public;SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
+public;useGroupHilitedElementsContext: () => GroupHilitedElements
 public;useGroupingMappingApiConfig: () => GroupingMappingApiConfig
 internal;useGroupsClient: () => IGroupsClient
 internal;useGroupsOperations: ({ mappingId }: GroupsOperationsProps) =>

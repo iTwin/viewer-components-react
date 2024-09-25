@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "date": "Tue, 24 Sep 2024 11:54:49 GMT",
+      "version": "0.22.1",
+      "tag": "@itwin/measure-tools-react_v0.22.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "3418768+a-gagnon@users.noreply.github.com",
+            "package": "@itwin/measure-tools-react",
+            "commit": "4066801195d2ef21f8decd423744d516ae167aef",
+            "comment": "Fix missing geo location information for location measurement in widget."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 28 Aug 2024 15:15:02 GMT",
       "version": "0.22.0",
       "tag": "@itwin/measure-tools-react_v0.22.0",

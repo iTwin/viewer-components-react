@@ -1,8 +1,25 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 13 Sep 2024 17:50:16 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Sep 2024 12:12:51 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.32.0
+
+Wed, 25 Sep 2024 12:12:51 GMT
+
+### Minor changes
+
+- Exported context for group highlighting ([#1056](https://github.com/iTwin/viewer-components-react/pull/1056))
+
+## 0.31.0
+
+Tue, 24 Sep 2024 11:54:49 GMT
+
+### Minor changes
+
+- Added flags to disable zoom during visualization ([#1042](https://github.com/iTwin/viewer-components-react/pull/1042))
+- Preserving group visualization for group properties pane ([#1054](https://github.com/iTwin/viewer-components-react/pull/1054))
 
 ## 0.30.1
 
