@@ -17,6 +17,8 @@ public;DataType = "Double" | "String" | "Boolean" | "Integer"
 public;GetAccessTokenFn = () => Promise
 public;GroupAction: (props: GroupActionProps) => JSX.Element
 public;GroupActionProps
+public;GroupHilitedElements
+public;GroupHilitedElementsContext: React_2.Context
 public;GroupingCustomUI 
 public;GroupingCustomUIProps
 public;GroupingMappingApiConfig
@@ -55,6 +57,7 @@ public;PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, disableZ
 public;PropertyMenuWithVisualizationProps 
 public;resolveFormulaDataType(formulaName: string, formula: string, properties: PropertyMap, providedDataType?: DataType_2): IResult
 public;SearchGroupingCustomUI: ({ updateQuery, isUpdating, resetView }: GroupingCustomUIProps) => JSX.Element
+public;useGroupHilitedElementsContext: () => GroupHilitedElements
 public;useGroupingMappingApiConfig: () => GroupingMappingApiConfig
 internal;useGroupsClient: () => IGroupsClient
 internal;useGroupsOperations: ({ mappingId }: GroupsOperationsProps) =>
