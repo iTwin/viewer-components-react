@@ -31,6 +31,7 @@ export { MappingsView, MappingsViewProps } from "./components/Mappings/MappingsV
 export { useGroupsOperations, GroupsOperationsProps } from "./components/Groups/hooks/useGroupsOperations";
 export { GroupsView, GroupsViewProps } from "./components/Groups/GroupsView";
 export { GroupingMappingContext, GroupingMappingContextProps } from "./components/GroupingMappingContext";
+export { useGroupHilitedElementsContext, GroupHilitedElements } from "./components/context/GroupHilitedElementsContext";
 export { Groups, GroupsProps } from "./components/Groups/Groups";
 export { GroupsVisualization, GroupsVisualizationProps } from "./components/Groups/GroupsVisualization";
 export { GroupAction, GroupActionProps } from "./components/Groups/Editing/GroupAction";
