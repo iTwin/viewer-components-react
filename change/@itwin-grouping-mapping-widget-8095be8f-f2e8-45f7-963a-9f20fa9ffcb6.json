@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Exported context for group highlighting",
+  "packageName": "@itwin/grouping-mapping-widget",
+  "email": "tejas.sutar@bentley.com",
+  "dependentChangeType": "patch"
+}
