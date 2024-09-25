@@ -72,6 +72,7 @@ export class QueryBuilder {
     if (propertyRecord.value?.valueFormat !== PropertyValueFormat.Primitive) return;
     const navigationPropertyValue = propertyRecord.value.value as NavigationPropertyValue;
     if (classInfo?.name === "BisCore:ModelContainsElements") {
+      // https://www.itwinjs.org/bis/guide/fundamentals/model-fundamentals/#model-identity
       // Lookup the modeled element as they share the same ECInstanceId
       const modeledElementQuery = `SELECT ec_classname(ecclassid) FROM biscore.element WHERE ecinstanceid = ? LIMIT 1`;
       const queryBinder = new QueryBinder();
