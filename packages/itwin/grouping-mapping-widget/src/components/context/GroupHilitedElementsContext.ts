@@ -40,6 +40,10 @@ export interface GroupHilitedElements {
   setGroupColors: (colors: Map<string, string>) => void;
 }
 
+/**
+ * The context which provides metadata for group highlighting.
+ * @public
+ */
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
   hiddenGroupsIds: new Set(),
   showGroupColor: false,
@@ -62,7 +66,7 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
 });
 
 /**
- * The context which provides metadata for group highlighting.
+ * The hook which provides context for group highlighting.
  * @public
  */
 export const useGroupHilitedElementsContext = (): GroupHilitedElements => {
