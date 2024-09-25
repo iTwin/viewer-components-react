@@ -2,6 +2,7 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+import type { PropertyValue } from "@itwin/appui-abstract";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { FieldDescriptorType, PropertiesField } from "@itwin/presentation-common";
 import type { FieldDescriptor, RelationshipPath, StrippedRelatedClassInfo } from "@itwin/presentation-common";
@@ -12,6 +13,8 @@ import { MockFactory } from "./MockFactory";
 import type { StubbedType } from "./MockFactory";
 import type { OperationTestData, PropertiesTestData, PropertyRecordTestData, QueryBuilderTestData } from "./QueryBuilderTestData";
 import { testCases } from "./QueryBuilder.testdata";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { ECSqlReader } from "@itwin/core-common";
 
 describe("QueryBuilder", () => {
   let sut: QueryBuilder;
@@ -20,8 +23,23 @@ describe("QueryBuilder", () => {
   beforeEach(() => {
     dataProvider = MockFactory.create(PresentationPropertyDataProvider);
     MockFactory.stubProperty(dataProvider, "getContentDescriptor", () => () => true);
+    const imodel = {
+      createQueryReader: (query) => {
+        if (query.includes("SELECT ec_classname(ecclassid) FROM biscore.element WHERE ecinstanceid = fakeId")) {
+          return {
+            next: async () => {
+              return {
+                value: ["mockModeledElement"],
+                done: true,
+              };
+            },
+          } as ECSqlReader;
+        }
+        return '';
+      }
+    } as IModelConnection;
 
-    sut = new QueryBuilder(dataProvider);
+    sut = new QueryBuilder(dataProvider, imodel);
   });
 
   afterEach(() => {
@@ -74,7 +92,7 @@ describe("QueryBuilder", () => {
     MockFactory.stubProperty(propertiesFieldMock, "type", () => propertiesField.type);
     MockFactory.stubProperty(propertiesFieldMock, "getFieldDescriptor", () => () => fieldDescriptor);
 
-    const prop: PropertyRecord = new PropertyRecord(propertyRecord.value, propertyRecord.property);
+    const prop: PropertyRecord = new PropertyRecord(propertyRecord.value as PropertyValue, propertyRecord.property);
     dataProvider.getFieldByPropertyRecord.withArgs(prop).resolves(propertiesFieldMock);
     return prop;
   };
@@ -99,7 +117,7 @@ describe("QueryBuilder", () => {
       }
     }
 
-    const result = queryBuilder.buildQueryString();
+    const result = await queryBuilder.buildQueryString();
     assert.strictEqual(result, expectedResult);
   };
 });

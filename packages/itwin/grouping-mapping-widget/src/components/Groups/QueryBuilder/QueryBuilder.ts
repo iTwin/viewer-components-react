@@ -3,10 +3,11 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
+import type { InstanceKey, NavigationPropertyValue, PropertiesField } from "@itwin/presentation-common";
 import type { Primitives, PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { toaster } from "@itwin/itwinui-react";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 export interface Query {
   unions: QueryUnion[];
@@ -33,6 +34,7 @@ export interface QueryProperty {
   className: string;
   classProperties: ClassProperty[];
   isCategory: boolean;
+  modeledElement: string;
   isAspect: boolean;
 }
 
@@ -54,15 +56,30 @@ export class QueryBuilder {
   private static readonly DEFAULT_DOUBLE_PRECISION = 4;
 
   private dataProvider: PresentationPropertyDataProvider;
+  private iModelConnection: IModelConnection
   private query: Query | undefined;
 
-  constructor(provider: PresentationPropertyDataProvider) {
+  constructor(provider: PresentationPropertyDataProvider, iModelConnection: IModelConnection) {
     this.dataProvider = provider;
+    this.iModelConnection = iModelConnection
   }
 
   private isCategory(propertyField: PropertiesField): boolean {
     const classInfo = propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
     return classInfo?.name === "BisCore:GeometricElement3dIsInCategory";
+  }
+
+  private async getPotentialModeledElement(propertyField: PropertiesField, propertyRecord: PropertyRecord): Promise<string> {
+    const classInfo = propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
+    if (propertyRecord.value?.valueFormat !== PropertyValueFormat.Primitive) return "";
+    const navigationPropertyValue = propertyRecord.value.value as NavigationPropertyValue;
+    if (classInfo?.name === "BisCore:ModelContainsElements") {
+      // Lookup the modeled element as they share the same ECInstanceId
+      const modeledElementQuery = `SELECT ec_classname(ecclassid) FROM biscore.element WHERE ecinstanceid = ${navigationPropertyValue.id}`
+      const modeledElement = (await this.iModelConnection.createQueryReader(modeledElementQuery).next()).value[0];
+      return modeledElement.replace(":", ".");
+    }
+    return '';
   }
 
   private _propertyMap: Map<string, AddedProperty> = new Map();
@@ -71,11 +88,11 @@ export class QueryBuilder {
     this._propertyMap = new Map();
   };
 
-  private regenerateQuery = () => {
+  private regenerateQuery = async () => {
     this.query = undefined;
 
     for (const property of this._propertyMap.values()) {
-      this.buildProperty(property.propertyRecord, property.propertiesField);
+      await this.buildProperty(property.propertyRecord, property.propertiesField);
     }
   };
 
@@ -106,7 +123,7 @@ export class QueryBuilder {
     this._propertyMap.delete(JSON.stringify(propertyField.getFieldDescriptor()));
   }
 
-  private buildProperty(prop: PropertyRecord, propertiesField: PropertiesField) {
+  private async buildProperty(prop: PropertyRecord, propertiesField: PropertiesField) {
     if (prop.value?.valueFormat !== PropertyValueFormat.Primitive || prop.value.value === undefined) {
       toaster.negative("Error. An unexpected error has occured while building a query.");
       return;
@@ -125,6 +142,7 @@ export class QueryBuilder {
     // get the special cases
     const isNavigation: boolean = prop.property.typename.toLowerCase() === "navigation";
     const isCategory: boolean = isNavigation && this.isCategory(propertiesField);
+    const isModel = await this.getPotentialModeledElement(propertiesField, prop);
 
     const isAspect: boolean =
       pathToPrimaryClass?.find(
@@ -135,13 +153,13 @@ export class QueryBuilder {
       const property = propertiesField.properties[i].property;
 
       const className = property.classInfo.name.replace(":", ".");
-      const propertyName = isNavigation ? (isCategory ? `${property.name}.CodeValue` : `${property.name}.id`) : property.name;
-      const propertyValue = isNavigation ? (isCategory ? prop.value.displayValue ?? "" : (prop.value.value as InstanceKey).id) : prop.value.value;
+      const propertyName = isNavigation ? (isCategory || isModel ? `${property.name}.CodeValue` : `${property.name}.id`) : property.name;
+      const propertyValue = isNavigation ? (isCategory || isModel ? prop.value.displayValue ?? "" : (prop.value.value as InstanceKey).id) : prop.value.value;
 
       if (!isAspect && pathToPrimaryClass && pathToPrimaryClass.length > 0) {
         this.addRelatedToQuery(i, propertiesField, propertyName, propertyValue);
       } else {
-        this.addPropertyToQuery(i, className, propertyName, propertyValue, this.needsQuote(propertiesField), isCategory, isAspect);
+        this.addPropertyToQuery(i, className, propertyName, propertyValue, this.needsQuote(propertiesField), isCategory, isModel, isAspect);
       }
     }
     return true;
@@ -169,7 +187,7 @@ export class QueryBuilder {
       this.addClassToQuery(unionIndex, relClassName, relClassProperty, sourceClassName, `ECInstanceId`);
 
       if (path.sourceClassInfo?.name === propertyField.parent?.contentClassInfo.name) {
-        this.addPropertyToQuery(unionIndex, sourceClassName, propertyName, propertyValue, this.needsQuote(propertyField), false, false);
+        this.addPropertyToQuery(unionIndex, sourceClassName, propertyName, propertyValue, this.needsQuote(propertyField), false, "", false);
       }
     });
   }
@@ -219,6 +237,7 @@ export class QueryBuilder {
     propertyValue: Primitives.Value,
     needsQuote: boolean,
     isCategory: boolean,
+    modeledElement: string,
     isAspect: boolean,
   ) {
     if (this.query === undefined) {
@@ -234,6 +253,7 @@ export class QueryBuilder {
     const queryProperty: QueryProperty = {
       className,
       isCategory,
+      modeledElement,
       isAspect,
       classProperties: [queryJoin],
     };
@@ -263,8 +283,8 @@ export class QueryBuilder {
     this.query.unions[unionIndex].properties.push(queryProperty);
   }
 
-  public buildQueryString() {
-    this.regenerateQuery();
+  public async buildQueryString() {
+    await this.regenerateQuery();
     if (this.query === undefined || this.query.unions.find((u) => u.classes.length === 0 && u.properties.length === 0)) {
       return "";
     }
@@ -289,6 +309,11 @@ export class QueryBuilder {
 
           querySegments.set("BisCore.Category", [`BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id`]);
           whereSegments.push(this.categoryWhereQuery(property.classProperties[0].value.toString()));
+          continue;
+        }
+        else if (property.modeledElement) {
+          querySegments.set(property.modeledElement, [`${property.modeledElement}.UserLabel = '${property.classProperties[0].value.toString()}' OR ${property.modeledElement}.CodeValue = '${property.classProperties[0].value.toString()}'`]);
+          whereSegments.push(`${property.modeledElement}.ECInstanceId = BisCore.Element.Model.id`);
           continue;
         }
 
