@@ -49,7 +49,7 @@ internal;MappingsView: ({ mappings, isLoading, extractionStatusData, showExtract
 internal;MappingsViewProps
 internal;PropertiesClientContext: Context
 public;PropertyMap
-public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, onGroupPropertyDelete, hideGroupProps, }: PropertyMenuProps) => JSX.Element
+public;PropertyMenu: ({ mapping, group, onClickAddGroupProperty, onClickModifyGroupProperty, hideRefreshIcon, hideGroupProps, }: PropertyMenuProps) => JSX.Element
 public;PropertyMenuProps
 public;PropertyMenuWithVisualization: ({ group, color, hideRefreshIcon, disableZoom, ...rest }: PropertyMenuWithVisualizationProps) => JSX.Element
 public;PropertyMenuWithVisualizationProps 
