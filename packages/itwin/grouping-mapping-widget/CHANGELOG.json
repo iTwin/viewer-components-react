@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Wed, 25 Sep 2024 12:12:51 GMT",
+      "version": "0.32.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.32.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "tejas.sutar@bentley.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "6540b1157b3d2b78782d56faecf2a0cffcd2bc6a",
+            "comment": "Exported context for group highlighting"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 24 Sep 2024 11:54:49 GMT",
       "version": "0.31.0",
       "tag": "@itwin/grouping-mapping-widget_v0.31.0",
