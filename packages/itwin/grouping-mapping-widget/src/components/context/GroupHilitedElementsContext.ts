@@ -19,6 +19,10 @@ export interface OverlappedElementsMetadata {
   overlappedElementGroupPairs: OverlappedElementGroupPairs[];
 }
 
+/**
+ * The type for the {@link GroupHilitedElementsContext} context.
+ * @public
+ */
 export interface GroupHilitedElements {
   hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
@@ -57,6 +61,10 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   groupColors: new Map(),
 });
 
+/**
+ * The context which provides metadata for group highlighting.
+ * @public
+ */
 export const useGroupHilitedElementsContext = (): GroupHilitedElements => {
   const context = React.useContext(GroupHilitedElementsContext);
   if (!context) {
