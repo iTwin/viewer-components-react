@@ -65,7 +65,7 @@ export const GroupQueryBuilderCustomUI = ({ updateQuery, isUpdating, resetView }
       setSelectionKeyset(keys);
       const dataProvider = await createPropertyDataProvider(keys, iModelConnection);
       setDataProvider(dataProvider);
-      setQueryBuilder(new QueryBuilder(dataProvider));
+      setQueryBuilder(new QueryBuilder(dataProvider, iModelConnection));
     };
 
     return iModelConnection ? Presentation.selection.selectionChange.addListener(onSelectionChanged) : () => {};
