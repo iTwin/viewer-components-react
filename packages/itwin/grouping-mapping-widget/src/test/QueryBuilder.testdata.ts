@@ -1262,6 +1262,53 @@ export const testCases: QueryBuilderTestData = {
       ],
     },
     {
+      name: "when property is a model, return a model query string",
+      expectedResult:
+        "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN mockModeledElement ON mockModeledElement.ECInstanceId = BisCore.Element.Model.id WHERE mockModeledElement.UserLabel = 'displayValueString' OR mockModeledElement.CodeValue = 'displayValueString'",
+      operations: [
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: { id: "fakeId" },
+              displayValue: "displayValueString",
+            },
+            property: {
+              typename: "navigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "somePropName",
+                  classInfo: {
+                    name: "BisCore:B",
+                  },
+                  navigationPropertyInfo: {
+                    classInfo: {
+                      name: "BisCore:ModelContainsElements",
+                    },
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "long",
+            },
+            parent: {
+              pathToPrimaryClass: [],
+            },
+          },
+        },
+      ],
+    },
+    {
       name: "when category property and relational property added, return query string with property value, relational chain and with category joined",
       expectedResult:
         "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN BisCore.Category ON BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id WHERE ((BisCore.Category.CodeValue = 'displayValueString') OR (BisCore.Category.UserLabel = 'displayValueString'))",

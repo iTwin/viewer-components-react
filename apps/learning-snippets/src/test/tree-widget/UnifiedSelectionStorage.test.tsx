@@ -9,7 +9,7 @@ import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_START__  TreeWidget.SelectionStorageInitializeExampleImports
 import { Presentation } from "@itwin/presentation-frontend";
 // __PUBLISH_EXTRACT_END__
-import { TestUtils } from "../../utils/TestUtils";
+import { TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils";
 // __PUBLISH_EXTRACT_START__  TreeWidget.SelectionStorageExampleImports
 import { IModelConnection } from "@itwin/core-frontend";
 import { createStorage } from "@itwin/unified-selection";
@@ -22,11 +22,11 @@ describe("Tree widget", () => {
       describe("Unified selection storage", () => {
         beforeEach(async () => {
           await NoRenderApp.startup();
-          await TestUtils.initialize();
+          await TreeWidgetTestUtils.initialize();
         });
 
         afterEach(async () => {
-          TestUtils.terminate();
+          TreeWidgetTestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
         });

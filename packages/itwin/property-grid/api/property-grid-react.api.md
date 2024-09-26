@@ -58,6 +58,9 @@ export interface ContextMenuProps {
 export function CopyPropertyTextContextMenuItem({ record, onSelect }: DefaultContextMenuItemProps): JSX.Element;
 
 // @public
+export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget;
+
+// @public
 export interface DataProviderProps {
     createDataProvider?: (imodel: IModelConnection) => IPresentationPropertyDataProvider;
 }
@@ -180,7 +183,7 @@ export interface PropertyGridSettingsMenuItemProps {
     title?: string;
 }
 
-// @public
+// @public @deprecated
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
     constructor(_props?: PropertyGridUiItemsProviderProps);
     // (undocumented)
@@ -189,7 +192,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget>;
 }
 
-// @public
+// @public @deprecated
 export interface PropertyGridUiItemsProviderProps {
     defaultPanelLocation?: StagePanelLocation;
     defaultPanelSection?: StagePanelSection;

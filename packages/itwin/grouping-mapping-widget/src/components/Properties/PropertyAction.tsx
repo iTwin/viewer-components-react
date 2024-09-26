@@ -9,6 +9,7 @@ import { usePropertyGridWrapper } from "../context/PropertyGridWrapperContext";
 import { Checkbox } from "@itwin/itwinui-react";
 import "./PropertyAction.scss";
 import type { QueryBuilder } from "../Groups/QueryBuilder/QueryBuilder";
+import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 
 export interface PropertyActionProps {
   property: PropertyRecord;
@@ -16,6 +17,10 @@ export interface PropertyActionProps {
 
 const usePropertySelection = (property: PropertyRecord, currentPropertyList: PropertyRecord[], queryBuilder: QueryBuilder | undefined) => {
   const [isCheckboxLoading, setIsCheckboxLoading] = useState(false);
+  const { iModelConnection } = useGroupingMappingApiConfig();
+  if (!iModelConnection) {
+    throw new Error("This hook requires an active iModelConnection.");
+  }
 
   const checkIfPropertyIsSelected = useCallback(
     (property: PropertyRecord): boolean => {
@@ -80,11 +85,11 @@ export const PropertyAction = ({ property }: PropertyActionProps) => {
     if (isPropertySelected) {
       await removeProperty(property);
       setCurrentPropertyList((prevList) => prevList.filter((x) => x !== property));
-      setQuery(queryBuilder?.buildQueryString() ?? "");
+      setQuery(await queryBuilder?.buildQueryString() ?? "");
     } else {
       if (await addProperty(property)) {
         setCurrentPropertyList((prevList) => prevList.concat(property));
-        setQuery(queryBuilder?.buildQueryString() ?? "");
+        setQuery(await queryBuilder?.buildQueryString() ?? "");
       }
     }
   }, [addProperty, isPropertySelected, property, removeProperty, queryBuilder, setCurrentPropertyList, setQuery]);

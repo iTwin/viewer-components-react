@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import type { FieldDescriptorType, RelationshipPath } from "@itwin/presentation-common";
+import type { FieldDescriptorType, NavigationPropertyValue, RelationshipPath } from "@itwin/presentation-common";
 
 export interface ClassInfoTestData {
   name: string;
@@ -43,7 +43,7 @@ export interface PropertiesFieldTestData {
 }
 
 export interface PropertyRecordTestData {
-  value: PropertyValue;
+  value: PropertyValue | NavigationPropertyValue;
   property: PropertyDescription;
 }
 
