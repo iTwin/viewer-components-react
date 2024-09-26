@@ -33,7 +33,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils";
 
 describe("Tree widget", () => {
   describe("Learning snippets", () => {
@@ -64,11 +64,11 @@ describe("Tree widget", () => {
 
         beforeEach(async () => {
           await NoRenderApp.startup();
-          await TestUtils.initialize();
+          await TreeWidgetTestUtils.initialize();
         });
 
         afterEach(async () => {
-          TestUtils.terminate();
+          TreeWidgetTestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
         });

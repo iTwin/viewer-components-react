@@ -45,7 +45,9 @@
     "test:e2e:local": "node ../../../scripts/run-e2e-tests.js",
     "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --ui",
     "clean": "rimraf lib",
-    "rebuild": "npm run clean && npm run build"
+    "rebuild": "npm run clean && npm run build",
+    "update-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md",
+    "check-extractions": "node ../../../scripts/updateExtractions.js --targets=./README.md --check"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^4.0.0",

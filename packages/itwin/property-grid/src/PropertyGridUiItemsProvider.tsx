@@ -23,7 +23,27 @@ import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent";
 
 /**
- * Id of the property grid widget created by `PropertyGridUiItemsProvider`.
+* Creates a property grid definition that should be returned from `UiItemsProvider.getWidgets()`.
+* @public
+*/
+export function createPropertyGrid(propertyGridProps: PropertyGridWidgetProps): Widget {
+  return {
+    id: "vcr:PropertyGridComponent",
+    label: PropertyGridManager.translate("widget-label"),
+    icon: <SvgInfoCircular />,
+    defaultState: WidgetState.Hidden,
+    layouts: {
+      standard: {
+        section: StagePanelSection.End,
+        location: StagePanelLocation.Right,
+      },
+    },
+    content: <PropertyGridWidget {...propertyGridProps} />,
+  };
+}
+
+/**
+ * Id of the property grid widget created by `createPropertyGrid`.
  * @public
  */
 export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
@@ -31,6 +51,7 @@ export const PropertyGridWidgetId = "vcr:PropertyGridComponent";
 /**
  * Props for creating `PropertyGridUiItemsProvider`.
  * @public
+ * @deprecated in 1.13.0. Use `createPropertyGrid` instead.
  */
 export interface PropertyGridUiItemsProviderProps {
   /** The stage panel to place the widget in. Defaults to `StagePanelLocation.Right`. */
@@ -41,16 +62,17 @@ export interface PropertyGridUiItemsProviderProps {
   defaultPanelWidgetPriority?: number;
   /** Props for configuring `PropertyGridComponent` shown in the widget. */
   propertyGridProps?: PropertyGridWidgetProps;
-
 }
 
 /**
  * A `UiItemsProvider` implementation that provides a `PropertyGridComponent` into a stage panel.
  * @public
+ * @deprecated in 1.13.0. Use `createPropertyGrid` instead.
  */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 
+  // eslint-disable-next-line deprecation/deprecation
   constructor(private _props: PropertyGridUiItemsProviderProps = {}) {}
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection): ReadonlyArray<Widget> {
