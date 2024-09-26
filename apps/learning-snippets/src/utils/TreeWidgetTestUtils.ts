@@ -16,11 +16,11 @@ import { IModelApp } from "@itwin/core-frontend";
 // __PUBLISH_EXTRACT_END__
 
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-export class TestUtils {
+export class TreeWidgetTestUtils {
   private static _initialized = false;
 
   public static async initialize() {
-    if (TestUtils._initialized) {
+    if (TreeWidgetTestUtils._initialized) {
       return;
     }
 
@@ -28,13 +28,13 @@ export class TestUtils {
     // __PUBLISH_EXTRACT_START__ TreeWidget.TreeWidgetInitialize
     await TreeWidget.initialize(IModelApp.localization);
     // __PUBLISH_EXTRACT_END__
-    TestUtils._initialized = true;
+    TreeWidgetTestUtils._initialized = true;
   }
 
   public static terminate() {
     UiFramework.terminate();
     TreeWidget.terminate();
-    TestUtils._initialized = false;
+    TreeWidgetTestUtils._initialized = false;
   }
 }
 

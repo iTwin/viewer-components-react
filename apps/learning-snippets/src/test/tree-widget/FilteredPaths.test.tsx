@@ -21,7 +21,7 @@ import { useModelsTree, VisibilityTree, VisibilityTreeRenderer } from "@itwin/tr
 import { createStorage } from "@itwin/unified-selection";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { buildIModel, insertPhysicalElement, insertPhysicalModelWithPartition, insertSpatialCategory } from "../../utils/IModelUtils";
-import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TestUtils } from "../../utils/TestUtils";
+import { getSchemaContext, getTestViewer, mockGetBoundingClientRect, TreeWidgetTestUtils } from "../../utils/TreeWidgetTestUtils";
 
 import type { SelectionStorage } from "@itwin/unified-selection";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -38,12 +38,16 @@ interface CustomModelsTreeProps {
 }
 
 function CustomModelsTreeComponent({ viewport, selectionStorage, imodel, targetItems }: CustomModelsTreeProps) {
-  const getFilteredPaths = useCallback<GetFilteredPathsType>(async ({ createInstanceKeyPaths }) => {
-    return createInstanceKeyPaths({
-      // list of instance keys representing nodes that should be displayed in the hierarchy
-      targetItems,
-    })}, [targetItems]);
-  
+  const getFilteredPaths = useCallback<GetFilteredPathsType>(
+    async ({ createInstanceKeyPaths }) => {
+      return createInstanceKeyPaths({
+        // list of instance keys representing nodes that should be displayed in the hierarchy
+        targetItems,
+      });
+    },
+    [targetItems],
+  );
+
   const { modelsTreeProps, rendererProps } = useModelsTree({ activeView: viewport, getFilteredPaths });
 
   return (
@@ -87,11 +91,11 @@ describe("Tree widget", () => {
 
         beforeEach(async () => {
           await NoRenderApp.startup();
-          await TestUtils.initialize();
+          await TreeWidgetTestUtils.initialize();
         });
 
         afterEach(async () => {
-          TestUtils.terminate();
+          TreeWidgetTestUtils.terminate();
           await IModelApp.shutdown();
           sinon.restore();
         });

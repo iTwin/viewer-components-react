@@ -11,6 +11,10 @@ const packages = [
     name: "@itwin/tree-widget-react",
     dir: "tree-widget",
   },
+  {
+    name: "@itwin/property-grid-react",
+    dir: "property-grid",
+  },
 ];
 
 linkPackages();
