@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "date": "Thu, 26 Sep 2024 20:21:11 GMT",
+      "version": "0.33.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.33.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "Guillar1@users.noreply.github.com",
+            "package": "@itwin/grouping-mapping-widget",
+            "commit": "79fd9cf7d9208228047fd88336d01dacb056317c",
+            "comment": "Enhanced Model selection to match based on string in Query Builder when creating Groups by Selection."
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 25 Sep 2024 12:12:51 GMT",
       "version": "0.32.0",
       "tag": "@itwin/grouping-mapping-widget_v0.32.0",

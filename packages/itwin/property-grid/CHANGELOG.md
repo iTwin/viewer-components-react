@@ -1,8 +1,16 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 01 Aug 2024 16:01:52 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Sep 2024 20:21:11 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 1.13.0
+
+Thu, 26 Sep 2024 20:21:11 GMT
+
+### Minor changes
+
+- Deprecated `PropertyGridUiItemsProvider`. Use `createPropertyGrid` as its replacement. ([#1052](https://github.com/iTwin/viewer-components-react/pull/1052))
 
 ## 1.12.0
 
