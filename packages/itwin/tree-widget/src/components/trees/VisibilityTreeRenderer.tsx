@@ -106,7 +106,6 @@ export function createVisibilityTreeNodeRenderer({
         className={classNames(
           "with-checkbox",
           (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander",
-          treeNodeProps.className,
         )}
       />
     );
