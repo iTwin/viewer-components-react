@@ -1,8 +1,16 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 25 Sep 2024 12:12:51 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Sep 2024 20:21:11 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.33.0
+
+Thu, 26 Sep 2024 20:21:11 GMT
+
+### Minor changes
+
+- Enhanced Model selection to match based on string in Query Builder when creating Groups by Selection. ([#1055](https://github.com/iTwin/viewer-components-react/pull/1055))
 
 ## 0.32.0
 

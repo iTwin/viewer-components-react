@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Deprecated `PropertyGridUiItemsProvider`. Use `createPropertyGrid` as its replacement.",
-  "packageName": "@itwin/property-grid-react",
-  "email": "43886789+MartynasStrazdas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

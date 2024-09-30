@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "date": "Thu, 26 Sep 2024 20:21:11 GMT",
+      "version": "1.13.0",
+      "tag": "@itwin/property-grid-react_v1.13.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "43886789+MartynasStrazdas@users.noreply.github.com",
+            "package": "@itwin/property-grid-react",
+            "commit": "5e10bf0416770be503603acd3c2d1c6562d296f4",
+            "comment": "Deprecated `PropertyGridUiItemsProvider`. Use `createPropertyGrid` as its replacement."
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 01 Aug 2024 16:01:52 GMT",
       "version": "1.12.0",
       "tag": "@itwin/property-grid-react_v1.12.0",
