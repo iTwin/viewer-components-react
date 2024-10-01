@@ -2,6 +2,21 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "date": "Tue, 01 Oct 2024 15:47:45 GMT",
+      "version": "2.3.4",
+      "tag": "@itwin/tree-widget-react_v2.3.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "43886789+MartynasStrazdas@users.noreply.github.com",
+            "package": "@itwin/tree-widget-react",
+            "commit": "cbe9d7282e7b8473ee1b79784918bcf5211cb43b",
+            "comment": "Fix visibility eye icon being misaligned when node does not have an expander"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 29 Jul 2024 14:42:02 GMT",
       "version": "2.3.3",
       "tag": "@itwin/tree-widget-react_v2.3.3",

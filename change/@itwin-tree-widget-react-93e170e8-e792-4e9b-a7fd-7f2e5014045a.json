@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix visibility eye icon being misaligned when node does not have an expander",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "43886789+MartynasStrazdas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

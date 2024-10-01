@@ -1,8 +1,16 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 29 Jul 2024 14:42:02 GMT and should not be manually modified.
+This log was last generated on Tue, 01 Oct 2024 15:47:45 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.3.4
+
+Tue, 01 Oct 2024 15:47:45 GMT
+
+### Patches
+
+- Fix visibility eye icon being misaligned when node does not have an expander ([#1058](https://github.com/iTwin/viewer-components-react/pull/1058))
 
 ## 2.3.3
 
