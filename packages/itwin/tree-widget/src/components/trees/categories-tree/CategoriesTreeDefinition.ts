@@ -53,8 +53,11 @@ export class CategoriesTreeDefinition implements HierarchyDefinition {
         ],
       },
     });
-    this._selectQueryFactory = createNodesQueryClauseFactory({ imodelAccess: props.imodelAccess });
     this._nodeLabelSelectClauseFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: props.imodelAccess });
+    this._selectQueryFactory = createNodesQueryClauseFactory({
+      imodelAccess: props.imodelAccess,
+      instanceLabelSelectClauseFactory: this._nodeLabelSelectClauseFactory,
+    });
   }
 
   public async defineHierarchyLevel(props: DefineHierarchyLevelProps) {

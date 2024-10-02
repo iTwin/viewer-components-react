@@ -81,8 +81,8 @@ describe("Tree widget", () => {
         const getHierarchyDefinition: TreeProps["getHierarchyDefinition"] = ({ imodelAccess }) => {
           // create a hierarchy definition that defines what should be shown in the tree
           // see https://github.com/iTwin/presentation/blob/master/packages/hierarchies/README.md#hierarchy-definition
-          const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess });
           const labelsQueryFactory = createBisInstanceLabelSelectClauseFactory({ classHierarchyInspector: imodelAccess });
+          const nodesQueryFactory = createNodesQueryClauseFactory({ imodelAccess, instanceLabelSelectClauseFactory: labelsQueryFactory });
           return createClassBasedHierarchyDefinition({
             classHierarchyInspector: imodelAccess,
             hierarchy: {
