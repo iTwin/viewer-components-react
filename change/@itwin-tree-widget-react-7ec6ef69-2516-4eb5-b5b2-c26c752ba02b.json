@@ -1,6 +1,6 @@
 {
   "type": "minor",
-  "comment": "Added error reporting to feature telemetry in stateless tree components.",
+  "comment": "Added error reporting to feature telemetry in tree components.",
   "packageName": "@itwin/tree-widget-react",
   "email": "33428304+jasdom@users.noreply.github.com",
   "dependentChangeType": "patch"

@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "Fix issue of model visibility taking into account extra categories",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "yato333@users.noreply.github.com",
-  "dependentChangeType": "none"
-}

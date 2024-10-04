@@ -1,6 +1,6 @@
 {
   "type": "none",
-  "comment": "",
+  "comment": "bump presentation deps to `1.0`",
   "packageName": "@itwin/tree-widget-react",
   "email": "35135765+grigasp@users.noreply.github.com",
   "dependentChangeType": "none"

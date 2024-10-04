@@ -1,7 +1,0 @@
-{
-  "type": "major",
-  "comment": "Implemented `CategoriesTree`, `IModelContentTree` and `ExternalSourcesTree` based on `@itwin/presentation-hierarchies-react`.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

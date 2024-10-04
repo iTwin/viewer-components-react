@@ -9,7 +9,7 @@ module.exports = {
   bumpDeps: false,
   access: "public",
   tag: "latest",
-  scope: ["packages/itwin/*", "!packages/itwin/tree-widget"],
+  scope: ["packages/itwin/*"],
   ignorePatterns: [
     ".nycrc",
     "eslint.config.js",

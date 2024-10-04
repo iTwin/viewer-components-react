@@ -1,7 +1,0 @@
-{
-  "type": "major",
-  "comment": "Add base components for building visibility trees based on `@itwin/presentation-hierarchies-react`.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "prerelease",
-  "comment": "Fix element nodes in iModel content tree shown as having children when they have an empty sub-model.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

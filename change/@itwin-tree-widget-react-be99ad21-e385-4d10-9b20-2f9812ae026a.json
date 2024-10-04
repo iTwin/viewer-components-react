@@ -1,7 +1,0 @@
-{
-  "type": "major",
-  "comment": "Remove `2.x` generation tree components",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

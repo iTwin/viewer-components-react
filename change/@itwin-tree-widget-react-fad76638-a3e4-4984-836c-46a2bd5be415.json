@@ -1,7 +1,0 @@
-{
-  "type": "prerelease",
-  "comment": "Bump `presentation` dependencies and `core` and `appui` dev dependencies",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Added error messages when stateless trees are filtered and too many results are found.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models tree filtering: substantial performance improvement, ability to filter not just by Subjects and Models, but also by Categories and Elements, fix filtering by labels containing special characters `%` and `_`.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

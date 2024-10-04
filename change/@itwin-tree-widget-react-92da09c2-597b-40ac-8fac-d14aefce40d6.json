@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Prevent auto-expansion of grouping nodes when focusing on them.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "yato333@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

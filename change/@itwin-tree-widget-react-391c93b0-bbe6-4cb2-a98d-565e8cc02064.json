@@ -1,6 +1,6 @@
 {
-  "type": "minor",
-  "comment": "Updated ModelsTree and CategoriesTree header buttons to apply action on filtered tree.",
+  "type": "major",
+  "comment": "Updated `ModelsTree` and `CategoriesTree` header buttons to apply action on filtered tree.",
   "packageName": "@itwin/tree-widget-react",
   "email": "24278440+saskliutas@users.noreply.github.com",
   "dependentChangeType": "patch"
