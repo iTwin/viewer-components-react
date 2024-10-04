@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Style fixes for itwinUI 3.13",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "martynas.strazdas@bentley.com",
-  "dependentChangeType": "patch"
-}

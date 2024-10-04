@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix childless Subject nodes being displayed if they have empty and/or private Models referenced through the `Subject.Model.TargetPartition` json property.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

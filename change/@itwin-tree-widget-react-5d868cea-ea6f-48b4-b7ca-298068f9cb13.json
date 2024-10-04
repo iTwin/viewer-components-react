@@ -1,7 +1,0 @@
-{
-  "type": "major",
-  "comment": "Bump `@itwin/itwinui-react` peer dependency version to `^3.11.0`. This package is using features that were only introduced in `3.11`.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

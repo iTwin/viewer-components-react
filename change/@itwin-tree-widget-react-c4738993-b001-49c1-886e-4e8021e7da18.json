@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Models Tree: Improve performance of Filter Dialog initial loading",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "yato333@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

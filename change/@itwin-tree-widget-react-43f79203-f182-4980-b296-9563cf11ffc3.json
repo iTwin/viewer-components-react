@@ -1,7 +1,0 @@
-{
-  "type": "prerelease",
-  "comment": "`IModelContent` tree: Fix element nodes sometimes not having children when they should. Also, `GroupInformationElement` nodes showing their child element nodes directly as well as under the \"Children\" child node.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "35135765+grigasp@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

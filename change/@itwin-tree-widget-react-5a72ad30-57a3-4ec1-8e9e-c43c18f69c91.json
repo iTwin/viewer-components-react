@@ -1,7 +1,7 @@
 {
-  "type": "none",
-  "comment": "Made `@itwin/itwinui-react` a peer dependency.",
+  "type": "major",
+  "comment": "Made `@itwin/itwinui-react` a peer dependency, bumped its version to `^3.11.0`.",
   "packageName": "@itwin/tree-widget-react",
   "email": "24278440+saskliutas@users.noreply.github.com",
-  "dependentChangeType": "none"
+  "dependentChangeType": "patch"
 }

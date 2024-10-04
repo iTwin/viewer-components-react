@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fixed outline not being shown when visibility checkbox is focused using a keyboard in stateless trees.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "33428304+jasdom@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
