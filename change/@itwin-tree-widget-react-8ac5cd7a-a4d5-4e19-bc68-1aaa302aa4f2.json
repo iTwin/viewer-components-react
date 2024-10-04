@@ -1,7 +1,0 @@
-{
-  "type": "major",
-  "comment": "Models Tree: Changed the tree to determine status of node visibility using not just the element the node represents, but also its children. This also introduces partial visibility state for cases when visibility states of different elements are different.",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "yato333@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}

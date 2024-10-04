@@ -1,8 +1,31 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 10 Jun 2024 12:47:48 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Oct 2024 15:06:44 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.0.0
+
+Fri, 04 Oct 2024 15:06:44 GMT
+
+### Major changes
+
+- Updated `ModelsTree` and `CategoriesTree` header buttons to apply action on filtered tree. ([#1034](https://github.com/iTwin/viewer-components-react/pull/1034))
+- Made `@itwin/itwinui-react` a peer dependency, bumped its version to `^3.11.0`. ([#1004](https://github.com/iTwin/viewer-components-react/pull/1004))
+- Models Tree: Changed the tree to determine status of node visibility using not just the element the node represents, but also its children. This also introduces partial visibility state for cases when visibility states of different elements are different. ([#829](https://github.com/iTwin/viewer-components-react/pull/829))
+- Refactor tree components to use `@itwin/presentation-hierarchies-react`. Add an `@itwin/ecschema-metadata@^4.0.0` peer dependency. ([#840](https://github.com/iTwin/viewer-components-react/pull/840))
+
+### Minor changes
+
+- Add ability to focus nodes in `ModelsTree` ([#943](https://github.com/iTwin/viewer-components-react/pull/943))
+- Added ability to display a subset of `ModelsTree`. ([#994](https://github.com/iTwin/viewer-components-react/pull/994))
+- Added ability to retry loading failed hierarchy levels ([#976](https://github.com/iTwin/viewer-components-react/pull/976))
+- Added error reporting to feature telemetry in tree components. ([#988](https://github.com/iTwin/viewer-components-react/pull/988))
+
+### Patches
+
+- Added a loading indicator when matching instances count is being calculated in hierarchy level filtering dialog. ([#962](https://github.com/iTwin/viewer-components-react/pull/962))
+- Add thousands separator to filter dialog result count ([#960](https://github.com/iTwin/viewer-components-react/pull/960))
 
 ## 2.3.2
 

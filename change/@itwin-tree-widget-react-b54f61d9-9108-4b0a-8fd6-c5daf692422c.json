@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Add thousands separator to filter dialog result count",
-  "packageName": "@itwin/tree-widget-react",
-  "email": "yato333@users.noreply.github.com",
-  "dependentChangeType": "patch"
-}
